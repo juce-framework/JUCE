@@ -53,6 +53,45 @@ inline StringArray msBuildEscape (StringArray range)
     return range;
 }
 
+enum class Architecture
+{
+    win32,
+    win64,
+    arm64,
+    arm64ec
+};
+
+static String toString (Architecture arch)
+{
+    switch (arch)
+    {
+        case Architecture::win32:   return "Win32";
+        case Architecture::win64:   return "x64";
+        case Architecture::arm64:   return "ARM64";
+        case Architecture::arm64ec: return "ARM64EC";
+    }
+
+    jassertfalse;
+    return "";
+}
+
+static std::optional<Architecture> architectureTypeFromString (const String& string)
+{
+    constexpr Architecture values[] { Architecture::win32,
+                                      Architecture::win64,
+                                      Architecture::arm64,
+                                      Architecture::arm64ec };
+
+    for (auto value : values)
+    {
+        if (toString (value) == string)
+            return value;
+    }
+
+    jassertfalse;
+    return {};
+}
+
 //==============================================================================
 class MSVCProjectExporterBase : public ProjectExporter
 {
@@ -125,7 +164,7 @@ public:
 
             if (oldStylePrebuildCommand.isNotEmpty())
                 for (ConfigIterator config (*this); config.next();)
-                    dynamic_cast<MSVCBuildConfiguration&> (*config).getValue (Ids::prebuildCommand) = oldStylePrebuildCommand;
+                    static_cast<MSVCBuildConfiguration*> (&*config)->getValue (Ids::prebuildCommand) = oldStylePrebuildCommand;
         }
 
         {
@@ -167,7 +206,28 @@ public:
         }
 
         for (ConfigIterator i (*this); i.next();)
-            dynamic_cast<MSVCBuildConfiguration&> (*i).updateOldLTOSetting();
+        {
+            auto& config = *static_cast<MSVCBuildConfiguration*> (&*i);
+            config.updateOldLTOSetting();
+            config.updateOldArchSetting();
+        }
+    }
+
+    Array<Architecture> getAllActiveArchitectures() const
+    {
+        Array<Architecture> archs;
+
+        for (ConstConfigIterator i (*this); i.next();)
+        {
+            const auto& config = *static_cast<const MSVCBuildConfiguration*> (&*i);
+            const auto configArchs = config.getArchitectures();
+
+            for (const auto& arch : configArchs)
+                if (! archs.contains (arch))
+                    archs.add (arch);
+        }
+
+        return archs;
     }
 
     void initialiseDependencyPathValues() override
@@ -183,8 +243,7 @@ public:
     }
 
     //==============================================================================
-    class MSVCBuildConfiguration final : public BuildConfiguration,
-                                         private Value::Listener
+    class MSVCBuildConfiguration final : public BuildConfiguration
     {
     public:
         MSVCBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -199,7 +258,7 @@ public:
               multiProcessorCompilationValue (config, Ids::multiProcessorCompilation,  getUndoManager(), true),
               intermediatesPathValue         (config, Ids::intermediatesPath,          getUndoManager()),
               characterSetValue              (config, Ids::characterSet,               getUndoManager()),
-              architectureTypeValue          (config, Ids::winArchitecture,            getUndoManager(), getIntel64BitArchName()),
+              architectureTypeValue          (config, Ids::winArchitecture,            getUndoManager(), Array<var> { toString (Architecture::win64) }, ","),
               fastMathValue                  (config, Ids::fastMath,                   getUndoManager()),
               debugInformationFormatValue    (config, Ids::debugInformationFormat,     getUndoManager(), isDebug() ? "ProgramDatabase" : "None"),
               pluginBinaryCopyStepValue      (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false),
@@ -207,32 +266,68 @@ public:
               vst3BinaryLocation             (config, Ids::vst3BinaryLocation,         getUndoManager()),
               aaxBinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
               lv2BinaryLocation              (config, Ids::lv2BinaryLocation,          getUndoManager()),
-              unityPluginBinaryLocation      (config, Ids::unityPluginBinaryLocation,  getUndoManager(), {})
+              unityPluginBinaryLocation      (config, Ids::unityPluginBinaryLocation,  getUndoManager())
         {
-            setPluginBinaryCopyLocationDefaults();
-            optimisationLevelValue.setDefault (isDebug() ? optimisationOff : optimiseFull);
+            constexpr std::tuple<Architecture, const char*, const char*> paths[]
+            {
+                { Architecture::win32,   "%programfiles(x86)%", "%CommonProgramFiles(x86)%" },
+                { Architecture::win64,   "%ProgramW6432%",      "%CommonProgramW6432%" },
+                { Architecture::arm64,   "%ProgramW6432%",      "%CommonProgramW6432%" },
+                { Architecture::arm64ec, "%ProgramW6432%",      "%CommonProgramW6432%" }
+            };
 
-            architectureValueToListenTo = architectureTypeValue.getPropertyAsValue();
-            architectureValueToListenTo.addListener (this);
+            for (const auto& [arch, programFolderPath, commonFolderPath] : paths)
+            {
+                setBinaryPathDefault (Ids::vstBinaryLocation,  arch, programFolderPath + String ("\\Steinberg\\Vstplugins"));
+                setBinaryPathDefault (Ids::vst3BinaryLocation, arch, commonFolderPath  + String ("\\VST3"));
+                setBinaryPathDefault (Ids::aaxBinaryLocation,  arch, commonFolderPath  + String ("\\Avid\\Audio\\Plug-Ins"));
+                setBinaryPathDefault (Ids::lv2BinaryLocation,  arch, "%APPDATA%\\LV2");
+            }
+
+            optimisationLevelValue.setDefault (isDebug() ? optimisationOff : optimiseFull);
+        }
+
+        String getBinaryPath (const Identifier& id, Architecture arch) const
+        {
+            if (auto* location = getLocationForArchitecture (id, arch))
+                return location->get().toString();
+
+            return "";
+        }
+
+        void setBinaryPathDefault (const Identifier& id, Architecture arch, const String& path)
+        {
+            if (auto* location = getLocationForArchitecture (id, arch))
+                location->setDefault (path);
         }
 
         //==============================================================================
         int getWarningLevel() const                       { return warningLevelValue.get(); }
         bool areWarningsTreatedAsErrors() const           { return warningsAreErrorsValue.get(); }
 
+        Array<Architecture> getArchitectures() const
+        {
+            auto value = architectureTypeValue.get();
+            auto* array = value.getArray();
+
+            if (array == nullptr)
+                return {};
+
+            Array<Architecture> result;
+            result.resize (array->size());
+
+            std::transform (array->begin(), array->end(), result.begin(), [] (const var& archVar)
+            {
+                return *architectureTypeFromString (archVar.toString());
+            });
+
+            return result;
+        }
+
         String getPrebuildCommandString() const           { return prebuildCommandValue.get(); }
         String getPostbuildCommandString() const          { return postbuildCommandValue.get(); }
-        String getVSTBinaryLocationString() const         { return vstBinaryLocation.get(); }
-        String getVST3BinaryLocationString() const        { return vst3BinaryLocation.get(); }
-        String getAAXBinaryLocationString() const         { return aaxBinaryLocation.get();}
-        String getLV2BinaryLocationString() const         { return lv2BinaryLocation.get();}
-        String getUnityPluginBinaryLocationString() const { return unityPluginBinaryLocation.get(); }
         String getIntermediatesPathString() const         { return intermediatesPathValue.get(); }
         String getCharacterSetString() const              { return characterSetValue.get(); }
-        String getIntel64BitArchName() const              { return "x64"; }
-        String getIntel32BitArchName() const              { return "Win32"; }
-        String getArm64BitArchName() const                { return "ARM64"; }
-        String getArchitectureString() const              { return architectureTypeValue.get(); }
         String getDebugInformationFormatString() const    { return debugInformationFormatValue.get(); }
 
         bool shouldGenerateDebugSymbols() const           { return generateDebugSymbolsValue.get(); }
@@ -243,9 +338,9 @@ public:
         bool isPluginBinaryCopyStepEnabled() const        { return pluginBinaryCopyStepValue.get(); }
 
         //==============================================================================
-        String createMSVCConfigName() const
+        String createMSVCConfigName (Architecture arch) const
         {
-            return getName() + "|" + getArchitectureString();
+            return getName() + "|" + toString (arch);
         }
 
         String getOutputFilename (const String& suffix,
@@ -274,9 +369,20 @@ public:
             if (project.isAudioPluginProject())
                 addVisualStudioPluginInstallPathProperties (props);
 
-            props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
-                                                    { getIntel32BitArchName(), getIntel64BitArchName(), getArm64BitArchName() },
-                                                    { getIntel32BitArchName(), getIntel64BitArchName(), getArm64BitArchName() }),
+            const auto architectureList = exporter.getExporterIdentifier() == Identifier { "VS2022" }
+                                        ? std::vector<Architecture> { Architecture::win32, Architecture::win64, Architecture::arm64, Architecture::arm64ec }
+                                        : std::vector<Architecture> { Architecture::win32, Architecture::win64, Architecture::arm64 };
+
+            Array<String> architectureListAsStrings;
+            Array<var> architectureListAsVars;
+
+            for (const auto& arch : architectureList)
+            {
+                architectureListAsStrings.add (toString (arch));
+                architectureListAsVars.add (toString (arch));
+            }
+
+            props.add (new MultiChoicePropertyComponent (architectureTypeValue, "Architecture", architectureListAsStrings, architectureListAsVars),
                        "Which Windows architecture to use.");
 
             props.add (new ChoicePropertyComponentWithEnablement (debugInformationFormatValue,
@@ -361,15 +467,111 @@ public:
                 linkTimeOptimisationValue = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
         }
 
+        void updateOldArchSetting()
+        {
+            if (architectureTypeValue.get().isArray())
+                return;
+
+            const auto archString = architectureTypeValue.get().toString();
+            const auto archType = architectureTypeFromString (archString);
+
+            if (! archType)
+                return;
+
+            const auto pluginBinaryPathLocationIds =
+            {
+                Ids::vstBinaryLocation,
+                Ids::vst3BinaryLocation,
+                Ids::lv2BinaryLocation,
+                Ids::aaxBinaryLocation,
+                Ids::unityPluginBinaryLocation
+            };
+
+            for (const auto& location : pluginBinaryPathLocationIds)
+            {
+                if (auto* prop = config.getPropertyPointer (location))
+                {
+                    setBinaryPathDefault (location, *archType, prop->toString());
+                }
+            }
+
+            architectureTypeValue = Array<var> { archString };
+        }
+
     private:
         ValueTreePropertyWithDefault warningLevelValue, warningsAreErrorsValue, prebuildCommandValue, postbuildCommandValue, generateDebugSymbolsValue,
                                      enableIncrementalLinkingValue, useRuntimeLibDLLValue, multiProcessorCompilationValue,
                                      intermediatesPathValue, characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue,
                                      pluginBinaryCopyStepValue;
 
-        ValueTreePropertyWithDefault vstBinaryLocation, vst3BinaryLocation, aaxBinaryLocation, lv2BinaryLocation, unityPluginBinaryLocation;
+        struct LocationProperties
+        {
+            LocationProperties (ValueTree& tree, const Identifier& propertyID, UndoManager* um)
+                : win32   (tree, propertyID + "_Win32",   um),
+                  x64     (tree, propertyID + "_x64",     um),
+                  arm64   (tree, propertyID + "_arm64",   um),
+                  arm64ec (tree, propertyID + "_arm64ec", um)
+            {
+            }
 
-        Value architectureValueToListenTo;
+            const ValueTreePropertyWithDefault* get (Architecture arch) const
+            {
+                return get (*this, arch);
+            }
+
+            ValueTreePropertyWithDefault* get (Architecture arch)
+            {
+                return get (*this, arch);
+            }
+
+            ValueTreePropertyWithDefault win32, x64, arm64, arm64ec;
+
+        private:
+            template <typename This>
+            static auto get (This& t, Architecture arch) -> decltype (t.get (arch))
+            {
+                switch (arch)
+                {
+                    case Architecture::win32:   return &t.win32;
+                    case Architecture::win64:   return &t.x64;
+                    case Architecture::arm64:   return &t.arm64;
+                    case Architecture::arm64ec: return &t.arm64ec;
+                }
+
+                jassertfalse;
+                return nullptr;
+            }
+        };
+
+        template <typename This>
+        static auto getLocationForArchitecture (This& t, const Identifier& id, Architecture arch)
+        {
+            const auto properties =
+            {
+                std::pair { Ids::vstBinaryLocation,  &t.vstBinaryLocation },
+                std::pair { Ids::vst3BinaryLocation, &t.vst3BinaryLocation },
+                std::pair { Ids::aaxBinaryLocation,  &t.aaxBinaryLocation },
+                std::pair { Ids::lv2BinaryLocation,  &t.lv2BinaryLocation }
+            };
+
+            const auto iter = std::find_if (properties.begin(),
+                                            properties.end(),
+                                            [id] (auto pair) { return id == pair.first; });
+
+            return iter != properties.end() ? iter->second->get (arch) : nullptr;
+        }
+
+        ValueTreePropertyWithDefault* getLocationForArchitecture (const Identifier& id, Architecture arch)
+        {
+            return getLocationForArchitecture (*this, id, arch);
+        }
+
+        const ValueTreePropertyWithDefault* getLocationForArchitecture (const Identifier& id, Architecture arch) const
+        {
+            return getLocationForArchitecture (*this, id, arch);
+        }
+
+        LocationProperties vstBinaryLocation, vst3BinaryLocation, aaxBinaryLocation, lv2BinaryLocation, unityPluginBinaryLocation;
 
         //==============================================================================
         void addVisualStudioPluginInstallPathProperties (PropertyListBuilder& props)
@@ -381,60 +583,33 @@ public:
                 props.add (new ChoicePropertyComponent (pluginBinaryCopyStepValue, "Enable Plugin Copy Step"),
                            "Enable this to copy plugin binaries to a specified folder after building.");
 
+            const auto addLocationProperties = [&] (auto& locationProps, const String& format)
+            {
+                for (const auto& [member, arch] : { std::tuple (&LocationProperties::win32,   Architecture::win32),
+                                                    std::tuple (&LocationProperties::x64,     Architecture::win64),
+                                                    std::tuple (&LocationProperties::arm64,   Architecture::arm64),
+                                                    std::tuple (&LocationProperties::arm64ec, Architecture::arm64ec) })
+                {
+                    const auto archAndFormat = toString (arch) + " " + format;
+                    props.add (new TextPropertyComponentWithEnablement (locationProps.*member, pluginBinaryCopyStepValue, archAndFormat + " Binary Location", 1024, false),
+                               "The folder in which the compiled " + archAndFormat + " binary should be placed.");
+                }
+            };
+
             if (project.shouldBuildVST3())
-                props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepValue, "VST3 Binary Location",
-                                                                    1024, false),
-                           "The folder in which the compiled VST3 binary should be placed.");
+                addLocationProperties (vst3BinaryLocation, "VST3");
 
             if (project.shouldBuildAAX())
-                props.add (new TextPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepValue, "AAX Binary Location",
-                                                                    1024, false),
-                           "The folder in which the compiled AAX binary should be placed.");
+                addLocationProperties (aaxBinaryLocation, "AAX");
 
             if (project.shouldBuildLV2())
-                props.add (new TextPropertyComponentWithEnablement (lv2BinaryLocation, pluginBinaryCopyStepValue, "LV2 Binary Location",
-                                                                    1024, false),
-                           "The folder in which the compiled LV2 binary should be placed.");
+                addLocationProperties (lv2BinaryLocation, "LV2");
 
             if (project.shouldBuildUnityPlugin())
-                props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepValue, "Unity Binary Location",
-                                                                    1024, false),
-                           "The folder in which the compiled Unity plugin binary and associated C# GUI script should be placed.");
+                addLocationProperties (unityPluginBinaryLocation, "Unity");
 
             if (project.shouldBuildVST())
-                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST (Legacy) Binary Location",
-                                                                    1024, false),
-                           "The folder in which the compiled legacy VST binary should be placed.");
-
-        }
-
-        void setPluginBinaryCopyLocationDefaults()
-        {
-            const auto [programsFolderPath, commonsFolderPath] = [&]() -> std::tuple<String, String>
-            {
-                static const std::map<String, std::tuple<String, String>> options
-                {
-                    { "Win32", { "%programfiles(x86)%", "%CommonProgramFiles(x86)%" } },
-                    { "x64",   { "%ProgramW6432%",      "%CommonProgramW6432%"      } },
-                    { "ARM64", { "%ProgramW6432%",      "%CommonProgramW6432%"      } }
-                };
-
-                if (const auto iter = options.find (getArchitectureString()); iter != options.cend())
-                    return iter->second;
-
-                jassertfalse;
-                return { "%programfiles%", "%CommonProgramFiles%" };
-            }();
-
-            vstBinaryLocation.setDefault  (programsFolderPath + String ("\\Steinberg\\Vstplugins"));
-            vst3BinaryLocation.setDefault (commonsFolderPath + String ("\\VST3"));
-            aaxBinaryLocation.setDefault  (commonsFolderPath + String ("\\Avid\\Audio\\Plug-Ins"));
-            lv2BinaryLocation.setDefault  ("%APPDATA%\\LV2");
-        }
-
-        void valueChanged (Value&) override
-        {
-            setPluginBinaryCopyLocationDefaults();
+                addLocationProperties (vstBinaryLocation, "VST (Legacy)");
         }
     };
 
@@ -448,7 +623,7 @@ public:
             projectGuid = createGUID (owner.getProject().getProjectUIDString() + getName());
         }
 
-        virtual ~MSVCTarget() {}
+        virtual ~MSVCTarget() = default;
 
         String getProjectVersionString() const     { return "10.00"; }
         String getProjectFileSuffix() const        { return ".vcxproj"; }
@@ -462,17 +637,22 @@ public:
             projectXml.setAttribute ("ToolsVersion", getOwner().getToolsVersion());
             projectXml.setAttribute ("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
 
+            const auto allArchitectures = owner.getAllActiveArchitectures();
+
             {
                 auto* configsGroup = projectXml.createNewChildElement ("ItemGroup");
                 configsGroup->setAttribute ("Label", "ProjectConfigurations");
 
                 for (ConstConfigIterator i (owner); i.next();)
                 {
-                    auto& config = dynamic_cast<const MSVCBuildConfiguration&> (*i);
-                    auto* e = configsGroup->createNewChildElement ("ProjectConfiguration");
-                    e->setAttribute ("Include", config.createMSVCConfigName());
-                    e->createNewChildElement ("Configuration")->addTextElement (config.getName());
-                    e->createNewChildElement ("Platform")->addTextElement (config.getArchitectureString());
+                    auto& config = *static_cast<const MSVCBuildConfiguration*> (&*i);
+                    for (const auto& arch : allArchitectures)
+                    {
+                        auto* e = configsGroup->createNewChildElement ("ProjectConfiguration");
+                        e->setAttribute ("Include", config.createMSVCConfigName (arch));
+                        e->createNewChildElement ("Configuration")->addTextElement (config.getName());
+                        e->createNewChildElement ("Platform")->addTextElement (toString (arch));
+                    }
                 }
             }
 
@@ -489,40 +669,43 @@ public:
 
             for (ConstConfigIterator i (owner); i.next();)
             {
-                auto& config = dynamic_cast<const MSVCBuildConfiguration&> (*i);
+                auto& config = *static_cast<const MSVCBuildConfiguration*> (&*i);
 
-                auto* e = projectXml.createNewChildElement ("PropertyGroup");
-                setConditionAttribute (*e, config);
-                e->setAttribute ("Label", "Configuration");
-                e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
-                e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
-                e->createNewChildElement ("WholeProgramOptimization")->addTextElement (config.isLinkTimeOptimisationEnabled() ? "true"
-                                                                                                                              : "false");
-
-                auto charSet = config.getCharacterSetString();
-
-                if (charSet.isNotEmpty())
-                    e->createNewChildElement ("CharacterSet")->addTextElement (charSet);
-
-                if (config.shouldLinkIncremental())
-                    e->createNewChildElement ("LinkIncremental")->addTextElement ("true");
-
-                e->createNewChildElement ("PlatformToolset")->addTextElement (owner.getPlatformToolset());
-
-                addWindowsTargetPlatformToConfig (*e);
-
-                struct IntelLibraryInfo
+                for (const auto& arch : allArchitectures)
                 {
-                    String libraryKind;
-                    String configString;
-                };
+                    auto* e = projectXml.createNewChildElement ("PropertyGroup");
+                    setConditionAttribute (*e, config, arch);
+                    e->setAttribute ("Label", "Configuration");
+                    e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
+                    e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
+                    e->createNewChildElement ("WholeProgramOptimization")->addTextElement (config.isLinkTimeOptimisationEnabled() ? "true"
+                                                                                                                                  : "false");
 
-                for (const auto& info : { IntelLibraryInfo { owner.getIPPLibrary(),   "UseIntelIPP" },
-                                          IntelLibraryInfo { owner.getIPP1ALibrary(), "UseIntelIPP1A" },
-                                          IntelLibraryInfo { owner.getMKL1ALibrary(), "UseInteloneMKL" } })
-                {
-                    if (info.libraryKind.isNotEmpty())
-                        e->createNewChildElement (info.configString)->addTextElement (info.libraryKind);
+                    auto charSet = config.getCharacterSetString();
+
+                    if (charSet.isNotEmpty())
+                        e->createNewChildElement ("CharacterSet")->addTextElement (charSet);
+
+                    if (config.shouldLinkIncremental())
+                        e->createNewChildElement ("LinkIncremental")->addTextElement ("true");
+
+                    e->createNewChildElement ("PlatformToolset")->addTextElement (owner.getPlatformToolset());
+
+                    addWindowsTargetPlatformToConfig (*e);
+
+                    struct IntelLibraryInfo
+                    {
+                        String libraryKind;
+                        String configString;
+                    };
+
+                    for (const auto& info : { IntelLibraryInfo { owner.getIPPLibrary(),   "UseIntelIPP" },
+                                              IntelLibraryInfo { owner.getIPP1ALibrary(), "UseIntelIPP1A" },
+                                              IntelLibraryInfo { owner.getMKL1ALibrary(), "UseInteloneMKL" } })
+                    {
+                        if (info.libraryKind.isNotEmpty())
+                            e->createNewChildElement (info.configString)->addTextElement (info.libraryKind);
+                    }
                 }
             }
 
@@ -552,47 +735,50 @@ public:
 
                 for (ConstConfigIterator i (owner); i.next();)
                 {
-                    auto& config = dynamic_cast<const MSVCBuildConfiguration&> (*i);
+                    auto& config = *static_cast<const MSVCBuildConfiguration*> (&*i);
 
-                    if (getConfigTargetPath (config).isNotEmpty())
+                    for (const auto& arch : allArchitectures)
                     {
-                        auto* outdir = props->createNewChildElement ("OutDir");
-                        setConditionAttribute (*outdir, config);
-                        outdir->addTextElement (build_tools::windowsStylePath (getConfigTargetPath (config)) + "\\");
-                    }
-
-                    {
-                        auto* intdir = props->createNewChildElement ("IntDir");
-                        setConditionAttribute (*intdir, config);
-
-                        auto intermediatesPath = getIntermediatesPath (config);
-                        if (! intermediatesPath.endsWithChar (L'\\'))
-                            intermediatesPath += L'\\';
-
-                        intdir->addTextElement (build_tools::windowsStylePath (intermediatesPath));
-                    }
-
-                    {
-                        auto* targetName = props->createNewChildElement ("TargetName");
-                        setConditionAttribute (*targetName, config);
-                        targetName->addTextElement (msBuildEscape (config.getOutputFilename ("", false, type)));
-                    }
-
-                    {
-                        auto* manifest = props->createNewChildElement ("GenerateManifest");
-                        setConditionAttribute (*manifest, config);
-                        manifest->addTextElement ("true");
-                    }
-
-                    if (type != SharedCodeTarget)
-                    {
-                        auto librarySearchPaths = getLibrarySearchPaths (config);
-
-                        if (! librarySearchPaths.isEmpty())
+                        if (getConfigTargetPath (config).isNotEmpty())
                         {
-                            auto* libPath = props->createNewChildElement ("LibraryPath");
-                            setConditionAttribute (*libPath, config);
-                            libPath->addTextElement ("$(LibraryPath);" + librarySearchPaths.joinIntoString (";"));
+                            auto* outdir = props->createNewChildElement ("OutDir");
+                            setConditionAttribute (*outdir, config, arch);
+                            outdir->addTextElement (build_tools::windowsStylePath (getConfigTargetPath (config)) + "\\");
+                        }
+
+                        {
+                            auto* intdir = props->createNewChildElement ("IntDir");
+                            setConditionAttribute (*intdir, config, arch);
+
+                            auto intermediatesPath = getIntermediatesPath (config);
+                            if (! intermediatesPath.endsWithChar (L'\\'))
+                                intermediatesPath += L'\\';
+
+                            intdir->addTextElement (build_tools::windowsStylePath (intermediatesPath));
+                        }
+
+                        {
+                            auto* targetName = props->createNewChildElement ("TargetName");
+                            setConditionAttribute (*targetName, config, arch);
+                            targetName->addTextElement (msBuildEscape (config.getOutputFilename ("", false, type)));
+                        }
+
+                        {
+                            auto* manifest = props->createNewChildElement ("GenerateManifest");
+                            setConditionAttribute (*manifest, config, arch);
+                            manifest->addTextElement ("true");
+                        }
+
+                        if (type != SharedCodeTarget)
+                        {
+                            auto librarySearchPaths = getLibrarySearchPaths (config);
+
+                            if (! librarySearchPaths.isEmpty())
+                            {
+                                auto* libPath = props->createNewChildElement ("LibraryPath");
+                                setConditionAttribute (*libPath, config, arch);
+                                libPath->addTextElement ("$(LibraryPath);" + librarySearchPaths.joinIntoString (";"));
+                            }
                         }
                     }
                 }
@@ -600,191 +786,194 @@ public:
 
             for (ConstConfigIterator i (owner); i.next();)
             {
-                auto& config = dynamic_cast<const MSVCBuildConfiguration&> (*i);
+                auto& config = *static_cast<const MSVCBuildConfiguration*> (&*i);
 
-                enum class EscapeQuotes { no, yes };
-
-                // VS doesn't correctly escape double quotes in preprocessor definitions, so we have
-                // to add our own layer of escapes
-                const auto addIncludePathsAndPreprocessorDefinitions = [this, &config] (XmlElement& xml, EscapeQuotes escapeQuotes)
+                for (const auto& arch : allArchitectures)
                 {
-                    auto includePaths = getOwner().getHeaderSearchPaths (config);
-                    includePaths.add ("%(AdditionalIncludeDirectories)");
-                    xml.createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
+                    enum class EscapeQuotes { no, yes };
 
-                    const auto preprocessorDefs = getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)";
-                    const auto preprocessorDefsEscaped = escapeQuotes == EscapeQuotes::yes ? preprocessorDefs.replace ("\"", "\\\"")
-                                                                                           : preprocessorDefs;
-                    xml.createNewChildElement ("PreprocessorDefinitions")->addTextElement (preprocessorDefsEscaped);
-                };
-
-                bool isDebug = config.isDebug();
-
-                auto* group = projectXml.createNewChildElement ("ItemDefinitionGroup");
-                setConditionAttribute (*group, config);
-
-                {
-                    auto* midl = group->createNewChildElement ("Midl");
-                    midl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"
-                                                                                                     : "NDEBUG;%(PreprocessorDefinitions)");
-                    midl->createNewChildElement ("MkTypLibCompatible")->addTextElement ("true");
-                    midl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-                    midl->createNewChildElement ("TargetEnvironment")->addTextElement ("Win32");
-                    midl->createNewChildElement ("HeaderFileName");
-                }
-
-                bool isUsingEditAndContinue = false;
-                const auto pdbFilename = getOwner().getIntDirFile (config, config.getOutputFilename (".pdb", true, type));
-
-                {
-                    auto* cl = group->createNewChildElement ("ClCompile");
-
-                    cl->createNewChildElement ("Optimization")->addTextElement (getOptimisationLevelString (config.getOptimisationLevelInt()));
-
-                    if (isDebug || config.shouldGenerateDebugSymbols())
+                    // VS doesn't correctly escape double quotes in preprocessor definitions, so we have
+                    // to add our own layer of escapes
+                    const auto addIncludePathsAndPreprocessorDefinitions = [this, &config] (XmlElement& xml, EscapeQuotes escapeQuotes)
                     {
-                        cl->createNewChildElement ("DebugInformationFormat")
-                          ->addTextElement (config.getDebugInformationFormatString());
+                        auto includePaths = getOwner().getHeaderSearchPaths (config);
+                        includePaths.add ("%(AdditionalIncludeDirectories)");
+                        xml.createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
+
+                        const auto preprocessorDefs = getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)";
+                        const auto preprocessorDefsEscaped = escapeQuotes == EscapeQuotes::yes ? preprocessorDefs.replace ("\"", "\\\"")
+                                                                                               : preprocessorDefs;
+                        xml.createNewChildElement ("PreprocessorDefinitions")->addTextElement (preprocessorDefsEscaped);
+                    };
+
+                    bool isDebug = config.isDebug();
+
+                    auto* group = projectXml.createNewChildElement ("ItemDefinitionGroup");
+                    setConditionAttribute (*group, config, arch);
+
+                    {
+                        auto* midl = group->createNewChildElement ("Midl");
+                        midl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"
+                                                                                                         : "NDEBUG;%(PreprocessorDefinitions)");
+                        midl->createNewChildElement ("MkTypLibCompatible")->addTextElement ("true");
+                        midl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
+                        midl->createNewChildElement ("TargetEnvironment")->addTextElement ("Win32");
+                        midl->createNewChildElement ("HeaderFileName");
                     }
 
-                    addIncludePathsAndPreprocessorDefinitions (*cl, EscapeQuotes::no);
+                    bool isUsingEditAndContinue = false;
+                    const auto pdbFilename = getOwner().getIntDirFile (config, config.getOutputFilename (".pdb", true, type));
 
-                    cl->createNewChildElement ("RuntimeLibrary")->addTextElement (config.isUsingRuntimeLibDLL() ? (isDebug ? "MultiThreadedDebugDLL" : "MultiThreadedDLL")
-                                                                                                                : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
-                    cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
-                    cl->createNewChildElement ("PrecompiledHeader")->addTextElement ("NotUsing");
-                    cl->createNewChildElement ("AssemblerListingLocation")->addTextElement ("$(IntDir)\\");
-                    cl->createNewChildElement ("ObjectFileName")->addTextElement ("$(IntDir)\\");
-                    cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement (pdbFilename);
-                    cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (config.getWarningLevel()));
-                    cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-                    cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement (config.shouldUseMultiProcessorCompilation() ? "true" : "false");
-
-                    if (config.isFastMathEnabled())
-                        cl->createNewChildElement ("FloatingPointModel")->addTextElement ("Fast");
-
-                    auto extraFlags = getOwner().replacePreprocessorTokens (config, config.getAllCompilerFlagsString()).trim();
-
-                    if (extraFlags.isNotEmpty())
-                        cl->createNewChildElement ("AdditionalOptions")->addTextElement (extraFlags + " %(AdditionalOptions)");
-
-                    if (config.areWarningsTreatedAsErrors())
-                        cl->createNewChildElement ("TreatWarningAsError")->addTextElement ("true");
-
-                    auto cppStandard = owner.project.getCppStandardString();
-                    cl->createNewChildElement ("LanguageStandard")->addTextElement ("stdcpp" + cppStandard);
-                }
-
-                {
-                    auto* res = group->createNewChildElement ("ResourceCompile");
-                    addIncludePathsAndPreprocessorDefinitions (*res, EscapeQuotes::yes);
-                }
-
-                auto externalLibraries = getExternalLibraries (config, getOwner().getExternalLibrariesStringArray());
-                auto additionalDependencies = type != SharedCodeTarget && type != LV2Helper && type != VST3Helper && ! externalLibraries.isEmpty()
-                                                        ? externalLibraries.joinIntoString (";") + ";%(AdditionalDependencies)"
-                                                        : String();
-
-                auto librarySearchPaths = config.getLibrarySearchPaths();
-                auto additionalLibraryDirs = type != SharedCodeTarget && type != LV2Helper && type != VST3Helper && librarySearchPaths.size() > 0
-                                                       ? getOwner().replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";")) + ";%(AdditionalLibraryDirectories)"
-                                                       : String();
-
-                {
-                    auto* link = group->createNewChildElement ("Link");
-                    link->createNewChildElement ("OutputFile")->addTextElement (getOutputFilePath (config));
-                    link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-                    link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
-                                                                                                            : "%(IgnoreSpecificDefaultLibraries)");
-                    link->createNewChildElement ("GenerateDebugInformation")->addTextElement ((isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
-                    link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (pdbFilename);
-                    link->createNewChildElement ("SubSystem")->addTextElement (type == ConsoleApp || type == LV2Helper || type == VST3Helper ? "Console" : "Windows");
-
-                    if (config.getArchitectureString() == "Win32")
-                        link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
-
-                    if (isUsingEditAndContinue)
-                        link->createNewChildElement ("ImageHasSafeExceptionHandlers")->addTextElement ("false");
-
-                    if (! isDebug)
                     {
-                        link->createNewChildElement ("OptimizeReferences")->addTextElement ("true");
-                        link->createNewChildElement ("EnableCOMDATFolding")->addTextElement ("true");
+                        auto* cl = group->createNewChildElement ("ClCompile");
+
+                        cl->createNewChildElement ("Optimization")->addTextElement (getOptimisationLevelString (config.getOptimisationLevelInt()));
+
+                        if (isDebug || config.shouldGenerateDebugSymbols())
+                        {
+                            cl->createNewChildElement ("DebugInformationFormat")
+                              ->addTextElement (config.getDebugInformationFormatString());
+                        }
+
+                        addIncludePathsAndPreprocessorDefinitions (*cl, EscapeQuotes::no);
+
+                        cl->createNewChildElement ("RuntimeLibrary")->addTextElement (config.isUsingRuntimeLibDLL() ? (isDebug ? "MultiThreadedDebugDLL" : "MultiThreadedDLL")
+                                                                                                                    : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
+                        cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
+                        cl->createNewChildElement ("PrecompiledHeader")->addTextElement ("NotUsing");
+                        cl->createNewChildElement ("AssemblerListingLocation")->addTextElement ("$(IntDir)\\");
+                        cl->createNewChildElement ("ObjectFileName")->addTextElement ("$(IntDir)\\");
+                        cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement (pdbFilename);
+                        cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (config.getWarningLevel()));
+                        cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
+                        cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement (config.shouldUseMultiProcessorCompilation() ? "true" : "false");
+
+                        if (config.isFastMathEnabled())
+                            cl->createNewChildElement ("FloatingPointModel")->addTextElement ("Fast");
+
+                        auto extraFlags = getOwner().replacePreprocessorTokens (config, config.getAllCompilerFlagsString()).trim();
+
+                        if (extraFlags.isNotEmpty())
+                            cl->createNewChildElement ("AdditionalOptions")->addTextElement (extraFlags + " %(AdditionalOptions)");
+
+                        if (config.areWarningsTreatedAsErrors())
+                            cl->createNewChildElement ("TreatWarningAsError")->addTextElement ("true");
+
+                        auto cppStandard = owner.project.getCppStandardString();
+                        cl->createNewChildElement ("LanguageStandard")->addTextElement ("stdcpp" + cppStandard);
                     }
 
-                    if (additionalLibraryDirs.isNotEmpty())
-                        link->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (additionalLibraryDirs);
-
-                    link->createNewChildElement ("LargeAddressAware")->addTextElement ("true");
-
-                    if (config.isLinkTimeOptimisationEnabled())
-                        link->createNewChildElement ("LinkTimeCodeGeneration")->addTextElement ("UseLinkTimeCodeGeneration");
-
-                    if (additionalDependencies.isNotEmpty())
-                        link->createNewChildElement ("AdditionalDependencies")->addTextElement (additionalDependencies);
-
-                    auto extraLinkerOptions = config.getAllLinkerFlagsString();
-                    if (extraLinkerOptions.isNotEmpty())
-                        link->createNewChildElement ("AdditionalOptions")->addTextElement (getOwner().replacePreprocessorTokens (config, extraLinkerOptions).trim()
-                                                                                           + " %(AdditionalOptions)");
-
-                    auto delayLoadedDLLs = getOwner().msvcDelayLoadedDLLs;
-                    if (delayLoadedDLLs.isNotEmpty())
-                        link->createNewChildElement ("DelayLoadDLLs")->addTextElement (delayLoadedDLLs);
-
-                    auto moduleDefinitionsFile = getModuleDefinitions (config);
-                    if (moduleDefinitionsFile.isNotEmpty())
-                        link->createNewChildElement ("ModuleDefinitionFile")
-                            ->addTextElement (moduleDefinitionsFile);
-                }
-
-                {
-                    auto* bsc = group->createNewChildElement ("Bscmake");
-                    bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-                    bsc->createNewChildElement ("OutputFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".bsc", true, type)));
-                }
-
-                if (type != SharedCodeTarget && type != LV2Helper && type != VST3Helper)
-                {
-                    auto* lib = group->createNewChildElement ("Lib");
-
-                    if (additionalDependencies.isNotEmpty())
-                        lib->createNewChildElement ("AdditionalDependencies")->addTextElement (additionalDependencies);
-
-                    if (additionalLibraryDirs.isNotEmpty())
-                        lib->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (additionalLibraryDirs);
-                }
-
-                if (auto manifestFile = getOwner().getManifestPath(); manifestFile.getRoot() != build_tools::RelativePath::unknown || type == VST3Helper)
-                {
-                    auto* bsc = group->createNewChildElement ("Manifest");
-                    auto* additional = bsc->createNewChildElement ("AdditionalManifestFiles");
-
-                    if (manifestFile.getRoot() != build_tools::RelativePath::unknown)
                     {
-                        additional->addTextElement (manifestFile.rebased (getOwner().getProject().getFile().getParentDirectory(),
-                                                                          getOwner().getTargetFolder(),
-                                                                          build_tools::RelativePath::buildTargetFolder).toWindowsStyle());
+                        auto* res = group->createNewChildElement ("ResourceCompile");
+                        addIncludePathsAndPreprocessorDefinitions (*res, EscapeQuotes::yes);
                     }
+
+                    auto externalLibraries = getExternalLibraries (config, getOwner().getExternalLibrariesStringArray());
+                    auto additionalDependencies = type != SharedCodeTarget && type != LV2Helper && type != VST3Helper && ! externalLibraries.isEmpty()
+                                                  ? externalLibraries.joinIntoString (";") + ";%(AdditionalDependencies)"
+                                                  : String();
+
+                    auto librarySearchPaths = config.getLibrarySearchPaths();
+                    auto additionalLibraryDirs = type != SharedCodeTarget && type != LV2Helper && type != VST3Helper && librarySearchPaths.size() > 0
+                                                 ? getOwner().replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";")) + ";%(AdditionalLibraryDirectories)"
+                                                 : String();
+
+                    {
+                        auto* link = group->createNewChildElement ("Link");
+                        link->createNewChildElement ("OutputFile")->addTextElement (getOutputFilePath (config));
+                        link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
+                        link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
+                                                                                                                : "%(IgnoreSpecificDefaultLibraries)");
+                        link->createNewChildElement ("GenerateDebugInformation")->addTextElement ((isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
+                        link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (pdbFilename);
+                        link->createNewChildElement ("SubSystem")->addTextElement (type == ConsoleApp || type == LV2Helper || type == VST3Helper ? "Console" : "Windows");
+
+                        if (arch == Architecture::win32)
+                            link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
+
+                        if (isUsingEditAndContinue)
+                            link->createNewChildElement ("ImageHasSafeExceptionHandlers")->addTextElement ("false");
+
+                        if (! isDebug)
+                        {
+                            link->createNewChildElement ("OptimizeReferences")->addTextElement ("true");
+                            link->createNewChildElement ("EnableCOMDATFolding")->addTextElement ("true");
+                        }
+
+                        if (additionalLibraryDirs.isNotEmpty())
+                            link->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (additionalLibraryDirs);
+
+                        link->createNewChildElement ("LargeAddressAware")->addTextElement ("true");
+
+                        if (config.isLinkTimeOptimisationEnabled())
+                            link->createNewChildElement ("LinkTimeCodeGeneration")->addTextElement ("UseLinkTimeCodeGeneration");
+
+                        if (additionalDependencies.isNotEmpty())
+                            link->createNewChildElement ("AdditionalDependencies")->addTextElement (additionalDependencies);
+
+                        auto extraLinkerOptions = config.getAllLinkerFlagsString();
+                        if (extraLinkerOptions.isNotEmpty())
+                            link->createNewChildElement ("AdditionalOptions")->addTextElement (getOwner().replacePreprocessorTokens (config, extraLinkerOptions).trim()
+                                                                                               + " %(AdditionalOptions)");
+
+                        auto delayLoadedDLLs = getOwner().msvcDelayLoadedDLLs;
+                        if (delayLoadedDLLs.isNotEmpty())
+                            link->createNewChildElement ("DelayLoadDLLs")->addTextElement (delayLoadedDLLs);
+
+                        auto moduleDefinitionsFile = getModuleDefinitions (config);
+                        if (moduleDefinitionsFile.isNotEmpty())
+                            link->createNewChildElement ("ModuleDefinitionFile")
+                                ->addTextElement (moduleDefinitionsFile);
+                    }
+
+                    {
+                        auto* bsc = group->createNewChildElement ("Bscmake");
+                        bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
+                        bsc->createNewChildElement ("OutputFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".bsc", true, type)));
+                    }
+
+                    if (type != SharedCodeTarget && type != LV2Helper && type != VST3Helper)
+                    {
+                        auto* lib = group->createNewChildElement ("Lib");
+
+                        if (additionalDependencies.isNotEmpty())
+                            lib->createNewChildElement ("AdditionalDependencies")->addTextElement (additionalDependencies);
+
+                        if (additionalLibraryDirs.isNotEmpty())
+                            lib->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (additionalLibraryDirs);
+                    }
+
+                    if (auto manifestFile = getOwner().getManifestPath(); manifestFile.getRoot() != build_tools::RelativePath::unknown || type == VST3Helper)
+                    {
+                        auto* bsc = group->createNewChildElement ("Manifest");
+                        auto* additional = bsc->createNewChildElement ("AdditionalManifestFiles");
+
+                        if (manifestFile.getRoot() != build_tools::RelativePath::unknown)
+                        {
+                            additional->addTextElement (manifestFile.rebased (getOwner().getProject().getFile().getParentDirectory(),
+                                                                              getOwner().getTargetFolder(),
+                                                                              build_tools::RelativePath::buildTargetFolder).toWindowsStyle());
+                        }
+                    }
+
+                    if (getTargetFileType() == staticLibrary && arch == Architecture::win32)
+                    {
+                        auto* lib = group->createNewChildElement ("Lib");
+                        lib->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
+                    }
+
+                    auto preBuild = getPreBuildSteps (config, arch);
+                    if (preBuild.isNotEmpty())
+                        group->createNewChildElement ("PreBuildEvent")
+                             ->createNewChildElement ("Command")
+                             ->addTextElement (preBuild);
+
+                    auto postBuild = getPostBuildSteps (config, arch);
+                    if (postBuild.isNotEmpty())
+                        group->createNewChildElement ("PostBuildEvent")
+                             ->createNewChildElement ("Command")
+                             ->addTextElement (postBuild);
                 }
-
-                if (getTargetFileType() == staticLibrary && config.getArchitectureString() == "Win32")
-                {
-                    auto* lib = group->createNewChildElement ("Lib");
-                    lib->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
-                }
-
-                auto preBuild = getPreBuildSteps (config);
-                if (preBuild.isNotEmpty())
-                    group->createNewChildElement ("PreBuildEvent")
-                         ->createNewChildElement ("Command")
-                         ->addTextElement (preBuild);
-
-                auto postBuild = getPostBuildSteps (config);
-                if (postBuild.isNotEmpty())
-                    group->createNewChildElement ("PostBuildEvent")
-                         ->createNewChildElement ("Command")
-                         ->addTextElement (postBuild);
             }
 
             std::unique_ptr<XmlElement> otherFilesGroup (new XmlElement ("ItemGroup"));
@@ -878,11 +1067,15 @@ public:
         }
 
         //==============================================================================
-        static void setSourceFilePCHSettings (XmlElement& element, const File& pchFile, const String& option, const BuildConfiguration& config)
+        static void setSourceFilePCHSettings (XmlElement& element,
+                                              const File& pchFile,
+                                              const String& option,
+                                              const BuildConfiguration& config,
+                                              Architecture arch)
         {
-            auto setConfigConditionAttribute = [&config] (XmlElement* elementToSet) -> XmlElement*
+            auto setConfigConditionAttribute = [&config, arch] (XmlElement* elementToSet) -> XmlElement*
             {
-                setConditionAttribute (*elementToSet, config);
+                setConditionAttribute (*elementToSet, config, arch);
                 return elementToSet;
             };
 
@@ -894,39 +1087,44 @@ public:
 
         void writePrecompiledHeaderFiles (XmlElement& cpps) const
         {
-            for (ConstConfigIterator config (owner); config.next();)
+            for (ConstConfigIterator i (owner); i.next();)
             {
-                if (config->shouldUsePrecompiledHeaderFile())
+                if (! i->shouldUsePrecompiledHeaderFile())
+                    continue;
+
+                auto& config = *static_cast<const MSVCBuildConfiguration*> (&*i);
+
+                for (const auto& arch : config.getArchitectures())
                 {
-                    auto pchFileContent = config->getPrecompiledHeaderFileContent();
+                    auto pchFileContent = config.getPrecompiledHeaderFileContent();
 
-                    if (pchFileContent.isNotEmpty())
+                    if (pchFileContent.isEmpty())
+                        continue;
+
+                    auto pchFile = owner.getTargetFolder().getChildFile (config.getPrecompiledHeaderFilename()).withFileExtension (".h");
+
+                    build_tools::writeStreamToFile (pchFile, [&] (MemoryOutputStream& mo)
                     {
-                        auto pchFile = owner.getTargetFolder().getChildFile (config->getPrecompiledHeaderFilename()).withFileExtension (".h");
+                        mo << pchFileContent;
+                    });
 
-                        build_tools::writeStreamToFile (pchFile, [&] (MemoryOutputStream& mo)
-                        {
-                            mo << pchFileContent;
-                        });
+                    auto pchSourceFile = pchFile.withFileExtension (".cpp");
 
-                        auto pchSourceFile = pchFile.withFileExtension (".cpp");
+                    build_tools::writeStreamToFile (pchSourceFile, [this] (MemoryOutputStream& mo)
+                    {
+                        mo.setNewLineString (owner.getNewLineString());
 
-                        build_tools::writeStreamToFile (pchSourceFile, [this] (MemoryOutputStream& mo)
-                        {
-                            mo.setNewLineString (owner.getNewLineString());
+                        writeAutoGenWarningComment (mo);
 
-                            writeAutoGenWarningComment (mo);
+                        mo << "    This is an empty source file generated by JUCE required for Visual Studio PCH." << newLine
+                            << newLine
+                            << "*/" << newLine
+                            << newLine;
+                    });
 
-                            mo << "    This is an empty source file generated by JUCE required for Visual Studio PCH." << newLine
-                                << newLine
-                                << "*/" << newLine
-                                << newLine;
-                        });
-
-                        auto* pchSourceElement = cpps.createNewChildElement ("ClCompile");
-                        pchSourceElement->setAttribute ("Include", prependDot (pchSourceFile.getFileName()));
-                        setSourceFilePCHSettings (*pchSourceElement, pchFile, "Create", *config);
-                    }
+                    auto* pchSourceElement = cpps.createNewChildElement ("ClCompile");
+                    pchSourceElement->setAttribute ("Include", prependDot (pchSourceFile.getFileName()));
+                    setSourceFilePCHSettings (*pchSourceElement, pchFile, "Create", config, arch);
                 }
             }
         }
@@ -974,12 +1172,17 @@ public:
                         {
                             for (ConstConfigIterator i (owner); i.next();)
                             {
-                                if (i->shouldUsePrecompiledHeaderFile())
-                                {
-                                    auto pchFile = owner.getTargetFolder().getChildFile (i->getPrecompiledHeaderFilename()).withFileExtension (".h");
+                                auto& config = *static_cast<const MSVCBuildConfiguration*> (&*i);
 
-                                    if (pchFile.existsAsFile())
-                                        setSourceFilePCHSettings (*e, pchFile, "Use", *i);
+                                if (config.shouldUsePrecompiledHeaderFile())
+                                {
+                                    for (const auto& arch : config.getArchitectures())
+                                    {
+                                        auto pchFile = owner.getTargetFolder().getChildFile (i->getPrecompiledHeaderFilename()).withFileExtension (".h");
+
+                                        if (pchFile.existsAsFile())
+                                            setSourceFilePCHSettings (*e, pchFile, "Use", *i, arch);
+                                    }
                                 }
                             }
                         }
@@ -1000,10 +1203,10 @@ public:
             }
         }
 
-        static void setConditionAttribute (XmlElement& xml, const BuildConfiguration& config)
+        static void setConditionAttribute (XmlElement& xml, const BuildConfiguration& config, Architecture arch)
         {
-            auto& msvcConfig = dynamic_cast<const MSVCBuildConfiguration&> (config);
-            xml.setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + msvcConfig.createMSVCConfigName() + "'");
+            auto& msvcConfig = *static_cast<const MSVCBuildConfiguration*> (&config);
+            xml.setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + msvcConfig.createMSVCConfigName (arch) + "'");
         }
 
         //==============================================================================
@@ -1080,7 +1283,7 @@ public:
 
             for (int i = 0; i < getOwner().getAllGroups().size(); ++i)
             {
-                auto& group = getOwner().getAllGroups().getReference(i);
+                auto& group = getOwner().getAllGroups().getReference (i);
 
                 if (group.getNumChildren() > 0)
                     addFilesToFilter (group, group.getName(), *cpps, *headers, *otherFilesGroup, *groupsXml);
@@ -1255,7 +1458,7 @@ public:
             return aaxSdk.getChildFile ("Utilities").getChildFile ("PlugIn.ico");
         }
 
-        String getExtraPostBuildSteps (const MSVCBuildConfiguration& config) const
+        String getExtraPostBuildSteps (const MSVCBuildConfiguration& config, Architecture arch) const
         {
             const auto copyBuildOutputIntoBundle = [&] (const StringArray& segments)
             {
@@ -1282,7 +1485,7 @@ public:
                 const auto bundleScript  = aaxSdk.getChildFile ("Utilities").getChildFile ("CreatePackage.bat");
                 const auto iconFilePath  = getAAXIconFile();
 
-                const auto segments = getAaxBundleStructure (config);
+                const auto segments = getAaxBundleStructure (config, arch);
 
                 const auto pkgScript = copyBuildOutputIntoBundle (segments);
 
@@ -1295,7 +1498,7 @@ public:
                                      + String (" ")
                                      + createRebasedPath (iconFilePath);
 
-                const auto copyScript = copyBundleToInstallDirectory (segments, config.getAAXBinaryLocationString());
+                const auto copyScript = copyBundleToInstallDirectory (segments, config.getBinaryPath (Ids::aaxBinaryLocation, arch));
 
                 return pkgScript + fixScript + copyScript;
             }
@@ -1310,7 +1513,7 @@ public:
 
                 if (config.isPluginBinaryCopyStepEnabled())
                 {
-                    auto copyLocation = config.getUnityPluginBinaryLocationString();
+                    auto copyLocation = config.getBinaryPath (Ids::unityPluginBinaryLocation, arch);
 
                     pkgScript += "\r\ncopy /Y \"$(OutDir)$(TargetFileName)\" " +  String (copyLocation + "\\$(TargetFileName)").quoted();
                     pkgScript += "\r\ncopy /Y " + String ("$(OutDir)" + config.project.getUnityScriptName()).quoted() + " " + String (copyLocation + "\\" + config.project.getUnityScriptName()).quoted();
@@ -1335,7 +1538,7 @@ public:
                                   + writerTarget->getBinaryNameWithSuffix (config);
 
                 const auto copyStep = "xcopy /E /H /I /K /R /Y \"$(OutDir)\" \""
-                                    + config.getLV2BinaryLocationString()
+                                    + config.getBinaryPath (Ids::lv2BinaryLocation, arch)
                                     + '\\'
                                     + config.getTargetBinaryNameString()
                                     + ".lv2\"\r\n";
@@ -1347,7 +1550,7 @@ public:
 
             if (type == VST3PlugIn)
             {
-                const auto segments = getVst3BundleStructure (config);
+                const auto segments = getVst3BundleStructure (config, arch);
 
                 const auto manifestScript = [&]() -> String
                 {
@@ -1384,18 +1587,18 @@ public:
                 }();
 
                 const auto pkgScript = copyBuildOutputIntoBundle (segments);
-                const auto copyScript = copyBundleToInstallDirectory (segments, config.getVST3BinaryLocationString());
+                const auto copyScript = copyBundleToInstallDirectory (segments, config.getBinaryPath (Ids::vst3BinaryLocation, arch));
 
                 return pkgScript + manifestScript + copyScript;
             }
 
             if (type == VSTPlugIn && config.isPluginBinaryCopyStepEnabled())
-                return "copy /Y \"$(OutDir)$(TargetFileName)\" \"" + config.getVSTBinaryLocationString() + "\\$(TargetFileName)\"";
+                return "copy /Y \"$(OutDir)$(TargetFileName)\" \"" + config.getBinaryPath (Ids::vstBinaryLocation, arch) + "\\$(TargetFileName)\"";
 
             return {};
         }
 
-        String getExtraPreBuildSteps (const MSVCBuildConfiguration& config) const
+        String getExtraPreBuildSteps (const MSVCBuildConfiguration& config, Architecture arch) const
         {
             const auto createBundleStructure = [&] (const StringArray& segments)
             {
@@ -1412,26 +1615,26 @@ public:
             };
 
             if (type == AAXPlugIn)
-                return createBundleStructure (getAaxBundleStructure (config));
+                return createBundleStructure (getAaxBundleStructure (config, arch));
 
             if (type == VST3PlugIn)
-                return createBundleStructure (getVst3BundleStructure (config));
+                return createBundleStructure (getVst3BundleStructure (config, arch));
 
             return {};
         }
 
-        String getPostBuildSteps (const MSVCBuildConfiguration& config) const
+        String getPostBuildSteps (const MSVCBuildConfiguration& config, Architecture arch) const
         {
             auto postBuild = config.getPostbuildCommandString().replace ("\n", "\r\n");;
-            auto extraPostBuild = getExtraPostBuildSteps (config);
+            auto extraPostBuild = getExtraPostBuildSteps (config, arch);
 
             return postBuild + String (postBuild.isNotEmpty() && extraPostBuild.isNotEmpty() ? "\r\n" : "") + extraPostBuild;
         }
 
-        String getPreBuildSteps (const MSVCBuildConfiguration& config) const
+        String getPreBuildSteps (const MSVCBuildConfiguration& config, Architecture arch) const
         {
             auto preBuild = config.getPrebuildCommandString().replace ("\n", "\r\n");;
-            auto extraPreBuild = getExtraPreBuildSteps (config);
+            auto extraPreBuild = getExtraPreBuildSteps (config, arch);
 
             return preBuild + String (preBuild.isNotEmpty() && extraPreBuild.isNotEmpty() ? "\r\n" : "") + extraPreBuild;
         }
@@ -1513,24 +1716,31 @@ public:
         }
 
     protected:
-        StringArray getAaxBundleStructure (const MSVCBuildConfiguration& config) const
+        StringArray getAaxBundleStructure (const MSVCBuildConfiguration& config, Architecture arch) const
         {
             const auto dllName = config.getOutputFilename (".aaxplugin", false, type);
-            return { dllName, "Contents", config.getArchitectureString(), dllName };
+            return { dllName, "Contents", toString (arch), dllName };
         }
 
-        StringArray getVst3BundleStructure (const MSVCBuildConfiguration& config) const
+        StringArray getVst3BundleStructure (const MSVCBuildConfiguration& config, Architecture arch) const
         {
-            static const std::map<String, String> suffixes
+            // These suffixes are defined in the VST3 SDK docs
+            const auto suffix = std::invoke ([&]() -> String
             {
-                { "Win32", "x86" },
-                { "x64",   "x86_64" },
-            };
+                switch (arch)
+                {
+                    case Architecture::win32:    return "x86";
+                    case Architecture::win64:    return "x86_64";
+                    case Architecture::arm64:    return "arm64";
+                    case Architecture::arm64ec:  return "arm64ec";
+                }
 
-            const auto iter = suffixes.find (config.getArchitectureString());
+                jassertfalse;
+                return {};
+            });
 
             const auto dllName = config.getOutputFilename (".vst3", false, type);
-            return { dllName, "Contents", iter != suffixes.cend() ? iter->second + "-win" : "win", dllName };
+            return { dllName, "Contents", suffix + "-win", dllName };
         }
 
         const MSVCProjectExporterBase& owner;
@@ -1667,7 +1877,7 @@ public:
         msvcExtraPreprocessorDefs.set ("_CRT_SECURE_NO_WARNINGS", "");
 
         if (type.isCommandLineApp())
-            msvcExtraPreprocessorDefs.set("_CONSOLE", "");
+            msvcExtraPreprocessorDefs.set ("_CONSOLE", "");
 
         callForAllSupportedTargets ([this] (build_tools::ProjectType::Target::Type targetType)
                                     {
@@ -1849,23 +2059,41 @@ protected:
 
         for (ConstConfigIterator i (*this); i.next();)
         {
-            auto& config = dynamic_cast<const MSVCBuildConfiguration&> (*i);
-            auto configName = config.createMSVCConfigName();
-            out << "\t\t" << configName << " = " << configName << newLine;
+            auto& config = *static_cast<const MSVCBuildConfiguration*> (&*i);
+
+            for (const auto& arch : config.getArchitectures())
+            {
+                auto configName = config.createMSVCConfigName (arch);
+                out << "\t\t" << configName << " = " << configName << newLine;
+            }
         }
 
         out << "\tEndGlobalSection" << newLine
             << "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution" << newLine;
 
+        const auto allArchitectures = getAllActiveArchitectures();
+
         for (auto& target : targets)
+        {
             for (ConstConfigIterator i (*this); i.next();)
             {
-                auto& config = dynamic_cast<const MSVCBuildConfiguration&> (*i);
-                auto configName = config.createMSVCConfigName();
+                auto& config = *static_cast<const MSVCBuildConfiguration*> (&*i);
 
-                for (auto& suffix : { "ActiveCfg", "Build.0" })
-                    out << "\t\t" << target->getProjectGuid() << "." << configName << "." << suffix << " = " << configName << newLine;
+                // Add a configuration for all projects but only mark the desired to be built.
+                // We have to do this as VS will automatically add the entry anyway.
+                for (const auto& arch : allArchitectures)
+                {
+                    auto configName = config.createMSVCConfigName (arch);
+
+                    out << "\t\t" << target->getProjectGuid() << "." << configName << "." << "ActiveCfg" << " = " << configName << newLine;
+
+                    const auto shouldBuild = config.getArchitectures().contains (arch);
+
+                    if (shouldBuild)
+                        out << "\t\t" << target->getProjectGuid() << "." << configName << "." << "Build.0" << " = " << configName << newLine;
+                }
             }
+        }
 
         out << "\tEndGlobalSection" << newLine
             << "\tGlobalSection(SolutionProperties) = preSolution" << newLine
