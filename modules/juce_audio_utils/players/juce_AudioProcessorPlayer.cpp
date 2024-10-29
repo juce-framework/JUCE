@@ -35,17 +35,6 @@
 namespace juce
 {
 
-template <typename Value>
-struct ChannelInfo
-{
-    ChannelInfo() = default;
-    ChannelInfo (Value* const* dataIn, int numChannelsIn)
-        : data (dataIn), numChannels (numChannelsIn)  {}
-
-    Value* const* data = nullptr;
-    int numChannels = 0;
-};
-
 /** Sets up `channels` so that it contains channel pointers suitable for passing to
     an AudioProcessor's processBlock.
 
@@ -69,25 +58,25 @@ struct ChannelInfo
     @param tempBuffer     temporary storage for inputs that don't have a corresponding output.
     @param channels       holds pointers to each of the processor's audio channels.
 */
-static void initialiseIoBuffers (ChannelInfo<const float> ins,
-                                 ChannelInfo<float> outs,
+static void initialiseIoBuffers (Span<const float* const> ins,
+                                 Span<float* const> outs,
                                  const int numSamples,
-                                 int processorIns,
-                                 int processorOuts,
+                                 size_t processorIns,
+                                 size_t processorOuts,
                                  AudioBuffer<float>& tempBuffer,
                                  std::vector<float*>& channels)
 {
-    jassert ((int) channels.size() >= jmax (processorIns, processorOuts));
+    jassert (channels.size() >= jmax (processorIns, processorOuts));
 
     size_t totalNumChans = 0;
     const auto numBytes = (size_t) numSamples * sizeof (float);
 
-    const auto prepareInputChannel = [&] (int index)
+    const auto prepareInputChannel = [&] (size_t index)
     {
-        if (ins.numChannels == 0)
+        if (ins.empty())
             zeromem (channels[totalNumChans], numBytes);
         else
-            memcpy (channels[totalNumChans], ins.data[index % ins.numChannels], numBytes);
+            memcpy (channels[totalNumChans], ins[index % ins.size()], numBytes);
     };
 
     if (processorIns > processorOuts)
@@ -95,35 +84,35 @@ static void initialiseIoBuffers (ChannelInfo<const float> ins,
         // If there aren't enough output channels for the number of
         // inputs, we need to use some temporary extra ones (can't
         // use the input data in case it gets written to).
-        jassert (tempBuffer.getNumChannels() >= processorIns - processorOuts);
+        jassert ((size_t) tempBuffer.getNumChannels() >= processorIns - processorOuts);
         jassert (tempBuffer.getNumSamples() >= numSamples);
 
-        for (int i = 0; i < processorOuts; ++i)
+        for (size_t i = 0; i < processorOuts; ++i)
         {
-            channels[totalNumChans] = outs.data[i];
+            channels[totalNumChans] = outs[i];
             prepareInputChannel (i);
             ++totalNumChans;
         }
 
-        for (auto i = processorOuts; i < processorIns; ++i)
+        for (size_t i = processorOuts; i < processorIns; ++i)
         {
-            channels[totalNumChans] = tempBuffer.getWritePointer (i - processorOuts);
+            channels[totalNumChans] = tempBuffer.getWritePointer ((int) (i - processorOuts));
             prepareInputChannel (i);
             ++totalNumChans;
         }
     }
     else
     {
-        for (int i = 0; i < processorIns; ++i)
+        for (size_t i = 0; i < processorIns; ++i)
         {
-            channels[totalNumChans] = outs.data[i];
+            channels[totalNumChans] = outs[i];
             prepareInputChannel (i);
             ++totalNumChans;
         }
 
-        for (auto i = processorIns; i < processorOuts; ++i)
+        for (size_t i = processorIns; i < processorOuts; ++i)
         {
-            channels[totalNumChans] = outs.data[i];
+            channels[totalNumChans] = outs[i];
             zeromem (channels[totalNumChans], (size_t) numSamples * sizeof (float));
             ++totalNumChans;
         }
@@ -266,11 +255,11 @@ void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float* const*
     incomingMidi.clear();
     messageCollector.removeNextBlockOfMessages (incomingMidi, numSamples);
 
-    initialiseIoBuffers ({ inputChannelData,  numInputChannels },
-                         { outputChannelData, numOutputChannels },
+    initialiseIoBuffers ({ inputChannelData,  (size_t) numInputChannels },
+                         { outputChannelData, (size_t) numOutputChannels },
                          numSamples,
-                         actualProcessorChannels.ins,
-                         actualProcessorChannels.outs,
+                         (size_t) actualProcessorChannels.ins,
+                         (size_t) actualProcessorChannels.outs,
                          tempBuffer,
                          channels);
 
@@ -455,11 +444,11 @@ struct AudioProcessorPlayerTests final : public UnitTest
                     AudioBuffer<float> tempBuffer (jmax (layout.numIns, layout.numOuts), numSamples);
                     std::vector<float*> channels ((size_t) jmax (layout.numIns, layout.numOuts), nullptr);
 
-                    initialiseIoBuffers ({ systemIns.getArrayOfReadPointers(),   systemIns.getNumChannels() },
-                                         { systemOuts.getArrayOfWritePointers(), systemOuts.getNumChannels() },
+                    initialiseIoBuffers ({ systemIns.getArrayOfReadPointers(),   (size_t) systemIns.getNumChannels() },
+                                         { systemOuts.getArrayOfWritePointers(), (size_t) systemOuts.getNumChannels() },
                                          numSamples,
-                                         layout.numIns,
-                                         layout.numOuts,
+                                         (size_t) layout.numIns,
+                                         (size_t) layout.numOuts,
                                          tempBuffer,
                                          channels);
 
