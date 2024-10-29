@@ -416,68 +416,71 @@ void AudioProcessorPlayer::handleIncomingMidiMessage (MidiInput*, const MidiMess
 
 struct AudioProcessorPlayerTests final : public UnitTest
 {
+    struct Layout
+    {
+        int numIns, numOuts;
+    };
+
     AudioProcessorPlayerTests()
         : UnitTest ("AudioProcessorPlayer", UnitTestCategories::audio) {}
 
     void runTest() override
     {
-        struct Layout
-        {
-            int numIns, numOuts;
-        };
-
-        const Layout processorLayouts[] { Layout { 0, 0 },
-                                          Layout { 1, 1 },
-                                          Layout { 4, 4 },
-                                          Layout { 4, 8 },
-                                          Layout { 8, 4 } };
-
         beginTest ("Buffers are prepared correctly for a variety of channel layouts");
         {
+            const Layout processorLayouts[] { Layout { 0, 0 },
+                                              Layout { 1, 1 },
+                                              Layout { 4, 4 },
+                                              Layout { 4, 8 },
+                                              Layout { 8, 4 } };
+
             for (const auto& layout : processorLayouts)
             {
                 for (const auto numSystemInputs : { 0, 1, layout.numIns })
                 {
-                    const int numSamples = 256;
-                    const auto systemIns = getTestBuffer (numSystemInputs, numSamples);
-                    auto systemOuts = getTestBuffer (layout.numOuts, numSamples);
-                    AudioBuffer<float> tempBuffer (jmax (layout.numIns, layout.numOuts), numSamples);
-                    std::vector<float*> channels ((size_t) jmax (layout.numIns, layout.numOuts), nullptr);
-
-                    initialiseIoBuffers ({ systemIns.getArrayOfReadPointers(),   (size_t) systemIns.getNumChannels() },
-                                         { systemOuts.getArrayOfWritePointers(), (size_t) systemOuts.getNumChannels() },
-                                         numSamples,
-                                         (size_t) layout.numIns,
-                                         (size_t) layout.numOuts,
-                                         tempBuffer,
-                                         channels);
-
-                    int channelIndex = 0;
-
-                    for (const auto& channel : channels)
-                    {
-                        const auto value = [&]
-                        {
-                            // Any channels past the number of inputs should be silent.
-                            if (layout.numIns <= channelIndex)
-                                return 0.0f;
-
-                            // If there's no input, all input channels should be silent.
-                            if (numSystemInputs == 0)       return 0.0f;
-
-                            // If there's one input, all input channels should copy from that input.
-                            if (numSystemInputs == 1)       return 1.0f;
-
-                            // Otherwise, each processor input should match the corresponding system input.
-                            return (float) (channelIndex + 1);
-                        }();
-
-                        expect (FloatVectorOperations::findMinAndMax (channel, numSamples) == Range<float> (value, value));
-
-                        channelIndex += 1;
-                    }
+                    runTest ({ numSystemInputs, layout.numOuts }, layout);
                 }
             }
+        }
+    }
+
+    void runTest (Layout systemLayout, Layout processorLayout)
+    {
+        const int numSamples = 256;
+        const auto systemIns = getTestBuffer (systemLayout.numIns, numSamples);
+        auto systemOuts = getTestBuffer (systemLayout.numOuts, numSamples);
+        AudioBuffer<float> tempBuffer (jmax (processorLayout.numIns, processorLayout.numOuts), numSamples);
+        std::vector<float*> channels ((size_t) tempBuffer.getNumChannels());
+
+        initialiseIoBuffers ({ systemIns.getArrayOfReadPointers(),   (size_t) systemIns.getNumChannels() },
+                             { systemOuts.getArrayOfWritePointers(), (size_t) systemOuts.getNumChannels() },
+                             numSamples,
+                             (size_t) processorLayout.numIns,
+                             (size_t) processorLayout.numOuts,
+                             tempBuffer,
+                             channels);
+
+        for (const auto [index, channel] : enumerate (channels, int{}))
+        {
+            const auto value = [&, channelIndex = index]
+            {
+                // Any channels past the number of inputs should be silent.
+                if (processorLayout.numIns <= channelIndex)
+                    return 0.0f;
+
+                // If there's no input, all input channels should be silent.
+                if (systemLayout.numIns == 0)
+                    return 0.0f;
+
+                // If there's one input, all input channels should copy from that input.
+                if (systemLayout.numIns == 1)
+                    return 1.0f;
+
+                // Otherwise, each processor input should match the corresponding system input.
+                return (float) (channelIndex + 1);
+            }();
+
+            expect (FloatVectorOperations::findMinAndMax (channel, numSamples) == Range<float> (value, value));
         }
     }
 
