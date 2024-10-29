@@ -47,7 +47,7 @@ namespace juce
     to all processor inputs.
 
     In the case that the system provides no input channels, but the processor has
-    been initialise with multiple input channels, the processor's input channels will
+    been initialised with multiple input channels, the processor's input channels will
     all be zeroed.
 
     @param ins            the system inputs.
@@ -66,57 +66,41 @@ static void initialiseIoBuffers (Span<const float* const> ins,
                                  AudioBuffer<float>& tempBuffer,
                                  std::vector<float*>& channels)
 {
-    jassert (channels.size() >= jmax (processorIns, processorOuts));
+    const auto totalNumChannels = jmax (processorIns, processorOuts);
 
-    size_t totalNumChans = 0;
+    jassert (channels.capacity() >= totalNumChannels);
+    jassert ((size_t) tempBuffer.getNumChannels() >= totalNumChannels);
+    jassert (tempBuffer.getNumSamples() >= numSamples);
+
+    channels.resize (totalNumChannels);
+
     const auto numBytes = (size_t) numSamples * sizeof (float);
 
-    const auto prepareInputChannel = [&] (size_t index)
+    size_t tempBufferIndex = 0;
+
+    for (size_t i = 0; i < totalNumChannels; ++i)
     {
-        if (ins.empty())
-            zeromem (channels[totalNumChans], numBytes);
+        auto*& channelPtr = channels[i];
+        channelPtr = i < outs.size()
+                   ? outs[i]
+                   : tempBuffer.getWritePointer ((int) tempBufferIndex++);
+
+        // If there's a single input channel, route it to all inputs on the processor
+        if (ins.size() == 1 && i < processorIns)
+            memcpy (channelPtr, ins.front(), numBytes);
+
+        // Otherwise, if there's a system input corresponding to this channel, use that
+        else if (i < ins.size())
+            memcpy (channelPtr, ins[i], numBytes);
+
+        // Otherwise, silence the channel
         else
-            memcpy (channels[totalNumChans], ins[index % ins.size()], numBytes);
-    };
-
-    if (processorIns > processorOuts)
-    {
-        // If there aren't enough output channels for the number of
-        // inputs, we need to use some temporary extra ones (can't
-        // use the input data in case it gets written to).
-        jassert ((size_t) tempBuffer.getNumChannels() >= processorIns - processorOuts);
-        jassert (tempBuffer.getNumSamples() >= numSamples);
-
-        for (size_t i = 0; i < processorOuts; ++i)
-        {
-            channels[totalNumChans] = outs[i];
-            prepareInputChannel (i);
-            ++totalNumChans;
-        }
-
-        for (size_t i = processorOuts; i < processorIns; ++i)
-        {
-            channels[totalNumChans] = tempBuffer.getWritePointer ((int) (i - processorOuts));
-            prepareInputChannel (i);
-            ++totalNumChans;
-        }
+            zeromem (channelPtr, numBytes);
     }
-    else
-    {
-        for (size_t i = 0; i < processorIns; ++i)
-        {
-            channels[totalNumChans] = outs[i];
-            prepareInputChannel (i);
-            ++totalNumChans;
-        }
 
-        for (size_t i = processorIns; i < processorOuts; ++i)
-        {
-            channels[totalNumChans] = outs[i];
-            zeromem (channels[totalNumChans], (size_t) numSamples * sizeof (float));
-            ++totalNumChans;
-        }
-    }
+    // Zero any output channels that won't be written by the processor
+    for (size_t i = totalNumChannels; i < outs.size(); ++i)
+        zeromem (outs[i], numBytes);
 }
 
 //==============================================================================
@@ -434,12 +418,18 @@ struct AudioProcessorPlayerTests final : public UnitTest
                                               Layout { 4, 8 },
                                               Layout { 8, 4 } };
 
-            for (const auto& layout : processorLayouts)
+            const Layout systemLayouts[] { Layout { 0, 1 },
+                                           Layout { 0, 2 },
+                                           Layout { 1, 1 },
+                                           Layout { 1, 2 },
+                                           Layout { 1, 0 },
+                                           Layout { 2, 2 },
+                                           Layout { 2, 0 } };
+
+            for (const auto& processorLayout : processorLayouts)
             {
-                for (const auto numSystemInputs : { 0, 1, layout.numIns })
-                {
-                    runTest ({ numSystemInputs, layout.numOuts }, layout);
-                }
+                for (const auto& systemLayout : systemLayouts)
+                    runTest (systemLayout, processorLayout);
             }
         }
     }
@@ -464,17 +454,17 @@ struct AudioProcessorPlayerTests final : public UnitTest
         {
             const auto value = [&, channelIndex = index]
             {
-                // Any channels past the number of inputs should be silent.
+                // Any channels past the number of processor inputs should be silent.
                 if (processorLayout.numIns <= channelIndex)
-                    return 0.0f;
-
-                // If there's no input, all input channels should be silent.
-                if (systemLayout.numIns == 0)
                     return 0.0f;
 
                 // If there's one input, all input channels should copy from that input.
                 if (systemLayout.numIns == 1)
                     return 1.0f;
+
+                // If there's not exactly one input, any channels past the number of system inputs should be silent.
+                if (systemLayout.numIns <= channelIndex)
+                    return 0.0f;
 
                 // Otherwise, each processor input should match the corresponding system input.
                 return (float) (channelIndex + 1);
