@@ -133,7 +133,10 @@ AudioProcessorPlayer::NumChannels AudioProcessorPlayer::findMostSuitableLayout (
         return proc.checkBusesLayoutSupported (chans.toLayout());
     });
 
-    return it != std::end (layouts) ? *it : layouts[0];
+    if (it == layouts.end())
+        return defaultProcessorChannels;
+
+    return *it;
 }
 
 void AudioProcessorPlayer::resizeChannels()
@@ -252,10 +255,6 @@ void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float* const*
 
     if (processor != nullptr)
     {
-        // The processor should be prepared to deal with the same number of output channels
-        // as our output device.
-        jassert (processor->isMidiEffect() || numOutputChannels == actualProcessorChannels.outs);
-
         const ScopedLock sl2 (processor->getCallbackLock());
 
         if (std::exchange (currentWorkgroup, currentDevice->getWorkgroup()) != currentDevice->getWorkgroup())
