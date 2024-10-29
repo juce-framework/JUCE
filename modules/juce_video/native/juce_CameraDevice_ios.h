@@ -47,7 +47,7 @@ struct CameraDevice::Pimpl
 
     struct PreviewLayerAngleTrait
     {
-       #if defined (__IPHONE_17_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_17_0
+       #if JUCE_IOS_API_VERSION_CAN_BE_BUILT (17, 0)
         API_AVAILABLE (ios (17))
         static void newFn (AVCaptureDevice* device, AVCaptureVideoPreviewLayer* previewLayer, AVCaptureConnection* outputConnection)
         {
@@ -66,7 +66,7 @@ struct CameraDevice::Pimpl
 
     struct CaptureLayerAngleTrait
     {
-       #if defined (__IPHONE_17_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_17_0
+       #if JUCE_IOS_API_VERSION_CAN_BE_BUILT (17, 0)
         API_AVAILABLE (ios (17))
         static void newFn (AVCaptureDevice* device, AVCaptureVideoPreviewLayer* previewLayer, AVCaptureConnection* outputConnection)
         {
@@ -1224,7 +1224,7 @@ struct CameraDevice::ViewerComponent  : public UIViewComponent
 
     struct AddObserverTrait
     {
-       #if defined (__IPHONE_17_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_17_0
+       #if JUCE_IOS_API_VERSION_CAN_BE_BUILT (17, 0)
         API_AVAILABLE (ios (17))
         static void newFn (ViewerComponent* self)
         {

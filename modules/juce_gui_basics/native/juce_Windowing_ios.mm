@@ -170,7 +170,7 @@ namespace juce
 
 struct BadgeUpdateTrait
 {
-   #if defined (__IPHONE_16_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_16_0
+   #if JUCE_IOS_API_VERSION_CAN_BE_BUILT (16, 0)
     API_AVAILABLE (ios (16))
     static void newFn (UIApplication*)
     {

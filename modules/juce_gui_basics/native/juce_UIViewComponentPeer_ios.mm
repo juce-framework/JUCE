@@ -865,7 +865,7 @@ static std::optional<int> getKeyCodeForSpecialCharacterString (StringRef charact
                              { nsStringToJuce (UIKeyInputF12),           KeyPress::F12Key } });
         }
 
-       #if defined (__IPHONE_15_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_15_0
+       #if JUCE_IOS_API_VERSION_CAN_BE_BUILT (15, 0)
         if (@available (iOS 15.0, *))
         {
             result.insert ({ { nsStringToJuce (UIKeyInputDelete),        KeyPress::deleteKey } });
@@ -1028,7 +1028,7 @@ static void postTraitChangeNotification (UITraitCollection* previousTraitCollect
                                                             object: nil];
 }
 
-#if ! defined (__IPHONE_17_0) || __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_17_0
+#if JUCE_IOS_API_VERSION_CAN_BE_BUILT (17, 0)
 - (void) traitCollectionDidChange: (UITraitCollection*) previousTraitCollection
 {
     [super traitCollectionDidChange: previousTraitCollection];
@@ -1683,7 +1683,7 @@ Point<float> juce_lastMousePos;
 
 struct ChangeRegistrationTrait
 {
-   #if defined (__IPHONE_17_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_17_0
+   #if JUCE_IOS_API_VERSION_CAN_BE_BUILT (17, 0)
     API_AVAILABLE (ios (17))
     static void newFn (UIView* view)
     {
@@ -2222,7 +2222,7 @@ void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable,
 
 void Desktop::allowedOrientationsChanged()
 {
-   #if defined (__IPHONE_16_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_16_0
+   #if JUCE_IOS_API_VERSION_CAN_BE_BUILT (16, 0)
     if (@available (iOS 16.0, *))
     {
         UIApplication* sharedApplication = [UIApplication sharedApplication];
