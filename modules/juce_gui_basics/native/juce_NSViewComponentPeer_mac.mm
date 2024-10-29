@@ -540,12 +540,20 @@ public:
 
                 if (! isWindowAtPoint (viewWindow, screenPoint))
                     return false;
-
             }
         }
 
-        NSView* v = [view hitTest: NSMakePoint (viewFrame.origin.x + localPos.getX(),
-                                                viewFrame.origin.y + localPos.getY())];
+        const auto pointInSuperview = std::invoke ([&]
+        {
+            const auto local = NSMakePoint (localPos.x, localPos.y);
+
+            if (auto* superview = [view superview])
+                return [view convertPoint: local toView: superview];
+
+            return local;
+        });
+
+        NSView* v = [view hitTest: pointInSuperview];
 
         return trueIfInAChildWindow ? (v != nil)
                                     : (v == view);
