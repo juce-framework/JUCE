@@ -902,7 +902,8 @@ public:
             On Windows, this might be "\Documents and Settings\username\Application Data".
             On the Mac, it might be "~/Library". If you're going to store your settings in here,
             always create your own sub-folder to put them in, to avoid making a mess.
-            On GNU/Linux it is "~/.config".
+            On GNU/Linux it is "~/.config" and you may need to create the directory before
+            using it.
         */
         userApplicationDataDirectory,
 
