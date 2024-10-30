@@ -58,7 +58,7 @@ public:
     static Vector3D zAxis() noexcept                        { return { 0, 0, (Type) 1 }; }
 
     Vector3D& operator+= (Type value) noexcept              { x += value;  y += value;  z += value;  return *this; }
-    Vector3D& operator-= (Type value) noexcept              { x -= value;  y -= value;  z -= scaleFactor;  return *this; }
+    Vector3D& operator-= (Type value) noexcept              { x -= value;  y -= value;  z -= value;  return *this; }
     Vector3D& operator*= (Type scaleFactor) noexcept        { x *= scaleFactor;  y *= scaleFactor;  z *= scaleFactor;  return *this; }
     Vector3D& operator/= (Type scaleFactor) noexcept        { x /= scaleFactor;  y /= scaleFactor;  z /= scaleFactor;  return *this; }
     Vector3D& operator+= (Vector3D other) noexcept          { x += other.x;  y += other.y;  z += other.z;  return *this; }
