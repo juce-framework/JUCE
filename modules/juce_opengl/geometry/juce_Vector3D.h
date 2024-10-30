@@ -76,7 +76,7 @@ public:
 
 
     Vector3D multiplied (Vector3D other) const noexcept     { return { x * other.x, y * other.y, z * other.z }; }
-    void multiply(Vector3D other) const noexcept            { x *= other.x; y *= other.y; z *= other.z }
+    void multiply(Vector3D other) const noexcept            { x *= other.x; y *= other.y; z *= other.z; }
 
     /** Returns the dot-product of these two vectors. */
     Type operator* (Vector3D other) const noexcept          { return x * other.x + y * other.y + z * other.z; }
