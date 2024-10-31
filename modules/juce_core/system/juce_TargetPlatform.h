@@ -185,7 +185,7 @@
     #define JUCE_BIG_ENDIAN 1
   #endif
 
-  #if defined (__LP64__) || defined (_LP64) || defined (__arm64__)
+  #if defined (__LP64__) || defined (_LP64) || defined (__arm64__) || defined (__aarch64__)
     #define JUCE_64BIT 1
   #else
     #define JUCE_32BIT 1
