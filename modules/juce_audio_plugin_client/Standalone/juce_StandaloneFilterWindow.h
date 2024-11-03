@@ -91,6 +91,10 @@ public:
           channelConfiguration (channels),
           autoOpenMidiDevices (shouldAutoOpenMidiDevices)
     {
+        // Only one StandalonePluginHolder may be created at a time
+        jassert (currentInstance == nullptr);
+        currentInstance = this;
+
         shouldMuteInput.addListener (this);
         shouldMuteInput = ! isInterAppAudioConnected();
 
@@ -128,6 +132,8 @@ public:
 
         handleDeletePlugin();
         shutDownAudioDevices();
+
+        currentInstance = nullptr;
     }
 
     //==============================================================================
@@ -409,7 +415,10 @@ public:
         return {};
     }
 
-    static StandalonePluginHolder* getInstance();
+    static StandalonePluginHolder* getInstance()
+    {
+        return currentInstance;
+    }
 
     //==============================================================================
     OptionalScopedPointer<PropertySet> settings;
@@ -432,6 +441,8 @@ public:
     ScopedMessageBox messageBox;
 
 private:
+    inline static StandalonePluginHolder* currentInstance = nullptr;
+
     //==============================================================================
     void handleCreatePlugin()
     {
@@ -1159,22 +1170,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };
-
-inline StandalonePluginHolder* StandalonePluginHolder::getInstance()
-{
-   #if JucePlugin_Enable_IAA || JucePlugin_Build_Standalone
-    if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
-    {
-        auto& desktop = Desktop::getInstance();
-        const int numTopLevelWindows = desktop.getNumComponents();
-
-        for (int i = 0; i < numTopLevelWindows; ++i)
-            if (auto window = dynamic_cast<StandaloneFilterWindow*> (desktop.getComponent (i)))
-                return window->getPluginHolder();
-    }
-   #endif
-
-    return nullptr;
-}
 
 } // namespace juce
