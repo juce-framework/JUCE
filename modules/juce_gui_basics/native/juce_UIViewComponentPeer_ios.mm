@@ -1028,7 +1028,7 @@ static void postTraitChangeNotification (UITraitCollection* previousTraitCollect
                                                             object: nil];
 }
 
-#if JUCE_IOS_API_VERSION_CAN_BE_BUILT (17, 0)
+#if ! JUCE_IOS_API_VERSION_MIN_REQUIRED_AT_LEAST (17, 0)
 - (void) traitCollectionDidChange: (UITraitCollection*) previousTraitCollection
 {
     [super traitCollectionDidChange: previousTraitCollection];

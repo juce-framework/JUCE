@@ -564,14 +564,6 @@ private:
     Class klass = nullptr;
 };
 
-// Expands to true if the API of the specified version is available at build time, false otherwise
-#define JUCE_MAC_API_VERSION_CAN_BE_BUILT(major, minor) \
-    major * 10'000 + minor * 100 <= MAC_OS_X_VERSION_MAX_ALLOWED
-
-// Expands to true if the API of the specified version is available at build time, false otherwise
-#define JUCE_IOS_API_VERSION_CAN_BE_BUILT(major, minor) \
-    major * 10'000 + minor * 100 <= __IPHONE_OS_VERSION_MAX_ALLOWED
-
 #if JUCE_IOS
 
 // Defines a function that will check the requested version both at
