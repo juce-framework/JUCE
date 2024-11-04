@@ -126,7 +126,12 @@ public:
         }
         {
             Time currentTime (Time::currentTimeMillis());
-            double deltaInSeconds = 1.234;
+
+            // Make sure we use a double that has a representation that will always
+            // truncate to what we expect when multipled by 1000 and turned into
+            // integer milliseconds.
+            double deltaInSeconds = 1.562;
+
             RelativeTime delta (deltaInSeconds);
             Time laterTime = currentTime + delta;
 
