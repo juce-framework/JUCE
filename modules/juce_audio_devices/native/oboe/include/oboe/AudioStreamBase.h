@@ -307,7 +307,7 @@ protected:
     // Control whether Oboe can convert data formats to achieve optimal results.
     bool                            mFormatConversionAllowed = false;
     // Control whether and how Oboe can convert sample rates to achieve optimal results.
-    SampleRateConversionQuality     mSampleRateConversionQuality = SampleRateConversionQuality::None;
+    SampleRateConversionQuality     mSampleRateConversionQuality = SampleRateConversionQuality::Medium;
 
     /** Validate stream parameters that might not be checked in lower layers */
     virtual Result isValidConfig() {

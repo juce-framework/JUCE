@@ -45,10 +45,12 @@ set (oboe_sources
     src/flowgraph/SinkI16.cpp
     src/flowgraph/SinkI24.cpp
     src/flowgraph/SinkI32.cpp
+    src/flowgraph/SinkI8_24.cpp
     src/flowgraph/SourceFloat.cpp
     src/flowgraph/SourceI16.cpp
     src/flowgraph/SourceI24.cpp
     src/flowgraph/SourceI32.cpp
+    src/flowgraph/SourceI8_24.cpp
     src/flowgraph/resampler/IntegerRatio.cpp
     src/flowgraph/resampler/LinearResampler.cpp
     src/flowgraph/resampler/MultiChannelResampler.cpp
@@ -76,20 +78,19 @@ target_include_directories(oboe
         PRIVATE src
         PUBLIC include)
 
-# JUCE CHANGE STARTS HERE
-
-# This comment provided for Apache License compliance. We've removed the extra warnings flags and
-# the `-Werror` option, to avoid cases where compilers produce unexpected errors and fail the build.
-# We've also removed the explicit `-std=c++17` compile option, and replaced it with a more
-# cmake-friendly way of specifying the language standard.
-
+# Compile Flags:
+#     Enable -Werror when building debug config
+#     Enable -Ofast
 target_compile_options(oboe
         PRIVATE
+        -std=c++17
+        -Wall
+        -Wextra-semi
+        -Wshadow
+        -Wshadow-field
         "$<$<CONFIG:RELEASE>:-Ofast>"
-        "$<$<CONFIG:DEBUG>:-O3>")
-target_compile_features(oboe PRIVATE cxx_std_17)
-
-# JUCE CHANGE ENDS HERE
+        "$<$<CONFIG:DEBUG>:-O3>"
+        "$<$<CONFIG:DEBUG>:-Werror>")
 
 # Enable logging of D,V for debug builds
 target_compile_definitions(oboe PUBLIC $<$<CONFIG:DEBUG>:OBOE_ENABLE_LOGGING=1>)

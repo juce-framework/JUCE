@@ -17,6 +17,7 @@
 #ifndef FLOWGRAPH_UTILITIES_H
 #define FLOWGRAPH_UTILITIES_H
 
+#include <math.h>
 #include <unistd.h>
 
 using namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph;
@@ -48,6 +49,20 @@ static int32_t clamp32FromFloat(float f)
      * ensure that we round to nearest, ties away from 0.
      */
     return f > 0 ? f + 0.5 : f - 0.5;
+}
+
+/**
+ * Convert a single-precision floating point value to a Q0.23 integer value, stored in a
+ * 32 bit signed integer (technically stored as Q8.23, but clamped to Q0.23).
+ *
+ * Values outside the range [-1.0, 1.0) are properly clamped to -8388608 and 8388607,
+ * including -Inf and +Inf. NaN values are considered undefined, and behavior may change
+ * depending on hardware and future implementation of this function.
+ */
+static int32_t clamp24FromFloat(float f)
+{
+    static const float scale = 1 << 23;
+    return (int32_t) lroundf(fmaxf(fminf(f * scale, scale - 1.f), -scale));
 }
 
 };

@@ -120,7 +120,7 @@ void MultiChannelResampler::writeFrame(const float *frame) {
 }
 
 float MultiChannelResampler::sinc(float radians) {
-    if (abs(radians) < 1.0e-9) return 1.0f;   // avoid divide by zero
+    if (fabsf(radians) < 1.0e-9f) return 1.0f;   // avoid divide by zero
     return sinf(radians) / radians;   // Sinc function
 }
 

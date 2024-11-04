@@ -177,7 +177,7 @@ public:
      *
      */
     DataCallbackResult onAudioReady(
-            AudioStream *audioStream,
+            AudioStream * /*audioStream*/,
             void *audioData,
             int numFrames) {
         DataCallbackResult callbackResult = DataCallbackResult::Continue;

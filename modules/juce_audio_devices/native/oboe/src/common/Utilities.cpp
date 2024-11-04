@@ -278,6 +278,20 @@ const char *convertToText<ChannelCount>(ChannelCount channelCount) {
     }
 }
 
+template<>
+const char *convertToText<SampleRateConversionQuality>(SampleRateConversionQuality sampleRateConversionQuality) {
+
+    switch (sampleRateConversionQuality) {
+        case SampleRateConversionQuality::None:     return "None";
+        case SampleRateConversionQuality::Fastest:  return "Fastest";
+        case SampleRateConversionQuality::Low:      return "Low";
+        case SampleRateConversionQuality::Medium:   return "Medium";
+        case SampleRateConversionQuality::High:     return "High";
+        case SampleRateConversionQuality::Best:     return "Best";
+        default:                                    return "Unrecognized sample rate conversion quality";
+    }
+}
+
 std::string getPropertyString(const char * name) {
     std::string result;
 #ifdef __ANDROID__

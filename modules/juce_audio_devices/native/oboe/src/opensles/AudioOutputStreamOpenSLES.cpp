@@ -16,8 +16,6 @@
 
 #include <cassert>
 
-#include <SLES/OpenSLES.h>
-#include <SLES/OpenSLES_Android.h>
 #include <common/AudioClock.h>
 
 #include "common/OboeDebug.h"
@@ -30,9 +28,10 @@
 using namespace oboe;
 
 static SLuint32 OpenSLES_convertOutputUsage(Usage oboeUsage) {
-    SLuint32 openslStream = SL_ANDROID_STREAM_MEDIA;
+    SLuint32 openslStream;
     switch(oboeUsage) {
         case Usage::Media:
+        case Usage::Game:
             openslStream = SL_ANDROID_STREAM_MEDIA;
             break;
         case Usage::VoiceCommunication:
@@ -43,18 +42,15 @@ static SLuint32 OpenSLES_convertOutputUsage(Usage oboeUsage) {
             openslStream = SL_ANDROID_STREAM_ALARM;
             break;
         case Usage::Notification:
-        case Usage::NotificationRingtone:
         case Usage::NotificationEvent:
             openslStream = SL_ANDROID_STREAM_NOTIFICATION;
+            break;
+        case Usage::NotificationRingtone:
+            openslStream = SL_ANDROID_STREAM_RING;
             break;
         case Usage::AssistanceAccessibility:
         case Usage::AssistanceNavigationGuidance:
         case Usage::AssistanceSonification:
-            openslStream = SL_ANDROID_STREAM_SYSTEM;
-            break;
-        case Usage::Game:
-            openslStream = SL_ANDROID_STREAM_MEDIA;
-            break;
         case Usage::Assistant:
         default:
             openslStream = SL_ANDROID_STREAM_SYSTEM;
@@ -182,8 +178,8 @@ Result AudioOutputStreamOpenSLES::open() {
 
     // Configure the stream.
     result = (*mObjectInterface)->GetInterface(mObjectInterface,
-                                               SL_IID_ANDROIDCONFIGURATION,
-                                               (void *)&configItf);
+            EngineOpenSLES::getInstance().getIidAndroidConfiguration(),
+            (void *)&configItf);
     if (SL_RESULT_SUCCESS != result) {
         LOGW("%s() GetInterface(SL_IID_ANDROIDCONFIGURATION) failed with %s",
              __func__, getSLErrStr(result));
@@ -209,7 +205,9 @@ Result AudioOutputStreamOpenSLES::open() {
         goto error;
     }
 
-    result = (*mObjectInterface)->GetInterface(mObjectInterface, SL_IID_PLAY, &mPlayInterface);
+    result = (*mObjectInterface)->GetInterface(mObjectInterface,
+                                               EngineOpenSLES::getInstance().getIidPlay(),
+                                               &mPlayInterface);
     if (SL_RESULT_SUCCESS != result) {
         LOGE("GetInterface PLAY result:%s", getSLErrStr(result));
         goto error;
@@ -374,7 +372,7 @@ Result AudioOutputStreamOpenSLES::requestFlush_l() {
     } else {
         SLresult slResult = (*mSimpleBufferQueueInterface)->Clear(mSimpleBufferQueueInterface);
         if (slResult != SL_RESULT_SUCCESS){
-            LOGW("Failed to clear buffer queue. OpenSLES error: %d", result);
+            LOGW("Failed to clear buffer queue. OpenSLES error: %s", getSLErrStr(slResult));
             result = Result::ErrorInternal;
         }
     }

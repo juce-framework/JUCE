@@ -60,9 +60,13 @@ static aaudio_data_callback_result_t oboe_aaudio_data_callback_proc(
 // This runs in its own thread.
 // Only one of these threads will be launched from internalErrorCallback().
 // It calls app error callbacks from a static function in case the stream gets deleted.
-static void oboe_aaudio_error_thread_proc(AudioStreamAAudio *oboeStream,
+static void oboe_aaudio_error_thread_proc_common(AudioStreamAAudio *oboeStream,
                                           Result error) {
-    LOGD("%s(,%d) - entering >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", __func__, error);
+#if 0
+    LOGE("%s() sleep for 5 seconds", __func__);
+    usleep(5*1000*1000);
+    LOGD("%s() - woke up -------------------------", __func__);
+#endif
     AudioStreamErrorCallback *errorCallback = oboeStream->getErrorCallback();
     if (errorCallback == nullptr) return; // should be impossible
     bool isErrorHandled = errorCallback->onError(oboeStream, error);
@@ -74,16 +78,24 @@ static void oboe_aaudio_error_thread_proc(AudioStreamAAudio *oboeStream,
         // Warning, oboeStream may get deleted by this callback.
         errorCallback->onErrorAfterClose(oboeStream, error);
     }
+}
+
+// Callback thread for raw pointers.
+static void oboe_aaudio_error_thread_proc(AudioStreamAAudio *oboeStream,
+                                          Result error) {
+    LOGD("%s(,%d) - entering >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", __func__, error);
+    oboe_aaudio_error_thread_proc_common(oboeStream, error);
     LOGD("%s() - exiting <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", __func__);
 }
 
-// This runs in its own thread.
-// Only one of these threads will be launched from internalErrorCallback().
-// Prevents deletion of the stream if the app is using AudioStreamBuilder::openSharedStream()
+// Callback thread for shared pointers.
 static void oboe_aaudio_error_thread_proc_shared(std::shared_ptr<AudioStream> sharedStream,
                                           Result error) {
+    LOGD("%s(,%d) - entering >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", __func__, error);
+    // Hold the shared pointer while we use the raw pointer.
     AudioStreamAAudio *oboeStream = reinterpret_cast<AudioStreamAAudio*>(sharedStream.get());
-    oboe_aaudio_error_thread_proc(oboeStream, error);
+    oboe_aaudio_error_thread_proc_common(oboeStream, error);
+    LOGD("%s() - exiting <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", __func__);
 }
 
 namespace oboe {
@@ -528,7 +540,7 @@ DataCallbackResult AudioStreamAAudio::callOnAudioReady(AAudioStream * /*stream*/
         if (result == DataCallbackResult::Stop) {
             LOGD("Oboe callback returned DataCallbackResult::Stop");
         } else {
-            LOGE("Oboe callback returned unexpected value = %d", result);
+            LOGE("Oboe callback returned unexpected value. Error: %d", static_cast<int>(result));
         }
 
         // Returning Stop caused various problems before S. See #1230

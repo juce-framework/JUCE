@@ -1,7 +1,7 @@
 The files in this directory are reproduced from the official Oboe repository, which can be found at
 github.com/google/oboe.
 
-These files are from tag 1.8.0 (987538b).
+These files are from tag 1.9.0 (03242e9ef9495e418e6ae83954d239dc9193ec5c).
 
 We've included only those parts of the original repository which are required to build the Oboe
 library. Documentation, samples, tests, and other non-library items have been omitted.

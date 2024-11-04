@@ -54,7 +54,7 @@ public:
      */
     explicit AudioStream(const AudioStreamBuilder &builder);
 
-    virtual ~AudioStream() = default;
+    virtual ~AudioStream();
 
     /**
      * Open a stream based on the current settings.
@@ -193,6 +193,13 @@ public:
     * at run-time for each device.
     *
     * This cannot be set higher than getBufferCapacity().
+    *
+    * This should only be used with Output streams. It will
+    * be ignored for Input streams because they are generally kept as empty as possible.
+    *
+    * For OpenSL ES, this method only has an effect on output stream that do NOT
+    * use a callback. The blocking writes goes into a buffer in Oboe and the size of that
+    * buffer is controlled by this method.
     *
     * @param requestedFrames requested number of frames that can be filled without blocking
     * @return the resulting buffer size in frames (obtained using value()) or an error (obtained
@@ -622,7 +629,7 @@ protected:
      * This may be called internally at the end of a callback.
      * @param numFrames passed to the callback
      */
-    virtual void endPerformanceHintInCallback(int32_t numFrames) {}
+    virtual void endPerformanceHintInCallback(int32_t /*numFrames*/) {}
 
     /**
      * This will be called when the stream is closed just in case performance hints were enabled.

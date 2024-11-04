@@ -19,9 +19,6 @@
 
 #include <memory>
 
-#include <SLES/OpenSLES.h>
-#include <SLES/OpenSLES_Android.h>
-
 #include "oboe/Oboe.h"
 #include "common/MonotonicCounter.h"
 #include "opensles/AudioStreamBuffered.h"

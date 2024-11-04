@@ -48,7 +48,8 @@ public:
      * write() on the stream that is making the callback.
      *
      * Note that numFrames can vary unless AudioStreamBuilder::setFramesPerCallback()
-     * is called.
+     * is called. If AudioStreamBuilder::setFramesPerCallback() is NOT called then
+     * numFrames should always be <= AudioStream::getFramesPerBurst().
      *
      * Also note that this callback function should be considered a "real-time" function.
      * It must not do anything that could cause an unbounded delay because that can cause the
