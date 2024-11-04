@@ -43,6 +43,8 @@
 
 #include "juce_dsp.h"
 
+#include <juce_audio_formats/juce_audio_formats.h>
+
 #ifndef JUCE_USE_VDSP_FRAMEWORK
  #define JUCE_USE_VDSP_FRAMEWORK 1
 #endif

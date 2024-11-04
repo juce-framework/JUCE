@@ -65,7 +65,6 @@
 #define JUCE_DSP_H_INCLUDED
 
 #include <juce_audio_basics/juce_audio_basics.h>
-#include <juce_audio_formats/juce_audio_formats.h>
 
 #if JUCE_INTEL
 
