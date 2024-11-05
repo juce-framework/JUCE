@@ -126,4 +126,3 @@ function(_juce_create_atomic_target target_name)
 endfunction()
 
 _juce_create_atomic_target(juce_atomic_wrapper)
-
