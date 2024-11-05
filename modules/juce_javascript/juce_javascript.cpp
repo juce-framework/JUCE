@@ -48,3 +48,7 @@
 #undef choc
 
 #include "javascript/juce_Javascript.cpp"
+
+#if JUCE_UNIT_TESTS
+ #include "javascript/juce_Javascript_test.cpp"
+#endif

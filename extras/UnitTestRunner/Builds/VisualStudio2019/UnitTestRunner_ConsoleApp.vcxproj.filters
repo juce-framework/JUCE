@@ -3709,6 +3709,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_javascript\javascript\juce_Javascript.cpp">
       <Filter>JUCE Modules\juce_javascript\javascript</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_javascript\javascript\juce_Javascript_test.cpp">
+      <Filter>JUCE Modules\juce_javascript\javascript</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_javascript\juce_javascript.cpp">
       <Filter>JUCE Modules\juce_javascript</Filter>
     </ClCompile>
