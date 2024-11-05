@@ -43,6 +43,11 @@
 
 #include "juce_javascript.h"
 
+#ifdef CONFIG_BIGNUM
+ JUCE_COMPILER_WARNING ("The QuickJS version embedded inside of JUCE does not support the CONFIG_BIGNUM setting.")
+ #undef CONFIG_BIGNUM
+#endif
+
 #define choc juce::detail::choc
 #include <juce_javascript/choc/javascript/choc_javascript_QuickJS.h>
 #undef choc
