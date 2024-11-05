@@ -383,26 +383,8 @@
     <Filter Include="JUCE Modules\juce_core\files">
       <UniqueIdentifier>{7868764A-6572-381A-906C-9C26792A4C29}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JUCE Modules\juce_core\javascript\choc\containers">
-      <UniqueIdentifier>{259B70B2-0C68-1990-EC86-42DAA564D388}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_core\javascript\choc\javascript">
-      <UniqueIdentifier>{19C3DF40-ABE4-49F7-CDD2-7A592EA01F73}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_core\javascript\choc\math">
-      <UniqueIdentifier>{20DE6E65-B828-EB00-17F7-541D368DFA9B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_core\javascript\choc\platform">
-      <UniqueIdentifier>{5CCB85C1-6052-8F8C-FCA7-E34D5514A0EE}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_core\javascript\choc\text">
-      <UniqueIdentifier>{375615B1-7B81-BB18-920B-926E88A78F9A}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_core\javascript\choc">
-      <UniqueIdentifier>{17CA846A-C621-9676-4FBD-8B04DBAA4488}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_core\javascript">
-      <UniqueIdentifier>{03678508-A517-48BB-FB4A-485628C34E08}</UniqueIdentifier>
+    <Filter Include="JUCE Modules\juce_core\json">
+      <UniqueIdentifier>{ED602AA0-0A43-9721-5882-747B526C812E}</UniqueIdentifier>
     </Filter>
     <Filter Include="JUCE Modules\juce_core\logging">
       <UniqueIdentifier>{07D27C1D-3227-F527-356C-17DA11551A99}</UniqueIdentifier>
@@ -1840,17 +1822,14 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.cpp">
       <Filter>JUCE Modules\juce_core\files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\javascript\juce_Javascript.cpp">
-      <Filter>JUCE Modules\juce_core\javascript</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_core\json\juce_JSON.cpp">
+      <Filter>JUCE Modules\juce_core\json</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\javascript\juce_JSON.cpp">
-      <Filter>JUCE Modules\juce_core\javascript</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_core\json\juce_JSONSerialisation_test.cpp">
+      <Filter>JUCE Modules\juce_core\json</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\javascript\juce_JSONSerialisation_test.cpp">
-      <Filter>JUCE Modules\juce_core\javascript</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\javascript\juce_JSONUtils.cpp">
-      <Filter>JUCE Modules\juce_core\javascript</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_core\json\juce_JSONUtils.cpp">
+      <Filter>JUCE Modules\juce_core\json</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\logging\juce_FileLogger.cpp">
       <Filter>JUCE Modules\juce_core\logging</Filter>
@@ -5307,50 +5286,14 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.h">
       <Filter>JUCE Modules\juce_core\files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\containers\choc_Value.h">
-      <Filter>JUCE Modules\juce_core\javascript\choc\containers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_core\json\juce_JSON.h">
+      <Filter>JUCE Modules\juce_core\json</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\javascript\choc_javascript.h">
-      <Filter>JUCE Modules\juce_core\javascript\choc\javascript</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_core\json\juce_JSONSerialisation.h">
+      <Filter>JUCE Modules\juce_core\json</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\javascript\choc_javascript_QuickJS.h">
-      <Filter>JUCE Modules\juce_core\javascript\choc\javascript</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\math\choc_MathHelpers.h">
-      <Filter>JUCE Modules\juce_core\javascript\choc\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\platform\choc_Assert.h">
-      <Filter>JUCE Modules\juce_core\javascript\choc\platform</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\platform\choc_DisableAllWarnings.h">
-      <Filter>JUCE Modules\juce_core\javascript\choc\platform</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\platform\choc_ReenableAllWarnings.h">
-      <Filter>JUCE Modules\juce_core\javascript\choc\platform</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\text\choc_FloatToString.h">
-      <Filter>JUCE Modules\juce_core\javascript\choc\text</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\text\choc_JSON.h">
-      <Filter>JUCE Modules\juce_core\javascript\choc\text</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\text\choc_StringUtilities.h">
-      <Filter>JUCE Modules\juce_core\javascript\choc\text</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\text\choc_UTF8.h">
-      <Filter>JUCE Modules\juce_core\javascript\choc\text</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_Javascript.h">
-      <Filter>JUCE Modules\juce_core\javascript</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSON.h">
-      <Filter>JUCE Modules\juce_core\javascript</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSONSerialisation.h">
-      <Filter>JUCE Modules\juce_core\javascript</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSONUtils.h">
-      <Filter>JUCE Modules\juce_core\javascript</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_core\json\juce_JSONUtils.h">
+      <Filter>JUCE Modules\juce_core\json</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\logging\juce_FileLogger.h">
       <Filter>JUCE Modules\juce_core\logging</Filter>
@@ -8005,9 +7948,6 @@
     </None>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\README.md">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK</Filter>
-    </None>
-    <None Include="..\..\..\..\modules\juce_core\javascript\choc\LICENSE.md">
-      <Filter>JUCE Modules\juce_core\javascript\choc</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt">
       <Filter>JUCE Modules\juce_core\native\java</Filter>

@@ -61,6 +61,7 @@
         <MODULEPATH id="juce_osc" path="../../modules"/>
         <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
         <MODULEPATH id="juce_animation" path="../../modules"/>
+        <MODULEPATH id="juce_javascript" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" smallIcon="YyqWd2" bigIcon="YyqWd2">
@@ -89,6 +90,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
         <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_animation" path="../../modules"/>
+        <MODULEPATH id="juce_javascript" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
     <ANDROIDSTUDIO targetFolder="Builds/Android" androidMinimumSDK="23" microphonePermissionNeeded="1"
@@ -123,6 +125,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
         <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_animation" path="../../modules"/>
+        <MODULEPATH id="juce_javascript" path="../../modules"/>
       </MODULEPATHS>
     </ANDROIDSTUDIO>
     <XCODE_IPHONE targetFolder="Builds/iOS" UISupportsDocumentBrowser="1" microphonePermissionNeeded="1"
@@ -157,6 +160,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
         <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_animation" path="../../modules"/>
+        <MODULEPATH id="juce_javascript" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_IPHONE>
     <VS2019 targetFolder="Builds/VisualStudio2019" smallIcon="YyqWd2" bigIcon="YyqWd2"
@@ -186,6 +190,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
         <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_animation" path="../../modules"/>
+        <MODULEPATH id="juce_javascript" path="../../modules"/>
       </MODULEPATHS>
     </VS2019>
     <VS2022 targetFolder="Builds/VisualStudio2022" smallIcon="YyqWd2" bigIcon="YyqWd2"
@@ -215,6 +220,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
         <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_animation" path="../../modules"/>
+        <MODULEPATH id="juce_javascript" path="../../modules"/>
       </MODULEPATHS>
     </VS2022>
   </EXPORTFORMATS>
@@ -235,6 +241,7 @@
     <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_javascript" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_osc" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_product_unlocking" showAllCode="1" useLocalCopy="0"

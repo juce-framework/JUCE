@@ -32,10 +32,6 @@
   ==============================================================================
 */
 
-#define choc juce::detail::choc
-#include <juce_core/javascript/choc/javascript/choc_javascript_QuickJS.h>
-#undef choc
-
 namespace juce
 {
 

@@ -4,6 +4,24 @@
 
 ## Change
 
+The Javascript implementation has been moved into a independent juce module.
+
+**Possible Issues**
+
+Any existing use of JavascriptEngine, JSCursor, or JSObject will fail to compile.
+
+**Workaround**
+
+Add the new juce_javascript module to the project.
+
+**Rationale**
+
+The Javascript implementation increases compilation times while being required
+by only a select number of projects.
+
+
+## Change
+
 The VBlankAttachment class' inheritance from the ComponentPeer::VBlankListener
 and ComponentListener classes has been made private.
 
@@ -80,7 +98,7 @@ algorithm to lay out the string, with support for font fallback.
 
 ## Change
 
-The constructors of the WebSliderRelay, WebToggleButtonRelay and 
+The constructors of the WebSliderRelay, WebToggleButtonRelay and
 WebComboBoxRelay classes were changed and they no longer accept a reference
 parameter to a WebBrowserComponent object.
 
