@@ -44,11 +44,11 @@
 
   ID:                 juce_animation
   vendor:             juce
-  version:            7.0.9
+  version:            8.0.3
   name:               JUCE Animation classes
   description:        Classes for defining and handling animations.
   website:            http://www.juce.com/juce
-  license:            GPL/Commercial
+  license:            AGPLv3/Commercial
   minimumCppStandard: 17
 
   dependencies:       juce_gui_basics
