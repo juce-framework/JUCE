@@ -91,7 +91,7 @@ var commObject = new CommunicationsObject();
 class JavascriptTests  : public UnitTest
 {
 public:
-    JavascriptTests() : UnitTest ("Javascript", UnitTestCategories::gui)
+    JavascriptTests() : UnitTest ("Javascript", UnitTestCategories::javascript)
     {
     }
 

@@ -47,6 +47,7 @@ namespace juce::UnitTestCategories
     static const String files                      { "Files" };
     static const String graphics                   { "Graphics" };
     static const String gui                        { "GUI" };
+    static const String javascript                 { "Javascript" };
     static const String json                       { "JSON" };
     static const String maths                      { "Maths" };
     static const String memory                     { "Memory" };
