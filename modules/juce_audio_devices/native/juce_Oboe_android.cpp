@@ -403,7 +403,7 @@ private:
                                                   bufferSizeHint,
                                                   &callback);
 
-        if (auto* nativeStream = tempStream.getNativeStream())
+        if (auto nativeStream = tempStream.getNativeStream())
             return nativeStream->getFramesPerBurst();
 
         return bufferSizeHint;
@@ -472,7 +472,6 @@ private:
         ~OboeStream()
         {
             close();
-            delete stream;
         }
 
         bool openedOk() const noexcept
@@ -513,7 +512,7 @@ private:
             }
         }
 
-        oboe::AudioStream* getNativeStream() const
+        std::shared_ptr<oboe::AudioStream> getNativeStream() const
         {
             jassert (openedOk());
             return stream;
@@ -577,7 +576,7 @@ private:
                  + "\nSampleRate = " + String (newSampleRate)
                  + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency));
 
-            openResult = builder.openStream (&stream);
+            openResult = builder.openStream (stream);
             JUCE_OBOE_LOG ("Building Oboe stream with result: " + getOboeString (openResult)
                  + "\nStream state = " + (stream != nullptr ? getOboeString (stream->getState()) : String ("?")));
 
@@ -613,7 +612,7 @@ private:
             }
         }
 
-        oboe::AudioStream* stream = nullptr;
+        std::shared_ptr<oboe::AudioStream> stream;
        #if JUCE_USE_ANDROID_OBOE_STABILIZED_CALLBACK
         std::unique_ptr<oboe::StabilizedCallback> stabilizedCallback;
        #endif
@@ -690,9 +689,13 @@ private:
 
                 if (inputStream->openedOk() && outputStream->openedOk())
                 {
+                    const auto getSampleRate = [] (auto nativeStream)
+                    {
+                        return nativeStream != nullptr ? nativeStream->getSampleRate() : 0;
+                    };
                     // Input & output sample rates should match!
-                    jassert (inputStream->getNativeStream()->getSampleRate()
-                               == outputStream->getNativeStream()->getSampleRate());
+                    jassert (getSampleRate (inputStream->getNativeStream())
+                               == getSampleRate (outputStream->getNativeStream()));
                 }
 
                 checkStreamSetup (inputStream.get(), inputDeviceId, numInputChannels,
@@ -711,7 +714,7 @@ private:
                                [[maybe_unused]] int expectedBufferSize,
                                oboe::AudioFormat format)
         {
-            if ([[maybe_unused]] auto* nativeStream = stream != nullptr ? stream->getNativeStream() : nullptr)
+            if ([[maybe_unused]] auto nativeStream = stream != nullptr ? stream->getNativeStream() : nullptr)
             {
                 jassert (numChannels == 0 || numChannels == nativeStream->getChannelCount());
                 jassert (expectedSampleRate == 0 || expectedSampleRate == nativeStream->getSampleRate());
@@ -726,7 +729,10 @@ private:
             if (ptr == nullptr || ! ptr->openedOk())
                 return 0;
 
-            return ptr->getNativeStream()->getBufferCapacityInFrames();
+            if (auto nativeStream = ptr->getNativeStream())
+                return nativeStream->getBufferCapacityInFrames();
+
+            return 0;
         }
 
         OboeAudioIODevice& owner;
@@ -789,8 +795,10 @@ private:
             if (stream == nullptr || ! openedOk())
                 return false;
 
-            auto result = stream->getNativeStream()->getTimestamp (CLOCK_MONOTONIC, nullptr, nullptr);
-            return result != oboe::Result::ErrorUnimplemented;
+            if (auto ptr = stream->getNativeStream())
+                return ptr->getTimestamp (CLOCK_MONOTONIC, nullptr, nullptr) != oboe::Result::ErrorUnimplemented;
+
+            return false;
         }
 
         oboe::DataCallbackResult onAudioReady (oboe::AudioStream* stream, void* audioData, int32_t numFrames) override
@@ -803,7 +811,7 @@ private:
                     return oboe::DataCallbackResult::Stop;
 
                 // only output stream should be the master stream receiving callbacks
-                jassert (stream->getDirection() == oboe::Direction::Output && stream == outputStream->getNativeStream());
+                jassert (stream->getDirection() == oboe::Direction::Output && stream == outputStream->getNativeStream().get());
 
                 // Read input from Oboe
                 const auto expandedBufferSize = jmax (inputStreamNativeBuffer.size(),
@@ -812,7 +820,7 @@ private:
 
                 if (inputStream != nullptr)
                 {
-                    auto* nativeInputStream = inputStream->getNativeStream();
+                    auto nativeInputStream = inputStream->getNativeStream();
 
                     if (nativeInputStream->getFormat() != oboe::AudioFormat::I16 && nativeInputStream->getFormat() != oboe::AudioFormat::Float)
                     {
@@ -821,7 +829,7 @@ private:
                         return oboe::DataCallbackResult::Continue;
                     }
 
-                    auto result = inputStream->getNativeStream()->read (inputStreamNativeBuffer.data(), numFrames, 0);
+                    auto result = nativeInputStream->read (inputStreamNativeBuffer.data(), numFrames, 0);
 
                     if (result)
                     {
@@ -888,25 +896,25 @@ private:
 
         int getLatencyFor (OboeStream& stream)
         {
-            auto& nativeStream = *stream.getNativeStream();
+            auto nativeStream = stream.getNativeStream();
 
-            if (auto latency = nativeStream.calculateLatencyMillis())
+            if (auto latency = nativeStream->calculateLatencyMillis())
                 return static_cast<int> ((latency.value() * sampleRate) / 1000);
 
             // Get the time that a known audio frame was presented.
             int64_t hardwareFrameIndex = 0;
             int64_t hardwareFrameHardwareTime = 0;
 
-            auto result = nativeStream.getTimestamp (CLOCK_MONOTONIC,
-                                                     &hardwareFrameIndex,
-                                                     &hardwareFrameHardwareTime);
+            auto result = nativeStream->getTimestamp (CLOCK_MONOTONIC,
+                                                      &hardwareFrameIndex,
+                                                      &hardwareFrameHardwareTime);
 
             if (result != oboe::Result::OK)
                 return 0;
 
             // Get counter closest to the app.
-            const bool isOutput = nativeStream.getDirection() == oboe::Direction::Output;
-            const int64_t appFrameIndex = isOutput ? nativeStream.getFramesWritten() : nativeStream.getFramesRead();
+            const bool isOutput = nativeStream->getDirection() == oboe::Direction::Output;
+            const int64_t appFrameIndex = isOutput ? nativeStream->getFramesWritten() : nativeStream->getFramesRead();
 
             // Assume that the next frame will be processed at the current time
             int64_t appFrameAppTime = getCurrentTimeNanos();
