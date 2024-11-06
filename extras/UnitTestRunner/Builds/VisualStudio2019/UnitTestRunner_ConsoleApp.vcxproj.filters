@@ -716,6 +716,9 @@
     <Filter Include="JUCE Modules\juce_javascript\choc">
       <UniqueIdentifier>{D2777265-A166-EDB8-938A-47D1EDAADA42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_javascript\detail">
+      <UniqueIdentifier>{D98D147D-FDDB-12D7-2C59-B686F458CE18}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_javascript\javascript">
       <UniqueIdentifier>{AF145034-7775-F013-E219-381BA369C108}</UniqueIdentifier>
     </Filter>
@@ -3706,10 +3709,16 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.mm">
       <Filter>JUCE Modules\juce_gui_extra</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_javascript\javascript\juce_Javascript.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_javascript\javascript\juce_Javascript_test.cpp">
       <Filter>JUCE Modules\juce_javascript\javascript</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_javascript\javascript\juce_Javascript_test.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_javascript\javascript\juce_JavascriptEngine.cpp">
+      <Filter>JUCE Modules\juce_javascript\javascript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_javascript\javascript\juce_JSCursor.cpp">
+      <Filter>JUCE Modules\juce_javascript\javascript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_javascript\javascript\juce_JSObject.cpp">
       <Filter>JUCE Modules\juce_javascript\javascript</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_javascript\juce_javascript.cpp">
@@ -7971,7 +7980,16 @@
     <ClInclude Include="..\..\..\..\modules\juce_javascript\choc\text\choc_UTF8.h">
       <Filter>JUCE Modules\juce_javascript\choc\text</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_javascript\javascript\juce_Javascript.h">
+    <ClInclude Include="..\..\..\..\modules\juce_javascript\detail\juce_QuickJSHelpers.h">
+      <Filter>JUCE Modules\juce_javascript\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_javascript\javascript\juce_JavascriptEngine.h">
+      <Filter>JUCE Modules\juce_javascript\javascript</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_javascript\javascript\juce_JSCursor.h">
+      <Filter>JUCE Modules\juce_javascript\javascript</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_javascript\javascript\juce_JSObject.h">
       <Filter>JUCE Modules\juce_javascript\javascript</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_javascript\juce_javascript.h">

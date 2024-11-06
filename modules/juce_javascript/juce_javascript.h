@@ -62,4 +62,7 @@
 #define JUCE_JAVASCRIPT_H_INCLUDED
 
 #include <juce_core/juce_core.h>
-#include "javascript/juce_Javascript.h"
+
+#include "javascript/juce_JSObject.h"
+#include "javascript/juce_JSCursor.h"
+#include "javascript/juce_JavascriptEngine.h"

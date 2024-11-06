@@ -52,7 +52,11 @@
 #include <juce_javascript/choc/javascript/choc_javascript_QuickJS.h>
 #undef choc
 
-#include "javascript/juce_Javascript.cpp"
+#include "detail/juce_QuickJSHelpers.h"
+
+#include "javascript/juce_JSObject.cpp"
+#include "javascript/juce_JSCursor.cpp"
+#include "javascript/juce_JavascriptEngine.cpp"
 
 #if JUCE_UNIT_TESTS
  #include "javascript/juce_Javascript_test.cpp"
