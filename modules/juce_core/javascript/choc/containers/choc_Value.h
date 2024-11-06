@@ -2323,7 +2323,7 @@ inline std::string_view ValueView::getString() const
     // from this function
     if (stringDictionary == nullptr)
         throwError ("No string dictionary supplied");
-        
+
     return stringDictionary->getStringForHandle (getStringHandle());
 }
 
@@ -2430,43 +2430,28 @@ void ValueView::serialise (OutputStream& output) const
     if (type.isVoid())
         return;
 
-     auto dataSize = type.getValueDataSize();
-     check (dataSize > 0, "Invalid data size");
+    auto dataSize = type.getValueDataSize();
+    check (dataSize > 0, "Invalid data size");
 
-     if (stringDictionary == nullptr || ! type.usesStrings())
-     {
-         output.write (data, dataSize);
-         return;
-     }
+    if (stringDictionary == nullptr || ! type.usesStrings())
+    {
+        output.write (data, dataSize);
+        return;
+    }
 
-     uint8_t* localCopy = nullptr;
+   #if defined (_MSC_VER)
+    #pragma warning (push)
+    #pragma warning (disable: 6255)
+    auto* localCopy = (uint8_t*) _alloca (dataSize);
+    #pragma warning (pop)
+   #elif defined (__MINGW32__)
+    auto* localCopy = (uint8_t*) _alloca (dataSize);
+   #else
+    auto* localCopy = (uint8_t*) alloca (dataSize);
+   #endif
 
-    #if _MSC_VER
-
-     #ifdef __clang__
-      #pragma clang diagnostic push
-      #pragma clang diagnostic ignored "-Wlanguage-extension-token"
-     #endif
-
-     __try
-     {
-         localCopy = (uint8_t*) _alloca (dataSize);
-     }
-     __except (GetExceptionCode() == STATUS_STACK_OVERFLOW)
-     {
-         throwError ("Stack overflow");
-     }
-
-     #ifdef __clang__
-      #pragma clang diagnostic pop
-     #endif
-
-    #else
-     localCopy = (uint8_t*) alloca (dataSize);
-    #endif
-
-     check (localCopy != nullptr, "Stack allocation failed");
-     std::memcpy (localCopy, data, dataSize);
+    check (localCopy != nullptr, "Stack allocation failed");
+    std::memcpy (localCopy, data, dataSize);
 
     static constexpr uint32_t maxStrings = 128;
     uint32_t numStrings = 0, stringDataSize = 0;
