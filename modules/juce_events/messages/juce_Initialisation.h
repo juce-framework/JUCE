@@ -128,7 +128,7 @@ public:
     JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
   #define JUCE_MAIN_FUNCTION_DEFINITION \
-    extern "C" JUCE_MAIN_FUNCTION \
+    JUCE_MAIN_FUNCTION \
     { \
        juce::JUCEApplicationBase::createInstance = &juce_CreateApplication; \
        juce::JUCEApplicationBase::iOSCustomDelegate = juce_GetIOSCustomDelegateClass(); \
@@ -149,7 +149,7 @@ public:
     juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); }
 
   #define JUCE_MAIN_FUNCTION_DEFINITION \
-    extern "C" JUCE_MAIN_FUNCTION \
+    JUCE_MAIN_FUNCTION \
     { \
        juce::JUCEApplicationBase::createInstance = &juce_CreateApplication; \
        return juce::JUCEApplicationBase::main (JUCE_MAIN_FUNCTION_ARGS); \
