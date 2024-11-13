@@ -987,6 +987,22 @@ public:
                                    bool& allowsClicksOnChildComponents) const noexcept;
 
 
+    /** 
+    *  Disables internal mouse events for this component.
+
+        This method allows you to disable the internal event callback of mouse events for the component.
+        When disabled, the component will only call events from its listeners.
+
+        @see getDisableInternalMouseEvents
+    */
+    void setDisableInternalMouseEvents(bool disableInternalMouseEvents) noexcept;
+
+    /** Retrieves the current state of the disable internal mouse events flags.
+
+         @see setDisableInternalMouseEvents
+    */
+    bool getDisableInternalMouseEvents() const noexcept;
+
     /** Returns true if a given point lies within this component or one of its children.
 
         Never override this method! Use hitTest to create custom hit regions.
@@ -2660,6 +2676,7 @@ private:
         bool opaqueFlag                   : 1;
         bool ignoresMouseClicksFlag       : 1;
         bool allowChildMouseClicksFlag    : 1;
+		bool disableInternalMouseEventsFlag : 1;
         bool wantsKeyboardFocusFlag       : 1;
         bool isFocusContainerFlag         : 1;
         bool isKeyboardFocusContainerFlag : 1;
