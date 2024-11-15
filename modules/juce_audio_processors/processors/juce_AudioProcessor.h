@@ -1305,8 +1305,8 @@ public:
         AudioProcessor is loaded. */
     struct TrackProperties
     {
-        String name;    // The name of the track - this will be empty if the track name is not known
-        Colour colour;  // The colour of the track - this will be transparentBlack if the colour is not known
+        std::optional<String> name;     // The name of the track - this will be empty if the track name is not known
+        std::optional<Colour> colour;   // The colour of the track - this will be empty if the colour is not known
 
         // other properties may be added in the future
     };

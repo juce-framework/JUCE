@@ -1322,7 +1322,7 @@ namespace AAXClasses
                     if (data != nullptr)
                     {
                         AudioProcessor::TrackProperties props;
-                        props.name = String::fromUTF8 (static_cast<const AAX_IString*> (data)->Get());
+                        props.name = std::make_optional (String::fromUTF8 (static_cast<const AAX_IString*> (data)->Get()));
 
                         pluginInstance->updateTrackProperties (props);
                     }

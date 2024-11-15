@@ -1612,9 +1612,9 @@ public:
     //==============================================================================
     void updateTrackProperties (const TrackProperties& properties) override
     {
-        if (properties.name.isNotEmpty())
+        if (properties.name.has_value())
         {
-            CFObjectHolder<CFStringRef> contextName { properties.name.toCFString() };
+            CFObjectHolder<CFStringRef> contextName { properties.name->toCFString() };
             AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ContextName, kAudioUnitScope_Global,
                                   0, &contextName.object, sizeof (contextName.object));
         }

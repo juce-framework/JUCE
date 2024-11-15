@@ -470,8 +470,8 @@ private:
             auto trackColour = getProcessor().getTrackProperties().colour;
             auto& lf = getLookAndFeel();
 
-            backgroundColour = (trackColour == Colour() ? lf.findColour (ResizableWindow::backgroundColourId)
-                                                        : trackColour.withAlpha (1.0f).withBrightness (0.266f));
+            backgroundColour = (trackColour.has_value() ? trackColour->withAlpha (1.0f).withBrightness (0.266f)
+                                                        : lf.findColour (ResizableWindow::backgroundColourId));
             repaint();
         }
 

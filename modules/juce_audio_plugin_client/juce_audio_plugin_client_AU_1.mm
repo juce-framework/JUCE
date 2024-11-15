@@ -2589,7 +2589,7 @@ private:
              && juceFilter != nullptr && GetContextName() != nullptr)
         {
             AudioProcessor::TrackProperties props;
-            props.name = String::fromCFString (GetContextName());
+            props.name = std::make_optional (String::fromCFString (GetContextName()));
 
             juceFilter->updateTrackProperties (props);
         }

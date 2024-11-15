@@ -26,6 +26,25 @@ incorrect. This update ensures the method works as intended.
 
 ## Change
 
+AudioProcessor::TrackProperties now uses std::optional.
+
+**Possible Issues**
+
+Code that accessed TrackProperties properties directly will no longer compile.
+
+**Workaround**
+
+Use std::optional::has_value() to check if a property is set. Or Access the
+property value safely using std::optional::value() or operator*.
+
+**Rationale**
+
+Previously, it was not possible to distinguish whether a TrackProperty was
+explicitly set or if the default value was being used.
+
+
+## Change
+
 Support for Arm32 in Projucer has been removed for Windows targets.
 
 **Possible Issues**

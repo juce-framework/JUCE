@@ -3142,8 +3142,11 @@ public:
         {
             if (! std::strcmp (id, Vst::ChannelContext::kChannelNameKey))
             {
-                Steinberg::String str (props.name.toRawUTF8());
-                str.copyTo (string, 0, (Steinberg::int32) jmin (size, (Steinberg::uint32) std::numeric_limits<Steinberg::int32>::max()));
+                if (props.name.has_value())
+                {
+                    Steinberg::String str (props.name->toRawUTF8());
+                    str.copyTo (string, 0, (Steinberg::int32) jmin (size, (Steinberg::uint32) std::numeric_limits<Steinberg::int32>::max()));
+                }
 
                 return kResultTrue;
             }
@@ -3153,9 +3156,12 @@ public:
 
         tresult PLUGIN_API getInt (AttrID id, Steinberg::int64& value) override
         {
-            if      (! std::strcmp (Vst::ChannelContext::kChannelNameLengthKey, id)) value = props.name.length();
-            else if (! std::strcmp (Vst::ChannelContext::kChannelColorKey,      id)) value = static_cast<Steinberg::int64> (props.colour.getARGB());
-            else return kResultFalse;
+            if (! std::strcmp (Vst::ChannelContext::kChannelNameLengthKey, id))
+                value = props.name.value_or (String{}).length();
+            else if (! std::strcmp (Vst::ChannelContext::kChannelColorKey, id))
+                value = static_cast<Steinberg::int64> (props.colour.value_or (Colours::transparentBlack).getARGB());
+            else
+                return kResultFalse;
 
             return kResultTrue;
         }

@@ -460,7 +460,7 @@ public:
         if (str != nullptr)
         {
             AudioProcessor::TrackProperties props;
-            props.name = nsStringToJuce (str);
+            props.name = std::make_optional (nsStringToJuce (str));
 
             getAudioProcessor().updateTrackProperties (props);
         }
