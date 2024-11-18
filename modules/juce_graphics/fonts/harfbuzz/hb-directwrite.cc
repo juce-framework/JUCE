@@ -168,8 +168,11 @@ _hb_directwrite_shaper_face_data_create (hb_face_t *face)
   } HB_STMT_END
 
   data->dwrite_dll = LoadLibrary (TEXT ("DWRITE"));
-  if (unlikely (!data->dwrite_dll))
-    FAIL ("Cannot find DWrite.DLL");
+  if ( unlikely( !data->dwrite_dll ) )
+  {
+    delete data;
+    FAIL("Cannot find DWrite.DLL");
+  }
 
   t_DWriteCreateFactory p_DWriteCreateFactory;
 

@@ -6023,8 +6023,8 @@ static int compute_stack_size(const uint8_t *bc_buf, int bc_buf_len)
     pos = 0;
     while (pos < bc_buf_len) {
         opcode = bc_buf[pos];
-        len = reopcode_info[opcode].size;
         assert(opcode < REOP_COUNT);
+        len = reopcode_info[opcode].size;
         assert((pos + len) <= bc_buf_len);
         switch(opcode) {
         case REOP_push_i32:

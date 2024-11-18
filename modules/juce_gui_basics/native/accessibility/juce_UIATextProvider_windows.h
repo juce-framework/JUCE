@@ -82,9 +82,11 @@ public:
     {
         return withTextInterface (pRetVal, [&] (const AccessibilityTextInterface& textInterface)
         {
+            HRESULT hr;
+
             *pRetVal = SafeArrayCreateVector (VT_UNKNOWN, 0, 1);
 
-            if (pRetVal != nullptr)
+            if (*pRetVal != nullptr)
             {
                 auto selection = textInterface.getSelection();
                 auto hasSelection = ! selection.isEmpty();
@@ -95,15 +97,16 @@ public:
                                                                   hasSelection ? selection.getEnd()   : cursorPos });
 
                 LONG pos = 0;
-                auto hr = SafeArrayPutElement (*pRetVal, &pos, static_cast<IUnknown*> (rangeProvider));
-
-                if (FAILED (hr))
-                    return E_FAIL;
+                hr = SafeArrayPutElement (*pRetVal, &pos, static_cast<IUnknown*> (rangeProvider));
 
                 rangeProvider->Release();
             }
+            else
+            {
+                hr = E_FAIL;
+            }
 
-            return S_OK;
+            return hr;
         });
     }
 
@@ -111,22 +114,25 @@ public:
     {
         return withTextInterface (pRetVal, [&] (const AccessibilityTextInterface& textInterface)
         {
-            *pRetVal = SafeArrayCreateVector (VT_UNKNOWN, 0, 1);
+            HRESULT hr;
 
-            if (pRetVal != nullptr)
+            *pRetVal = SafeArrayCreateVector(VT_UNKNOWN, 0, 1);
+
+            if (*pRetVal != nullptr)
             {
                 auto* rangeProvider = new UIATextRangeProvider (*this, { 0, textInterface.getTotalNumCharacters() });
 
                 LONG pos = 0;
-                auto hr = SafeArrayPutElement (*pRetVal, &pos, static_cast<IUnknown*> (rangeProvider));
-
-                if (FAILED (hr))
-                    return E_FAIL;
+                hr = SafeArrayPutElement (*pRetVal, &pos, static_cast<IUnknown*> (rangeProvider));
 
                 rangeProvider->Release();
             }
+            else
+            {
+                hr = E_FAIL;
+            }
 
-            return S_OK;
+            return hr;
         });
     }
 

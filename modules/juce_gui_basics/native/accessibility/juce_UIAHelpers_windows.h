@@ -87,7 +87,7 @@ inline JUCE_COMRESULT addHandlersToArray (const std::vector<const AccessibilityH
 
     *pRetVal = SafeArrayCreateVector (VT_UNKNOWN, 0, (ULONG) numHandlers);
 
-    if (pRetVal != nullptr)
+    if (*pRetVal != nullptr)
     {
         for (LONG i = 0; i < (LONG) numHandlers; ++i)
         {

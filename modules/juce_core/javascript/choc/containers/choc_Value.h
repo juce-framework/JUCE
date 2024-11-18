@@ -2838,7 +2838,7 @@ inline void Value::changeMember (uint32_t index, const Type& newType, void* newD
 
         for (uint32_t i = 0; i < numElements; ++i)
         {
-            auto member = value.type.getObjectMember (i);
+            const auto &member = value.type.getObjectMember (i);
             newCopy.addMember (member.name, i == index ? ValueView (newType, newData, newDictionary) : value[i]);
         }
 

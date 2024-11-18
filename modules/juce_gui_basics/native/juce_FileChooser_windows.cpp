@@ -451,25 +451,28 @@ private:
 
             LPITEMIDLIST list = SHBrowseForFolder (&bi);
 
-            if (! SHGetPathFromIDListW (list, files))
+            if ( list != nullptr )
             {
-                files[0] = 0;
-                returnedString.clear();
-            }
+                if (!SHGetPathFromIDListW(list, files))
+                {
+                    files[0] = 0;
+                    returnedString.clear();
+                }
 
-            LPMALLOC al;
+                LPMALLOC al;
 
-            if (list != nullptr && SUCCEEDED (SHGetMalloc (&al)))
-                al->Free (list);
+                if (SUCCEEDED(SHGetMalloc(&al)))
+                    al->Free(list);
 
-            if (files[0] != 0)
-            {
-                File result (String (files.get()));
+                if (files[0] != 0)
+                {
+                    File result(String(files.get()));
 
-                if (returnedString.isNotEmpty())
-                    result = result.getSiblingFile (returnedString);
+                    if (returnedString.isNotEmpty())
+                        result = result.getSiblingFile(returnedString);
 
-                selections.add (URL (result));
+                    selections.add(URL(result));
+                }
             }
         }
         else
