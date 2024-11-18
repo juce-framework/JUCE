@@ -223,6 +223,13 @@ public:
                                              , "lfoWaveform":    "triangle"
                                              , "pitchEnvelope":  { "rates": [94,67,95,60], "levels": [50,50,50,50] }
                                              })");
+
+			expect (JSONUtils::getPointer (obj, "/name", {}) == "PIANO 4");
+			expect (JSONUtils::getPointer (obj, "/lfoSpeed", {}) == var (30));
+			expect (JSONUtils::getPointer (obj, "/pitchEnvelope/rates/1", {}) == var (67));
+			expect (JSONUtils::getPointer (obj, "/pitchEnvelope/levels/2", {}) == var (50));
+			expect (JSONUtils::getPointer (obj, "/pitchEnvelope/levels/10", {}) == var());
+
             expectDeepEqual (JSONUtils::setPointer (obj, "", "hello world"), var ("hello world"));
             expectDeepEqual (JSONUtils::setPointer (obj, "/lfoWaveform/foobar", "str"), std::nullopt);
             expectDeepEqual (JSONUtils::setPointer (JSON::parse (R"({"foo":0,"bar":1})"), "/foo", 2), JSON::parse (R"({"foo":2,"bar":1})"));
