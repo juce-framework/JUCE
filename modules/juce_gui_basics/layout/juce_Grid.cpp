@@ -651,7 +651,7 @@ struct Grid::Helpers
             {
                 for (int i = 0; i < columnSpan; i++)
                     for (int j = 0; j < rowSpan; j++)
-                        setCell (cell.column + i, cell.row + j);
+                        occupiedCells.insert ({ cell.column + i, cell.row + j });
 
                 return { { cell.column, cell.column + columnSpan }, { cell.row, cell.row + rowSpan } };
             }
@@ -700,36 +700,30 @@ struct Grid::Helpers
             }
 
         private:
-            struct SortableCell
+            struct Comparator
             {
-                int column, row;
-                bool columnFirst;
-
-                bool operator< (const SortableCell& other) const
+                bool operator() (const Cell& a, const Cell& b) const
                 {
                     if (columnFirst)
                     {
-                        if (row == other.row)
-                            return column < other.column;
+                        if (a.row == b.row)
+                            return a.column < b.column;
 
-                        return row < other.row;
+                        return a.row < b.row;
                     }
 
-                    if (row == other.row)
-                        return column < other.column;
+                    if (a.row == b.row)
+                        return a.column < b.column;
 
-                    return row < other.row;
+                    return a.row < b.row;
                 }
-            };
 
-            void setCell (int column, int row)
-            {
-                occupiedCells.insert ({ column, row, columnFirst });
-            }
+                const bool columnFirst;
+            };
 
             bool isOccupied (Cell cell) const
             {
-                return occupiedCells.count ({ cell.column, cell.row, columnFirst }) > 0;
+                return occupiedCells.count (cell) > 0;
             }
 
             bool isOccupied (Cell cell, int columnSpan, int rowSpan) const
@@ -780,8 +774,11 @@ struct Grid::Helpers
             }
 
             int highestCrossDimension;
-            bool columnFirst;
-            std::set<SortableCell> occupiedCells;
+            const bool columnFirst;
+            std::set<Cell, Comparator> occupiedCells { Comparator { columnFirst } };
+
+            JUCE_DECLARE_NON_COPYABLE (OccupancyPlane)
+            JUCE_DECLARE_NON_MOVEABLE (OccupancyPlane)
         };
 
         //==============================================================================
