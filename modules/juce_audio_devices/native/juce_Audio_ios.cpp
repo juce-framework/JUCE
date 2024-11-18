@@ -518,10 +518,6 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
         availableSampleRates.addIfNotAlreadyThere (highestRate);
 
-        // Reset sample rate back to the original, so that we don't end up stuck on the highest rate
-        sampleRate = trySampleRate (sampleRate);
-        bufferSize = getBufferSize (sampleRate);
-
         AudioUnitAddPropertyListener (audioUnit,
                                       kAudioUnitProperty_StreamFormat,
                                       dispatchAudioUnitPropertyChange,
@@ -553,6 +549,13 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         JUCE_IOS_AUDIO_LOG ("Updating hardware info");
 
         updateAvailableSampleRates();
+
+        // The sample rate and buffer size may have been affected by
+        // updateAvailableSampleRates(), so try restoring the last good
+        // sample rate
+        sampleRate = trySampleRate (sampleRate);
+        bufferSize = getBufferSize (sampleRate);
+
         updateAvailableBufferSizes();
 
         if (deviceType != nullptr)
