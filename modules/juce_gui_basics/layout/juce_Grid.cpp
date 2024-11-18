@@ -702,23 +702,19 @@ struct Grid::Helpers
         private:
             struct Comparator
             {
+                using Tie = std::tuple<int, int> (*) (const Cell&);
+
+                explicit Comparator (bool columnFirstIn)
+                    : tie (columnFirstIn ? Tie { [] (const Cell& x) { return std::tuple (x.row, x.column); } }
+                                         : Tie { [] (const Cell& x) { return std::tuple (x.column, x.row); } })
+                {}
+
                 bool operator() (const Cell& a, const Cell& b) const
                 {
-                    if (columnFirst)
-                    {
-                        if (a.row == b.row)
-                            return a.column < b.column;
-
-                        return a.row < b.row;
-                    }
-
-                    if (a.row == b.row)
-                        return a.column < b.column;
-
-                    return a.row < b.row;
+                    return tie (a) < tie (b);
                 }
 
-                const bool columnFirst;
+                const Tie tie;
             };
 
             bool isOccupied (Cell cell) const
@@ -746,20 +742,20 @@ struct Grid::Helpers
 
             int getHighestCrossDimension() const
             {
-                Cell cell { 1, 1 };
+                const auto cell = occupiedCells.empty() ? Cell { 1, 1 }
+                                                        : *std::prev (occupiedCells.end());
 
-                if (occupiedCells.size() > 0)
-                    cell = { occupiedCells.crbegin()->column, occupiedCells.crbegin()->row };
-
-                return std::max (getCrossDimension (cell), highestCrossDimension);
+                return std::max (getCrossDimension (cell) + 1, highestCrossDimension);
             }
 
             Cell advance (Cell cell) const
             {
-                if ((getCrossDimension (cell) + 1) >= getHighestCrossDimension())
+                const auto next = getCrossDimension (cell) + 1;
+
+                if (next >= getHighestCrossDimension())
                     return fromDimensions (getMainDimension (cell) + 1, 1);
 
-                return fromDimensions (getMainDimension (cell), getCrossDimension (cell) + 1);
+                return fromDimensions (getMainDimension (cell), next);
             }
 
             int getMainDimension (Cell cell) const   { return columnFirst ? cell.column : cell.row; }
@@ -1639,6 +1635,85 @@ struct GridTests final : public UnitTest
                 const auto randomSolution = createSolution (numColumns, probabilityOfFractionalColumn, bounds);
                 evaluateInvariants (randomSolution);
             }
+        }
+
+        {
+            beginTest ("Cell orderings for row and columns work correctly");
+
+            const Rectangle<int> bounds { 0, 0, 200, 200 };
+
+            Grid grid;
+            grid.autoColumns = Grid::TrackInfo { Grid::Fr { 1 } };
+            grid.autoRows = Grid::TrackInfo { Grid::Fr { 1 } };
+
+            grid.items = { GridItem{}.withArea (1, 20),
+                           GridItem{}.withArea (2, 10),
+                           GridItem{}.withArea (GridItem::Span { 1 }, GridItem::Span { 15 }),
+                           GridItem{} };
+
+            grid.autoFlow = Grid::AutoFlow::row;
+            grid.performLayout (bounds);
+            expect (grid.items.getLast().currentBounds == Rect { 150, 0, 10, 100 });
+
+            grid.autoFlow = Grid::AutoFlow::column;
+            grid.performLayout (bounds);
+            expect (grid.items.getLast().currentBounds == Rect { 0, 100, 10, 100 });
+
+            grid.items = { GridItem{}.withArea (20, 1),
+                           GridItem{}.withArea (10, 2),
+                           GridItem{}.withArea (GridItem::Span { 15 }, GridItem::Span { 1 }),
+                           GridItem{} };
+
+            grid.autoFlow = Grid::AutoFlow::row;
+            grid.performLayout (bounds);
+            expect (grid.items.getLast().currentBounds == Rect { 100, 0, 100, 10 });
+
+            grid.autoFlow = Grid::AutoFlow::column;
+            grid.performLayout (bounds);
+            expect (grid.items.getLast().currentBounds == Rect { 0, 150, 100, 10 });
+        }
+
+        beginTest ("Complex grid layout");
+        {
+            Grid grid;
+
+            using Track = Grid::TrackInfo;
+
+            grid.templateRows    = { Track (1_fr), Track (1_fr), Track (1_fr) };
+            grid.templateColumns = { Track (1_fr), Track (1_fr), Track (1_fr) };
+
+            grid.autoColumns = Track (1_fr);
+            grid.autoRows    = Track (1_fr);
+
+            grid.autoFlow = Grid::AutoFlow::column;
+
+            grid.items.addArray ({ GridItem().withArea (2, 2, 4, 4),
+                                   GridItem(),
+                                   GridItem().withArea ({}, 3),
+                                   GridItem(),
+                                   GridItem().withArea (GridItem::Span (2), {}),
+                                   GridItem(),
+                                   GridItem(),
+                                   GridItem(),
+                                   GridItem(),
+                                   GridItem(),
+                                   GridItem(),
+                                   GridItem() });
+
+            grid.performLayout ({ 60, 30 });
+
+            expect (grid.items[0] .currentBounds == Rect { 10, 10, 20, 20 });
+            expect (grid.items[1] .currentBounds == Rect {  0,  0, 10, 10 });
+            expect (grid.items[2] .currentBounds == Rect { 20,  0, 10, 10 });
+            expect (grid.items[3] .currentBounds == Rect {  0, 10, 10, 10 });
+            expect (grid.items[4] .currentBounds == Rect { 30,  0, 10, 20 });
+            expect (grid.items[5] .currentBounds == Rect { 30, 20, 10, 10 });
+            expect (grid.items[6] .currentBounds == Rect { 40,  0, 10, 10 });
+            expect (grid.items[7] .currentBounds == Rect { 40, 10, 10, 10 });
+            expect (grid.items[8] .currentBounds == Rect { 40, 20, 10, 10 });
+            expect (grid.items[9] .currentBounds == Rect { 50,  0, 10, 10 });
+            expect (grid.items[10].currentBounds == Rect { 50, 10, 10, 10 });
+            expect (grid.items[11].currentBounds == Rect { 50, 20, 10, 10 });
         }
     }
 };
