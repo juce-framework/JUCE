@@ -117,6 +117,14 @@ else()
         list(APPEND PASSTHROUGH_ARGS "-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}")
     endif()
 
+    if(CMAKE_C_COMPILER_LAUNCHER)
+        list(APPEND PASSTHROUGH_ARGS "-DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}")
+    endif()
+
+    if(CMAKE_CXX_COMPILER_LAUNCHER)
+        list(APPEND PASSTHROUGH_ARGS "-DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}")
+    endif()
+
     # Looks like we're bootstrapping, reinvoke CMake
     execute_process(COMMAND "${CMAKE_COMMAND}"
             "."
