@@ -124,6 +124,57 @@ std::optional<var> JSONUtils::setPointer (const var& v,
     return {};
 }
 
+var JSONUtils::getPointer (const var& v, String pointer, const var& defaultValue)
+{
+    if (pointer.isEmpty())
+        return defaultValue;
+
+    if (! pointer.startsWith ("/"))
+    {
+        // This is not a well-formed JSON pointer
+        jassertfalse;
+        return {};
+    }
+
+    const auto findResult = pointer.indexOfChar (1, '/');
+    const auto pos = findResult < 0 ? pointer.length() : findResult;
+    const String head (pointer.begin() + 1, pointer.begin() + pos);
+    const String tail (pointer.begin() + pos, pointer.end());
+
+    const auto unescaped = head.replace ("~1", "/").replace ("~0", "~");
+
+    if (auto* object = v.getDynamicObject())
+    {
+        if (tail.isEmpty())
+            return object->hasProperty (unescaped) ? object->getProperty (unescaped) : defaultValue;
+        else
+            return getPointer (object->getProperty (unescaped), tail, defaultValue);
+    }
+    else if (auto* array = v.getArray())
+    {
+        const auto index = [&]() -> size_t
+        {
+            if (unescaped == "-")
+                return (size_t) array->size();
+
+            if (unescaped == "0")
+                return 0;
+
+            if (! unescaped.startsWith ("0"))
+                return (size_t) unescaped.getLargeIntValue();
+
+            return std::numeric_limits<size_t>::max();
+        }();
+
+        if (tail.isEmpty())
+            return isPositiveAndBelow (index, array->size()) ? (*array)[int (index)] : defaultValue;
+        else
+            return getPointer ((*array)[(int) index], tail, defaultValue);
+    }
+
+    return defaultValue;
+}
+
 bool JSONUtils::deepEqual (const var& a, const var& b)
 {
     const auto compareObjects = [] (const DynamicObject& x, const DynamicObject& y)
