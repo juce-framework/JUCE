@@ -633,6 +633,8 @@ struct Grid::Helpers
     //==============================================================================
     struct AutoPlacement
     {
+        AutoPlacement() = delete;
+
         using ItemPlacementArray = Array<std::pair<GridItem*, PlacementHelpers::LineArea>>;
 
         //==============================================================================
@@ -841,7 +843,7 @@ struct Grid::Helpers
         }
 
         //==============================================================================
-        ItemPlacementArray deduceAllItems (Grid& grid) const
+        static ItemPlacementArray deduceAllItems (Grid& grid)
         {
             const auto namedAreas = PlacementHelpers::deduceNamedAreas (grid.templateAreas);
 
@@ -1112,7 +1114,7 @@ float Grid::TrackInfo::getAbsoluteSize (float relativeFractionalUnit) const
 //==============================================================================
 void Grid::performLayout (Rectangle<int> targetArea)
 {
-    const auto itemsAndAreas = Helpers::AutoPlacement().deduceAllItems (*this);
+    const auto itemsAndAreas = Helpers::AutoPlacement::deduceAllItems (*this);
 
     auto implicitTracks = Helpers::AutoPlacement::createImplicitTracks (*this, itemsAndAreas);
 
