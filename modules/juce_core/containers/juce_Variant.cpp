@@ -708,6 +708,21 @@ bool var::hasProperty (const Identifier& propertyName) const noexcept
     return false;
 }
 
+juce::StringArray var::getProperties() const
+{
+    if (auto* o = getDynamicObject())
+    {
+        juce::StringArray names;
+
+        for (auto itr : o->getProperties())
+            names.add (itr.name.toString());
+
+        return names;
+    }
+
+    return {};
+}
+
 var::NativeFunction var::getNativeFunction() const
 {
     return isMethod() && (value.methodValue != nullptr) ? *value.methodValue : nullptr;
@@ -892,6 +907,8 @@ var::NativeFunctionArgs::NativeFunctionArgs (const var& t, const var* args, int 
     : thisObject (t), arguments (args), numArguments (numArgs)
 {
 }
+
+//==============================================================================
 
 //==============================================================================
 #if JUCE_ALLOW_STATIC_NULL_VARIABLES

@@ -57,6 +57,17 @@ struct JSONUtils
     */
     static std::optional<var> setPointer (const var& v, String pointer, const var& newValue);
 
+    /** Given a JSON array/object 'v', a string representing a JSON pointer,
+        returns the value of the property or array index referenced by the pointer
+
+        If the pointer cannot be followed, due to referencing missing array indices
+        or fields, then this returns defaultValue.
+
+        For more details, check the JSON Pointer RFC 6901:
+        https://datatracker.ietf.org/doc/html/rfc6901
+    */
+    static var getPointer (const var& v, String pointer, const var& defaultValue);
+
     /** Converts the provided key/value pairs into a JSON object. */
     static var makeObject (const std::map<Identifier, var>& source);
 

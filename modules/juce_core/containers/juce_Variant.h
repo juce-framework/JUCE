@@ -262,6 +262,8 @@ public:
     var getProperty (const Identifier& propertyName, const var& defaultReturnValue) const;
     /** Returns true if this variant is an object and if it has the given property. */
     bool hasProperty (const Identifier& propertyName) const noexcept;
+    /** Returns property names if this variant is an object. */
+    juce::StringArray getProperties() const;
 
     /** Invokes a named method call with no arguments. */
     var call (const Identifier& method) const;
