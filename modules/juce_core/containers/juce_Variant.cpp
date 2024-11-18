@@ -910,71 +910,71 @@ var::NativeFunctionArgs::NativeFunctionArgs (const var& t, const var* args, int 
 
 //==============================================================================
 VarIterator::VarIterator (const var& v_, bool isEnd)
-	: v (v_)
+    : v (v_)
 {
-	if (isEnd)
-	{
-		if (v.isArray())
-			index = v.getArray()->size();
-		else if (auto o = v.getDynamicObject())
-			itr = o->getProperties().end();
-	}
-	else
-	{
-		if (v.isArray())
-			index = 0;
-		else if (auto o = v.getDynamicObject())
-			itr = o->getProperties().begin();
-	}
+    if (isEnd)
+    {
+        if (v.isArray())
+            index = v.getArray()->size();
+        else if (auto o = v.getDynamicObject())
+            itr = o->getProperties().end();
+    }
+    else
+    {
+        if (v.isArray())
+            index = 0;
+        else if (auto o = v.getDynamicObject())
+            itr = o->getProperties().begin();
+    }
 }
 
 VarIterator& VarIterator::operator++()
 {
-	if (v.isArray())
-	{
-		index++;
-	}
-	else if (v.getDynamicObject())
-	{
-		auto i = (const NamedValueSet::NamedValue*)itr;
-		i++;
-		itr = i;
-	}
-	return *this;
+    if (v.isArray())
+    {
+        index++;
+    }
+    else if (v.getDynamicObject())
+    {
+        auto i = (const NamedValueSet::NamedValue*)itr;
+        i++;
+        itr = i;
+    }
+    return *this;
 }
 
 bool VarIterator::operator== (const VarIterator& other) const
 {
-	return index == other.index && itr == other.itr;
+    return index == other.index && itr == other.itr;
 }
 
 bool VarIterator::operator!= (const VarIterator& other) const
 {
-	return ! (*this == other);
+    return ! (*this == other);
 }
 
 VarIterator::NamedValue VarIterator::operator*() const
 {
-	if (v.isArray())
-	{
-		return { index, (*v.getArray())[index] };
-	}
-	else if (v.getDynamicObject())
-	{
-		auto i = (const NamedValueSet::NamedValue*)itr;
-		return { i->name.toString(), i->value };
-	}
-	return {};
+    if (v.isArray())
+    {
+        return { index, (*v.getArray())[index] };
+    }
+    else if (v.getDynamicObject())
+    {
+        auto i = (const NamedValueSet::NamedValue*)itr;
+        return { i->name.toString(), i->value };
+    }
+    return {};
 }
 
 VarIterator begin (const var& v)
 {
-	return VarIterator (v, false);
+    return VarIterator (v, false);
 }
 
 VarIterator end (const var& v)
 {
-	return VarIterator (v, true);
+    return VarIterator (v, true);
 }
 
 //==============================================================================
