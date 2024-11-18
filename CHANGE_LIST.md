@@ -3,6 +3,21 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.4
+
+  - Simplified singleton creation
+  - Fixed some Javascript and C++ interoperability issues
+  - Added exact passthrough of MIDI CC timestamps
+  - Switched to obtaining MIDI plug-in properties at runtime
+  - Improved Windows Arm CMake support
+  - Improved ShapedText
+  - Fixed some issues with Windows DLL builds
+  - Add system-provided timestamps to VBlankAttachment and animations
+  - Fixed some iOS deprecation warnings
+  - Updated embedded CHOC version
+  - Updated embedded Oboe version
+  - Moved the JavaScript implementation into a separate module
+
 ## Version 8.0.3
 
   - Updated the AAX SDK to 2.8.0
