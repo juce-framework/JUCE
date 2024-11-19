@@ -274,10 +274,10 @@ public:
 
         memset (&vstEffect, 0, sizeof (vstEffect));
         vstEffect.magic = 0x56737450 /* 'VstP' */;
-        vstEffect.dispatcher = (Vst2::AEffectDispatcherProc) dispatcherCB;
+        vstEffect.dispatcher = dispatcherCB;
         vstEffect.process = nullptr;
-        vstEffect.setParameter = (Vst2::AEffectSetParameterProc) setParameterCB;
-        vstEffect.getParameter = (Vst2::AEffectGetParameterProc) getParameterCB;
+        vstEffect.setParameter = setParameterCB;
+        vstEffect.getParameter = getParameterCB;
         vstEffect.numPrograms = jmax (1, processor->getNumPrograms());
         vstEffect.numParams = juceParameters.getNumParameters();
         vstEffect.numInputs = maxNumInChannels;
@@ -292,8 +292,8 @@ public:
         vstEffect.version = JucePlugin_VersionCode;
        #endif
 
-        vstEffect.processReplacing = (Vst2::AEffectProcessProc) processReplacingCB;
-        vstEffect.processDoubleReplacing = (Vst2::AEffectProcessDoubleProc) processDoubleReplacingCB;
+        vstEffect.processReplacing = processReplacingCB;
+        vstEffect.processDoubleReplacing = processDoubleReplacingCB;
 
         vstEffect.flags |= Vst2::effFlagsHasEditor;
 
@@ -505,7 +505,7 @@ public:
         internalProcessReplacing (inputs, outputs, sampleFrames, floatTempBuffers);
     }
 
-    static void processReplacingCB (Vst2::AEffect* vstInterface, float** inputs, float** outputs, int32 sampleFrames)
+    static void processReplacingCB (Vst2::AEffect* vstInterface, float** inputs, float** outputs, Vst2::VstInt32 sampleFrames)
     {
         getWrapper (vstInterface)->processReplacing (inputs, outputs, sampleFrames);
     }
@@ -516,7 +516,7 @@ public:
         internalProcessReplacing (inputs, outputs, sampleFrames, doubleTempBuffers);
     }
 
-    static void processDoubleReplacingCB (Vst2::AEffect* vstInterface, double** inputs, double** outputs, int32 sampleFrames)
+    static void processDoubleReplacingCB (Vst2::AEffect* vstInterface, double** inputs, double** outputs, Vst2::VstInt32 sampleFrames)
     {
         getWrapper (vstInterface)->processDoubleReplacing (inputs, outputs, sampleFrames);
     }
@@ -678,7 +678,7 @@ public:
         return 0.0f;
     }
 
-    static float getParameterCB (Vst2::AEffect* vstInterface, int32 index)
+    static float getParameterCB (Vst2::AEffect* vstInterface, Vst2::VstInt32 index)
     {
         return getWrapper (vstInterface)->getParameter (index);
     }
@@ -689,7 +689,7 @@ public:
             setValueAndNotifyIfChanged (*param, value);
     }
 
-    static void setParameterCB (Vst2::AEffect* vstInterface, int32 index, float value)
+    static void setParameterCB (Vst2::AEffect* vstInterface, Vst2::VstInt32 index, float value)
     {
         getWrapper (vstInterface)->setParameter (index, value);
     }
@@ -902,8 +902,8 @@ public:
         }
     }
 
-    static pointer_sized_int dispatcherCB (Vst2::AEffect* vstInterface, int32 opCode, int32 index,
-                                           pointer_sized_int value, void* ptr, float opt)
+    static Vst2::VstIntPtr dispatcherCB (Vst2::AEffect* vstInterface, Vst2::VstInt32 opCode, Vst2::VstInt32 index,
+                                           Vst2::VstIntPtr value, void* ptr, float opt)
     {
         auto* wrapper = getWrapper (vstInterface);
         VstOpCodeArguments args = { index, value, ptr, opt };

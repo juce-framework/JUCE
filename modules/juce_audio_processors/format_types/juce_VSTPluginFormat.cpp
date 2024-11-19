@@ -223,7 +223,7 @@ namespace
 
 //==============================================================================
 typedef Vst2::AEffect* (VSTCALLBACK *MainCall) (Vst2::audioMasterCallback);
-static pointer_sized_int VSTCALLBACK audioMaster (Vst2::AEffect*, int32, int32, pointer_sized_int, void*, float);
+static Vst2::VstIntPtr VSTCALLBACK audioMaster (Vst2::AEffect*, Vst2::VstInt32, Vst2::VstInt32, Vst2::VstIntPtr, void*, float);
 
 //==============================================================================
 // Change this to disable logging of various VST activities
@@ -3458,7 +3458,7 @@ bool VSTPluginInstance::updateSizeFromEditor ([[maybe_unused]] int w, [[maybe_un
 
 //==============================================================================
 // entry point for all callbacks from the plugin
-static pointer_sized_int VSTCALLBACK audioMaster (Vst2::AEffect* effect, int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
+static Vst2::VstIntPtr VSTCALLBACK audioMaster (Vst2::AEffect* effect, Vst2::VstInt32 opcode, Vst2::VstInt32 index, Vst2::VstIntPtr value, void* ptr, float opt)
 {
     if (effect != nullptr)
         if (auto* instance = (VSTPluginInstance*) (effect->resvd2))
