@@ -1158,10 +1158,10 @@ public:
         expect (home.getChildFile ("...xyz").getFileName() == "...xyz");
         expect (home.getChildFile ("./xyz") == home.getChildFile ("xyz"));
         expect (home.getChildFile ("././xyz") == home.getChildFile ("xyz"));
-        expect (home.getChildFile ("../xyz") == home.getParentDirectory().getChildFile ("xyz"));
-        expect (home.getChildFile (".././xyz") == home.getParentDirectory().getChildFile ("xyz"));
-        expect (home.getChildFile (".././xyz/./abc") == home.getParentDirectory().getChildFile ("xyz/abc"));
-        expect (home.getChildFile ("./../xyz") == home.getParentDirectory().getChildFile ("xyz"));
+        expect (home.getChildFile ("../xyz") == home.getSiblingFile ("xyz"));
+        expect (home.getChildFile (".././xyz") == home.getSiblingFile ("xyz"));
+        expect (home.getChildFile (".././xyz/./abc") == home.getSiblingFile ("xyz/abc"));
+        expect (home.getChildFile ("./../xyz") == home.getSiblingFile ("xyz"));
         expect (home.getChildFile ("a1/a2/a3/./../../a4") == home.getChildFile ("a1/a4"));
 
         expect (! File().hasReadAccess());
