@@ -420,6 +420,9 @@ public:
     void sendBlockOfMessages (const MidiBuffer& buffer,
                               double millisecondCounterToStartAt,
                               double samplesPerSecondForBuffer);
+    
+    /** Returns true if there are pending midi messages */
+    bool hasPendingMessages() const;
 
     /** Gets rid of any midi messages that had been added by sendBlockOfMessages(). */
     void clearAllPendingMessages();
