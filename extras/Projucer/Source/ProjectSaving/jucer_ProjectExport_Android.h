@@ -1992,6 +1992,9 @@ private:
         if (androidVibratePermission.get())
             s.add ("android.permission.VIBRATE");
 
+        if (arePushNotificationsEnabled())
+            s.add ("android.permission.POST_NOTIFICATIONS");
+
         return getCleanedStringArray (s);
     }
 
