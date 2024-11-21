@@ -2466,6 +2466,9 @@ namespace AAXClasses
         properties->AddProperty (AAX_eProperty_InputStemFormat,     static_cast<AAX_CPropertyValue> (aaxInputFormat));
         properties->AddProperty (AAX_eProperty_OutputStemFormat,    static_cast<AAX_CPropertyValue> (aaxOutputFormat));
 
+        // If the plugin doesn't have an editor, ask the host to provide one
+        properties->AddProperty (AAX_eProperty_UsesClientGUI,       static_cast<AAX_CPropertyValue> (! processor.hasEditor()));
+
         const auto& extensions = processor.getAAXClientExtensions();
 
         // This value needs to match the RTAS wrapper's Type ID, so that
