@@ -1055,4 +1055,9 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString,
                                   javaString (announcementString).get());
 }
 
+bool AccessibilityHandler::areAnyAccessibilityClientsActive()
+{
+    return AccessibilityNativeHandle::areAnyAccessibilityClientsActive();
+}
+
 } // namespace juce

@@ -666,4 +666,9 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
     sendAccessibilityEvent (UIAccessibilityAnnouncementNotification, juceStringToNS (announcementString));
 }
 
+bool AccessibilityHandler::areAnyAccessibilityClientsActive()
+{
+    return juce::areAnyAccessibilityClientsActive();
+}
+
 } // namespace juce

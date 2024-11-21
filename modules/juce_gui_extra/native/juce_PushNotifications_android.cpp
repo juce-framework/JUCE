@@ -35,6 +35,8 @@
 namespace juce
 {
 
+#define JUCE_PUSH_NOTIFICATIONS_IMPL 1
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (constructor,             "<init>",                  "(Ljava/lang/String;Ljava/lang/CharSequence;I)V") \
   METHOD (enableLights,            "enableLights",            "(Z)V") \
@@ -274,9 +276,9 @@ bool PushNotifications::Notification::isValid() const noexcept
 }
 
 //==============================================================================
-struct PushNotifications::Pimpl
+struct PushNotifications::Impl
 {
-    explicit Pimpl (PushNotifications& p)
+    explicit Impl (PushNotifications& p)
         : owner (p)
     {}
 
@@ -306,7 +308,7 @@ struct PushNotifications::Pimpl
             const auto notifyListeners = []
             {
                 if (auto* instance = PushNotifications::getInstance())
-                    instance->listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
+                    instance->listeners.call ([] (Listener& l) { l.notificationSettingsReceived (makeDefaultSettings()); });
             };
 
             if (MessageManager::getInstance()->isThisTheMessageThread())
@@ -318,7 +320,7 @@ struct PushNotifications::Pimpl
 
     void requestSettingsUsed()
     {
-        owner.listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
+        owner.listeners.call ([] (Listener& l) { l.notificationSettingsReceived (makeDefaultSettings()); });
     }
 
     void sendLocalNotification (const Notification& n)
@@ -1573,6 +1575,15 @@ struct PushNotifications::Pimpl
             && env->CallBooleanMethod (extras, AndroidBundle.containsKey, javaString ("google.message_id").get());
     }
 
+    static Settings makeDefaultSettings()
+    {
+        Settings settings;
+        settings.allowAlert = true;
+        settings.allowBadge = true;
+        settings.allowSound = true;
+        return settings;
+    }
+
     PushNotifications& owner;
 };
 
@@ -1640,14 +1651,14 @@ bool juce_handleNotificationIntent (void* intent)
 {
     auto* instance = PushNotifications::getInstanceWithoutCreating();
 
-    if (PushNotifications::Pimpl::isDeleteNotificationIntent ((jobject) intent))
+    if (PushNotifications::Impl::isDeleteNotificationIntent ((jobject) intent))
     {
         if (instance)
             instance->pimpl->notifyListenersAboutLocalNotificationDeleted (LocalRef<jobject> ((jobject) intent));
 
         return true;
     }
-    else if (PushNotifications::Pimpl::isLocalNotificationIntent ((jobject) intent))
+    else if (PushNotifications::Impl::isLocalNotificationIntent ((jobject) intent))
     {
         if (instance)
             instance->pimpl->notifyListenersAboutLocalNotification (LocalRef<jobject> ((jobject) intent));
@@ -1655,7 +1666,7 @@ bool juce_handleNotificationIntent (void* intent)
         return true;
     }
   #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
-    else if (PushNotifications::Pimpl::isRemoteNotificationIntent ((jobject) intent))
+    else if (PushNotifications::Impl::isRemoteNotificationIntent ((jobject) intent))
     {
         if (instance)
             instance->pimpl->notifyListenersAboutRemoteNotificationFromSystemTray (LocalRef<jobject> ((jobject) intent));
