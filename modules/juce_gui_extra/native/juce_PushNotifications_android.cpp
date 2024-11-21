@@ -296,7 +296,7 @@ struct PushNotifications::Pimpl
     }
 
     //==============================================================================
-    void sendLocalNotification (const PushNotifications::Notification& n)
+    void sendLocalNotification (const Notification& n)
     {
         // All required fields have to be setup!
         jassert (n.isValid());
@@ -322,7 +322,7 @@ struct PushNotifications::Pimpl
         {
             auto* env = getEnv();
 
-            Array<PushNotifications::Notification> notifications;
+            Array<Notification> notifications;
 
             auto notificationManager = getNotificationManager();
             jassert (notificationManager != nullptr);
@@ -601,7 +601,7 @@ struct PushNotifications::Pimpl
                                                          javaString ("notification").get()));
     }
 
-    static LocalRef<jobject> juceNotificationToJavaNotification (const PushNotifications::Notification& n)
+    static LocalRef<jobject> juceNotificationToJavaNotification (const Notification& n)
     {
         auto* env = getEnv();
 
@@ -616,7 +616,7 @@ struct PushNotifications::Pimpl
         return LocalRef<jobject> (env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.build));
     }
 
-    static LocalRef<jobject> createNotificationBuilder (const PushNotifications::Notification& n)
+    static LocalRef<jobject> createNotificationBuilder (const Notification& n)
     {
         auto* env = getEnv();
         LocalRef<jobject> context (getMainActivity());
@@ -648,7 +648,7 @@ struct PushNotifications::Pimpl
         return LocalRef<jobject> (env->NewObject (builderClass, builderConstructor, context.get()));
     }
 
-    static void setupRequiredFields (const PushNotifications::Notification& n, LocalRef<jobject>& notificationBuilder)
+    static void setupRequiredFields (const Notification& n, LocalRef<jobject>& notificationBuilder)
     {
         auto* env = getEnv();
         LocalRef<jobject> context (getMainActivity());
@@ -696,7 +696,7 @@ struct PushNotifications::Pimpl
         }
     }
 
-    static LocalRef<jobject> juceNotificationToBundle (const PushNotifications::Notification& n)
+    static LocalRef<jobject> juceNotificationToBundle (const Notification& n)
     {
         auto* env = getEnv();
 
@@ -753,7 +753,7 @@ struct PushNotifications::Pimpl
         return bundle;
     }
 
-    static void setupOptionalFields (const PushNotifications::Notification& n, LocalRef<jobject>& notificationBuilder)
+    static void setupOptionalFields (const Notification& n, LocalRef<jobject>& notificationBuilder)
     {
         auto* env = getEnv();
 
@@ -818,11 +818,11 @@ struct PushNotifications::Pimpl
 
         if (getAndroidSDKVersion() < 24)
         {
-            const bool useChronometer = n.timestampVisibility == PushNotifications::Notification::chronometer;
+            const bool useChronometer = n.timestampVisibility == Notification::chronometer;
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.setUsesChronometer, useChronometer);
         }
 
-        const bool showTimeStamp = n.timestampVisibility != PushNotifications::Notification::off;
+        const bool showTimeStamp = n.timestampVisibility != Notification::off;
         env->CallObjectMethod (notificationBuilder, NotificationBuilderApi17.setShowWhen, showTimeStamp);
 
         if (n.groupId.isNotEmpty())
@@ -857,8 +857,8 @@ struct PushNotifications::Pimpl
 
         if (getAndroidSDKVersion() >= 24)
         {
-            const bool useChronometer = n.timestampVisibility == PushNotifications::Notification::chronometer;
-            const bool useCountDownChronometer = n.timestampVisibility == PushNotifications::Notification::countDownChronometer;
+            const bool useChronometer = n.timestampVisibility == Notification::chronometer;
+            const bool useCountDownChronometer = n.timestampVisibility == Notification::countDownChronometer;
 
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi24.setChronometerCountDown, useCountDownChronometer);
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.setUsesChronometer, useChronometer | useCountDownChronometer);
@@ -874,7 +874,7 @@ struct PushNotifications::Pimpl
         setupNotificationDeletedCallback (n, notificationBuilder);
     }
 
-    static void setupNotificationDeletedCallback (const PushNotifications::Notification& n,
+    static void setupNotificationDeletedCallback (const Notification& n,
                                                   LocalRef<jobject>& notificationBuilder)
     {
         auto* env = getEnv();
@@ -900,7 +900,7 @@ struct PushNotifications::Pimpl
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setDeleteIntent, deletePendingIntent.get());
     }
 
-    static void setupActions (const PushNotifications::Notification& n, LocalRef<jobject>& notificationBuilder)
+    static void setupActions (const Notification& n, LocalRef<jobject>& notificationBuilder)
     {
         auto* env = getEnv();
         LocalRef<jobject> context (getMainActivity());
@@ -912,7 +912,7 @@ struct PushNotifications::Pimpl
             auto activityClass = LocalRef<jobject> (env->CallObjectMethod (context.get(), JavaObject.getClass));
             auto notifyIntent  = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), activityClass.get()));
 
-            const bool isTextStyle = action.style == PushNotifications::Notification::Action::text;
+            const bool isTextStyle = action.style == Notification::Action::text;
 
             auto packageNameString   = LocalRef<jstring> ((jstring) (env->CallObjectMethod (context.get(), AndroidContext.getPackageName)));
             const String notificationActionString = isTextStyle ? ".JUCE_NOTIFICATION_TEXT_INPUT_ACTION." : ".JUCE_NOTIFICATION_BUTTON_ACTION.";
@@ -1029,26 +1029,26 @@ struct PushNotifications::Pimpl
         return bitmap;
     }
 
-    static String typeToCategory (PushNotifications::Notification::Type t)
+    static String typeToCategory (Notification::Type t)
     {
         switch (t)
         {
-            case PushNotifications::Notification::unspecified:    return {};
-            case PushNotifications::Notification::alarm:          return "alarm";
-            case PushNotifications::Notification::call:           return "call";
-            case PushNotifications::Notification::email:          return "email";
-            case PushNotifications::Notification::error:          return "err";
-            case PushNotifications::Notification::event:          return "event";
-            case PushNotifications::Notification::message:        return "msg";
-            case PushNotifications::Notification::taskProgress:   return "progress";
-            case PushNotifications::Notification::promo:          return "promo";
-            case PushNotifications::Notification::recommendation: return "recommendation";
-            case PushNotifications::Notification::reminder:       return "reminder";
-            case PushNotifications::Notification::service:        return "service";
-            case PushNotifications::Notification::social:         return "social";
-            case PushNotifications::Notification::status:         return "status";
-            case PushNotifications::Notification::system:         return "sys";
-            case PushNotifications::Notification::transport:      return "transport";
+            case Notification::unspecified:    return {};
+            case Notification::alarm:          return "alarm";
+            case Notification::call:           return "call";
+            case Notification::email:          return "email";
+            case Notification::error:          return "err";
+            case Notification::event:          return "event";
+            case Notification::message:        return "msg";
+            case Notification::taskProgress:   return "progress";
+            case Notification::promo:          return "promo";
+            case Notification::recommendation: return "recommendation";
+            case Notification::reminder:       return "reminder";
+            case Notification::service:        return "service";
+            case Notification::social:         return "social";
+            case Notification::status:         return "status";
+            case Notification::system:         return "sys";
+            case Notification::transport:      return "transport";
         }
 
         return {};
@@ -1081,11 +1081,11 @@ struct PushNotifications::Pimpl
     }
 
     // Reverse of juceNotificationToBundle().
-    static PushNotifications::Notification localNotificationBundleToJuceNotification (const LocalRef<jobject>& bundle)
+    static Notification localNotificationBundleToJuceNotification (const LocalRef<jobject>& bundle)
     {
         auto* env = getEnv();
 
-        PushNotifications::Notification n;
+        Notification n;
 
         if (bundle.get() != nullptr)
         {
@@ -1100,23 +1100,23 @@ struct PushNotifications::Pimpl
             n.icon        = getStringFromBundle (env, "icon", bundle);
             n.channelId   = getStringFromBundle (env, "channelId", bundle);
 
-            PushNotifications::Notification::Progress progress;
+            Notification::Progress progress;
             progress.max           = getIntFromBundle  (env, "progressMax", bundle);
             progress.current       = getIntFromBundle  (env, "progressCurrent", bundle);
             progress.indeterminate = getBoolFromBundle (env, "progressIndeterminate", bundle);
             n.progress = progress;
 
             n.person       = getStringFromBundle (env, "person", bundle);
-            n.type         = (PushNotifications::Notification::Type)     getIntFromBundle (env, "type", bundle);
-            n.priority     = (PushNotifications::Notification::Priority) getIntFromBundle (env, "priority", bundle);
-            n.lockScreenAppearance = (PushNotifications::Notification::LockScreenAppearance) getIntFromBundle (env, "lockScreenAppearance", bundle);
+            n.type         = (Notification::Type)     getIntFromBundle (env, "type", bundle);
+            n.priority     = (Notification::Priority) getIntFromBundle (env, "priority", bundle);
+            n.lockScreenAppearance = (Notification::LockScreenAppearance) getIntFromBundle (env, "lockScreenAppearance", bundle);
             n.groupId      = getStringFromBundle (env, "groupId", bundle);
             n.groupSortKey = getStringFromBundle (env, "groupSortKey", bundle);
             n.groupSummary = getBoolFromBundle   (env, "groupSummary", bundle);
             n.accentColour = Colour ((uint32) getIntFromBundle (env, "accentColour", bundle));
             n.ledColour    = Colour ((uint32) getIntFromBundle (env, "ledColour", bundle));
 
-            PushNotifications::Notification::LedBlinkPattern ledBlinkPattern;
+            Notification::LedBlinkPattern ledBlinkPattern;
             ledBlinkPattern.msToBeOn  = getIntFromBundle (env, "ledBlinkPatternMsToBeOn", bundle);
             ledBlinkPattern.msToBeOff = getIntFromBundle (env, "ledBlinkPatternMsToBeOff", bundle);
             n.ledBlinkPattern = ledBlinkPattern;
@@ -1127,9 +1127,9 @@ struct PushNotifications::Pimpl
             n.localOnly           = getBoolFromBundle (env, "localOnly", bundle);
             n.ongoing             = getBoolFromBundle (env, "ongoing", bundle);
             n.alertOnlyOnce       = getBoolFromBundle (env, "alertOnlyOnce", bundle);
-            n.timestampVisibility = (PushNotifications::Notification::TimestampVisibility) getIntFromBundle (env, "timestampVisibility", bundle);
-            n.badgeIconType       = (PushNotifications::Notification::BadgeIconType) getIntFromBundle (env, "badgeIconType", bundle);
-            n.groupAlertBehaviour = (PushNotifications::Notification::GroupAlertBehaviour) getIntFromBundle (env, "groupAlertBehaviour", bundle);
+            n.timestampVisibility = (Notification::TimestampVisibility) getIntFromBundle (env, "timestampVisibility", bundle);
+            n.badgeIconType       = (Notification::BadgeIconType) getIntFromBundle (env, "badgeIconType", bundle);
+            n.groupAlertBehaviour = (Notification::GroupAlertBehaviour) getIntFromBundle (env, "groupAlertBehaviour", bundle);
             n.timeoutAfterMs      = getLongFromBundle (env, "timeoutAfterMs", bundle);
         }
 
@@ -1216,7 +1216,7 @@ struct PushNotifications::Pimpl
         return {};
     }
 
-    static PushNotifications::Notification javaNotificationToJuceNotification (const LocalRef<jobject>& notification)
+    static Notification javaNotificationToJuceNotification (const LocalRef<jobject>& notification)
     {
         auto* env = getEnv();
 
@@ -1230,10 +1230,10 @@ struct PushNotifications::Pimpl
         return remoteNotificationBundleToJuceNotification (extras);
     }
 
-    static PushNotifications::Notification remoteNotificationBundleToJuceNotification (const LocalRef<jobject>& bundle)
+    static Notification remoteNotificationBundleToJuceNotification (const LocalRef<jobject>& bundle)
     {
         // This will probably work only for remote notifications that get delivered to system tray
-        PushNotifications::Notification n;
+        Notification n;
         n.properties = bundleToVar (bundle);
 
         return n;
@@ -1282,7 +1282,7 @@ struct PushNotifications::Pimpl
     }
 
   #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
-    static PushNotifications::Notification firebaseRemoteNotificationToJuceNotification (jobject remoteNotification)
+    static Notification firebaseRemoteNotificationToJuceNotification (jobject remoteNotification)
     {
         auto* env = getEnv();
 
@@ -1325,7 +1325,7 @@ struct PushNotifications::Pimpl
         propertiesDynamicObject->setProperty ("ttl", ttl);
         propertiesDynamicObject->setProperty ("data", dataVar);
 
-        PushNotifications::Notification n;
+        Notification n;
 
         if (notification != 0)
         {
