@@ -638,6 +638,14 @@ public:
         return erase ({ i, ranges.get (ranges.size() - 1).getEnd() });
     }
 
+    Ranges::Operations eraseUpTo (int64 i)
+    {
+        if (ranges.isEmpty())
+            return {};
+
+        return erase ({ ranges.get (0).getStart(), i });
+    }
+
     /** Create a RangedValues object from non-overlapping ranges. */
     template<MergeEqualItems mergeEquals, typename Iterable>
     auto setForEach (Iterable begin, Iterable end)
