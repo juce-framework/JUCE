@@ -276,7 +276,7 @@ bool PushNotifications::Notification::isValid() const noexcept
 //==============================================================================
 struct PushNotifications::Pimpl
 {
-    Pimpl (PushNotifications& p)
+    explicit Pimpl (PushNotifications& p)
         : owner (p)
     {}
 
@@ -303,16 +303,18 @@ struct PushNotifications::Pimpl
 
         auto* env = getEnv();
 
-        auto notificationManager = getNotificationManager();
-
-        if (notificationManager.get() != nullptr)
+        if (auto notificationManager = getNotificationManager())
         {
-            auto notification = juceNotificationToJavaNotification (n);
+            if (auto notification = juceNotificationToJavaNotification (n))
+            {
+                auto tag = javaString (n.identifier);
+                const int id = 0;
 
-            auto tag = javaString (n.identifier);
-            const int id = 0;
-
-            env->CallVoidMethod (notificationManager.get(), NotificationManagerBase.notify, tag.get(), id, notification.get());
+                env->CallVoidMethod (notificationManager.get(),
+                                     NotificationManagerBase.notify,
+                                     tag.get(),
+                                     id, notification.get());
+            }
         }
     }
 
@@ -607,11 +609,12 @@ struct PushNotifications::Pimpl
 
         auto notificationBuilder = createNotificationBuilder (n);
 
-        setupRequiredFields (n, notificationBuilder);
-        setupOptionalFields (n, notificationBuilder);
+        notificationBuilder = setupRequiredFields (n, notificationBuilder);
+        notificationBuilder = setupOptionalFields (n, notificationBuilder);
+        notificationBuilder = setupActions (n, notificationBuilder);
 
-        if (n.actions.size() > 0)
-            setupActions (n, notificationBuilder);
+        if (notificationBuilder == nullptr)
+            return notificationBuilder;
 
         return LocalRef<jobject> (env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.build));
     }
@@ -648,8 +651,11 @@ struct PushNotifications::Pimpl
         return LocalRef<jobject> (env->NewObject (builderClass, builderConstructor, context.get()));
     }
 
-    static void setupRequiredFields (const Notification& n, LocalRef<jobject>& notificationBuilder)
+    static LocalRef<jobject> setupRequiredFields (const Notification& n, LocalRef<jobject> notificationBuilder)
     {
+        if (notificationBuilder == nullptr)
+            return notificationBuilder;
+
         auto* env = getEnv();
         LocalRef<jobject> context (getMainActivity());
 
@@ -676,8 +682,16 @@ struct PushNotifications::Pimpl
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentIntent, notifyPendingIntent.get());
 
         auto resources = LocalRef<jobject> (env->CallObjectMethod (context.get(), AndroidContext.getResources));
-        const int iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (n.icon).get(),
-                                               javaString ("raw").get(), packageNameString.get());
+        const auto iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (n.icon).get(),
+                                                javaString ("raw").get(), packageNameString.get());
+
+        if (iconId == 0)
+        {
+            // If you hit this, the notification icon could not be located, and the notification
+            // will not be sent.
+            jassertfalse;
+            return {};
+        }
 
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSmallIcon, iconId);
 
@@ -688,12 +702,17 @@ struct PushNotifications::Pimpl
 
             auto publicNotificationBuilder = createNotificationBuilder (n);
 
-            setupRequiredFields (*n.publicVersion, publicNotificationBuilder);
-            setupOptionalFields (*n.publicVersion, publicNotificationBuilder);
+            publicNotificationBuilder = setupRequiredFields (*n.publicVersion, publicNotificationBuilder);
+            publicNotificationBuilder = setupOptionalFields (*n.publicVersion, publicNotificationBuilder);
+
+            if (publicNotificationBuilder == nullptr)
+                return {};
 
             auto publicVersion = LocalRef<jobject> (env->CallObjectMethod (publicNotificationBuilder, NotificationBuilderApi16.build));
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi21.setPublicVersion, publicVersion.get());
         }
+
+        return notificationBuilder;
     }
 
     static LocalRef<jobject> juceNotificationToBundle (const Notification& n)
@@ -753,8 +772,11 @@ struct PushNotifications::Pimpl
         return bundle;
     }
 
-    static void setupOptionalFields (const Notification& n, LocalRef<jobject>& notificationBuilder)
+    static LocalRef<jobject> setupOptionalFields (const Notification n, LocalRef<jobject>& notificationBuilder)
     {
+        if (notificationBuilder == nullptr)
+            return notificationBuilder;
+
         auto* env = getEnv();
 
         if (n.subtitle.isNotEmpty())
@@ -871,12 +893,15 @@ struct PushNotifications::Pimpl
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setTimeoutAfter, (jlong) n.timeoutAfterMs);
         }
 
-        setupNotificationDeletedCallback (n, notificationBuilder);
+        return setupNotificationDeletedCallback (n, notificationBuilder);
     }
 
-    static void setupNotificationDeletedCallback (const Notification& n,
-                                                  LocalRef<jobject>& notificationBuilder)
+    static LocalRef<jobject> setupNotificationDeletedCallback (const Notification& n,
+                                                               LocalRef<jobject> notificationBuilder)
     {
+        if (notificationBuilder == nullptr)
+            return notificationBuilder;
+
         auto* env = getEnv();
         LocalRef<jobject> context (getMainActivity());
 
@@ -898,16 +923,19 @@ struct PushNotifications::Pimpl
                                                                                    0));
 
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setDeleteIntent, deletePendingIntent.get());
+
+        return notificationBuilder;
     }
 
-    static void setupActions (const Notification& n, LocalRef<jobject>& notificationBuilder)
+    static LocalRef<jobject> setupActions (const Notification& n, LocalRef<jobject> notificationBuilder)
     {
+        if (notificationBuilder == nullptr || n.actions.isEmpty())
+            return notificationBuilder;
+
         auto* env = getEnv();
         LocalRef<jobject> context (getMainActivity());
 
-        int actionIndex = 0;
-
-        for (const auto& action : n.actions)
+        for (const auto [actionIndex, action] : enumerate (n.actions))
         {
             auto activityClass = LocalRef<jobject> (env->CallObjectMethod (context.get(), JavaObject.getClass));
             auto notifyIntent  = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), activityClass.get()));
@@ -937,6 +965,14 @@ struct PushNotifications::Pimpl
             if (iconId == 0)
                 iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (n.icon).get(),
                                              javaString ("raw").get(), packageNameString.get());
+
+            if (iconId == 0)
+            {
+                // If this is hit, the notification icon could not be located, so the notification
+                // cannot be displayed.
+                jassertfalse;
+                return {};
+            }
 
             auto actionBuilder = LocalRef<jobject> (env->NewObject (NotificationActionBuilder,
                                                                     NotificationActionBuilder.constructor,
@@ -982,9 +1018,9 @@ struct PushNotifications::Pimpl
 
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi20.addAction,
                                    env->CallObjectMethod (actionBuilder, NotificationActionBuilder.build));
-
-            ++actionIndex;
         }
+
+        return notificationBuilder;
     }
 
     static LocalRef<jobject> juceUrlToAndroidUri (const URL& url)
