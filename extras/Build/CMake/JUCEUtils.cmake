@@ -1051,10 +1051,6 @@ function(_juce_add_vst3_manifest_helper_target)
         target_compile_options(juce_vst3_helper PRIVATE -fobjc-arc)
     endif()
 
-    if(MSYS OR MINGW)
-        target_link_options(juce_vst3_helper PRIVATE -municode)
-    endif()
-
     set_target_properties(juce_vst3_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
@@ -1081,11 +1077,6 @@ function(juce_enable_vst3_manifest_step shared_code_target)
         message(FATAL_ERROR "VST3 manifest generation would run after plugin copy step, so it has been disabled. "
             "If you're manually calling juce_enable_vst3_manifest_step, then you probably need to call "
             "juce_enable_copy_plugin_step too.")
-    endif()
-
-    if((MSYS OR MINGW) AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
-        message(WARNING "VST3 manifest generation is disabled for ${shared_code_target} because the compiler is not supported.")
-        return()
     endif()
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT JUCE_WINDOWS_HELPERS_CAN_RUN)
