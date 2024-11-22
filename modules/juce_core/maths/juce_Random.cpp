@@ -46,26 +46,29 @@ Random::Random()  : seed (1)
 
 void Random::setSeed (const int64 newSeed) noexcept
 {
-    if (this == &getSystemRandom())
-    {
-        // Resetting the system Random risks messing up
-        // JUCE's internal state. If you need a predictable
-        // stream of random numbers you should use a local
-        // Random object.
-        jassertfalse;
-        return;
-    }
+    // Resetting the system Random risks messing up JUCE's internal state.
+    // If you need a predictable stream of random numbers you should use a
+    // local Random object.
+    jassert (! isSystemRandom);
 
     seed = newSeed;
 }
 
 void Random::combineSeed (const int64 seedValue) noexcept
 {
+    // Resetting the system Random risks messing up JUCE's internal state.
+    // Consider using a local Random object instead.
+    jassert (! isSystemRandom);
+
     seed ^= nextInt64() ^ seedValue;
 }
 
 void Random::setSeedRandomly()
 {
+    // Resetting the system Random risks messing up JUCE's internal state.
+    // Consider using a local Random object instead.
+    jassert (! isSystemRandom);
+
     static std::atomic<int64> globalSeed { 0 };
 
     combineSeed (globalSeed ^ (int64) (pointer_sized_int) this);
@@ -78,13 +81,28 @@ void Random::setSeedRandomly()
 
 Random& Random::getSystemRandom() noexcept
 {
-    static Random sysRand;
+    thread_local Random sysRand = std::invoke ([]
+    {
+        Random r;
+       #if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
+        r.isSystemRandom = true;
+       #endif
+        return r;
+    });
+
     return sysRand;
 }
 
 //==============================================================================
 int Random::nextInt() noexcept
 {
+    // If you encounter this assertion you've likely stored a reference to the
+    // system random object and are accessing it from a thread other than the
+    // one it was first created on. This may lead to race conditions on the
+    // random object. To avoid this assertion call Random::getSystemRandom()
+    // directly instead of storing a reference.
+    jassert (! isSystemRandom || this == &getSystemRandom());
+
     seed = (int64) (((((uint64) seed) * 0x5deece66dLL) + 11) & 0xffffffffffffLL);
 
     return (int) (seed >> 16);
