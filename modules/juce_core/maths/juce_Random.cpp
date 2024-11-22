@@ -204,22 +204,92 @@ public:
     void runTest() override
     {
         beginTest ("Random");
-
-        Random r = getRandom();
-
-        for (int i = 2000; --i >= 0;)
         {
-            expect (r.nextDouble() >= 0.0 && r.nextDouble() < 1.0);
-            expect (r.nextFloat() >= 0.0f && r.nextFloat() < 1.0f);
-            expect (r.nextInt (5) >= 0 && r.nextInt (5) < 5);
-            expect (r.nextInt (1) == 0);
+            Random r = getRandom();
 
-            int n = r.nextInt (50) + 1;
-            expect (r.nextInt (n) >= 0 && r.nextInt (n) < n);
+            for (int i = 2000; --i >= 0;)
+            {
+                expect (r.nextDouble() >= 0.0 && r.nextDouble() < 1.0);
+                expect (r.nextFloat() >= 0.0f && r.nextFloat() < 1.0f);
+                expect (r.nextInt (5) >= 0 && r.nextInt (5) < 5);
+                expect (r.nextInt (1) == 0);
 
-            n = r.nextInt (0x7ffffffe) + 1;
-            expect (r.nextInt (n) >= 0 && r.nextInt (n) < n);
+                int n = r.nextInt (50) + 1;
+                expect (r.nextInt (n) >= 0 && r.nextInt (n) < n);
+
+                n = r.nextInt (0x7ffffffe) + 1;
+                expect (r.nextInt (n) >= 0 && r.nextInt (n) < n);
+            }
         }
+
+        beginTest ("System random stress test");
+        {
+            // Run this with thread-sanitizer to detect race conditions
+            runOnMultipleThreadsConcurrently ([] { Random::getSystemRandom().nextInt(); });
+        }
+    }
+
+private:
+    static void runOnMultipleThreadsConcurrently (std::function<void()> functionToInvoke,
+                                                  int numberOfInvocationsPerThread = 10'000,
+                                                  int numberOfThreads = 100)
+    {
+        class FastWaitableEvent
+        {
+        public:
+            void notify() { notified = true; }
+            void wait() const { while (! notified){} }
+
+        private:
+            std::atomic<bool> notified = false;
+        };
+
+        class InvokerThread final : private Thread
+        {
+        public:
+            InvokerThread (std::function<void()> fn, FastWaitableEvent& notificationEvent, int numInvocationsToTrigger)
+                : Thread ("InvokerThread"),
+                  invokable (fn),
+                  notified (&notificationEvent),
+                  numInvocations (numInvocationsToTrigger)
+            {
+                startThread();
+            }
+
+            ~InvokerThread() { stopThread (-1); }
+
+            void waitUntilReady() const { ready.wait(); }
+
+        private:
+            void run() final
+            {
+                ready.notify();
+                notified->wait();
+
+                for (int i = numInvocations; --i >= 0;)
+                    invokable();
+            }
+
+            std::function<void()> invokable;
+            FastWaitableEvent* notified;
+            FastWaitableEvent ready;
+            int numInvocations;
+        };
+
+        std::vector<std::unique_ptr<InvokerThread>> threads;
+        threads.reserve ((size_t) numberOfThreads);
+        FastWaitableEvent start;
+
+        for (int i = numberOfThreads; --i >= 0;)
+            threads.push_back (std::make_unique<InvokerThread> (functionToInvoke, start, numberOfInvocationsPerThread));
+
+        for (auto& thread : threads)
+            thread->waitUntilReady();
+
+        // just to increase the odds that all the threads are now at the same point
+        // ready to be notified
+        Thread::sleep (1);
+        start.notify();
     }
 };
 
