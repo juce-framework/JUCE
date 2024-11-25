@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT name="DemoRunner" projectType="guiapp" defines="JUCE_DEMO_RUNNER=1&#10;JUCE_UNIT_TESTS=1"
+<JUCERPROJECT name="DemoRunner" projectType="guiapp" defines="JUCE_DEMO_RUNNER=1&#10;JUCE_UNIT_TESTS=1&#10;JUCE_PUSH_NOTIFICATIONS=1"
               bundleIdentifier="com.rmsl.jucedemorunner" version="8.0.4" companyName="Raw Material Software Limited"
               companyCopyright="Copyright (c) - Raw Material Software Limited"
               companyWebsite="https://www.juce.com/" companyEmail="info@juce.com"
@@ -101,8 +101,8 @@
                    androidBluetoothScanNeeded="1" androidBluetoothAdvertiseNeeded="1"
                    androidBluetoothConnectNeeded="1">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" recommendedWarnings="LLVM"/>
-        <CONFIGURATION isDebug="0" name="Release" recommendedWarnings="LLVM"/>
+        <CONFIGURATION isDebug="1" name="Debug" recommendedWarnings="LLVM" androidAdditionalRawValueResources="Source/accessibilitynotificationicon.png"/>
+        <CONFIGURATION isDebug="0" name="Release" recommendedWarnings="LLVM" androidAdditionalRawValueResources="Source/accessibilitynotificationicon.png"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
