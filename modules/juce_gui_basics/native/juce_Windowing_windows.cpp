@@ -1530,7 +1530,7 @@ public:
         return BorderSize<int> { 0, 0, 0, 0 };
     }
 
-    BorderSize<int> findPhysicalBorderSize() const
+    std::optional<BorderSize<int>> findPhysicalBorderSize() const
     {
         if (const auto custom = getCustomBorderSize())
             return *custom;
@@ -1543,10 +1543,15 @@ public:
         if (! GetWindowInfo (hwnd, &info))
             return {};
 
-        return { info.rcClient.top - info.rcWindow.top,
-                 info.rcClient.left - info.rcWindow.left,
-                 info.rcWindow.bottom - info.rcClient.bottom,
-                 info.rcWindow.right - info.rcClient.right };
+        // Sometimes GetWindowInfo returns bogus information when called in the middle of restoring
+        // the window
+        if (info.rcWindow.left <= -32000 && info.rcWindow.top <= -32000)
+            return {};
+
+        return BorderSize<int> { info.rcClient.top - info.rcWindow.top,
+                                 info.rcClient.left - info.rcWindow.left,
+                                 info.rcWindow.bottom - info.rcClient.bottom,
+                                 info.rcWindow.right - info.rcClient.right };
     }
 
     void setBounds (const Rectangle<int>& bounds, bool isNowFullScreen) override
@@ -1563,7 +1568,7 @@ public:
 
         const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
 
-        const auto borderSize = findPhysicalBorderSize();
+        const auto borderSize = findPhysicalBorderSize().value_or (BorderSize<int>{});
         auto newBounds = borderSize.addedTo ([&]
         {
             ScopedThreadDPIAwarenessSetter setter { hwnd };
@@ -1630,7 +1635,7 @@ public:
                 // This means that we may end up clipping off up to one logical pixel under the physical
                 // window border, but this is preferable to displaying an uninitialised/unpainted
                 // region of the client area.
-                const auto physicalBorder = findPhysicalBorderSize();
+                const auto physicalBorder = findPhysicalBorderSize().value_or (BorderSize<int>{});
 
                 const auto physicalBounds = D2DUtilities::toRectangle (getWindowScreenRect (hwnd));
                 const auto physicalClient = physicalBorder.subtractedFrom (physicalBounds);
@@ -1781,7 +1786,7 @@ public:
 
     BorderSize<int> getFrameSize() const override
     {
-        return findPhysicalBorderSize().multipliedBy (1.0 / scaleFactor);
+        return findPhysicalBorderSize().value_or (BorderSize<int>{}).multipliedBy (1.0 / scaleFactor);
     }
 
     bool setAlwaysOnTop (bool alwaysOnTop) override
@@ -3363,7 +3368,11 @@ private:
                                                                       movingLeft,
                                                                       movingBottom,
                                                                       movingRight);
-            r = D2DUtilities::toRECT (modifiedPhysicalBounds);
+
+            if (! modifiedPhysicalBounds.has_value())
+                return TRUE;
+
+            r = D2DUtilities::toRECT (*modifiedPhysicalBounds);
         }
 
         return TRUE;
@@ -3378,12 +3387,14 @@ private:
                  && ! Component::isMouseButtonDownAnywhere())
             {
                 const auto requestedPhysicalBounds = D2DUtilities::toRectangle ({ wp.x, wp.y, wp.x + wp.cx, wp.y + wp.cy });
-                const auto modifiedPhysicalBounds = getConstrainedBounds (requestedPhysicalBounds, false, false, false, false);
 
-                wp.x  = modifiedPhysicalBounds.getX();
-                wp.y  = modifiedPhysicalBounds.getY();
-                wp.cx = modifiedPhysicalBounds.getWidth();
-                wp.cy = modifiedPhysicalBounds.getHeight();
+                if (const auto modifiedPhysicalBounds = getConstrainedBounds (requestedPhysicalBounds, false, false, false, false))
+                {
+                    wp.x  = modifiedPhysicalBounds->getX();
+                    wp.y  = modifiedPhysicalBounds->getY();
+                    wp.cx = modifiedPhysicalBounds->getWidth();
+                    wp.cy = modifiedPhysicalBounds->getHeight();
+                }
             }
         }
 
@@ -3395,9 +3406,17 @@ private:
         return 0;
     }
 
-    Rectangle<int> getConstrainedBounds (Rectangle<int> proposed, bool top, bool left, bool bottom, bool right) const
+    std::optional<Rectangle<int>> getConstrainedBounds (Rectangle<int> proposed,
+                                                        bool top,
+                                                        bool left,
+                                                        bool bottom,
+                                                        bool right) const
     {
         const auto physicalBorder = findPhysicalBorderSize();
+
+        if (! physicalBorder.has_value())
+            return {};
+
         const auto logicalBorder = getFrameSize();
 
         // The constrainer expects to operate in logical coordinate space.
@@ -3409,7 +3428,7 @@ private:
         // After the constrainer returns, we substitute in the other direction, replacing logical
         // borders with physical.
         const auto requestedPhysicalBounds = proposed;
-        const auto requestedPhysicalClient = physicalBorder.subtractedFrom (requestedPhysicalBounds);
+        const auto requestedPhysicalClient = physicalBorder->subtractedFrom (requestedPhysicalBounds);
         const auto requestedLogicalClient = detail::ScalingHelpers::unscaledScreenPosToScaled (
                 component,
                 convertPhysicalScreenRectangleToLogical (requestedPhysicalClient, hwnd));
@@ -3455,7 +3474,7 @@ private:
             return modified;
         }();
 
-        return physicalBorder.addedTo (withSnappedPosition);
+        return physicalBorder->addedTo (withSnappedPosition);
     }
 
     enum class ForceRefreshDispatcher
