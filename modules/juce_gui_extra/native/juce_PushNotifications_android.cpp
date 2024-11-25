@@ -282,6 +282,9 @@ struct PushNotifications::Pimpl
 
     bool areNotificationsEnabled() const
     {
+        if (getAndroidSDKVersion() >= 33 && ! RuntimePermissions::isGranted (RuntimePermissions::postNotification))
+            return false;
+
         if (getAndroidSDKVersion() >= 24)
         {
             auto* env = getEnv();
@@ -296,6 +299,28 @@ struct PushNotifications::Pimpl
     }
 
     //==============================================================================
+    void requestPermissionsWithSettings (const Settings&)
+    {
+        RuntimePermissions::request (RuntimePermissions::postNotification, [&] (bool)
+        {
+            const auto notifyListeners = []
+            {
+                if (auto* instance = PushNotifications::getInstance())
+                    instance->listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
+            };
+
+            if (MessageManager::getInstance()->isThisTheMessageThread())
+                notifyListeners();
+            else
+                MessageManager::callAsync (notifyListeners);
+        });
+    }
+
+    void requestSettingsUsed()
+    {
+        owner.listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
+    }
+
     void sendLocalNotification (const Notification& n)
     {
         // All required fields have to be setup!
@@ -651,6 +676,8 @@ struct PushNotifications::Pimpl
         return LocalRef<jobject> (env->NewObject (builderClass, builderConstructor, context.get()));
     }
 
+    static constexpr auto FLAG_IMMUTABLE = 0x04000000;
+
     static LocalRef<jobject> setupRequiredFields (const Notification& n, LocalRef<jobject> notificationBuilder)
     {
         if (notificationBuilder == nullptr)
@@ -675,7 +702,7 @@ struct PushNotifications::Pimpl
                                                                                    context.get(),
                                                                                    1002,
                                                                                    notifyIntent.get(),
-                                                                                   0));
+                                                                                   FLAG_IMMUTABLE));
 
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentTitle,  javaString (n.title).get());
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentText,   javaString (n.body).get());
@@ -920,7 +947,7 @@ struct PushNotifications::Pimpl
                                                                                    context.get(),
                                                                                    1002,
                                                                                    deleteIntent.get(),
-                                                                                   0));
+                                                                                   FLAG_IMMUTABLE));
 
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setDeleteIntent, deletePendingIntent.get());
 
@@ -956,7 +983,7 @@ struct PushNotifications::Pimpl
                                                                                        context.get(),
                                                                                        1002,
                                                                                        notifyIntent.get(),
-                                                                                       0));
+                                                                                       FLAG_IMMUTABLE));
 
             auto resources = LocalRef<jobject> (env->CallObjectMethod (context.get(), AndroidContext.getResources));
             int iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (action.icon).get(),
