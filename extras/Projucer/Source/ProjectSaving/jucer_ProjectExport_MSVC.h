@@ -1791,9 +1791,11 @@ public:
                     return nullptr;
                 }();
 
-                const auto writer = writerTarget->getExpandedConfigTargetPath (config)
+                Builder builder;
+                const auto writer = (writerTarget->getExpandedConfigTargetPath (config)
                                   + "\\"
-                                  + writerTarget->getBinaryNameWithSuffix (config);
+                                  + writerTarget->getBinaryNameWithSuffix (config)).quoted()
+                                  + " \"$(OutDir)$(TargetFileName)\"\r\n";
 
                 const auto copyStep = "xcopy /E /H /I /K /R /Y \"$(OutDir)\" \""
                                     + config.getBinaryPath (Ids::lv2BinaryLocation, arch)
@@ -1801,9 +1803,12 @@ public:
                                     + config.getTargetBinaryNameString()
                                     + ".lv2\"\r\n";
 
-                return writer.quoted()
-                     + " \"$(OutDir)$(TargetFileName)\"\r\n"
-                     + (config.isPluginBinaryCopyStepEnabled() ? copyStep : "");
+                builder.runAndCheck (writer,
+                                     config.isPluginBinaryCopyStepEnabled() ? copyStep : Builder{}.info ("Sucessfully generated LV2 manifest").build(),
+                                     Builder{}.error ("Failed to generate LV2 manifest.")
+                                              .exit (-1));
+
+                return builder.build();
             }
 
             if (type == VST3PlugIn)
@@ -1940,6 +1945,40 @@ public:
 
                 return script.build();
             };
+
+            if (type == LV2PlugIn)
+            {
+                const auto crossCompilationPairs =
+                {
+                    // This catches ARM64 and EC for x64 manifest generation
+                    std::pair { Architecture::arm64, Architecture::win64 },
+                    std::pair { arch, arch }
+                };
+
+                MSVCScriptBuilder builder;
+
+                for (auto [hostArch, targetArch] : crossCompilationPairs)
+                {
+                    const StringArray expr
+                    {
+                        "\"$(PROCESSOR_ARCHITECTURE)\" == " + getVisualStudioArchitectureId (hostArch).quoted(),
+                        "\"$(Platform)\""            " == " + getVisualStudioPlatformId (targetArch).quoted()
+                    };
+
+                    builder.ifAllConditionsTrue (expr, MSVCScriptBuilder{}.jump ("_continue"));
+                }
+
+                builder.error (StringArray
+                               {
+                                   "\"$(Platform)\"",
+                                   "LV2 cross-compilation is not available on",
+                                   "\"$(PROCESSOR_ARCHITECTURE)\" hosts."
+                               }.joinIntoString (" "));
+                builder.exit (-1);
+                builder.labelledSection ("_continue", "");
+
+                return builder.build();
+            }
 
             if (type == AAXPlugIn)
                 return createBundleStructure (getAaxBundleStructure (config, arch));
