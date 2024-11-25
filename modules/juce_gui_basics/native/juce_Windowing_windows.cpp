@@ -2390,6 +2390,7 @@ private:
         const auto hasMax = (styleFlags & windowHasMaximiseButton) != 0;
         const auto appearsOnTaskbar = (styleFlags & windowAppearsOnTaskbar) != 0;
         const auto resizable = (styleFlags & windowIsResizable) != 0;
+        const auto usesDropShadow = windowUsesNativeShadow();
 
         if (parentToAddTo != nullptr)
         {
@@ -2397,13 +2398,14 @@ private:
         }
         else
         {
-            if (titled || windowUsesNativeShadow())
+            if (titled || usesDropShadow)
             {
+                type |= usesDropShadow ? WS_CAPTION : 0;
                 type |= titled ? (WS_OVERLAPPED | WS_CAPTION) : WS_POPUP;
                 type |= hasClose ? (WS_SYSMENU | WS_CAPTION) : 0;
                 type |= hasMin ? (WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
                 type |= hasMax ? (WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
-                type |= resizable || windowUsesNativeShadow() ? WS_THICKFRAME : 0;
+                type |= resizable ? WS_THICKFRAME : 0;
             }
             else
             {
@@ -2420,7 +2422,7 @@ private:
                                L"", type, 0, 0, 0, 0, parentToAddTo, nullptr,
                                (HINSTANCE) Process::getCurrentModuleInstanceHandle(), nullptr);
 
-        if (! titled && windowUsesNativeShadow())
+        if (! titled && usesDropShadow)
         {
             // The choice of margins is very particular.
             // - Using 0 for all values disables the system decoration (shadow etc.) completely.
