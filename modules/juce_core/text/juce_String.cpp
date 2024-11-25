@@ -2375,24 +2375,25 @@ public:
             const String s (createRandomWideCharString (r, stringLength));
 
             using CharType = typename CharPointerType::CharType;
-            CharType buffer[300];
+            constexpr auto bytesPerCodeUnit = sizeof (CharType);
+            constexpr auto maxCodeUnitsPerCodePoint = 4 / bytesPerCodeUnit;
 
-            memset (buffer, 0xff, sizeof (buffer));
-            CharPointerType (buffer).writeAll (s.toUTF32());
-            test.expectEquals (String (CharPointerType (buffer)), s);
+            std::array<CharType, stringLength * maxCodeUnitsPerCodePoint + 1> codeUnits{};
+            const auto codeUnitsSizeInBytes = codeUnits.size() * bytesPerCodeUnit;
 
-            memset (buffer, 0xff, sizeof (buffer));
-            CharPointerType (buffer).writeAll (s.toUTF16());
-            test.expectEquals (String (CharPointerType (buffer)), s);
+            std::memset (codeUnits.data(), 0xff, codeUnitsSizeInBytes);
+            CharPointerType (codeUnits.data()).writeAll (s.toUTF32());
+            test.expectEquals (String (CharPointerType (codeUnits.data())), s);
 
-            memset (buffer, 0xff, sizeof (buffer));
-            CharPointerType (buffer).writeAll (s.toUTF8());
-            test.expectEquals (String (CharPointerType (buffer)), s);
+            std::memset (codeUnits.data(), 0xff, codeUnitsSizeInBytes);
+            CharPointerType (codeUnits.data()).writeAll (s.toUTF16());
+            test.expectEquals (String (CharPointerType (codeUnits.data())), s);
 
-            const auto nullTerminator = std::find (buffer, buffer + std::size (buffer), (CharType) 0);
-            const auto numValidBytes = (int) std::distance (buffer, nullTerminator) * (int) sizeof (CharType);
+            std::memset (codeUnits.data(), 0xff, codeUnitsSizeInBytes);
+            CharPointerType (codeUnits.data()).writeAll (s.toUTF8());
+            test.expectEquals (String (CharPointerType (codeUnits.data())), s);
 
-            test.expect (CharPointerType::isValidString (buffer, numValidBytes));
+            test.expect (CharPointerType::isValidString (codeUnits.data(), codeUnitsSizeInBytes));
         }
     };
 
