@@ -385,6 +385,25 @@ struct Ranges final
         return iter != ranges.end() ? std::make_optional (getIndex (iter)) : std::nullopt;
     }
 
+    /* Returns true if this object covers each element in the provided range. For empty ranges it
+       returns true if the start value is covered.
+    */
+    bool covers (Range<int64> range) const
+    {
+        for (auto curr = find (range.getStart()), prev = curr; curr != cend(); ++curr)
+        {
+            if (prev != curr && prev->getEnd() != curr->getStart())
+                return false;
+
+            if (range.getEnd() <= curr->getEnd())
+                return true;
+
+            prev = curr;
+        }
+
+        return false;
+    }
+
 private:
     size_t getIndex (std::vector<Range<int64>>::const_iterator it) const
     {

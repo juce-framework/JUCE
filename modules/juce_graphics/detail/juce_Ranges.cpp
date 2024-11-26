@@ -406,6 +406,33 @@ public:
             ranges.drop ({ -1000, 1000 });
             expect (ranges.isEmpty());
         }
+
+        beginTest ("Ranges::covers()");
+        {
+            Ranges ranges;
+
+            ranges.set ({ 0, 48 });
+            ranges.set ({ 48, 49 });
+            ranges.set ({ 55, 94 });
+            ranges.set ({ 94, 127 });
+            ranges.set ({ 127, 150 });
+
+            expect (ranges.covers ({ 0, 48 }));
+            expect (ranges.covers ({ 0, 20 }));
+            expect (ranges.covers ({ 10, 30 }));
+            expect (ranges.covers ({ 30, 48 }));
+            expect (ranges.covers ({ 30, 49 }));
+            expect (ranges.covers ({ 55, 150 }));
+            expect (ranges.covers ({ 60, 145 }));
+
+            expect (! ranges.covers ({ -1, 10 }));
+            expect (! ranges.covers ({ 1, 50 }));
+            expect (! ranges.covers ({ 50, 140 }));
+            expect (! ranges.covers ({ 149, 151 }));
+
+            expect (ranges.covers ({ 10, 10 }));
+            expect (! ranges.covers ({ 151, 151 }));
+        }
     }
 };
 
