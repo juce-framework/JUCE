@@ -2032,7 +2032,7 @@ public:
         }
 
         HWNDComponentPeer& peer;
-        ComponentPeer::DragInfo dragInfo;
+        DragInfo dragInfo;
         bool peerIsDeleted = false;
 
     private:
@@ -3740,12 +3740,12 @@ private:
 
     static ModifierKeys getMouseModifiers()
     {
-        HWNDComponentPeer::updateKeyModifiers();
+        updateKeyModifiers();
 
         int mouseMods = 0;
-        if (HWNDComponentPeer::isKeyDown (VK_LBUTTON))  mouseMods |= ModifierKeys::leftButtonModifier;
-        if (HWNDComponentPeer::isKeyDown (VK_RBUTTON))  mouseMods |= ModifierKeys::rightButtonModifier;
-        if (HWNDComponentPeer::isKeyDown (VK_MBUTTON))  mouseMods |= ModifierKeys::middleButtonModifier;
+        if (isKeyDown (VK_LBUTTON))  mouseMods |= ModifierKeys::leftButtonModifier;
+        if (isKeyDown (VK_RBUTTON))  mouseMods |= ModifierKeys::rightButtonModifier;
+        if (isKeyDown (VK_MBUTTON))  mouseMods |= ModifierKeys::middleButtonModifier;
 
         ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
 
@@ -3796,8 +3796,12 @@ private:
                         if (const auto result = DefWindowProc (h, message, wParam, lParam); HTSIZEFIRST <= result && result <= HTSIZELAST)
                             return result;
 
-                    const auto localPoint = getLocalPointFromScreenLParam (lParam).toFloat();
-                    const auto kind = component.findControlAtPoint (localPoint);
+                    const auto physicalPoint = D2DUtilities::toPoint (getPOINTFromLParam (lParam));
+                    const auto logicalPoint = convertPhysicalScreenPointToLogical (physicalPoint, hwnd);
+                    const auto localPoint = globalToLocal (logicalPoint.toFloat());
+                    const auto componentPoint = detail::ScalingHelpers::unscaledScreenPosToScaled (component, localPoint);
+
+                    const auto kind = component.findControlAtPoint (componentPoint);
 
                     using Kind = Component::WindowControlKind;
                     switch (kind)
@@ -4093,7 +4097,7 @@ private:
 
                 if (auto* modal = Component::getCurrentlyModalComponent())
                     if (auto* peer = modal->getPeer())
-                        if ((peer->getStyleFlags() & ComponentPeer::windowIsTemporary) != 0)
+                        if ((peer->getStyleFlags() & windowIsTemporary) != 0)
                             sendInputAttemptWhenModalMessage();
 
                 break;
