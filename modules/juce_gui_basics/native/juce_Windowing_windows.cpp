@@ -2231,7 +2231,7 @@ private:
     uint32 lastPaintTime = 0;
     ULONGLONG lastMagnifySize = 0;
     bool isDragging = false, isMouseOver = false,
-         hasCreatedCaret = false, constrainerIsResizing = false;
+         hasCreatedCaret = false, constrainerIsResizing = false, sizing = false;
     IconConverters::IconPtr currentWindowIcon;
     FileDropTarget* dropTarget = nullptr;
     UWPUIViewSettings uwpViewSettings;
@@ -4010,13 +4010,25 @@ private:
                 break;
 
             //==============================================================================
+            case WM_ENTERSIZEMOVE:
+                sizing = true;
+                break;
+
+            case WM_EXITSIZEMOVE:
+                sizing = false;
+                break;
+
             case WM_SIZING:
+                sizing = true;
                 return handleSizeConstraining (*(RECT*) lParam, wParam);
 
             case WM_MOVING:
                 return handleSizeConstraining (*(RECT*) lParam, 0);
 
             case WM_WINDOWPOSCHANGING:
+                if (hasTitleBar() && sizing)
+                    break;
+
                 return handlePositionChanging (*(WINDOWPOS*) lParam);
 
             case 0x2e0: /* WM_DPICHANGED */  return handleDPIChanging ((int) HIWORD (wParam), *(RECT*) lParam);
