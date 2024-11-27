@@ -2145,7 +2145,11 @@ struct WaveAudioFormatTests final : public UnitTest
         for (int i = numElementsInArray (WavFileHelpers::ListInfoChunk::types); --i >= 0;)
             metadataValues[WavFileHelpers::ListInfoChunk::types[i]] = WavFileHelpers::ListInfoChunk::types[i];
 
-        metadataValues[WavAudioFormat::internationalStandardRecordingCode] = WavAudioFormat::internationalStandardRecordingCode;
+        const String prefixCode { "AA6Q7" }; // two letters followed by three alphanumeric characters
+        const String yearOfReference { "20" }; // two digits, 20 meaning the year 2020
+        const String designationCode { "00047" }; // five digits
+
+        metadataValues[WavAudioFormat::internationalStandardRecordingCode] = prefixCode + yearOfReference + designationCode;;
 
         if (metadataValues.size() > 0)
             metadataValues["MetaDataSource"] = "WAV";
