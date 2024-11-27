@@ -2683,22 +2683,15 @@ private:
         client,
     };
 
-    std::optional<LRESULT> doMouseMove (LPARAM lParam, bool isMouseDownEvent, WindowArea area)
+    std::optional<LRESULT> doMouseMove (const LPARAM lParam, bool isMouseDownEvent, WindowArea area)
     {
-        auto point = getPOINTFromLParam (lParam);
-
-        if (area == WindowArea::client)
-            ClientToScreen (hwnd, &point);
-
-        const auto adjustedLParam = MAKELPARAM (point.x, point.y);
-
         // Check if the mouse has moved since being pressed in the caption area.
         // If it has, then we defer to DefWindowProc to handle the mouse movement.
         // Allowing DefWindowProc to handle WM_NCLBUTTONDOWN directly will pause message
         // processing (and therefore painting) when the mouse is clicked in the caption area,
         // which is why we wait until the mouse is *moved* before asking the system to take over.
         // Letting the system handle the move is important for things like Aero Snap to work.
-        if (captionMouseDown.has_value() && *captionMouseDown != adjustedLParam)
+        if (area == WindowArea::nonclient && captionMouseDown.has_value() && *captionMouseDown != lParam)
         {
             captionMouseDown.reset();
 
@@ -2710,19 +2703,20 @@ private:
             // ModifierKeys::currentModifiers gets left in the wrong state. As a workaround, we
             // manually update the modifier keys after DefWindowProc exits, and update the
             // capture state if necessary.
-            const auto result = DefWindowProc (hwnd, WM_NCLBUTTONDOWN, HTCAPTION, adjustedLParam);
+            const auto result = DefWindowProc (hwnd, WM_NCLBUTTONDOWN, HTCAPTION, lParam);
             getMouseModifiers();
             releaseCaptureIfNecessary();
             return result;
         }
-
-        const auto position = getLocalPointFromScreenLParam (adjustedLParam);
 
         ModifierKeys modsToSend (ModifierKeys::currentModifiers);
 
         // this will be handled by WM_TOUCH
         if (isTouchEvent() || areOtherTouchSourcesActive())
             return {};
+
+        const auto position = area == WindowArea::client ? getPointFromLocalLParam (lParam)
+                                                         : getLocalPointFromScreenLParam (lParam);
 
         if (! isMouseOver)
         {
@@ -2808,7 +2802,7 @@ private:
 
             isDragging = true;
 
-            doMouseEvent (clientLparamToPoint (lParam), MouseInputSource::defaultPressure);
+            doMouseEvent (getPointFromLocalLParam (lParam), MouseInputSource::defaultPressure);
         }
     }
 
@@ -3726,11 +3720,21 @@ private:
         return globalToLocal (convertPhysicalScreenPointToLogical (globalPos, hwnd).toFloat());
     }
 
-    Point<float> clientLparamToPoint (LPARAM lParam)
+    Point<float> getPointFromLocalLParam (LPARAM lParam) noexcept
     {
-        auto point = getPOINTFromLParam (lParam);
-        ClientToScreen (hwnd, &point);
-        return getLocalPointFromScreenLParam (MAKELPARAM (point.x, point.y));
+        const auto p = D2DUtilities::toPoint (getPOINTFromLParam (lParam));
+
+        if (! isPerMonitorDPIAwareWindow (hwnd))
+            return p.toFloat();
+
+        // LPARAM is relative to this window's top-left but may be on a different monitor so we need to calculate the
+        // physical screen position and then convert this to local logical coordinates
+        auto r = getWindowScreenRect (hwnd);
+        const auto windowBorder = findPhysicalBorderSize().value_or (BorderSize<int>{});
+        const auto offset = p
+                          + Point { (int) r.left, (int) r.top }
+                          + Point { windowBorder.getLeft(), windowBorder.getTop() };
+        return globalToLocal (Desktop::getInstance().getDisplays().physicalToLogical (offset).toFloat());
     }
 
     Point<float> getCurrentMousePos() noexcept
@@ -3978,7 +3982,7 @@ private:
             case WM_LBUTTONUP:
             case WM_MBUTTONUP:
             case WM_RBUTTONUP:
-                doMouseUp (clientLparamToPoint (lParam), wParam);
+                doMouseUp (getPointFromLocalLParam (lParam), wParam);
                 return 0;
 
             case WM_POINTERWHEEL:
