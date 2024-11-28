@@ -4586,9 +4586,10 @@ private:
         {
             if (auto* targetComp = dynamic_cast<Component*> (target))
             {
-                auto area = peer.getComponent().getLocalArea (targetComp, target->getCaretRectangle());
+                const auto screenPos = targetComp->localPointToGlobal (target->getCaretRectangle().getBottomLeft());
+                const auto relativePos = peer.globalToLocal (screenPos) * peer.getPlatformScaleFactor();
 
-                CANDIDATEFORM pos = { 0, CFS_CANDIDATEPOS, { area.getX(), area.getBottom() }, { 0, 0, 0, 0 } };
+                CANDIDATEFORM pos { 0, CFS_CANDIDATEPOS, D2DUtilities::toPOINT (relativePos), { 0, 0, 0, 0 } };
                 ImmSetCandidateWindow (hImc, &pos);
             }
         }
