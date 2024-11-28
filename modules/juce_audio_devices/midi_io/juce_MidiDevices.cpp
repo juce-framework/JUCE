@@ -98,6 +98,11 @@ void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
     notify();
 }
 
+bool MidiOutput::hasPendingMessages() const
+{
+    return firstMessage != nullptr;
+}
+
 void MidiOutput::clearAllPendingMessages()
 {
     const ScopedLock sl (lock);
