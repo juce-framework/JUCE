@@ -4328,7 +4328,7 @@ private:
             case WM_IME_SETCONTEXT:
                 imeHandler.handleSetContext (h, wParam == TRUE);
                 lParam &= ~(LPARAM) ISC_SHOWUICOMPOSITIONWINDOW;
-                return ImmIsUIMessage (h, message, wParam, lParam);
+                break;
 
             case WM_IME_STARTCOMPOSITION:  imeHandler.handleStartComposition (*this); return 0;
             case WM_IME_ENDCOMPOSITION:    imeHandler.handleEndComposition (*this, h); return 0;
