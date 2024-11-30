@@ -4298,8 +4298,14 @@ private:
 
             case WM_IME_SETCONTEXT:
                 imeHandler.handleSetContext (h, wParam == TRUE);
+
                 lParam &= ~(LPARAM) ISC_SHOWUICOMPOSITIONWINDOW;
-                return ImmIsUIMessage (h, message, wParam, lParam);
+                // On Windows 11, directly returning from this function
+                // will cause the input method candidate box to not display correctly.
+                // The window's default message handler should be used
+                // to continue processing this message.
+                // Older version of the code is this: return ImmIsUIMessage (h, message, wParam, lParam);
+                break;
 
             case WM_IME_STARTCOMPOSITION:  imeHandler.handleStartComposition (*this); return 0;
             case WM_IME_ENDCOMPOSITION:    imeHandler.handleEndComposition (*this, h); return 0;
