@@ -1107,7 +1107,7 @@ static void postTraitChangeNotification (UITraitCollection* previousTraitCollect
 
 - (BOOL) canPerformAction: (SEL) action withSender: (id) sender
 {
-    if (auto* target = [self getTextInputTarget])
+    if ([self getTextInputTarget] != nullptr)
     {
         if (action == @selector (paste:))
             return [[UIPasteboard generalPasteboard] hasStrings];
@@ -1266,7 +1266,7 @@ static void postTraitChangeNotification (UITraitCollection* previousTraitCollect
 - (UITextRange*) markedTextRange
 {
     if (owner != nullptr && owner->stringBeingComposed.isNotEmpty())
-        if (auto* target = owner->findCurrentTextInputTarget())
+        if (owner->findCurrentTextInputTarget() != nullptr)
             return [JuceUITextRange withRange: owner->getMarkedTextRange()];
 
     return nil;

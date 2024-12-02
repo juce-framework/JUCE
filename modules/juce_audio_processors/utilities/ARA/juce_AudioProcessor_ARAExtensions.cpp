@@ -134,7 +134,7 @@ void AudioProcessorARAExtension::didBindToARA() noexcept
         playbackRenderer->araExtension = this;
 #endif
 
-#if (! JUCE_DISABLE_ASSERTIONS)
+#if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
     // validate proper subclassing of the instance role classes
     if (auto playbackRenderer = getPlaybackRenderer())
         jassert (dynamic_cast<ARAPlaybackRenderer*> (playbackRenderer) != nullptr);

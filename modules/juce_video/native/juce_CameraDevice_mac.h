@@ -542,7 +542,7 @@ private:
 
         startSession();
 
-        if (auto* videoConnection = getVideoConnection())
+        if (getVideoConnection() != nullptr)
             imageOutput->triggerImageCapture (*this);
     }
 

@@ -1633,7 +1633,7 @@ public:
 
         const auto handled = [&]() -> bool
         {
-            if (auto* target = findCurrentTextInputTarget())
+            if (findCurrentTextInputTarget() != nullptr)
                 if (const auto* inputContext = [view inputContext])
                     return [inputContext handleEvent: ev] && ! viewCannotHandleEvent;
 
