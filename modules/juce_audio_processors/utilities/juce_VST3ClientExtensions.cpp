@@ -74,13 +74,39 @@ VST3ClientExtensions::InterfaceId VST3ClientExtensions::convertJucePluginId (uin
         return 0;
     });
 
-    std::array<std::byte, 16> data;
-    std::memcpy (&data[0], &word0, sizeof (word0));
-    std::memcpy (&data[4], &word1, sizeof (word1));
-    std::memcpy (&data[8], &manufacturerCode, sizeof (manufacturerCode));
-    std::memcpy (&data[12], &pluginCode, sizeof (pluginCode));
+    constexpr auto getByteFromLSB = [] (uint32_t word, int byteIndex)
+    {
+        jassert (isPositiveAndNotGreaterThan (byteIndex, 3));
+        return (std::byte) ((word >> (byteIndex * 8)) & 0xff);
+    };
 
-    return data;
+   #if JUCE_WINDOWS
+    constexpr auto isWindows = true;
+   #else
+    constexpr auto isWindows = false;
+   #endif
+
+    return {
+        getByteFromLSB (word0, isWindows ? 0 : 3),
+        getByteFromLSB (word0, isWindows ? 1 : 2),
+        getByteFromLSB (word0, isWindows ? 2 : 1),
+        getByteFromLSB (word0, isWindows ? 3 : 0),
+
+        getByteFromLSB (word1, isWindows ? 2 : 3),
+        getByteFromLSB (word1, isWindows ? 3 : 2),
+        getByteFromLSB (word1, isWindows ? 0 : 1),
+        getByteFromLSB (word1, isWindows ? 1 : 0),
+
+        getByteFromLSB (manufacturerCode, 3),
+        getByteFromLSB (manufacturerCode, 2),
+        getByteFromLSB (manufacturerCode, 1),
+        getByteFromLSB (manufacturerCode, 0),
+
+        getByteFromLSB (pluginCode, 3),
+        getByteFromLSB (pluginCode, 2),
+        getByteFromLSB (pluginCode, 1),
+        getByteFromLSB (pluginCode, 0)
+    };
 }
 
 VST3ClientExtensions::InterfaceId VST3ClientExtensions::convertVST2PluginId (uint32_t pluginCode,
