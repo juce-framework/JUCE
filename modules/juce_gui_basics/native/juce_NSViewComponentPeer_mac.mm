@@ -129,14 +129,16 @@ static constexpr int translateVirtualToAsciiKeyCode (int keyCode) noexcept
 constexpr int extendedKeyModifier = 0x30000;
 
 //==============================================================================
-class JuceCALayerDelegate final : public ObjCClass<NSObject<CALayerDelegate>>
+struct JuceCALayerDelegateCallback
+{
+    virtual ~JuceCALayerDelegateCallback() = default;
+    virtual void displayLayer (CALayer*) = 0;
+};
+
+class API_AVAILABLE (macos (10.12)) JuceCALayerDelegate final : public ObjCClass<NSObject<CALayerDelegate>>
 {
 public:
-    struct Callback
-    {
-        virtual ~Callback() = default;
-        virtual void displayLayer (CALayer*) = 0;
-    };
+    using Callback = JuceCALayerDelegateCallback;
 
     static NSObject<CALayerDelegate>* construct (Callback* owner)
     {
@@ -176,7 +178,7 @@ private:
 
 //==============================================================================
 class NSViewComponentPeer final : public ComponentPeer,
-                                  private JuceCALayerDelegate::Callback
+                                  private JuceCALayerDelegateCallback
 {
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
