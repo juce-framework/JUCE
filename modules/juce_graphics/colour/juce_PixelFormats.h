@@ -556,7 +556,7 @@ public:
 
     //==============================================================================
     /** The indexes of the different components in the byte layout of this type of colour. */
-   #if JUCE_MAC
+   #if JUCE_MAC || JUCE_IOS
     enum { indexR = 0, indexG = 1, indexB = 2 };
    #else
     enum { indexR = 2, indexG = 1, indexB = 0 };
@@ -578,7 +578,7 @@ private:
     }
 
     //==============================================================================
-   #if JUCE_MAC
+   #if JUCE_MAC || JUCE_IOS
     uint8 r, g, b;
    #else
     uint8 b, g, r;
