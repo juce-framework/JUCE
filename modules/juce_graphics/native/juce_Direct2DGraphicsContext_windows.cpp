@@ -340,7 +340,7 @@ public:
 
             const auto d2d1Bitmap = [&]
             {
-                if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (fillType.image.getPixelData()))
+                if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (fillType.image.getPixelData().get()))
                     if (const auto page = direct2DPixelData->getFirstPageForContext (context))
                         if (page->GetPixelFormat().format == DXGI_FORMAT_B8G8R8A8_UNORM)
                             return page;
@@ -1170,7 +1170,7 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
         // Is this a Direct2D image already?
         ComSmartPtr<ID2D1Bitmap> d2d1Bitmap;
 
-        if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (sourceImage.getPixelData()))
+        if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (sourceImage.getPixelData().get()))
             d2d1Bitmap = direct2DPixelData->getFirstPageForContext (deviceContext);
 
         if (! d2d1Bitmap)
@@ -1454,7 +1454,7 @@ void Direct2DGraphicsContext::drawImage (const Image& imageIn, const AffineTrans
 
         const auto imageTransform = currentState->currentTransform.getTransformWith (transform);
 
-        if (auto* subsectionPixelData = dynamic_cast<SubsectionPixelData*> (image.getPixelData()))
+        if (auto* subsectionPixelData = dynamic_cast<SubsectionPixelData*> (image.getPixelData().get()))
         {
             if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (subsectionPixelData->getSourcePixelData().get()))
             {
@@ -1462,7 +1462,7 @@ void Direct2DGraphicsContext::drawImage (const Image& imageIn, const AffineTrans
                 imageClipArea = subsectionPixelData->getSubsection();
             }
         }
-        else if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (image.getPixelData()))
+        else if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (image.getPixelData().get()))
         {
             nativeBitmap  = direct2DPixelData;
             imageClipArea = { direct2DPixelData->width, direct2DPixelData->height };

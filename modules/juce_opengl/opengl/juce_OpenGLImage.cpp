@@ -217,7 +217,7 @@ ImagePixelData::Ptr OpenGLImageType::create (Image::PixelFormat, int width, int 
 
 OpenGLFrameBuffer* OpenGLImageType::getFrameBufferFrom (const Image& image)
 {
-    if (OpenGLFrameBufferImage* const glImage = dynamic_cast<OpenGLFrameBufferImage*> (image.getPixelData()))
+    if (OpenGLFrameBufferImage* const glImage = dynamic_cast<OpenGLFrameBufferImage*> (image.getPixelData().get()))
         return &(glImage->frameBuffer);
 
     return nullptr;

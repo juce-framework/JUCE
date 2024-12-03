@@ -418,7 +418,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    ImagePixelData* getPixelData() const noexcept       { return image.get(); }
+    ReferenceCountedObjectPtr<ImagePixelData> getPixelData() const noexcept       { return image; }
 
     /** @internal */
     explicit Image (ReferenceCountedObjectPtr<ImagePixelData>) noexcept;

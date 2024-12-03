@@ -4977,7 +4977,7 @@ private:
                     peer.handlePaint (*context);
                 }
 
-                auto* image = static_cast<WindowsBitmapImage*> (offscreenImage.getPixelData());
+                auto* image = static_cast<WindowsBitmapImage*> (offscreenImage.getPixelData().get());
 
                 if (perPixelTransparent)
                 {

@@ -103,15 +103,14 @@ public:
     {
         jassert (getReferenceCount() > 0); // (This method can't be used on an unowned pointer, as it will end up self-deleting)
         auto type = createType();
-
-        Image newImage (type->create (pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB));
+        auto result = type->create (pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB);
 
         {
-            Graphics g (newImage);
+            Graphics g { Image { result } };
             g.drawImageAt (Image (*this), 0, 0);
         }
 
-        return *newImage.getPixelData();
+        return result;
     }
 
     std::unique_ptr<ImageType> createType() const override { return sourceImage->createType(); }
@@ -735,7 +734,7 @@ void Image::moveImageSection (int dx, int dy,
 
 void ImageEffects::applyGaussianBlurEffect (float radius, const Image& input, Image& result)
 {
-    auto* image = input.getPixelData();
+    auto image = input.getPixelData();
 
     if (image == nullptr)
     {
@@ -806,7 +805,7 @@ static void blurSingleChannelImage (Image& image, int radius)
 
 void ImageEffects::applySingleChannelBoxBlurEffect (int radius, const Image& input, Image& result)
 {
-    auto* image = input.getPixelData();
+    auto image = input.getPixelData();
 
     if (image == nullptr)
     {

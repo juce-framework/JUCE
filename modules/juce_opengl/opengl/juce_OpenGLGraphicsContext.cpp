@@ -73,7 +73,7 @@ struct CachedImageList final : public ReferenceCountedObject,
     TextureInfo getTextureFor (const Image& image)
     {
         auto pixelData = image.getPixelData();
-        auto* c = findCachedImage (pixelData);
+        auto* c = findCachedImage (pixelData.get());
 
         if (c == nullptr)
         {
@@ -89,7 +89,7 @@ struct CachedImageList final : public ReferenceCountedObject,
                 return t;
             }
 
-            c = images.add (new CachedImage (*this, pixelData));
+            c = images.add (new CachedImage (*this, pixelData.get()));
             totalSize += c->imageSize;
 
             while (totalSize > maxCacheSize && images.size() > 1 && totalSize > 0)

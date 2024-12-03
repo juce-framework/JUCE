@@ -524,7 +524,7 @@ void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap,
 void Direct2DPixelData::applyGaussianBlurEffect (float radius, Image& result)
 {
     // The result must be a separate image!
-    jassert (result.getPixelData() != this);
+    jassert (result.getPixelData().get() != this);
 
     const auto adapter = directX->adapters.getDefaultAdapter();
 
@@ -571,7 +571,7 @@ void Direct2DPixelData::applyGaussianBlurEffect (float radius, Image& result)
 void Direct2DPixelData::applySingleChannelBoxBlurEffect (int radius, Image& result)
 {
     // The result must be a separate image!
-    jassert (result.getPixelData() != this);
+    jassert (result.getPixelData().get() != this);
 
     const auto adapter = directX->adapters.getDefaultAdapter();
 
@@ -778,7 +778,7 @@ public:
 
                     const auto maxPageBounds = [&]
                     {
-                        if (auto* data = dynamic_cast<Direct2DPixelData*> (d2dImage.getPixelData()))
+                        if (auto* data = dynamic_cast<Direct2DPixelData*> (d2dImage.getPixelData().get()))
                             if (auto pages = data->getPagesForContext (contextToUse); ! pages.empty())
                                 return pages.front().getBounds();
 
