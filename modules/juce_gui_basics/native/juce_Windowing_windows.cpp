@@ -2895,14 +2895,8 @@ private:
         // the window with focus, despite what the MSDN docs might say.
         // This is the behaviour we want; if we're receiving a scroll event, we can assume it
         // should be processed by the current peer.
-        const auto currentMousePos = getPOINTFromLParam ((LPARAM) GetMessagePos());
-        auto* peer = getOwnerOfWindow (WindowFromPoint (currentMousePos));
-
-        if (peer == nullptr)
-            return false;
-
-        const auto localPos = peer->globalToLocal (convertPhysicalScreenPointToLogical (D2DUtilities::toPoint (currentMousePos), hwnd).toFloat());
-        peer->handleMouseWheel (getPointerType (wParam), localPos, getMouseEventTime(), wheel);
+        const auto localPos = getLocalPointFromScreenLParam ((LPARAM) GetMessagePos());
+        handleMouseWheel (getPointerType (wParam), localPos, getMouseEventTime(), wheel);
         return true;
     }
 
