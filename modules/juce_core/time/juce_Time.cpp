@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -27,11 +39,7 @@ namespace TimeHelpers
 {
     static std::tm millisToLocal (int64 millis) noexcept
     {
-       #if JUCE_WINDOWS && JUCE_MINGW
-        auto now = (time_t) (millis / 1000);
-        return *localtime (&now);
-
-       #elif JUCE_WINDOWS
+       #if JUCE_WINDOWS
         std::tm result;
         millis /= 1000;
 
@@ -53,11 +61,7 @@ namespace TimeHelpers
 
     static std::tm millisToUTC (int64 millis) noexcept
     {
-       #if JUCE_WINDOWS && JUCE_MINGW
-        auto now = (time_t) (millis / 1000);
-        return *gmtime (&now);
-
-       #elif JUCE_WINDOWS
+       #if JUCE_WINDOWS
         std::tm result;
         millis /= 1000;
 
@@ -219,7 +223,7 @@ Time::Time (int year, int month, int day,
 //==============================================================================
 int64 Time::currentTimeMillis() noexcept
 {
-   #if JUCE_WINDOWS && ! JUCE_MINGW
+   #if JUCE_WINDOWS
     struct _timeb t;
     _ftime_s (&t);
     return ((int64) t.time) * 1000 + t.millitm;
@@ -568,7 +572,8 @@ Time& Time::operator-= (RelativeTime delta) noexcept           { millisSinceEpoc
 Time operator+ (Time time, RelativeTime delta) noexcept        { Time t (time); return t += delta; }
 Time operator- (Time time, RelativeTime delta) noexcept        { Time t (time); return t -= delta; }
 Time operator+ (RelativeTime delta, Time time) noexcept        { Time t (time); return t += delta; }
-const RelativeTime operator- (Time time1, Time time2) noexcept { return RelativeTime::milliseconds (time1.toMilliseconds() - time2.toMilliseconds()); }
+
+RelativeTime operator- (Time time1, Time time2) noexcept { return RelativeTime::milliseconds (time1.toMilliseconds() - time2.toMilliseconds()); }
 
 bool operator== (Time time1, Time time2) noexcept      { return time1.toMilliseconds() == time2.toMilliseconds(); }
 bool operator!= (Time time1, Time time2) noexcept      { return time1.toMilliseconds() != time2.toMilliseconds(); }
@@ -589,14 +594,18 @@ static int getMonthNumberForCompileDate (const String& m)
     return 0;
 }
 
+// Implemented in juce_core_CompilationTime.cpp
+extern const char* juce_compilationDate;
+extern const char* juce_compilationTime;
+
 Time Time::getCompilationDate()
 {
     StringArray dateTokens, timeTokens;
 
-    dateTokens.addTokens (__DATE__, true);
+    dateTokens.addTokens (juce_compilationDate, true);
     dateTokens.removeEmptyStrings (true);
 
-    timeTokens.addTokens (__TIME__, ":", StringRef());
+    timeTokens.addTokens (juce_compilationTime, ":", StringRef());
 
     return Time (dateTokens[2].getIntValue(),
                  getMonthNumberForCompileDate (dateTokens[0]),
@@ -610,7 +619,7 @@ Time Time::getCompilationDate()
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class TimeTests  : public UnitTest
+class TimeTests final : public UnitTest
 {
 public:
     TimeTests()
@@ -668,7 +677,10 @@ public:
 
         expect (Time (1982, 1, 1, 12, 0, 0, 0, true) + RelativeTime::days (365) == Time (1983, 1, 1, 12, 0, 0, 0, true));
         expect (Time (1970, 1, 1, 12, 0, 0, 0, true) + RelativeTime::days (365) == Time (1971, 1, 1, 12, 0, 0, 0, true));
+
+       #if ! JUCE_32BIT
         expect (Time (2038, 1, 1, 12, 0, 0, 0, true) + RelativeTime::days (365) == Time (2039, 1, 1, 12, 0, 0, 0, true));
+       #endif
 
         expect (Time (1982, 1, 1, 12, 0, 0, 0, false) + RelativeTime::days (365) == Time (1983, 1, 1, 12, 0, 0, 0, false));
         expect (Time (1970, 1, 1, 12, 0, 0, 0, false) + RelativeTime::days (365) == Time (1971, 1, 1, 12, 0, 0, 0, false));

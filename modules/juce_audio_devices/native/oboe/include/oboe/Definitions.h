@@ -98,6 +98,8 @@ namespace oboe {
 
         /**
          * Unspecified format. Format will be decided by Oboe.
+         * When calling getHardwareFormat(), this will be returned if
+         * the API is not supported.
          */
         Unspecified = 0, // AAUDIO_FORMAT_UNSPECIFIED,
 
@@ -137,6 +139,19 @@ namespace oboe {
          */
         I32 = 4, // AAUDIO_FORMAT_PCM_I32
 
+        /**
+        * This format is used for compressed audio wrapped in IEC61937 for HDMI
+        * or S/PDIF passthrough.
+        *
+        * Unlike PCM playback, the Android framework is not able to do format
+        * conversion for IEC61937. In that case, when IEC61937 is requested, sampling
+        * rate and channel count or channel mask must be specified. Otherwise, it may
+        * fail when opening the stream. Apps are able to get the correct configuration
+        * for the playback by calling AudioManager#getDevices(int).
+        *
+        * Available since API 34 (U).
+        */
+        IEC61937 = 5, // AAUDIO_FORMAT_IEC61937
     };
 
     /**
@@ -244,11 +259,14 @@ namespace oboe {
 
         /**
          * Use OpenSL ES.
+         * Note that OpenSL ES is deprecated in Android 13, API 30 and above.
          */
         OpenSLES,
 
         /**
          * Try to use AAudio. Fail if unavailable.
+         * AAudio was first supported in Android 8, API 26 and above.
+         * It is only recommended for API 27 and above.
          */
         AAudio
     };
@@ -268,8 +286,17 @@ namespace oboe {
          * This may be implemented using bilinear interpolation.
          */
         Fastest,
+        /**
+         * Low quality conversion with 8 taps.
+         */
         Low,
+        /**
+         * Medium quality conversion with 16 taps.
+         */
         Medium,
+        /**
+         * High quality conversion with 32 taps.
+         */
         High,
         /**
          * Highest quality conversion, which may be expensive in terms of CPU.
@@ -480,6 +507,331 @@ namespace oboe {
        * Use this for stereo audio.
        */
       Stereo = 2,
+    };
+
+    /**
+     * The channel mask of the audio stream. The underlying type is `uint32_t`.
+     * Use of this enum is convenient.
+     *
+     * ChannelMask::Unspecified means this is not specified.
+     * The rest of the enums are channel position masks.
+     * Use the combinations of the channel position masks defined below instead of
+     * using those values directly.
+     *
+     * Channel masks are for input only, output only, or both input and output.
+     * These channel masks are different than those defined in AudioFormat.java.
+     * If an app gets a channel mask from Java API and wants to use it in Oboe,
+     * conversion should be done by the app.
+     */
+    enum class ChannelMask : uint32_t { // aaudio_channel_mask_t
+        Unspecified = kUnspecified,
+        FrontLeft = 1 << 0,
+        FrontRight = 1 << 1,
+        FrontCenter = 1 << 2,
+        LowFrequency = 1 << 3,
+        BackLeft = 1 << 4,
+        BackRight = 1 << 5,
+        FrontLeftOfCenter = 1 << 6,
+        FrontRightOfCenter = 1 << 7,
+        BackCenter = 1 << 8,
+        SideLeft = 1 << 9,
+        SideRight = 1 << 10,
+        TopCenter = 1 << 11,
+        TopFrontLeft = 1 << 12,
+        TopFrontCenter = 1 << 13,
+        TopFrontRight = 1 << 14,
+        TopBackLeft = 1 << 15,
+        TopBackCenter = 1 << 16,
+        TopBackRight = 1 << 17,
+        TopSideLeft = 1 << 18,
+        TopSideRight = 1 << 19,
+        BottomFrontLeft = 1 << 20,
+        BottomFrontCenter = 1 << 21,
+        BottomFrontRight = 1 << 22,
+        LowFrequency2 = 1 << 23,
+        FrontWideLeft = 1 << 24,
+        FrontWideRight = 1 << 25,
+
+        /**
+         * Supported for Input and Output
+         */
+        Mono = FrontLeft,
+
+        /**
+         * Supported for Input and Output
+         */
+        Stereo = FrontLeft |
+                 FrontRight,
+
+        /**
+         * Supported for only Output
+         */
+        CM2Point1 = FrontLeft |
+                    FrontRight |
+                    LowFrequency,
+
+        /**
+         * Supported for only Output
+         */
+        Tri = FrontLeft |
+              FrontRight |
+              FrontCenter,
+
+        /**
+         * Supported for only Output
+         */
+        TriBack = FrontLeft |
+                  FrontRight |
+                  BackCenter,
+
+        /**
+         * Supported for only Output
+         */
+        CM3Point1 = FrontLeft |
+                    FrontRight |
+                    FrontCenter |
+                    LowFrequency,
+
+        /**
+         * Supported for Input and Output
+         */
+        CM2Point0Point2 = FrontLeft |
+                          FrontRight |
+                          TopSideLeft |
+                          TopSideRight,
+
+        /**
+         * Supported for Input and Output
+         */
+        CM2Point1Point2 = CM2Point0Point2 |
+                          LowFrequency,
+
+        /**
+         * Supported for Input and Output
+         */
+        CM3Point0Point2 = FrontLeft |
+                          FrontRight |
+                          FrontCenter |
+                          TopSideLeft |
+                          TopSideRight,
+
+        /**
+         * Supported for Input and Output
+         */
+        CM3Point1Point2 = CM3Point0Point2 |
+                          LowFrequency,
+
+        /**
+         * Supported for only Output
+         */
+        Quad = FrontLeft |
+               FrontRight |
+               BackLeft |
+               BackRight,
+
+        /**
+         * Supported for only Output
+         */
+        QuadSide = FrontLeft |
+                   FrontRight |
+                   SideLeft |
+                   SideRight,
+
+        /**
+         * Supported for only Output
+         */
+        Surround = FrontLeft |
+                   FrontRight |
+                   FrontCenter |
+                   BackCenter,
+
+        /**
+         * Supported for only Output
+         */
+        Penta = Quad |
+                FrontCenter,
+
+        /**
+         * Supported for Input and Output. aka 5Point1Back
+         */
+        CM5Point1 = FrontLeft |
+                    FrontRight |
+                    FrontCenter |
+                    LowFrequency |
+                    BackLeft |
+                    BackRight,
+
+        /**
+         * Supported for only Output
+         */
+        CM5Point1Side = FrontLeft |
+                        FrontRight |
+                        FrontCenter |
+                        LowFrequency |
+                        SideLeft |
+                        SideRight,
+
+        /**
+         * Supported for only Output
+         */
+        CM6Point1 = FrontLeft |
+                    FrontRight |
+                    FrontCenter |
+                    LowFrequency |
+                    BackLeft |
+                    BackRight |
+                    BackCenter,
+
+        /**
+         * Supported for only Output
+         */
+        CM7Point1 = CM5Point1 |
+                    SideLeft |
+                    SideRight,
+
+        /**
+         * Supported for only Output
+         */
+        CM5Point1Point2 = CM5Point1 |
+                          TopSideLeft |
+                          TopSideRight,
+
+        /**
+         * Supported for only Output
+         */
+        CM5Point1Point4 = CM5Point1 |
+                          TopFrontLeft |
+                          TopFrontRight |
+                          TopBackLeft |
+                          TopBackRight,
+
+        /**
+         * Supported for only Output
+         */
+        CM7Point1Point2 = CM7Point1 |
+                          TopSideLeft |
+                          TopSideRight,
+
+        /**
+         * Supported for only Output
+         */
+        CM7Point1Point4 = CM7Point1 |
+                          TopFrontLeft |
+                          TopFrontRight |
+                          TopBackLeft |
+                          TopBackRight,
+
+        /**
+         * Supported for only Output
+         */
+        CM9Point1Point4 = CM7Point1Point4 |
+                          FrontWideLeft |
+                          FrontWideRight,
+
+        /**
+         * Supported for only Output
+         */
+        CM9Point1Point6 = CM9Point1Point4 |
+                          TopSideLeft |
+                          TopSideRight,
+
+        /**
+         * Supported for only Input
+         */
+        FrontBack = FrontCenter |
+                    BackCenter,
+    };
+
+    /**
+     * The spatialization behavior of the audio stream.
+     */
+    enum class SpatializationBehavior : int32_t {
+
+        /**
+         * Constant indicating that the spatialization behavior is not specified.
+         */
+        Unspecified = kUnspecified,
+
+        /**
+         * Constant indicating the audio content associated with these attributes will follow the
+         * default platform behavior with regards to which content will be spatialized or not.
+         */
+        Auto = 1,
+
+        /**
+         * Constant indicating the audio content associated with these attributes should never
+         * be spatialized.
+         */
+        Never = 2,
+    };
+
+    /**
+     * The PrivacySensitiveMode attribute determines whether an input stream can be shared
+     * with another privileged app, for example the Assistant.
+     *
+     * This allows to override the default behavior tied to the audio source (e.g
+     * InputPreset::VoiceCommunication is private by default but InputPreset::Unprocessed is not).
+     */
+    enum class PrivacySensitiveMode : int32_t {
+
+        /**
+         * When not explicitly requested, set privacy sensitive mode according to input preset:
+         * communication and camcorder captures are considered privacy sensitive by default.
+         */
+        Unspecified = kUnspecified,
+
+        /**
+         * Privacy sensitive mode disabled.
+         */
+        Disabled = 1,
+
+        /**
+         * Privacy sensitive mode enabled.
+         */
+        Enabled = 2,
+    };
+
+    /**
+     * Specifies whether audio may or may not be captured by other apps or the system for an
+     * output stream.
+     *
+     * Note that these match the equivalent values in AudioAttributes in the Android Java API.
+     *
+     * Added in API level 29 for AAudio.
+     */
+    enum class AllowedCapturePolicy : int32_t {
+        /**
+         * When not explicitly requested, set privacy sensitive mode according to the Usage.
+         * This should behave similarly to setting AllowedCapturePolicy::All.
+         */
+        Unspecified = kUnspecified,
+        /**
+         * Indicates that the audio may be captured by any app.
+         *
+         * For privacy, the following Usages can not be recorded: VoiceCommunication*,
+         * Notification*, Assistance* and Assistant.
+         *
+         * On Android Q, only Usage::Game and Usage::Media may be captured.
+         *
+         * See ALLOW_CAPTURE_BY_ALL in the AudioAttributes Java API.
+         */
+        All = 1,
+        /**
+         * Indicates that the audio may only be captured by system apps.
+         *
+         * System apps can capture for many purposes like accessibility, user guidance...
+         * but have strong restriction. See ALLOW_CAPTURE_BY_SYSTEM in the AudioAttributes Java API
+         * for what the system apps can do with the capture audio.
+         */
+        System = 2,
+        /**
+         * Indicates that the audio may not be recorded by any app, even if it is a system app.
+         *
+         * It is encouraged to use AllowedCapturePolicy::System instead of this value as system apps
+         * provide significant and useful features for the user (eg. accessibility).
+         * See ALLOW_CAPTURE_BY_NONE in the AudioAttributes Java API
+         */
+        None = 3,
     };
 
     /**

@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2016  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,10 +43,20 @@
 #include "../compat.h"
 #include "include/private/format.h"
 
+
+#if (defined GIT_COMMIT_HASH && defined GIT_COMMIT_DATE)
+# ifdef GIT_COMMIT_TAG
+FLAC_API const char *FLAC__VERSION_STRING = GIT_COMMIT_TAG;
+FLAC_API const char *FLAC__VENDOR_STRING = "reference libFLAC " GIT_COMMIT_TAG " " GIT_COMMIT_DATE;
+# else
+FLAC_API const char *FLAC__VERSION_STRING = "git-" GIT_COMMIT_HASH " " GIT_COMMIT_DATE;
+FLAC_API const char *FLAC__VENDOR_STRING = "reference libFLAC git-" GIT_COMMIT_HASH " " GIT_COMMIT_DATE;
+# endif
+#else
 /* PACKAGE_VERSION should come from configure */
 FLAC_API const char *FLAC__VERSION_STRING = PACKAGE_VERSION;
-
-FLAC_API const char *FLAC__VENDOR_STRING = "reference libFLAC " PACKAGE_VERSION " 20220220";
+FLAC_API const char *FLAC__VENDOR_STRING = "reference libFLAC " PACKAGE_VERSION " 20230623";
+#endif
 
 FLAC_API const FLAC__byte FLAC__STREAM_SYNC_STRING[4] = { 'f','L','a','C' };
 FLAC_API const uint32_t FLAC__STREAM_SYNC = 0x664C6143;
@@ -198,7 +208,7 @@ FLAC_API const char * const FLAC__StreamMetadata_Picture_TypeString[] = {
 
 FLAC_API FLAC__bool FLAC__format_sample_rate_is_valid(uint32_t sample_rate)
 {
-	if(sample_rate == 0 || sample_rate > FLAC__MAX_SAMPLE_RATE) {
+	if(sample_rate > FLAC__MAX_SAMPLE_RATE) {
 		return false;
 	}
 	else
@@ -217,12 +227,10 @@ FLAC_API FLAC__bool FLAC__format_blocksize_is_subset(uint32_t blocksize, uint32_
 
 FLAC_API FLAC__bool FLAC__format_sample_rate_is_subset(uint32_t sample_rate)
 {
-	if(
-		!FLAC__format_sample_rate_is_valid(sample_rate) ||
-		(
-			sample_rate >= (1u << 16) &&
-			!(sample_rate % 1000 == 0 || sample_rate % 10 == 0)
-		)
+	if( // sample rate is not subset if
+		!FLAC__format_sample_rate_is_valid(sample_rate) || // sample rate is invalid or
+		sample_rate >= ((1u << 16) * 10) || // sample rate is larger then or equal to 655360 or
+		(sample_rate >= (1u << 16) && sample_rate % 10 != 0) //sample rate is >= 65536 and not divisible by 10
 	) {
 		return false;
 	}
@@ -238,6 +246,9 @@ FLAC_API FLAC__bool FLAC__format_seektable_is_legal(const FLAC__StreamMetadata_S
 	FLAC__bool got_prev = false;
 
 	FLAC__ASSERT(0 != seek_table);
+
+	if((FLAC__uint64)(seek_table->num_points) * FLAC__STREAM_METADATA_SEEKPOINT_LENGTH >= (1u << FLAC__STREAM_METADATA_LENGTH_LEN))
+		return false;
 
 	for(i = 0; i < seek_table->num_points; i++) {
 		if(got_prev) {
@@ -514,6 +525,7 @@ FLAC_API FLAC__bool FLAC__format_picture_is_legal(const FLAC__StreamMetadata_Pic
 /*
  * These routines are private to libFLAC
  */
+#if 0 /* UNUSED */
 uint32_t FLAC__format_get_max_rice_partition_order(uint32_t blocksize, uint32_t predictor_order)
 {
 	return
@@ -523,6 +535,7 @@ uint32_t FLAC__format_get_max_rice_partition_order(uint32_t blocksize, uint32_t 
 			predictor_order
 		);
 }
+#endif
 
 uint32_t FLAC__format_get_max_rice_partition_order_from_blocksize(uint32_t blocksize)
 {
@@ -569,13 +582,16 @@ void FLAC__format_entropy_coding_method_partitioned_rice_contents_clear(FLAC__En
 	FLAC__format_entropy_coding_method_partitioned_rice_contents_init(object);
 }
 
+#if defined(_MSC_VER)
+// silence three MSVC warnings 'result of 32-bit shift implicitly converted to 64 bits (was 64-bit shift intended?)'
+#pragma warning ( disable : 4334 )
+#endif
+
 FLAC__bool FLAC__format_entropy_coding_method_partitioned_rice_contents_ensure_size(FLAC__EntropyCodingMethod_PartitionedRiceContents *object, uint32_t max_partition_order)
 {
 	FLAC__ASSERT(0 != object);
 
-	FLAC__ASSERT(object->capacity_by_order > 0 || (0 == object->parameters && 0 == object->raw_bits));
-
-	if(object->capacity_by_order < max_partition_order) {
+	if(object->capacity_by_order < max_partition_order || object->parameters == NULL || object->raw_bits == NULL) {
 		if(0 == (object->parameters = (uint32_t*) safe_realloc_(object->parameters, sizeof(uint32_t)*(1 << max_partition_order))))
 			return false;
 		if(0 == (object->raw_bits = (uint32_t*) safe_realloc_(object->raw_bits, sizeof(uint32_t)*(1 << max_partition_order))))
@@ -586,3 +602,7 @@ FLAC__bool FLAC__format_entropy_coding_method_partitioned_rice_contents_ensure_s
 
 	return true;
 }
+
+#if defined(_MSC_VER)
+#pragma warning ( default : 4334 )
+#endif

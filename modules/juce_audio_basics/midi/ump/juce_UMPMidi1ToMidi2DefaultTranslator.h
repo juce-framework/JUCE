@@ -1,30 +1,40 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -61,10 +71,10 @@ public:
 
         const HelperValues helperValues
         {
-            (uint8_t) ((0x4 << 0x4) | Utils::getGroup (firstWord)),
-            (uint8_t) ((firstWord >> 0x10) & 0xff),
-            (uint8_t) ((firstWord >> 0x08) & 0x7f),
-            (uint8_t) ((firstWord >> 0x00) & 0x7f),
+            std::byte ((0x4 << 0x4) | Utils::getGroup (firstWord)),
+            std::byte ((firstWord >> 0x10) & 0xff),
+            std::byte ((firstWord >> 0x08) & 0x7f),
+            std::byte ((firstWord >> 0x00) & 0x7f),
         };
 
         switch (Utils::getStatus (firstWord))
@@ -128,32 +138,32 @@ private:
 
     struct HelperValues
     {
-        uint8_t typeAndGroup;
-        uint8_t byte0;
-        uint8_t byte1;
-        uint8_t byte2;
+        std::byte typeAndGroup;
+        std::byte byte0;
+        std::byte byte1;
+        std::byte byte2;
     };
 
-    static PacketX2 processNoteOnOrOff (const HelperValues helpers);
-    static PacketX2 processPolyPressure (const HelperValues helpers);
+    static PacketX2 processNoteOnOrOff (HelperValues helpers);
+    static PacketX2 processPolyPressure (HelperValues helpers);
 
-    bool processControlChange (const HelperValues helpers, PacketX2& packet);
+    bool processControlChange (HelperValues helpers, PacketX2& packet);
 
-    PacketX2 processProgramChange (const HelperValues helpers) const;
+    PacketX2 processProgramChange (HelperValues helpers) const;
 
-    static PacketX2 processChannelPressure (const HelperValues helpers);
-    static PacketX2 processPitchBend (const HelperValues helpers);
+    static PacketX2 processChannelPressure (HelperValues helpers);
+    static PacketX2 processPitchBend (HelperValues helpers);
 
     class PnAccumulator
     {
     public:
-        bool addByte (uint8_t cc, uint8_t byte);
+        bool addByte (uint8_t cc, std::byte byte);
 
-        const std::array<uint8_t, 4>& getBytes() const noexcept { return bytes; }
+        const std::array<std::byte, 4>& getBytes() const noexcept { return bytes; }
         PnKind getKind() const noexcept { return kind; }
 
     private:
-        std::array<uint8_t, 4> bytes;
+        std::array<std::byte, 4> bytes;
         uint8_t index = 0;
         PnKind kind = PnKind::nrpn;
     };
@@ -185,7 +195,6 @@ private:
     std::array<ChannelBanks, 16> groupBanks;
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2016  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -53,13 +53,8 @@ typedef struct FLAC__StreamDecoderProtected {
 } FLAC__StreamDecoderProtected;
 
 /*
- * return the number of input bytes consumed
+ * Return the number of input bytes consumed
  */
 uint32_t FLAC__stream_decoder_get_input_bytes_unconsumed(const FLAC__StreamDecoder *decoder);
-
-/*
- * return client_data from decoder
- */
-FLAC_API void *get_client_data_from_decoder(FLAC__StreamDecoder *decoder);
 
 #endif

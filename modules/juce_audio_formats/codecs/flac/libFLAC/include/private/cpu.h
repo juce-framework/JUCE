@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2016  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -66,7 +66,6 @@
 typedef enum {
 	FLAC__CPUINFO_TYPE_IA32,
 	FLAC__CPUINFO_TYPE_X86_64,
-	FLAC__CPUINFO_TYPE_PPC,
 	FLAC__CPUINFO_TYPE_UNKNOWN
 } FLAC__CPUInfo_Type;
 
@@ -85,18 +84,13 @@ typedef struct {
 	FLAC__bool avx;
 	FLAC__bool avx2;
 	FLAC__bool fma;
+	FLAC__bool bmi2;
 } FLAC__CPUInfo_x86;
-
-typedef struct {
-	FLAC__bool arch_3_00;
-	FLAC__bool arch_2_07;
-} FLAC__CPUInfo_ppc;
 
 typedef struct {
 	FLAC__bool use_asm;
 	FLAC__CPUInfo_Type type;
 	FLAC__CPUInfo_x86 x86;
-	FLAC__CPUInfo_ppc ppc;
 } FLAC__CPUInfo;
 
 void FLAC__cpu_info(FLAC__CPUInfo *info);

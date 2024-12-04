@@ -55,7 +55,7 @@ public:
 	/** Gets float value. */
 	virtual tresult PLUGIN_API getFloat (AttrID id, double& value) = 0;
 
-	/** Sets string value (UTF16) (should be null-terminated!). */
+	/** Sets string value (UTF16) (must be null-terminated!). */
 	virtual tresult PLUGIN_API setString (AttrID id, const TChar* string) = 0;
 
 	/** Gets string value (UTF16). Note that Size is in Byte, not the string Length!
@@ -106,7 +106,7 @@ tresult PLUGIN_API MyPlugin::setState (IBStream* state)
 				UString128 tmp (string);
 				char ascii[128];
 				tmp.toAscii (ascii, 128);
-				if (!strncmp (ascii, StateType::kProject, strlen (StateType::kProject)))
+				if (strncmp (ascii, StateType::kProject, strlen (StateType::kProject)) == 0)
 				{
 					// we are in project loading context...
 				}

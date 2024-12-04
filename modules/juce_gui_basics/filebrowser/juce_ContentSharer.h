@@ -1,43 +1,61 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
-
 namespace juce
 {
 
-/** A singleton class responsible for sharing content between apps and devices.
+//==============================================================================
+/**
+    Functions that allow sharing content between apps and devices.
 
     You can share text, images, files or an arbitrary data block.
 
     @tags{GUI}
 */
-class JUCE_API ContentSharer  : public DeletedAtShutdown
+class JUCE_API ContentSharer
 {
 public:
-    JUCE_DECLARE_SINGLETON (ContentSharer, false)
+    ContentSharer() = delete;
+
+    /** A callback of this type is passed when starting a content sharing
+        session.
+
+        When the session ends, the function will receive a flag indicating
+        whether the session was successful. In the case of failure, the
+        errorText argument may hold a string describing the problem.
+    */
+    using Callback = std::function<void (bool success, const String& errorText)>;
 
     /** Shares the given files. Each URL should be either a full file path
         or it should point to a resource within the application bundle. For
@@ -50,9 +68,16 @@ public:
         Sadly on Android the returned success flag may be wrong as there is no
         standard way the sharing targets report if the sharing operation
         succeeded. Also, the optional error message is always empty on Android.
+
+        @param files        the files to share
+        @param callback     a callback that will be called on the main thread
+                            when the sharing session ends
+        @param parent       the component that should be used to host the
+                            sharing view
     */
-    void shareFiles (const Array<URL>& files,
-                     std::function<void (bool /*success*/, const String& /*error*/)> callback);
+    [[nodiscard]] static ScopedMessageBox shareFilesScoped (const Array<URL>& files,
+                                                            Callback callback,
+                                                            Component* parent = nullptr);
 
     /** Shares the given text.
 
@@ -60,9 +85,16 @@ public:
         Sadly on Android the returned success flag may be wrong as there is no
         standard way the sharing targets report if the sharing operation
         succeeded. Also, the optional error message is always empty on Android.
+
+        @param text         the text to share
+        @param callback     a callback that will be called on the main thread
+                            when the sharing session ends
+        @param parent       the component that should be used to host the
+                            sharing view
     */
-    void shareText (const String& text,
-                    std::function<void (bool /*success*/, const String& /*error*/)> callback);
+    [[nodiscard]] static ScopedMessageBox shareTextScoped (const String& text,
+                                                           Callback callback,
+                                                           Component* parent = nullptr);
 
     /** A convenience function to share an image. This is useful when you have images
         loaded in memory. The images will be written to temporary files first, so if
@@ -84,10 +116,20 @@ public:
         Sadly on Android the returned success flag may be wrong as there is no
         standard way the sharing targets report if the sharing operation
         succeeded. Also, the optional error message is always empty on Android.
+
+        @param images       the images to share
+        @param format       the file format to use when saving the images.
+                            If no format is provided, a sensible default will
+                            be used.
+        @param callback     a callback that will be called on the main thread
+                            when the sharing session ends
+        @param parent       the component that should be used to host the
+                            sharing view
     */
-    void shareImages (const Array<Image>& images,
-                      std::function<void (bool /*success*/, const String& /*error*/)> callback,
-                      ImageFileFormat* imageFileFormatToUse = nullptr);
+    [[nodiscard]] static ScopedMessageBox shareImagesScoped (const Array<Image>& images,
+                                                             std::unique_ptr<ImageFileFormat> format,
+                                                             Callback callback,
+                                                             Component* parent = nullptr);
 
     /** A convenience function to share arbitrary data. The data will be written
         to a temporary file and then that file will be shared. If you have
@@ -97,47 +139,16 @@ public:
         Sadly on Android the returned success flag may be wrong as there is no
         standard way the sharing targets report if the sharing operation
         succeeded. Also, the optional error message is always empty on Android.
+
+        @param mb           the data to share
+        @param callback     a callback that will be called on the main thread
+                            when the sharing session ends
+        @param parent       the component that should be used to host the
+                            sharing view
     */
-    void shareData (const MemoryBlock& mb,
-                    std::function<void (bool /*success*/, const String& /*error*/)> callback);
-
-private:
-    ContentSharer();
-    ~ContentSharer();
-
-    Array<File> temporaryFiles;
-
-    std::function<void (bool, String)> callback;
-
-  #if JUCE_CONTENT_SHARING
-    struct Pimpl
-    {
-        virtual ~Pimpl() {}
-        virtual void shareFiles (const Array<URL>& files) = 0;
-        virtual void shareText (const String& text) = 0;
-    };
-
-    std::unique_ptr<Pimpl> pimpl;
-    Pimpl* createPimpl();
-
-    void startNewShare (std::function<void (bool, const String&)>);
-
-    class ContentSharerNativeImpl;
-    friend class ContentSharerNativeImpl;
-
-    class PrepareImagesThread;
-    friend class PrepareImagesThread;
-    std::unique_ptr<PrepareImagesThread> prepareImagesThread;
-
-    class PrepareDataThread;
-    friend class PrepareDataThread;
-    std::unique_ptr<PrepareDataThread> prepareDataThread;
-
-    void filesToSharePrepared();
-  #endif
-
-    void deleteTemporaryFiles();
-    void sharingFinished (bool, const String&);
+    [[nodiscard]] static ScopedMessageBox shareDataScoped (const MemoryBlock& mb,
+                                                           Callback callback,
+                                                           Component* parent = nullptr);
 };
 
 } // namespace juce

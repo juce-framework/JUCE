@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -213,7 +222,7 @@ private:
 };
 
 //==============================================================================
-class AudioAccessController : public ARA::Host::AudioAccessControllerInterface
+class AudioAccessController final : public ARA::Host::AudioAccessControllerInterface
 {
 public:
     ARA::ARAAudioReaderHostRef createAudioReaderForSource (ARA::ARAAudioSourceHostRef audioSourceHostRef,
@@ -264,7 +273,7 @@ private:
     std::map<AudioReader*, std::unique_ptr<AudioReader>> audioReaders;
 };
 
-class ArchivingController : public ARA::Host::ArchivingControllerInterface
+class ArchivingController final : public ARA::Host::ArchivingControllerInterface
 {
 public:
     using ReaderConverter = ARAHostModel::ConversionFunctions<MemoryBlock*, ARA::ARAArchiveReaderHostRef>;
@@ -316,7 +325,7 @@ public:
     }
 };
 
-class ContentAccessController : public ARA::Host::ContentAccessControllerInterface
+class ContentAccessController final : public ARA::Host::ContentAccessControllerInterface
 {
 public:
     using Converter = ARAHostModel::ConversionFunctions<ARA::ARAContentType, ARA::ARAContentReaderHostRef>;
@@ -433,7 +442,7 @@ public:
     ARA::ARAContentBarSignature barSignature;
 };
 
-class ModelUpdateController : public ARA::Host::ModelUpdateControllerInterface
+class ModelUpdateController final : public ARA::Host::ModelUpdateControllerInterface
 {
 public:
     void notifyAudioSourceAnalysisProgress (ARA::ARAAudioSourceHostRef audioSourceHostRef,
@@ -465,7 +474,7 @@ public:
     }
 };
 
-class PlaybackController : public ARA::Host::PlaybackControllerInterface
+class PlaybackController final : public ARA::Host::PlaybackControllerInterface
 {
 public:
     void requestStartPlayback() noexcept override {}
@@ -484,7 +493,7 @@ public:
     void requestEnableCycle (bool enable) noexcept override { ignoreUnused (enable); }
 };
 
-struct SimplePlayHead  : public juce::AudioPlayHead
+struct SimplePlayHead final : public juce::AudioPlayHead
 {
     Optional<PositionInfo> getPosition() const override
     {
@@ -509,9 +518,9 @@ struct HostPlaybackController
     virtual void clearAudioSource() = 0;
 };
 
-class AudioSourceComponent  : public Component,
-                              public FileDragAndDropTarget,
-                              public ChangeListener
+class AudioSourceComponent final : public Component,
+                                   public FileDragAndDropTarget,
+                                   public ChangeListener
 {
 public:
     explicit AudioSourceComponent (HostPlaybackController& controller, juce::ChangeBroadcaster& bc)
@@ -607,8 +616,8 @@ public:
     }
 
 private:
-    class WaveformComponent  : public Component,
-                               public ChangeListener
+    class WaveformComponent final : public Component,
+                                    public ChangeListener
     {
     public:
         WaveformComponent (AudioSourceComponent& p)
@@ -701,14 +710,14 @@ private:
     TextButton playButton, goToStartButton;
 };
 
-class ARAPluginInstanceWrapper  : public AudioPluginInstance
+class ARAPluginInstanceWrapper final : public AudioPluginInstance
 {
 public:
-    class ARATestHost  : public HostPlaybackController,
-                         public juce::ChangeBroadcaster
+    class ARATestHost final : public HostPlaybackController,
+                              public juce::ChangeBroadcaster
     {
     public:
-        class Editor  : public AudioProcessorEditor
+        class Editor final : public AudioProcessorEditor
         {
         public:
             explicit Editor (ARATestHost& araTestHost)

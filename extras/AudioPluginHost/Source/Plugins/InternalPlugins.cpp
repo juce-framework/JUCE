@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -61,7 +70,7 @@ static std::unique_ptr<InputStream> createAssetInputStream (const char* resource
 #include "../../../../examples/Plugins/SurroundPluginDemo.h"
 
 //==============================================================================
-class InternalPlugin   : public AudioPluginInstance
+class InternalPlugin final : public AudioPluginInstance
 {
 public:
     explicit InternalPlugin (std::unique_ptr<AudioProcessor> innerIn)
@@ -167,7 +176,7 @@ private:
 };
 
 //==============================================================================
-class SineWaveSynth : public AudioProcessor
+class SineWaveSynth final : public AudioProcessor
 {
 public:
     SineWaveSynth()
@@ -224,7 +233,7 @@ public:
 
 private:
     //==============================================================================
-    struct SineWaveSound  : public SynthesiserSound
+    struct SineWaveSound final : public SynthesiserSound
     {
         SineWaveSound() = default;
 
@@ -232,7 +241,7 @@ private:
         bool appliesToChannel (int /*midiChannel*/) override    { return true; }
     };
 
-    struct SineWaveVoice  : public SynthesiserVoice
+    struct SineWaveVoice final : public SynthesiserVoice
     {
         SineWaveVoice() = default;
 
@@ -262,8 +271,8 @@ private:
                 // start a tail-off by setting this flag. The render callback will pick up on
                 // this and do a fade out, calling clearCurrentNote() when it's finished.
 
-                if (tailOff == 0.0) // we only need to begin a tail-off if it's not already doing so - the
-                    // stopNote method could be called more than once.
+                if (approximatelyEqual (tailOff, 0.0)) // we only need to begin a tail-off if it's not already doing so - the
+                                                       // stopNote method could be called more than once.
                     tailOff = 1.0;
             }
             else
@@ -287,7 +296,7 @@ private:
 
         void renderNextBlock (AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override
         {
-            if (angleDelta != 0.0)
+            if (! approximatelyEqual (angleDelta, 0.0))
             {
                 if (tailOff > 0)
                 {
@@ -343,7 +352,7 @@ private:
 };
 
 //==============================================================================
-class ReverbPlugin : public AudioProcessor
+class ReverbPlugin final : public AudioProcessor
 {
 public:
     ReverbPlugin()

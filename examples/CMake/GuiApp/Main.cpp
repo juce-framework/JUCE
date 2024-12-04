@@ -1,7 +1,7 @@
 #include "MainComponent.h"
 
 //==============================================================================
-class GuiAppApplication  : public juce::JUCEApplication
+class GuiAppApplication final : public juce::JUCEApplication
 {
 public:
     //==============================================================================
@@ -51,7 +51,7 @@ public:
         This class implements the desktop window that contains an instance of
         our MainComponent class.
     */
-    class MainWindow    : public juce::DocumentWindow
+    class MainWindow final : public juce::DocumentWindow
     {
     public:
         explicit MainWindow (juce::String name)

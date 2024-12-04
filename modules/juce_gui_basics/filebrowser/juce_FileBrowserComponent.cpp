@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -36,7 +45,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
      previewComp (previewComp_),
      currentPathBox ("path"),
      fileLabel ("f", TRANS ("file:")),
-     thread ("JUCE FileBrowser"),
+     thread (SystemStats::getJUCEVersion() + ": FileBrowser"),
      wasProcessActive (true)
 {
     // You need to specify one or other of the open/save flags..
@@ -323,9 +332,9 @@ void FileBrowserComponent::setFileFilter (const FileFilter* const newFileFilter)
 
 String FileBrowserComponent::getActionVerb() const
 {
-    return isSaveMode() ? ((flags & canSelectDirectories) != 0 ? TRANS("Choose")
-                                                               : TRANS("Save"))
-                        : TRANS("Open");
+    return isSaveMode() ? ((flags & canSelectDirectories) != 0 ? TRANS ("Choose")
+                                                               : TRANS ("Save"))
+                        : TRANS ("Open");
 }
 
 void FileBrowserComponent::setFilenameBoxLabel (const String& name)
@@ -371,7 +380,6 @@ void FileBrowserComponent::lookAndFeelChanged()
     filenameBox.applyColourToAllText (findColour (filenameBoxTextColourId));
 
     resized();
-    repaint();
 }
 
 //==============================================================================
@@ -530,7 +538,7 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
 
     for (int i = 0; i < roots.size(); ++i)
     {
-        const File& drive = roots.getReference(i);
+        const File& drive = roots.getReference (i);
 
         String name (drive.getFullPathName());
         rootPaths.add (name);
@@ -540,13 +548,13 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
             String volume (drive.getVolumeLabel());
 
             if (volume.isEmpty())
-                volume = TRANS("Hard Drive");
+                volume = TRANS ("Hard Drive");
 
             name << " [" << volume << ']';
         }
         else if (drive.isOnCDRomDrive())
         {
-            name << " [" << TRANS("CD/DVD drive") << ']';
+            name << " [" << TRANS ("CD/DVD drive") << ']';
         }
 
         rootNames.add (name);
@@ -556,25 +564,25 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootNames.add ({});
 
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
-    rootNames.add (TRANS("Documents"));
+    rootNames.add (TRANS ("Documents"));
     rootPaths.add (File::getSpecialLocation (File::userMusicDirectory).getFullPathName());
-    rootNames.add (TRANS("Music"));
+    rootNames.add (TRANS ("Music"));
     rootPaths.add (File::getSpecialLocation (File::userPicturesDirectory).getFullPathName());
-    rootNames.add (TRANS("Pictures"));
+    rootNames.add (TRANS ("Pictures"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (TRANS("Desktop"));
+    rootNames.add (TRANS ("Desktop"));
 
    #elif JUCE_MAC
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    rootNames.add (TRANS("Home folder"));
+    rootNames.add (TRANS ("Home folder"));
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
-    rootNames.add (TRANS("Documents"));
+    rootNames.add (TRANS ("Documents"));
     rootPaths.add (File::getSpecialLocation (File::userMusicDirectory).getFullPathName());
-    rootNames.add (TRANS("Music"));
+    rootNames.add (TRANS ("Music"));
     rootPaths.add (File::getSpecialLocation (File::userPicturesDirectory).getFullPathName());
-    rootNames.add (TRANS("Pictures"));
+    rootNames.add (TRANS ("Pictures"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (TRANS("Desktop"));
+    rootNames.add (TRANS ("Desktop"));
 
     rootPaths.add ({});
     rootNames.add ({});
@@ -592,9 +600,9 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootPaths.add ("/");
     rootNames.add ("/");
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    rootNames.add (TRANS("Home folder"));
+    rootNames.add (TRANS ("Home folder"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (TRANS("Desktop"));
+    rootNames.add (TRANS ("Desktop"));
    #endif
 }
 
@@ -605,7 +613,7 @@ void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPa
 
 void FileBrowserComponent::timerCallback()
 {
-    const auto isProcessActive = isForegroundOrEmbeddedProcess (this);
+    const auto isProcessActive = detail::WindowingHelpers::isForegroundOrEmbeddedProcess (this);
 
     if (wasProcessActive != isProcessActive)
     {

@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -26,7 +35,7 @@
 namespace juce
 {
 
-class ValueTree::SharedObject  : public ReferenceCountedObject
+class ValueTree::SharedObject final : public ReferenceCountedObject
 {
 public:
     using Ptr = ReferenceCountedObjectPtr<SharedObject>;
@@ -46,7 +55,7 @@ public:
 
     SharedObject& operator= (const SharedObject&) = delete;
 
-    ~SharedObject()
+    ~SharedObject() override
     {
         jassert (parent == nullptr); // this should never happen unless something isn't obeying the ref-counting!
 
@@ -67,23 +76,21 @@ public:
     template <typename Function>
     void callListeners (ValueTree::Listener* listenerToExclude, Function fn) const
     {
-        auto numListeners = valueTreesWithListeners.size();
+        if (valueTreesWithListeners.size() == 0)
+            return;
 
-        if (numListeners == 1)
+        if (valueTreesWithListeners.size() == 1)
         {
             valueTreesWithListeners.getUnchecked (0)->listeners.callExcluding (listenerToExclude, fn);
+            return;
         }
-        else if (numListeners > 0)
+
+        const auto listenersCopy = valueTreesWithListeners;
+
+        for (auto [i, v] : enumerate (listenersCopy, int{}))
         {
-            auto listenersCopy = valueTreesWithListeners;
-
-            for (int i = 0; i < numListeners; ++i)
-            {
-                auto* v = listenersCopy.getUnchecked (i);
-
-                if (i == 0 || valueTreesWithListeners.contains (v))
-                    v->listeners.callExcluding (listenerToExclude, fn);
-            }
+            if (valueTreesWithListeners[i] == v || valueTreesWithListeners.contains (v))
+                v->listeners.callExcluding (listenerToExclude, fn);
         }
     }
 
@@ -408,7 +415,7 @@ public:
     }
 
     //==============================================================================
-    struct SetPropertyAction  : public UndoableAction
+    struct SetPropertyAction final : public UndoableAction
     {
         SetPropertyAction (Ptr targetObject, const Identifier& propertyName,
                            const var& newVal, const var& oldVal, bool isAdding, bool isDeleting,
@@ -472,7 +479,7 @@ public:
     };
 
     //==============================================================================
-    struct AddOrRemoveChildAction  : public UndoableAction
+    struct AddOrRemoveChildAction final : public UndoableAction
     {
         AddOrRemoveChildAction (Ptr parentObject, int index, SharedObject* newChild)
             : target (std::move (parentObject)),
@@ -524,7 +531,7 @@ public:
     };
 
     //==============================================================================
-    struct MoveChildAction  : public UndoableAction
+    struct MoveChildAction final : public UndoableAction
     {
         MoveChildAction (Ptr parentObject, int fromIndex, int toIndex) noexcept
             : parent (std::move (parentObject)), startIndex (fromIndex), endIndex (toIndex)
@@ -809,8 +816,8 @@ int ValueTree::getReferenceCount() const noexcept
 }
 
 //==============================================================================
-struct ValueTreePropertyValueSource  : public Value::ValueSource,
-                                       private ValueTree::Listener
+struct ValueTreePropertyValueSource final : public Value::ValueSource,
+                                            private ValueTree::Listener
 {
     ValueTreePropertyValueSource (const ValueTree& vt, const Identifier& prop, UndoManager* um, bool sync)
         : tree (vt), property (prop), undoManager (um), updateSynchronously (sync)
@@ -873,7 +880,7 @@ ValueTree::Iterator::Iterator (const ValueTree& v, bool isEnd)
 
 ValueTree::Iterator& ValueTree::Iterator::operator++()
 {
-    internal = static_cast<SharedObject**> (internal) + 1;
+    ++internal;
     return *this;
 }
 
@@ -882,7 +889,7 @@ bool ValueTree::Iterator::operator!= (const Iterator& other) const  { return int
 
 ValueTree ValueTree::Iterator::operator*() const
 {
-    return ValueTree (SharedObject::Ptr (*static_cast<SharedObject**> (internal)));
+    return ValueTree (SharedObject::Ptr (*internal));
 }
 
 ValueTree::Iterator ValueTree::begin() const noexcept   { return Iterator (*this, false); }
@@ -1118,7 +1125,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class ValueTreeTests  : public UnitTest
+class ValueTreeTests final : public UnitTest
 {
 public:
     ValueTreeTests()

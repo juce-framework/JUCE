@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -117,7 +126,7 @@ void SourceCodeDocument::saveAsync (std::function<void (bool)> callback)
 
 void SourceCodeDocument::saveAsAsync (std::function<void (bool)> callback)
 {
-    chooser = std::make_unique<FileChooser> (TRANS("Save As..."), getFile(), "*");
+    chooser = std::make_unique<FileChooser> (TRANS ("Save As..."), getFile(), "*");
     auto flags = FileBrowserComponent::saveMode
                | FileBrowserComponent::canSelectFiles
                | FileBrowserComponent::warnAboutOverwriting;
@@ -266,6 +275,89 @@ void SourceCodeEditor::valueTreeRedirected (ValueTree&)                         
 void SourceCodeEditor::codeDocumentTextInserted (const String&, int)              { checkSaveState(); }
 void SourceCodeEditor::codeDocumentTextDeleted (int, int)                         { checkSaveState(); }
 
+class GenericCodeEditorComponent::FindPanel final : public Component
+{
+public:
+    FindPanel()
+    {
+        editor.setColour (CaretComponent::caretColourId, Colours::black);
+
+        addAndMakeVisible (editor);
+        label.setColour (Label::textColourId, Colours::white);
+        label.attachToComponent (&editor, false);
+
+        addAndMakeVisible (caseButton);
+        caseButton.setColour (ToggleButton::textColourId, Colours::white);
+        caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
+        caseButton.onClick = [this] { setCaseSensitiveSearch (caseButton.getToggleState()); };
+
+        findPrev.setConnectedEdges (Button::ConnectedOnRight);
+        findNext.setConnectedEdges (Button::ConnectedOnLeft);
+        addAndMakeVisible (findPrev);
+        addAndMakeVisible (findNext);
+
+        setWantsKeyboardFocus (false);
+        setFocusContainerType (FocusContainerType::keyboardFocusContainer);
+        findPrev.setWantsKeyboardFocus (false);
+        findNext.setWantsKeyboardFocus (false);
+
+        editor.setText (getSearchString());
+        editor.onTextChange = [this] { changeSearchString(); };
+        editor.onReturnKey  = [] { ProjucerApplication::getCommandManager().invokeDirectly (CommandIDs::findNext, true); };
+        editor.onEscapeKey  = [this]
+        {
+            if (auto* ed = getOwner())
+                ed->hideFindPanel();
+        };
+    }
+
+    void setCommandManager (ApplicationCommandManager* cm)
+    {
+        findPrev.setCommandToTrigger (cm, CommandIDs::findPrevious, true);
+        findNext.setCommandToTrigger (cm, CommandIDs::findNext, true);
+    }
+
+    void paint (Graphics& g) override
+    {
+        Path outline;
+        outline.addRoundedRectangle (1.0f, 1.0f, (float) getWidth() - 2.0f, (float) getHeight() - 2.0f, 8.0f);
+
+        g.setColour (Colours::black.withAlpha (0.6f));
+        g.fillPath (outline);
+        g.setColour (Colours::white.withAlpha (0.8f));
+        g.strokePath (outline, PathStrokeType (1.0f));
+    }
+
+    void resized() override
+    {
+        int y = 30;
+        editor.setBounds (10, y, getWidth() - 20, 24);
+        y += 30;
+        caseButton.setBounds (10, y, getWidth() / 2 - 10, 22);
+        findNext.setBounds (getWidth() - 40, y, 30, 22);
+        findPrev.setBounds (getWidth() - 70, y, 30, 22);
+    }
+
+    void changeSearchString()
+    {
+        setSearchString (editor.getText());
+
+        if (auto* ed = getOwner())
+            ed->findNext (true, false);
+    }
+
+    GenericCodeEditorComponent* getOwner() const
+    {
+        return findParentComponentOfClass <GenericCodeEditorComponent>();
+    }
+
+    TextEditor editor;
+    Label label  { {}, "Find:" };
+    ToggleButton caseButton  { "Case-sensitive" };
+    TextButton findPrev  { "<" },
+               findNext  { ">" };
+};
+
 //==============================================================================
 GenericCodeEditorComponent::GenericCodeEditorComponent (const File& f, CodeDocument& codeDocument,
                                                         CodeTokeniser* tokeniser)
@@ -375,89 +467,6 @@ void GenericCodeEditorComponent::removeListener (GenericCodeEditorComponent::Lis
 }
 
 //==============================================================================
-class GenericCodeEditorComponent::FindPanel  : public Component
-{
-public:
-    FindPanel()
-    {
-        editor.setColour (CaretComponent::caretColourId, Colours::black);
-
-        addAndMakeVisible (editor);
-        label.setColour (Label::textColourId, Colours::white);
-        label.attachToComponent (&editor, false);
-
-        addAndMakeVisible (caseButton);
-        caseButton.setColour (ToggleButton::textColourId, Colours::white);
-        caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
-        caseButton.onClick = [this] { setCaseSensitiveSearch (caseButton.getToggleState()); };
-
-        findPrev.setConnectedEdges (Button::ConnectedOnRight);
-        findNext.setConnectedEdges (Button::ConnectedOnLeft);
-        addAndMakeVisible (findPrev);
-        addAndMakeVisible (findNext);
-
-        setWantsKeyboardFocus (false);
-        setFocusContainerType (FocusContainerType::keyboardFocusContainer);
-        findPrev.setWantsKeyboardFocus (false);
-        findNext.setWantsKeyboardFocus (false);
-
-        editor.setText (getSearchString());
-        editor.onTextChange = [this] { changeSearchString(); };
-        editor.onReturnKey  = [] { ProjucerApplication::getCommandManager().invokeDirectly (CommandIDs::findNext, true); };
-        editor.onEscapeKey  = [this]
-        {
-            if (auto* ed = getOwner())
-                ed->hideFindPanel();
-        };
-    }
-
-    void setCommandManager (ApplicationCommandManager* cm)
-    {
-        findPrev.setCommandToTrigger (cm, CommandIDs::findPrevious, true);
-        findNext.setCommandToTrigger (cm, CommandIDs::findNext, true);
-    }
-
-    void paint (Graphics& g) override
-    {
-        Path outline;
-        outline.addRoundedRectangle (1.0f, 1.0f, (float) getWidth() - 2.0f, (float) getHeight() - 2.0f, 8.0f);
-
-        g.setColour (Colours::black.withAlpha (0.6f));
-        g.fillPath (outline);
-        g.setColour (Colours::white.withAlpha (0.8f));
-        g.strokePath (outline, PathStrokeType (1.0f));
-    }
-
-    void resized() override
-    {
-        int y = 30;
-        editor.setBounds (10, y, getWidth() - 20, 24);
-        y += 30;
-        caseButton.setBounds (10, y, getWidth() / 2 - 10, 22);
-        findNext.setBounds (getWidth() - 40, y, 30, 22);
-        findPrev.setBounds (getWidth() - 70, y, 30, 22);
-    }
-
-    void changeSearchString()
-    {
-        setSearchString (editor.getText());
-
-        if (auto* ed = getOwner())
-            ed->findNext (true, false);
-    }
-
-    GenericCodeEditorComponent* getOwner() const
-    {
-        return findParentComponentOfClass <GenericCodeEditorComponent>();
-    }
-
-    TextEditor editor;
-    Label label  { {}, "Find:" };
-    ToggleButton caseButton  { "Case-sensitive" };
-    TextButton findPrev  { "<" },
-               findNext  { ">" };
-};
-
 void GenericCodeEditorComponent::resized()
 {
     CodeEditorComponent::resized();
@@ -643,7 +652,7 @@ void CppCodeEditorComponent::addPopupMenuItems (PopupMenu& menu, const MouseEven
     GenericCodeEditorComponent::addPopupMenuItems (menu, e);
 
     menu.addSeparator();
-    menu.addItem (insertComponentID, TRANS("Insert code for a new Component class..."));
+    menu.addItem (insertComponentID, TRANS ("Insert code for a new Component class..."));
 }
 
 void CppCodeEditorComponent::performPopupMenuAction (int menuItemID)

@@ -1,39 +1,39 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
 namespace juce
 {
-
-template <typename This>
-auto* getPrimaryDisplayImpl (This& t)
-{
-    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
-
-    const auto iter = std::find_if (t.displays.begin(), t.displays.end(), [] (auto& d) { return d.isMain; });
-    return iter != t.displays.end() ? std::addressof (*iter) : nullptr;
-}
 
 Displays::Displays (Desktop& desktop)
 {
@@ -171,7 +171,10 @@ Point<ValueType> Displays::logicalToPhysical (Point<ValueType> point, const Disp
 
 const Displays::Display* Displays::getPrimaryDisplay() const noexcept
 {
-    return getPrimaryDisplayImpl (*this);
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
+    const auto iter = std::find_if (displays.begin(), displays.end(), [] (auto& d) { return d.isMain; });
+    return iter != displays.end() ? iter : nullptr;
 }
 
 RectangleList<int> Displays::getRectangleList (bool userAreasOnly) const
@@ -266,10 +269,10 @@ static void processDisplay (DisplayNode* currentNode, Array<DisplayNode>& allNod
 
         Rectangle<double> logicalArea (0.0, 0.0, logicalWidth, logicalHeight);
 
-        if      (physicalArea.getRight() == physicalParentArea.getX())     logicalArea.setPosition ({ logicalParentArea.getX() - logicalWidth, physicalArea.getY() / parentScale });  // on left
-        else if (physicalArea.getX() == physicalParentArea.getRight())     logicalArea.setPosition ({ logicalParentArea.getRight(),  physicalArea.getY() / parentScale });            // on right
-        else if (physicalArea.getBottom() == physicalParentArea.getY())    logicalArea.setPosition ({ physicalArea.getX() / parentScale, logicalParentArea.getY() - logicalHeight }); // on top
-        else if (physicalArea.getY() == physicalParentArea.getBottom())    logicalArea.setPosition ({ physicalArea.getX() / parentScale, logicalParentArea.getBottom() });            // on bottom
+        if      (approximatelyEqual (physicalArea.getRight(), physicalParentArea.getX()))     logicalArea.setPosition ({ logicalParentArea.getX() - logicalWidth, physicalArea.getY() / parentScale });  // on left
+        else if (approximatelyEqual (physicalArea.getX(), physicalParentArea.getRight()))     logicalArea.setPosition ({ logicalParentArea.getRight(),  physicalArea.getY() / parentScale });            // on right
+        else if (approximatelyEqual (physicalArea.getBottom(), physicalParentArea.getY()))    logicalArea.setPosition ({ physicalArea.getX() / parentScale, logicalParentArea.getY() - logicalHeight }); // on top
+        else if (approximatelyEqual (physicalArea.getY(), physicalParentArea.getBottom()))    logicalArea.setPosition ({ physicalArea.getX() / parentScale, logicalParentArea.getBottom() });            // on bottom
         else                                                               jassertfalse;
 
         currentNode->logicalArea = logicalArea;
@@ -292,8 +295,8 @@ static void processDisplay (DisplayNode* currentNode, Array<DisplayNode>& allNod
         const auto otherPhysicalArea = node.display->totalArea.toDouble();
 
         // If the displays are touching on any side
-        if (otherPhysicalArea.getX() == physicalArea.getRight()  || otherPhysicalArea.getRight() == physicalArea.getX()
-            || otherPhysicalArea.getY() == physicalArea.getBottom() || otherPhysicalArea.getBottom() == physicalArea.getY())
+        if (approximatelyEqual (otherPhysicalArea.getX(), physicalArea.getRight())  || approximatelyEqual (otherPhysicalArea.getRight(),  physicalArea.getX())
+         || approximatelyEqual (otherPhysicalArea.getY(), physicalArea.getBottom()) || approximatelyEqual (otherPhysicalArea.getBottom(), physicalArea.getY()))
         {
             node.parent = currentNode;
             children.add (&node);

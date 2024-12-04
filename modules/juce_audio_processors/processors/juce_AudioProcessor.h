@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -40,9 +49,11 @@ namespace juce
     plugin, you should implement a global function called createPluginFilter() which
     creates and returns a new instance of your subclass.
 
+    @see AAXClientExtensions, VST2ClientExtensions, VST3ClientExtensions
+
     @tags{Audio}
 */
-class JUCE_API  AudioProcessor
+class JUCE_API  AudioProcessor : private AAXClientExtensions
 {
 protected:
     struct BusesProperties;
@@ -309,29 +320,37 @@ public:
     */
     struct BusesLayout
     {
+    private:
+        template <typename This>
+        static auto& getBuses (This& t, bool isInput) { return isInput ? t.inputBuses : t.outputBuses; }
+
+    public:
         /** An array containing the list of input buses that this processor supports. */
         Array<AudioChannelSet> inputBuses;
 
         /** An array containing the list of output buses that this processor supports. */
         Array<AudioChannelSet> outputBuses;
 
+        auto& getBuses (bool isInput) const { return getBuses (*this, isInput); }
+        auto& getBuses (bool isInput)       { return getBuses (*this, isInput); }
+
         /** Get the number of channels of a particular bus */
         int getNumChannels (bool isInput, int busIndex) const noexcept
         {
-            auto& bus = (isInput ? inputBuses : outputBuses);
+            auto& bus = getBuses (isInput);
             return isPositiveAndBelow (busIndex, bus.size()) ? bus.getReference (busIndex).size() : 0;
         }
 
         /** Get the channel set of a particular bus */
         AudioChannelSet& getChannelSet (bool isInput, int busIndex) noexcept
         {
-            return (isInput ? inputBuses : outputBuses).getReference (busIndex);
+            return getBuses (isInput).getReference (busIndex);
         }
 
         /** Get the channel set of a particular bus */
         AudioChannelSet getChannelSet (bool isInput, int busIndex) const noexcept
         {
-            return (isInput ? inputBuses : outputBuses)[busIndex];
+            return getBuses (isInput)[busIndex];
         }
 
         /** Get the input channel layout on the main bus. */
@@ -833,16 +852,36 @@ public:
     /** Returns the length of the processor's tail, in seconds. */
     virtual double getTailLengthSeconds() const = 0;
 
-    /** Returns true if the processor wants MIDI messages. */
+    /** Returns true if the processor wants MIDI messages.
+
+        This must return the same value every time it is called.
+        This may be called by the audio thread, so this should be fast.
+        Ideally, just return a constant.
+    */
     virtual bool acceptsMidi() const = 0;
 
-    /** Returns true if the processor produces MIDI messages. */
+    /** Returns true if the processor produces MIDI messages.
+
+        This must return the same value every time it is called.
+        This may be called by the audio thread, so this should be fast.
+        Ideally, just return a constant.
+    */
     virtual bool producesMidi() const = 0;
 
-    /** Returns true if the processor supports MPE. */
+    /** Returns true if the processor supports MPE.
+
+        This must return the same value every time it is called.
+        This may be called by the audio thread, so this should be fast.
+        Ideally, just return a constant.
+    */
     virtual bool supportsMPE() const                            { return false; }
 
-    /** Returns true if this is a MIDI effect plug-in and does no audio processing. */
+    /** Returns true if this is a MIDI effect plug-in and does no audio processing.
+
+        This must return the same value every time it is called.
+        This may be called by the audio thread, so this should be fast.
+        Ideally, just return a constant.
+    */
     virtual bool isMidiEffect() const                           { return false; }
 
     //==============================================================================
@@ -1167,19 +1206,41 @@ public:
     */
     void setRateAndBufferSizeDetails (double sampleRate, int blockSize) noexcept;
 
-    //==============================================================================
-    /** AAX plug-ins need to report a unique "plug-in id" for every audio layout
-        configuration that your AudioProcessor supports on the main bus. Override this
-        function if you want your AudioProcessor to use a custom "plug-in id" (for example
-        to stay backward compatible with older versions of JUCE).
+    /** This is called by the host when the thread workgroup context has changed.
 
-        The default implementation will compute a unique integer from the input and output
-        layout and add this value to the 4 character code 'jcaa' (for native AAX) or 'jyaa'
-        (for AudioSuite plug-ins).
+        This will only be called on the audio thread, so you can join the audio workgroup
+        in your implementation of this function.
+
+        You can use this workgroup id to synchronise any real-time threads you have.
+        Note: This is currently only called on Apple devices.
     */
-    virtual int32 getAAXPluginIDForMainBusConfig (const AudioChannelSet& mainInputLayout,
-                                                  const AudioChannelSet& mainOutputLayout,
-                                                  bool idForAudioSuite) const;
+    virtual void audioWorkgroupContextChanged ([[maybe_unused]] const AudioWorkgroup& workgroup) {}
+
+    //==============================================================================
+    /** Returns a reference to an object that implements AAX specific information regarding
+        this AudioProcessor.
+    */
+    virtual AAXClientExtensions& getAAXClientExtensions()       { return *this; }
+
+    /** Returns a non-owning pointer to an object that implements VST2 specific information
+        regarding this AudioProcessor.
+
+        By default, for backwards compatibility, this will attempt to dynamic-cast this
+        AudioProcessor to VST2ClientExtensions.
+        It is recommended to override this function to return a pointer directly to an object
+        of the correct type in order to avoid this dynamic cast.
+    */
+    virtual VST2ClientExtensions* getVST2ClientExtensions();
+
+    /** Returns a non-owning pointer to an object that implements VST3 specific information
+        regarding this AudioProcessor.
+
+        By default, for backwards compatibility, this will attempt to dynamic-cast this
+        AudioProcessor to VST3ClientExtensions.
+        It is recommended to override this function to return a pointer directly to an object
+        of the correct type in order to avoid this dynamic cast.
+    */
+    virtual VST3ClientExtensions* getVST3ClientExtensions();
 
     //==============================================================================
     /** Some plug-ins support sharing response curve data with the host so that it can

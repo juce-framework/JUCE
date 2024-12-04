@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -62,7 +71,7 @@ public:
     */
     virtual void setOrigin (Point<int>) = 0;
     virtual void addTransform (const AffineTransform&) = 0;
-    virtual float getPhysicalPixelScaleFactor() = 0;
+    virtual float getPhysicalPixelScaleFactor() const = 0;
 
     virtual bool clipToRectangle (const Rectangle<int>&) = 0;
     virtual bool clipToRectangleList (const RectangleList<int>&) = 0;
@@ -91,13 +100,87 @@ public:
     virtual void fillRect (const Rectangle<float>&) = 0;
     virtual void fillRectList (const RectangleList<float>&) = 0;
     virtual void fillPath (const Path&, const AffineTransform&) = 0;
+
+    virtual void drawRect (const Rectangle<float>& rect, float lineThickness)
+    {
+        auto r = rect;
+        RectangleList<float> rects;
+        rects.addWithoutMerging (r.removeFromTop    (lineThickness));
+        rects.addWithoutMerging (r.removeFromBottom (lineThickness));
+        rects.addWithoutMerging (r.removeFromLeft   (lineThickness));
+        rects.addWithoutMerging (r.removeFromRight  (lineThickness));
+        fillRectList (rects);
+    }
+
+    virtual void strokePath (const Path& path, const PathStrokeType& strokeType, const AffineTransform& transform)
+    {
+        Path stroke;
+        strokeType.createStrokedPath (stroke, path, transform, getPhysicalPixelScaleFactor());
+        fillPath (stroke, {});
+    }
+
     virtual void drawImage (const Image&, const AffineTransform&) = 0;
     virtual void drawLine (const Line<float>&) = 0;
 
+    virtual void drawLineWithThickness (const Line<float>& line, float lineThickness)
+    {
+        Path p;
+        p.addLineSegment (line, lineThickness);
+        fillPath (p, {});
+    }
+
     virtual void setFont (const Font&) = 0;
     virtual const Font& getFont() = 0;
-    virtual void drawGlyph (int glyphNumber, const AffineTransform&) = 0;
-    virtual bool drawTextLayout (const AttributedString&, const Rectangle<float>&)  { return false; }
+
+    /** Uses the current font to draw the provided glyph numbers. */
+    virtual void drawGlyphs (Span<const uint16_t>,
+                             Span<const Point<float>>,
+                             const AffineTransform&) = 0;
+
+    virtual void drawRoundedRectangle (const Rectangle<float>& r, float cornerSize, float lineThickness)
+    {
+        Path p;
+        p.addRoundedRectangle (r, cornerSize);
+        strokePath (p, PathStrokeType (lineThickness), {});
+    }
+
+    virtual void fillRoundedRectangle (const Rectangle<float>& r, float cornerSize)
+    {
+        Path p;
+        p.addRoundedRectangle (r, cornerSize);
+        fillPath (p, {});
+    }
+
+    virtual void drawEllipse (const Rectangle<float>& area, float lineThickness)
+    {
+        Path p;
+
+        if (approximatelyEqual (area.getWidth(), area.getHeight()))
+        {
+            // For a circle, we can avoid having to generate a stroke
+            p.addEllipse (area.expanded (lineThickness * 0.5f));
+            p.addEllipse (area.reduced  (lineThickness * 0.5f));
+            p.setUsingNonZeroWinding (false);
+            fillPath (p, {});
+        }
+        else
+        {
+            p.addEllipse (area);
+            strokePath (p, PathStrokeType (lineThickness), {});
+        }
+    }
+
+    virtual void fillEllipse (const Rectangle<float>& area)
+    {
+        Path p;
+        p.addEllipse (area);
+        fillPath (p, {});
+    }
+
+    /** Returns an integer that uniquely identifies the current frame.
+        Useful for debugging/logging.
+    */
+    virtual uint64_t getFrameId() const = 0;
 };
 
 } // namespace juce

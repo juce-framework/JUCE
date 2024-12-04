@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -26,10 +35,10 @@
 namespace juce
 {
 
-struct Button::CallbackHelper  : public Timer,
-                                 public ApplicationCommandManagerListener,
-                                 public Value::Listener,
-                                 public KeyListener
+struct Button::CallbackHelper final : public Timer,
+                                      public ApplicationCommandManagerListener,
+                                      public Value::Listener,
+                                      public KeyListener
 {
     CallbackHelper (Button& b) : button (b)   {}
 
@@ -122,7 +131,7 @@ void Button::updateAutomaticTooltip (const ApplicationCommandInfo& info)
             tt << " [";
 
             if (key.length() == 1)
-                tt << TRANS("shortcut") << ": '" << key << "']";
+                tt << TRANS ("shortcut") << ": '" << key << "']";
             else
                 tt << key << ']';
         }
@@ -421,8 +430,7 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
     if (checker.shouldBailOut())
         return;
 
-    if (onClick != nullptr)
-        onClick();
+    NullCheckedInvocation::invoke (onClick);
 }
 
 void Button::sendStateMessage()
@@ -439,8 +447,7 @@ void Button::sendStateMessage()
     if (checker.shouldBailOut())
         return;
 
-    if (onStateChange != nullptr)
-        onStateChange();
+    NullCheckedInvocation::invoke (onStateChange);
 }
 
 //==============================================================================
@@ -715,100 +722,9 @@ void Button::repeatTimerCallback()
     }
 }
 
-//==============================================================================
-class ButtonAccessibilityHandler  : public AccessibilityHandler
-{
-public:
-    explicit ButtonAccessibilityHandler (Button& buttonToWrap, AccessibilityRole roleIn)
-        : AccessibilityHandler (buttonToWrap,
-                                isRadioButton (buttonToWrap) ? AccessibilityRole::radioButton : roleIn,
-                                getAccessibilityActions (buttonToWrap),
-                                getAccessibilityInterfaces (buttonToWrap)),
-          button (buttonToWrap)
-    {
-    }
-
-    AccessibleState getCurrentState() const override
-    {
-        auto state = AccessibilityHandler::getCurrentState();
-
-        if (button.isToggleable())
-        {
-            state = state.withCheckable();
-
-            if (button.getToggleState())
-                state = state.withChecked();
-        }
-
-        return state;
-    }
-
-    String getTitle() const override
-    {
-        auto title = AccessibilityHandler::getTitle();
-
-        if (title.isEmpty())
-            return button.getButtonText();
-
-        return title;
-    }
-
-    String getHelp() const override  { return button.getTooltip(); }
-
-private:
-    class ButtonValueInterface  : public AccessibilityTextValueInterface
-    {
-    public:
-        explicit ButtonValueInterface (Button& buttonToWrap)
-            : button (buttonToWrap)
-        {
-        }
-
-        bool isReadOnly() const override                 { return true; }
-        String getCurrentValueAsString() const override  { return button.getToggleState() ? "On" : "Off"; }
-        void setValueAsString (const String&) override   {}
-
-    private:
-        Button& button;
-
-        //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonValueInterface)
-    };
-
-    static bool isRadioButton (const Button& button) noexcept
-    {
-        return button.getRadioGroupId() != 0;
-    }
-
-    static AccessibilityActions getAccessibilityActions (Button& button)
-    {
-        auto actions = AccessibilityActions().addAction (AccessibilityActionType::press,
-                                                         [&button] { button.triggerClick(); });
-
-        if (button.isToggleable())
-            actions = actions.addAction (AccessibilityActionType::toggle,
-                                         [&button] { button.setToggleState (! button.getToggleState(), sendNotification); });
-
-        return actions;
-    }
-
-    static Interfaces getAccessibilityInterfaces (Button& button)
-    {
-        if (button.isToggleable())
-            return { std::make_unique<ButtonValueInterface> (button) };
-
-        return {};
-    }
-
-    Button& button;
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonAccessibilityHandler)
-};
-
 std::unique_ptr<AccessibilityHandler> Button::createAccessibilityHandler()
 {
-    return std::make_unique<ButtonAccessibilityHandler> (*this, AccessibilityRole::button);
+    return std::make_unique<detail::ButtonAccessibilityHandler> (*this, AccessibilityRole::button);
 }
 
 } // namespace juce

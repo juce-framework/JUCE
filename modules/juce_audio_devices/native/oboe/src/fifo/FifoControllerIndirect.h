@@ -20,7 +20,7 @@
 #include <atomic>
 #include <stdint.h>
 
-#include "FifoControllerBase.h"
+#include "oboe/FifoControllerBase.h"
 
 namespace oboe {
 

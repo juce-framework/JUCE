@@ -1,41 +1,51 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 PacketX2 Midi1ToMidi2DefaultTranslator::processNoteOnOrOff (const HelperValues helpers)
 {
     const auto velocity = helpers.byte2;
-    const auto needsConversion = (helpers.byte0 >> 0x4) == 0x9 && velocity == 0;
-    const auto firstByte = needsConversion ? (uint8_t) ((0x8 << 0x4) | (helpers.byte0 & 0xf))
+    const auto needsConversion = (helpers.byte0 & std::byte { 0xf0 }) == std::byte { 0x90 } && velocity == std::byte { 0 };
+    const auto firstByte = needsConversion ? (std::byte { 0x80 } | (helpers.byte0 & std::byte { 0xf }))
                                            : helpers.byte0;
 
     return PacketX2
     {
-        Utils::bytesToWord (helpers.typeAndGroup, firstByte, helpers.byte1, 0),
-        (uint32_t) (Conversion::scaleTo16 (velocity) << 0x10)
+        Utils::bytesToWord (helpers.typeAndGroup, firstByte, helpers.byte1, std::byte { 0 }),
+        (uint32_t) (Conversion::scaleTo16 (uint8_t (velocity)) << 0x10)
     };
 }
 
@@ -43,8 +53,8 @@ PacketX2 Midi1ToMidi2DefaultTranslator::processPolyPressure (const HelperValues 
 {
     return PacketX2
     {
-        Utils::bytesToWord (helpers.typeAndGroup, helpers.byte0, helpers.byte1, 0),
-        Conversion::scaleTo32 (helpers.byte2)
+        Utils::bytesToWord (helpers.typeAndGroup, helpers.byte0, helpers.byte1, std::byte { 0 }),
+        Conversion::scaleTo32 (uint8_t (helpers.byte2))
     };
 }
 
@@ -52,7 +62,7 @@ bool Midi1ToMidi2DefaultTranslator::processControlChange (const HelperValues hel
                                                           PacketX2& packet)
 {
     const auto statusAndChannel = helpers.byte0;
-    const auto cc               = helpers.byte1;
+    const auto cc               = uint8_t (helpers.byte1);
 
     const auto shouldAccumulate = [&]
     {
@@ -70,8 +80,8 @@ bool Midi1ToMidi2DefaultTranslator::processControlChange (const HelperValues hel
         return false;
     }();
 
-    const auto group   = (uint8_t) (helpers.typeAndGroup & 0xf);
-    const auto channel = (uint8_t) (statusAndChannel & 0xf);
+    const auto group   = (uint8_t) (helpers.typeAndGroup & std::byte { 0xf });
+    const auto channel = (uint8_t) (statusAndChannel & std::byte { 0xf });
     const auto byte    = helpers.byte2;
 
     if (shouldAccumulate)
@@ -86,13 +96,13 @@ bool Midi1ToMidi2DefaultTranslator::processControlChange (const HelperValues hel
             const auto msb    = bytes[2];
             const auto lsb    = bytes[3];
 
-            const auto value = (uint16_t) (((msb & 0x7f) << 7) | (lsb & 0x7f));
+            const auto value = uint16_t ((uint16_t (msb & std::byte { 0x7f }) << 7) | uint16_t (lsb & std::byte { 0x7f }));
 
             const auto newStatus = (uint8_t) (accumulator.getKind() == PnKind::nrpn ? 0x3 : 0x2);
 
             packet = PacketX2
             {
-                Utils::bytesToWord (helpers.typeAndGroup, (uint8_t) ((newStatus << 0x4) | channel), bank, index),
+                Utils::bytesToWord (helpers.typeAndGroup, std::byte ((newStatus << 0x4) | channel), bank, index),
                 Conversion::scaleTo32 (value)
             };
             return true;
@@ -103,35 +113,41 @@ bool Midi1ToMidi2DefaultTranslator::processControlChange (const HelperValues hel
 
     if (cc == 0)
     {
-        groupBanks[group][channel].setMsb (byte);
+        groupBanks[group][channel].setMsb (uint8_t (byte));
         return false;
     }
 
     if (cc == 32)
     {
-        groupBanks[group][channel].setLsb (byte);
+        groupBanks[group][channel].setLsb (uint8_t (byte));
         return false;
     }
 
     packet = PacketX2
     {
-        Utils::bytesToWord (helpers.typeAndGroup, statusAndChannel, cc, 0),
-        Conversion::scaleTo32 (helpers.byte2)
+        Utils::bytesToWord (helpers.typeAndGroup, statusAndChannel, std::byte { cc }, std::byte { 0 }),
+        Conversion::scaleTo32 (uint8_t (helpers.byte2))
     };
     return true;
 }
 
 PacketX2 Midi1ToMidi2DefaultTranslator::processProgramChange (const HelperValues helpers) const
 {
-    const auto group   = (uint8_t) (helpers.typeAndGroup & 0xf);
-    const auto channel = (uint8_t) (helpers.byte0 & 0xf);
+    const auto group   = (uint8_t) (helpers.typeAndGroup & std::byte { 0xf });
+    const auto channel = (uint8_t) (helpers.byte0 & std::byte { 0xf });
     const auto bank    = groupBanks[group][channel];
     const auto valid   = bank.isValid();
 
     return PacketX2
     {
-        Utils::bytesToWord (helpers.typeAndGroup, helpers.byte0, 0, valid ? 1 : 0),
-        Utils::bytesToWord (helpers.byte1, 0, valid ? bank.getMsb() : 0, valid ? bank.getLsb() : 0)
+        Utils::bytesToWord (helpers.typeAndGroup,
+                            helpers.byte0,
+                            std::byte { 0 },
+                            valid ? std::byte { 1 } : std::byte { 0 }),
+        Utils::bytesToWord (helpers.byte1,
+                            std::byte { 0 },
+                            valid ? std::byte { bank.getMsb() } : std::byte { 0 },
+                            valid ? std::byte { bank.getLsb() } : std::byte { 0 })
     };
 }
 
@@ -139,8 +155,8 @@ PacketX2 Midi1ToMidi2DefaultTranslator::processChannelPressure (const HelperValu
 {
     return PacketX2
     {
-        Utils::bytesToWord (helpers.typeAndGroup, helpers.byte0, 0, 0),
-        Conversion::scaleTo32 (helpers.byte1)
+        Utils::bytesToWord (helpers.typeAndGroup, helpers.byte0, std::byte { 0 }, std::byte { 0 }),
+        Conversion::scaleTo32 (uint8_t (helpers.byte1))
     };
 }
 
@@ -148,16 +164,16 @@ PacketX2 Midi1ToMidi2DefaultTranslator::processPitchBend (const HelperValues hel
 {
     const auto lsb   = helpers.byte1;
     const auto msb   = helpers.byte2;
-    const auto value = (uint16_t) (msb << 7 | lsb);
+    const auto value = uint16_t (uint16_t (msb) << 7 | uint16_t (lsb));
 
     return PacketX2
     {
-        Utils::bytesToWord (helpers.typeAndGroup, helpers.byte0, 0, 0),
+        Utils::bytesToWord (helpers.typeAndGroup, helpers.byte0, std::byte { 0 }, std::byte { 0 }),
         Conversion::scaleTo32 (value)
     };
 }
 
-bool Midi1ToMidi2DefaultTranslator::PnAccumulator::addByte (uint8_t cc, uint8_t byte)
+bool Midi1ToMidi2DefaultTranslator::PnAccumulator::addByte (uint8_t cc, std::byte byte)
 {
     const auto isStart = cc == 99 || cc == 101;
 
@@ -191,5 +207,4 @@ bool Midi1ToMidi2DefaultTranslator::PnAccumulator::addByte (uint8_t cc, uint8_t 
     return true;
 }
 
-}
-}
+} // namespace juce::universal_midi_packets

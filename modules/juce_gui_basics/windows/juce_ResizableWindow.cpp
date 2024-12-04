@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -41,8 +50,6 @@ ResizableWindow::ResizableWindow (const String& name, Colour bkgnd, bool shouldA
 
 ResizableWindow::~ResizableWindow()
 {
-    splashScreen.deleteAndZero();
-
     // Don't delete or remove the resizer components yourself! They're managed by the
     // ResizableWindow, and you should leave them alone! You may have deleted them
     // accidentally by careless use of deleteAllChildren()..?
@@ -60,27 +67,6 @@ ResizableWindow::~ResizableWindow()
 
 void ResizableWindow::initialise (const bool shouldAddToDesktop)
 {
-    /*
-      ==========================================================================
-
-       In accordance with the terms of the JUCE 7 End-Use License Agreement, the
-       JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
-       ineffective unless you have a JUCE Indie or Pro license, or are using
-       JUCE under the GPL v3 license.
-
-       End User License Agreement: www.juce.com/juce-7-licence
-
-      ==========================================================================
-    */
-
-    // BEGIN SECTION A
-
-   #if ! JucePlugin_Build_Standalone
-    splashScreen = new JUCESplashScreen (*this);
-   #endif
-
-    // END SECTION A
-
     defaultConstrainer.setMinimumOnscreenAmounts (0x10000, 16, 24, 16);
 
     lastNonFullScreenPos.setBounds (50, 50, 256, 256);
@@ -93,7 +79,7 @@ int ResizableWindow::getDesktopWindowStyleFlags() const
 {
     int styleFlags = TopLevelWindow::getDesktopWindowStyleFlags();
 
-    if (isResizable() && (styleFlags & ComponentPeer::windowHasTitleBar) != 0)
+    if (isResizable() && Desktop::getInstance().supportsBorderlessNonClientResize())
         styleFlags |= ComponentPeer::windowIsResizable;
 
     return styleFlags;
@@ -174,7 +160,7 @@ void ResizableWindow::setContentComponentSize (int width, int height)
              height + border.getTopAndBottom());
 }
 
-BorderSize<int> ResizableWindow::getBorderThickness()
+BorderSize<int> ResizableWindow::getBorderThickness() const
 {
     if (isUsingNativeTitleBar() || isKioskMode())
         return {};
@@ -182,7 +168,7 @@ BorderSize<int> ResizableWindow::getBorderThickness()
     return BorderSize<int> ((resizableBorder != nullptr && ! isFullScreen()) ? 4 : 1);
 }
 
-BorderSize<int> ResizableWindow::getContentComponentBorder()
+BorderSize<int> ResizableWindow::getContentComponentBorder() const
 {
     return getBorderThickness();
 }
@@ -240,10 +226,6 @@ void ResizableWindow::childBoundsChanged (Component* child)
 {
     if ((child == contentComponent) && (child != nullptr) && resizeToFitContent)
     {
-        // not going to look very good if this component has a zero size..
-        jassert (child->getWidth() > 0);
-        jassert (child->getHeight() > 0);
-
         auto borders = getContentComponentBorder();
 
         setSize (child->getWidth() + borders.getLeftAndRight(),
@@ -268,6 +250,8 @@ void ResizableWindow::activeWindowStatusChanged()
 void ResizableWindow::setResizable (const bool shouldBeResizable,
                                     const bool useBottomRightCornerResizer)
 {
+    resizable = shouldBeResizable;
+
     if (shouldBeResizable)
     {
         if (useBottomRightCornerResizer)
@@ -285,7 +269,7 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
         {
             resizableCorner.reset();
 
-            if (resizableBorder == nullptr)
+            if (resizableBorder == nullptr && (! isOnDesktop() || ! Desktop::getInstance().supportsBorderlessNonClientResize()))
             {
                 resizableBorder.reset (new ResizableBorderComponent (this, constrainer));
                 Component::addChildComponent (resizableBorder.get());
@@ -298,7 +282,7 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
         resizableBorder.reset();
     }
 
-    if (isUsingNativeTitleBar())
+    if (isOnDesktop())
         recreateDesktopWindow();
 
     childBoundsChanged (contentComponent);
@@ -307,8 +291,7 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
 
 bool ResizableWindow::isResizable() const noexcept
 {
-    return resizableCorner != nullptr
-        || resizableBorder != nullptr;
+    return resizable;
 }
 
 void ResizableWindow::setResizeLimits (int newMinimumWidth,
@@ -339,13 +322,12 @@ void ResizableWindow::setConstrainer (ComponentBoundsConstrainer* newConstrainer
     {
         constrainer = newConstrainer;
 
-        bool useBottomRightCornerResizer = resizableCorner != nullptr;
-        bool shouldBeResizable = useBottomRightCornerResizer || resizableBorder != nullptr;
+        const bool useBottomRightCornerResizer = resizableCorner != nullptr;
 
         resizableCorner.reset();
         resizableBorder.reset();
 
-        setResizable (shouldBeResizable, useBottomRightCornerResizer);
+        setResizable (isResizable(), useBottomRightCornerResizer);
         updatePeerConstrainer();
     }
 }

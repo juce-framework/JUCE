@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -76,8 +80,8 @@ static String valueTreeToString (const ValueTree& v)
 }
 
 //==============================================================================
-class ChildProcessDemo   : public Component,
-                           private MessageListener
+class ChildProcessDemo final : public Component,
+                               private MessageListener
 {
 public:
     ChildProcessDemo()
@@ -95,7 +99,7 @@ public:
 
         addAndMakeVisible (testResultsBox);
         testResultsBox.setMultiLine (true);
-        testResultsBox.setFont ({ Font::getDefaultMonospacedFontName(), 12.0f, Font::plain });
+        testResultsBox.setFont (FontOptions { Font::getDefaultMonospacedFontName(), 12.0f, Font::plain });
 
         logMessage (String ("This demo uses the ChildProcessCoordinator and ChildProcessWorker classes to launch and communicate "
                             "with a child process, sending messages in the form of serialised ValueTree objects.") + newLine
@@ -155,7 +159,7 @@ public:
     // invoked by the 'ping' button.
     void pingChildProcess()
     {
-        if (coordinatorProcess.get() != nullptr)
+        if (coordinatorProcess != nullptr)
             coordinatorProcess->sendPingMessageToWorker();
         else
             logMessage ("Child process is not running!");
@@ -174,9 +178,9 @@ public:
     //==============================================================================
     // This class is used by the main process, acting as the coordinator and receiving messages
     // from the worker process.
-    class DemoCoordinatorProcess  : public ChildProcessCoordinator,
-                                    private DeletedAtShutdown,
-                                    private AsyncUpdater
+    class DemoCoordinatorProcess final : public ChildProcessCoordinator,
+                                         private DeletedAtShutdown,
+                                         private AsyncUpdater
     {
     public:
         DemoCoordinatorProcess (ChildProcessDemo& d) : demo (d) {}
@@ -231,7 +235,7 @@ private:
 
     TextEditor testResultsBox;
 
-    struct LogMessage  : public Message
+    struct LogMessage final : public Message
     {
         LogMessage (const String& m) : message (m) {}
 
@@ -257,8 +261,8 @@ private:
 /*  This class gets instantiated in the child process, and receives messages from
     the coordinator process.
 */
-class DemoWorkerProcess  : public ChildProcessWorker,
-                           private DeletedAtShutdown
+class DemoWorkerProcess final : public ChildProcessWorker,
+                                private DeletedAtShutdown
 {
 public:
     DemoWorkerProcess() = default;
@@ -322,7 +326,7 @@ inline bool invokeChildProcessDemo (const String& commandLine)
  // based on the command line parameters, we can't just use the normal auto-generated Main.cpp.
  // Instead, we don't do anything in Main.cpp and create a JUCEApplication subclass here with
  // the necessary modifications.
- class Application    : public JUCEApplication
+ class Application final : public JUCEApplication
  {
  public:
      //==============================================================================
@@ -343,7 +347,7 @@ inline bool invokeChildProcessDemo (const String& commandLine)
      void shutdown() override                                { mainWindow = nullptr; }
 
  private:
-     class MainWindow    : public DocumentWindow
+     class MainWindow final : public DocumentWindow
      {
      public:
          MainWindow (const String& name, std::unique_ptr<Component> c)

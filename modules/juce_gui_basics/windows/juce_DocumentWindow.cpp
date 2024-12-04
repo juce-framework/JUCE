@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -26,7 +35,7 @@
 namespace juce
 {
 
-class DocumentWindow::ButtonListenerProxy  : public Button::Listener
+class DocumentWindow::ButtonListenerProxy final : public Button::Listener
 {
 public:
     ButtonListenerProxy (DocumentWindow& w) : owner (w) {}
@@ -183,6 +192,21 @@ void DocumentWindow::maximiseButtonPressed()
     setFullScreen (! isFullScreen());
 }
 
+void DocumentWindow::windowControlClickedClose()
+{
+    closeButtonPressed();
+}
+
+void DocumentWindow::windowControlClickedMinimise()
+{
+    minimiseButtonPressed();
+}
+
+void DocumentWindow::windowControlClickedMaximise()
+{
+    maximiseButtonPressed();
+}
+
 //==============================================================================
 void DocumentWindow::paint (Graphics& g)
 {
@@ -238,12 +262,7 @@ void DocumentWindow::resized()
                             titleBarArea.getWidth(), menuBarHeight);
 }
 
-BorderSize<int> DocumentWindow::getBorderThickness()
-{
-    return ResizableWindow::getBorderThickness();
-}
-
-BorderSize<int> DocumentWindow::getContentComponentBorder()
+BorderSize<int> DocumentWindow::getContentComponentBorder() const
 {
     auto border = getBorderThickness();
 
@@ -260,13 +279,72 @@ int DocumentWindow::getTitleBarHeight() const
     return isUsingNativeTitleBar() ? 0 : jmin (titleBarHeight, getHeight() - 4);
 }
 
-Rectangle<int> DocumentWindow::getTitleBarArea()
+Rectangle<int> DocumentWindow::getTitleBarArea() const
 {
     if (isKioskMode())
         return {};
 
     auto border = getBorderThickness();
     return { border.getLeft(), border.getTop(), getWidth() - border.getLeftAndRight(), getTitleBarHeight() };
+}
+
+auto DocumentWindow::findControlAtPoint (Point<float> pt) const -> WindowControlKind
+{
+    if (resizableBorder != nullptr)
+    {
+        using Zone = ResizableBorderComponent::Zone;
+        const auto zone = Zone::fromPositionOnBorder (getLocalBounds(),
+                                                      resizableBorder->getBorderThickness(),
+                                                      pt.roundToInt());
+
+        switch (zone.getZoneFlags())
+        {
+            case Zone::top: return WindowControlKind::sizeTop;
+            case Zone::left: return WindowControlKind::sizeLeft;
+            case Zone::right: return WindowControlKind::sizeRight;
+            case Zone::bottom: return WindowControlKind::sizeBottom;
+
+            case Zone::top | Zone::left: return WindowControlKind::sizeTopLeft;
+            case Zone::top | Zone::right: return WindowControlKind::sizeTopRight;
+            case Zone::bottom | Zone::left: return WindowControlKind::sizeBottomLeft;
+            case Zone::bottom | Zone::right: return WindowControlKind::sizeBottomRight;
+        }
+    }
+
+    const auto topArea = getTitleBarArea().withTop (0);
+
+    if (! topArea.toFloat().contains (pt))
+        return WindowControlKind::client;
+
+    for (const auto& [control, kind] : { std::tuple (getMinimiseButton(), WindowControlKind::minimise),
+                                         std::tuple (getMaximiseButton(), WindowControlKind::maximise),
+                                         std::tuple (getCloseButton(),    WindowControlKind::close) })
+    {
+        if (control != nullptr && control->contains (control->getLocalPoint (this, pt)))
+            return kind;
+    }
+
+    // Add a few pixels for the top resizer, because Windows 11 expects the top resizer to be inside
+    // the window, unlike the resizers on the bottom/left/right.
+    constexpr auto topResizerSize = 4;
+    const auto topResizerArea = getLocalBounds().withHeight (topResizerSize).toFloat();
+
+    if (topResizerArea.contains (pt))
+    {
+        if (pt.x <= topResizerArea.getX() + topResizerSize)
+            return WindowControlKind::sizeTopLeft;
+
+        if (topResizerArea.getRight() - topResizerSize <= pt.x)
+            return WindowControlKind::sizeTopRight;
+
+        return WindowControlKind::sizeTop;
+    }
+
+    for (const auto& c : getChildren())
+        if (detail::ComponentHelpers::hitTest (*c, c->getLocalPoint (this, pt)))
+            return WindowControlKind::client;
+
+    return WindowControlKind::caption;
 }
 
 Button* DocumentWindow::getCloseButton()    const noexcept  { return titleBarButtons[2].get(); }

@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2012-2016  Xiph.org Foundation
+ * Copyright (C) 2012-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,8 +39,20 @@
 #ifndef FLAC__SHARE__COMPAT_H
 #define FLAC__SHARE__COMPAT_H
 
+#include <stddef.h>
+#include <stdarg.h>
+
+#if defined _WIN32 && !defined __CYGWIN__
+/* where MSVC puts unlink() */
+# include <io.h>
+#else
+# include <unistd.h>
+#endif
+
 #if defined _MSC_VER || defined __BORLANDC__ || defined __MINGW32__
+#include <sys/types.h> /* for off_t */
 #define FLAC__off_t __int64 /* use this instead of off_t to fix the 2 GB limit */
+#define FLAC__OFF_T_MAX INT64_MAX
 #if !defined __MINGW32__
 #define fseeko _fseeki64
 #define ftello _ftelli64
@@ -52,6 +64,14 @@
 #endif
 #else
 #define FLAC__off_t off_t
+#define FLAC__OFF_T_MAX OFF_T_MAX
+#endif
+
+
+
+#ifdef HAVE_INTTYPES_H
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 #endif
 
 #if defined(_MSC_VER)
@@ -85,21 +105,68 @@
 #define FLAC__STRNCASECMP strncasecmp
 #endif
 
+#if defined _MSC_VER || defined __MINGW32__ || defined __EMX__
+#include <io.h> /* for _setmode(), chmod() */
+#include <fcntl.h> /* for _O_BINARY */
+#else
+#include <unistd.h> /* for chown(), unlink() */
+#endif
+
+#if defined _MSC_VER || defined __BORLANDC__ || defined __MINGW32__
+#if defined __BORLANDC__
+#include <utime.h> /* for utime() */
+#else
+#include <sys/utime.h> /* for utime() */
+#endif
+#else
+#if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
+#include <fcntl.h>
+#else
+#include <sys/types.h> /* some flavors of BSD (like OS X) require this to get time_t */
+#include <utime.h> /* for utime() */
+#endif
+#endif
+
 #if defined _MSC_VER
 #  if _MSC_VER >= 1800
 #    include <inttypes.h>
 #  elif _MSC_VER >= 1600
 /* Visual Studio 2010 has decent C99 support */
+#    include <stdint.h>
 #    define PRIu64 "llu"
 #    define PRId64 "lld"
 #    define PRIx64 "llx"
 #  else
+#    include <limits.h>
 #    ifndef UINT32_MAX
 #      define UINT32_MAX _UI32_MAX
 #    endif
 #    define PRIu64 "I64u"
 #    define PRId64 "I64d"
 #    define PRIx64 "I64x"
+#  endif
+#  if defined(_USING_V110_SDK71_) && !defined(_DLL)
+#    pragma message("WARNING: This compile will NOT FUNCTION PROPERLY on Windows XP. See comments in include/share/compat.h for details")
+#define FLAC__USE_FILELENGTHI64
+/*
+ *************************************************************************************
+ * V110_SDK71, in MSVC 2017 also known as v141_xp, is a platform toolset that is supposed
+ * to target Windows XP. It turns out however that certain functions provided silently fail
+ * on Windows XP only, which makes debugging challenging. This only occurs when building with
+ * /MT. This problem has been reported to Microsoft, but there hasn't been a fix for years. See
+ * https://web.archive.org/web/20170327195018/https://connect.microsoft.com/VisualStudio/feedback/details/1557168/wstat64-returns-1-on-xp-always
+ *
+ * It is known that this problem affects the functions _wstat64 (used by flac_stat i.e.
+ * stat64_utf8) and _fstat64 (i.e. flac_fstat) and therefore affects both libFLAC in
+ * several places as well as the flac and metaflac command line tools
+ *
+ * As the extent of this problem is unknown and Microsoft seems unwilling to fix it,
+ * users of libFLAC building with Visual Studio are encouraged to not use the /MT compile
+ * switch when explicitly targeting Windows XP. When use of /MT is deemed necessary with
+ * this toolset, be sure to check whether your application works properly on Windows XP.
+ * It is also possible to build for Windows XP with MinGW instead.
+ *************************************************************************************
+*/
 #  endif
 #endif /* defined _MSC_VER */
 
@@ -111,15 +178,14 @@
 #define flac_printf printf_utf8
 #define flac_fprintf fprintf_utf8
 #define flac_vfprintf vfprintf_utf8
-
-#include "windows_unicode_filenames.h"
-#define flac_fopen flac_internal_fopen_utf8
-#define flac_chmod flac_internal_chmod_utf8
-#define flac_utime flac_internal_utime_utf8
-#define flac_unlink flac_internal_unlink_utf8
-#define flac_rename flac_internal_rename_utf8
-#define flac_stat flac_internal_stat64_utf8
 #endif
+
+#define flac_fopen fopen_utf8
+#define flac_chmod chmod_utf8
+#define flac_utime utime_utf8
+#define flac_unlink unlink_utf8
+#define flac_rename rename_utf8
+#define flac_stat stat64_utf8
 
 #else
 

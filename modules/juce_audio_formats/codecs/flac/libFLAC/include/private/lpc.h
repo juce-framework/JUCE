@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2016  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -55,6 +55,9 @@
  *	IN data_len
  */
 void FLAC__lpc_window_data(const FLAC__int32 in[], const FLAC__real window[], FLAC__real out[], uint32_t data_len);
+void FLAC__lpc_window_data_wide(const FLAC__int64 in[], const FLAC__real window[], FLAC__real out[], uint32_t data_len);
+void FLAC__lpc_window_data_partial(const FLAC__int32 in[], const FLAC__real window[], FLAC__real out[], uint32_t data_len, uint32_t part_size, uint32_t data_shift);
+void FLAC__lpc_window_data_partial_wide(const FLAC__int64 in[], const FLAC__real window[], FLAC__real out[], uint32_t data_len, uint32_t part_size, uint32_t data_shift);
 
 /*
  *	FLAC__lpc_compute_autocorrelation()
@@ -68,44 +71,28 @@ void FLAC__lpc_window_data(const FLAC__int32 in[], const FLAC__real window[], FL
  *	IN 0 < lag <= data_len
  *	OUT autoc[0,lag-1]
  */
-void FLAC__lpc_compute_autocorrelation(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
+void FLAC__lpc_compute_autocorrelation(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
 #ifndef FLAC__NO_ASM
-#  ifdef FLAC__CPU_IA32
-#    ifdef FLAC__HAS_NASM
-void FLAC__lpc_compute_autocorrelation_asm_ia32(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_asm_ia32_sse_lag_4_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_asm_ia32_sse_lag_8_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_asm_ia32_sse_lag_12_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_asm_ia32_sse_lag_16_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-#    endif
-#  endif
 #  if (defined FLAC__CPU_IA32 || defined FLAC__CPU_X86_64) && FLAC__HAS_X86INTRIN
-#    ifdef FLAC__SSE_SUPPORTED
-void FLAC__lpc_compute_autocorrelation_intrin_sse_lag_4_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_sse_lag_8_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_sse_lag_12_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_sse_lag_16_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_sse_lag_4_new(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_sse_lag_8_new(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_sse_lag_12_new(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_sse_lag_16_new(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
+#    ifdef FLAC__SSE2_SUPPORTED
+void FLAC__lpc_compute_autocorrelation_intrin_sse2_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
+void FLAC__lpc_compute_autocorrelation_intrin_sse2_lag_10(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
+void FLAC__lpc_compute_autocorrelation_intrin_sse2_lag_14(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
 #    endif
 #  endif
-#if defined(FLAC__CPU_PPC64) && defined(FLAC__USE_VSX)
-#ifdef FLAC__HAS_TARGET_POWER9
-void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_4(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_12(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_16(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
+#  if defined FLAC__CPU_X86_64 && FLAC__HAS_X86INTRIN
+#    ifdef FLAC__FMA_SUPPORTED
+void FLAC__lpc_compute_autocorrelation_intrin_fma_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
+void FLAC__lpc_compute_autocorrelation_intrin_fma_lag_12(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
+void FLAC__lpc_compute_autocorrelation_intrin_fma_lag_16(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
+#    endif
+#  endif
+#if defined FLAC__CPU_ARM64 && FLAC__HAS_NEONINTRIN && FLAC__HAS_A64NEONINTRIN
+void FLAC__lpc_compute_autocorrelation_intrin_neon_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
+void FLAC__lpc_compute_autocorrelation_intrin_neon_lag_10(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
+void FLAC__lpc_compute_autocorrelation_intrin_neon_lag_14(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
 #endif
-#ifdef FLAC__HAS_TARGET_POWER8
-void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_4(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_12(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_16(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[]);
-#endif
-#endif
-#endif
+#endif /* FLAC__NO_ASM */
 
 /*
  *	FLAC__lpc_compute_lp_coefficients()
@@ -128,7 +115,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_16(const FLAC__real
  *	         in lp_coeff[8][0,8], the LP coefficients for order 8 will be
  *			 in lp_coeff[7][0,7], etc.
  */
-void FLAC__lpc_compute_lp_coefficients(const FLAC__real autoc[], uint32_t *max_order, FLAC__real lp_coeff[][FLAC__MAX_LPC_ORDER], double error[]);
+void FLAC__lpc_compute_lp_coefficients(const double autoc[], uint32_t *max_order, FLAC__real lp_coeff[][FLAC__MAX_LPC_ORDER], double error[]);
 
 /*
  *	FLAC__lpc_quantize_coefficients()
@@ -167,14 +154,14 @@ int FLAC__lpc_quantize_coefficients(const FLAC__real lp_coeff[], uint32_t order,
  */
 void FLAC__lpc_compute_residual_from_qlp_coefficients(const FLAC__int32 *data, uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 residual[]);
 void FLAC__lpc_compute_residual_from_qlp_coefficients_wide(const FLAC__int32 *data, uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 residual[]);
+FLAC__bool FLAC__lpc_compute_residual_from_qlp_coefficients_limit_residual(const FLAC__int32 *data, uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 residual[]);
+FLAC__bool FLAC__lpc_compute_residual_from_qlp_coefficients_limit_residual_33bit(const FLAC__int64 *data, uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 residual[]);
 #ifndef FLAC__NO_ASM
-#  ifdef FLAC__CPU_IA32
-#    ifdef FLAC__HAS_NASM
-void FLAC__lpc_compute_residual_from_qlp_coefficients_asm_ia32(const FLAC__int32 *data, uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 residual[]);
-void FLAC__lpc_compute_residual_from_qlp_coefficients_asm_ia32_mmx(const FLAC__int32 *data, uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 residual[]);
-void FLAC__lpc_compute_residual_from_qlp_coefficients_wide_asm_ia32(const FLAC__int32 *data, uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 residual[]);
-#    endif
-#  endif
+#   ifdef FLAC__CPU_ARM64
+void FLAC__lpc_compute_residual_from_qlp_coefficients_intrin_neon(const FLAC__int32 *data, uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 residual[]);
+void FLAC__lpc_compute_residual_from_qlp_coefficients_wide_intrin_neon(const FLAC__int32 *data, uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 residual[]);
+#   endif
+
 #  if (defined FLAC__CPU_IA32 || defined FLAC__CPU_X86_64) && FLAC__HAS_X86INTRIN
 #    ifdef FLAC__SSE2_SUPPORTED
 void FLAC__lpc_compute_residual_from_qlp_coefficients_16_intrin_sse2(const FLAC__int32 *data, uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 residual[]);
@@ -194,6 +181,9 @@ void FLAC__lpc_compute_residual_from_qlp_coefficients_wide_intrin_avx2(const FLA
 
 #endif /* !defined FLAC__INTEGER_ONLY_LIBRARY */
 
+uint32_t FLAC__lpc_max_prediction_before_shift_bps(uint32_t subframe_bps, const FLAC__int32 qlp_coeff[], uint32_t order);
+uint32_t FLAC__lpc_max_residual_bps(uint32_t subframe_bps, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization);
+
 /*
  *	FLAC__lpc_restore_signal()
  *	--------------------------------------------------------------------
@@ -211,22 +201,7 @@ void FLAC__lpc_compute_residual_from_qlp_coefficients_wide_intrin_avx2(const FLA
  */
 void FLAC__lpc_restore_signal(const FLAC__int32 residual[], uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 data[]);
 void FLAC__lpc_restore_signal_wide(const FLAC__int32 residual[], uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 data[]);
-#ifndef FLAC__NO_ASM
-#  ifdef FLAC__CPU_IA32
-#    ifdef FLAC__HAS_NASM
-void FLAC__lpc_restore_signal_asm_ia32(const FLAC__int32 residual[], uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 data[]);
-void FLAC__lpc_restore_signal_asm_ia32_mmx(const FLAC__int32 residual[], uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 data[]);
-void FLAC__lpc_restore_signal_wide_asm_ia32(const FLAC__int32 residual[], uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 data[]);
-#    endif /* FLAC__HAS_NASM */
-#  endif /* FLAC__CPU_IA32 */
-#  if (defined FLAC__CPU_IA32 || defined FLAC__CPU_X86_64) && FLAC__HAS_X86INTRIN
-#    ifdef FLAC__SSE4_1_SUPPORTED
-void FLAC__lpc_restore_signal_intrin_sse41(const FLAC__int32 residual[], uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 data[]);
-void FLAC__lpc_restore_signal_16_intrin_sse41(const FLAC__int32 residual[], uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 data[]);
-void FLAC__lpc_restore_signal_wide_intrin_sse41(const FLAC__int32 residual[], uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int32 data[]);
-#    endif
-#  endif
-#endif /* FLAC__NO_ASM */
+void FLAC__lpc_restore_signal_wide_33bit(const FLAC__int32 residual[], uint32_t data_len, const FLAC__int32 qlp_coeff[], uint32_t order, int lp_quantization, FLAC__int64 data[]);
 
 #ifndef FLAC__INTEGER_ONLY_LIBRARY
 

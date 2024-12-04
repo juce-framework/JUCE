@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -165,7 +174,7 @@ void Label::componentMovedOrResized (Component& component, bool /*wasMoved*/, bo
 
     if (leftOfOwnerComp)
     {
-        auto width = jmin (roundToInt (f.getStringWidthFloat (textValue.toString()) + 0.5f)
+        auto width = jmin (roundToInt (GlyphArrangement::getStringWidth (f, textValue.toString()) + 0.5f)
                              + borderSize.getLeftAndRight(),
                            component.getX());
 
@@ -202,8 +211,7 @@ void Label::editorShown (TextEditor* textEditor)
     if (checker.shouldBailOut())
         return;
 
-    if (onEditorShow != nullptr)
-        onEditorShow();
+    NullCheckedInvocation::invoke (onEditorShow);
 }
 
 void Label::editorAboutToBeHidden (TextEditor* textEditor)
@@ -214,8 +222,7 @@ void Label::editorAboutToBeHidden (TextEditor* textEditor)
     if (checker.shouldBailOut())
         return;
 
-    if (onEditorHide != nullptr)
-        onEditorHide();
+    NullCheckedInvocation::invoke (onEditorHide);
 }
 
 void Label::showEditor()
@@ -389,7 +396,7 @@ void Label::colourChanged()
 
 void Label::setMinimumHorizontalScale (const float newScale)
 {
-    if (minimumHorizontalScale != newScale)
+    if (! approximatelyEqual (minimumHorizontalScale, newScale))
     {
         minimumHorizontalScale = newScale;
         repaint();
@@ -399,7 +406,7 @@ void Label::setMinimumHorizontalScale (const float newScale)
 //==============================================================================
 // We'll use a custom focus traverser here to make sure focus goes from the
 // text editor to another component rather than back to the label itself.
-class LabelKeyboardFocusTraverser   : public KeyboardFocusTraverser
+class LabelKeyboardFocusTraverser final : public KeyboardFocusTraverser
 {
 public:
     explicit LabelKeyboardFocusTraverser (Label& l)  : owner (l)  {}
@@ -463,8 +470,7 @@ void Label::callChangeListeners()
     if (checker.shouldBailOut())
         return;
 
-    if (onTextChange != nullptr)
-        onTextChange();
+    NullCheckedInvocation::invoke (onTextChange);
 }
 
 //==============================================================================
@@ -504,11 +510,11 @@ void Label::textEditorReturnKeyPressed (TextEditor& ed)
     }
 }
 
-void Label::textEditorEscapeKeyPressed (TextEditor& ed)
+void Label::textEditorEscapeKeyPressed ([[maybe_unused]] TextEditor& ed)
 {
     if (editor != nullptr)
     {
-        jassertquiet (&ed == editor.get());
+        jassert (&ed == editor.get());
 
         editor->setText (textValue.toString(), false);
         hideEditor (true);
@@ -521,7 +527,7 @@ void Label::textEditorFocusLost (TextEditor& ed)
 }
 
 //==============================================================================
-class LabelAccessibilityHandler  : public AccessibilityHandler
+class LabelAccessibilityHandler final : public AccessibilityHandler
 {
 public:
     explicit LabelAccessibilityHandler (Label& labelToWrap)
@@ -545,7 +551,7 @@ public:
     }
 
 private:
-    class LabelValueInterface  : public AccessibilityTextValueInterface
+    class LabelValueInterface final : public AccessibilityTextValueInterface
     {
     public:
         explicit LabelValueInterface (Label& labelToWrap)

@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -39,57 +51,53 @@ class CharPointer_ASCII  final
 public:
     using CharType = char;
 
-    inline explicit CharPointer_ASCII (const CharType* rawPointer) noexcept
+    explicit CharPointer_ASCII (const CharType* rawPointer) noexcept
         : data (const_cast<CharType*> (rawPointer))
     {
     }
 
-    inline CharPointer_ASCII (const CharPointer_ASCII& other) = default;
+    CharPointer_ASCII (const CharPointer_ASCII& other) = default;
 
-    inline CharPointer_ASCII operator= (const CharPointer_ASCII other) noexcept
-    {
-        data = other.data;
-        return *this;
-    }
+    CharPointer_ASCII& operator= (const CharPointer_ASCII& other) noexcept = default;
 
-    inline CharPointer_ASCII operator= (const CharType* text) noexcept
+    CharPointer_ASCII& operator= (const CharType* text) noexcept
     {
         data = const_cast<CharType*> (text);
         return *this;
     }
 
     /** This is a pointer comparison, it doesn't compare the actual text. */
-    inline bool operator== (CharPointer_ASCII other) const noexcept     { return data == other.data; }
-    inline bool operator!= (CharPointer_ASCII other) const noexcept     { return data != other.data; }
-    inline bool operator<= (CharPointer_ASCII other) const noexcept     { return data <= other.data; }
-    inline bool operator<  (CharPointer_ASCII other) const noexcept     { return data <  other.data; }
-    inline bool operator>= (CharPointer_ASCII other) const noexcept     { return data >= other.data; }
-    inline bool operator>  (CharPointer_ASCII other) const noexcept     { return data >  other.data; }
+    bool operator== (CharPointer_ASCII other) const noexcept     { return data == other.data; }
+    bool operator!= (CharPointer_ASCII other) const noexcept     { return data != other.data; }
+    bool operator<= (CharPointer_ASCII other) const noexcept     { return data <= other.data; }
+    bool operator<  (CharPointer_ASCII other) const noexcept     { return data <  other.data; }
+    bool operator>= (CharPointer_ASCII other) const noexcept     { return data >= other.data; }
+    bool operator>  (CharPointer_ASCII other) const noexcept     { return data >  other.data; }
 
     /** Returns the address that this pointer is pointing to. */
-    inline CharType* getAddress() const noexcept        { return data; }
+    CharType* getAddress() const noexcept        { return data; }
 
     /** Returns the address that this pointer is pointing to. */
-    inline operator const CharType*() const noexcept    { return data; }
+    operator const CharType*() const noexcept    { return data; }
 
     /** Returns true if this pointer is pointing to a null character. */
-    inline bool isEmpty() const noexcept                { return *data == 0; }
+    bool isEmpty() const noexcept                { return *data == 0; }
 
     /** Returns true if this pointer is not pointing to a null character. */
-    inline bool isNotEmpty() const noexcept             { return *data != 0; }
+    bool isNotEmpty() const noexcept             { return *data != 0; }
 
     /** Returns the unicode character that this pointer is pointing to. */
-    inline juce_wchar operator*() const noexcept        { return (juce_wchar) (uint8) *data; }
+    juce_wchar operator*() const noexcept        { return (juce_wchar) (uint8) *data; }
 
     /** Moves this pointer along to the next character in the string. */
-    inline CharPointer_ASCII operator++() noexcept
+    CharPointer_ASCII& operator++() noexcept
     {
         ++data;
         return *this;
     }
 
     /** Moves this pointer to the previous character in the string. */
-    inline CharPointer_ASCII operator--() noexcept
+    CharPointer_ASCII& operator--() noexcept
     {
         --data;
         return *this;
@@ -97,7 +105,7 @@ public:
 
     /** Returns the character that this pointer is currently pointing to, and then
         advances the pointer to point to the next character. */
-    inline juce_wchar getAndAdvance() noexcept  { return (juce_wchar) (uint8) *data++; }
+    juce_wchar getAndAdvance() noexcept  { return (juce_wchar) (uint8) *data++; }
 
     /** Moves this pointer along to the next character in the string. */
     CharPointer_ASCII operator++ (int) noexcept
@@ -108,18 +116,20 @@ public:
     }
 
     /** Moves this pointer forwards by the specified number of characters. */
-    inline void operator+= (const int numToSkip) noexcept
+    CharPointer_ASCII& operator+= (const int numToSkip) noexcept
     {
         data += numToSkip;
+        return *this;
     }
 
-    inline void operator-= (const int numToSkip) noexcept
+    CharPointer_ASCII& operator-= (const int numToSkip) noexcept
     {
         data -= numToSkip;
+        return *this;
     }
 
     /** Returns the character at a given character index from the start of the string. */
-    inline juce_wchar operator[] (const int characterIndex) const noexcept
+    juce_wchar operator[] (const int characterIndex) const noexcept
     {
         return (juce_wchar) (uint8) data [characterIndex];
     }
@@ -127,28 +137,28 @@ public:
     /** Returns a pointer which is moved forwards from this one by the specified number of characters. */
     CharPointer_ASCII operator+ (const int numToSkip) const noexcept
     {
-        return CharPointer_ASCII (data + numToSkip);
+        return CharPointer_ASCII (*this) += numToSkip;
     }
 
     /** Returns a pointer which is moved backwards from this one by the specified number of characters. */
     CharPointer_ASCII operator- (const int numToSkip) const noexcept
     {
-        return CharPointer_ASCII (data - numToSkip);
+        return CharPointer_ASCII (*this) -= numToSkip;
     }
 
     /** Writes a unicode character to this string, and advances this pointer to point to the next position. */
-    inline void write (const juce_wchar charToWrite) noexcept
+    void write (const juce_wchar charToWrite) noexcept
     {
         *data++ = (char) charToWrite;
     }
 
-    inline void replaceChar (const juce_wchar newChar) noexcept
+    void replaceChar (const juce_wchar newChar) noexcept
     {
         *data = (char) newChar;
     }
 
     /** Writes a null character to this string (leaving the pointer's position unchanged). */
-    inline void writeNull() const noexcept
+    void writeNull() const noexcept
     {
         *data = 0;
     }
@@ -265,7 +275,7 @@ public:
 
     int compareIgnoreCase (const CharPointer_ASCII other) const
     {
-       #if JUCE_MINGW || (JUCE_WINDOWS && JUCE_CLANG)
+       #if JUCE_WINDOWS && JUCE_CLANG
         return CharacterFunctions::compareIgnoreCase (*this, other);
        #elif JUCE_WINDOWS
         return stricmp (data, other.data);
@@ -335,7 +345,7 @@ public:
     /** Parses this string as a 64-bit integer. */
     int64 getIntValue64() const noexcept
     {
-       #if JUCE_LINUX || JUCE_BSD || JUCE_ANDROID || JUCE_MINGW
+       #if JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
         return atoll (data);
        #elif JUCE_WINDOWS
         return _atoi64 (data);
@@ -356,7 +366,7 @@ public:
     /** Returns true if the given unicode character can be represented in this encoding. */
     static bool canRepresent (juce_wchar character) noexcept
     {
-        return ((unsigned int) character) < (unsigned int) 128;
+        return CharacterFunctions::isAscii (character);
     }
 
     /** Returns true if this data contains a valid string in this encoding. */

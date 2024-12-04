@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -104,7 +113,7 @@ int writeBinaryData (juce::ArgumentList&& args)
     return 0;
 }
 
-struct IconParseResults final
+struct IconParseResults
 {
     juce::build_tools::Icons icons;
     juce::File output;
@@ -191,7 +200,7 @@ bool getBoolValue (const std::unordered_map<juce::String, juce::String>& dict, j
         || str.equalsIgnoreCase ("on");
 }
 
-struct UpdateField final
+struct UpdateField
 {
     const std::unordered_map<juce::String, juce::String>& dict;
 
@@ -322,9 +331,6 @@ int writePlist (juce::ArgumentList&& args)
 juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File& file,
                                                                 juce::build_tools::ProjectType::Target::Type type)
 {
-    if (type == juce::build_tools::ProjectType::Target::ConsoleApp)
-        juce::ConsoleApplication::fail ("Deduced project type does not require entitlements", 1);
-
     const auto dict = parseProjectData (file);
 
     UpdateField updateField { dict };
@@ -333,6 +339,7 @@ juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File
 
     updateField ("IS_IOS",                          result.isiOS);
     updateField ("IS_PLUGIN",                       result.isAudioPluginProject);
+    updateField ("IS_AU_PLUGIN_HOST",               result.isAUPluginHost);
     updateField ("ICLOUD_PERMISSIONS_ENABLED",      result.isiCloudPermissionsEnabled);
     updateField ("PUSH_NOTIFICATIONS_ENABLED",      result.isPushNotificationsEnabled);
     updateField ("APP_GROUPS_ENABLED",              result.isAppGroupsEnabled);
@@ -365,6 +372,14 @@ juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File
         if (! values.isEmpty())
             result.appSandboxTemporaryPaths.push_back ({ "com.apple.security.temporary-exception.files." + entry.key,
                                                          std::move (values) });
+    }
+
+    {
+        juce::StringArray values;
+        updateField ("APP_SANDBOX_EXCEPTION_IOKIT", values);
+
+        if (! values.isEmpty())
+            result.appSandboxExceptionIOKit = values;
     }
 
     result.type = type;
@@ -508,6 +523,12 @@ int writeHeader (juce::ArgumentList&& args)
     return createAndWrite (output.resolveAsFile(), headerText);
 }
 
+int printJUCEVersion (juce::ArgumentList&&)
+{
+    std::cout << juce::SystemStats::getJUCEVersion() << std::endl;
+    return 0;
+}
+
 } // namespace
 
 int main (int argc, char** argv)
@@ -543,6 +564,7 @@ int main (int argc, char** argv)
             { "pkginfo",         writePkgInfo },
             { "plist",           writePlist },
             { "rcfile",          writeRcFile },
+            { "version",         printJUCEVersion },
             { "winicon",         writeWinIcon }
         };
 
@@ -553,6 +575,25 @@ int main (int argc, char** argv)
         if (it == commands.cend())
             juce::ConsoleApplication::fail ("No matching mode", 1);
 
-        return it->second (std::move (argumentList));
+        try
+        {
+            return it->second (std::move (argumentList));
+        }
+        catch (const juce::build_tools::SaveError& error)
+        {
+            juce::ConsoleApplication::fail (error.message);
+        }
+        catch (const std::exception& ex)
+        {
+            juce::ConsoleApplication::fail (ex.what());
+        }
+        catch (...)
+        {
+            juce::ConsoleApplication::fail ("Unhandled exception");
+        }
+
+        return 1;
     });
+
+    return 0;
 }

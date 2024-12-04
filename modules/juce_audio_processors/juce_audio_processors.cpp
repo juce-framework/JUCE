@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -43,7 +52,9 @@
 
 //==============================================================================
 #if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3) && (JUCE_LINUX || JUCE_BSD)
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wvariadic-macros")
  #include <X11/Xlib.h>
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #include <X11/Xutil.h>
  #include <sys/utsname.h>
  #undef KeyPress
@@ -106,8 +117,8 @@ void callOnMessageThread (Callback&& callback)
     request that the editor bounds are updated. We can call `setSize` on this
     component from inside those dedicated callbacks.
 */
-struct NSViewComponentWithParent  : public NSViewComponent,
-                                    private AsyncUpdater
+struct NSViewComponentWithParent : public NSViewComponent,
+                                   private AsyncUpdater
 {
     enum class WantsNudge { no, yes };
 
@@ -154,29 +165,28 @@ private:
         }
     }
 
-    struct InnerNSView : public ObjCClass<NSView>
+    struct InnerNSView final : public ObjCClass<NSView>
     {
         InnerNSView()
             : ObjCClass ("JuceInnerNSView_")
         {
             addIvar<NSViewComponentWithParent*> ("owner");
 
-            addMethod (@selector (isOpaque),       isOpaque);
-            addMethod (@selector (didAddSubview:), didAddSubview);
+            addMethod (@selector (isOpaque), [] (id, SEL) { return YES; });
+
+            addMethod (@selector (didAddSubview:), [] (id self, SEL, NSView*)
+            {
+                if (auto* owner = getIvar<NSViewComponentWithParent*> (self, "owner"))
+                    if (owner->wantsNudge == WantsNudge::yes)
+                        owner->triggerAsyncUpdate();
+            });
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+            addMethod (@selector (clipsToBounds), [] (id, SEL) { return YES; });
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             registerClass();
         }
-
-        static BOOL isOpaque  (id, SEL) { return YES; }
-
-        static void nudge (id self)
-        {
-            if (auto* owner = getIvar<NSViewComponentWithParent*> (self, "owner"))
-                if (owner->wantsNudge == WantsNudge::yes)
-                    owner->triggerAsyncUpdate();
-        }
-
-        static void didAddSubview (id self, SEL, NSView*)      { nudge (self); }
     };
 
     static InnerNSView& getViewClass()
@@ -219,8 +229,8 @@ private:
 #include "utilities/juce_ParameterAttachments.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"
 #include "utilities/juce_PluginHostType.cpp"
-#include "utilities/juce_NativeScaleFactorNotifier.cpp"
-#include "utilities/juce_VSTCallbackHandler.cpp"
+#include "utilities/juce_AAXClientExtensions.cpp"
+#include "utilities/juce_VST2ClientExtensions.cpp"
 #include "utilities/ARA/juce_ARA_utils.cpp"
 
 #include "format_types/juce_LV2PluginFormat.cpp"

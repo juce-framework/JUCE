@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2012-2016  Xiph.org Foundation
+ * Copyright (C) 2012-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,10 +31,10 @@
 
 /* It is assumed that this header will be included after "config.h". */
 
-#if HAVE_BSWAP32			/* GCC and Clang */
+#ifdef HAVE_BSWAP32			/* GCC and Clang */
 
 /* GCC prior to 4.8 didn't provide bswap16 on x86_64 */
-#if ! HAVE_BSWAP16
+#ifndef HAVE_BSWAP16
 static inline unsigned short __builtin_bswap16(unsigned short a)
 {
 	return (a<<8)|(a>>8);
@@ -55,9 +55,7 @@ static inline unsigned short __builtin_bswap16(unsigned short a)
 
 #elif defined HAVE_BYTESWAP_H		/* Linux */
 
-// JUCE: removed as JUCE already includes standard headers and including
-// these in FlacNamespace will cause problems
-//#include <byteswap.h>
+#include <byteswap.h>
 
 #define	ENDSWAP_16(x)		(bswap_16 (x))
 #define	ENDSWAP_32(x)		(bswap_32 (x))

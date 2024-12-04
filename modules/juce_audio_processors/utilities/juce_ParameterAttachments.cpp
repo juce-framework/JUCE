@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -84,7 +93,7 @@ void ParameterAttachment::callIfParameterValueChanged (float newDenormalisedValu
 {
     const auto newValue = normalise (newDenormalisedValue);
 
-    if (parameter.getValue() != newValue)
+    if (! approximatelyEqual (parameter.getValue(), newValue))
         callback (newValue);
 }
 
@@ -105,8 +114,7 @@ void ParameterAttachment::parameterValueChanged (int, float newValue)
 
 void ParameterAttachment::handleAsyncUpdate()
 {
-    if (setValue != nullptr)
-        setValue (parameter.convertFrom0to1 (lastValue));
+    NullCheckedInvocation::invoke (setValue, parameter.convertFrom0to1 (lastValue));
 }
 
 //==============================================================================
@@ -265,5 +273,170 @@ void ButtonParameterAttachment::buttonClicked (Button*)
 
     attachment.setValueAsCompleteGesture (button.getToggleState() ? 1.0f : 0.0f);
 }
+
+//==============================================================================
+#if JUCE_WEB_BROWSER
+WebSliderParameterAttachment::WebSliderParameterAttachment (RangedAudioParameter& parameterIn,
+                                                            WebSliderRelay& sliderStateIn,
+                                                            UndoManager* undoManager)
+    : sliderState (sliderStateIn),
+      parameter (parameterIn),
+      attachment (parameter, [this] (float newValue) { setValue (newValue); }, undoManager)
+{
+    sendInitialUpdate();
+    sliderState.addListener (this);
+}
+
+WebSliderParameterAttachment::~WebSliderParameterAttachment()
+{
+    sliderState.removeListener (this);
+}
+
+void WebSliderParameterAttachment::sendInitialUpdate()
+{
+    const auto range = parameter.getNormalisableRange();
+    DynamicObject::Ptr object { new DynamicObject };
+    object->setProperty (detail::WebSliderRelayEvents::Event::eventTypeKey, "propertiesChanged");
+    object->setProperty ("start", range.start);
+    object->setProperty ("end", range.end);
+    object->setProperty ("skew", range.skew);
+    object->setProperty ("name", parameter.getName (100));
+    object->setProperty ("label", parameter.getLabel());
+
+    // We use the NormalisableRange defined num steps even for an AudioParameterFloat.
+    const auto numSteps = range.interval > 0
+                        ? static_cast<int> ((range.end - range.start) / range.interval) + 1
+                        : AudioProcessor::getDefaultNumParameterSteps();
+
+    object->setProperty ("numSteps", numSteps);
+    object->setProperty ("interval", range.interval);
+    object->setProperty ("parameterIndex", parameter.getParameterIndex());
+    sliderState.emitEvent (object.get());
+    attachment.sendInitialUpdate();
+}
+
+void WebSliderParameterAttachment::setValue (float newValue)
+{
+    const ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+    sliderState.setValue (newValue);
+}
+
+void WebSliderParameterAttachment::sliderValueChanged (WebSliderRelay* slider)
+{
+    if (ignoreCallbacks)
+    {
+        jassertfalse;
+        return;
+    }
+
+    attachment.setValueAsPartOfGesture (slider->getValue());
+}
+
+//==============================================================================
+WebToggleButtonParameterAttachment::WebToggleButtonParameterAttachment (RangedAudioParameter& parameterIn,
+                                                                        WebToggleButtonRelay& button,
+                                                                        UndoManager* undoManager)
+    : relay (button),
+      parameter (parameterIn),
+      attachment (parameter, [this] (float f) { setValue (f); }, undoManager)
+{
+    sendInitialUpdate();
+    relay.addListener (this);
+}
+
+WebToggleButtonParameterAttachment::~WebToggleButtonParameterAttachment()
+{
+    relay.removeListener (this);
+}
+
+void WebToggleButtonParameterAttachment::sendInitialUpdate()
+{
+    DynamicObject::Ptr object { new DynamicObject };
+    object->setProperty (detail::WebSliderRelayEvents::Event::eventTypeKey, "propertiesChanged");
+    object->setProperty ("name", parameter.getName (100));
+    object->setProperty ("parameterIndex", parameter.getParameterIndex());
+    relay.emitEvent (object.get());
+    attachment.sendInitialUpdate();
+}
+
+void WebToggleButtonParameterAttachment::setValue (float newValue)
+{
+    const ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+    relay.setToggleState (newValue >= 0.5f);
+}
+
+void WebToggleButtonParameterAttachment::toggleStateChanged (bool newValue)
+{
+    if (ignoreCallbacks)
+    {
+        jassertfalse;
+        return;
+    }
+
+    attachment.setValueAsCompleteGesture (newValue ? 1.0f : 0.0f);
+}
+
+void WebToggleButtonParameterAttachment::initialUpdateRequested()
+{
+    sendInitialUpdate();
+}
+
+//==============================================================================
+WebComboBoxParameterAttachment::WebComboBoxParameterAttachment (RangedAudioParameter& parameterIn,
+                                                                WebComboBoxRelay& combo,
+                                                                UndoManager* undoManager)
+    : relay (combo),
+      parameter (parameterIn),
+      attachment (parameter, [this] (float f) { setValue (f); }, undoManager)
+{
+    sendInitialUpdate();
+    relay.addListener (this);
+}
+
+WebComboBoxParameterAttachment::~WebComboBoxParameterAttachment()
+{
+    relay.removeListener (this);
+}
+
+void WebComboBoxParameterAttachment::sendInitialUpdate()
+{
+    DynamicObject::Ptr object { new DynamicObject };
+    object->setProperty (detail::WebSliderRelayEvents::Event::eventTypeKey, "propertiesChanged");
+    object->setProperty ("name", parameter.getName (100));
+    object->setProperty ("parameterIndex", parameter.getParameterIndex());
+
+    if (auto* choiceParameter = dynamic_cast<AudioParameterChoice*> (&parameter))
+        object->setProperty ("choices", choiceParameter->choices);
+    else
+        object->setProperty ("choices", StringArray{});
+
+    relay.emitEvent (object.get());
+    attachment.sendInitialUpdate();
+}
+
+void WebComboBoxParameterAttachment::setValue (float newValue)
+{
+    const auto normValue = parameter.convertTo0to1 (newValue);
+
+    const ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+    relay.setValue (normValue);
+}
+
+void WebComboBoxParameterAttachment::valueChanged (float newValue)
+{
+    if (ignoreCallbacks)
+    {
+        jassertfalse;
+        return;
+    }
+
+    attachment.setValueAsCompleteGesture (parameter.convertFrom0to1 (newValue));
+}
+
+void WebComboBoxParameterAttachment::initialUpdateRequested()
+{
+    sendInitialUpdate();
+}
+#endif
 
 } // namespace juce

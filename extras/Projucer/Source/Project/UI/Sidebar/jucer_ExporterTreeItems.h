@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -27,8 +36,8 @@
 
 
 //==============================================================================
-class ExporterItem   : public ProjectTreeItemBase,
-                       private Value::Listener
+class ExporterItem final : public ProjectTreeItemBase,
+                           private Value::Listener
 {
 public:
     ExporterItem (Project& p, ProjectExporter* e, int index)
@@ -58,7 +67,6 @@ public:
             if         (e->isXcode())        return Icon (getIcons().xcode,        Colours::transparentBlack);
             else if    (e->isVisualStudio()) return Icon (getIcons().visualStudio, Colours::transparentBlack);
             else if    (e->isAndroid())      return Icon (getIcons().android,      Colours::transparentBlack);
-            else if    (e->isCodeBlocks())   return Icon (getIcons().codeBlocks,   Colours::transparentBlack);
             else if    (e->isMakefile())     return Icon (getIcons().linux,        Colours::transparentBlack);
         }
 
@@ -77,7 +85,10 @@ public:
 
     void deleteItem() override
     {
-        auto resultCallback = [safeThis = WeakReference<ExporterItem> { this }] (int result)
+        auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
+                                                               "Delete Exporter",
+                                                               "Are you sure you want to delete this export target?");
+        messageBox = AlertWindow::showScopedAsync (options, [safeThis = WeakReference { this }] (int result)
         {
             if (safeThis == nullptr || result == 0)
                 return;
@@ -87,15 +98,7 @@ public:
             auto parent = safeThis->exporter->settings.getParent();
             parent.removeChild (safeThis->exporter->settings,
                                 safeThis->project.getUndoManagerFor (parent));
-        };
-
-        AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
-                                      "Delete Exporter",
-                                      "Are you sure you want to delete this export target?",
-                                      "",
-                                      "",
-                                      nullptr,
-                                      ModalCallbackFunction::create (std::move (resultCallback)));
+        });
     }
 
     void addSubItems() override
@@ -180,6 +183,8 @@ private:
 
     Value targetLocationValue;
 
+    ScopedMessageBox messageBox;
+
     void valueChanged (Value& value) override
     {
         if (value == exporter->getTargetLocationValue())
@@ -187,7 +192,7 @@ private:
     }
 
     //==============================================================================
-    struct SettingsComp  : public Component
+    struct SettingsComp final : public Component
     {
         SettingsComp (ProjectExporter& exp)
             : group (exp.getUniqueName(),
@@ -216,7 +221,7 @@ private:
 
 
 //==============================================================================
-class ConfigItem   : public ProjectTreeItemBase
+class ConfigItem final : public ProjectTreeItemBase
 {
 public:
     ConfigItem (const ProjectExporter::BuildConfiguration::Ptr& conf, ProjectExporter& e)
@@ -243,13 +248,10 @@ public:
 
     void deleteItem() override
     {
-        AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
-                                      "Delete Configuration",
-                                      "Are you sure you want to delete this configuration?",
-                                      "",
-                                      "",
-                                      nullptr,
-                                      ModalCallbackFunction::create ([parent = WeakReference<ConfigItem> { this }] (int result)
+        auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
+                                                               "Delete Configuration",
+                                                               "Are you sure you want to delete this configuration?");
+        messageBox = AlertWindow::showScopedAsync (options, [parent = WeakReference { this }] (int result)
         {
             if (parent == nullptr)
                 return;
@@ -259,7 +261,7 @@ public:
 
             parent->closeSettingsPage();
             parent->config->removeFromExporter();
-        }));
+        });
     }
 
     void showPopupMenu (Point<int> p) override
@@ -293,9 +295,10 @@ private:
     ProjectExporter::BuildConfiguration::Ptr config;
     ProjectExporter& exporter;
     ValueTree configTree;
+    ScopedMessageBox messageBox;
 
     //==============================================================================
-    class SettingsComp  : public Component
+    class SettingsComp final : public Component
     {
     public:
         SettingsComp (ProjectExporter::BuildConfiguration& conf)
@@ -321,11 +324,10 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfigItem)
     JUCE_DECLARE_WEAK_REFERENCEABLE (ConfigItem)
-
 };
 
 //==============================================================================
-class ExportersTreeRoot    : public ProjectTreeItemBase
+class ExportersTreeRoot final : public ProjectTreeItemBase
 {
 public:
     ExportersTreeRoot (Project& p)

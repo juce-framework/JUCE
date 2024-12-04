@@ -1,7 +1,7 @@
 # ==============================================================================
 #
 #  This file is part of the JUCE library.
-#  Copyright (c) 2020 - Raw Material Software Limited
+#  Copyright (c) - Raw Material Software Limited
 #
 #  JUCE is an open source library subject to commercial or open-source
 #  licensing.
@@ -21,6 +21,7 @@
 @PACKAGE_INIT@
 
 include("${CMAKE_CURRENT_LIST_DIR}/LV2_HELPER.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/VST3_HELPER.cmake")
 
 if(NOT TARGET juce::juceaide)
     add_executable(juce::juceaide IMPORTED)
@@ -53,6 +54,7 @@ set(_juce_modules
     juce_graphics
     juce_gui_basics
     juce_gui_extra
+    juce_javascript
     juce_opengl
     juce_osc
     juce_product_unlocking

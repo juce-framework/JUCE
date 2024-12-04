@@ -1,35 +1,39 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
-PopupMenu createGUIEditorMenu();
-void handleGUIEditorMenuCommand (int);
-void registerGUIEditorCommands();
-
-
 //==============================================================================
-struct ProjucerApplication::MainMenuModel  : public MenuBarModel
+struct ProjucerApplication::MainMenuModel final : public MenuBarModel
 {
     MainMenuModel()
     {
@@ -152,7 +156,6 @@ void ProjucerApplication::handleAsyncUpdate()
 
 void ProjucerApplication::doBasicApplicationSetup()
 {
-    licenseController = std::make_unique<LicenseController>();
     LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
     initCommandManager();
     icons = std::make_unique<Icons>();
@@ -199,7 +202,7 @@ void ProjucerApplication::shutdown()
     deleteLogger();
 }
 
-struct AsyncQuitRetrier  : private Timer
+struct AsyncQuitRetrier final : private Timer
 {
     AsyncQuitRetrier()   { startTimer (500); }
 
@@ -290,11 +293,7 @@ MenuBarModel* ProjucerApplication::getMenuModel()
 
 StringArray ProjucerApplication::getMenuNames()
 {
-    StringArray currentMenuNames { "File", "Edit", "View", "Window", "Document", "GUI Editor", "Tools", "Help" };
-
-    if (! isGUIEditorEnabled())  currentMenuNames.removeString ("GUI Editor");
-
-    return currentMenuNames;
+    return { "File", "Edit", "View", "Window", "Document", "Tools", "Help" };
 }
 
 PopupMenu ProjucerApplication::createMenu (const String& menuName)
@@ -319,10 +318,6 @@ PopupMenu ProjucerApplication::createMenu (const String& menuName)
 
     if (menuName == "Help")
         return createHelpMenu();
-
-    if (menuName == "GUI Editor")
-        if (isGUIEditorEnabled())
-            return createGUIEditorMenu();
 
     jassertfalse; // names have changed?
     return {};
@@ -364,11 +359,6 @@ PopupMenu ProjucerApplication::createFileMenu()
     menu.addSeparator();
     menu.addCommandItem (commandManager.get(), CommandIDs::openInIDE);
     menu.addCommandItem (commandManager.get(), CommandIDs::saveAndOpenInIDE);
-    menu.addSeparator();
-
-   #if ! JUCER_ENABLE_GPL_MODE
-    menu.addCommandItem (commandManager.get(), CommandIDs::loginLogout);
-   #endif
 
    #if ! JUCE_MAC
     menu.addCommandItem (commandManager.get(), CommandIDs::showAboutWindow);
@@ -501,7 +491,7 @@ PopupMenu ProjucerApplication::createDocumentMenu()
 
     for (int i = 0; i < numDocs; ++i)
     {
-        OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument(i);
+        OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument (i);
         menu.addItem (activeDocumentsBaseID + i, doc->getName());
     }
 
@@ -516,8 +506,6 @@ PopupMenu ProjucerApplication::createToolsMenu()
     menu.addCommandItem (commandManager.get(), CommandIDs::showUTF8Tool);
     menu.addCommandItem (commandManager.get(), CommandIDs::showSVGPathTool);
     menu.addCommandItem (commandManager.get(), CommandIDs::showTranslationTool);
-    menu.addSeparator();
-    menu.addCommandItem (commandManager.get(), CommandIDs::enableGUIEditor);
     return menu;
 }
 
@@ -684,7 +672,7 @@ static File getPlatformSpecificProjectFolder()
    #if JUCE_MAC
     return buildsFolder.getChildFile ("MacOSX");
    #elif JUCE_WINDOWS
-    return buildsFolder.getChildFile ("VisualStudio2017");
+    return buildsFolder.getChildFile ("VisualStudio2022");
    #elif JUCE_LINUX || JUCE_BSD
     return buildsFolder.getChildFile ("LinuxMakefile");
    #else
@@ -888,10 +876,6 @@ void ProjucerApplication::handleMainMenuCommand (int menuItemID)
     {
         findAndLaunchExample (menuItemID - examplesBaseID);
     }
-    else
-    {
-        handleGUIEditorMenuCommand (menuItemID);
-    }
 }
 
 //==============================================================================
@@ -911,15 +895,13 @@ void ProjucerApplication::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::showGlobalPathsWindow,
                               CommandIDs::showUTF8Tool,
                               CommandIDs::showSVGPathTool,
-                              CommandIDs::enableGUIEditor,
                               CommandIDs::showAboutWindow,
                               CommandIDs::checkForNewVersion,
                               CommandIDs::enableNewVersionCheck,
                               CommandIDs::showForum,
                               CommandIDs::showAPIModules,
                               CommandIDs::showAPIClasses,
-                              CommandIDs::showTutorials,
-                              CommandIDs::loginLogout };
+                              CommandIDs::showTutorials };
 
     commands.addArray (ids, numElementsInArray (ids));
 }
@@ -987,13 +969,6 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         result.setInfo ("SVG Path Converter", "Shows the SVG->Path data conversion utility", CommandCategories::general, 0);
         break;
 
-    case CommandIDs::enableGUIEditor:
-        result.setInfo ("GUI Editor Enabled",
-                        "Enables or disables the GUI editor functionality",
-                        CommandCategories::general,
-                        (isGUIEditorEnabled() ? ApplicationCommandInfo::isTicked : 0));
-        break;
-
     case CommandIDs::showAboutWindow:
         result.setInfo ("About Projucer", "Shows the Projucer's 'About' page.", CommandCategories::general, 0);
         break;
@@ -1025,19 +1000,6 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         result.setInfo ("JUCE Tutorials", "Shows the JUCE tutorials in a browser", CommandCategories::general, 0);
         break;
 
-    case CommandIDs::loginLogout:
-        {
-            auto licenseState = licenseController->getCurrentState();
-
-            if (licenseState.isGPL())
-                result.setInfo ("Disable GPL mode", "Disables GPL mode", CommandCategories::general, 0);
-            else
-                result.setInfo (licenseState.isSignedIn() ? String ("Sign out ") + licenseState.username + "..." : String ("Sign in..."),
-                                "Sign out of your JUCE account",
-                                CommandCategories::general, 0);
-            break;
-        }
-
     default:
         JUCEApplication::getCommandInfo (commandID, result);
         break;
@@ -1059,7 +1021,6 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::clearRecentFiles:          clearRecentFiles(); break;
         case CommandIDs::showUTF8Tool:              showUTF8ToolWindow(); break;
         case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow(); break;
-        case CommandIDs::enableGUIEditor:           enableOrDisableGUIEditor(); break;
         case CommandIDs::showGlobalPathsWindow:     showPathsWindow (false); break;
         case CommandIDs::showAboutWindow:           showAboutWindow(); break;
         case CommandIDs::checkForNewVersion:        LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (false); break;
@@ -1068,7 +1029,6 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::showAPIModules:            launchModulesBrowser(); break;
         case CommandIDs::showAPIClasses:            launchClassesBrowser(); break;
         case CommandIDs::showTutorials:             launchTutorialsBrowser(); break;
-        case CommandIDs::loginLogout:               doLoginOrLogout(); break;
         default:                                    return JUCEApplication::perform (info);
     }
 
@@ -1098,13 +1058,14 @@ void ProjucerApplication::createNewProjectFromClipboard()
     tempFile.create();
     tempFile.appendText (SystemClipboard::getTextFromClipboard());
 
-    auto cleanup = [tempFile] (String errorString)
+    auto cleanup = [parent = WeakReference { this }, tempFile] (String errorString)
     {
-        if (errorString.isNotEmpty())
-        {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, "Error", errorString);
-            tempFile.deleteFile();
-        }
+        if (parent == nullptr || errorString.isEmpty())
+            return;
+
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon, "Error", errorString);
+        parent->messageBox = AlertWindow::showScopedAsync (options, nullptr);
+        tempFile.deleteFile();
     };
 
     if (! isPIPFile (tempFile))
@@ -1113,7 +1074,7 @@ void ProjucerApplication::createNewProjectFromClipboard()
         return;
     }
 
-    openFile (tempFile, [parent = WeakReference<ProjucerApplication> { this }, cleanup] (bool openedSuccessfully)
+    openFile (tempFile, [parent = WeakReference { this }, cleanup] (bool openedSuccessfully)
     {
         if (parent == nullptr)
             return;
@@ -1155,7 +1116,7 @@ void ProjucerApplication::saveAllDocuments()
     openDocumentManager.saveAllSyncWithoutAsking();
 
     for (int i = 0; i < mainWindowList.windows.size(); ++i)
-        if (auto* pcc = mainWindowList.windows.getUnchecked(i)->getProjectContentComponent())
+        if (auto* pcc = mainWindowList.windows.getUnchecked (i)->getProjectContentComponent())
             pcc->refreshProjectTreeFileStatuses();
 }
 
@@ -1212,16 +1173,6 @@ void ProjucerApplication::showSVGPathDataToolWindow()
         new FloatingToolWindow ("SVG Path Converter", "svgPathWindowPos",
                                 new SVGPathDataComponent(), svgPathWindow, true,
                                 500, 500, 300, 300, 1000, 1000);
-}
-
-bool ProjucerApplication::isGUIEditorEnabled() const
-{
-    return getGlobalProperties().getBoolValue (Ids::guiEditorEnabled);
-}
-
-void ProjucerApplication::enableOrDisableGUIEditor()
-{
-    getGlobalProperties().setValue (Ids::guiEditorEnabled, ! isGUIEditorEnabled());
 }
 
 void ProjucerApplication::showAboutWindow()
@@ -1300,26 +1251,6 @@ void ProjucerApplication::launchTutorialsBrowser()
         tutorialsLink.launchInDefaultBrowser();
 }
 
-void ProjucerApplication::doLoginOrLogout()
-{
-    if (licenseController->getCurrentState().isSignedIn())
-    {
-        licenseController->resetState();
-    }
-    else
-    {
-        if (auto* window = mainWindowList.getMainWindowWithLoginFormOpen())
-        {
-            window->toFront (true);
-        }
-        else
-        {
-            mainWindowList.createWindowIfNoneAreOpen();
-            mainWindowList.getFrontmostWindow()->showLoginFormOverlay();
-        }
-    }
-}
-
 //==============================================================================
 struct FileWithTime
 {
@@ -1351,7 +1282,7 @@ void ProjucerApplication::deleteLogger()
                 files.addUsingDefaultSort (f);
 
             for (int i = 0; i < files.size() - maxNumLogFilesToKeep; ++i)
-                files.getReference(i).file.deleteFile();
+                files.getReference (i).file.deleteFile();
         }
     }
 
@@ -1386,8 +1317,6 @@ void ProjucerApplication::initCommandManager()
         CppCodeEditorComponent ed (File(), doc);
         commandManager->registerAllCommandsForTarget (&ed);
     }
-
-    registerGUIEditorCommands();
 }
 
 static void rescanModules (AvailableModulesList& list, const Array<File>& paths, bool async)

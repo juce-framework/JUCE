@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2006-2009  Josh Coalson
- * Copyright (C) 2011-2016  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,6 +42,10 @@
 
 #ifndef FLAC__INTEGER_ONLY_LIBRARY
 
+#if defined(_MSC_VER)
+// silence 25 MSVC warnings 'conversion from 'double' to 'float', possible loss of data'
+#pragma warning ( disable : 4244 )
+#endif
 
 void FLAC__window_bartlett(FLAC__real *window, const FLAC__int32 L)
 {
@@ -118,9 +122,15 @@ void FLAC__window_gauss(FLAC__real *window, const FLAC__int32 L, const FLAC__rea
 	const double N2 = (double)N / 2.;
 	FLAC__int32 n;
 
-	for (n = 0; n <= N; n++) {
-		const double k = ((double)n - N2) / (stddev * N2);
-		window[n] = (FLAC__real)exp(-0.5f * k * k);
+	if(!(stddev > 0.0f && stddev <= 0.5f))
+		/* stddev is not between 0 and 0.5, might be NaN.
+		 * Default to 0.5 */
+		FLAC__window_gauss(window, L, 0.25f);
+	else {
+		for (n = 0; n <= N; n++) {
+			const double k = ((double)n - N2) / (stddev * N2);
+			window[n] = (FLAC__real)exp(-0.5f * k * k);
+		}
 	}
 }
 
@@ -192,6 +202,10 @@ void FLAC__window_tukey(FLAC__real *window, const FLAC__int32 L, const FLAC__rea
 		FLAC__window_rectangle(window, L);
 	else if (p >= 1.0)
 		FLAC__window_hann(window, L);
+	else if (!(p > 0.0f && p < 1.0f))
+		/* p is not between 0 and 1, probably NaN.
+		 * Default to 0.5 */
+		FLAC__window_tukey(window, L, 0.5f);
 	else {
 		const FLAC__int32 Np = (FLAC__int32)(p / 2.0f * L) - 1;
 		FLAC__int32 n;
@@ -218,6 +232,10 @@ void FLAC__window_partial_tukey(FLAC__real *window, const FLAC__int32 L, const F
 		FLAC__window_partial_tukey(window, L, 0.05f, start, end);
 	else if (p >= 1.0f)
 		FLAC__window_partial_tukey(window, L, 0.95f, start, end);
+	else if (!(p > 0.0f && p < 1.0f))
+		/* p is not between 0 and 1, probably NaN.
+		 * Default to 0.5 */
+		FLAC__window_partial_tukey(window, L, 0.5f, start, end);
 	else {
 
 		Np = (FLAC__int32)(p / 2.0f * N);
@@ -245,6 +263,10 @@ void FLAC__window_punchout_tukey(FLAC__real *window, const FLAC__int32 L, const 
 		FLAC__window_punchout_tukey(window, L, 0.05f, start, end);
 	else if (p >= 1.0f)
 		FLAC__window_punchout_tukey(window, L, 0.95f, start, end);
+	else if (!(p > 0.0f && p < 1.0f))
+		/* p is not between 0 and 1, probably NaN.
+		 * Default to 0.5 */
+		FLAC__window_punchout_tukey(window, L, 0.5f, start, end);
 	else {
 
 		Ns = (FLAC__int32)(p / 2.0f * start_n);
@@ -278,5 +300,9 @@ void FLAC__window_welch(FLAC__real *window, const FLAC__int32 L)
 		window[n] = (FLAC__real)(1.0f - k * k);
 	}
 }
+
+#if defined(_MSC_VER)
+#pragma warning ( default : 4244 )
+#endif
 
 #endif /* !defined FLAC__INTEGER_ONLY_LIBRARY */

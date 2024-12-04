@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -108,14 +120,11 @@ void MPEZoneLayout::processNextMidiEvent (const MidiMessage& message)
     if (! message.isController())
         return;
 
-    MidiRPNMessage rpn;
-
-    if (rpnDetector.parseControllerMessage (message.getChannel(),
+    if (auto parsed = rpnDetector.tryParse (message.getChannel(),
                                             message.getControllerNumber(),
-                                            message.getControllerValue(),
-                                            rpn))
+                                            message.getControllerValue()))
     {
-        processRpnMessage (rpn);
+        processRpnMessage (*parsed);
     }
 }
 
@@ -216,7 +225,7 @@ void MPEZoneLayout::checkAndLimitZoneParameters (int minValue, int maxValue,
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class MPEZoneLayoutTests  : public UnitTest
+class MPEZoneLayoutTests final : public UnitTest
 {
 public:
     MPEZoneLayoutTests()
@@ -384,6 +393,17 @@ public:
             expectEquals (layout.getLowerZone().numMemberChannels, 3);
             expectEquals (layout.getLowerZone().perNotePitchbendRange, 48);
             expectEquals (layout.getLowerZone().masterPitchbendRange, 2);
+
+            const auto masterPitchBend = 0x0c;
+            layout.processNextMidiEvent ({ 0xb0, 0x64, 0x00 });
+            layout.processNextMidiEvent ({ 0xb0, 0x06, masterPitchBend });
+
+            expectEquals (layout.getLowerZone().masterPitchbendRange, masterPitchBend);
+
+            const auto newPitchBend = 0x0d;
+            layout.processNextMidiEvent ({ 0xb0, 0x06, newPitchBend });
+
+            expectEquals (layout.getLowerZone().masterPitchbendRange, newPitchBend);
         }
     }
 };

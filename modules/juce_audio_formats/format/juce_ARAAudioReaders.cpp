@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -67,26 +76,26 @@ void ARAAudioSourceReader::willUpdateAudioSourceProperties (ARAAudioSource* audi
                                                             ARAAudioSource::PropertiesPtr newProperties)
 {
     if (audioSource->getSampleCount() != newProperties->sampleCount
-        || audioSource->getSampleRate() != newProperties->sampleRate
+        || ! exactlyEqual (audioSource->getSampleRate(), newProperties->sampleRate)
         || audioSource->getChannelCount() != newProperties->channelCount)
     {
         invalidate();
     }
 }
 
-void ARAAudioSourceReader::doUpdateAudioSourceContent (ARAAudioSource* audioSource,
+void ARAAudioSourceReader::doUpdateAudioSourceContent ([[maybe_unused]] ARAAudioSource* audioSource,
                                                        ARAContentUpdateScopes scopeFlags)
 {
-    jassertquiet (audioSourceBeingRead == audioSource);
+    jassert (audioSourceBeingRead == audioSource);
 
     // Don't invalidate if the audio signal is unchanged
     if (scopeFlags.affectSamples())
         invalidate();
 }
 
-void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
+void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess ([[maybe_unused]] ARAAudioSource* audioSource, bool enable)
 {
-    jassertquiet (audioSourceBeingRead == audioSource);
+    jassert (audioSourceBeingRead == audioSource);
 
     // Invalidate our reader if sample access is disabled
     if (! enable)
@@ -96,9 +105,9 @@ void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* a
     }
 }
 
-void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
+void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess ([[maybe_unused]] ARAAudioSource* audioSource, bool enable)
 {
-    jassertquiet (audioSourceBeingRead == audioSource);
+    jassert (audioSourceBeingRead == audioSource);
 
     // Recreate our reader if sample access is enabled
     if (enable && isValid())
@@ -108,9 +117,9 @@ void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* au
     }
 }
 
-void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource)
+void ARAAudioSourceReader::willDestroyAudioSource ([[maybe_unused]] ARAAudioSource* audioSource)
 {
-    jassertquiet (audioSourceBeingRead == audioSource);
+    jassert (audioSourceBeingRead == audioSource);
 
     invalidate();
 }
@@ -277,10 +286,10 @@ void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackReg
 {
     jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
 
-    if ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime)
-        || (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime)
-        || (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime)
-        || (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime)
+    if ((! exactlyEqual (playbackRegion->getStartInAudioModificationTime(), newProperties->startInModificationTime))
+        || ! exactlyEqual (playbackRegion->getDurationInAudioModificationTime(), newProperties->durationInModificationTime)
+        || ! exactlyEqual (playbackRegion->getStartInPlaybackTime(), newProperties->startInPlaybackTime)
+        || ! exactlyEqual (playbackRegion->getDurationInPlaybackTime(), newProperties->durationInPlaybackTime)
         || (playbackRegion->isTimestretchEnabled() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretch) != 0))
         || (playbackRegion->isTimeStretchReflectingTempo() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretchReflectingTempo) != 0))
         || (playbackRegion->hasContentBasedFadeAtHead() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0))
@@ -290,19 +299,19 @@ void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackReg
     }
 }
 
-void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion,
+void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent ([[maybe_unused]] ARAPlaybackRegion* playbackRegion,
                                                               ARAContentUpdateScopes scopeFlags)
 {
-    jassertquiet (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
+    jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
 
     // Invalidate if the audio signal is changed
     if (scopeFlags.affectSamples())
         invalidate();
 }
 
-void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion)
+void ARAPlaybackRegionReader::willDestroyPlaybackRegion ([[maybe_unused]] ARAPlaybackRegion* playbackRegion)
 {
-    jassertquiet (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
+    jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
 
     invalidate();
 }

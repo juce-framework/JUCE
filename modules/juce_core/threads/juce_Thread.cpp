@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -48,7 +60,7 @@ Thread::~Thread()
 //==============================================================================
 // Use a ref-counted object to hold this shared data, so that it can outlive its static
 // shared pointer when threads are still running during static shutdown.
-struct CurrentThreadHolder   : public ReferenceCountedObject
+struct CurrentThreadHolder final : public ReferenceCountedObject
 {
     CurrentThreadHolder() noexcept {}
 
@@ -166,7 +178,7 @@ bool Thread::startRealtimeThread (const RealtimeOptions& options)
 
     if (threadHandle == nullptr)
     {
-        realtimeOptions = makeOptional (options);
+        realtimeOptions = std::make_optional (options);
 
         if (startThreadInternal (Priority::normal))
             return true;
@@ -276,7 +288,7 @@ void Thread::removeListener (Listener* listener)
 
 bool Thread::isRealtime() const
 {
-    return realtimeOptions.hasValue();
+    return realtimeOptions.has_value();
 }
 
 void Thread::setAffinityMask (const uint32 newAffinityMask)
@@ -285,7 +297,7 @@ void Thread::setAffinityMask (const uint32 newAffinityMask)
 }
 
 //==============================================================================
-bool Thread::wait (const int timeOutMilliseconds) const
+bool Thread::wait (double timeOutMilliseconds) const
 {
     return defaultEvent.wait (timeOutMilliseconds);
 }
@@ -296,9 +308,9 @@ void Thread::notify() const
 }
 
 //==============================================================================
-struct LambdaThread  : public Thread
+struct LambdaThread final : public Thread
 {
-    LambdaThread (std::function<void()>&& f) : Thread ("anonymous"), fn (std::move (f)) {}
+    LambdaThread (std::function<void()>&& f) : Thread (SystemStats::getJUCEVersion() + ": anonymous"), fn (std::move (f)) {}
 
     void run() override
     {
@@ -354,7 +366,7 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger() noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class AtomicTests  : public UnitTest
+class AtomicTests final : public UnitTest
 {
 public:
     AtomicTests()
@@ -366,9 +378,9 @@ public:
         beginTest ("Misc");
 
         char a1[7];
-        expect (numElementsInArray(a1) == 7);
+        expect (numElementsInArray (a1) == 7);
         int a2[3];
-        expect (numElementsInArray(a2) == 3);
+        expect (numElementsInArray (a2) == 3);
 
         expect (ByteOrder::swap ((uint16) 0x1122) == 0x2211);
         expect (ByteOrder::swap ((uint32) 0x11223344) == 0x44332211);
@@ -417,7 +429,7 @@ public:
     class AtomicTester
     {
     public:
-        AtomicTester() {}
+        AtomicTester() = default;
 
         static void testInteger (UnitTest& test)
         {
@@ -460,17 +472,17 @@ public:
             /*  These are some simple test cases to check the atomics - let me know
                 if any of these assertions fail on your system!
             */
-            test.expect (a.get() == (Type) 101);
+            test.expect (exactlyEqual (a.get(), (Type) 101));
             test.expect (! a.compareAndSetBool ((Type) 300, (Type) 200));
-            test.expect (a.get() == (Type) 101);
+            test.expect (exactlyEqual (a.get(), (Type) 101));
             test.expect (a.compareAndSetBool ((Type) 200, a.get()));
-            test.expect (a.get() == (Type) 200);
+            test.expect (exactlyEqual (a.get(), (Type) 200));
 
-            test.expect (a.exchange ((Type) 300) == (Type) 200);
-            test.expect (a.get() == (Type) 300);
+            test.expect (exactlyEqual (a.exchange ((Type) 300), (Type) 200));
+            test.expect (exactlyEqual (a.get(), (Type) 300));
 
             b = a;
-            test.expect (b.get() == a.get());
+            test.expect (exactlyEqual (b.get(), a.get()));
         }
     };
 };
@@ -478,13 +490,13 @@ public:
 static AtomicTests atomicUnitTests;
 
 //==============================================================================
-class ThreadLocalValueUnitTest  : public UnitTest,
-                                  private Thread
+class ThreadLocalValueUnitTest final : public UnitTest,
+                                       private Thread
 {
 public:
     ThreadLocalValueUnitTest()
         : UnitTest ("ThreadLocalValue", UnitTestCategories::threads),
-          Thread ("ThreadLocalValue Thread")
+          Thread (SystemStats::getJUCEVersion() + ": ThreadLocalValue Thread")
     {}
 
     void runTest() override

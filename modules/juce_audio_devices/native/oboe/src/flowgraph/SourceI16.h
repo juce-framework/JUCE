@@ -22,8 +22,7 @@
 
 #include "FlowGraphNode.h"
 
-namespace FLOWGRAPH_OUTER_NAMESPACE {
-namespace flowgraph {
+namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph {
 /**
  * AudioSource that reads a block of pre-defined 16-bit integer data.
  */
@@ -38,7 +37,6 @@ public:
     }
 };
 
-} /* namespace flowgraph */
-} /* namespace FLOWGRAPH_OUTER_NAMESPACE */
+} /* namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph */
 
 #endif //FLOWGRAPH_SOURCE_I16_H

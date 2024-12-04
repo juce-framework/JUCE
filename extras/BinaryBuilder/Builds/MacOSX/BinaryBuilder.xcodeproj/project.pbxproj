@@ -12,8 +12,10 @@
 		3C6FF7689E2FD827A48E2303 /* Main.cpp */ = {isa = PBXBuildFile; fileRef = 50B7C64414A3E778021F5EC4; };
 		4B72EFB0E9D74CA7227F6CAB /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = 57DDB771ED96A256F190ADF8; };
 		542006E949BB022F198DF0F2 /* RecentFilesMenuTemplate.nib */ = {isa = PBXBuildFile; fileRef = 1A71A586C0F50B6B328D877B; };
+		76329EF5627C14DD1C621F6E /* Security.framework */ = {isa = PBXBuildFile; fileRef = F9E4EBBA2682611A3978340C; };
 		9E4D85A3D54739A0FA80A446 /* include_juce_core.mm */ = {isa = PBXBuildFile; fileRef = D186E2D509765FAE0758F17D; };
 		C17566E1AACD033B3DD74E9F /* Foundation.framework */ = {isa = PBXBuildFile; fileRef = 6AA23C81496E022290EB2A0C; };
+		C72C2005E0871E7542A57DDA /* include_juce_core_CompilationTime.cpp */ = {isa = PBXBuildFile; fileRef = 85EE52F3EA830387CFC8BB96; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,10 +24,12 @@
 		57DDB771ED96A256F190ADF8 /* Cocoa.framework */ /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		6AA23C81496E022290EB2A0C /* Foundation.framework */ /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		799073185F72F5FAD05253C3 /* ConsoleApp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = BinaryBuilder; sourceTree = BUILT_PRODUCTS_DIR; };
+		85EE52F3EA830387CFC8BB96 /* include_juce_core_CompilationTime.cpp */ /* include_juce_core_CompilationTime.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_core_CompilationTime.cpp; path = ../../JuceLibraryCode/include_juce_core_CompilationTime.cpp; sourceTree = SOURCE_ROOT; };
 		8702176D2368B6F785546D2B /* juce_core */ /* juce_core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_core; path = ../../../../modules/juce_core; sourceTree = SOURCE_ROOT; };
 		D186E2D509765FAE0758F17D /* include_juce_core.mm */ /* include_juce_core.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_core.mm; path = ../../JuceLibraryCode/include_juce_core.mm; sourceTree = SOURCE_ROOT; };
 		D6C3594C8BEC94040AF108FE /* JuceHeader.h */ /* JuceHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = SOURCE_ROOT; };
 		F769CD634476C91F4C9D0596 /* IOKit.framework */ /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		F9E4EBBA2682611A3978340C /* Security.framework */ /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +40,7 @@
 				4B72EFB0E9D74CA7227F6CAB,
 				C17566E1AACD033B3DD74E9F,
 				0D53D8B0AEE37C02C147344B,
+				76329EF5627C14DD1C621F6E,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,6 +75,7 @@
 			isa = PBXGroup;
 			children = (
 				D186E2D509765FAE0758F17D,
+				85EE52F3EA830387CFC8BB96,
 				D6C3594C8BEC94040AF108FE,
 			);
 			name = "JUCE Library Code";
@@ -110,6 +116,7 @@
 				57DDB771ED96A256F190ADF8,
 				6AA23C81496E022290EB2A0C,
 				F769CD634476C91F4C9D0596,
+				F9E4EBBA2682611A3978340C,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -140,6 +147,7 @@
 		36B6F402BC83F21646259DEF = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1340;
 				ORGANIZATIONNAME = "Raw Material Software Limited";
 			};
@@ -177,6 +185,7 @@
 			files = (
 				3C6FF7689E2FD827A48E2303,
 				9E4D85A3D54739A0FA80A446,
+				C72C2005E0871E7542A57DDA,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -198,12 +207,11 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_DEBUG=1",
 					"DEBUG=1",
-					"JUCE_DISPLAY_SPLASH_SCREEN=0",
-					"JUCE_USE_DARK_SPLASH_SCREEN=1",
-					"JUCE_PROJUCER_VERSION=0x70004",
+					"JUCE_PROJUCER_VERSION=0x80004",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
 					"JUCE_STANDALONE_APPLICATION=1",
+					"JUCE_SILENCE_XCODE_15_LINKER_WARNING=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
 					"JUCE_APP_VERSION=1.0.0",
 					"JUCE_APP_VERSION_HEX=0x10000",
@@ -225,6 +233,7 @@
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
+				OTHER_LDFLAGS = "-Wl,-weak_reference_mismatches,weak";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.binarybuilder;
 				PRODUCT_NAME = "BinaryBuilder";
 				USE_HEADERMAP = NO;
@@ -272,6 +281,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CODE_SIGN_FLAGS = --timestamp;
 				PRODUCT_NAME = "BinaryBuilder";
 				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";
@@ -294,12 +304,11 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_NDEBUG=1",
 					"NDEBUG=1",
-					"JUCE_DISPLAY_SPLASH_SCREEN=0",
-					"JUCE_USE_DARK_SPLASH_SCREEN=1",
-					"JUCE_PROJUCER_VERSION=0x70004",
+					"JUCE_PROJUCER_VERSION=0x80004",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
 					"JUCE_STANDALONE_APPLICATION=1",
+					"JUCE_SILENCE_XCODE_15_LINKER_WARNING=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
 					"JUCE_APP_VERSION=1.0.0",
 					"JUCE_APP_VERSION_HEX=0x10000",
@@ -322,6 +331,7 @@
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
+				OTHER_LDFLAGS = "-Wl,-weak_reference_mismatches,weak";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.binarybuilder;
 				PRODUCT_NAME = "BinaryBuilder";
 				USE_HEADERMAP = NO;
@@ -370,6 +380,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CODE_SIGN_FLAGS = --timestamp;
 				PRODUCT_NAME = "BinaryBuilder";
 				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";

@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -194,11 +203,6 @@ const uint8 android[] = { 110,109,31,179,128,65,235,31,97,65,98,31,179,128,65,21
     159,84,65,51,76,36,63,98,192,70,83,65,100,115,21,63,214,87,81,65,146,202,28,63,152,81,80,65,106,223,52,63,108,206,64,62,65,202,79,22,64,98,3,89,50,65,182,131,3,64,149,32,37,65,39,20,242,63,99,49,23,65,39,20,242,63,98,48,66,9,65,39,20,242,63,195,17,248,
     64,15,129,3,64,158,66,224,64,202,79,22,64,108,100,34,188,64,224,219,52,63,98,43,16,186,64,28,206,28,63,32,52,182,64,219,111,21,63,164,129,179,64,174,72,36,63,98,40,207,176,64,31,44,51,63,9,76,176,64,156,194,82,63,127,92,178,64,115,215,106,63,108,123,
     35,213,64,219,223,31,64,98,38,216,157,64,148,108,83,64,182,34,110,64,196,176,154,64,1,65,100,64,77,218,211,64,108,223,79,117,65,77,218,211,64,98,167,217,114,65,196,176,154,64,10,118,95,65,118,109,83,64,207,208,67,65,189,224,31,64,101,0,0 };
-
-const uint8 codeBlocks[] = { 110,109,0,0,0,0,0,0,0,0,108,0,0,0,0,0,208,235,64,108,0,192,134,64,0,152,23,65,108,0,152,23,65,0,152,23,65,108,0,152,23,65,0,192,134,64,108,0,208,235,64,0,0,0,0,108,0,0,0,0,0,0,0,0,99,109,0,24,74,65,0,0,0,0,108,0,104,40,65,0,192,134,64,108,0,104,40,65,
-    0,152,23,65,108,255,159,124,65,0,152,23,65,108,0,0,160,65,0,208,235,64,108,0,0,160,65,0,0,0,0,108,0,24,74,65,0,0,0,0,99,109,0,192,134,64,0,104,40,65,108,0,0,0,0,0,24,74,65,108,0,0,0,0,0,0,160,65,108,0,208,235,64,0,0,160,65,108,0,152,23,65,255,159,124,
-    65,108,0,152,23,65,0,104,40,65,108,0,192,134,64,0,104,40,65,99,109,0,104,40,65,0,104,40,65,108,0,104,40,65,255,159,124,65,108,0,24,74,65,0,0,160,65,108,0,0,160,65,0,0,160,65,108,0,0,160,65,0,24,74,65,108,255,159,124,65,0,104,40,65,108,0,104,40,65,0,104,
-    40,65,99,101,0,0 };
 
 const uint8 linux[] = { 110,109,0,0,124,66,174,71,130,66,108,0,0,124,66,174,71,130,66,108,162,178,123,66,87,5,130,66,108,186,94,123,66,5,197,129,66,108,128,4,123,66,225,134,129,66,108,45,164,122,66,17,75,129,66,108,254,61,122,66,189,17,129,66,108,52,210,121,66,9,219,128,66,
     108,22,97,121,66,24,167,128,66,108,234,234,120,66,11,118,128,66,108,143,194,120,66,102,102,128,66,108,143,194,120,66,102,102,128,66,108,143,194,120,66,102,102,128,66,108,167,246,119,66,12,20,128,66,108,198,34,119,66,200,141,127,66,108,114,71,118,66,65,
@@ -651,7 +655,6 @@ Icons::Icons()
     JUCE_LOAD_PATH_DATA (singleModule)
     JUCE_LOAD_PATH_DATA (plus);
     JUCE_LOAD_PATH_DATA (android);
-    JUCE_LOAD_PATH_DATA (codeBlocks);
     JUCE_LOAD_PATH_DATA (linux);
     JUCE_LOAD_PATH_DATA (xcode);
     JUCE_LOAD_PATH_DATA (visualStudio);

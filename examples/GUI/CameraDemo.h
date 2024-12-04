@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -50,7 +54,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class CameraDemo  : public Component
+class CameraDemo final : public Component
 {
 public:
     CameraDemo()
@@ -123,7 +127,7 @@ public:
         auto previewArea = shouldUseLandscapeLayout() ? r.removeFromLeft (r.getWidth() / 2)
                                                       : r.removeFromTop (r.getHeight() / 2);
 
-        if (cameraPreviewComp.get() != nullptr)
+        if (cameraPreviewComp != nullptr)
             cameraPreviewComp->setBounds (previewArea);
 
         if (shouldUseLandscapeLayout())
@@ -252,8 +256,10 @@ private:
         }
         else
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, "Camera open failed",
-                                              "Camera open failed, reason: " + error);
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             "Camera open failed",
+                                                             "Camera open failed, reason: " + error);
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
 
         snapshotButton   .setEnabled (cameraDevice.get() != nullptr && ! contentSharingPending);
@@ -312,12 +318,11 @@ private:
 
                 SafePointer<CameraDemo> safeThis (this);
 
-                juce::ContentSharer::getInstance()->shareFiles ({url},
-                                                                [safeThis] (bool success, const String&) mutable
-                                                                {
-                                                                    if (safeThis)
-                                                                        safeThis->sharingFinished (success, false);
-                                                                });
+                messageBox = ContentSharer::shareFilesScoped ({ url }, [safeThis] (bool success, const String&)
+                {
+                    if (safeThis)
+                        safeThis->sharingFinished (success, false);
+                });
                #endif
             }
         }
@@ -353,21 +358,21 @@ private:
 
             SafePointer<CameraDemo> safeThis (this);
 
-            juce::ContentSharer::getInstance()->shareFiles ({url},
-                                                            [safeThis] (bool success, const String&) mutable
-                                                            {
-                                                                if (safeThis)
-                                                                    safeThis->sharingFinished (success, true);
-                                                            });
+            messageBox = ContentSharer::shareFilesScoped ({ url }, [safeThis] (bool success, const String&)
+            {
+                if (safeThis)
+                    safeThis->sharingFinished (success, true);
+            });
         }
        #endif
     }
 
     void errorOccurred (const String& error)
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
-                                          "Camera Device Error",
-                                          "An error has occurred: " + error + " Camera will be closed.");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
+                                                         "Camera Device Error",
+                                                         "An error has occurred: " + error + " Camera will be closed.");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
 
         cameraDevice.reset();
 
@@ -378,14 +383,17 @@ private:
 
     void sharingFinished (bool success, bool isCapture)
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
-                                          isCapture ? "Image sharing result" : "Video sharing result",
-                                          success ? "Success!" : "Failed!");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
+                                                         isCapture ? "Image sharing result" : "Video sharing result",
+                                                         success ? "Success!" : "Failed!");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
 
         contentSharingPending = false;
         snapshotButton   .setEnabled (true);
         recordMovieButton.setEnabled (true);
     }
+
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDemo)
 };

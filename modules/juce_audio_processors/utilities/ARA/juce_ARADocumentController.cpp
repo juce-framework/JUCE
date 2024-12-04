@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -26,8 +35,7 @@
 namespace juce
 {
 
-class ARADocumentControllerSpecialisation::ARADocumentControllerImpl  : public ARADocumentController,
-                                                                        private juce::Timer
+class ARADocumentControllerSpecialisation::ARADocumentControllerImpl  : public ARADocumentController
 {
 public:
     ARADocumentControllerImpl (const ARA::PlugIn::PlugInEntry* entry,
@@ -114,6 +122,9 @@ protected:
     ARA::PlugIn::ContentReader* doCreatePlaybackRegionContentReader (ARA::PlugIn::PlaybackRegion* playbackRegion,
                                                                      ARA::ARAContentType type,
                                                                      const ARA::ARAContentTimeRange* range) noexcept override;
+    void doGetPlaybackRegionHeadAndTailTime (const ARA::PlugIn::PlaybackRegion* playbackRegion,
+                                             ARA::ARATimeDuration* headTime,
+                                             ARA::ARATimeDuration* tailTime) noexcept override;
 
     //==============================================================================
     // ARAAudioSource analysis
@@ -201,10 +212,6 @@ protected:
     void didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
     void willDestroyPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
 
-    //==============================================================================
-    // juce::Timer overrides
-    void timerCallback() override;
-
 public:
     //==============================================================================
     /** @internal */
@@ -245,6 +252,9 @@ private:
     std::atomic<bool> internalAnalysisProgressIsSynced { true };
     ScopedJuceInitialiser_GUI libraryInitialiser;
     int activeAudioSourcesCount = 0;
+    std::optional<TimedCallback> analysisTimer;
+
+    void analysisTimerCallback();
 
     //==============================================================================
     template <typename ModelObject, typename Function, typename... Ts>
@@ -360,10 +370,15 @@ void ARADocumentControllerSpecialisation::ARADocumentControllerImpl::didEndEditi
 {
     notifyListeners (&ARADocument::Listener::didEndEditing, static_cast<ARADocument*> (getDocument()));
 
-    if (isTimerRunning() && (activeAudioSourcesCount == 0))
-        stopTimer();
-    else if (! isTimerRunning() && (activeAudioSourcesCount > 0))
-        startTimerHz (20);
+    if (activeAudioSourcesCount == 0)
+    {
+        analysisTimer.reset();
+    }
+    else if (! analysisTimer.has_value() && (activeAudioSourcesCount > 0))
+    {
+        analysisTimer.emplace ([this] { analysisTimerCallback(); });
+        analysisTimer->startTimerHz (20);
+    }
 }
 
 void ARADocumentControllerSpecialisation::ARADocumentControllerImpl::willNotifyModelUpdates() noexcept
@@ -659,6 +674,13 @@ ARA::PlugIn::ContentReader* ARADocumentControllerSpecialisation::ARADocumentCont
     return specialisation->doCreatePlaybackRegionContentReader (playbackRegion, type, range);
 }
 
+void ARADocumentControllerSpecialisation::ARADocumentControllerImpl::doGetPlaybackRegionHeadAndTailTime (const ARA::PlugIn::PlaybackRegion* playbackRegion,
+                                                                                                         ARA::ARATimeDuration* headTime,
+                                                                                                         ARA::ARATimeDuration* tailTime) noexcept
+{
+    specialisation->doGetPlaybackRegionHeadAndTailTime (playbackRegion, headTime, tailTime);
+}
+
 bool ARADocumentControllerSpecialisation::ARADocumentControllerImpl::doIsAudioSourceContentAnalysisIncomplete (const ARA::PlugIn::AudioSource* audioSource,
                                                                                                                ARA::ARAContentType type) noexcept
 {
@@ -750,7 +772,7 @@ namespace ModelUpdateControllerProgressAdapter
     }
 }
 
-void ARADocumentControllerSpecialisation::ARADocumentControllerImpl::timerCallback()
+void ARADocumentControllerSpecialisation::ARADocumentControllerImpl::analysisTimerCallback()
 {
     if (! internalAnalysisProgressIsSynced.exchange (true, std::memory_order_release))
         for (auto& audioSource : getDocument()->getAudioSources())
@@ -913,6 +935,14 @@ ARA::PlugIn::ContentReader* ARADocumentControllerSpecialisation::doCreatePlaybac
     jassertfalse;
 
     return nullptr;
+}
+
+void ARADocumentControllerSpecialisation::doGetPlaybackRegionHeadAndTailTime ([[maybe_unused]] const ARA::PlugIn::PlaybackRegion* playbackRegion,
+                                                                              ARA::ARATimeDuration* headTime,
+                                                                              ARA::ARATimeDuration* tailTime)
+{
+    *headTime = 0.0;
+    *tailTime = 0.0;
 }
 
 bool ARADocumentControllerSpecialisation::doIsAudioSourceContentAnalysisIncomplete ([[maybe_unused]] const ARA::PlugIn::AudioSource* audioSource,

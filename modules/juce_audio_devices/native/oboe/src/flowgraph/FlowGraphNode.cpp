@@ -68,7 +68,7 @@ FlowGraphPortFloat::FlowGraphPortFloat(FlowGraphNode &parent,
         : FlowGraphPort(parent, samplesPerFrame)
         , mFramesPerBuffer(framesPerBuffer)
         , mBuffer(nullptr) {
-    size_t numFloats = static_cast<size_t>(framesPerBuffer * getSamplesPerFrame());
+    size_t numFloats = static_cast<size_t>(framesPerBuffer) * getSamplesPerFrame();
     mBuffer = std::make_unique<float[]>(numFloats);
 }
 

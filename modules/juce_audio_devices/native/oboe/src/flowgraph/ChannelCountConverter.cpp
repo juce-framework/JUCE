@@ -27,7 +27,7 @@ ChannelCountConverter::ChannelCountConverter(
         , output(*this, outputChannelCount) {
 }
 
-ChannelCountConverter::~ChannelCountConverter() { }
+ChannelCountConverter::~ChannelCountConverter() = default;
 
 int32_t ChannelCountConverter::onProcess(int32_t numFrames) {
     const float *inputBuffer = input.getBuffer();

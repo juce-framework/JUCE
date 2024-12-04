@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -35,19 +44,18 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            7.0.4
+  version:            8.0.4
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
-  license:            GPL/Commercial
+  license:            AGPLv3/Commercial
   minimumCppStandard: 17
 
   dependencies:       juce_graphics juce_data_structures
   OSXFrameworks:      Cocoa QuartzCore
   WeakOSXFrameworks:  Metal MetalKit
   iOSFrameworks:      CoreServices UIKit
-  WeakiOSFrameworks:  Metal MetalKit
-  mingwLibs:          dxgi
+  WeakiOSFrameworks:  Metal MetalKit UniformTypeIdentifiers
 
  END_JUCE_MODULE_DECLARATION
 
@@ -127,7 +135,6 @@ namespace juce
     class Component;
     class LookAndFeel;
     class MouseInputSource;
-    class MouseInputSourceInternal;
     class ComponentPeer;
     class MouseEvent;
     struct MouseWheelDetails;
@@ -161,16 +168,27 @@ namespace juce
     class Displays;
     class AccessibilityHandler;
     class KeyboardFocusTraverser;
-    class PointerState;
 
     class FlexBox;
     class Grid;
     class FocusOutline;
 
-   #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX
+   #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
     Image createSnapshotOfNativeWindow (void* nativeWindowHandle);
    #endif
-}
+
+    namespace detail
+    {
+        struct ComponentHelpers;
+        class MouseInputSourceImpl;
+        class MouseInputSourceList;
+        class PointerState;
+        class ScopedMessageBoxImpl;
+        class ToolbarItemDragAndDropOverlayComponent;
+        class TopLevelWindowManager;
+    } // namespace detail
+
+} // namespace juce
 
 #include "mouse/juce_MouseCursor.h"
 #include "mouse/juce_MouseListener.h"
@@ -189,6 +207,7 @@ namespace juce
 #include "desktop/juce_Desktop.h"
 #include "desktop/juce_Displays.h"
 #include "layout/juce_ComponentBoundsConstrainer.h"
+#include "layout/juce_BorderedComponentBoundsConstrainer.h"
 #include "mouse/juce_ComponentDragger.h"
 #include "mouse/juce_DragAndDropTarget.h"
 #include "mouse/juce_DragAndDropContainer.h"
@@ -230,6 +249,16 @@ namespace juce
 #include "layout/juce_StretchableObjectResizer.h"
 #include "layout/juce_TabbedButtonBar.h"
 #include "layout/juce_TabbedComponent.h"
+#include "accessibility/interfaces/juce_AccessibilityCellInterface.h"
+#include "accessibility/interfaces/juce_AccessibilityTableInterface.h"
+#include "accessibility/interfaces/juce_AccessibilityTextInterface.h"
+#include "accessibility/interfaces/juce_AccessibilityValueInterface.h"
+#include "accessibility/enums/juce_AccessibilityActions.h"
+#include "accessibility/enums/juce_AccessibilityEvent.h"
+#include "accessibility/enums/juce_AccessibilityRole.h"
+#include "accessibility/juce_AccessibilityState.h"
+#include "accessibility/juce_AccessibilityHandler.h"
+#include "drawables/juce_Drawable.h"
 #include "layout/juce_Viewport.h"
 #include "menus/juce_PopupMenu.h"
 #include "menus/juce_MenuBarModel.h"
@@ -241,7 +270,6 @@ namespace juce
 #include "positioning/juce_RelativeCoordinatePositioner.h"
 #include "positioning/juce_RelativeParallelogram.h"
 #include "positioning/juce_RelativePointPath.h"
-#include "drawables/juce_Drawable.h"
 #include "drawables/juce_DrawableShape.h"
 #include "drawables/juce_DrawableComposite.h"
 #include "drawables/juce_DrawableImage.h"
@@ -265,10 +293,10 @@ namespace juce
 #include "buttons/juce_ToolbarButton.h"
 #include "misc/juce_DropShadower.h"
 #include "misc/juce_FocusOutline.h"
-#include "misc/juce_JUCESplashScreen.h"
 #include "widgets/juce_TreeView.h"
 #include "windows/juce_TopLevelWindow.h"
 #include "windows/juce_MessageBoxOptions.h"
+#include "windows/juce_ScopedMessageBox.h"
 #include "windows/juce_AlertWindow.h"
 #include "windows/juce_CallOutBox.h"
 #include "windows/juce_ComponentPeer.h"
@@ -278,7 +306,9 @@ namespace juce
 #include "windows/juce_NativeMessageBox.h"
 #include "windows/juce_ThreadWithProgressWindow.h"
 #include "windows/juce_TooltipWindow.h"
-#include "windows/juce_VBlankAttachement.h"
+#include "windows/juce_VBlankAttachment.h"
+#include "windows/juce_WindowUtils.h"
+#include "windows/juce_NativeScaleFactorNotifier.h"
 #include "layout/juce_MultiDocumentPanel.h"
 #include "layout/juce_SidePanel.h"
 #include "filebrowser/juce_FileBrowserListener.h"
@@ -310,20 +340,13 @@ namespace juce
 #include "lookandfeel/juce_LookAndFeel_V3.h"
 #include "lookandfeel/juce_LookAndFeel_V4.h"
 #include "mouse/juce_LassoComponent.h"
-#include "accessibility/interfaces/juce_AccessibilityCellInterface.h"
-#include "accessibility/interfaces/juce_AccessibilityTableInterface.h"
-#include "accessibility/interfaces/juce_AccessibilityTextInterface.h"
-#include "accessibility/interfaces/juce_AccessibilityValueInterface.h"
-#include "accessibility/enums/juce_AccessibilityActions.h"
-#include "accessibility/enums/juce_AccessibilityEvent.h"
-#include "accessibility/enums/juce_AccessibilityRole.h"
-#include "accessibility/juce_AccessibilityState.h"
-#include "accessibility/juce_AccessibilityHandler.h"
 
 #if JUCE_LINUX || JUCE_BSD
  #if JUCE_GUI_BASICS_INCLUDE_XHEADERS
   // If you're missing these headers, you need to install the libx11-dev package
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wvariadic-macros")
   #include <X11/Xlib.h>
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
   #include <X11/Xatom.h>
   #include <X11/Xresource.h>
   #include <X11/Xutil.h>
@@ -363,13 +386,13 @@ namespace juce
   #undef SIZEOF
   #undef KeyPress
 
-  #include "native/x11/juce_linux_XWindowSystem.h"
-  #include "native/x11/juce_linux_X11_Symbols.h"
+  #include "native/juce_XWindowSystem_linux.h"
+  #include "native/juce_XSymbols_linux.h"
  #endif
 #endif
 
 #if JUCE_GUI_BASICS_INCLUDE_SCOPED_THREAD_DPI_AWARENESS_SETTER && JUCE_WINDOWS
- #include "native/juce_win32_ScopedThreadDPIAwarenessSetter.h"
+ #include "native/juce_ScopedThreadDPIAwarenessSetter_windows.h"
 #endif
 
 #include "layout/juce_FlexItem.h"

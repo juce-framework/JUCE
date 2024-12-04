@@ -16,7 +16,7 @@ static OSStatus CB_GetComponentDescription(
 
 std::recursive_mutex& ComponentBase::InitializationMutex()
 {
-	__attribute__((no_destroy)) static std::recursive_mutex global;
+	__attribute__ ((no_destroy)) static std::recursive_mutex global;
 	return global;
 }
 

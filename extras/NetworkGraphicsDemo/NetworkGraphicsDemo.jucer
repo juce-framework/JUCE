@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="gWI5Ir" name="NetworkGraphicsDemo" projectType="guiapp" bundleIdentifier="com.juce.NetworkGraphicsDemo"
-              displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
+              companyName="Raw Material Software Limited"
               companyCopyright="Raw Material Software Limited" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <MAINGROUP id="OT9rJ2" name="NetworkGraphicsDemo">

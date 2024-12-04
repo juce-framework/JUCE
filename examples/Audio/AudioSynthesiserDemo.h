@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -53,20 +57,16 @@
 
 //==============================================================================
 /** Our demo synth sound is just a basic sine wave.. */
-struct SineWaveSound : public SynthesiserSound
+struct SineWaveSound final : public SynthesiserSound
 {
-    SineWaveSound() {}
-
     bool appliesToNote (int /*midiNoteNumber*/) override    { return true; }
     bool appliesToChannel (int /*midiChannel*/) override    { return true; }
 };
 
 //==============================================================================
 /** Our demo synth voice just plays a sine wave.. */
-struct SineWaveVoice  : public SynthesiserVoice
+struct SineWaveVoice final : public SynthesiserVoice
 {
-    SineWaveVoice() {}
-
     bool canPlaySound (SynthesiserSound* sound) override
     {
         return dynamic_cast<SineWaveSound*> (sound) != nullptr;
@@ -92,8 +92,8 @@ struct SineWaveVoice  : public SynthesiserVoice
             // start a tail-off by setting this flag. The render callback will pick up on
             // this and do a fade out, calling clearCurrentNote() when it's finished.
 
-            if (tailOff == 0.0) // we only need to begin a tail-off if it's not already doing so - the
-                tailOff = 1.0;  // stopNote method could be called more than once.
+            if (approximatelyEqual (tailOff, 0.0)) // we only need to begin a tail-off if it's not already doing so - the
+                tailOff = 1.0;                     // stopNote method could be called more than once.
         }
         else
         {
@@ -108,7 +108,7 @@ struct SineWaveVoice  : public SynthesiserVoice
 
     void renderNextBlock (AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override
     {
-        if (angleDelta != 0.0)
+        if (! approximatelyEqual (angleDelta, 0.0))
         {
             if (tailOff > 0.0)
             {
@@ -157,7 +157,7 @@ private:
 
 //==============================================================================
 // This is an audio source that streams the output of our demo synth.
-struct SynthAudioSource  : public AudioSource
+struct SynthAudioSource final : public AudioSource
 {
     SynthAudioSource (MidiKeyboardState& keyState)  : keyboardState (keyState)
     {
@@ -242,7 +242,52 @@ struct SynthAudioSource  : public AudioSource
 };
 
 //==============================================================================
-class AudioSynthesiserDemo  : public Component
+class Callback final : public AudioIODeviceCallback
+{
+public:
+    Callback (AudioSourcePlayer& playerIn, LiveScrollingAudioDisplay& displayIn)
+        : player (playerIn), display (displayIn) {}
+
+    void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
+                                           int numInputChannels,
+                                           float* const* outputChannelData,
+                                           int numOutputChannels,
+                                           int numSamples,
+                                           const AudioIODeviceCallbackContext& context) override
+    {
+        player.audioDeviceIOCallbackWithContext (inputChannelData,
+                                                 numInputChannels,
+                                                 outputChannelData,
+                                                 numOutputChannels,
+                                                 numSamples,
+                                                 context);
+        display.audioDeviceIOCallbackWithContext (outputChannelData,
+                                                  numOutputChannels,
+                                                  nullptr,
+                                                  0,
+                                                  numSamples,
+                                                  context);
+    }
+
+    void audioDeviceAboutToStart (AudioIODevice* device) override
+    {
+        player.audioDeviceAboutToStart (device);
+        display.audioDeviceAboutToStart (device);
+    }
+
+    void audioDeviceStopped() override
+    {
+        player.audioDeviceStopped();
+        display.audioDeviceStopped();
+    }
+
+private:
+    AudioSourcePlayer& player;
+    LiveScrollingAudioDisplay& display;
+};
+
+//==============================================================================
+class AudioSynthesiserDemo final : public Component
 {
 public:
     AudioSynthesiserDemo()
@@ -259,19 +304,13 @@ public:
         sampledButton.onClick = [this] { synthAudioSource.setUsingSampledSound(); };
 
         addAndMakeVisible (liveAudioDisplayComp);
-        audioDeviceManager.addAudioCallback (&liveAudioDisplayComp);
         audioSourcePlayer.setSource (&synthAudioSource);
 
        #ifndef JUCE_DEMO_RUNNER
-        RuntimePermissions::request (RuntimePermissions::recordAudio,
-                                     [this] (bool granted)
-                                     {
-                                         int numInputChannels = granted ? 2 : 0;
-                                         audioDeviceManager.initialise (numInputChannels, 2, nullptr, true, {}, nullptr);
-                                     });
+        audioDeviceManager.initialise (0, 2, nullptr, true, {}, nullptr);
        #endif
 
-        audioDeviceManager.addAudioCallback (&audioSourcePlayer);
+        audioDeviceManager.addAudioCallback (&callback);
         audioDeviceManager.addMidiInputDeviceCallback ({}, &(synthAudioSource.midiCollector));
 
         setOpaque (true);
@@ -282,8 +321,7 @@ public:
     {
         audioSourcePlayer.setSource (nullptr);
         audioDeviceManager.removeMidiInputDeviceCallback ({}, &(synthAudioSource.midiCollector));
-        audioDeviceManager.removeAudioCallback (&audioSourcePlayer);
-        audioDeviceManager.removeAudioCallback (&liveAudioDisplayComp);
+        audioDeviceManager.removeAudioCallback (&callback);
     }
 
     //==============================================================================
@@ -317,6 +355,8 @@ private:
     ToggleButton sampledButton  { "Use sampled sound" };
 
     LiveScrollingAudioDisplay liveAudioDisplayComp;
+
+    Callback callback { audioSourcePlayer, liveAudioDisplayComp };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSynthesiserDemo)
 };

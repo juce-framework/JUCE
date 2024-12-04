@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -26,8 +35,8 @@
 namespace juce
 {
 
-struct Spinner  : public Component,
-                  private Timer
+struct Spinner final : public Component,
+                       private Timer
 {
     Spinner()                       { startTimer (1000 / 50); }
     void timerCallback() override   { repaint(); }
@@ -36,12 +45,14 @@ struct Spinner  : public Component,
     {
         getLookAndFeel().drawSpinningWaitAnimation (g, Colours::darkgrey, 0, 0, getWidth(), getHeight());
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Spinner)
 };
 
-struct OnlineUnlockForm::OverlayComp  : public Component,
-                                        private Thread,
-                                        private Timer,
-                                        private Button::Listener
+struct OnlineUnlockForm::OverlayComp final : public Component,
+                                             private Thread,
+                                             private Timer,
+                                             private Button::Listener
 {
     OverlayComp (OnlineUnlockForm& f, bool hasCancelButton = false)
         : Thread (String()), form (f)
@@ -73,7 +84,7 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
         g.setColour (Colours::black);
         g.setFont (15.0f);
 
-        g.drawFittedText (TRANS("Contacting XYZ...").replace ("XYZ", form.status.getWebsiteName()),
+        g.drawFittedText (TRANS ("Contacting XYZ...").replace ("XYZ", form.status.getWebsiteName()),
                           getLocalBounds().reduced (20, 0).removeFromTop (proportionOfHeight (0.6f)),
                           Justification::centred, 5);
     }
@@ -100,15 +111,21 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
 
         if (result.errorMessage.isNotEmpty())
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                              TRANS("Registration Failed"),
-                                              result.errorMessage);
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             TRANS ("Registration Failed"),
+                                                             result.errorMessage,
+                                                             {},
+                                                             &form);
+            form.messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
         else if (result.informativeMessage.isNotEmpty())
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
-                                              TRANS("Registration Complete!"),
-                                              result.informativeMessage);
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
+                                                             TRANS ("Registration Complete!"),
+                                                             result.informativeMessage,
+                                                             {},
+                                                             &form);
+            form.messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
         else if (result.urlToLaunch.isNotEmpty())
         {
@@ -164,7 +181,7 @@ OnlineUnlockForm::OnlineUnlockForm (OnlineUnlockStatus& s,
                                     bool overlayHasCancelButton)
     : message (String(), userInstructions),
       passwordBox (String(), getDefaultPasswordChar()),
-      registerButton (TRANS("Register")),
+      registerButton (TRANS ("Register")),
       cancelButton (TRANS ("Cancel")),
       status (s),
       showOverlayCancelButton (overlayHasCancelButton)
@@ -235,9 +252,10 @@ void OnlineUnlockForm::resized()
     r.removeFromBottom (20);
 
     // (force use of a default system font to make sure it has the password blob character)
-    Font font (Font::getDefaultTypefaceForFont (Font (Font::getDefaultSansSerifFontName(),
-                                                      Font::getDefaultStyle(),
-                                                      5.0f)));
+    const auto typeface = Font::getDefaultTypefaceForFont (FontOptions (Font::getDefaultSansSerifFontName(),
+                                                                        Font::getDefaultStyle(),
+                                                                        5.0f));
+    Font font (withDefaultMetrics (FontOptions { typeface }));
 
     const int boxHeight = 24;
     passwordBox.setBounds (r.removeFromBottom (boxHeight));
@@ -261,8 +279,8 @@ void OnlineUnlockForm::lookAndFeelChanged()
 {
     Colour labelCol (findColour (TextEditor::backgroundColourId).contrasting (0.5f));
 
-    emailBox.setTextToShowWhenEmpty (TRANS("Email Address"), labelCol);
-    passwordBox.setTextToShowWhenEmpty (TRANS("Password"), labelCol);
+    emailBox.setTextToShowWhenEmpty (TRANS ("Email Address"), labelCol);
+    passwordBox.setTextToShowWhenEmpty (TRANS ("Password"), labelCol);
 }
 
 void OnlineUnlockForm::showBubbleMessage (const String& text, Component& target)
@@ -271,7 +289,7 @@ void OnlineUnlockForm::showBubbleMessage (const String& text, Component& target)
     addChildComponent (bubble.get());
 
     AttributedString attString;
-    attString.append (text, Font (16.0f));
+    attString.append (text, withDefaultMetrics (FontOptions (16.0f)));
 
     bubble->showAt (getLocalArea (&target, target.getLocalBounds()),
                     attString, 500,  // numMillisecondsBeforeRemoving

@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -30,9 +39,14 @@ struct ImageCache::Pimpl     : private Timer,
                                private DeletedAtShutdown
 {
     Pimpl() = default;
-    ~Pimpl() override { clearSingletonInstance(); }
 
-    JUCE_DECLARE_SINGLETON (ImageCache::Pimpl, false)
+    ~Pimpl() override
+    {
+        stopTimer();
+        clearSingletonInstance();
+    }
+
+    JUCE_DECLARE_SINGLETON_INLINE (ImageCache::Pimpl, false)
 
     Image getFromHashCode (const int64 hashCode) noexcept
     {
@@ -70,7 +84,7 @@ struct ImageCache::Pimpl     : private Timer,
 
         for (int i = images.size(); --i >= 0;)
         {
-            auto& item = images.getReference(i);
+            auto& item = images.getReference (i);
 
             if (item.image.getReferenceCount() <= 1)
             {
@@ -92,7 +106,7 @@ struct ImageCache::Pimpl     : private Timer,
         const ScopedLock sl (lock);
 
         for (int i = images.size(); --i >= 0;)
-            if (images.getReference(i).image.getReferenceCount() <= 1)
+            if (images.getReference (i).image.getReferenceCount() <= 1)
                 images.remove (i);
     }
 
@@ -109,9 +123,6 @@ struct ImageCache::Pimpl     : private Timer,
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
-
-JUCE_IMPLEMENT_SINGLETON (ImageCache::Pimpl)
-
 
 //==============================================================================
 Image ImageCache::getFromHashCode (const int64 hashCode)

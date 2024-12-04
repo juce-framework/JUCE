@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -26,7 +35,7 @@
 namespace juce
 {
 
-class KeyMappingEditorComponent::ChangeKeyButton  : public Button
+class KeyMappingEditorComponent::ChangeKeyButton final : public Button
 {
 public:
     ChangeKeyButton (KeyMappingEditorComponent& kec, CommandID command,
@@ -39,8 +48,8 @@ public:
         setWantsKeyboardFocus (false);
         setTriggeredOnMouseDown (keyNum >= 0);
 
-        setTooltip (keyIndex < 0 ? TRANS("Adds a new key-mapping")
-                                 : TRANS("Click to change this key-mapping"));
+        setTooltip (keyIndex < 0 ? TRANS ("Adds a new key-mapping")
+                                 : TRANS ("Click to change this key-mapping"));
     }
 
     void paintButton (Graphics& g, bool /*isOver*/, bool /*isDown*/) override
@@ -56,7 +65,7 @@ public:
             Component::SafePointer<ChangeKeyButton> button (this);
             PopupMenu m;
 
-            m.addItem (TRANS("Change this key-mapping"),
+            m.addItem (TRANS ("Change this key-mapping"),
                        [button]
                        {
                            if (button != nullptr)
@@ -65,7 +74,7 @@ public:
 
             m.addSeparator();
 
-            m.addItem (TRANS("Remove this key-mapping"),
+            m.addItem (TRANS ("Remove this key-mapping"),
                        [button]
                        {
                            if (button != nullptr)
@@ -86,23 +95,28 @@ public:
     void fitToContent (const int h) noexcept
     {
         if (keyNum < 0)
+        {
             setSize (h, h);
+        }
         else
-            setSize (jlimit (h * 4, h * 8, 6 + Font ((float) h * 0.6f).getStringWidth (getName())), h);
+        {
+            const auto idealWidth = GlyphArrangement::getStringWidthInt (withDefaultMetrics (FontOptions { (float) h * 0.6f }), getName());
+            setSize (jlimit (h * 4, h * 8, 6 + idealWidth), h);
+        }
     }
 
     //==============================================================================
-    class KeyEntryWindow  : public AlertWindow
+    class KeyEntryWindow final : public AlertWindow
     {
     public:
         KeyEntryWindow (KeyMappingEditorComponent& kec)
-            : AlertWindow (TRANS("New key-mapping"),
-                           TRANS("Please press a key combination now..."),
+            : AlertWindow (TRANS ("New key-mapping"),
+                           TRANS ("Please press a key combination now..."),
                            MessageBoxIconType::NoIcon),
               owner (kec)
         {
-            addButton (TRANS("OK"), 1);
-            addButton (TRANS("Cancel"), 0);
+            addButton (TRANS ("OK"), 1);
+            addButton (TRANS ("Cancel"), 0);
 
             // (avoid return + escape keys getting processed by the buttons..)
             for (auto* child : getChildren())
@@ -115,13 +129,13 @@ public:
         bool keyPressed (const KeyPress& key) override
         {
             lastPress = key;
-            String message (TRANS("Key") + ": " + owner.getDescriptionForKeyPress (key));
+            String message (TRANS ("Key") + ": " + owner.getDescriptionForKeyPress (key));
 
             auto previousCommand = owner.getMappings().findCommandForKeyPress (key);
 
             if (previousCommand != 0)
                 message << "\n\n("
-                        << TRANS("Currently assigned to \"CMDN\"")
+                        << TRANS ("Currently assigned to \"CMDN\"")
                             .replace ("CMDN", TRANS (owner.getCommandManager().getNameOfCommand (previousCommand)))
                         << ')';
 
@@ -142,12 +156,6 @@ public:
         JUCE_DECLARE_NON_COPYABLE (KeyEntryWindow)
     };
 
-    static void assignNewKeyCallback (int result, ChangeKeyButton* button, KeyPress newKey)
-    {
-        if (result != 0 && button != nullptr)
-            button->setNewKey (newKey, true);
-    }
-
     void setNewKey (const KeyPress& newKey, bool dontAskUser)
     {
         if (newKey.isValid())
@@ -165,17 +173,20 @@ public:
             }
             else
             {
-                AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
-                                              TRANS("Change key-mapping"),
-                                              TRANS("This key is already assigned to the command \"CMDN\"")
-                                                  .replace ("CMDN", owner.getCommandManager().getNameOfCommand (previousCommand))
-                                                + "\n\n"
-                                                + TRANS("Do you want to re-assign it to this new command instead?"),
-                                              TRANS("Re-assign"),
-                                              TRANS("Cancel"),
-                                              this,
-                                              ModalCallbackFunction::forComponent (assignNewKeyCallback,
-                                                                                   this, KeyPress (newKey)));
+                auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
+                                                                       TRANS ("Change key-mapping"),
+                                                                       TRANS ("This key is already assigned to the command \"CMDN\"")
+                                                                           .replace ("CMDN", owner.getCommandManager().getNameOfCommand (previousCommand))
+                                                                         + "\n\n"
+                                                                         + TRANS ("Do you want to re-assign it to this new command instead?"),
+                                                                       TRANS ("Re-assign"),
+                                                                       TRANS ("Cancel"),
+                                                                       this);
+                messageBox = AlertWindow::showScopedAsync (options, [this, newKey] (int result)
+                {
+                    if (result != 0)
+                        setNewKey (newKey, true);
+                });
             }
         }
     }
@@ -205,12 +216,13 @@ private:
     const CommandID commandID;
     const int keyNum;
     std::unique_ptr<KeyEntryWindow> currentKeyEntryWindow;
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChangeKeyButton)
 };
 
 //==============================================================================
-class KeyMappingEditorComponent::ItemComponent  : public Component
+class KeyMappingEditorComponent::ItemComponent final : public Component
 {
 public:
     ItemComponent (KeyMappingEditorComponent& kec, CommandID command)
@@ -254,7 +266,7 @@ public:
 
         for (int i = keyChangeButtons.size(); --i >= 0;)
         {
-            auto* b = keyChangeButtons.getUnchecked(i);
+            auto* b = keyChangeButtons.getUnchecked (i);
 
             b->fitToContent (getHeight() - 2);
             b->setTopRightPosition (x, 1);
@@ -278,7 +290,7 @@ private:
 };
 
 //==============================================================================
-class KeyMappingEditorComponent::MappingItem  : public TreeViewItem
+class KeyMappingEditorComponent::MappingItem final : public TreeViewItem
 {
 public:
     MappingItem (KeyMappingEditorComponent& kec, CommandID command)
@@ -300,7 +312,7 @@ private:
 
 
 //==============================================================================
-class KeyMappingEditorComponent::CategoryItem  : public TreeViewItem
+class KeyMappingEditorComponent::CategoryItem final : public TreeViewItem
 {
 public:
     CategoryItem (KeyMappingEditorComponent& kec, const String& name)
@@ -314,7 +326,7 @@ public:
 
     void paintItem (Graphics& g, int width, int height) override
     {
-        g.setFont (Font ((float) height * 0.7f, Font::bold));
+        g.setFont (owner.withDefaultMetrics (FontOptions ((float) height * 0.7f, Font::bold)));
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawText (TRANS (categoryName), 2, 0, width - 2, height, Justification::centredLeft, true);
@@ -343,8 +355,8 @@ private:
 };
 
 //==============================================================================
-class KeyMappingEditorComponent::TopLevelItem   : public TreeViewItem,
-                                                  private ChangeListener
+class KeyMappingEditorComponent::TopLevelItem final : public TreeViewItem,
+                                                      private ChangeListener
 {
 public:
     TopLevelItem (KeyMappingEditorComponent& kec)   : owner (kec)
@@ -383,12 +395,6 @@ private:
     KeyMappingEditorComponent& owner;
 };
 
-static void resetKeyMappingsToDefaultsCallback (int result, KeyMappingEditorComponent* owner)
-{
-    if (result != 0 && owner != nullptr)
-        owner->getMappings().resetToDefaultMappings();
-}
-
 //==============================================================================
 KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappingManager,
                                                       const bool showResetToDefaultButton)
@@ -403,12 +409,17 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
 
         resetButton.onClick = [this]
         {
-            AlertWindow::showOkCancelBox (MessageBoxIconType::QuestionIcon,
-                                          TRANS("Reset to defaults"),
-                                          TRANS("Are you sure you want to reset all the key-mappings to their default state?"),
-                                          TRANS("Reset"),
-                                          {}, this,
-                                          ModalCallbackFunction::forComponent (resetKeyMappingsToDefaultsCallback, this));
+            auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::QuestionIcon,
+                                                                   TRANS ("Reset to defaults"),
+                                                                   TRANS ("Are you sure you want to reset all the key-mappings to their default state?"),
+                                                                   TRANS ("Reset"),
+                                                                   {},
+                                                                   this);
+            messageBox = AlertWindow::showScopedAsync (options, [this] (int result)
+            {
+                if (result != 0)
+                    getMappings().resetToDefaultMappings();
+            });
         };
     }
 

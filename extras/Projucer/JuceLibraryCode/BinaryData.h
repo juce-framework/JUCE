@@ -50,9 +50,6 @@ namespace BinaryData
     extern const char*   export_android_svg;
     const int            export_android_svgSize = 3586;
 
-    extern const char*   export_codeBlocks_svg;
-    const int            export_codeBlocks_svgSize = 1726;
-
     extern const char*   export_linux_svg;
     const int            export_linux_svgSize = 28184;
 
@@ -61,9 +58,6 @@ namespace BinaryData
 
     extern const char*   export_xcode_svg;
     const int            export_xcode_svgSize = 12295;
-
-    extern const char*   gpl_logo_svg;
-    const int            gpl_logo_svgSize = 27030;
 
     extern const char*   juce_icon_png;
     const int            juce_icon_pngSize = 105697;
@@ -122,6 +116,15 @@ namespace BinaryData
     extern const char*   jucer_AudioPluginARADocumentControllerTemplate_h;
     const int            jucer_AudioPluginARADocumentControllerTemplate_hSize = 1445;
 
+    extern const char*   jucer_AudioPluginARAEditorTemplate_cpp;
+    const int            jucer_AudioPluginARAEditorTemplate_cppSize = 1613;
+
+    extern const char*   jucer_AudioPluginARAEditorTemplate_h;
+    const int            jucer_AudioPluginARAEditorTemplate_hSize = 1142;
+
+    extern const char*   jucer_AudioPluginARAFilterTemplate_h;
+    const int            jucer_AudioPluginARAFilterTemplate_hSize = 2462;
+
     extern const char*   jucer_AudioPluginARAPlaybackRendererTemplate_cpp;
     const int            jucer_AudioPluginARAPlaybackRendererTemplate_cppSize = 5322;
 
@@ -129,7 +132,7 @@ namespace BinaryData
     const int            jucer_AudioPluginARAPlaybackRendererTemplate_hSize = 1757;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
-    const int            jucer_AudioPluginEditorTemplate_cppSize = 1355;
+    const int            jucer_AudioPluginEditorTemplate_cppSize = 1375;
 
     extern const char*   jucer_AudioPluginEditorTemplate_h;
     const int            jucer_AudioPluginEditorTemplate_hSize = 973;
@@ -138,25 +141,25 @@ namespace BinaryData
     const int            jucer_AudioPluginFilterTemplate_cppSize = 6218;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2462;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2299;
 
     extern const char*   jucer_ComponentTemplate_cpp;
-    const int            jucer_ComponentTemplate_cppSize = 2147;
+    const int            jucer_ComponentTemplate_cppSize = 2142;
 
     extern const char*   jucer_ComponentTemplate_h;
-    const int            jucer_ComponentTemplate_hSize = 2065;
+    const int            jucer_ComponentTemplate_hSize = 2060;
 
     extern const char*   jucer_ContentCompSimpleTemplate_h;
-    const int            jucer_ContentCompSimpleTemplate_hSize = 1524;
+    const int            jucer_ContentCompSimpleTemplate_hSize = 1531;
 
     extern const char*   jucer_ContentCompTemplate_cpp;
-    const int            jucer_ContentCompTemplate_cppSize = 1007;
+    const int            jucer_ContentCompTemplate_cppSize = 1014;
 
     extern const char*   jucer_ContentCompTemplate_h;
     const int            jucer_ContentCompTemplate_hSize = 878;
 
     extern const char*   jucer_InlineComponentTemplate_h;
-    const int            jucer_InlineComponentTemplate_hSize = 1276;
+    const int            jucer_InlineComponentTemplate_hSize = 1296;
 
     extern const char*   jucer_MainConsoleAppTemplate_cpp;
     const int            jucer_MainConsoleAppTemplate_cppSize = 443;
@@ -168,7 +171,7 @@ namespace BinaryData
     const int            jucer_MainTemplate_Window_cppSize = 4081;
 
     extern const char*   jucer_NewComponentTemplate_cpp;
-    const int            jucer_NewComponentTemplate_cppSize = 1521;
+    const int            jucer_NewComponentTemplate_cppSize = 1541;
 
     extern const char*   jucer_NewComponentTemplate_h;
     const int            jucer_NewComponentTemplate_hSize = 665;
@@ -180,7 +183,7 @@ namespace BinaryData
     const int            jucer_NewCppFileTemplate_hSize = 258;
 
     extern const char*   jucer_NewInlineComponentTemplate_h;
-    const int            jucer_NewInlineComponentTemplate_hSize = 1719;
+    const int            jucer_NewInlineComponentTemplate_hSize = 1739;
 
     extern const char*   jucer_OpenGLComponentSimpleTemplate_h;
     const int            jucer_OpenGLComponentSimpleTemplate_hSize = 1987;
@@ -204,10 +207,16 @@ namespace BinaryData
     const int            colourscheme_light_xmlSize = 1050;
 
     extern const char*   juce_runtime_arch_detection_cpp;
-    const int            juce_runtime_arch_detection_cppSize = 3005;
+    const int            juce_runtime_arch_detection_cppSize = 3575;
+
+    extern const char*   juce_LinuxSubprocessHelper_cpp;
+    const int            juce_LinuxSubprocessHelper_cppSize = 1865;
+
+    extern const char*   juce_SimpleBinaryBuilder_cpp;
+    const int            juce_SimpleBinaryBuilder_cppSize = 12997;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 66;
+    const int namedResourceListSize = 69;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -33,6 +45,8 @@ template <typename Type>
 class AudioBuffer
 {
 public:
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
+
     //==============================================================================
     /** Creates an empty buffer with 0 channels and 0 length. */
     AudioBuffer() noexcept
@@ -686,11 +700,11 @@ public:
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
-        if (gain != Type (1) && ! isClear)
+        if (! approximatelyEqual (gain, Type (1)) && ! isClear)
         {
             auto* d = channels[channel] + startSample;
 
-            if (gain == Type())
+            if (approximatelyEqual (gain, Type()))
                 FloatVectorOperations::clear (d, numSamples);
             else
                 FloatVectorOperations::multiply (d, gain, numSamples);
@@ -728,7 +742,7 @@ public:
     {
         if (! isClear)
         {
-            if (startGain == endGain)
+            if (approximatelyEqual (startGain, endGain))
             {
                 applyGain (channel, startSample, numSamples, startGain);
             }
@@ -798,7 +812,7 @@ public:
         jassert (isPositiveAndBelow (sourceChannel, source.numChannels));
         jassert (sourceStartSample >= 0 && sourceStartSample + numSamples <= source.size);
 
-        if (gainToApplyToSource != 0 && numSamples > 0 && ! source.isClear)
+        if (! approximatelyEqual (gainToApplyToSource, (Type) 0) && numSamples > 0 && ! source.isClear)
         {
             auto* d = channels[destChannel] + destStartSample;
             auto* s = source.channels[sourceChannel] + sourceStartSample;
@@ -809,14 +823,14 @@ public:
             {
                 isClear = false;
 
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::copyWithMultiply (d, s, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::copy (d, s, numSamples);
             }
             else
             {
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::addWithMultiply (d, s, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::add (d, s, numSamples);
@@ -850,7 +864,7 @@ public:
         jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
         jassert (source != nullptr);
 
-        if (gainToApplyToSource != 0 && numSamples > 0)
+        if (! approximatelyEqual (gainToApplyToSource, Type()) && numSamples > 0)
         {
             auto* d = channels[destChannel] + destStartSample;
 
@@ -858,14 +872,14 @@ public:
             {
                 isClear = false;
 
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::copyWithMultiply (d, source, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::copy (d, source, numSamples);
             }
             else
             {
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::addWithMultiply (d, source, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::add (d, source, numSamples);
@@ -899,7 +913,7 @@ public:
                           Type startGain,
                           Type endGain) noexcept
     {
-        if (startGain == endGain)
+        if (approximatelyEqual (startGain, endGain))
         {
             addFrom (destChannel, destStartSample, source, numSamples, startGain);
         }
@@ -912,7 +926,7 @@ public:
             if (numSamples > 0)
             {
                 isClear = false;
-                const auto increment = (endGain - startGain) / numSamples;
+                const auto increment = (endGain - startGain) / (Type) numSamples;
                 auto* d = channels[destChannel] + destStartSample;
 
                 while (--numSamples >= 0)
@@ -1023,9 +1037,9 @@ public:
         {
             auto* d = channels[destChannel] + destStartSample;
 
-            if (gain != Type (1))
+            if (! approximatelyEqual (gain, Type (1)))
             {
-                if (gain == Type())
+                if (approximatelyEqual (gain, Type()))
                 {
                     if (! isClear)
                         FloatVectorOperations::clear (d, numSamples);
@@ -1071,7 +1085,7 @@ public:
                            Type startGain,
                            Type endGain) noexcept
     {
-        if (startGain == endGain)
+        if (approximatelyEqual (startGain, endGain))
         {
             copyFrom (destChannel, destStartSample, source, numSamples, startGain);
         }
@@ -1084,7 +1098,7 @@ public:
             if (numSamples > 0)
             {
                 isClear = false;
-                const auto increment = (endGain - startGain) / numSamples;
+                const auto increment = (endGain - startGain) / (Type) numSamples;
                 auto* d = channels[destChannel] + destStartSample;
 
                 while (--numSamples >= 0)
@@ -1279,6 +1293,31 @@ private:
 
     JUCE_LEAK_DETECTOR (AudioBuffer)
 };
+
+//==============================================================================
+template <typename Type>
+bool operator== (const AudioBuffer<Type>& a, const AudioBuffer<Type>& b)
+{
+    if (a.getNumChannels() != b.getNumChannels())
+        return false;
+
+    for (auto c = 0; c < a.getNumChannels(); ++c)
+    {
+        const auto begin = [c] (auto& x) { return x.getReadPointer (c); };
+        const auto end = [c] (auto& x) { return x.getReadPointer (c) + x.getNumSamples(); };
+
+        if (! std::equal (begin (a), end (a), begin (b), end (b)))
+            return false;
+    }
+
+    return true;
+}
+
+template <typename Type>
+bool operator!= (const AudioBuffer<Type>& a, const AudioBuffer<Type>& b)
+{
+    return ! (a == b);
+}
 
 //==============================================================================
 /**

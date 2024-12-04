@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -52,17 +61,15 @@ bool AudioProcessorValueTreeState::Parameter::isBoolean() const         { return
 
 void AudioProcessorValueTreeState::Parameter::valueChanged (float newValue)
 {
-    if (lastValue == newValue)
+    if (approximatelyEqual ((float) lastValue, newValue))
         return;
 
     lastValue = newValue;
-
-    if (onValueChanged != nullptr)
-        onValueChanged();
+    NullCheckedInvocation::invoke (onValueChanged);
 }
 
 //==============================================================================
-class AudioProcessorValueTreeState::ParameterAdapter   : private AudioProcessorParameter::Listener
+class AudioProcessorValueTreeState::ParameterAdapter final : private AudioProcessorParameter::Listener
 {
 private:
     using Listener = AudioProcessorValueTreeState::Listener;
@@ -93,10 +100,8 @@ public:
 
     void setDenormalisedValue (float value)
     {
-        if (value == unnormalisedValue)
-            return;
-
-        setNormalisedValue (normalise (value));
+        if (! approximatelyEqual (value, (float) unnormalisedValue))
+            setNormalisedValue (normalise (value));
     }
 
     float getDenormalisedValueForText (const String& text) const
@@ -119,9 +124,9 @@ public:
         if (! needsUpdate.compare_exchange_strong (needsUpdateTestValue, false))
             return false;
 
-        if (auto valueProperty = tree.getPropertyPointer (key))
+        if (auto* valueProperty = tree.getPropertyPointer (key))
         {
-            if ((float) *valueProperty != unnormalisedValue)
+            if (! approximatelyEqual ((float) *valueProperty, unnormalisedValue.load()))
             {
                 ScopedValueSetter<bool> svs (ignoreParameterChangedCallbacks, true);
                 tree.setProperty (key, unnormalisedValue.load(), um);
@@ -144,7 +149,7 @@ private:
     {
         const auto newValue = denormalise (parameter.getValue());
 
-        if (unnormalisedValue == newValue && ! listenersNeedCalling)
+        if (! listenersNeedCalling && approximatelyEqual ((float) unnormalisedValue, newValue))
             return;
 
         unnormalisedValue = newValue;
@@ -212,7 +217,7 @@ AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& proc
                                                             ParameterLayout parameterLayout)
     : AudioProcessorValueTreeState (processorToConnectTo, undoManagerToUse)
 {
-    struct PushBackVisitor : ParameterLayout::Visitor
+    struct PushBackVisitor final : ParameterLayout::Visitor
     {
         explicit PushBackVisitor (AudioProcessorValueTreeState& stateIn)
             : state (&stateIn) {}
@@ -510,7 +515,7 @@ AudioProcessorValueTreeState::ButtonAttachment::ButtonAttachment (AudioProcessor
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct ParameterAdapterTests  : public UnitTest
+struct ParameterAdapterTests final : public UnitTest
 {
     ParameterAdapterTests()
         : UnitTest ("Parameter Adapter", UnitTestCategories::audioProcessorParameters)
@@ -604,7 +609,7 @@ inline bool operator!= (const NormalisableRange<ValueType>& a,
 }
 } // namespace
 
-class AudioProcessorValueTreeStateTests  : public UnitTest
+class AudioProcessorValueTreeStateTests final : public UnitTest
 {
 private:
     using Parameter = AudioProcessorValueTreeState::Parameter;
@@ -612,7 +617,7 @@ private:
     using ParameterLayout = AudioProcessorValueTreeState::ParameterLayout;
     using Attributes = AudioProcessorValueTreeStateParameterAttributes;
 
-    class TestAudioProcessor : public AudioProcessor
+    class TestAudioProcessor final : public AudioProcessor
     {
     public:
         TestAudioProcessor() = default;

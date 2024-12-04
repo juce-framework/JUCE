@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -171,7 +180,7 @@ void TabBarButton::resized()
 }
 
 //==============================================================================
-class TabbedButtonBar::BehindFrontTabComp  : public Component
+class TabbedButtonBar::BehindFrontTabComp final : public Component
 {
 public:
     BehindFrontTabComp (TabbedButtonBar& tb)  : owner (tb)
@@ -343,7 +352,7 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex, bool shouldSendChangeMes
         currentTabIndex = newIndex;
 
         for (int i = 0; i < tabs.size(); ++i)
-            tabs.getUnchecked(i)->button->setToggleState (i == newIndex, dontSendNotification);
+            tabs.getUnchecked (i)->button->setToggleState (i == newIndex, dontSendNotification);
 
         resized();
 
@@ -365,7 +374,7 @@ TabBarButton* TabbedButtonBar::getTabButton (const int index) const
 int TabbedButtonBar::indexOfTabButton (const TabBarButton* button) const
 {
     for (int i = tabs.size(); --i >= 0;)
-        if (tabs.getUnchecked(i)->button.get() == button)
+        if (tabs.getUnchecked (i)->button.get() == button)
             return i;
 
     return -1;
@@ -416,7 +425,7 @@ void TabbedButtonBar::updateTabPositions (bool animate)
 
     for (int i = 0; i < tabs.size(); ++i)
     {
-        auto* tb = tabs.getUnchecked(i)->button.get();
+        auto* tb = tabs.getUnchecked (i)->button.get();
 
         totalLength += tb->getBestTabLength (depth) - overlap;
         tb->overlapPixels = jmax (0, overlap / 2);
@@ -459,7 +468,7 @@ void TabbedButtonBar::updateTabPositions (bool animate)
 
         for (int i = 0; i < tabs.size(); ++i)
         {
-            auto* tb = tabs.getUnchecked(i)->button.get();
+            auto* tb = tabs.getUnchecked (i)->button.get();
             auto newLength = totalLength + tb->getBestTabLength (depth);
 
             if (i > 0 && newLength * minimumScale > tabsButtonPos)
@@ -557,7 +566,7 @@ void TabbedButtonBar::showExtraItemsMenu()
 
     for (int i = 0; i < tabs.size(); ++i)
     {
-        auto* tab = tabs.getUnchecked(i);
+        auto* tab = tabs.getUnchecked (i);
 
         if (! tab->button->isVisible())
             m.addItem (PopupMenu::Item (tab->name)

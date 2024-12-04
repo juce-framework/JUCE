@@ -1,24 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   to use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
-
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -26,7 +24,7 @@
 #include "MainComponent.h"
 
 //==============================================================================
-struct SidePanelHeader    : public Component
+struct SidePanelHeader final : public Component
 {
     SidePanelHeader (MainComponent& o)
         : owner (o)
@@ -80,7 +78,7 @@ struct SidePanelHeader    : public Component
         addAndMakeVisible (settingsButton);
         settingsButton.onClick = [this] { owner.settingsButtonClicked(); };
 
-        lookAndFeelChanged();
+        updateLookAndFeel();
     }
 
     void paint (Graphics& g) override
@@ -102,7 +100,7 @@ struct SidePanelHeader    : public Component
         titleLabel.setBounds (bounds);
     }
 
-    void lookAndFeelChanged() override
+    void updateLookAndFeel()
     {
         auto& sidePanel = owner.getSidePanel();
         auto& lf = sidePanel.getLookAndFeel();
@@ -117,6 +115,12 @@ struct SidePanelHeader    : public Component
 
         homeButton.setColours (normal, over, down);
         settingsButton.setColours (normal, over, down);
+
+    }
+
+    void lookAndFeelChanged() override
+    {
+        updateLookAndFeel();
     }
 
     MainComponent& owner;
@@ -126,8 +130,8 @@ struct SidePanelHeader    : public Component
 };
 
 //==============================================================================
-class DemoList    : public Component,
-                    public ListBoxModel
+class DemoList final : public Component,
+                       public ListBoxModel
 {
 public:
     DemoList (DemoContentComponent& holder)
@@ -208,7 +212,7 @@ public:
 
 private:
     //==============================================================================
-    class CategoryListHeaderComponent  : public Button
+    class CategoryListHeaderComponent final : public Button
     {
     public:
         explicit CategoryListHeaderComponent (DemoList& o)
@@ -284,7 +288,7 @@ MainComponent::MainComponent()
         {
            #if JUCE_MAC && USE_COREGRAPHICS_RENDERING
             setRenderingEngine (1);
-           #else
+           #elif ! JUCE_WINDOWS
             setRenderingEngine (0);
            #endif
         }
@@ -357,8 +361,10 @@ void MainComponent::resized()
     {
         auto bounds = getLocalBounds();
 
+       #if JUCE_IOS || JUCE_ANDROID
         if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (getScreenBounds()))
             return display->safeAreaInsets.subtractedFrom (display->keyboardInsets.subtractedFrom (bounds));
+       #endif
 
         return bounds;
     }();

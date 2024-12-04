@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -30,7 +39,7 @@
 constexpr const char* scanModeKey = "pluginScanMode";
 
 //==============================================================================
-class Superprocess  : private ChildProcessCoordinator
+class Superprocess final : private ChildProcessCoordinator
 {
 public:
     Superprocess()
@@ -94,8 +103,8 @@ private:
 };
 
 //==============================================================================
-class CustomPluginScanner  : public KnownPluginList::CustomScanner,
-                             private ChangeListener
+class CustomPluginScanner final : public KnownPluginList::CustomScanner,
+                                  private ChangeListener
 {
 public:
     CustomPluginScanner()
@@ -103,7 +112,7 @@ public:
         if (auto* file = getAppProperties().getUserSettings())
             file->addChangeListener (this);
 
-        changeListenerCallback (nullptr);
+        handleChange();
     }
 
     ~CustomPluginScanner() override
@@ -183,10 +192,15 @@ private:
         }
     }
 
-    void changeListenerCallback (ChangeBroadcaster*) override
+    void handleChange()
     {
         if (auto* file = getAppProperties().getUserSettings())
             scanInProcess = (file->getIntValue (scanModeKey) == 0);
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*) override
+    {
+        handleChange();
     }
 
     std::unique_ptr<Superprocess> superprocess;
@@ -197,7 +211,7 @@ private:
 };
 
 //==============================================================================
-class CustomPluginListComponent  : public PluginListComponent
+class CustomPluginListComponent final : public PluginListComponent
 {
 public:
     CustomPluginListComponent (AudioPluginFormatManager& manager,
@@ -226,10 +240,16 @@ public:
             getAppProperties().getUserSettings()->setValue (scanModeKey, validationModeBox.getSelectedItemIndex());
         };
 
-        resized();
+        handleResize();
     }
 
     void resized() override
+    {
+        handleResize();
+    }
+
+private:
+    void handleResize()
     {
         PluginListComponent::resized();
 
@@ -237,7 +257,7 @@ public:
         validationModeBox.setBounds (buttonBounds.withWidth (130).withRightX (getWidth() - buttonBounds.getX()));
     }
 
-private:
+
     Label validationModeLabel { {}, "Scan mode" };
     ComboBox validationModeBox;
 
@@ -245,7 +265,7 @@ private:
 };
 
 //==============================================================================
-class MainHostWindow::PluginListWindow  : public DocumentWindow
+class MainHostWindow::PluginListWindow final : public DocumentWindow
 {
 public:
     PluginListWindow (MainHostWindow& mw, AudioPluginFormatManager& pluginFormatManager)
@@ -386,7 +406,7 @@ void MainHostWindow::closeButtonPressed()
     tryToQuitApplication();
 }
 
-struct AsyncQuitRetrier  : private Timer
+struct AsyncQuitRetrier final : private Timer
 {
     AsyncQuitRetrier()   { startTimer (500); }
 
@@ -602,9 +622,9 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
     }
     else
     {
-        if (getIndexChosenByMenu (menuItemID) >= 0)
-            createPlugin (getChosenType (menuItemID), { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
-                                                        proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
+        if (const auto chosen = getChosenType (menuItemID))
+            createPlugin (*chosen, { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
+                                     proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
     }
 }
 
@@ -697,18 +717,19 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m)
     addToMenu (*tree, m, pluginDescriptions, pluginDescriptionsAndPreference);
 }
 
-int MainHostWindow::getIndexChosenByMenu (int menuID) const
+std::optional<PluginDescriptionAndPreference> MainHostWindow::getChosenType (const int menuID) const
 {
-    const auto i = menuID - menuIDBase;
-    return isPositiveAndBelow (i, pluginDescriptionsAndPreference.size()) ? i : -1;
-}
+    const auto internalIndex = menuID - 1;
 
-PluginDescriptionAndPreference MainHostWindow::getChosenType (const int menuID) const
-{
-    if (menuID >= 1 && menuID < (int) (1 + internalTypes.size()))
-        return PluginDescriptionAndPreference { internalTypes[(size_t) (menuID - 1)] };
+    if (isPositiveAndBelow (internalIndex, internalTypes.size()))
+        return PluginDescriptionAndPreference { internalTypes[(size_t) internalIndex] };
 
-    return pluginDescriptionsAndPreference[getIndexChosenByMenu (menuID)];
+    const auto externalIndex = menuID - menuIDBase;
+
+    if (isPositiveAndBelow (externalIndex, pluginDescriptionsAndPreference.size()))
+        return pluginDescriptionsAndPreference[externalIndex];
+
+    return {};
 }
 
 //==============================================================================
@@ -747,7 +768,7 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
    #if ! (JUCE_IOS || JUCE_ANDROID)
     case CommandIDs::newFile:
         result.setInfo ("New", "Creates a new filter graph file", category, 0);
-        result.defaultKeypresses.add(KeyPress('n', ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('n', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::open:
@@ -990,7 +1011,7 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
             auto pos = graphHolder->getLocalPoint (this, Point<int> (x, y));
 
             for (int i = 0; i < jmin (5, typesFound.size()); ++i)
-                if (auto* desc = typesFound.getUnchecked(i))
+                if (auto* desc = typesFound.getUnchecked (i))
                     createPlugin (PluginDescriptionAndPreference { *desc }, pos);
         }
     }

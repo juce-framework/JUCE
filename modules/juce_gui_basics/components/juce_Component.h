@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -867,8 +876,8 @@ public:
         Components with custom shapes will probably want to override it to perform
         some more complex hit-testing.
 
-        The default implementation of this method returns either true or false,
-        depending on the value that was set by calling setInterceptsMouseClicks() (true
+        The default implementation of this method returns either 'client' or 'none',
+        depending on the value that was set by calling setInterceptsMouseClicks() ('client'
         is the default return value).
 
         Note that the hit-test region is not related to the opacity with which
@@ -891,6 +900,61 @@ public:
         @see setInterceptsMouseClicks, contains
     */
     virtual bool hitTest (int x, int y);
+
+    /** Types of control that are commonly found in windows, especially title-bars. */
+    enum class WindowControlKind
+    {
+        client,             ///< Parts of the component that are not transparent and also don't have any of the following control functions
+        caption,            ///< The part of a title bar that may be dragged by the mouse to move the window
+        minimise,           ///< The minimise/iconify button
+        maximise,           ///< The maximise/zoom button
+        close,              ///< The button that dismisses the component
+        sizeTop,            ///< The area that may be dragged to move the top edge of the window
+        sizeLeft,           ///< The area that may be dragged to move the left edge of the window
+        sizeRight,          ///< The area that may be dragged to move the right edge of the window
+        sizeBottom,         ///< The area that may be dragged to move the bottom edge of the window
+        sizeTopLeft,        ///< The area that may be dragged to move the top-left corner of the window
+        sizeTopRight,       ///< The area that may be dragged to move the top-right corner of the window
+        sizeBottomLeft,     ///< The area that may be dragged to move the bottom-left corner of the window
+        sizeBottomRight,    ///< The area that may be dragged to move the bottom-right corner of the window
+    };
+
+    /** For components that are added to the desktop, this may be called to determine what kind of
+        control is at particular locations in the window. On Windows, this is used to provide
+        functionality like Aero Snap (snapping the window to half of the screen after dragging the
+        window's caption area to the edge of the screen), double-clicking a horizontal border to
+        stretch a window vertically, and the window tiling flyout that appears when hovering the
+        mouse over the maximise button.
+
+        It's dangerous to call Component::contains from an overriding function, because this might
+        call into the peer to do system hit-testing - but the system hit-test could in turn call
+        findControlAtPoint, leading to infinite recursion. It's better to use functions like
+        Rectangle::contains or Path::contains to test for the window control areas.
+
+        This is called by the peer. Component subclasses may override this but should not call it directly.
+     */
+    virtual WindowControlKind findControlAtPoint (Point<float>) const { return WindowControlKind::client; }
+
+    /** For components that are added to the desktop, this may be called to indicate that the mouse
+        was clicked inside the area of the "close" control. This is currently only called on Windows.
+
+        This is called by the peer. Component subclasses may override this but should not call it directly.
+    */
+    virtual void windowControlClickedClose() {}
+
+    /** For components that are added to the desktop, this may be called to indicate that the mouse
+        was clicked inside the area of the "minimise" control. This is currently only called on Windows.
+
+        This is called by the peer. Component subclasses may override this but should not call it directly.
+    */
+    virtual void windowControlClickedMinimise() {}
+
+    /** For components that are added to the desktop, this may be called to indicate that the mouse
+        was clicked inside the area of the "maximise" control. This is currently only called on Windows.
+
+        This is called by the peer. Component subclasses may override this but should not call it directly.
+    */
+    virtual void windowControlClickedMaximise() {}
 
     /** Changes the default return value for the hitTest() method.
 
@@ -1144,7 +1208,7 @@ public:
     /** Returns the current component effect.
         @see setComponentEffect
     */
-    ImageEffectFilter* getComponentEffect() const noexcept              { return effect; }
+    ImageEffectFilter* getComponentEffect() const noexcept;
 
     //==============================================================================
     /** Finds the appropriate look-and-feel to use for this component.
@@ -1168,14 +1232,17 @@ public:
 
         Calling this method will also invoke the sendLookAndFeelChange() method.
 
-        @see getLookAndFeel, lookAndFeelChanged
+        @see getLookAndFeel, lookAndFeelChanged, sendLookAndFeelChange
     */
     void setLookAndFeel (LookAndFeel* newLookAndFeel);
 
+    /** Returns a copy of the FontOptions with the default metrics kind from the component's LookAndFeel. */
+    FontOptions withDefaultMetrics (FontOptions opt) const;
+
     /** Called to let the component react to a change in the look-and-feel setting.
 
-        When the look-and-feel is changed for a component, this will be called in
-        all its child components, recursively.
+        When the look-and-feel is changed for a component, this method, repaint(), and
+        colourChanged() are called on the original component and all its children recursively.
 
         It can also be triggered manually by the sendLookAndFeelChange() method, in case
         an application uses a LookAndFeel class that might have changed internally.
@@ -1184,10 +1251,8 @@ public:
     */
     virtual void lookAndFeelChanged();
 
-    /** Calls the lookAndFeelChanged() method in this component and all its children.
-
-        This will recurse through the children and their children, calling lookAndFeelChanged()
-        on them all.
+    /** Calls the methods repaint(), lookAndFeelChanged(), and colourChanged() in this
+        component and all its children recursively.
 
         @see lookAndFeelChanged
     */
@@ -1893,10 +1958,27 @@ public:
         focusChangedDirectly        /**< Means that the focus was changed by a call to grabKeyboardFocus(). */
     };
 
+    /** Enumeration used by the focusGainedWithDirection() method. */
+    enum class FocusChangeDirection
+    {
+        unknown,
+        forward,
+        backward
+    };
+
     /** Called to indicate that this component has just acquired the keyboard focus.
         @see focusLost, setWantsKeyboardFocus, getCurrentlyFocusedComponent, hasKeyboardFocus
     */
     virtual void focusGained (FocusChangeType cause);
+
+    /** Called to indicate that this component has just acquired the keyboard focus.
+
+        This function is called every time focusGained() is called but it has an additional change
+        direction parameter.
+
+        @see focusLost, setWantsKeyboardFocus, getCurrentlyFocusedComponent, hasKeyboardFocus
+    */
+    virtual void focusGainedWithDirection (FocusChangeType cause, FocusChangeDirection direction);
 
     /** Called to indicate that this component has just lost the keyboard focus.
         @see focusGained, setWantsKeyboardFocus, getCurrentlyFocusedComponent, hasKeyboardFocus
@@ -2113,13 +2195,14 @@ public:
         The callback is an optional object which will receive a callback when the modal
         component loses its modal status, either by being hidden or when exitModalState()
         is called. If you pass an object in here, the system will take care of deleting it
-        later, after making the callback
+        later, after making the callback.
 
         If deleteWhenDismissed is true, then when it is dismissed, the component will be
         deleted and then the callback will be called. (This will safely handle the situation
         where the component is deleted before its exitModalState() method is called).
 
-        @see exitModalState, runModalLoop, ModalComponentManager::attachCallback
+        @see exitModalState, runModalLoop, ModalComponentManager::attachCallback,
+             ModalCallbackFunction
     */
     void enterModalState (bool takeKeyboardFocus = true,
                           ModalComponentManager::Callback* callback = nullptr,
@@ -2236,6 +2319,8 @@ public:
         method, which your component can override if it needs to do something when
         colours are altered.
 
+        Note repaint() is not automatically called when a colour is changed.
+
         For more details about colour IDs, see the comments for findColour().
 
         @see findColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
@@ -2257,8 +2342,11 @@ public:
     */
     void copyAllExplicitColoursTo (Component& target) const;
 
-    /** This method is called when a colour is changed by the setColour() method.
-        @see setColour, findColour
+    /** This method is called when a colour is changed by the setColour() method,
+        or when the look-and-feel is changed by the setLookAndFeel() or
+        sendLookAndFeelChanged() methods.
+
+        @see setColour, findColour, setLookAndFeel, sendLookAndFeelChanged
     */
     virtual void colourChanged();
 
@@ -2311,7 +2399,7 @@ public:
         ComponentType* operator->() const noexcept            { return getComponent(); }
 
         /** If the component is valid, this deletes it and sets this pointer to null. */
-        void deleteAndZero()                                  { delete getComponent(); }
+        void deleteAndZero()                                  { delete std::exchange (weakRef, nullptr); }
 
         bool operator== (ComponentType* component) const noexcept   { return weakRef == component; }
         bool operator!= (ComponentType* component) const noexcept   { return weakRef != component; }
@@ -2479,6 +2567,9 @@ public:
     /** Returns the accessibility handler for this component, or nullptr if this component is not
         accessible.
 
+        To customise the accessibility handler for a component, override
+        createAccessibilityHandler().
+
         @see setAccessible
     */
     AccessibilityHandler* getAccessibilityHandler();
@@ -2490,6 +2581,30 @@ public:
         createAccessibilityHandler().
     */
     void invalidateAccessibilityHandler();
+
+    //==============================================================================
+    /** Override this method to return a custom AccessibilityHandler for this component.
+
+        The default implementation creates and returns a AccessibilityHandler object with an
+        unspecified role, meaning that it will be visible to accessibility clients but
+        without a specific role, action callbacks or interfaces. To control how accessibility
+        clients see and interact with your component subclass AccessibilityHandler, implement
+        the desired behaviours, and return an instance of it from this method in your
+        component subclass.
+
+        The accessibility handler you return here is guaranteed to be destroyed before
+        its Component, so it's safe to store and use a reference back to the Component
+        inside the AccessibilityHandler if necessary.
+
+        This function should rarely be called directly. If you need to query a component's
+        accessibility handler, it's normally better to call getAccessibilityHandler().
+        The exception to this rule is derived implementations of createAccessibilityHandler(),
+        which may find it useful to call the base class implementation, and then wrap or
+        modify the result.
+
+        @see getAccessibilityHandler
+    */
+    virtual std::unique_ptr<AccessibilityHandler> createAccessibilityHandler();
 
     //==============================================================================
    #ifndef DOXYGEN
@@ -2505,27 +2620,10 @@ public:
    #endif
 
 private:
-    //==============================================================================
-    /** Override this method to return a custom AccessibilityHandler for this component.
-
-        The default implementation creates and returns a AccessibilityHandler object with an
-        unspecified role, meaning that it will be visible to accessibility clients but
-        without a specific role, action callbacks or interfaces. To control how accessibility
-        clients see and interact with your component subclass AccessibilityHandler, implement
-        the desired behaviours, and return an instance of it from this method in your
-        component subclass.
-
-        The accessibility handler you return here is guaranteed to be destroyed before
-        its Component, so it's safe to store and use a reference back to the Component
-        inside the AccessibilityHandler if necessary.
-
-        @see getAccessibilityHandler
-    */
-    virtual std::unique_ptr<AccessibilityHandler> createAccessibilityHandler();
 
     //==============================================================================
     friend class ComponentPeer;
-    friend class MouseInputSourceInternal;
+    friend class detail::MouseInputSourceImpl;
 
    #ifndef DOXYGEN
     static Component* currentlyFocusedComponent;
@@ -2539,7 +2637,9 @@ private:
     Array<Component*> childComponentList;
     WeakReference<LookAndFeel> lookAndFeel;
     MouseCursor cursor;
-    ImageEffectFilter* effect = nullptr;
+
+    class EffectState;
+    std::unique_ptr<EffectState> effectState;
     std::unique_ptr<CachedComponentImage> cachedImage;
 
     class MouseListenerList;
@@ -2594,14 +2694,14 @@ private:
     //==============================================================================
     void internalMouseEnter (MouseInputSource, Point<float>, Time);
     void internalMouseExit  (MouseInputSource, Point<float>, Time);
-    void internalMouseDown  (MouseInputSource, const PointerState&, Time);
-    void internalMouseUp    (MouseInputSource, const PointerState&, Time, const ModifierKeys oldModifiers);
-    void internalMouseDrag  (MouseInputSource, const PointerState&, Time);
+    void internalMouseDown  (MouseInputSource, const detail::PointerState&, Time);
+    void internalMouseUp    (MouseInputSource, const detail::PointerState&, Time, ModifierKeys oldModifiers);
+    void internalMouseDrag  (MouseInputSource, const detail::PointerState&, Time);
     void internalMouseMove  (MouseInputSource, Point<float>, Time);
     void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
     void internalMagnifyGesture (MouseInputSource, Point<float>, Time, float);
     void internalBroughtToFront();
-    void internalKeyboardFocusGain (FocusChangeType, const WeakReference<Component>&);
+    void internalKeyboardFocusGain (FocusChangeType, const WeakReference<Component>&, FocusChangeDirection);
     void internalKeyboardFocusGain (FocusChangeType);
     void internalKeyboardFocusLoss (FocusChangeType);
     void internalChildKeyboardFocusChange (FocusChangeType, const WeakReference<Component>&);
@@ -2619,14 +2719,13 @@ private:
     void sendMovedResizedMessagesIfPending();
     void repaintParent();
     void sendFakeMouseMove() const;
-    void takeKeyboardFocus (FocusChangeType);
-    void grabKeyboardFocusInternal (FocusChangeType, bool canTryParent);
+    void takeKeyboardFocus (FocusChangeType, FocusChangeDirection);
+    void grabKeyboardFocusInternal (FocusChangeType, bool canTryParent, FocusChangeDirection);
     void giveAwayKeyboardFocusInternal (bool sendFocusLossEvent);
     void sendEnablementChangeMessage();
     void sendVisibilityChangeMessage();
 
-    struct ComponentHelpers;
-    friend struct ComponentHelpers;
+    friend struct detail::ComponentHelpers;
 
     /* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
        You might need to give your subclasses a private dummy constructor to avoid compiler warnings.

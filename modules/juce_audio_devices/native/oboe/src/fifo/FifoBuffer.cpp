@@ -18,10 +18,10 @@
 #include <memory.h>
 #include <stdint.h>
 
-#include "fifo/FifoControllerBase.h"
+#include "oboe/FifoControllerBase.h"
 #include "fifo/FifoController.h"
 #include "fifo/FifoControllerIndirect.h"
-#include "fifo/FifoBuffer.h"
+#include "oboe/FifoBuffer.h"
 
 namespace oboe {
 

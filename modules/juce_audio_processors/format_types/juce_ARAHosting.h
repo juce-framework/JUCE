@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -56,7 +65,7 @@ namespace juce
 
     @tags{ARA}
 */
-class ARAEditGuard
+class JUCE_API ARAEditGuard
 {
 public:
     explicit ARAEditGuard (ARA::Host::DocumentController& dcIn);
@@ -107,6 +116,8 @@ struct ConversionFunctions
     when the lifetime of the helper class object ends.
 
     You shouldn't use this class directly but instead inherit from the helper classes.
+
+    @tags{ARA}
 */
 template <typename Base, typename PtrIn>
 class ManagedARAHandle
@@ -156,7 +167,7 @@ private:
 
     @tags{ARA}
 */
-class AudioSource : public ManagedARAHandle<AudioSource, ARA::ARAAudioSourceRef>
+class JUCE_API AudioSource : public ManagedARAHandle<AudioSource, ARA::ARAAudioSourceRef>
 {
 public:
     /** Returns an %ARA versioned struct with the `structSize` correctly set for the currently
@@ -224,7 +235,7 @@ public:
 
     @tags{ARA}
 */
-class AudioModification : public ManagedARAHandle<AudioModification, ARA::ARAAudioModificationRef>
+class JUCE_API AudioModification : public ManagedARAHandle<AudioModification, ARA::ARAAudioModificationRef>
 {
 public:
     /** Returns an %ARA versioned struct with the `structSize` correctly set for the currently
@@ -279,8 +290,10 @@ private:
 
 /** This class is used internally by PlaybackRegionRegistry to be notified when a PlaybackRegion
     object is deleted.
+
+    @tags{ARA}
 */
-struct DeletionListener
+struct JUCE_API DeletionListener
 {
     /** Destructor. */
     virtual ~DeletionListener() = default;
@@ -305,7 +318,7 @@ struct DeletionListener
 
     @tags{ARA}
 */
-struct PlaybackRegion
+struct JUCE_API PlaybackRegion
 {
 public:
     /** Returns an %ARA versioned struct with the `structSize` correctly set for the currently
@@ -373,7 +386,7 @@ private:
 
     @tags{ARA}
 */
-class MusicalContext : public ManagedARAHandle<MusicalContext, ARA::ARAMusicalContextRef>
+class JUCE_API MusicalContext : public ManagedARAHandle<MusicalContext, ARA::ARAMusicalContextRef>
 {
 public:
     /** Returns an %ARA versioned struct with the `structSize` correctly set for the currently
@@ -435,7 +448,7 @@ public:
 
     @tags{ARA}
 */
-class RegionSequence : public ManagedARAHandle<RegionSequence, ARA::ARARegionSequenceRef>
+class JUCE_API RegionSequence : public ManagedARAHandle<RegionSequence, ARA::ARARegionSequenceRef>
 {
 public:
     /** Returns an %ARA versioned struct with the `structSize` correctly set for the currently
@@ -653,8 +666,10 @@ using EditorRendererInterface   = PlaybackRegionRegistry<ARA::ARAEditorRendererR
 
     Returned by ARAHostDocumentController::bindDocumentToPluginInstance(). The corresponding
     ARAHostDocumentController must remain valid as long as the plugin extension is in use.
+
+    @tags{ARA}
 */
-class PlugInExtensionInstance final
+class JUCE_API PlugInExtensionInstance final
 {
 public:
     /** Creates an empty PlugInExtensionInstance object.
@@ -711,7 +726,7 @@ private:
 
     @tags{ARA}
 */
-class ARAHostDocumentController final
+class JUCE_API ARAHostDocumentController final
 {
 public:
     /** Factory function.
@@ -760,7 +775,7 @@ private:
     The object passed to the callback must be checked even if the plugin instance reports having
     ARA extensions.
 */
-void createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (ARAFactoryWrapper)> cb);
+void JUCE_API createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (ARAFactoryWrapper)> cb);
 
 } // namespace juce
 

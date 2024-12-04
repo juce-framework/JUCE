@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -32,11 +44,11 @@
 
   ID:                 juce_events
   vendor:             juce
-  version:            7.0.4
+  version:            8.0.4
   name:               JUCE message and event handling classes
   description:        Classes for running an application's main event loop and sending/receiving messages, timers, etc.
   website:            http://www.juce.com/juce
-  license:            ISC
+  license:            AGPLv3/Commercial
   minimumCppStandard: 17
 
   dependencies:       juce_core
@@ -82,10 +94,13 @@
 #include "broadcasters/juce_ActionBroadcaster.h"
 #include "broadcasters/juce_ActionListener.h"
 #include "broadcasters/juce_AsyncUpdater.h"
+#include "broadcasters/juce_LockingAsyncUpdater.h"
 #include "broadcasters/juce_ChangeListener.h"
 #include "broadcasters/juce_ChangeBroadcaster.h"
 #include "timers/juce_Timer.h"
+#include "timers/juce_TimedCallback.h"
 #include "timers/juce_MultiTimer.h"
+#include "interprocess/juce_ChildProcessManager.h"
 #include "interprocess/juce_InterprocessConnection.h"
 #include "interprocess/juce_InterprocessConnectionServer.h"
 #include "interprocess/juce_ConnectedChildProcess.h"
@@ -93,14 +108,14 @@
 #include "native/juce_ScopedLowPowerModeDisabler.h"
 
 #if JUCE_LINUX || JUCE_BSD
- #include "native/juce_linux_EventLoop.h"
+ #include "native/juce_EventLoop_linux.h"
 #endif
 
 #if JUCE_WINDOWS
  #if JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW
-  #include "native/juce_win32_HiddenMessageWindow.h"
+  #include "native/juce_HiddenMessageWindow_windows.h"
  #endif
  #if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER
-  #include "native/juce_win32_WinRTWrapper.h"
+  #include "native/juce_WinRTWrapper_windows.h"
  #endif
 #endif

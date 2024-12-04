@@ -128,7 +128,7 @@ public:
 
 	/** Adds a new parameter queue with a given ID at the end of the list,
 	returns it and its index in the parameter changes list. */
-	virtual IParamValueQueue* PLUGIN_API addParameterData (const Vst::ParamID& id, int32& index /*out*/) = 0;
+	virtual IParamValueQueue* PLUGIN_API addParameterData (const ParamID& id, int32& index /*out*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;

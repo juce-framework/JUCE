@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -110,10 +114,10 @@ struct OpenGLUtils
         {
             using namespace ::juce::gl;
 
-            if (position.get() != nullptr)        glDisableVertexAttribArray (position->attributeID);
-            if (normal.get() != nullptr)          glDisableVertexAttribArray (normal->attributeID);
-            if (sourceColour.get() != nullptr)    glDisableVertexAttribArray (sourceColour->attributeID);
-            if (textureCoordIn.get() != nullptr)  glDisableVertexAttribArray (textureCoordIn->attributeID);
+            if (position != nullptr)        glDisableVertexAttribArray (position->attributeID);
+            if (normal != nullptr)          glDisableVertexAttribArray (normal->attributeID);
+            if (sourceColour != nullptr)    glDisableVertexAttribArray (sourceColour->attributeID);
+            if (textureCoordIn != nullptr)  glDisableVertexAttribArray (textureCoordIn->attributeID);
         }
 
         std::unique_ptr<OpenGLShaderProgram::Attribute> position, normal, sourceColour, textureCoordIn;
@@ -646,7 +650,7 @@ struct OpenGLUtils
         String name;
     };
 
-    struct DynamicTexture   : public DemoTexture
+    struct DynamicTexture final : public DemoTexture
     {
         DynamicTexture() { name = "Dynamically-generated texture"; }
 
@@ -693,7 +697,7 @@ struct OpenGLUtils
         return image;
     }
 
-    struct BuiltInTexture   : public DemoTexture
+    struct BuiltInTexture final : public DemoTexture
     {
         BuiltInTexture (const char* nm, const void* imageData, size_t imageSize)
             : image (resizeImageToPowerOfTwo (ImageFileFormat::loadFrom (imageData, imageSize)))
@@ -710,7 +714,7 @@ struct OpenGLUtils
         }
     };
 
-    struct TextureFromFile   : public DemoTexture
+    struct TextureFromFile final : public DemoTexture
     {
         TextureFromFile (const File& file)
         {
@@ -727,7 +731,7 @@ struct OpenGLUtils
         }
     };
 
-    struct TextureFromAsset   : public DemoTexture
+    struct TextureFromAsset final : public DemoTexture
     {
         TextureFromAsset (const char* assetName)
         {
@@ -749,9 +753,9 @@ struct OpenGLUtils
 /** This is the main demo component - the GL context gets attached to it, and
     it implements the OpenGLRenderer callback so that it can do real GL work.
 */
-class OpenGLDemo  : public Component,
-                    private OpenGLRenderer,
-                    private AsyncUpdater
+class OpenGLDemo final : public Component,
+                         private OpenGLRenderer,
+                         private AsyncUpdater
 {
 public:
     OpenGLDemo()
@@ -763,6 +767,7 @@ public:
         controlsOverlay.reset (new DemoControlsOverlay (*this));
         addAndMakeVisible (controlsOverlay.get());
 
+        openGLContext.setOpenGLVersionRequired (OpenGLContext::openGL3_2);
         openGLContext.setRenderer (this);
         openGLContext.attachTo (*this);
         openGLContext.setContinuousRepainting (true);
@@ -783,7 +788,7 @@ public:
         // on demand, during the render callback.
         freeAllContextObjects();
 
-        if (controlsOverlay.get() != nullptr)
+        if (controlsOverlay != nullptr)
             controlsOverlay->updateShader();
     }
 
@@ -841,7 +846,9 @@ public:
         glEnable (GL_BLEND);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glActiveTexture (GL_TEXTURE0);
-        glEnable (GL_TEXTURE_2D);
+
+        if (! openGLContext.isCoreProfile())
+            glEnable (GL_TEXTURE_2D);
 
         glViewport (0, 0,
                     roundToInt (desktopScale * (float) bounds.getWidth()),
@@ -854,19 +861,19 @@ public:
 
         shader->use();
 
-        if (uniforms->projectionMatrix.get() != nullptr)
+        if (uniforms->projectionMatrix != nullptr)
             uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
 
-        if (uniforms->viewMatrix.get() != nullptr)
+        if (uniforms->viewMatrix != nullptr)
             uniforms->viewMatrix->setMatrix4 (getViewMatrix().mat, 1, false);
 
-        if (uniforms->texture.get() != nullptr)
+        if (uniforms->texture != nullptr)
             uniforms->texture->set ((GLint) 0);
 
-        if (uniforms->lightPosition.get() != nullptr)
+        if (uniforms->lightPosition != nullptr)
             uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
 
-        if (uniforms->bouncingNumber.get() != nullptr)
+        if (uniforms->bouncingNumber != nullptr)
             uniforms->bouncingNumber->set (bouncingNumber.getValue());
 
         shape->draw (*attributes);
@@ -948,7 +955,7 @@ private:
             Graphics g (*glRenderer);
             g.addTransform (AffineTransform::scale (desktopScale));
 
-            for (auto s : stars)
+            for (const auto& s : stars)
             {
                 auto size = 0.25f;
 
@@ -979,10 +986,10 @@ private:
         This component sits on top of the main GL demo, and contains all the sliders
         and widgets that control things.
     */
-    class DemoControlsOverlay  : public Component,
-                                 private CodeDocument::Listener,
-                                 private Slider::Listener,
-                                 private Timer
+    class DemoControlsOverlay final : public Component,
+                                      private CodeDocument::Listener,
+                                      private Slider::Listener,
+                                      private Timer
     {
     public:
         DemoControlsOverlay (OpenGLDemo& d)
@@ -990,7 +997,7 @@ private:
         {
             addAndMakeVisible (statusLabel);
             statusLabel.setJustificationType (Justification::topLeft);
-            statusLabel.setFont (Font (14.0f));
+            statusLabel.setFont (FontOptions (14.0f));
 
             addAndMakeVisible (sizeSlider);
             sizeSlider.setRange (0.0, 1.0, 0.001);
@@ -1041,12 +1048,12 @@ private:
 
             addAndMakeVisible (textureLabel);
             textureLabel.attachToComponent (&textureBox, true);
-
-            lookAndFeelChanged();
         }
 
         void initialise()
         {
+            lookAndFeelChanged();
+
             showBackgroundToggle.setToggleState (false, sendNotification);
             textureBox.setSelectedItemIndex (0);
             presetBox .setSelectedItemIndex (0);
@@ -1113,7 +1120,8 @@ private:
 
         void selectPreset (int preset)
         {
-            const auto& p = OpenGLUtils::getPresets()[preset];
+            const auto presets = OpenGLUtils::getPresets();
+            const auto& p = presets[preset];
 
             vertexDocument  .replaceAllContent (p.vertexShader);
             fragmentDocument.replaceAllContent (p.fragmentShader);
@@ -1278,7 +1286,7 @@ private:
                 shader.reset (newShader.release());
                 shader->use();
 
-                shape     .reset (new OpenGLUtils::Shape      ());
+                shape     .reset (new OpenGLUtils::Shape());
                 attributes.reset (new OpenGLUtils::Attributes (*shader));
                 uniforms  .reset (new OpenGLUtils::Uniforms   (*shader));
 

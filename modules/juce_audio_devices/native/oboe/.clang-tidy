@@ -1,0 +1,3 @@
+# We want to ignore this directory, but we need to enable at least a single
+# check to avoid an error
+Checks: -*,darwin-dispatch-once-nonstatic

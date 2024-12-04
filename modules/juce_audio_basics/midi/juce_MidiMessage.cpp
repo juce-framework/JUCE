@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -404,7 +416,7 @@ void MidiMessage::setChannel (const int channel) noexcept
 
     if ((data[0] & 0xf0) != (uint8) 0xf0)
         data[0] = (uint8) ((data[0] & (uint8) 0xf0)
-                            | (uint8)(channel - 1));
+                            | (uint8) (channel - 1));
 }
 
 bool MidiMessage::isNoteOn (const bool returnTrueForVelocity0) const noexcept
@@ -683,6 +695,11 @@ MidiMessage MidiMessage::createSysExMessage (const void* sysexData, const int da
     m[dataSize + 1] = 0xf7;
 
     return MidiMessage (m, dataSize + 2);
+}
+
+MidiMessage MidiMessage::createSysExMessage (Span<const std::byte> data)
+{
+    return createSysExMessage (data.data(), (int) data.size());
 }
 
 const uint8* MidiMessage::getSysExData() const noexcept
@@ -1048,38 +1065,38 @@ const char* MidiMessage::getGMInstrumentName (const int n)
 {
     static const char* names[] =
     {
-        NEEDS_TRANS("Acoustic Grand Piano"),    NEEDS_TRANS("Bright Acoustic Piano"),   NEEDS_TRANS("Electric Grand Piano"),    NEEDS_TRANS("Honky-tonk Piano"),
-        NEEDS_TRANS("Electric Piano 1"),        NEEDS_TRANS("Electric Piano 2"),        NEEDS_TRANS("Harpsichord"),             NEEDS_TRANS("Clavinet"),
-        NEEDS_TRANS("Celesta"),                 NEEDS_TRANS("Glockenspiel"),            NEEDS_TRANS("Music Box"),               NEEDS_TRANS("Vibraphone"),
-        NEEDS_TRANS("Marimba"),                 NEEDS_TRANS("Xylophone"),               NEEDS_TRANS("Tubular Bells"),           NEEDS_TRANS("Dulcimer"),
-        NEEDS_TRANS("Drawbar Organ"),           NEEDS_TRANS("Percussive Organ"),        NEEDS_TRANS("Rock Organ"),              NEEDS_TRANS("Church Organ"),
-        NEEDS_TRANS("Reed Organ"),              NEEDS_TRANS("Accordion"),               NEEDS_TRANS("Harmonica"),               NEEDS_TRANS("Tango Accordion"),
-        NEEDS_TRANS("Acoustic Guitar (nylon)"), NEEDS_TRANS("Acoustic Guitar (steel)"), NEEDS_TRANS("Electric Guitar (jazz)"),  NEEDS_TRANS("Electric Guitar (clean)"),
-        NEEDS_TRANS("Electric Guitar (mute)"),  NEEDS_TRANS("Overdriven Guitar"),       NEEDS_TRANS("Distortion Guitar"),       NEEDS_TRANS("Guitar Harmonics"),
-        NEEDS_TRANS("Acoustic Bass"),           NEEDS_TRANS("Electric Bass (finger)"),  NEEDS_TRANS("Electric Bass (pick)"),    NEEDS_TRANS("Fretless Bass"),
-        NEEDS_TRANS("Slap Bass 1"),             NEEDS_TRANS("Slap Bass 2"),             NEEDS_TRANS("Synth Bass 1"),            NEEDS_TRANS("Synth Bass 2"),
-        NEEDS_TRANS("Violin"),                  NEEDS_TRANS("Viola"),                   NEEDS_TRANS("Cello"),                   NEEDS_TRANS("Contrabass"),
-        NEEDS_TRANS("Tremolo Strings"),         NEEDS_TRANS("Pizzicato Strings"),       NEEDS_TRANS("Orchestral Harp"),         NEEDS_TRANS("Timpani"),
-        NEEDS_TRANS("String Ensemble 1"),       NEEDS_TRANS("String Ensemble 2"),       NEEDS_TRANS("SynthStrings 1"),          NEEDS_TRANS("SynthStrings 2"),
-        NEEDS_TRANS("Choir Aahs"),              NEEDS_TRANS("Voice Oohs"),              NEEDS_TRANS("Synth Voice"),             NEEDS_TRANS("Orchestra Hit"),
-        NEEDS_TRANS("Trumpet"),                 NEEDS_TRANS("Trombone"),                NEEDS_TRANS("Tuba"),                    NEEDS_TRANS("Muted Trumpet"),
-        NEEDS_TRANS("French Horn"),             NEEDS_TRANS("Brass Section"),           NEEDS_TRANS("SynthBrass 1"),            NEEDS_TRANS("SynthBrass 2"),
-        NEEDS_TRANS("Soprano Sax"),             NEEDS_TRANS("Alto Sax"),                NEEDS_TRANS("Tenor Sax"),               NEEDS_TRANS("Baritone Sax"),
-        NEEDS_TRANS("Oboe"),                    NEEDS_TRANS("English Horn"),            NEEDS_TRANS("Bassoon"),                 NEEDS_TRANS("Clarinet"),
-        NEEDS_TRANS("Piccolo"),                 NEEDS_TRANS("Flute"),                   NEEDS_TRANS("Recorder"),                NEEDS_TRANS("Pan Flute"),
-        NEEDS_TRANS("Blown Bottle"),            NEEDS_TRANS("Shakuhachi"),              NEEDS_TRANS("Whistle"),                 NEEDS_TRANS("Ocarina"),
-        NEEDS_TRANS("Lead 1 (square)"),         NEEDS_TRANS("Lead 2 (sawtooth)"),       NEEDS_TRANS("Lead 3 (calliope)"),       NEEDS_TRANS("Lead 4 (chiff)"),
-        NEEDS_TRANS("Lead 5 (charang)"),        NEEDS_TRANS("Lead 6 (voice)"),          NEEDS_TRANS("Lead 7 (fifths)"),         NEEDS_TRANS("Lead 8 (bass+lead)"),
-        NEEDS_TRANS("Pad 1 (new age)"),         NEEDS_TRANS("Pad 2 (warm)"),            NEEDS_TRANS("Pad 3 (polysynth)"),       NEEDS_TRANS("Pad 4 (choir)"),
-        NEEDS_TRANS("Pad 5 (bowed)"),           NEEDS_TRANS("Pad 6 (metallic)"),        NEEDS_TRANS("Pad 7 (halo)"),            NEEDS_TRANS("Pad 8 (sweep)"),
-        NEEDS_TRANS("FX 1 (rain)"),             NEEDS_TRANS("FX 2 (soundtrack)"),       NEEDS_TRANS("FX 3 (crystal)"),          NEEDS_TRANS("FX 4 (atmosphere)"),
-        NEEDS_TRANS("FX 5 (brightness)"),       NEEDS_TRANS("FX 6 (goblins)"),          NEEDS_TRANS("FX 7 (echoes)"),           NEEDS_TRANS("FX 8 (sci-fi)"),
-        NEEDS_TRANS("Sitar"),                   NEEDS_TRANS("Banjo"),                   NEEDS_TRANS("Shamisen"),                NEEDS_TRANS("Koto"),
-        NEEDS_TRANS("Kalimba"),                 NEEDS_TRANS("Bag pipe"),                NEEDS_TRANS("Fiddle"),                  NEEDS_TRANS("Shanai"),
-        NEEDS_TRANS("Tinkle Bell"),             NEEDS_TRANS("Agogo"),                   NEEDS_TRANS("Steel Drums"),             NEEDS_TRANS("Woodblock"),
-        NEEDS_TRANS("Taiko Drum"),              NEEDS_TRANS("Melodic Tom"),             NEEDS_TRANS("Synth Drum"),              NEEDS_TRANS("Reverse Cymbal"),
-        NEEDS_TRANS("Guitar Fret Noise"),       NEEDS_TRANS("Breath Noise"),            NEEDS_TRANS("Seashore"),                NEEDS_TRANS("Bird Tweet"),
-        NEEDS_TRANS("Telephone Ring"),          NEEDS_TRANS("Helicopter"),              NEEDS_TRANS("Applause"),                NEEDS_TRANS("Gunshot")
+        NEEDS_TRANS ("Acoustic Grand Piano"),    NEEDS_TRANS ("Bright Acoustic Piano"),   NEEDS_TRANS ("Electric Grand Piano"),    NEEDS_TRANS ("Honky-tonk Piano"),
+        NEEDS_TRANS ("Electric Piano 1"),        NEEDS_TRANS ("Electric Piano 2"),        NEEDS_TRANS ("Harpsichord"),             NEEDS_TRANS ("Clavinet"),
+        NEEDS_TRANS ("Celesta"),                 NEEDS_TRANS ("Glockenspiel"),            NEEDS_TRANS ("Music Box"),               NEEDS_TRANS ("Vibraphone"),
+        NEEDS_TRANS ("Marimba"),                 NEEDS_TRANS ("Xylophone"),               NEEDS_TRANS ("Tubular Bells"),           NEEDS_TRANS ("Dulcimer"),
+        NEEDS_TRANS ("Drawbar Organ"),           NEEDS_TRANS ("Percussive Organ"),        NEEDS_TRANS ("Rock Organ"),              NEEDS_TRANS ("Church Organ"),
+        NEEDS_TRANS ("Reed Organ"),              NEEDS_TRANS ("Accordion"),               NEEDS_TRANS ("Harmonica"),               NEEDS_TRANS ("Tango Accordion"),
+        NEEDS_TRANS ("Acoustic Guitar (nylon)"), NEEDS_TRANS ("Acoustic Guitar (steel)"), NEEDS_TRANS ("Electric Guitar (jazz)"),  NEEDS_TRANS ("Electric Guitar (clean)"),
+        NEEDS_TRANS ("Electric Guitar (mute)"),  NEEDS_TRANS ("Overdriven Guitar"),       NEEDS_TRANS ("Distortion Guitar"),       NEEDS_TRANS ("Guitar Harmonics"),
+        NEEDS_TRANS ("Acoustic Bass"),           NEEDS_TRANS ("Electric Bass (finger)"),  NEEDS_TRANS ("Electric Bass (pick)"),    NEEDS_TRANS ("Fretless Bass"),
+        NEEDS_TRANS ("Slap Bass 1"),             NEEDS_TRANS ("Slap Bass 2"),             NEEDS_TRANS ("Synth Bass 1"),            NEEDS_TRANS ("Synth Bass 2"),
+        NEEDS_TRANS ("Violin"),                  NEEDS_TRANS ("Viola"),                   NEEDS_TRANS ("Cello"),                   NEEDS_TRANS ("Contrabass"),
+        NEEDS_TRANS ("Tremolo Strings"),         NEEDS_TRANS ("Pizzicato Strings"),       NEEDS_TRANS ("Orchestral Harp"),         NEEDS_TRANS ("Timpani"),
+        NEEDS_TRANS ("String Ensemble 1"),       NEEDS_TRANS ("String Ensemble 2"),       NEEDS_TRANS ("SynthStrings 1"),          NEEDS_TRANS ("SynthStrings 2"),
+        NEEDS_TRANS ("Choir Aahs"),              NEEDS_TRANS ("Voice Oohs"),              NEEDS_TRANS ("Synth Voice"),             NEEDS_TRANS ("Orchestra Hit"),
+        NEEDS_TRANS ("Trumpet"),                 NEEDS_TRANS ("Trombone"),                NEEDS_TRANS ("Tuba"),                    NEEDS_TRANS ("Muted Trumpet"),
+        NEEDS_TRANS ("French Horn"),             NEEDS_TRANS ("Brass Section"),           NEEDS_TRANS ("SynthBrass 1"),            NEEDS_TRANS ("SynthBrass 2"),
+        NEEDS_TRANS ("Soprano Sax"),             NEEDS_TRANS ("Alto Sax"),                NEEDS_TRANS ("Tenor Sax"),               NEEDS_TRANS ("Baritone Sax"),
+        NEEDS_TRANS ("Oboe"),                    NEEDS_TRANS ("English Horn"),            NEEDS_TRANS ("Bassoon"),                 NEEDS_TRANS ("Clarinet"),
+        NEEDS_TRANS ("Piccolo"),                 NEEDS_TRANS ("Flute"),                   NEEDS_TRANS ("Recorder"),                NEEDS_TRANS ("Pan Flute"),
+        NEEDS_TRANS ("Blown Bottle"),            NEEDS_TRANS ("Shakuhachi"),              NEEDS_TRANS ("Whistle"),                 NEEDS_TRANS ("Ocarina"),
+        NEEDS_TRANS ("Lead 1 (square)"),         NEEDS_TRANS ("Lead 2 (sawtooth)"),       NEEDS_TRANS ("Lead 3 (calliope)"),       NEEDS_TRANS ("Lead 4 (chiff)"),
+        NEEDS_TRANS ("Lead 5 (charang)"),        NEEDS_TRANS ("Lead 6 (voice)"),          NEEDS_TRANS ("Lead 7 (fifths)"),         NEEDS_TRANS ("Lead 8 (bass+lead)"),
+        NEEDS_TRANS ("Pad 1 (new age)"),         NEEDS_TRANS ("Pad 2 (warm)"),            NEEDS_TRANS ("Pad 3 (polysynth)"),       NEEDS_TRANS ("Pad 4 (choir)"),
+        NEEDS_TRANS ("Pad 5 (bowed)"),           NEEDS_TRANS ("Pad 6 (metallic)"),        NEEDS_TRANS ("Pad 7 (halo)"),            NEEDS_TRANS ("Pad 8 (sweep)"),
+        NEEDS_TRANS ("FX 1 (rain)"),             NEEDS_TRANS ("FX 2 (soundtrack)"),       NEEDS_TRANS ("FX 3 (crystal)"),          NEEDS_TRANS ("FX 4 (atmosphere)"),
+        NEEDS_TRANS ("FX 5 (brightness)"),       NEEDS_TRANS ("FX 6 (goblins)"),          NEEDS_TRANS ("FX 7 (echoes)"),           NEEDS_TRANS ("FX 8 (sci-fi)"),
+        NEEDS_TRANS ("Sitar"),                   NEEDS_TRANS ("Banjo"),                   NEEDS_TRANS ("Shamisen"),                NEEDS_TRANS ("Koto"),
+        NEEDS_TRANS ("Kalimba"),                 NEEDS_TRANS ("Bag pipe"),                NEEDS_TRANS ("Fiddle"),                  NEEDS_TRANS ("Shanai"),
+        NEEDS_TRANS ("Tinkle Bell"),             NEEDS_TRANS ("Agogo"),                   NEEDS_TRANS ("Steel Drums"),             NEEDS_TRANS ("Woodblock"),
+        NEEDS_TRANS ("Taiko Drum"),              NEEDS_TRANS ("Melodic Tom"),             NEEDS_TRANS ("Synth Drum"),              NEEDS_TRANS ("Reverse Cymbal"),
+        NEEDS_TRANS ("Guitar Fret Noise"),       NEEDS_TRANS ("Breath Noise"),            NEEDS_TRANS ("Seashore"),                NEEDS_TRANS ("Bird Tweet"),
+        NEEDS_TRANS ("Telephone Ring"),          NEEDS_TRANS ("Helicopter"),              NEEDS_TRANS ("Applause"),                NEEDS_TRANS ("Gunshot")
     };
 
     return isPositiveAndBelow (n, numElementsInArray (names)) ? names[n] : nullptr;
@@ -1089,10 +1106,10 @@ const char* MidiMessage::getGMInstrumentBankName (const int n)
 {
     static const char* names[] =
     {
-        NEEDS_TRANS("Piano"),           NEEDS_TRANS("Chromatic Percussion"),    NEEDS_TRANS("Organ"),       NEEDS_TRANS("Guitar"),
-        NEEDS_TRANS("Bass"),            NEEDS_TRANS("Strings"),                 NEEDS_TRANS("Ensemble"),    NEEDS_TRANS("Brass"),
-        NEEDS_TRANS("Reed"),            NEEDS_TRANS("Pipe"),                    NEEDS_TRANS("Synth Lead"),  NEEDS_TRANS("Synth Pad"),
-        NEEDS_TRANS("Synth Effects"),   NEEDS_TRANS("Ethnic"),                  NEEDS_TRANS("Percussive"),  NEEDS_TRANS("Sound Effects")
+        NEEDS_TRANS ("Piano"),           NEEDS_TRANS ("Chromatic Percussion"),    NEEDS_TRANS ("Organ"),       NEEDS_TRANS ("Guitar"),
+        NEEDS_TRANS ("Bass"),            NEEDS_TRANS ("Strings"),                 NEEDS_TRANS ("Ensemble"),    NEEDS_TRANS ("Brass"),
+        NEEDS_TRANS ("Reed"),            NEEDS_TRANS ("Pipe"),                    NEEDS_TRANS ("Synth Lead"),  NEEDS_TRANS ("Synth Pad"),
+        NEEDS_TRANS ("Synth Effects"),   NEEDS_TRANS ("Ethnic"),                  NEEDS_TRANS ("Percussive"),  NEEDS_TRANS ("Sound Effects")
     };
 
     return isPositiveAndBelow (n, numElementsInArray (names)) ? names[n] : nullptr;
@@ -1102,18 +1119,18 @@ const char* MidiMessage::getRhythmInstrumentName (const int n)
 {
     static const char* names[] =
     {
-        NEEDS_TRANS("Acoustic Bass Drum"),  NEEDS_TRANS("Bass Drum 1"),     NEEDS_TRANS("Side Stick"),      NEEDS_TRANS("Acoustic Snare"),
-        NEEDS_TRANS("Hand Clap"),           NEEDS_TRANS("Electric Snare"),  NEEDS_TRANS("Low Floor Tom"),   NEEDS_TRANS("Closed Hi-Hat"),
-        NEEDS_TRANS("High Floor Tom"),      NEEDS_TRANS("Pedal Hi-Hat"),    NEEDS_TRANS("Low Tom"),         NEEDS_TRANS("Open Hi-Hat"),
-        NEEDS_TRANS("Low-Mid Tom"),         NEEDS_TRANS("Hi-Mid Tom"),      NEEDS_TRANS("Crash Cymbal 1"),  NEEDS_TRANS("High Tom"),
-        NEEDS_TRANS("Ride Cymbal 1"),       NEEDS_TRANS("Chinese Cymbal"),  NEEDS_TRANS("Ride Bell"),       NEEDS_TRANS("Tambourine"),
-        NEEDS_TRANS("Splash Cymbal"),       NEEDS_TRANS("Cowbell"),         NEEDS_TRANS("Crash Cymbal 2"),  NEEDS_TRANS("Vibraslap"),
-        NEEDS_TRANS("Ride Cymbal 2"),       NEEDS_TRANS("Hi Bongo"),        NEEDS_TRANS("Low Bongo"),       NEEDS_TRANS("Mute Hi Conga"),
-        NEEDS_TRANS("Open Hi Conga"),       NEEDS_TRANS("Low Conga"),       NEEDS_TRANS("High Timbale"),    NEEDS_TRANS("Low Timbale"),
-        NEEDS_TRANS("High Agogo"),          NEEDS_TRANS("Low Agogo"),       NEEDS_TRANS("Cabasa"),          NEEDS_TRANS("Maracas"),
-        NEEDS_TRANS("Short Whistle"),       NEEDS_TRANS("Long Whistle"),    NEEDS_TRANS("Short Guiro"),     NEEDS_TRANS("Long Guiro"),
-        NEEDS_TRANS("Claves"),              NEEDS_TRANS("Hi Wood Block"),   NEEDS_TRANS("Low Wood Block"),  NEEDS_TRANS("Mute Cuica"),
-        NEEDS_TRANS("Open Cuica"),          NEEDS_TRANS("Mute Triangle"),   NEEDS_TRANS("Open Triangle")
+        NEEDS_TRANS ("Acoustic Bass Drum"),  NEEDS_TRANS ("Bass Drum 1"),     NEEDS_TRANS ("Side Stick"),      NEEDS_TRANS ("Acoustic Snare"),
+        NEEDS_TRANS ("Hand Clap"),           NEEDS_TRANS ("Electric Snare"),  NEEDS_TRANS ("Low Floor Tom"),   NEEDS_TRANS ("Closed Hi-Hat"),
+        NEEDS_TRANS ("High Floor Tom"),      NEEDS_TRANS ("Pedal Hi-Hat"),    NEEDS_TRANS ("Low Tom"),         NEEDS_TRANS ("Open Hi-Hat"),
+        NEEDS_TRANS ("Low-Mid Tom"),         NEEDS_TRANS ("Hi-Mid Tom"),      NEEDS_TRANS ("Crash Cymbal 1"),  NEEDS_TRANS ("High Tom"),
+        NEEDS_TRANS ("Ride Cymbal 1"),       NEEDS_TRANS ("Chinese Cymbal"),  NEEDS_TRANS ("Ride Bell"),       NEEDS_TRANS ("Tambourine"),
+        NEEDS_TRANS ("Splash Cymbal"),       NEEDS_TRANS ("Cowbell"),         NEEDS_TRANS ("Crash Cymbal 2"),  NEEDS_TRANS ("Vibraslap"),
+        NEEDS_TRANS ("Ride Cymbal 2"),       NEEDS_TRANS ("Hi Bongo"),        NEEDS_TRANS ("Low Bongo"),       NEEDS_TRANS ("Mute Hi Conga"),
+        NEEDS_TRANS ("Open Hi Conga"),       NEEDS_TRANS ("Low Conga"),       NEEDS_TRANS ("High Timbale"),    NEEDS_TRANS ("Low Timbale"),
+        NEEDS_TRANS ("High Agogo"),          NEEDS_TRANS ("Low Agogo"),       NEEDS_TRANS ("Cabasa"),          NEEDS_TRANS ("Maracas"),
+        NEEDS_TRANS ("Short Whistle"),       NEEDS_TRANS ("Long Whistle"),    NEEDS_TRANS ("Short Guiro"),     NEEDS_TRANS ("Long Guiro"),
+        NEEDS_TRANS ("Claves"),              NEEDS_TRANS ("Hi Wood Block"),   NEEDS_TRANS ("Low Wood Block"),  NEEDS_TRANS ("Mute Cuica"),
+        NEEDS_TRANS ("Open Cuica"),          NEEDS_TRANS ("Mute Triangle"),   NEEDS_TRANS ("Open Triangle")
     };
 
     return (n >= 35 && n <= 81) ? names[n - 35] : nullptr;
@@ -1123,38 +1140,38 @@ const char* MidiMessage::getControllerName (const int n)
 {
     static const char* names[] =
     {
-        NEEDS_TRANS("Bank Select"), NEEDS_TRANS("Modulation Wheel (coarse)"), NEEDS_TRANS("Breath controller (coarse)"),
+        NEEDS_TRANS ("Bank Select"), NEEDS_TRANS ("Modulation Wheel (coarse)"), NEEDS_TRANS ("Breath controller (coarse)"),
         nullptr,
-        NEEDS_TRANS("Foot Pedal (coarse)"), NEEDS_TRANS("Portamento Time (coarse)"), NEEDS_TRANS("Data Entry (coarse)"),
-        NEEDS_TRANS("Volume (coarse)"), NEEDS_TRANS("Balance (coarse)"),
+        NEEDS_TRANS ("Foot Pedal (coarse)"), NEEDS_TRANS ("Portamento Time (coarse)"), NEEDS_TRANS ("Data Entry (coarse)"),
+        NEEDS_TRANS ("Volume (coarse)"), NEEDS_TRANS ("Balance (coarse)"),
         nullptr,
-        NEEDS_TRANS("Pan position (coarse)"), NEEDS_TRANS("Expression (coarse)"), NEEDS_TRANS("Effect Control 1 (coarse)"),
-        NEEDS_TRANS("Effect Control 2 (coarse)"),
+        NEEDS_TRANS ("Pan position (coarse)"), NEEDS_TRANS ("Expression (coarse)"), NEEDS_TRANS ("Effect Control 1 (coarse)"),
+        NEEDS_TRANS ("Effect Control 2 (coarse)"),
         nullptr, nullptr,
-        NEEDS_TRANS("General Purpose Slider 1"), NEEDS_TRANS("General Purpose Slider 2"),
-        NEEDS_TRANS("General Purpose Slider 3"), NEEDS_TRANS("General Purpose Slider 4"),
+        NEEDS_TRANS ("General Purpose Slider 1"), NEEDS_TRANS ("General Purpose Slider 2"),
+        NEEDS_TRANS ("General Purpose Slider 3"), NEEDS_TRANS ("General Purpose Slider 4"),
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-        NEEDS_TRANS("Bank Select (fine)"), NEEDS_TRANS("Modulation Wheel (fine)"), NEEDS_TRANS("Breath controller (fine)"),
+        NEEDS_TRANS ("Bank Select (fine)"), NEEDS_TRANS ("Modulation Wheel (fine)"), NEEDS_TRANS ("Breath controller (fine)"),
         nullptr,
-        NEEDS_TRANS("Foot Pedal (fine)"), NEEDS_TRANS("Portamento Time (fine)"), NEEDS_TRANS("Data Entry (fine)"), NEEDS_TRANS("Volume (fine)"),
-        NEEDS_TRANS("Balance (fine)"), nullptr, NEEDS_TRANS("Pan position (fine)"), NEEDS_TRANS("Expression (fine)"),
-        NEEDS_TRANS("Effect Control 1 (fine)"), NEEDS_TRANS("Effect Control 2 (fine)"),
+        NEEDS_TRANS ("Foot Pedal (fine)"), NEEDS_TRANS ("Portamento Time (fine)"), NEEDS_TRANS ("Data Entry (fine)"), NEEDS_TRANS ("Volume (fine)"),
+        NEEDS_TRANS ("Balance (fine)"), nullptr, NEEDS_TRANS ("Pan position (fine)"), NEEDS_TRANS ("Expression (fine)"),
+        NEEDS_TRANS ("Effect Control 1 (fine)"), NEEDS_TRANS ("Effect Control 2 (fine)"),
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-        NEEDS_TRANS("Hold Pedal (on/off)"), NEEDS_TRANS("Portamento (on/off)"), NEEDS_TRANS("Sustenuto Pedal (on/off)"), NEEDS_TRANS("Soft Pedal (on/off)"),
-        NEEDS_TRANS("Legato Pedal (on/off)"), NEEDS_TRANS("Hold 2 Pedal (on/off)"), NEEDS_TRANS("Sound Variation"), NEEDS_TRANS("Sound Timbre"),
-        NEEDS_TRANS("Sound Release Time"), NEEDS_TRANS("Sound Attack Time"), NEEDS_TRANS("Sound Brightness"), NEEDS_TRANS("Sound Control 6"),
-        NEEDS_TRANS("Sound Control 7"), NEEDS_TRANS("Sound Control 8"), NEEDS_TRANS("Sound Control 9"), NEEDS_TRANS("Sound Control 10"),
-        NEEDS_TRANS("General Purpose Button 1 (on/off)"), NEEDS_TRANS("General Purpose Button 2 (on/off)"),
-        NEEDS_TRANS("General Purpose Button 3 (on/off)"), NEEDS_TRANS("General Purpose Button 4 (on/off)"),
+        NEEDS_TRANS ("Hold Pedal (on/off)"), NEEDS_TRANS ("Portamento (on/off)"), NEEDS_TRANS ("Sustenuto Pedal (on/off)"), NEEDS_TRANS ("Soft Pedal (on/off)"),
+        NEEDS_TRANS ("Legato Pedal (on/off)"), NEEDS_TRANS ("Hold 2 Pedal (on/off)"), NEEDS_TRANS ("Sound Variation"), NEEDS_TRANS ("Sound Timbre"),
+        NEEDS_TRANS ("Sound Release Time"), NEEDS_TRANS ("Sound Attack Time"), NEEDS_TRANS ("Sound Brightness"), NEEDS_TRANS ("Sound Control 6"),
+        NEEDS_TRANS ("Sound Control 7"), NEEDS_TRANS ("Sound Control 8"), NEEDS_TRANS ("Sound Control 9"), NEEDS_TRANS ("Sound Control 10"),
+        NEEDS_TRANS ("General Purpose Button 1 (on/off)"), NEEDS_TRANS ("General Purpose Button 2 (on/off)"),
+        NEEDS_TRANS ("General Purpose Button 3 (on/off)"), NEEDS_TRANS ("General Purpose Button 4 (on/off)"),
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-        NEEDS_TRANS("Reverb Level"), NEEDS_TRANS("Tremolo Level"), NEEDS_TRANS("Chorus Level"), NEEDS_TRANS("Celeste Level"),
-        NEEDS_TRANS("Phaser Level"), NEEDS_TRANS("Data Button increment"), NEEDS_TRANS("Data Button decrement"), NEEDS_TRANS("Non-registered Parameter (fine)"),
-        NEEDS_TRANS("Non-registered Parameter (coarse)"), NEEDS_TRANS("Registered Parameter (fine)"), NEEDS_TRANS("Registered Parameter (coarse)"),
+        NEEDS_TRANS ("Reverb Level"), NEEDS_TRANS ("Tremolo Level"), NEEDS_TRANS ("Chorus Level"), NEEDS_TRANS ("Celeste Level"),
+        NEEDS_TRANS ("Phaser Level"), NEEDS_TRANS ("Data Button increment"), NEEDS_TRANS ("Data Button decrement"), NEEDS_TRANS ("Non-registered Parameter (fine)"),
+        NEEDS_TRANS ("Non-registered Parameter (coarse)"), NEEDS_TRANS ("Registered Parameter (fine)"), NEEDS_TRANS ("Registered Parameter (coarse)"),
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-        NEEDS_TRANS("All Sound Off"), NEEDS_TRANS("All Controllers Off"), NEEDS_TRANS("Local Keyboard (on/off)"), NEEDS_TRANS("All Notes Off"),
-        NEEDS_TRANS("Omni Mode Off"), NEEDS_TRANS("Omni Mode On"), NEEDS_TRANS("Mono Operation"), NEEDS_TRANS("Poly Operation")
+        NEEDS_TRANS ("All Sound Off"), NEEDS_TRANS ("All Controllers Off"), NEEDS_TRANS ("Local Keyboard (on/off)"), NEEDS_TRANS ("All Notes Off"),
+        NEEDS_TRANS ("Omni Mode Off"), NEEDS_TRANS ("Omni Mode On"), NEEDS_TRANS ("Mono Operation"), NEEDS_TRANS ("Poly Operation")
     };
 
     return isPositiveAndBelow (n, numElementsInArray (names)) ? names[n] : nullptr;
@@ -1164,7 +1181,7 @@ const char* MidiMessage::getControllerName (const int n)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct MidiMessageTest  : public UnitTest
+struct MidiMessageTest final : public UnitTest
 {
     MidiMessageTest()
         : UnitTest ("MidiMessage", UnitTestCategories::midi)

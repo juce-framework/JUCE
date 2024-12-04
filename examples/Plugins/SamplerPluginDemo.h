@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -111,8 +115,8 @@ struct Command
 };
 
 template <typename Proc, typename Func>
-class TemplateCommand  : public Command<Proc>,
-                         private Func
+class TemplateCommand final : public Command<Proc>,
+                              private Func
 {
 public:
     template <typename FuncPrime>
@@ -208,7 +212,7 @@ class MPESamplerSound final
 public:
     void setSample (std::unique_ptr<Sample> value)
     {
-        sample = move (value);
+        sample = std::move (value);
         setLoopPointsInSeconds (loopPoints);
     }
 
@@ -257,7 +261,7 @@ private:
 };
 
 //==============================================================================
-class MPESamplerVoice  : public MPESynthesiserVoice
+class MPESamplerVoice final : public MPESynthesiserVoice
 {
 public:
     explicit MPESamplerVoice (std::shared_ptr<const MPESamplerSound> sound)
@@ -291,7 +295,7 @@ public:
     {
         jassert (currentlyPlayingNote.keyState == MPENote::off);
 
-        if (allowTailOff && tailOff == 0.0)
+        if (allowTailOff && approximatelyEqual (tailOff, 0.0))
             tailOff = 1.0;
         else
             stopNote();
@@ -422,7 +426,7 @@ private:
 
     bool isTailingOff() const
     {
-        return tailOff != 0.0;
+        return ! approximatelyEqual (tailOff, 0.0);
     }
 
     void stopNote()
@@ -501,7 +505,7 @@ private:
 };
 
 template <typename Contents>
-class ReferenceCountingAdapter  : public ReferenceCountedObject
+class ReferenceCountingAdapter final : public ReferenceCountedObject
 {
 public:
     template <typename... Args>
@@ -564,17 +568,17 @@ public:
 };
 
 //==============================================================================
-class MemoryAudioFormatReaderFactory  : public AudioFormatReaderFactory
+class MemoryAudioFormatReaderFactory final : public AudioFormatReaderFactory
 {
 public:
-    MemoryAudioFormatReaderFactory (const void* sampleDataIn, size_t dataSizeIn)
-        : sampleData (sampleDataIn),
-          dataSize (dataSizeIn)
-    {}
+    explicit MemoryAudioFormatReaderFactory (MemoryBlock mb)
+        : memoryBlock (std::make_shared<MemoryBlock> (std::move (mb)))
+    {
+    }
 
     std::unique_ptr<AudioFormatReader> make (AudioFormatManager& manager) const override
     {
-        return makeAudioFormatReader (manager, sampleData, dataSize);
+        return makeAudioFormatReader (manager, memoryBlock->getData(), memoryBlock->getSize());
     }
 
     std::unique_ptr<AudioFormatReaderFactory> clone() const override
@@ -583,12 +587,11 @@ public:
     }
 
 private:
-    const void* sampleData;
-    size_t dataSize;
+    std::shared_ptr<MemoryBlock> memoryBlock;
 };
 
 //==============================================================================
-class FileAudioFormatReaderFactory  : public AudioFormatReaderFactory
+class FileAudioFormatReaderFactory final : public AudioFormatReaderFactory
 {
 public:
     explicit FileAudioFormatReaderFactory (File fileIn)
@@ -643,20 +646,20 @@ struct GenericVariantConverter
 };
 
 template <typename Numeric>
-struct VariantConverter<Range<Numeric>>  : GenericVariantConverter<Range<Numeric>> {};
+struct VariantConverter<Range<Numeric>> final : GenericVariantConverter<Range<Numeric>> {};
 
 template<>
-struct VariantConverter<MPEZoneLayout>  : GenericVariantConverter<MPEZoneLayout> {};
+struct VariantConverter<MPEZoneLayout> final : GenericVariantConverter<MPEZoneLayout> {};
 
 template<>
-struct VariantConverter<std::shared_ptr<AudioFormatReaderFactory>>
+struct VariantConverter<std::shared_ptr<AudioFormatReaderFactory>> final
     : GenericVariantConverter<std::shared_ptr<AudioFormatReaderFactory>>
 {};
 
 } // namespace juce
 
 //==============================================================================
-class VisibleRangeDataModel  : private ValueTree::Listener
+class VisibleRangeDataModel final : private ValueTree::Listener
 {
 public:
     class Listener
@@ -757,7 +760,7 @@ private:
 };
 
 //==============================================================================
-class MPESettingsDataModel  : private ValueTree::Listener
+class MPESettingsDataModel final : private ValueTree::Listener
 {
 public:
     class Listener
@@ -947,7 +950,7 @@ private:
 };
 
 //==============================================================================
-class DataModel  : private ValueTree::Listener
+class DataModel final : private ValueTree::Listener
 {
 public:
     class Listener
@@ -995,7 +998,7 @@ public:
     void setSampleReader (std::unique_ptr<AudioFormatReaderFactory> readerFactory,
                           UndoManager* undoManager)
     {
-        sampleReader.setValue (move (readerFactory), undoManager);
+        sampleReader.setValue (std::move (readerFactory), undoManager);
         setLoopPointsSeconds (Range<double> (0, getSampleLengthSeconds()).constrainRange (loopPointsSeconds),
                               undoManager);
     }
@@ -1132,8 +1135,8 @@ constexpr int controlSeparation = 6;
 } // namespace
 
 //==============================================================================
-class MPELegacySettingsComponent final  : public Component,
-                                          private MPESettingsDataModel::Listener
+class MPELegacySettingsComponent final : public Component,
+                                         private MPESettingsDataModel::Listener
 {
 public:
     explicit MPELegacySettingsComponent (const MPESettingsDataModel& model,
@@ -1192,7 +1195,7 @@ private:
         }
     }
 
-    bool isLegacyModeValid() const
+    bool isLegacyModeValid()
     {
         if (! areLegacyModeParametersValid())
         {
@@ -1233,13 +1236,14 @@ private:
         return getFirstChannel() <= getLastChannel();
     }
 
-    void handleInvalidLegacyModeParameters() const
+    void handleInvalidLegacyModeParameters()
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                          "Invalid legacy mode channel layout",
-                                          "Cannot set legacy mode start/end channel:\n"
-                                          "The end channel must not be less than the start channel!",
-                                          "Got it");
+        auto options = MessageBoxOptions::makeOptionsOk (AlertWindow::WarningIcon,
+                                                         "Invalid legacy mode channel layout",
+                                                         "Cannot set legacy mode start/end channel:\n"
+                                                         "The end channel must not be less than the start channel!",
+                                                         "Got it");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
     }
 
     MPESettingsDataModel dataModel;
@@ -1251,11 +1255,12 @@ private:
           legacyPitchbendRangeLabel { {}, "Pitchbend range (semitones)" };
 
     UndoManager* undoManager;
+    ScopedMessageBox messageBox;
 };
 
 //==============================================================================
-class MPENewSettingsComponent final  : public Component,
-                                       private MPESettingsDataModel::Listener
+class MPENewSettingsComponent final : public Component,
+                                      private MPESettingsDataModel::Listener
 {
 public:
     MPENewSettingsComponent (const MPESettingsDataModel& model,
@@ -1350,8 +1355,8 @@ private:
 };
 
 //==============================================================================
-class MPESettingsComponent final  : public Component,
-                                    private MPESettingsDataModel::Listener
+class MPESettingsComponent final : public Component,
+                                   private MPESettingsDataModel::Listener
 {
 public:
     MPESettingsComponent (const MPESettingsDataModel& model,
@@ -1444,7 +1449,7 @@ private:
 };
 
 //==============================================================================
-class LoopPointMarker  : public Component
+class LoopPointMarker final : public Component
 {
 public:
     using MouseCallback = std::function<void (LoopPointMarker&, const MouseEvent&)>;
@@ -1521,8 +1526,8 @@ private:
 };
 
 //==============================================================================
-class Ruler  : public Component,
-               private VisibleRangeDataModel::Listener
+class Ruler final : public Component,
+                    private VisibleRangeDataModel::Listener
 {
 public:
     explicit Ruler (const VisibleRangeDataModel& model)
@@ -1612,9 +1617,9 @@ private:
 };
 
 //==============================================================================
-class LoopPointsOverlay  : public Component,
-                           private DataModel::Listener,
-                           private VisibleRangeDataModel::Listener
+class LoopPointsOverlay final : public Component,
+                                private DataModel::Listener,
+                                private VisibleRangeDataModel::Listener
 {
 public:
     LoopPointsOverlay (const DataModel& dModel,
@@ -1713,9 +1718,9 @@ private:
 };
 
 //==============================================================================
-class PlaybackPositionOverlay  : public Component,
-                                 private Timer,
-                                 private VisibleRangeDataModel::Listener
+class PlaybackPositionOverlay final : public Component,
+                                      private Timer,
+                                      private VisibleRangeDataModel::Listener
 {
 public:
     using Provider = std::function<std::vector<float>()>;
@@ -1760,10 +1765,10 @@ private:
 };
 
 //==============================================================================
-class WaveformView  : public Component,
-                      private ChangeListener,
-                      private DataModel::Listener,
-                      private VisibleRangeDataModel::Listener
+class WaveformView final : public Component,
+                           private ChangeListener,
+                           private DataModel::Listener,
+                           private VisibleRangeDataModel::Listener
 {
 public:
     WaveformView (const DataModel& model,
@@ -1851,8 +1856,8 @@ private:
 };
 
 //==============================================================================
-class WaveformEditor  : public Component,
-                        private DataModel::Listener
+class WaveformEditor final : public Component,
+                             private DataModel::Listener
 {
 public:
     WaveformEditor (const DataModel& model,
@@ -1860,7 +1865,7 @@ public:
                     UndoManager& undoManager)
         : dataModel (model),
           waveformView (model, visibleRange),
-          playbackOverlay (visibleRange, move (provider)),
+          playbackOverlay (visibleRange, std::move (provider)),
           loopPoints (dataModel, visibleRange, undoManager),
           ruler (visibleRange)
     {
@@ -1907,16 +1912,16 @@ private:
 };
 
 //==============================================================================
-class MainSamplerView  : public Component,
-                         private DataModel::Listener,
-                         private ChangeListener
+class MainSamplerView final : public Component,
+                              private DataModel::Listener,
+                              private ChangeListener
 {
 public:
     MainSamplerView (const DataModel& model,
                      PlaybackPositionOverlay::Provider provider,
                      UndoManager& um)
         : dataModel (model),
-          waveformEditor (dataModel, move (provider), um),
+          waveformEditor (dataModel, std::move (provider), um),
           undoManager (um)
     {
         dataModel.addListener (*this);
@@ -2101,7 +2106,7 @@ struct ProcessorState
 };
 
 //==============================================================================
-class SamplerAudioProcessor  : public AudioProcessor
+class SamplerAudioProcessor final : public AudioProcessor
 {
 public:
     SamplerAudioProcessor()
@@ -2109,25 +2114,28 @@ public:
     {
         if (auto inputStream = createAssetInputStream ("cello.wav"))
         {
+            MemoryBlock mb;
             inputStream->readIntoMemoryBlock (mb);
-            readerFactory.reset (new MemoryAudioFormatReaderFactory (mb.getData(), mb.getSize()));
+            readerFactory = std::make_unique<MemoryAudioFormatReaderFactory> (std::move (mb));
         }
 
-        // Set up initial sample, which we load from a binary resource
-        AudioFormatManager manager;
-        manager.registerBasicFormats();
-        auto reader = readerFactory->make (manager);
-        jassert (reader != nullptr); // Failed to load resource!
+        if (readerFactory != nullptr)
+        {
+            AudioFormatManager manager;
+            manager.registerBasicFormats();
 
-        auto sound = samplerSound;
-        auto sample = std::unique_ptr<Sample> (new Sample (*reader, 10.0));
-        auto lengthInSeconds = sample->getLength() / sample->getSampleRate();
-        sound->setLoopPointsInSeconds ({lengthInSeconds * 0.1, lengthInSeconds * 0.9 });
-        sound->setSample (move (sample));
+            if (auto reader = readerFactory->make (manager))
+            {
+                auto sample = std::make_unique<Sample> (*reader, 10.0);
+                auto lengthInSeconds = sample->getLength() / sample->getSampleRate();
+                samplerSound->setLoopPointsInSeconds ({ lengthInSeconds * 0.1, lengthInSeconds * 0.9 });
+                samplerSound->setSample (std::move (sample));
+            }
+        }
 
         // Start with the max number of voices
         for (auto i = 0; i != maxVoices; ++i)
-            synthesiser.addVoice (new MPESamplerVoice (sound));
+            synthesiser.addVoice (new MPESamplerVoice (samplerSound));
     }
 
     void prepareToPlay (double sampleRate, int) override
@@ -2216,7 +2224,7 @@ public:
 
             void operator() (SamplerAudioProcessor& proc)
             {
-                proc.readerFactory = move (readerFactory);
+                proc.readerFactory = std::move (readerFactory);
                 auto sound = proc.samplerSound;
                 sound->setSample (std::move (sample));
                 auto numberOfVoices = proc.synthesiser.getNumVoices();
@@ -2245,15 +2253,15 @@ public:
 
         if (fact == nullptr)
         {
-            commands.push (SetSampleCommand (move (fact),
+            commands.push (SetSampleCommand (std::move (fact),
                                              nullptr,
-                                             move (newSamplerVoices)));
+                                             std::move (newSamplerVoices)));
         }
         else if (auto reader = fact->make (formatManager))
         {
-            commands.push (SetSampleCommand (move (fact),
+            commands.push (SetSampleCommand (std::move (fact),
                                              std::unique_ptr<Sample> (new Sample (*reader, 10.0)),
-                                             move (newSamplerVoices)));
+                                             std::move (newSamplerVoices)));
         }
     }
 
@@ -2350,13 +2358,13 @@ public:
         for (auto i = 0; i != numberOfVoices; ++i)
             newSamplerVoices.emplace_back (new MPESamplerVoice (loadedSamplerSound));
 
-        commands.push (SetNumVoicesCommand (move (newSamplerVoices)));
+        commands.push (SetNumVoicesCommand (std::move (newSamplerVoices)));
     }
 
     // These accessors are just for an 'overview' and won't give the exact
     // state of the audio engine at a particular point in time.
     // If you call getNumVoices(), get the result '10', and then call
-    // getPlaybackPosiiton(9), there's a chance the audio engine will have
+    // getPlaybackPosiiton (9), there's a chance the audio engine will have
     // been updated to remove some voices in the meantime, so the returned
     // value won't correspond to an existing voice.
     int getNumVoices() const                    { return synthesiser.getNumVoices(); }
@@ -2364,10 +2372,10 @@ public:
 
 private:
     //==============================================================================
-    class SamplerAudioProcessorEditor  : public AudioProcessorEditor,
-                                         public FileDragAndDropTarget,
-                                         private DataModel::Listener,
-                                         private MPESettingsDataModel::Listener
+    class SamplerAudioProcessorEditor final : public AudioProcessorEditor,
+                                              public FileDragAndDropTarget,
+                                              private DataModel::Listener,
+                                              private MPESettingsDataModel::Listener
     {
     public:
         SamplerAudioProcessorEditor (SamplerAudioProcessor& p, ProcessorState state)
@@ -2409,7 +2417,8 @@ private:
             mpeSettings.setVoiceStealingEnabled (state.voiceStealingEnabled,      nullptr);
             mpeSettings.setMPEZoneLayout        (state.mpeZoneLayout,             nullptr);
 
-            dataModel.setSampleReader (move (state.readerFactory),    nullptr);
+            dataModel.setSampleReader (std::move (state.readerFactory), nullptr);
+
             dataModel.setLoopPointsSeconds  (state.loopPointsSeconds, nullptr);
             dataModel.setCentreFrequencyHz  (state.centreFrequencyHz, nullptr);
             dataModel.setLoopMode           (state.loopMode,          nullptr);
@@ -2583,7 +2592,6 @@ private:
 
     CommandFifo<SamplerAudioProcessor> commands;
 
-    MemoryBlock mb;
     std::unique_ptr<AudioFormatReaderFactory> readerFactory;
     std::shared_ptr<MPESamplerSound> samplerSound = std::make_shared<MPESamplerSound>();
     MPESynthesiser synthesiser;

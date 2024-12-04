@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -33,11 +42,11 @@ namespace juce
     some static methods for running these.
 
     For more complex dialogs, an AlertWindow can be created, then it can have some
-    buttons and components added to it, and its runModalLoop() method is then used to
-    show it. The value returned by runModalLoop() shows which button the
-    user pressed to dismiss the box.
+    buttons and components added to it, and its enterModalState() method is used to
+    show it. The value returned to the ModalComponentManager::Callback shows
+    which button the user pressed to dismiss the box.
 
-    @see ThreadWithProgressWindow
+    @see ThreadWithProgressWindow, Component::enterModalState
 
     @tags{GUI}
 */
@@ -91,6 +100,22 @@ public:
 
     /** Returns the number of buttons that the window currently has. */
     int getNumButtons() const;
+
+    /** Returns a Button that was added to the AlertWindow.
+
+        @param index   the index of the button in order that it was added with the addButton() method.
+        @returns the Button component, or nullptr if the index is out of bounds.
+
+        @see getNumButtons
+    */
+    Button* getButton (int index) const;
+
+    /** Returns a Button that was added to the AlertWindow.
+
+        @param buttonName   the name that was passed into the addButton() method
+        @returns the Button component, or nullptr if none was found for the given name.
+    */
+    Button* getButton (const String& buttonName) const;
 
     /** Invokes a click of one of the buttons. */
     void triggerButtonClick (const String& buttonName);
@@ -172,8 +197,13 @@ public:
         @param progressValue    a variable that will be repeatedly checked while the
                                 dialog box is visible, to see how far the process has
                                 got. The value should be in the range 0 to 1.0
+        @param style            determines the style the ProgressBar should adopt.
+                                By default this use a style automatically chosen by
+                                the LookAndFeel, but you can force a particular style
+                                by passing a non-optional value.
+        @see ProgressBar::setStyle
     */
-    void addProgressBarComponent (double& progressValue);
+    void addProgressBarComponent (double& progressValue, std::optional<ProgressBar::Style> style = std::nullopt);
 
     //==============================================================================
     /** Adds a user-defined component to the dialog box.
@@ -312,11 +342,13 @@ public:
         Ideal for ok/cancel or yes/no choices. The return key can also be used
         to trigger the first button, and the escape key for the second button.
 
-        If the callback parameter is null, the box is shown modally, and the method will
-        block until the user has clicked the button (or pressed the escape or return keys).
-        If the callback parameter is non-null, the box will be displayed and placed into a
-        modal state, but this method will return immediately, and the callback will be invoked
-        later when the user dismisses the box.
+        If JUCE_MODAL_LOOPS_PERMITTED is not defined or the callback parameter is non-null,
+        this function will return immediately. The object passed as the callback argument will
+        receive the result of the alert window asynchronously.
+        Otherwise, if JUCE_MODAL_LOOPS_PERMITTED is defined and the callback parameter is null,
+        the box is shown modally, and the method will block until the user has clicked the button
+        (or pressed the escape or return keys). This mode of operation can cause problems,
+        especially in plugins, so it is not recommended.
 
         @param iconType     the type of icon to show
         @param title        the headline to show at the top of the box
@@ -363,11 +395,13 @@ public:
 
         The escape key can be used to trigger the third button.
 
-        If the callback parameter is null, the box is shown modally, and the method will
-        block until the user has clicked the button (or pressed the escape or return keys).
-        If the callback parameter is non-null, the box will be displayed and placed into a
-        modal state, but this method will return immediately, and the callback will be invoked
-        later when the user dismisses the box.
+        If JUCE_MODAL_LOOPS_PERMITTED is not defined or the callback parameter is non-null,
+        this function will return immediately. The object passed as the callback argument will
+        receive the result of the alert window asynchronously.
+        Otherwise, if JUCE_MODAL_LOOPS_PERMITTED is defined and the callback parameter is null,
+        the box is shown modally, and the method will block until the user has clicked the button
+        (or pressed the escape or return keys). This mode of operation can cause problems,
+        especially in plugins, so it is not recommended.
 
         @param iconType     the type of icon to show
         @param title        the headline to show at the top of the box
@@ -412,6 +446,39 @@ public:
                                                  Component* associatedComponent,
                                                  ModalComponentManager::Callback* callback);
                                                 #endif
+
+    /** Shows an alert window using the specified options.
+
+        The box will be displayed and placed into a modal state, but this method will return
+        immediately, and the callback will be invoked later when the user dismisses the box.
+
+        This function is always asynchronous, even if the callback is null.
+
+        The result codes returned by the alert window are as follows.
+        - One button:
+            - button[0] returns 0
+        - Two buttons:
+            - button[0] returns 1
+            - button[1] returns 0
+        - Three buttons:
+            - button[0] returns 1
+            - button[1] returns 2
+            - button[2] returns 0
+
+        @param options   the options to use when creating the dialog.
+        @param callback  if this is non-null, the callback will receive a call to its
+                         modalStateFinished() when the box is dismissed with the index of the
+                         button that was clicked as its argument.
+                         The callback object will be owned and deleted by the system, so make sure
+                         that it works safely and doesn't keep any references to objects that might
+                         be deleted before it gets called.
+        @returns         a ScopedMessageBox instance. The message box will remain visible for no
+                         longer than the ScopedMessageBox remains alive.
+
+        @see MessageBoxOptions
+    */
+    [[nodiscard]] static ScopedMessageBox showScopedAsync (const MessageBoxOptions& options,
+                                                           std::function<void (int)> callback);
 
     //==============================================================================
    #if JUCE_MODAL_LOOPS_PERMITTED && ! defined (DOXYGEN)
@@ -481,6 +548,9 @@ public:
     static constexpr auto WarningIcon  = MessageBoxIconType::WarningIcon;
     static constexpr auto InfoIcon     = MessageBoxIconType::InfoIcon;
 
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
 protected:
     //==============================================================================
     /** @internal */
@@ -521,7 +591,6 @@ private:
     bool escapeKeyCancels = true;
     float desktopScale = 1.0f;
 
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void exitAlert (Button* button);
     void updateLayout (bool onlyIncreaseSize);
 

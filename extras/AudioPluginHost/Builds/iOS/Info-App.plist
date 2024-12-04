@@ -14,7 +14,7 @@
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIdentifier</key>
-    <string>com.juce.pluginhost</string>
+    <string>com.juce.audiopluginhost</string>
     <key>CFBundleName</key>
     <string>AudioPluginHost</string>
     <key>CFBundleDisplayName</key>

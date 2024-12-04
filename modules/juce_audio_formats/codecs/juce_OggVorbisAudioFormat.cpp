@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -37,20 +46,21 @@ namespace OggVorbisNamespace
 #if JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE)
  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365 4456 4457 4459 6297 6011 6001 6308 6255 6386 6385 6246 6387 6263 6262 28182)
 
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
-                                      "-Wshadow",
-                                      "-Wfloat-conversion",
-                                      "-Wdeprecated-register",
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-align",
+                                      "-Wconversion",
                                       "-Wdeprecated-declarations",
-                                      "-Wswitch-enum",
-                                      "-Wzero-as-null-pointer-constant",
-                                      "-Wsign-conversion",
-                                      "-Wswitch-default",
-                                      "-Wredundant-decls",
+                                      "-Wdeprecated-register",
+                                      "-Wfloat-conversion",
+                                      "-Wfloat-equal",
+                                      "-Wmaybe-uninitialized",
                                       "-Wmisleading-indentation",
                                       "-Wmissing-prototypes",
-                                      "-Wcast-align",
-                                      "-Wmaybe-uninitialized")
+                                      "-Wredundant-decls",
+                                      "-Wshadow",
+                                      "-Wsign-conversion",
+                                      "-Wswitch-default",
+                                      "-Wswitch-enum",
+                                      "-Wzero-as-null-pointer-constant")
  JUCE_BEGIN_NO_SANITIZE ("undefined")
 
  #include "oggvorbis/vorbisenc.h"
@@ -108,7 +118,7 @@ const char* const OggVorbisAudioFormat::id3trackNumber = "id3trackNumber";
 
 
 //==============================================================================
-class OggReader : public AudioFormatReader
+class OggReader final : public AudioFormatReader
 {
 public:
     OggReader (InputStream* inp)  : AudioFormatReader (inp, oggFormatName)
@@ -261,7 +271,7 @@ private:
 };
 
 //==============================================================================
-class OggWriter  : public AudioFormatWriter
+class OggWriter final : public AudioFormatWriter
 {
 public:
     OggWriter (OutputStream* out, double rate,
