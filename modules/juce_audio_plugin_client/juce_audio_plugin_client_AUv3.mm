@@ -1465,6 +1465,7 @@ private:
             switch (event->head.eventType)
             {
                 case AURenderEventMIDI:
+                case AURenderEventMIDISysEx:
                 {
                     const AUMIDIEvent& midiEvent = event->MIDI;
                     midiMessages.addEvent (midiEvent.data, midiEvent.length, static_cast<int> (midiEvent.eventSampleTime - startTime));
@@ -1505,10 +1506,6 @@ private:
                     }
                 }
                 break;
-
-                case AURenderEventMIDISysEx:
-                default:
-                    break;
             }
         }
     }
