@@ -740,7 +740,9 @@ public:
                         if (inDataSize != sizeof (AUMIDIEventListBlock))
                             return kAudioUnitErr_InvalidPropertyValue;
 
-                        midiEventListBlock = ScopedMIDIEventListBlock::copy (*static_cast<const AUMIDIEventListBlock*> (inData));
+                        if (@available (macos 12, *))
+                            eventListOutput.setBlock (*static_cast<const AUMIDIEventListBlock*> (inData));
+
                         return noErr;
                     }
                     break;
@@ -2024,53 +2026,8 @@ private:
     AUMIDIOutputCallbackStruct midiCallback;
 
    #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
-    class ScopedMIDIEventListBlock
-    {
-    public:
-        ScopedMIDIEventListBlock() = default;
-
-        ScopedMIDIEventListBlock (ScopedMIDIEventListBlock&& other) noexcept
-            : midiEventListBlock (std::exchange (other.midiEventListBlock, nil)) {}
-
-        ScopedMIDIEventListBlock& operator= (ScopedMIDIEventListBlock&& other) noexcept
-        {
-            ScopedMIDIEventListBlock { std::move (other) }.swap (*this);
-            return *this;
-        }
-
-        ~ScopedMIDIEventListBlock()
-        {
-            if (midiEventListBlock != nil)
-                [midiEventListBlock release];
-        }
-
-        static ScopedMIDIEventListBlock copy (AUMIDIEventListBlock b)
-        {
-            return ScopedMIDIEventListBlock { b };
-        }
-
-        explicit operator bool() const { return midiEventListBlock != nil; }
-
-        void operator() (AUEventSampleTime eventSampleTime, uint8_t cable, const struct MIDIEventList * eventList) const
-        {
-            jassert (midiEventListBlock != nil);
-            midiEventListBlock (eventSampleTime, cable, eventList);
-        }
-
-    private:
-        void swap (ScopedMIDIEventListBlock& other) noexcept
-        {
-            std::swap (other.midiEventListBlock, midiEventListBlock);
-        }
-
-        explicit ScopedMIDIEventListBlock (AUMIDIEventListBlock b) : midiEventListBlock ([b copy]) {}
-
-        AUMIDIEventListBlock midiEventListBlock = nil;
-    };
-
-    ScopedMIDIEventListBlock midiEventListBlock;
+    AudioUnitHelpers::EventListOutput eventListOutput;
     std::optional<SInt32> hostProtocol;
-    ump::ToUMP1Converter toUmp1Converter;
     ump::ToBytestreamDispatcher toBytestreamDispatcher { 2048 };
    #endif
 
@@ -2186,61 +2143,8 @@ private:
        #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
         if (@available (macOS 12.0, iOS 15.0, *))
         {
-            if (midiEventListBlock)
-            {
-                struct MIDIEventList stackList = {};
-                MIDIEventPacket* end = nullptr;
-
-                const auto init = [&]
-                {
-                    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability-new")
-                    end = MIDIEventListInit (&stackList, kMIDIProtocol_1_0);
-                    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-                };
-
-                const auto send = [&]
-                {
-                    midiEventListBlock (static_cast<int64_t> (lastTimeStamp.mSampleTime), 0, &stackList);
-                };
-
-                const auto add = [&] (const ump::View& view, int timeStamp)
-                {
-                    static_assert (sizeof (uint32_t) == sizeof (UInt32)
-                                   && alignof (uint32_t) == alignof (UInt32),
-                                   "If this fails, the cast below will be broken too!");
-                    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability-new")
-                    using List = struct MIDIEventList;
-                    end = MIDIEventListAdd (&stackList,
-                                            sizeof (List::packet),
-                                            end,
-                                            (MIDITimeStamp) timeStamp,
-                                            view.size(),
-                                            reinterpret_cast<const UInt32*> (view.data()));
-                    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-                };
-
-                init();
-
-                for (const auto metadata : midiEvents)
-                {
-                    toUmp1Converter.convert (ump::BytestreamMidiView (metadata), [&] (const ump::View& view)
-                    {
-                        add (view, metadata.samplePosition);
-
-                        if (end != nullptr)
-                            return;
-
-                        send();
-                        init();
-                        add (view, metadata.samplePosition);
-                    });
-
-                }
-
-                send();
-
+            if (eventListOutput.trySend (midiEvents, (int64_t) lastTimeStamp.mSampleTime))
                 return;
-            }
         }
        #endif
 
