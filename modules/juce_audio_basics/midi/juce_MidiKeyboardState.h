@@ -189,15 +189,16 @@ public:
     */
     void removeListener (Listener* listener);
 
+    // SD make these public
+    void noteOnInternal  (int midiChannel, int midiNoteNumber, float velocity);
+    void noteOffInternal (int midiChannel, int midiNoteNumber, float velocity);
+
 private:
     //==============================================================================
     CriticalSection lock;
     std::atomic<uint16> noteStates[128];
     MidiBuffer eventsToAdd;
     ListenerList<Listener> listeners;
-
-    void noteOnInternal  (int midiChannel, int midiNoteNumber, float velocity);
-    void noteOffInternal (int midiChannel, int midiNoteNumber, float velocity);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardState)
 };
