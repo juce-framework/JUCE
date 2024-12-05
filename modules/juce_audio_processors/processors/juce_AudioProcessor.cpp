@@ -1271,8 +1271,7 @@ VST3ClientExtensions* AudioProcessor::getVST3ClientExtensions()
 }
 
 //==============================================================================
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 void AudioProcessor::setParameterNotifyingHost (int parameterIndex, float newValue)
 {
@@ -1510,8 +1509,7 @@ AudioProcessorParameter* AudioProcessor::getParamChecked (int index) const
 bool AudioProcessor::canAddBus ([[maybe_unused]] bool isInput) const                     { return false; }
 bool AudioProcessor::canRemoveBus ([[maybe_unused]] bool isInput) const                  { return false; }
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 //==============================================================================
 void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int) {}

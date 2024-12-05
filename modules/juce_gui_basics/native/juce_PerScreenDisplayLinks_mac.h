@@ -109,7 +109,7 @@ private:
 // NSScreen.displayLink(target:selector:) all of which were only introduced in macOS 14+ however,
 // it's not clear how these methods can be used to replace all use cases
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 class ScopedDisplayLink
 {
@@ -188,7 +188,7 @@ private:
     JUCE_DECLARE_NON_MOVEABLE (ScopedDisplayLink)
 };
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 //==============================================================================
 /*

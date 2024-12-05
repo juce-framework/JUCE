@@ -35,6 +35,8 @@
 namespace juce
 {
 
+#define JUCE_PUSH_NOTIFICATIONS_IMPL 1
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (constructor,             "<init>",                  "(Ljava/lang/String;Ljava/lang/CharSequence;I)V") \
   METHOD (enableLights,            "enableLights",            "(Z)V") \
@@ -274,14 +276,17 @@ bool PushNotifications::Notification::isValid() const noexcept
 }
 
 //==============================================================================
-struct PushNotifications::Pimpl
+struct PushNotifications::Impl
 {
-    Pimpl (PushNotifications& p)
+    explicit Impl (PushNotifications& p)
         : owner (p)
     {}
 
     bool areNotificationsEnabled() const
     {
+        if (getAndroidSDKVersion() >= 33 && ! RuntimePermissions::isGranted (RuntimePermissions::postNotification))
+            return false;
+
         if (getAndroidSDKVersion() >= 24)
         {
             auto* env = getEnv();
@@ -296,23 +301,47 @@ struct PushNotifications::Pimpl
     }
 
     //==============================================================================
-    void sendLocalNotification (const PushNotifications::Notification& n)
+    void requestPermissionsWithSettings (const Settings&)
+    {
+        RuntimePermissions::request (RuntimePermissions::postNotification, [&] (bool)
+        {
+            const auto notifyListeners = []
+            {
+                if (auto* instance = PushNotifications::getInstance())
+                    instance->listeners.call ([] (Listener& l) { l.notificationSettingsReceived (makeDefaultSettings()); });
+            };
+
+            if (MessageManager::getInstance()->isThisTheMessageThread())
+                notifyListeners();
+            else
+                MessageManager::callAsync (notifyListeners);
+        });
+    }
+
+    void requestSettingsUsed()
+    {
+        owner.listeners.call ([] (Listener& l) { l.notificationSettingsReceived (makeDefaultSettings()); });
+    }
+
+    void sendLocalNotification (const Notification& n)
     {
         // All required fields have to be setup!
         jassert (n.isValid());
 
         auto* env = getEnv();
 
-        auto notificationManager = getNotificationManager();
-
-        if (notificationManager.get() != nullptr)
+        if (auto notificationManager = getNotificationManager())
         {
-            auto notification = juceNotificationToJavaNotification (n);
+            if (auto notification = juceNotificationToJavaNotification (n))
+            {
+                auto tag = javaString (n.identifier);
+                const int id = 0;
 
-            auto tag = javaString (n.identifier);
-            const int id = 0;
-
-            env->CallVoidMethod (notificationManager.get(), NotificationManagerBase.notify, tag.get(), id, notification.get());
+                env->CallVoidMethod (notificationManager.get(),
+                                     NotificationManagerBase.notify,
+                                     tag.get(),
+                                     id, notification.get());
+            }
         }
     }
 
@@ -322,7 +351,7 @@ struct PushNotifications::Pimpl
         {
             auto* env = getEnv();
 
-            Array<PushNotifications::Notification> notifications;
+            Array<Notification> notifications;
 
             auto notificationManager = getNotificationManager();
             jassert (notificationManager != nullptr);
@@ -601,22 +630,23 @@ struct PushNotifications::Pimpl
                                                          javaString ("notification").get()));
     }
 
-    static LocalRef<jobject> juceNotificationToJavaNotification (const PushNotifications::Notification& n)
+    static LocalRef<jobject> juceNotificationToJavaNotification (const Notification& n)
     {
         auto* env = getEnv();
 
         auto notificationBuilder = createNotificationBuilder (n);
 
-        setupRequiredFields (n, notificationBuilder);
-        setupOptionalFields (n, notificationBuilder);
+        notificationBuilder = setupRequiredFields (n, notificationBuilder);
+        notificationBuilder = setupOptionalFields (n, notificationBuilder);
+        notificationBuilder = setupActions (n, notificationBuilder);
 
-        if (n.actions.size() > 0)
-            setupActions (n, notificationBuilder);
+        if (notificationBuilder == nullptr)
+            return notificationBuilder;
 
         return LocalRef<jobject> (env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.build));
     }
 
-    static LocalRef<jobject> createNotificationBuilder (const PushNotifications::Notification& n)
+    static LocalRef<jobject> createNotificationBuilder (const Notification& n)
     {
         auto* env = getEnv();
         LocalRef<jobject> context (getMainActivity());
@@ -648,8 +678,13 @@ struct PushNotifications::Pimpl
         return LocalRef<jobject> (env->NewObject (builderClass, builderConstructor, context.get()));
     }
 
-    static void setupRequiredFields (const PushNotifications::Notification& n, LocalRef<jobject>& notificationBuilder)
+    static constexpr auto FLAG_IMMUTABLE = 0x04000000;
+
+    static LocalRef<jobject> setupRequiredFields (const Notification& n, LocalRef<jobject> notificationBuilder)
     {
+        if (notificationBuilder == nullptr)
+            return notificationBuilder;
+
         auto* env = getEnv();
         LocalRef<jobject> context (getMainActivity());
 
@@ -669,15 +704,23 @@ struct PushNotifications::Pimpl
                                                                                    context.get(),
                                                                                    1002,
                                                                                    notifyIntent.get(),
-                                                                                   0));
+                                                                                   FLAG_IMMUTABLE));
 
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentTitle,  javaString (n.title).get());
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentText,   javaString (n.body).get());
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentIntent, notifyPendingIntent.get());
 
         auto resources = LocalRef<jobject> (env->CallObjectMethod (context.get(), AndroidContext.getResources));
-        const int iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (n.icon).get(),
-                                               javaString ("raw").get(), packageNameString.get());
+        const auto iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (n.icon).get(),
+                                                javaString ("raw").get(), packageNameString.get());
+
+        if (iconId == 0)
+        {
+            // If you hit this, the notification icon could not be located, and the notification
+            // will not be sent.
+            jassertfalse;
+            return {};
+        }
 
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSmallIcon, iconId);
 
@@ -688,15 +731,20 @@ struct PushNotifications::Pimpl
 
             auto publicNotificationBuilder = createNotificationBuilder (n);
 
-            setupRequiredFields (*n.publicVersion, publicNotificationBuilder);
-            setupOptionalFields (*n.publicVersion, publicNotificationBuilder);
+            publicNotificationBuilder = setupRequiredFields (*n.publicVersion, publicNotificationBuilder);
+            publicNotificationBuilder = setupOptionalFields (*n.publicVersion, publicNotificationBuilder);
+
+            if (publicNotificationBuilder == nullptr)
+                return {};
 
             auto publicVersion = LocalRef<jobject> (env->CallObjectMethod (publicNotificationBuilder, NotificationBuilderApi16.build));
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi21.setPublicVersion, publicVersion.get());
         }
+
+        return notificationBuilder;
     }
 
-    static LocalRef<jobject> juceNotificationToBundle (const PushNotifications::Notification& n)
+    static LocalRef<jobject> juceNotificationToBundle (const Notification& n)
     {
         auto* env = getEnv();
 
@@ -753,8 +801,11 @@ struct PushNotifications::Pimpl
         return bundle;
     }
 
-    static void setupOptionalFields (const PushNotifications::Notification& n, LocalRef<jobject>& notificationBuilder)
+    static LocalRef<jobject> setupOptionalFields (const Notification n, LocalRef<jobject>& notificationBuilder)
     {
+        if (notificationBuilder == nullptr)
+            return notificationBuilder;
+
         auto* env = getEnv();
 
         if (n.subtitle.isNotEmpty())
@@ -818,11 +869,11 @@ struct PushNotifications::Pimpl
 
         if (getAndroidSDKVersion() < 24)
         {
-            const bool useChronometer = n.timestampVisibility == PushNotifications::Notification::chronometer;
+            const bool useChronometer = n.timestampVisibility == Notification::chronometer;
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.setUsesChronometer, useChronometer);
         }
 
-        const bool showTimeStamp = n.timestampVisibility != PushNotifications::Notification::off;
+        const bool showTimeStamp = n.timestampVisibility != Notification::off;
         env->CallObjectMethod (notificationBuilder, NotificationBuilderApi17.setShowWhen, showTimeStamp);
 
         if (n.groupId.isNotEmpty())
@@ -857,8 +908,8 @@ struct PushNotifications::Pimpl
 
         if (getAndroidSDKVersion() >= 24)
         {
-            const bool useChronometer = n.timestampVisibility == PushNotifications::Notification::chronometer;
-            const bool useCountDownChronometer = n.timestampVisibility == PushNotifications::Notification::countDownChronometer;
+            const bool useChronometer = n.timestampVisibility == Notification::chronometer;
+            const bool useCountDownChronometer = n.timestampVisibility == Notification::countDownChronometer;
 
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi24.setChronometerCountDown, useCountDownChronometer);
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.setUsesChronometer, useChronometer | useCountDownChronometer);
@@ -871,12 +922,15 @@ struct PushNotifications::Pimpl
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setTimeoutAfter, (jlong) n.timeoutAfterMs);
         }
 
-        setupNotificationDeletedCallback (n, notificationBuilder);
+        return setupNotificationDeletedCallback (n, notificationBuilder);
     }
 
-    static void setupNotificationDeletedCallback (const PushNotifications::Notification& n,
-                                                  LocalRef<jobject>& notificationBuilder)
+    static LocalRef<jobject> setupNotificationDeletedCallback (const Notification& n,
+                                                               LocalRef<jobject> notificationBuilder)
     {
+        if (notificationBuilder == nullptr)
+            return notificationBuilder;
+
         auto* env = getEnv();
         LocalRef<jobject> context (getMainActivity());
 
@@ -895,24 +949,27 @@ struct PushNotifications::Pimpl
                                                                                    context.get(),
                                                                                    1002,
                                                                                    deleteIntent.get(),
-                                                                                   0));
+                                                                                   FLAG_IMMUTABLE));
 
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setDeleteIntent, deletePendingIntent.get());
+
+        return notificationBuilder;
     }
 
-    static void setupActions (const PushNotifications::Notification& n, LocalRef<jobject>& notificationBuilder)
+    static LocalRef<jobject> setupActions (const Notification& n, LocalRef<jobject> notificationBuilder)
     {
+        if (notificationBuilder == nullptr || n.actions.isEmpty())
+            return notificationBuilder;
+
         auto* env = getEnv();
         LocalRef<jobject> context (getMainActivity());
 
-        int actionIndex = 0;
-
-        for (const auto& action : n.actions)
+        for (const auto [actionIndex, action] : enumerate (n.actions))
         {
             auto activityClass = LocalRef<jobject> (env->CallObjectMethod (context.get(), JavaObject.getClass));
             auto notifyIntent  = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), activityClass.get()));
 
-            const bool isTextStyle = action.style == PushNotifications::Notification::Action::text;
+            const bool isTextStyle = action.style == Notification::Action::text;
 
             auto packageNameString   = LocalRef<jstring> ((jstring) (env->CallObjectMethod (context.get(), AndroidContext.getPackageName)));
             const String notificationActionString = isTextStyle ? ".JUCE_NOTIFICATION_TEXT_INPUT_ACTION." : ".JUCE_NOTIFICATION_BUTTON_ACTION.";
@@ -928,7 +985,7 @@ struct PushNotifications::Pimpl
                                                                                        context.get(),
                                                                                        1002,
                                                                                        notifyIntent.get(),
-                                                                                       0));
+                                                                                       FLAG_IMMUTABLE));
 
             auto resources = LocalRef<jobject> (env->CallObjectMethod (context.get(), AndroidContext.getResources));
             int iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (action.icon).get(),
@@ -937,6 +994,14 @@ struct PushNotifications::Pimpl
             if (iconId == 0)
                 iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (n.icon).get(),
                                              javaString ("raw").get(), packageNameString.get());
+
+            if (iconId == 0)
+            {
+                // If this is hit, the notification icon could not be located, so the notification
+                // cannot be displayed.
+                jassertfalse;
+                return {};
+            }
 
             auto actionBuilder = LocalRef<jobject> (env->NewObject (NotificationActionBuilder,
                                                                     NotificationActionBuilder.constructor,
@@ -982,9 +1047,9 @@ struct PushNotifications::Pimpl
 
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi20.addAction,
                                    env->CallObjectMethod (actionBuilder, NotificationActionBuilder.build));
-
-            ++actionIndex;
         }
+
+        return notificationBuilder;
     }
 
     static LocalRef<jobject> juceUrlToAndroidUri (const URL& url)
@@ -1029,26 +1094,26 @@ struct PushNotifications::Pimpl
         return bitmap;
     }
 
-    static String typeToCategory (PushNotifications::Notification::Type t)
+    static String typeToCategory (Notification::Type t)
     {
         switch (t)
         {
-            case PushNotifications::Notification::unspecified:    return {};
-            case PushNotifications::Notification::alarm:          return "alarm";
-            case PushNotifications::Notification::call:           return "call";
-            case PushNotifications::Notification::email:          return "email";
-            case PushNotifications::Notification::error:          return "err";
-            case PushNotifications::Notification::event:          return "event";
-            case PushNotifications::Notification::message:        return "msg";
-            case PushNotifications::Notification::taskProgress:   return "progress";
-            case PushNotifications::Notification::promo:          return "promo";
-            case PushNotifications::Notification::recommendation: return "recommendation";
-            case PushNotifications::Notification::reminder:       return "reminder";
-            case PushNotifications::Notification::service:        return "service";
-            case PushNotifications::Notification::social:         return "social";
-            case PushNotifications::Notification::status:         return "status";
-            case PushNotifications::Notification::system:         return "sys";
-            case PushNotifications::Notification::transport:      return "transport";
+            case Notification::unspecified:    return {};
+            case Notification::alarm:          return "alarm";
+            case Notification::call:           return "call";
+            case Notification::email:          return "email";
+            case Notification::error:          return "err";
+            case Notification::event:          return "event";
+            case Notification::message:        return "msg";
+            case Notification::taskProgress:   return "progress";
+            case Notification::promo:          return "promo";
+            case Notification::recommendation: return "recommendation";
+            case Notification::reminder:       return "reminder";
+            case Notification::service:        return "service";
+            case Notification::social:         return "social";
+            case Notification::status:         return "status";
+            case Notification::system:         return "sys";
+            case Notification::transport:      return "transport";
         }
 
         return {};
@@ -1081,11 +1146,11 @@ struct PushNotifications::Pimpl
     }
 
     // Reverse of juceNotificationToBundle().
-    static PushNotifications::Notification localNotificationBundleToJuceNotification (const LocalRef<jobject>& bundle)
+    static Notification localNotificationBundleToJuceNotification (const LocalRef<jobject>& bundle)
     {
         auto* env = getEnv();
 
-        PushNotifications::Notification n;
+        Notification n;
 
         if (bundle.get() != nullptr)
         {
@@ -1100,23 +1165,23 @@ struct PushNotifications::Pimpl
             n.icon        = getStringFromBundle (env, "icon", bundle);
             n.channelId   = getStringFromBundle (env, "channelId", bundle);
 
-            PushNotifications::Notification::Progress progress;
+            Notification::Progress progress;
             progress.max           = getIntFromBundle  (env, "progressMax", bundle);
             progress.current       = getIntFromBundle  (env, "progressCurrent", bundle);
             progress.indeterminate = getBoolFromBundle (env, "progressIndeterminate", bundle);
             n.progress = progress;
 
             n.person       = getStringFromBundle (env, "person", bundle);
-            n.type         = (PushNotifications::Notification::Type)     getIntFromBundle (env, "type", bundle);
-            n.priority     = (PushNotifications::Notification::Priority) getIntFromBundle (env, "priority", bundle);
-            n.lockScreenAppearance = (PushNotifications::Notification::LockScreenAppearance) getIntFromBundle (env, "lockScreenAppearance", bundle);
+            n.type         = (Notification::Type)     getIntFromBundle (env, "type", bundle);
+            n.priority     = (Notification::Priority) getIntFromBundle (env, "priority", bundle);
+            n.lockScreenAppearance = (Notification::LockScreenAppearance) getIntFromBundle (env, "lockScreenAppearance", bundle);
             n.groupId      = getStringFromBundle (env, "groupId", bundle);
             n.groupSortKey = getStringFromBundle (env, "groupSortKey", bundle);
             n.groupSummary = getBoolFromBundle   (env, "groupSummary", bundle);
             n.accentColour = Colour ((uint32) getIntFromBundle (env, "accentColour", bundle));
             n.ledColour    = Colour ((uint32) getIntFromBundle (env, "ledColour", bundle));
 
-            PushNotifications::Notification::LedBlinkPattern ledBlinkPattern;
+            Notification::LedBlinkPattern ledBlinkPattern;
             ledBlinkPattern.msToBeOn  = getIntFromBundle (env, "ledBlinkPatternMsToBeOn", bundle);
             ledBlinkPattern.msToBeOff = getIntFromBundle (env, "ledBlinkPatternMsToBeOff", bundle);
             n.ledBlinkPattern = ledBlinkPattern;
@@ -1127,9 +1192,9 @@ struct PushNotifications::Pimpl
             n.localOnly           = getBoolFromBundle (env, "localOnly", bundle);
             n.ongoing             = getBoolFromBundle (env, "ongoing", bundle);
             n.alertOnlyOnce       = getBoolFromBundle (env, "alertOnlyOnce", bundle);
-            n.timestampVisibility = (PushNotifications::Notification::TimestampVisibility) getIntFromBundle (env, "timestampVisibility", bundle);
-            n.badgeIconType       = (PushNotifications::Notification::BadgeIconType) getIntFromBundle (env, "badgeIconType", bundle);
-            n.groupAlertBehaviour = (PushNotifications::Notification::GroupAlertBehaviour) getIntFromBundle (env, "groupAlertBehaviour", bundle);
+            n.timestampVisibility = (Notification::TimestampVisibility) getIntFromBundle (env, "timestampVisibility", bundle);
+            n.badgeIconType       = (Notification::BadgeIconType) getIntFromBundle (env, "badgeIconType", bundle);
+            n.groupAlertBehaviour = (Notification::GroupAlertBehaviour) getIntFromBundle (env, "groupAlertBehaviour", bundle);
             n.timeoutAfterMs      = getLongFromBundle (env, "timeoutAfterMs", bundle);
         }
 
@@ -1216,7 +1281,7 @@ struct PushNotifications::Pimpl
         return {};
     }
 
-    static PushNotifications::Notification javaNotificationToJuceNotification (const LocalRef<jobject>& notification)
+    static Notification javaNotificationToJuceNotification (const LocalRef<jobject>& notification)
     {
         auto* env = getEnv();
 
@@ -1230,10 +1295,10 @@ struct PushNotifications::Pimpl
         return remoteNotificationBundleToJuceNotification (extras);
     }
 
-    static PushNotifications::Notification remoteNotificationBundleToJuceNotification (const LocalRef<jobject>& bundle)
+    static Notification remoteNotificationBundleToJuceNotification (const LocalRef<jobject>& bundle)
     {
         // This will probably work only for remote notifications that get delivered to system tray
-        PushNotifications::Notification n;
+        Notification n;
         n.properties = bundleToVar (bundle);
 
         return n;
@@ -1282,7 +1347,7 @@ struct PushNotifications::Pimpl
     }
 
   #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
-    static PushNotifications::Notification firebaseRemoteNotificationToJuceNotification (jobject remoteNotification)
+    static Notification firebaseRemoteNotificationToJuceNotification (jobject remoteNotification)
     {
         auto* env = getEnv();
 
@@ -1325,7 +1390,7 @@ struct PushNotifications::Pimpl
         propertiesDynamicObject->setProperty ("ttl", ttl);
         propertiesDynamicObject->setProperty ("data", dataVar);
 
-        PushNotifications::Notification n;
+        Notification n;
 
         if (notification != 0)
         {
@@ -1510,6 +1575,15 @@ struct PushNotifications::Pimpl
             && env->CallBooleanMethod (extras, AndroidBundle.containsKey, javaString ("google.message_id").get());
     }
 
+    static Settings makeDefaultSettings()
+    {
+        Settings settings;
+        settings.allowAlert = true;
+        settings.allowBadge = true;
+        settings.allowSound = true;
+        return settings;
+    }
+
     PushNotifications& owner;
 };
 
@@ -1577,14 +1651,14 @@ bool juce_handleNotificationIntent (void* intent)
 {
     auto* instance = PushNotifications::getInstanceWithoutCreating();
 
-    if (PushNotifications::Pimpl::isDeleteNotificationIntent ((jobject) intent))
+    if (PushNotifications::Impl::isDeleteNotificationIntent ((jobject) intent))
     {
         if (instance)
             instance->pimpl->notifyListenersAboutLocalNotificationDeleted (LocalRef<jobject> ((jobject) intent));
 
         return true;
     }
-    else if (PushNotifications::Pimpl::isLocalNotificationIntent ((jobject) intent))
+    else if (PushNotifications::Impl::isLocalNotificationIntent ((jobject) intent))
     {
         if (instance)
             instance->pimpl->notifyListenersAboutLocalNotification (LocalRef<jobject> ((jobject) intent));
@@ -1592,7 +1666,7 @@ bool juce_handleNotificationIntent (void* intent)
         return true;
     }
   #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
-    else if (PushNotifications::Pimpl::isRemoteNotificationIntent ((jobject) intent))
+    else if (PushNotifications::Impl::isRemoteNotificationIntent ((jobject) intent))
     {
         if (instance)
             instance->pimpl->notifyListenersAboutRemoteNotificationFromSystemTray (LocalRef<jobject> ((jobject) intent));

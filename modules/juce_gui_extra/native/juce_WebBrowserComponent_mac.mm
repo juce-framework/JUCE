@@ -197,9 +197,9 @@ struct WebViewKeyEquivalentResponder final : public ObjCClass<WebViewClass>
                                  if (@available (macOS 10.12, *))
                                      return (modifierFlags & NSEventModifierFlagDeviceIndependentFlagsMask) == NSEventModifierFlagCommand;
 
-                                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+                                 JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
                                  return (modifierFlags & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask;
-                                 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+                                 JUCE_END_IGNORE_DEPRECATION_WARNINGS
                              }();
 
                              if (isCommandDown)
@@ -270,7 +270,7 @@ struct WebViewKeyEquivalentResponder final : public ObjCClass<WebViewClass>
     }
 };
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 struct DownloadClickDetectorClass final : public ObjCClass<NSObject>
 {
     DownloadClickDetectorClass()  : ObjCClass ("JUCEWebClickDetector_")
@@ -372,7 +372,7 @@ private:
         }
     }
 };
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 #endif
 
 // Connects the delegate to the rest of the implementation without making WebViewDelegateClass
@@ -652,7 +652,7 @@ window.__JUCE__ = {
 
 //==============================================================================
 #if JUCE_MAC
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 class WebBrowserComponent::Impl::Platform::WebViewImpl  : public WebBrowserComponent::Impl::PlatformInterface,
                                                          #if JUCE_MAC
                                                           public NSViewComponent
@@ -783,7 +783,7 @@ private:
     ObjCObjectHandle<WebView*> webView;
     ObjCObjectHandle<id> clickListener;
 };
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 #endif
 
 class WebBrowserComponent::Impl::Platform::WKWebViewImpl : public WebBrowserComponent::Impl::PlatformInterface,

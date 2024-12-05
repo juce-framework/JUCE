@@ -1231,8 +1231,7 @@ struct MidiMessageTest final : public UnitTest
 
             size_t index = 0;
 
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+            JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
             for (const auto& input : inputs)
             {
@@ -1258,8 +1257,7 @@ struct MidiMessageTest final : public UnitTest
                 ++index;
             }
 
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-            JUCE_END_IGNORE_WARNINGS_MSVC
+            JUCE_END_IGNORE_DEPRECATION_WARNINGS
         }
 
         beginTest ("ReadVariableLengthVal should return 0 if input is truncated");

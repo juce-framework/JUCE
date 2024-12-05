@@ -244,7 +244,7 @@ public:
 
         if (androidExtraAssetsFolderValue.isNotEmpty())
         {
-            auto extraAssets = getProject().getFile().getParentDirectory().getChildFile (androidExtraAssetsFolderValue);
+            auto extraAssets = getProject().getFile().getSiblingFile (androidExtraAssetsFolderValue);
 
             if (extraAssets.exists() && extraAssets.isDirectory())
             {
@@ -1284,7 +1284,7 @@ private:
                 if (remoteNotifsConfigFilePath.isEmpty())
                     remoteNotifsConfigFilePath = androidRemoteNotificationsConfigFile.get().toString();
 
-                File file (getProject().getFile().getChildFile (remoteNotifsConfigFilePath));
+                File file (getProject().getFile().getSiblingFile (remoteNotifsConfigFilePath));
                 // Settings file must be present for remote notifications to work and it must be called google-services.json.
                 jassert (file.existsAsFile() && file.getFileName() == "google-services.json");
 
@@ -1303,7 +1303,7 @@ private:
 
         for (auto& path : resourcePaths)
         {
-            auto file = getProject().getFile().getChildFile (path);
+            auto file = getProject().getFile().getSiblingFile (path);
 
             jassert (file.exists());
 
@@ -1991,6 +1991,9 @@ private:
 
         if (androidVibratePermission.get())
             s.add ("android.permission.VIBRATE");
+
+        if (arePushNotificationsEnabled())
+            s.add ("android.permission.POST_NOTIFICATIONS");
 
         return getCleanedStringArray (s);
     }

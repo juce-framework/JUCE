@@ -148,9 +148,9 @@ struct CameraDevice::Pimpl
     {
         if (@available (macOS 10.15, *))
         {
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
             const auto deviceType = AVCaptureDeviceTypeExternalUnknown;
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+            JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
             auto* discovery = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes: @[AVCaptureDeviceTypeBuiltInWideAngleCamera, deviceType]
                                                                                      mediaType: AVMediaTypeVideo
@@ -159,9 +159,9 @@ struct CameraDevice::Pimpl
             return [discovery devices];
         }
 
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+        JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
         return [AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo];
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        JUCE_END_IGNORE_DEPRECATION_WARNINGS
     }
 
     static StringArray getAvailableDevices()
@@ -331,7 +331,7 @@ private:
         NSUniquePtr<NSObject<AVCapturePhotoCaptureDelegate>> delegate;
     };
 
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+    JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
     class PreCatalinaStillImageOutput  : public ImageOutputBase
     {
     public:
@@ -397,7 +397,7 @@ private:
     private:
         AVCaptureStillImageOutput* imageOutput = nil;
     };
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
     //==============================================================================
     void addImageCapture()
@@ -542,7 +542,7 @@ private:
 
         startSession();
 
-        if (auto* videoConnection = getVideoConnection())
+        if (getVideoConnection() != nullptr)
             imageOutput->triggerImageCapture (*this);
     }
 

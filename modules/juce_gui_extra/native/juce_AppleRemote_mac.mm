@@ -63,9 +63,9 @@ namespace
                 return kIOMainPortDefault;
            #endif
 
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
             return kIOMasterPortDefault;
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+            JUCE_END_IGNORE_DEPRECATION_WARNINGS
         }();
 
         if (IOServiceGetMatchingServices (defaultPort, dict, &iter) == kIOReturnSuccess

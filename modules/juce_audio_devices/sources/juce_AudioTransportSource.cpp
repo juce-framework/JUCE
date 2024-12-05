@@ -168,8 +168,9 @@ double AudioTransportSource::getLengthInSeconds() const
 
 bool AudioTransportSource::hasStreamFinished() const noexcept
 {
-    return positionableSource->getNextReadPosition() > positionableSource->getTotalLength() + 1
-              && ! positionableSource->isLooping();
+    return positionableSource == nullptr
+        || (positionableSource->getNextReadPosition() > positionableSource->getTotalLength() + 1
+            && ! positionableSource->isLooping());
 }
 
 void AudioTransportSource::setNextReadPosition (int64 newPosition)

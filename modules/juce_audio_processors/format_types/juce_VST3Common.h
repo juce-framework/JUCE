@@ -1430,7 +1430,7 @@ private:
                                                              controlEvent->controllerNumber);
 
         if (controlParamID != Steinberg::Vst::kNoParamId)
-            callback (controlParamID, controlEvent->paramValue, msg.getTimeStamp());
+            callback (controlParamID, (float) controlEvent->paramValue, msg.getTimeStamp());
 
         return true;
     }

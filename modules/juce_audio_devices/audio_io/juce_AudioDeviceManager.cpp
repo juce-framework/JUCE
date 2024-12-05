@@ -1398,6 +1398,8 @@ public:
 
     void runTest() override
     {
+        ScopedJuceInitialiser_GUI libraryInitialiser;
+
         beginTest ("When the AudioDeviceSetup has non-empty device names, initialise uses the requested devices");
         {
             AudioDeviceManager manager;

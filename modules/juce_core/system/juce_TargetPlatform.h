@@ -110,13 +110,7 @@
   #endif
 
   #ifdef __MINGW32__
-    #define JUCE_MINGW 1
-    #warning Support for MinGW has been removed. Please use an alternative compiler.
-    #ifdef __MINGW64__
-      #define JUCE_64BIT 1
-    #else
-      #define JUCE_32BIT 1
-    #endif
+    #error "MinGW is not supported. Please use an alternative compiler."
   #endif
 
   /** If defined, this indicates that the processor is little-endian. */

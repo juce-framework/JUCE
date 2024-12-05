@@ -331,19 +331,6 @@ struct Ranges final
         return result;
     }
 
-    std::optional<size_t> getIndexForEnclosingRange (int64 positionInTextRange) const
-    {
-        auto it = std::lower_bound (ranges.begin(),
-                                    ranges.end(),
-                                    positionInTextRange,
-                                    [] (auto& elem, auto& value) { return elem.getEnd() <= value; });
-
-        if (it != ranges.end() && it->getStart() <= positionInTextRange)
-            return getIndex (it);
-
-        return std::nullopt;
-    }
-
     //==============================================================================
     size_t size() const
     {
@@ -379,6 +366,42 @@ struct Ranges final
     auto cend() const
     {
         return ranges.cend();
+    }
+
+    /* Returns an iterator for the Range element which includes the provided value. */
+    auto find (int64 i) const
+    {
+        const auto it = std::lower_bound (cbegin(),
+                                          cend(),
+                                          i,
+                                          [] (auto& elem, auto& value) { return elem.getEnd() <= value; });
+
+        return it != cend() && it->getStart() <= i ? it : cend();
+    }
+
+    std::optional<size_t> getIndexForEnclosingRange (int64 positionInTextRange) const
+    {
+        const auto iter = find (positionInTextRange);
+        return iter != ranges.end() ? std::make_optional (getIndex (iter)) : std::nullopt;
+    }
+
+    /* Returns true if this object covers each element in the provided range. For empty ranges it
+       returns true if the start value is covered.
+    */
+    bool covers (Range<int64> range) const
+    {
+        for (auto curr = find (range.getStart()), prev = curr; curr != cend(); ++curr)
+        {
+            if (prev != curr && prev->getEnd() != curr->getStart())
+                return false;
+
+            if (range.getEnd() <= curr->getEnd())
+                return true;
+
+            prev = curr;
+        }
+
+        return false;
     }
 
 private:
@@ -638,6 +661,14 @@ public:
         return erase ({ i, ranges.get (ranges.size() - 1).getEnd() });
     }
 
+    Ranges::Operations eraseUpTo (int64 i)
+    {
+        if (ranges.isEmpty())
+            return {};
+
+        return erase ({ ranges.get (0).getStart(), i });
+    }
+
     /** Create a RangedValues object from non-overlapping ranges. */
     template<MergeEqualItems mergeEquals, typename Iterable>
     auto setForEach (Iterable begin, Iterable end)
@@ -662,6 +693,17 @@ public:
     {
         return getItemWithEnclosingRangeImpl (*this, i);
     }
+
+    // Finds the item whose range encloses the provided value
+    template <typename Self>
+    static auto findImpl (Self& self, int64 i)
+    {
+        return iteratorWithAdvance (self.begin(),
+                                    std::distance (self.ranges.cbegin(), self.ranges.find (i)));
+    }
+
+    auto find (int64 i) { return findImpl (*this, i); }
+    auto find (int64 i) const { return findImpl (*this, i); }
 
     Item getItem (size_t i)
     {

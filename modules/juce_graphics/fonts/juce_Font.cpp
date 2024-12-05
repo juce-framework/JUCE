@@ -754,11 +754,9 @@ float Font::getDescentInPoints() const      { return getDescent() * getHeightToP
 
 int Font::getStringWidth (const String& text) const
 {
-    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+    JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
     return (int) std::ceil (getStringWidthFloat (text));
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-    JUCE_END_IGNORE_WARNINGS_MSVC
+    JUCE_END_IGNORE_DEPRECATION_WARNINGS
 }
 
 float Font::getStringWidthFloat (const String& text) const
@@ -941,11 +939,9 @@ public:
 
         beginTest ("Old constructor from Typeface");
         {
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+            JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
             Font f { face };
-            JUCE_END_IGNORE_WARNINGS_MSVC
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+            JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
             expect (f.getTypefaceName() == face->getName());
             expect (f.getTypefaceStyle() == face->getStyle());

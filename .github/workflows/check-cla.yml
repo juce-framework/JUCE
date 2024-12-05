@@ -18,6 +18,7 @@ jobs:
               with urllib.request.urlopen(req) as response:
                   return json.loads(response.read().decode('utf-8'))
           prCommits = jsonRequest('https://api.github.com/repos/juce-framework/JUCE/pulls/${{ github.event.number }}/commits')
+          print(f'Commit info:\n{json.dumps(prCommits, indent=4)}')
           allAuthors = [commit[authorType]['login'] for authorType in ['author', 'committer'] for commit in prCommits if commit[authorType]]
           uniqueAuthors = [name for name in list(set(allAuthors)) if name != 'web-flow']
           if (len(uniqueAuthors) == 0):

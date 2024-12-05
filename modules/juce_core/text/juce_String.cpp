@@ -1860,7 +1860,7 @@ String String::formattedRaw (const char* pf, ...)
         va_start (args, pf);
 
        #if JUCE_WINDOWS
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+        JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
        #endif
 
       #if JUCE_ANDROID
@@ -1881,7 +1881,7 @@ String String::formattedRaw (const char* pf, ...)
       #endif
 
        #if JUCE_WINDOWS
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        JUCE_END_IGNORE_DEPRECATION_WARNINGS
        #endif
         va_end (args);
 
@@ -2342,13 +2342,11 @@ static String serialiseDouble (double input, int maxDecimalPlaces = 0)
 //==============================================================================
 #if JUCE_ALLOW_STATIC_NULL_VARIABLES
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 const String String::empty;
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 #endif
 
@@ -2371,49 +2369,55 @@ public:
     {
         static void test (UnitTest& test, Random& r)
         {
-            String s (createRandomWideCharString (r));
+            constexpr auto stringLength = 50;
+            const String s (createRandomWideCharString (r, stringLength));
 
             using CharType = typename CharPointerType::CharType;
-            CharType buffer[300];
+            constexpr auto bytesPerCodeUnit = sizeof (CharType);
+            constexpr auto maxCodeUnitsPerCodePoint = 4 / bytesPerCodeUnit;
 
-            memset (buffer, 0xff, sizeof (buffer));
-            CharPointerType (buffer).writeAll (s.toUTF32());
-            test.expectEquals (String (CharPointerType (buffer)), s);
+            std::array<CharType, stringLength * maxCodeUnitsPerCodePoint + 1> codeUnits{};
+            const auto codeUnitsSizeInBytes = codeUnits.size() * bytesPerCodeUnit;
 
-            memset (buffer, 0xff, sizeof (buffer));
-            CharPointerType (buffer).writeAll (s.toUTF16());
-            test.expectEquals (String (CharPointerType (buffer)), s);
+            std::memset (codeUnits.data(), 0xff, codeUnitsSizeInBytes);
+            CharPointerType (codeUnits.data()).writeAll (s.toUTF32());
+            test.expectEquals (String (CharPointerType (codeUnits.data())), s);
 
-            memset (buffer, 0xff, sizeof (buffer));
-            CharPointerType (buffer).writeAll (s.toUTF8());
-            test.expectEquals (String (CharPointerType (buffer)), s);
+            std::memset (codeUnits.data(), 0xff, codeUnitsSizeInBytes);
+            CharPointerType (codeUnits.data()).writeAll (s.toUTF16());
+            test.expectEquals (String (CharPointerType (codeUnits.data())), s);
 
-            const auto nullTerminator = std::find (buffer, buffer + std::size (buffer), (CharType) 0);
-            const auto numValidBytes = (int) std::distance (buffer, nullTerminator) * (int) sizeof (CharType);
+            std::memset (codeUnits.data(), 0xff, codeUnitsSizeInBytes);
+            CharPointerType (codeUnits.data()).writeAll (s.toUTF8());
+            test.expectEquals (String (CharPointerType (codeUnits.data())), s);
 
-            test.expect (CharPointerType::isValidString (buffer, numValidBytes));
+            test.expect (CharPointerType::isValidString (codeUnits.data(), codeUnitsSizeInBytes));
         }
     };
 
-    static String createRandomWideCharString (Random& r)
+    static String createRandomWideCharString (Random& r, size_t length)
     {
-        juce_wchar buffer[50] = { 0 };
+        std::vector<juce_wchar> characters (length, 0);
 
-        for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
+        for (auto& character : characters)
         {
             if (r.nextBool())
             {
                 do
                 {
-                    buffer[i] = (juce_wchar) (1 + r.nextInt (0x10ffff - 1));
+                    character = (juce_wchar) (1 + r.nextInt (0x10ffff - 1));
                 }
-                while (! CharPointer_UTF16::canRepresent (buffer[i]));
+                while (! CharPointer_UTF16::canRepresent (character));
             }
             else
-                buffer[i] = (juce_wchar) (1 + r.nextInt (0xff));
+            {
+                character = (juce_wchar) (1 + r.nextInt (0xff));
+            }
         }
 
-        return CharPointer_UTF32 (buffer);
+        characters.push_back (0);
+
+        return CharPointer_UTF32 (characters.data());
     }
 
     void runTest() override

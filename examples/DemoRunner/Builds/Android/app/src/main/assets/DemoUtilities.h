@@ -63,7 +63,7 @@ inline File getExamplesDirectory() noexcept
     return File { CharPointer_UTF8 { PIP_JUCE_EXAMPLES_DIRECTORY_STRING } };
    #else
     auto currentFile = File::getSpecialLocation (File::SpecialLocationType::currentApplicationFile);
-    auto exampleDir = currentFile.getParentDirectory().getChildFile ("examples");
+    auto exampleDir = currentFile.getSiblingFile ("examples");
 
     if (exampleDir.exists())
         return exampleDir;
@@ -109,10 +109,10 @@ inline std::unique_ptr<InputStream> createAssetInputStream (const char* resource
   #else
    #if JUCE_IOS
     auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
-                          .getParentDirectory().getChildFile ("Assets");
+                          .getSiblingFile ("Assets");
    #elif JUCE_MAC
     auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
-                          .getParentDirectory().getParentDirectory().getChildFile ("Resources").getChildFile ("Assets");
+                          .getParentDirectory().getSiblingFile ("Resources").getChildFile ("Assets");
 
     if (! assetsDir.exists())
         assetsDir = getExamplesDirectory().getChildFile ("Assets");

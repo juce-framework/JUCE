@@ -35,8 +35,6 @@
 namespace juce
 {
 
-AccessibilityHandler* AccessibilityHandler::currentlyFocusedHandler = nullptr;
-
 class NativeChildHandler
 {
 public:
@@ -403,10 +401,24 @@ void AccessibilityHandler::setNativeChildForComponent (Component& component, voi
     NativeChildHandler::getInstance().setNativeChild (component, nativeChild);
 }
 
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
+void privatePostSystemNotification (const String&, const String&);
+#endif
+
+void AccessibilityHandler::postSystemNotification ([[maybe_unused]] const String& notificationTitle,
+                                                   [[maybe_unused]] const String& notificationBody)
+{
+   #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    if (areAnyAccessibilityClientsActive())
+        privatePostSystemNotification (notificationTitle, notificationBody);
+   #endif
+}
+
 #if ! JUCE_NATIVE_ACCESSIBILITY_INCLUDED
  void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent) const {}
  void AccessibilityHandler::postAnnouncement (const String&, AnnouncementPriority) {}
  AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const { return nullptr; }
+ bool AccessibilityHandler::areAnyAccessibilityClientsActive() { return false; }
 #endif
 
 } // namespace juce

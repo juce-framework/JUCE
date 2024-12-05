@@ -113,7 +113,13 @@ public:
         /** Permission to read video files that your app didn't create.
             Has the same effect as readExternalStorage on iOS and Android versions before 33.
         */
-        readMediaVideo = 8
+        readMediaVideo = 8,
+
+        /** Permission to post notifications.
+
+            @see PushNotifications::requestPermissionsWithSettings
+        */
+        postNotification = 9
     };
 
     //==============================================================================

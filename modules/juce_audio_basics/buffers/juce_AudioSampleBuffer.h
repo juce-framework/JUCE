@@ -569,17 +569,17 @@ public:
     */
     void clear() noexcept
     {
-        if (! isClear)
-        {
-            for (int i = 0; i < numChannels; ++i)
-            {
-                JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
-                FloatVectorOperations::clear (channels[i], size);
-                JUCE_END_IGNORE_WARNINGS_MSVC
-            }
+        if (isClear)
+            return;
 
-            isClear = true;
+        for (int i = 0; i < numChannels; ++i)
+        {
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
+            FloatVectorOperations::clear (channels[i], size);
+            JUCE_END_IGNORE_WARNINGS_MSVC
         }
+
+        isClear = true;
     }
 
     /** Clears a specified region of all the channels.
@@ -598,13 +598,13 @@ public:
     {
         jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
-        if (! isClear)
-        {
-            for (int i = 0; i < numChannels; ++i)
-                FloatVectorOperations::clear (channels[i] + startSample, numSamples);
+        if (isClear)
+            return;
 
-            isClear = (startSample == 0 && numSamples == size);
-        }
+        for (int i = 0; i < numChannels; ++i)
+            FloatVectorOperations::clear (channels[i] + startSample, numSamples);
+
+        isClear = (startSample == 0 && numSamples == size);
     }
 
     /** Clears a specified region of just one channel.
@@ -700,15 +700,11 @@ public:
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
-        if (! approximatelyEqual (gain, Type (1)) && ! isClear)
-        {
-            auto* d = channels[channel] + startSample;
+        if (isClear)
+            return;
 
-            if (approximatelyEqual (gain, Type()))
-                FloatVectorOperations::clear (d, numSamples);
-            else
-                FloatVectorOperations::multiply (d, gain, numSamples);
-        }
+        auto* d = channels[channel] + startSample;
+        FloatVectorOperations::multiply (d, gain, numSamples);
     }
 
     /** Applies a gain multiple to a region of all the channels.
@@ -740,26 +736,19 @@ public:
     void applyGainRamp (int channel, int startSample, int numSamples,
                         Type startGain, Type endGain) noexcept
     {
-        if (! isClear)
+        jassert (isPositiveAndBelow (channel, numChannels));
+        jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
+
+        if (isClear)
+            return;
+
+        const auto increment = (endGain - startGain) / (float) numSamples;
+        auto* d = channels[channel] + startSample;
+
+        while (--numSamples >= 0)
         {
-            if (approximatelyEqual (startGain, endGain))
-            {
-                applyGain (channel, startSample, numSamples, startGain);
-            }
-            else
-            {
-                jassert (isPositiveAndBelow (channel, numChannels));
-                jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
-
-                const auto increment = (endGain - startGain) / (float) numSamples;
-                auto* d = channels[channel] + startSample;
-
-                while (--numSamples >= 0)
-                {
-                    *d++ *= startGain;
-                    startGain += increment;
-                }
-            }
+            *d++ *= startGain;
+            startGain += increment;
         }
     }
 
@@ -812,32 +801,25 @@ public:
         jassert (isPositiveAndBelow (sourceChannel, source.numChannels));
         jassert (sourceStartSample >= 0 && sourceStartSample + numSamples <= source.size);
 
-        if (! approximatelyEqual (gainToApplyToSource, (Type) 0) && numSamples > 0 && ! source.isClear)
+        if (numSamples <= 0 || source.isClear)
+            return;
+
+        auto* d = channels[destChannel] + destStartSample;
+        auto* s = source.channels[sourceChannel] + sourceStartSample;
+
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
+
+        if (isClear)
         {
-            auto* d = channels[destChannel] + destStartSample;
-            auto* s = source.channels[sourceChannel] + sourceStartSample;
-
-            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
-
-            if (isClear)
-            {
-                isClear = false;
-
-                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
-                    FloatVectorOperations::copyWithMultiply (d, s, gainToApplyToSource, numSamples);
-                else
-                    FloatVectorOperations::copy (d, s, numSamples);
-            }
-            else
-            {
-                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
-                    FloatVectorOperations::addWithMultiply (d, s, gainToApplyToSource, numSamples);
-                else
-                    FloatVectorOperations::add (d, s, numSamples);
-            }
-
-            JUCE_END_IGNORE_WARNINGS_MSVC
+            isClear = false;
+            FloatVectorOperations::copyWithMultiply (d, s, gainToApplyToSource, numSamples);
         }
+        else
+        {
+            FloatVectorOperations::addWithMultiply (d, s, gainToApplyToSource, numSamples);
+        }
+
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     /** Adds samples from an array of floats to one of the channels.
@@ -864,26 +846,19 @@ public:
         jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
         jassert (source != nullptr);
 
-        if (! approximatelyEqual (gainToApplyToSource, Type()) && numSamples > 0)
+        if (numSamples <= 0)
+            return;
+
+        auto* d = channels[destChannel] + destStartSample;
+
+        if (isClear)
         {
-            auto* d = channels[destChannel] + destStartSample;
-
-            if (isClear)
-            {
-                isClear = false;
-
-                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
-                    FloatVectorOperations::copyWithMultiply (d, source, gainToApplyToSource, numSamples);
-                else
-                    FloatVectorOperations::copy (d, source, numSamples);
-            }
-            else
-            {
-                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
-                    FloatVectorOperations::addWithMultiply (d, source, gainToApplyToSource, numSamples);
-                else
-                    FloatVectorOperations::add (d, source, numSamples);
-            }
+            isClear = false;
+            FloatVectorOperations::copyWithMultiply (d, source, gainToApplyToSource, numSamples);
+        }
+        else
+        {
+            FloatVectorOperations::addWithMultiply (d, source, gainToApplyToSource, numSamples);
         }
     }
 
@@ -913,30 +888,23 @@ public:
                           Type startGain,
                           Type endGain) noexcept
     {
-        if (approximatelyEqual (startGain, endGain))
-        {
-            addFrom (destChannel, destStartSample, source, numSamples, startGain);
-        }
-        else
-        {
-            jassert (isPositiveAndBelow (destChannel, numChannels));
-            jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
-            jassert (source != nullptr);
+        jassert (isPositiveAndBelow (destChannel, numChannels));
+        jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
+        jassert (source != nullptr);
 
-            if (numSamples > 0)
-            {
-                isClear = false;
-                const auto increment = (endGain - startGain) / (Type) numSamples;
-                auto* d = channels[destChannel] + destStartSample;
+        if (numSamples <= 0)
+            return;
 
-                while (--numSamples >= 0)
-                {
-                    *d++ += startGain * *source++;
-                    startGain += increment;
-                }
-            }
+        isClear = false;
+        const auto increment = (endGain - startGain) / (Type) numSamples;
+        auto* d = channels[destChannel] + destStartSample;
+
+        while (--numSamples >= 0)
+        {
+            *d++ += startGain * *source++;
+            startGain += increment;
         }
-    }
+}
 
     /** Copies samples from another buffer to this one.
 
@@ -965,20 +933,20 @@ public:
         jassert (isPositiveAndBelow (sourceChannel, source.numChannels));
         jassert (sourceStartSample >= 0 && numSamples >= 0 && sourceStartSample + numSamples <= source.size);
 
-        if (numSamples > 0)
+        if (numSamples <= 0)
+            return;
+
+        if (source.isClear)
         {
-            if (source.isClear)
-            {
-                if (! isClear)
-                    FloatVectorOperations::clear (channels[destChannel] + destStartSample, numSamples);
-            }
-            else
-            {
-                isClear = false;
-                FloatVectorOperations::copy (channels[destChannel] + destStartSample,
-                                             source.channels[sourceChannel] + sourceStartSample,
-                                             numSamples);
-            }
+            if (! isClear)
+                FloatVectorOperations::clear (channels[destChannel] + destStartSample, numSamples);
+        }
+        else
+        {
+            isClear = false;
+            FloatVectorOperations::copy (channels[destChannel] + destStartSample,
+                                         source.channels[sourceChannel] + sourceStartSample,
+                                         numSamples);
         }
     }
 
@@ -1003,11 +971,11 @@ public:
         jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
         jassert (source != nullptr);
 
-        if (numSamples > 0)
-        {
-            isClear = false;
-            FloatVectorOperations::copy (channels[destChannel] + destStartSample, source, numSamples);
-        }
+        if (numSamples <= 0)
+            return;
+
+        isClear = false;
+        FloatVectorOperations::copy (channels[destChannel] + destStartSample, source, numSamples);
     }
 
     /** Copies samples from an array of floats into one of the channels, applying a gain to it.
@@ -1033,29 +1001,12 @@ public:
         jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
         jassert (source != nullptr);
 
-        if (numSamples > 0)
-        {
-            auto* d = channels[destChannel] + destStartSample;
+        if (numSamples <= 0)
+            return;
 
-            if (! approximatelyEqual (gain, Type (1)))
-            {
-                if (approximatelyEqual (gain, Type()))
-                {
-                    if (! isClear)
-                        FloatVectorOperations::clear (d, numSamples);
-                }
-                else
-                {
-                    isClear = false;
-                    FloatVectorOperations::copyWithMultiply (d, source, gain, numSamples);
-                }
-            }
-            else
-            {
-                isClear = false;
-                FloatVectorOperations::copy (d, source, numSamples);
-            }
-        }
+        auto* d = channels[destChannel] + destStartSample;
+        isClear = false;
+        FloatVectorOperations::copyWithMultiply (d, source, gain, numSamples);
     }
 
     /** Copies samples from an array of floats into one of the channels, applying a gain ramp.
@@ -1085,28 +1036,21 @@ public:
                            Type startGain,
                            Type endGain) noexcept
     {
-        if (approximatelyEqual (startGain, endGain))
-        {
-            copyFrom (destChannel, destStartSample, source, numSamples, startGain);
-        }
-        else
-        {
-            jassert (isPositiveAndBelow (destChannel, numChannels));
-            jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
-            jassert (source != nullptr);
+        jassert (isPositiveAndBelow (destChannel, numChannels));
+        jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
+        jassert (source != nullptr);
 
-            if (numSamples > 0)
-            {
-                isClear = false;
-                const auto increment = (endGain - startGain) / (Type) numSamples;
-                auto* d = channels[destChannel] + destStartSample;
+        if (numSamples <= 0)
+            return;
 
-                while (--numSamples >= 0)
-                {
-                    *d++ = startGain * *source++;
-                    startGain += increment;
-                }
-            }
+        isClear = false;
+        const auto increment = (endGain - startGain) / (Type) numSamples;
+        auto* d = channels[destChannel] + destStartSample;
+
+        while (--numSamples >= 0)
+        {
+            *d++ = startGain * *source++;
+            startGain += increment;
         }
     }
 
@@ -1136,8 +1080,7 @@ public:
         if (isClear)
             return Type (0);
 
-        auto r = findMinMax (channel, startSample, numSamples);
-
+        const auto r = findMinMax (channel, startSample, numSamples);
         return jmax (r.getStart(), -r.getStart(), r.getEnd(), -r.getEnd());
     }
 
@@ -1146,9 +1089,11 @@ public:
     {
         Type mag (0);
 
-        if (! isClear)
-            for (int i = 0; i < numChannels; ++i)
-                mag = jmax (mag, getMagnitude (i, startSample, numSamples));
+        if (isClear)
+            return mag;
+
+        for (int i = 0; i < numChannels; ++i)
+            mag = jmax (mag, getMagnitude (i, startSample, numSamples));
 
         return mag;
     }
@@ -1159,7 +1104,7 @@ public:
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
-        if (numSamples <= 0 || channel < 0 || channel >= numChannels || isClear)
+        if (numSamples <= 0 || isClear || ! isPositiveAndBelow (channel, numChannels))
             return Type (0);
 
         auto* data = channels[channel] + startSample;
@@ -1180,14 +1125,21 @@ public:
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
-        if (! isClear)
-            std::reverse (channels[channel] + startSample,
-                          channels[channel] + startSample + numSamples);
+        if (isClear)
+            return;
+
+        std::reverse (channels[channel] + startSample,
+                      channels[channel] + startSample + numSamples);
     }
 
     /** Reverses a part of the buffer. */
     void reverse (int startSample, int numSamples) const noexcept
     {
+        jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
+
+        if (isClear)
+            return;
+
         for (int i = 0; i < numChannels; ++i)
             reverse (i, startSample, numSamples);
     }

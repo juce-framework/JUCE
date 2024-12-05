@@ -63,11 +63,11 @@ struct AEffect;
 
 #include "juce_VSTCommon.h"
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 #include "juce_VSTMidiEventList.h"
 
@@ -81,7 +81,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
 #endif
 
 #ifndef JUCE_VST_WRAPPER_INVOKE_MAIN
-#define JUCE_VST_WRAPPER_INVOKE_MAIN  effect = module->moduleMain ((Vst2::audioMasterCallback) &audioMaster);
+#define JUCE_VST_WRAPPER_INVOKE_MAIN  effect = module->moduleMain (audioMaster);
 #endif
 
 #ifndef JUCE_VST_FALLBACK_HOST_NAME
@@ -222,8 +222,7 @@ namespace
 }
 
 //==============================================================================
-typedef Vst2::AEffect* (VSTCALLBACK *MainCall) (Vst2::audioMasterCallback);
-static pointer_sized_int VSTCALLBACK audioMaster (Vst2::AEffect*, int32, int32, pointer_sized_int, void*, float);
+using MainCall = Vst2::AEffect* (VSTCALLBACK*) (Vst2::audioMasterCallback);
 
 //==============================================================================
 // Change this to disable logging of various VST activities
@@ -828,8 +827,6 @@ private:
 
 static const int defaultVSTSampleRateValue = 44100;
 static const int defaultVSTBlockSizeValue = 512;
-
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
 class TempChannelPointers
 {
@@ -2156,6 +2153,20 @@ private:
                 UseResFile (module->resFileId);
            #endif
 
+            constexpr Vst2::audioMasterCallback audioMaster = [] (Vst2::AEffect* eff,
+                                                                  Vst2::VstInt32 opcode,
+                                                                  Vst2::VstInt32 index,
+                                                                  Vst2::VstIntPtr value,
+                                                                  void* ptr,
+                                                                  float opt) -> Vst2::VstIntPtr
+            {
+                if (eff != nullptr)
+                    if (auto* instance = (VSTPluginInstance*) (eff->resvd2))
+                        return instance->handleCallback (opcode, index, value, ptr, opt);
+
+                return VSTPluginInstance::handleGeneralCallback (opcode, index, value, ptr, opt);
+            };
+
             {
                 JUCE_VST_WRAPPER_INVOKE_MAIN
             }
@@ -3433,8 +3444,6 @@ private:
 };
 #endif
 
-JUCE_END_IGNORE_WARNINGS_MSVC
-
 //==============================================================================
 AudioProcessorEditor* VSTPluginInstance::createEditor()
 {
@@ -3458,15 +3467,6 @@ bool VSTPluginInstance::updateSizeFromEditor ([[maybe_unused]] int w, [[maybe_un
 
 //==============================================================================
 // entry point for all callbacks from the plugin
-static pointer_sized_int VSTCALLBACK audioMaster (Vst2::AEffect* effect, int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
-{
-    if (effect != nullptr)
-        if (auto* instance = (VSTPluginInstance*) (effect->resvd2))
-            return instance->handleCallback (opcode, index, value, ptr, opt);
-
-    return VSTPluginInstance::handleGeneralCallback (opcode, index, value, ptr, opt);
-}
-
 //==============================================================================
 VSTPluginFormat::VSTPluginFormat() {}
 VSTPluginFormat::~VSTPluginFormat() {}
@@ -3758,7 +3758,7 @@ void VSTPluginFormat::aboutToScanVSTShellPlugin (const PluginDescription&) {}
 
 } // namespace juce
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif

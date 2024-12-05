@@ -939,4 +939,9 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
                                NSAccessibilityPriorityKey:     @(nsPriority) });
 }
 
+bool AccessibilityHandler::areAnyAccessibilityClientsActive()
+{
+    return juce::areAnyAccessibilityClientsActive();
+}
+
 } // namespace juce

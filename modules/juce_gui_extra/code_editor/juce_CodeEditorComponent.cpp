@@ -1697,11 +1697,9 @@ void CodeEditorComponent::setFont (const Font& newFont)
 {
     font = newFont;
 
-    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+    JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
     charWidth = font.getStringWidthFloat ("0");
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-    JUCE_END_IGNORE_WARNINGS_MSVC
+    JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
     lineHeight = roundToInt (font.getHeight());
     resized();

@@ -1154,7 +1154,11 @@ public:
 
         See also the helper function getXmlFromBinary() for loading settings as XML.
 
-        @see setCurrentProgramStateInformation
+        VST3ClientExtensions::getCompatibleParameterIds() will always be called after
+        setStateInformation() therefore you can use information from the plugin state
+        to determine which parameter mapping to use if necessary.
+
+        @see setCurrentProgramStateInformation, VST3ClientExtensions::getCompatibleParameterIds
     */
     virtual void setStateInformation (const void* data, int sizeInBytes) = 0;
 

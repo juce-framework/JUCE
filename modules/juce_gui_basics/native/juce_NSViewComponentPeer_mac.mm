@@ -129,14 +129,16 @@ static constexpr int translateVirtualToAsciiKeyCode (int keyCode) noexcept
 constexpr int extendedKeyModifier = 0x30000;
 
 //==============================================================================
-class JuceCALayerDelegate final : public ObjCClass<NSObject<CALayerDelegate>>
+struct JuceCALayerDelegateCallback
+{
+    virtual ~JuceCALayerDelegateCallback() = default;
+    virtual void displayLayer (CALayer*) = 0;
+};
+
+class API_AVAILABLE (macos (10.12)) JuceCALayerDelegate final : public ObjCClass<NSObject<CALayerDelegate>>
 {
 public:
-    struct Callback
-    {
-        virtual ~Callback() = default;
-        virtual void displayLayer (CALayer*) = 0;
-    };
+    using Callback = JuceCALayerDelegateCallback;
 
     static NSObject<CALayerDelegate>* construct (Callback* owner)
     {
@@ -176,7 +178,7 @@ private:
 
 //==============================================================================
 class NSViewComponentPeer final : public ComponentPeer,
-                                  private JuceCALayerDelegate::Callback
+                                  private JuceCALayerDelegateCallback
 {
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
@@ -1460,9 +1462,9 @@ public:
             if (@available (macOS 10.13, *))
                 return NSPasteboardTypeFileURL;
 
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
             return (NSString*) kUTTypeFileURL;
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+            JUCE_END_IGNORE_DEPRECATION_WARNINGS
         }();
 
         return [NSArray arrayWithObjects: type, (NSString*) kPasteboardTypeFileURLPromise, NSPasteboardTypeString, nil];
@@ -1633,7 +1635,7 @@ public:
 
         const auto handled = [&]() -> bool
         {
-            if (auto* target = findCurrentTextInputTarget())
+            if (findCurrentTextInputTarget() != nullptr)
                 if (const auto* inputContext = [view inputContext])
                     return [inputContext handleEvent: ev] && ! viewCannotHandleEvent;
 

@@ -36,10 +36,50 @@ namespace juce
 {
 
 //==============================================================================
-#if ! JUCE_ANDROID && ! JUCE_IOS && ! JUCE_MAC
+#if ! JUCE_PUSH_NOTIFICATIONS_IMPL
+
+struct PushNotifications::Impl
+{
+    explicit Impl (PushNotifications& o) : owner (o) {}
+
+    void requestPermissionsWithSettings (const Settings&) const
+    {
+        owner.listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
+    }
+
+    void requestSettingsUsed() const
+    {
+        owner.listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
+    }
+
+    bool areNotificationsEnabled() const { return false; }
+    void getDeliveredNotifications() const {}
+    void removeAllDeliveredNotifications() const {}
+    String getDeviceToken() const { return {}; }
+    void setupChannels (const Array<ChannelGroup>&, const Array<Channel>&) const {}
+    void getPendingLocalNotifications() const {}
+    void removeAllPendingLocalNotifications() const {}
+    void subscribeToTopic (const String&) const {}
+    void unsubscribeFromTopic (const String&) const {}
+    void sendLocalNotification (const Notification&) const {}
+    void removeDeliveredNotification (const String&) const {}
+    void removePendingLocalNotification (const String&) const {}
+    void sendUpstreamMessage (const String&,
+                              const String&,
+                              const String&,
+                              const String&,
+                              int,
+                              const StringPairArray&) const {}
+
+private:
+    PushNotifications& owner;
+};
+
 bool PushNotifications::Notification::isValid() const noexcept { return true; }
+
 #endif
 
+//==============================================================================
 PushNotifications::Notification::Notification (const Notification& other)
     : identifier (other.identifier),
       title (other.title),
@@ -82,9 +122,7 @@ PushNotifications::Notification::Notification (const Notification& other)
 
 //==============================================================================
 PushNotifications::PushNotifications()
-  #if JUCE_PUSH_NOTIFICATIONS
-    : pimpl (new Pimpl (*this))
-  #endif
+    : pimpl (new Impl (*this))
 {
 }
 
@@ -93,128 +131,90 @@ PushNotifications::~PushNotifications() { clearSingletonInstance(); }
 void PushNotifications::addListener (Listener* l)      { listeners.add (l); }
 void PushNotifications::removeListener (Listener* l)   { listeners.remove (l); }
 
-void PushNotifications::requestPermissionsWithSettings ([[maybe_unused]] const PushNotifications::Settings& settings)
+void PushNotifications::requestPermissionsWithSettings (const Settings& settings)
 {
-  #if JUCE_PUSH_NOTIFICATIONS && (JUCE_IOS || JUCE_MAC)
     pimpl->requestPermissionsWithSettings (settings);
-  #else
-    listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
-  #endif
 }
 
 void PushNotifications::requestSettingsUsed()
 {
-  #if JUCE_PUSH_NOTIFICATIONS && (JUCE_IOS || JUCE_MAC)
     pimpl->requestSettingsUsed();
-  #else
-    listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
-  #endif
 }
 
 bool PushNotifications::areNotificationsEnabled() const
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     return pimpl->areNotificationsEnabled();
-  #else
-    return false;
-  #endif
 }
 
 void PushNotifications::getDeliveredNotifications() const
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     pimpl->getDeliveredNotifications();
-  #endif
 }
 
 void PushNotifications::removeAllDeliveredNotifications()
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     pimpl->removeAllDeliveredNotifications();
-  #endif
 }
 
 String PushNotifications::getDeviceToken() const
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     return pimpl->getDeviceToken();
-  #else
-    return {};
-  #endif
 }
 
-void PushNotifications::setupChannels ([[maybe_unused]] const Array<ChannelGroup>& groups, [[maybe_unused]] const Array<Channel>& channels)
+void PushNotifications::setupChannels (const Array<ChannelGroup>& groups,
+                                       const Array<Channel>& channels)
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     pimpl->setupChannels (groups, channels);
-  #endif
 }
 
 void PushNotifications::getPendingLocalNotifications() const
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     pimpl->getPendingLocalNotifications();
-  #endif
 }
 
 void PushNotifications::removeAllPendingLocalNotifications()
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     pimpl->removeAllPendingLocalNotifications();
-  #endif
 }
 
-void PushNotifications::subscribeToTopic ([[maybe_unused]] const String& topic)
+void PushNotifications::subscribeToTopic (const String& topic)
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     pimpl->subscribeToTopic (topic);
-  #endif
 }
 
-void PushNotifications::unsubscribeFromTopic ([[maybe_unused]] const String& topic)
+void PushNotifications::unsubscribeFromTopic (const String& topic)
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     pimpl->unsubscribeFromTopic (topic);
-  #endif
 }
 
-
-void PushNotifications::sendLocalNotification ([[maybe_unused]] const Notification& n)
+void PushNotifications::sendLocalNotification (const Notification& n)
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     pimpl->sendLocalNotification (n);
-  #endif
 }
 
-void PushNotifications::removeDeliveredNotification ([[maybe_unused]] const String& identifier)
+void PushNotifications::removeDeliveredNotification (const String& identifier)
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     pimpl->removeDeliveredNotification (identifier);
-  #endif
 }
 
-void PushNotifications::removePendingLocalNotification ([[maybe_unused]] const String& identifier)
+void PushNotifications::removePendingLocalNotification (const String& identifier)
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     pimpl->removePendingLocalNotification (identifier);
-  #endif
 }
 
-void PushNotifications::sendUpstreamMessage ([[maybe_unused]] const String& serverSenderId,
-                                             [[maybe_unused]] const String& collapseKey,
-                                             [[maybe_unused]] const String& messageId,
-                                             [[maybe_unused]] const String& messageType,
-                                             [[maybe_unused]] int timeToLive,
-                                             [[maybe_unused]] const StringPairArray& additionalData)
+void PushNotifications::sendUpstreamMessage (const String& serverSenderId,
+                                             const String& collapseKey,
+                                             const String& messageId,
+                                             const String& messageType,
+                                             int timeToLive,
+                                             const StringPairArray& additionalData)
 {
-  #if JUCE_PUSH_NOTIFICATIONS
     pimpl->sendUpstreamMessage (serverSenderId,
                                 collapseKey,
                                 messageId,
                                 messageType,
                                 timeToLive,
                                 additionalData);
-  #endif
 }
 
 //==============================================================================
@@ -233,5 +233,93 @@ void PushNotifications::Listener::remoteNotificationsDeleted() {}
 void PushNotifications::Listener::upstreamMessageSent ([[maybe_unused]] const String& messageId) {}
 void PushNotifications::Listener::upstreamMessageSendingError ([[maybe_unused]] const String& messageId,
                                                                [[maybe_unused]] const String& error) {}
+
+//==============================================================================
+void privatePostSystemNotification (const String& notificationTitle, const String& notificationBody);
+void privatePostSystemNotification ([[maybe_unused]] const String& notificationTitle,
+                                    [[maybe_unused]] const String& notificationBody)
+{
+  #if JUCE_PUSH_NOTIFICATIONS
+   #if JUCE_ANDROID || JUCE_IOS || JUCE_MAC
+    auto* notificationsInstance = PushNotifications::getInstance();
+
+    if (notificationsInstance == nullptr)
+        return;
+
+   #if JUCE_ANDROID
+    notificationsInstance->requestPermissionsWithSettings ({});
+
+    static auto channels = std::invoke ([]() -> Array<PushNotifications::Channel>
+    {
+        PushNotifications::Channel chan;
+
+        chan.identifier = "1";
+        chan.name = "Notifications";
+        chan.description = "Accessibility notifications";
+        chan.groupId = "accessibility";
+        chan.ledColour = Colours::yellow;
+        chan.canShowBadge = true;
+        chan.enableLights = true;
+        chan.enableVibration = true;
+        chan.soundToPlay = URL ("default_os_sound");
+        chan.vibrationPattern = { 1000, 1000 };
+
+        return { chan };
+    });
+
+    notificationsInstance->setupChannels ({ PushNotifications::ChannelGroup { "accessibility", "accessibility" } },
+                                          channels);
+   #else
+    static auto settings = std::invoke ([]
+    {
+        PushNotifications::Settings s;
+        s.allowAlert = true;
+        s.allowBadge = true;
+        s.allowSound = true;
+
+       #if JUCE_IOS
+        PushNotifications::Settings::Category c;
+        c.identifier = "Accessibility";
+
+        s.categories = { c };
+       #endif
+
+        return s;
+    });
+
+    notificationsInstance->requestPermissionsWithSettings (settings);
+   #endif
+
+    const auto notification = std::invoke ([&notificationTitle, &notificationBody]
+    {
+        PushNotifications::Notification n;
+
+        n.identifier = String (Random::getSystemRandom().nextInt());
+        n.title = notificationTitle;
+        n.body = notificationBody;
+
+       #if JUCE_IOS
+        n.category = "Accessibility";
+       #elif JUCE_ANDROID
+        n.channelId = "1";
+        n.icon = "accessibilitynotificationicon";
+       #endif
+
+        return n;
+    });
+
+    if (notification.isValid())
+        notificationsInstance->sendLocalNotification (notification);
+
+   #else
+    SystemTrayIconComponent systemTrayIcon;
+
+    Image im (Image::ARGB, 128, 128, true);
+    systemTrayIcon.setIconImage (im, im);
+
+    systemTrayIcon.showInfoBubble (notificationTitle, notificationBody);
+   #endif
+  #endif
+}
 
 } // namespace juce

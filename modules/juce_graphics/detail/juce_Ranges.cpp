@@ -406,6 +406,33 @@ public:
             ranges.drop ({ -1000, 1000 });
             expect (ranges.isEmpty());
         }
+
+        beginTest ("Ranges::covers()");
+        {
+            Ranges ranges;
+
+            ranges.set ({ 0, 48 });
+            ranges.set ({ 48, 49 });
+            ranges.set ({ 55, 94 });
+            ranges.set ({ 94, 127 });
+            ranges.set ({ 127, 150 });
+
+            expect (ranges.covers ({ 0, 48 }));
+            expect (ranges.covers ({ 0, 20 }));
+            expect (ranges.covers ({ 10, 30 }));
+            expect (ranges.covers ({ 30, 48 }));
+            expect (ranges.covers ({ 30, 49 }));
+            expect (ranges.covers ({ 55, 150 }));
+            expect (ranges.covers ({ 60, 145 }));
+
+            expect (! ranges.covers ({ -1, 10 }));
+            expect (! ranges.covers ({ 1, 50 }));
+            expect (! ranges.covers ({ 50, 140 }));
+            expect (! ranges.covers ({ 149, 151 }));
+
+            expect (ranges.covers ({ 10, 10 }));
+            expect (! ranges.covers ({ 151, 151 }));
+        }
     }
 };
 
@@ -661,6 +688,41 @@ public:
             expectRangedValuesItem (rangedValues.getItem (3), { 23, 30 }, 'c');
             expectRangedValuesItem (rangedValues.getItem (4), { 35, 45 }, 'c');
             expectRangedValuesItem (rangedValues.getItem (5), { 45, 60 }, 'd');
+        }
+
+        beginTest ("RangedValues::eraseUpTo() - erasing before all ranges has no effect");
+        {
+            auto rangedValues = createRangedValuesObjectForErase();
+
+            rangedValues.eraseUpTo (rangedValues.getRanges().get (0).getStart());
+
+            expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },  'a');
+            expectRangedValuesItem (rangedValues.getItem (1), { 11, 20 }, 'b');
+            expectRangedValuesItem (rangedValues.getItem (2), { 23, 30 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (3), { 35, 45 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (4), { 45, 60 }, 'd');
+        }
+
+        beginTest ("RangedValues::eraseUpTo() - erasing values up to, not including 15");
+        {
+            auto rangedValues = createRangedValuesObjectForErase();
+
+            rangedValues.eraseUpTo (15);
+
+            expectRangedValuesItem (rangedValues.getItem (0), { 15, 20 }, 'b');
+            expectRangedValuesItem (rangedValues.getItem (1), { 23, 30 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (2), { 35, 45 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (3), { 45, 60 }, 'd');
+        }
+
+        beginTest ("RangedValues::eraseUpTo() - erasing up to the end of all ranges clears the container");
+        {
+            auto rangedValues = createRangedValuesObjectForErase();
+            const auto ranges = rangedValues.getRanges();
+
+            rangedValues.eraseUpTo (ranges.get (ranges.size() - 1).getEnd());
+
+            expect (rangedValues.isEmpty());
         }
 
         beginTest ("RangedValues::drop() - drop shifts ranges downward on the right side");

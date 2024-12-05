@@ -39,26 +39,83 @@ namespace juce
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 
-static bool isStartingUpOrShuttingDown()
+//==============================================================================
+struct WindowsAccessibility
 {
-    if (auto* app = JUCEApplicationBase::getInstance())
-        if (app->isInitialising())
+    WindowsAccessibility() = delete;
+
+    static long getUiaRootObjectId()
+    {
+        return static_cast<long> (UiaRootObjectId);
+    }
+
+    static bool handleWmGetObject (AccessibilityHandler* handler, WPARAM wParam, LPARAM lParam, LRESULT* res)
+    {
+        if (isStartingUpOrShuttingDown() || (handler == nullptr || ! isHandlerValid (*handler)))
+            return false;
+
+        if (auto* uiaWrapper = WindowsUIAWrapper::getInstance())
+        {
+            ComSmartPtr<IRawElementProviderSimple> provider;
+            handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
+
+            if (! uiaWrapper->isProviderDisconnecting (provider))
+                *res = uiaWrapper->returnRawElementProvider ((HWND) handler->getComponent().getWindowHandle(), wParam, lParam, provider);
+
             return true;
+        }
 
-    if (auto* mm = MessageManager::getInstanceWithoutCreating())
-        if (mm->hasStopMessageBeenSent())
-            return true;
+        return false;
+    }
 
-    return false;
-}
+    static void revokeUIAMapEntriesForWindow (HWND hwnd)
+    {
+        if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
+            uiaWrapper->returnRawElementProvider (hwnd, 0, 0, nullptr);
+    }
 
-static bool isHandlerValid (const AccessibilityHandler& handler)
-{
-    if (auto* provider = handler.getNativeImplementation())
-        return provider->isElementValid();
+    static bool isStartingUpOrShuttingDown()
+    {
+        if (auto* app = JUCEApplicationBase::getInstance())
+            if (app->isInitialising())
+                return true;
 
-    return false;
-}
+        if (auto* mm = MessageManager::getInstanceWithoutCreating())
+            if (mm->hasStopMessageBeenSent())
+                return true;
+
+        return false;
+    }
+
+    static bool isHandlerValid (const AccessibilityHandler& handler)
+    {
+        if (auto* provider = handler.getNativeImplementation())
+            return provider->isElementValid();
+
+        return false;
+    }
+
+    static bool areAnyAccessibilityClientsActive()
+    {
+        const auto areClientsListening = []
+        {
+            if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
+                return uiaWrapper->clientsAreListening() != 0;
+
+            return false;
+        };
+
+        const auto isScreenReaderRunning = []
+        {
+            BOOL isRunning = FALSE;
+            SystemParametersInfo (SPI_GETSCREENREADER, 0, (PVOID) &isRunning, 0);
+
+            return isRunning != 0;
+        };
+
+        return areClientsListening() || isScreenReaderRunning();
+    }
+};
 
 //==============================================================================
 class AccessibilityHandler::AccessibilityNativeImpl
@@ -103,31 +160,12 @@ AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
     return nativeImpl->accessibilityElement;
 }
 
-static bool areAnyAccessibilityClientsActive()
-{
-    const auto areClientsListening = []
-    {
-        if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
-            return uiaWrapper->clientsAreListening() != 0;
-
-        return false;
-    };
-
-    const auto isScreenReaderRunning = []
-    {
-        BOOL isRunning = FALSE;
-        SystemParametersInfo (SPI_GETSCREENREADER, 0, (PVOID) &isRunning, 0);
-
-        return isRunning != 0;
-    };
-
-    return areClientsListening() || isScreenReaderRunning();
-}
-
 template <typename Callback>
 void getProviderWithCheckedWrapper (const AccessibilityHandler& handler, Callback&& callback)
 {
-    if (! areAnyAccessibilityClientsActive() || isStartingUpOrShuttingDown() || ! isHandlerValid (handler))
+    if (! WindowsAccessibility::areAnyAccessibilityClientsActive()
+        || WindowsAccessibility::isStartingUpOrShuttingDown()
+        || ! WindowsAccessibility::isHandlerValid (handler))
         return;
 
     if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
@@ -292,40 +330,10 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
     }
 }
 
-//==============================================================================
-namespace WindowsAccessibility
+bool AccessibilityHandler::areAnyAccessibilityClientsActive()
 {
-    static long getUiaRootObjectId()
-    {
-        return static_cast<long> (UiaRootObjectId);
-    }
-
-    static bool handleWmGetObject (AccessibilityHandler* handler, WPARAM wParam, LPARAM lParam, LRESULT* res)
-    {
-        if (isStartingUpOrShuttingDown() || (handler == nullptr || ! isHandlerValid (*handler)))
-            return false;
-
-        if (auto* uiaWrapper = WindowsUIAWrapper::getInstance())
-        {
-            ComSmartPtr<IRawElementProviderSimple> provider;
-            handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
-
-            if (! uiaWrapper->isProviderDisconnecting (provider))
-                *res = uiaWrapper->returnRawElementProvider ((HWND) handler->getComponent().getWindowHandle(), wParam, lParam, provider);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    static void revokeUIAMapEntriesForWindow (HWND hwnd)
-    {
-        if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
-            uiaWrapper->returnRawElementProvider (hwnd, 0, 0, nullptr);
-    }
+    return WindowsAccessibility::areAnyAccessibilityClientsActive();
 }
-
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 

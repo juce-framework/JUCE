@@ -518,10 +518,6 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
         availableSampleRates.addIfNotAlreadyThere (highestRate);
 
-        // Reset sample rate back to the original, so that we don't end up stuck on the highest rate
-        sampleRate = trySampleRate (sampleRate);
-        bufferSize = getBufferSize (sampleRate);
-
         AudioUnitAddPropertyListener (audioUnit,
                                       kAudioUnitProperty_StreamFormat,
                                       dispatchAudioUnitPropertyChange,
@@ -553,6 +549,13 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         JUCE_IOS_AUDIO_LOG ("Updating hardware info");
 
         updateAvailableSampleRates();
+
+        // The sample rate and buffer size may have been affected by
+        // updateAvailableSampleRates(), so try restoring the last good
+        // sample rate
+        sampleRate = trySampleRate (sampleRate);
+        bufferSize = getBufferSize (sampleRate);
+
         updateAvailableBufferSizes();
 
         if (deviceType != nullptr)
@@ -815,7 +818,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
     //==============================================================================
    #if JUCE_MODULE_AVAILABLE_juce_graphics
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+    JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
     Image getIcon (int size)
     {
        #if TARGET_OS_MACCATALYST
@@ -831,7 +834,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
         return {};
     }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    JUCE_END_IGNORE_DEPRECATION_WARNINGS
    #endif
 
     void switchApplication()

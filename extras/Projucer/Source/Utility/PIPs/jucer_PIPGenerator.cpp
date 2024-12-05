@@ -507,7 +507,7 @@ Array<File> PIPGenerator::replaceRelativeIncludesAndGetFilesToMove()
             if (path.startsWith ("<") && path.endsWith (">"))
                 continue;
 
-            auto file = pipFile.getParentDirectory().getChildFile (path);
+            auto file = pipFile.getSiblingFile (path);
             files.add (file);
 
             line = line.replace (path, file.getFileName());

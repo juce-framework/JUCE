@@ -58,8 +58,7 @@ bool DirectoryIterator::next()
     return next (nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 }
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 bool DirectoryIterator::next (bool* isDirResult, bool* isHiddenResult, int64* fileSize,
                               Time* modTime, Time* creationTime, bool* isReadOnly)
@@ -144,8 +143,7 @@ bool DirectoryIterator::next (bool* isDirResult, bool* isHiddenResult, int64* fi
     }
 }
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 const File& DirectoryIterator::getFile() const
 {

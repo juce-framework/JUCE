@@ -404,7 +404,7 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, Kno
     : formatManager (manager),
       list (listToEdit),
       deadMansPedalFile (deadMansPedal),
-      optionsButton ("Options..."),
+      optionsButton (TRANS ("Options...")),
       propertiesToUse (props),
       allowAsync (allowPluginsWhichRequireAsynchronousInstantiation),
       numThreads (allowAsync ? 1 : 0)
@@ -554,7 +554,7 @@ PopupMenu PluginListComponent::createOptionsMenu()
 
     for (auto format : formatManager.getFormats())
         if (format->canScanForPlugins())
-            menu.addItem (PopupMenu::Item ("Remove all " + format->getName() + " plug-ins")
+            menu.addItem (PopupMenu::Item (TRANS ("Remove all XFMTX plug-ins").replace ("XFMTX", format->getName()))
                             .setEnabled (! list.getTypesForFormat (*format).isEmpty())
                             .setAction ([this, format]
                                         {
@@ -583,7 +583,7 @@ PopupMenu PluginListComponent::createOptionsMenu()
 
     for (auto format : formatManager.getFormats())
         if (format->canScanForPlugins())
-            menu.addItem (PopupMenu::Item ("Scan for new or updated " + format->getName() + " plug-ins")
+            menu.addItem (PopupMenu::Item (TRANS ("Scan for new or updated XFMTX plug-ins").replace ("XFMTX", format->getName()))
                             .setAction ([this, format]  { scanFor (*format); }));
 
     return menu;

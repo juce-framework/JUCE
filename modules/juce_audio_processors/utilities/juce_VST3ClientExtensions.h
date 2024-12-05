@@ -104,16 +104,156 @@ struct VST3ClientExtensions
     */
     virtual bool getPluginHasMainInput() const  { return true; }
 
-    /** This function should return the UIDs of any compatible VST2 plug-ins.
+    using InterfaceId = std::array<std::byte, 16>;
 
-        Each item in the vector should be a 32-character string consisting only
-        of the characters 0-9 and A-F.
+    /** This function should return the UIDs of any compatible VST2 or VST3
+        plug-ins.
 
         This information will be used to implement the IPluginCompatibility
         interface. Hosts can use this interface to determine whether this VST3
         is capable of replacing a given VST2.
+
+        Each compatible class is a 16-byte array that corresponds to the VST3
+        interface ID for the class implementing the IComponent interface.
+        For VST2 or JUCE plugins these IDs can be determined in the following
+        ways:
+        - Use convertVST2PluginId() for VST2 plugins or JUCE VST3 plugins with
+          JUCE_VST3_CAN_REPLACE_VST3 enabled
+        - Use convertJucePluginId() for any other JUCE VST3 plugins
+
+        If JUCE_VST3_CAN_REPLACE_VST2 is enabled the VST3 plugin will have the
+        same identifier as the VST2 plugin and therefore there will be no need
+        to implement this function.
+
+        If the parameter IDs between compatible versions differ
+        getCompatibleParameterIds() should also be overridden. However, unlike
+        getCompatibleParameterIds() this function should remain constant and
+        always return the same IDs.
+
+        @see getCompatibleParameterIds()
     */
-    virtual std::vector<String> getCompatibleClasses() const { return {}; }
+    virtual std::vector<InterfaceId> getCompatibleClasses() const { return {}; }
+
+    /** This function should return a map of VST3 parameter IDs and the JUCE
+        parameters they map to.
+
+        This information is used to implement the IRemapParameter interface.
+        Hosts can use this to preserve automation data when a session was saved
+        using a compatible plugin that has different parameter IDs.
+
+        Not all hosts will take this information into account. Therefore,
+        parameter IDs should be maintained between plugin versions. For JUCE
+        plugins migrating from VST2 to VST3 the best method for achieving this
+        is enabling JUCE_FORCE_LEGACY_PARAM_IDS. However, if a plugin has
+        already been released without enabling this flag, this method offers an
+        alternative approach that won't cause any further compatibility issues.
+
+        The key in the map is a VST3 parameter identifier or Vst::ParamID. For
+        VST2 or JUCE plugins these IDs can be determined in the following ways
+        - Use the parameter index for
+          - VST2 plugins
+          - JUCE VST3 plugins with JUCE_FORCE_LEGACY_PARAM_IDS enabled
+          - Any parameter that doesn't inherit from HostedAudioProcessorParameter
+        - Use convertJuceParameterId() for JUCE VST3 plugins where
+          JUCE_FORCE_LEGACY_PARAM_IDS is disabled
+
+        The value in the map is the JUCE parameter ID for the parameter to map
+        to, or an empty string to indicate that there is no parameter to map to.
+        If a parameter doesn't inherit from HostedAudioProcessorParameter its ID
+        will be the parameter index as a string, for example "1". Otherwise
+        always use the actual parameter ID (even if JUCE_FORCE_LEGACY_PARAM_IDS
+        is enabled).
+
+        In the unlikely event that two plugins share the same plugin ID, and
+        both have a different parameters that share the same parameter ID, it
+        may be possible to determine which version of the plugin is being loaded
+        during setStateInformation(). This method will always be called after
+        setStateInformation(), so that the map with the correct mapping can be
+        provided when queried.
+
+        Below is an example of how you might implement this function for a JUCE
+        VST3 plugin where JUCE_VST3_CAN_REPLACE_VST2 is enabled, but
+        JUCE_FORCE_LEGACY_PARAM_IDS is disabled.
+
+        @code
+        std::map<uint32_t, String> getCompatibleParameterIds (const String&) const override
+        {
+            return { { 0, "Frequency" },
+                     { 1, "CutOff" },
+                     { 2, "Gain" },
+                     { 3, "Bypass" } };
+        }
+        @endcode
+
+        @param compatibleClass  A plugin identifier, either for the current
+                                plugin or one listed in getCompatibleClasses().
+                                This parameter allows the implementation to
+                                return a different parameter map for each
+                                compatible class. Use convertJucePluginId() and
+                                convertVST2PluginId() to determine the class IDs
+                                used by JUCE plugins.
+
+        @returns    A map where each key is a VST3 parameter ID in the compatible
+                    plugin, and the value is the unique JUCE parameter ID in the
+                    current plugin that it should be mapped to.
+
+        @see getCompatibleClasses, convertJucePluginId, convertVST2PluginId, convertJuceParameterId
+    */
+    virtual std::map<uint32_t, String> getCompatibleParameterIds (const InterfaceId& compatibleClass) const;
+
+    /** An enum indicating the various VST3 interface types.
+
+        In most cases users shouldn't need to concern themselves with any
+        interfaces other than the component, which is used to report the actual
+        audio effect.
+    */
+    enum class InterfaceType
+    {
+        ara,
+        controller,
+        compatibility,
+        component,
+        processor
+    };
+
+    /** Returns a 16-byte array indicating the VST3 interface ID used for a
+        given JUCE VST3 plugin.
+
+        Internally this is what JUCE will use to assign an ID to each VST3
+        interface, unless JUCE_VST3_CAN_REPLACE_VST2 is enabled.
+
+        @see convertVST2PluginId, getCompatibleClasses, getCompatibleParameterIds
+    */
+    static InterfaceId convertJucePluginId (uint32_t manufacturerCode,
+                                            uint32_t pluginCode,
+                                            InterfaceType interfaceType = InterfaceType::component);
+
+    /** Returns a 16-byte array indicating the VST3 interface ID used for a
+        given VST2 plugin.
+
+        Internally JUCE will use this method to assign an ID for the component
+        and controller interfaces when JUCE_VST3_CAN_REPLACE_VST2 is enabled.
+
+        @convertJucePluginId, getCompatibleClasses, getCompatibleParameterIds
+    */
+    static InterfaceId convertVST2PluginId (uint32_t pluginCode,
+                                            const String& pluginName,
+                                            InterfaceType interfaceType = InterfaceType::component);
+
+    /** Returns the VST3 compatible parameter ID reported for a given JUCE
+        parameter.
+
+        Internally JUCE will use this method to determine the Vst::ParamID for
+        a HostedAudioProcessorParameter, unless JUCE_FORCE_LEGACY_PARAM_IDS is
+        enabled, in which case it will use the parameter index.
+
+        @see getCompatibleParameterIds
+    */
+    static uint32_t convertJuceParameterId (const String& parameterId,
+                                            bool studioOneCompatible = true);
+
+    /** Converts a 32-character hex notation string to a VST3 interface ID. */
+    static InterfaceId toInterfaceId (const String& interfaceIdString);
 };
 
 } // namespace juce

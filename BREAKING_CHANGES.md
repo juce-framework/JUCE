@@ -4,6 +4,23 @@
 
 ## Change
 
+Support for Arm32 in Projucer has been removed for Windows targets.
+
+**Possible Issues**
+
+Projucer projects targeting Arm32 on Windows will no longer be able to select that option.
+
+**Workaround**
+
+Select Arm64 or Arm64EC instead of Arm32, and port any 32-bit specific code to 64-bit.
+
+**Rationale**
+
+32-bit Arm support has been deprecated in current versions of Windows 11.
+
+
+## Change
+
 The Javascript implementation has been moved into a independent juce module.
 
 **Possible Issues**
@@ -18,6 +35,27 @@ Add the new juce_javascript module to the project.
 
 The Javascript implementation increases compilation times while being required
 by only a select number of projects.
+
+
+## Change
+
+The return type for VST3ClientExtensions::getCompatibleClasses() has changed
+from a String to an array of 16 bytes.
+
+**Possible Issues**
+
+Any inherited classes overriding this method might fail to compile.
+
+**Workaround**
+
+Either explicitly switch to creating a 16-byte std::array or use
+VST3ClientExtensions::toInterfaceId() to convert a string to a 16-byte array.
+
+**Rationale**
+
+As part of adding functionality to support migrating parameter IDs from
+compatible plugins it was useful to switch to a safer type for representing
+VST3 interface IDs that closer matches the VST3 SDK types.
 
 
 ## Change

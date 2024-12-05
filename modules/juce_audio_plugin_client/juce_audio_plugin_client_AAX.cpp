@@ -2466,6 +2466,9 @@ namespace AAXClasses
         properties->AddProperty (AAX_eProperty_InputStemFormat,     static_cast<AAX_CPropertyValue> (aaxInputFormat));
         properties->AddProperty (AAX_eProperty_OutputStemFormat,    static_cast<AAX_CPropertyValue> (aaxOutputFormat));
 
+        // If the plugin doesn't have an editor, ask the host to provide one
+        properties->AddProperty (AAX_eProperty_UsesClientGUI,       static_cast<AAX_CPropertyValue> (! processor.hasEditor()));
+
         const auto& extensions = processor.getAAXClientExtensions();
 
         // This value needs to match the RTAS wrapper's Type ID, so that
@@ -2546,30 +2549,6 @@ namespace AAXClasses
         check (desc.AddProcessProc_Native (algorithmProcessCallback, properties));
     }
 
-    static inline bool hostSupportsStemFormat (AAX_EStemFormat stemFormat, const AAX_IFeatureInfo* featureInfo)
-    {
-        if (featureInfo != nullptr)
-        {
-            AAX_ESupportLevel supportLevel;
-
-            if (featureInfo->SupportLevel (supportLevel) == AAX_SUCCESS && supportLevel == AAX_eSupportLevel_ByProperty)
-            {
-                std::unique_ptr<const AAX_IPropertyMap> props (featureInfo->AcquireProperties());
-
-                // Due to a bug in ProTools 12.8, ProTools thinks that AAX_eStemFormat_Ambi_1_ACN is not supported
-                // To workaround this bug, check if ProTools supports AAX_eStemFormat_Ambi_2_ACN, and, if yes,
-                // we can safely assume that it will also support AAX_eStemFormat_Ambi_1_ACN
-                if (stemFormat == AAX_eStemFormat_Ambi_1_ACN)
-                    stemFormat = AAX_eStemFormat_Ambi_2_ACN;
-
-                if (props != nullptr && props->GetProperty ((AAX_EProperty) stemFormat, (AAX_CPropertyValue*) &supportLevel) != 0)
-                    return (supportLevel == AAX_eSupportLevel_Supported);
-            }
-        }
-
-        return (AAX_STEM_FORMAT_INDEX (stemFormat) <= 12);
-    }
-
     static void getPlugInDescription (AAX_IEffectDescriptor& descriptor, [[maybe_unused]] const AAX_IFeatureInfo* featureInfo)
     {
         auto plugin = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
@@ -2628,19 +2607,15 @@ namespace AAXClasses
                     auto aaxOutFormat = numOuts > 0 ? aaxFormats[outIdx] : AAX_eStemFormat_None;
                     auto outLayout = channelSetFromStemFormat (aaxOutFormat, false);
 
-                    if (hostSupportsStemFormat (aaxInFormat, featureInfo)
-                        && hostSupportsStemFormat (aaxOutFormat, featureInfo))
+                    AudioProcessor::BusesLayout fullLayout;
+
+                    if (! JuceAAX_Processor::fullBusesLayoutFromMainLayout (*plugin, inLayout, outLayout, fullLayout))
+                        continue;
+
+                    if (auto* desc = descriptor.NewComponentDescriptor())
                     {
-                        AudioProcessor::BusesLayout fullLayout;
-
-                        if (! JuceAAX_Processor::fullBusesLayoutFromMainLayout (*plugin, inLayout, outLayout, fullLayout))
-                            continue;
-
-                        if (auto* desc = descriptor.NewComponentDescriptor())
-                        {
-                            createDescriptor (*desc, fullLayout, *plugin, pluginIds, numMeters);
-                            check (descriptor.AddComponent (desc));
-                        }
+                        createDescriptor (*desc, fullLayout, *plugin, pluginIds, numMeters);
+                        check (descriptor.AddComponent (desc));
                     }
                 }
             }
