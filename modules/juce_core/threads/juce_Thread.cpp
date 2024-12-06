@@ -123,7 +123,14 @@ void Thread::threadEntryPoint()
     // Once closeThreadHandle is called this class may be deleted by a different
     // thread, so we need to store deleteOnThreadEnd in a local variable.
     auto shouldDeleteThis = deleteOnThreadEnd;
-    closeThreadHandle();
+
+    // On Windows, CloseHandle must not race with another thread's
+    // WaitForSingleObject, as used in isThreadRunning(). deleteOnThreadEnd
+    // means no other thread holds this object, so it is safe to close here.
+   #if JUCE_WINDOWS
+    if (shouldDeleteThis)
+   #endif
+        closeThreadHandle();
 
     if (shouldDeleteThis)
         delete this;
@@ -148,13 +155,11 @@ bool Thread::startThreadInternal (Priority threadPriority)
     priority = threadPriority;
    #endif
 
-    if (createNativeThread (threadPriority))
-    {
-        startSuspensionEvent.signal();
-        return true;
-    }
+    if (! createNativeThread (threadPriority))
+        return false;
 
-    return false;
+    startSuspensionEvent.signal();
+    return true;
 }
 
 bool Thread::startThread()
@@ -166,35 +171,49 @@ bool Thread::startThread (Priority threadPriority)
 {
     const ScopedLock sl (startStopLock);
 
-    if (threadHandle == nullptr)
-    {
-        realtimeOptions.reset();
-        return startThreadInternal (threadPriority);
-    }
+    if (isThreadRunning())
+        return false;
 
-    return false;
+    realtimeOptions.reset();
+    return startThreadInternal (threadPriority);
 }
 
 bool Thread::startRealtimeThread (const RealtimeOptions& options)
 {
     const ScopedLock sl (startStopLock);
 
-    if (threadHandle == nullptr)
-    {
-        realtimeOptions = std::make_optional (options);
+    if (isThreadRunning())
+        return false;
 
-        if (startThreadInternal (Priority::normal))
-            return true;
+    realtimeOptions = std::make_optional (options);
 
-        realtimeOptions.reset();
-    }
+    if (startThreadInternal (Priority::normal))
+        return true;
 
+    realtimeOptions.reset();
     return false;
 }
 
 bool Thread::isThreadRunning() const
 {
+   #if JUCE_WINDOWS
+    if (threadHandle == nullptr)
+        return false;
+
+    // If this is the thread itself it must still be running. Avoid taking
+    // startStopLock here to avoid a deadlock while trying to stop the thread.
+    if (const auto id = getThreadId(); id != ThreadID() && id == getCurrentThreadId())
+        return true;
+
+    const ScopedLock sl (startStopLock);
+
+    // In the event WaitForSingleObject returns an error it's safest to assume
+    // the thread is still running.
+    return threadHandle != nullptr
+        && WaitForSingleObject (threadHandle, 0) != WAIT_OBJECT_0;
+   #else
     return threadHandle != nullptr;
+   #endif
 }
 
 Thread* JUCE_CALLTYPE Thread::getCurrentThread()
@@ -304,12 +323,13 @@ bool Thread::stopThread (Seconds timeOut)
             Logger::writeToLog ("!! killing thread by force !!");
 
             killThread();
-
-            threadHandle = nullptr;
-            threadId = {};
+            closeThreadHandle();
             return false;
         }
     }
+
+    if (threadHandle != nullptr)
+        closeThreadHandle();
 
     return true;
 }
