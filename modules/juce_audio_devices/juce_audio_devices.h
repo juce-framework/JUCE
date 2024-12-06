@@ -121,7 +121,7 @@
 #endif
 
 /** Config: JUCE_JACK
-    Enables JACK audio devices (Linux only).
+    Enables JACK audio devices.
 */
 #ifndef JUCE_JACK
  #define JUCE_JACK 0
