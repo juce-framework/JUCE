@@ -432,6 +432,112 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger() noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
+class ThreadTests final : public UnitTest
+{
+public:
+    ThreadTests()
+        : UnitTest ("Thread", UnitTestCategories::threads)
+    {}
+
+    void runTest() final
+    {
+        static constexpr Seconds maximumTimeout { 30.0 };
+
+        beginTest ("Start and stop a thread");
+        {
+            struct TestThread final : public Thread
+            {
+                TestThread() : Thread ("TestThread") {}
+
+                void run() final
+                {
+                    runMethodCalled.signal();
+                    wait (maximumTimeout);
+                }
+
+                WaitableEvent runMethodCalled;
+            };
+
+            TestThread thread;
+            expect (! thread.isThreadRunning());
+
+            expect (thread.startThread());
+            expect (thread.isThreadRunning());
+            expect (thread.runMethodCalled.wait (maximumTimeout));
+
+            expect (thread.isThreadRunning());
+            expect (thread.stopThread (maximumTimeout));
+            expect (! thread.isThreadRunning());
+        }
+
+        beginTest ("Notify a thread");
+        {
+            struct TestThread final : public Thread
+            {
+                TestThread() : Thread ("TestThread") {}
+                void run() final { wait (maximumTimeout); }
+            };
+
+            TestThread thread;
+            expect (thread.startThread());
+
+            thread.notify();
+            expect (thread.waitForThreadToExit (maximumTimeout));
+        }
+
+        beginTest ("Lambda thread");
+        {
+            WaitableEvent threadLaunched;
+
+            LambdaThread thread ([&] { threadLaunched.signal(); });
+            expect (! thread.isThreadRunning());
+
+            expect (thread.startThread());
+            expect (thread.isThreadRunning());
+            expect (threadLaunched.wait (maximumTimeout));
+
+            expect (thread.stopThread (maximumTimeout));
+            expect (! thread.isThreadRunning());
+        }
+
+        beginTest ("Launch a thread");
+        {
+            WaitableEvent threadLaunched;
+
+            Thread::launch ([&] { threadLaunched.signal(); });
+            expect (threadLaunched.wait (maximumTimeout));
+        }
+
+        beginTest ("A thread is not running once finished, without calling stopThread()");
+        {
+            struct TestThread final : public Thread
+            {
+                TestThread() : Thread ("TestThread") {}
+                void run() final { wait (maximumTimeout); }
+            };
+
+            TestThread thread;
+            expect (thread.startThread());
+
+            // We check this twice to check state isn't changing by observing
+            // the result
+            expect (thread.isThreadRunning());
+            expect (thread.isThreadRunning());
+
+            thread.notify();
+            expect (thread.waitForThreadToExit (maximumTimeout));
+
+            // We check this twice to check state isn't changing by observing
+            // the result
+            expect (! thread.isThreadRunning());
+            expect (! thread.isThreadRunning());
+        }
+    }
+};
+
+static ThreadTests threadTests;
+
+//==============================================================================
 class AtomicTests final : public UnitTest
 {
 public:
