@@ -81,6 +81,7 @@ private:
 };
 
 class Timer::TimerThread final : private Thread,
+                                 private Thread::Listener,
                                  private ShutdownDetector::Listener
 {
 public:
@@ -91,16 +92,14 @@ public:
     {
         timers.reserve (32);
         ShutdownDetector::addListener (this);
+        addListener (this);
     }
 
     ~TimerThread() override
     {
-        // If this is hit, a timer has outlived the platform event system.
-        jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
-
-        stopThreadAsync();
         ShutdownDetector::removeListener (this);
-        stopThread (-1);
+        stopThread();
+        removeListener (this);
     }
 
     void run() override
@@ -338,12 +337,11 @@ private:
     //==============================================================================
     void applicationShuttingDown() final
     {
-        stopThreadAsync();
+        stopThread();
     }
 
-    void stopThreadAsync()
+    void exitSignalSent() final
     {
-        signalThreadShouldExit();
         callbackArrived.signal();
     }
 
