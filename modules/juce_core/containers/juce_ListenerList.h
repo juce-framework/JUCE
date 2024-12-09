@@ -98,6 +98,18 @@ public:
             jassertfalse; // Listeners can't be null pointers!
     }
 
+    /** Adds a listener to the list.
+        A listener can only be added once, so if the listener is already in the list, this method
+        has no effect.
+
+        If a Listener is added during a callback, it is guaranteed not to be called in the same
+        iteration.
+
+        @see remove
+    */
+    void add (ListenerClass& listenerToAdd) { add (&listenerToAdd); }
+    void add (ListenerClass&&) = delete;
+
     /** Removes a listener from the list.
         If the listener wasn't in the list, this has no effect.
 
@@ -126,6 +138,15 @@ public:
         }
     }
 
+    /** Removes a listener from the list.
+        If the listener wasn't in the list, this has no effect.
+
+        If a Listener is removed during a callback, it is guaranteed not to be called if it hasn't
+        already been called.
+    */
+    void remove (ListenerClass& listenerToRemove) { remove (&listenerToRemove); }
+    void remove (ListenerClass&&) = delete;
+
     /** Adds a listener that will be automatically removed again when the Guard is destroyed.
 
         Be very careful to ensure that the ErasedScopeGuard is destroyed or released before the
@@ -137,6 +158,8 @@ public:
         add (&listenerToAdd);
         return ErasedScopeGuard { [this, &listenerToAdd] { remove (&listenerToAdd); } };
     }
+
+    ErasedScopeGuard addScoped (ListenerClass&&) = delete;
 
     /** Returns the number of registered listeners. */
     [[nodiscard]] int size() const noexcept                                { return ! initialised() ? 0 : data->listeners.size(); }
@@ -478,6 +501,17 @@ public:
             jassertfalse; // Listeners can't be null pointers!
     }
 
+    /** Adds a listener to the list.
+        A listener can only be added once, so if the listener is already in the list, this method
+        has no effect.
+
+        If you need to add a Listener during a callback, use the ListenerList type.
+
+        @see remove
+    */
+    void add (ListenerClass& listenerToAdd) { add (&listenerToAdd); }
+    void add (ListenerClass&&) = delete;
+
     /** Removes a listener from the list.
         If the listener wasn't in the list, this has no effect.
 
@@ -495,6 +529,14 @@ public:
         listeners.removeFirstMatchingValue (listenerToRemove);
     }
 
+    /** Removes a listener from the list.
+        If the listener wasn't in the list, this has no effect.
+
+        If you need to remove a Listener during a callback, use the ListenerList type.
+    */
+    void remove (ListenerClass& listenerToRemove) { remove (&listenerToRemove); }
+    void remove (ListenerClass&&) = delete;
+
     /** Adds a listener that will be automatically removed when the Guard is destroyed.
 
         Be very careful to ensure that the ErasedScopeGuard is destroyed or released before the
@@ -506,6 +548,8 @@ public:
         add (&listenerToAdd);
         return ErasedScopeGuard { [this, &listenerToAdd] { remove (&listenerToAdd); } };
     }
+
+    ErasedScopeGuard addScoped (ListenerClass&&) = delete;
 
     /** Returns the number of registered listeners. */
     [[nodiscard]] int size() const noexcept { return listeners.size(); }
