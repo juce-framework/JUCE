@@ -35,54 +35,9 @@
 namespace juce
 {
 
-class ShutdownDetector : private DeletedAtShutdown
-{
-public:
-    ShutdownDetector() = default;
-
-    ~ShutdownDetector() override
-    {
-        getListeners().call (&Listener::applicationShuttingDown);
-        clearSingletonInstance();
-    }
-
-    struct Listener
-    {
-        virtual ~Listener() = default;
-        virtual void applicationShuttingDown() = 0;
-    };
-
-    static void addListener (Listener* listenerToAdd)
-    {
-        // Only try to create an instance of the ShutdownDetector when a listener is added
-        [[maybe_unused]] auto* instance = getInstance();
-        getListeners().add (listenerToAdd);
-    }
-
-    static void removeListener (Listener* listenerToRemove)
-    {
-        getListeners().remove (listenerToRemove);
-    }
-
-private:
-    using ListenerListType = ThreadSafeListenerList<Listener>;
-
-    // By having a static ListenerList it can outlive the ShutdownDetector instance preventing
-    // issues for objects trying to remove themselves after the instance has been deleted
-    static ListenerListType& getListeners()
-    {
-        static ListenerListType listeners;
-        return listeners;
-    }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShutdownDetector)
-    JUCE_DECLARE_NON_MOVEABLE (ShutdownDetector)
-    JUCE_DECLARE_SINGLETON_INLINE (ShutdownDetector, false)
-};
-
 class Timer::TimerThread final : private Thread,
                                  private Thread::Listener,
-                                 private ShutdownDetector::Listener
+                                 private MessageManager::LifetimeListener
 {
 public:
     using LockType = CriticalSection;
@@ -91,13 +46,13 @@ public:
         : Thread (SystemStats::getJUCEVersion() + ": Timer")
     {
         timers.reserve (32);
-        ShutdownDetector::addListener (this);
         addListener (this);
+        MessageManager::addLifetimeListener (*this);
     }
 
     ~TimerThread() override
     {
-        ShutdownDetector::removeListener (this);
+        MessageManager::removeLifetimeListener (*this);
         stopThread();
         removeListener (this);
     }
@@ -350,7 +305,9 @@ private:
     }
 
     //==============================================================================
-    void applicationShuttingDown() final
+    void messageManagerStarting() final {}
+
+    void messageManagerStopping() final
     {
         stopThread();
     }

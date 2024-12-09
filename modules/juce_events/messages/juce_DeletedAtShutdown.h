@@ -39,12 +39,14 @@ namespace juce
 /**
     Classes derived from this will be automatically deleted when the application exits.
 
-    After JUCEApplicationBase::shutdown() has been called, any objects derived from
-    DeletedAtShutdown which are still in existence will be deleted in the reverse
-    order to that in which they were created.
+    When the MessageManager shuts down, lifetime listeners are notified first.
+    Any DeletedAtShutdown objects which are still in existence are then deleted
+    in the reverse order to that in which they were created.
 
     So if you've got a singleton and don't want to have to explicitly delete it, just
     inherit from this and it'll be taken care of.
+
+    @see MessageManager::LifetimeListener
 
     @tags{Events}
 */

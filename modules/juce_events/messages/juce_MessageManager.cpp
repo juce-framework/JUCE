@@ -46,12 +46,25 @@ MessageManager::MessageManager() noexcept
 
 MessageManager::~MessageManager() noexcept
 {
+    // Refuse new posts without calling stopDispatchLoop()
+    quitMessagePosted = true;
+
+    JUCE_TRY
+    {
+        notifyLifetimeStopping();
+    }
+    JUCE_CATCH_EXCEPTION
+
+    DeletedAtShutdown::deleteAll();
+
     broadcaster.reset();
 
     doPlatformSpecificShutdown();
 
     jassert (instance == this);
-    instance = nullptr;  // do this last in case this instance is still needed by doPlatformSpecificShutdown()
+
+    // do this last in case this instance is still needed by any shutdown code
+    instance = nullptr;
 }
 
 MessageManager* MessageManager::instance = nullptr;
@@ -62,6 +75,7 @@ MessageManager* MessageManager::getInstance()
     {
         instance = new MessageManager();
         doPlatformSpecificInitialisation();
+        notifyLifetimeStarting();
     }
 
     return instance;
@@ -75,6 +89,45 @@ MessageManager* MessageManager::getInstanceWithoutCreating() noexcept
 void MessageManager::deleteInstance()
 {
     deleteAndZero (instance);
+}
+
+namespace
+{
+    // Namespace-scope so this exists before any LifetimeListener is
+    // constructed and remains until after they are destroyed. Do not make
+    // this a function-local static because it would be destroyed before some
+    // listeners, and calling getLifetimeListeners() from their destructors
+    // would be undefined behaviour.
+    bool lifetimeListenersDeleted = false;
+}
+
+MessageManager::LifetimeListenerList* MessageManager::getLifetimeListeners()
+{
+    // Check before touching the function-local static: after Holder is
+    // destroyed, accessing it is undefined behaviour.
+    if (lifetimeListenersDeleted)
+        return nullptr;
+
+    struct Holder
+    {
+        ~Holder() { lifetimeListenersDeleted = true; }
+        LifetimeListenerList list;
+    };
+
+    static Holder holder;
+    return &holder.list;
+}
+
+void MessageManager::notifyLifetimeStarting()
+{
+    if (auto* list = getLifetimeListeners())
+        list->call (&LifetimeListener::messageManagerStarting);
+}
+
+void MessageManager::notifyLifetimeStopping()
+{
+    if (auto* list = getLifetimeListeners())
+        list->call (&LifetimeListener::messageManagerStopping);
 }
 
 //==============================================================================
@@ -454,6 +507,27 @@ void MessageManagerLock::exitSignalSent()
 }
 
 //==============================================================================
+// It's important that this is not marked constexpr, and that its definition
+// lives in the source file. This ensures that derived classes cannot have a
+// constexpr constructor, which in turn means they will be dynamically
+// initialised. Since lifetimeListenersDeleted is statically initialised and a
+// listener is dynamically initialised, the order in which they are created and
+// destroyed is guaranteed even between different translation units.
+MessageManager::LifetimeListener::LifetimeListener() = default;
+
+#if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
+MessageManager::LifetimeListener::~LifetimeListener()
+{
+    // removeLifetimeListener() must be called before or during the
+    // destructor of the derived class!
+    if (auto* list = getLifetimeListeners())
+        jassert (! list->contains (this));
+}
+#else
+MessageManager::LifetimeListener::~LifetimeListener() = default;
+#endif
+
+//==============================================================================
 JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
 {
     JUCE_AUTORELEASEPOOL
@@ -466,7 +540,6 @@ JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI()
 {
     JUCE_AUTORELEASEPOOL
     {
-        DeletedAtShutdown::deleteAll();
         MessageManager::deleteInstance();
     }
 }

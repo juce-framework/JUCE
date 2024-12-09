@@ -39,6 +39,7 @@ class MessageManagerLock;
 class ThreadPoolJob;
 class ActionListener;
 class ActionBroadcaster;
+class JUCEApplicationBase;
 
 //==============================================================================
 /** See MessageManager::callFunctionOnMessageThread() for use of this function type. */
@@ -69,9 +70,83 @@ public:
     static MessageManager* getInstanceWithoutCreating() noexcept;
 
     /** Deletes the global MessageManager instance.
-        Does nothing if no instance had been created.
+
+        Notifies lifetime listeners, deletes any remaining DeletedAtShutdown
+        objects, then destroys the manager. Does nothing if no instance had
+        been created.
     */
     static void deleteInstance();
+
+    //==============================================================================
+    /** Receives callbacks when a MessageManager is starting or stopping.
+
+        Listeners are process-lifetime: they remain registered across MessageManager
+        restart (for example a plugin reload). They are not unregistered automatically
+        when the manager is deleted.
+
+        If you register after the current manager has already been created you will
+        not receive messageManagerStarting() for that instance. Check
+        getInstanceWithoutCreating() in your constructor if you need to catch up.
+
+        @see addLifetimeListener, removeLifetimeListener
+    */
+    struct JUCE_API LifetimeListener
+    {
+        /** Default constructor */
+        LifetimeListener();
+
+        /** Destructor */
+        virtual ~LifetimeListener();
+
+        /** Called after a new MessageManager has been constructed and its platform
+            message queue is ready, and before the dispatch loop is pumping.
+
+            This runs on the message thread. Posted callbacks will not run until the
+            message loop starts (or the host pumps it). Do not wait for a posted
+            message here; the loop is not pumping yet so that would deadlock.
+        */
+        virtual void messageManagerStarting() = 0;
+
+        /** Called after the manager has stopped accepting new messages, and before
+            DeletedAtShutdown objects and the MessageManager itself are destroyed.
+
+            The MessageManager instance is still available. Do not post messages;
+            they will be discarded.
+        */
+        virtual void messageManagerStopping() = 0;
+
+        JUCE_DECLARE_NON_COPYABLE (LifetimeListener)
+        JUCE_DECLARE_NON_MOVEABLE (LifetimeListener)
+    };
+
+    /** Register a listener for MessageManager start and stop callbacks. */
+    static void addLifetimeListener (LifetimeListener& listenerToAdd)
+    {
+        if (auto* list = getLifetimeListeners())
+            list->add (listenerToAdd);
+        else
+            jassertfalse; // Adding a listener after the list has been destroyed
+    }
+
+    /** Unregister a listener added with addLifetimeListener(). */
+    static void removeLifetimeListener (LifetimeListener& listenerToRemove)
+    {
+        if (auto* list = getLifetimeListeners())
+            list->remove (listenerToRemove);
+    }
+
+    /** Register a listener that is removed when the returned object is destroyed.
+
+        The returned guard must not outlive listenerToAdd.
+    */
+    [[nodiscard]] static ErasedScopeGuard addScopedLifetimeListener (LifetimeListener& listenerToAdd)
+    {
+        addLifetimeListener (listenerToAdd);
+        return ErasedScopeGuard { [&listenerToAdd]
+        {
+            removeLifetimeListener (listenerToAdd);
+        } };
+    }
 
     //==============================================================================
     /** Runs the event dispatch loop until a stop message is posted.
@@ -430,6 +505,11 @@ private:
     static void* exitModalLoopCallback (void*);
     static void doPlatformSpecificInitialisation();
     static void doPlatformSpecificShutdown();
+
+    using LifetimeListenerList = ThreadSafeListenerList<LifetimeListener>;
+    static LifetimeListenerList* getLifetimeListeners();
+    static void notifyLifetimeStarting();
+    static void notifyLifetimeStopping();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageManager)
 };
