@@ -341,7 +341,7 @@ public:
             const auto d2d1Bitmap = [&]
             {
                 if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (fillType.image.getPixelData().get()))
-                    if (const auto page = direct2DPixelData->getFirstPageForContext (context))
+                    if (const auto page = direct2DPixelData->getFirstPageForDevice (D2DUtilities::getDeviceForContext (context)))
                         if (page->GetPixelFormat().format == DXGI_FORMAT_B8G8R8A8_UNORM)
                             return page;
 
@@ -1171,7 +1171,7 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
         ComSmartPtr<ID2D1Bitmap> d2d1Bitmap;
 
         if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (sourceImage.getPixelData().get()))
-            d2d1Bitmap = direct2DPixelData->getFirstPageForContext (deviceContext);
+            d2d1Bitmap = direct2DPixelData->getFirstPageForDevice (D2DUtilities::getDeviceForContext (deviceContext));
 
         if (! d2d1Bitmap)
         {
@@ -1481,7 +1481,7 @@ void Direct2DGraphicsContext::drawImage (const Image& imageIn, const AffineTrans
 
         auto drawTiles = [&] (const auto& pixelData, auto&& getRect)
         {
-            for (const auto& page : pixelData->getPagesForContext (deviceContext))
+            for (const auto& page : pixelData->getPagesForDevice (D2DUtilities::getDeviceForContext (deviceContext)))
             {
                 const auto pageBounds = page.getBounds();
                 const auto intersection = pageBounds.toFloat().getIntersection (imageClipArea.toFloat());

@@ -333,6 +333,16 @@ struct D2DUtilities
     {
         return { (int) s.width, (int) s.height };
     }
+
+    static ComSmartPtr<ID2D1Device1> getDeviceForContext (ComSmartPtr<ID2D1DeviceContext1> context)
+    {
+        if (context == nullptr)
+            return {};
+
+        ComSmartPtr<ID2D1Device> device;
+        context->GetDevice (device.resetAndGetPointerAddress());
+        return device.getInterface<ID2D1Device1>();
+    }
 };
 
 //==============================================================================

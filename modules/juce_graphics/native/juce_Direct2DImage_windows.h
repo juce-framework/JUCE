@@ -77,7 +77,7 @@ public:
         - mark the GPU images as up-to-date, or
         - clear the GPU images, then mark them as up-to-date
     */
-    Direct2DPixelDataPages (ComSmartPtr<ID2D1DeviceContext1>, ImagePixelData::Ptr, State);
+    Direct2DPixelDataPages (ComSmartPtr<ID2D1Device1>, ImagePixelData::Ptr, State);
 
     /*  Returns all pages included in this set.
         This will be called before reading from the pages (e.g. when drawing them).
@@ -132,7 +132,7 @@ public:
         This will immediately copy the content of the image to the software backup, so that the
         image can still be drawn if original device goes away.
     */
-    Direct2DPixelData (ComSmartPtr<ID2D1DeviceContext1>, ComSmartPtr<ID2D1Bitmap1>);
+    Direct2DPixelData (ComSmartPtr<ID2D1Device1>, ComSmartPtr<ID2D1Bitmap1>);
 
     /*  Creates software image storage of the requested size. */
     Direct2DPixelData (Image::PixelFormat, int, int, bool);
@@ -178,14 +178,14 @@ public:
         through the Direct2D API will have unpredictable results.
         If you want to render into this image using D2D, call createLowLevelContext.
     */
-    Span<const Page> getPagesForContext (ComSmartPtr<ID2D1DeviceContext1>);
+    Span<const Page> getPagesForDevice (ComSmartPtr<ID2D1Device1>);
 
     /*  Utility function that just returns a pointer to the bitmap for the first page returned from
         getPagesForContext.
     */
-    ComSmartPtr<ID2D1Bitmap1> getFirstPageForContext (ComSmartPtr<ID2D1DeviceContext1> context)
+    ComSmartPtr<ID2D1Bitmap1> getFirstPageForDevice (ComSmartPtr<ID2D1Device1> device)
     {
-        const auto pages = getPagesForContext (context);
+        const auto pages = getPagesForDevice (device);
         return ! pages.empty() ? pages.front().bitmap : nullptr;
     }
 
@@ -199,7 +199,7 @@ private:
     };
 
     Direct2DPixelData (ImagePixelData::Ptr, State);
-    auto getIteratorForContext (ComSmartPtr<ID2D1DeviceContext1>);
+    auto getIteratorForDevice (ComSmartPtr<ID2D1Device1>);
 
     void adapterCreated (DxgiAdapter::Ptr) override {}
     void adapterRemoved (DxgiAdapter::Ptr adapter) override

@@ -5277,7 +5277,7 @@ private:
 
         Image getImage() const
         {
-            return Image { new Direct2DPixelData { deviceContext, bitmap } };
+            return Image { new Direct2DPixelData { adapter->direct2DDevice, bitmap } };
         }
 
         ComSmartPtr<ID2D1Bitmap1> getBitmap() const
