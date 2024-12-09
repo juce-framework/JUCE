@@ -1779,7 +1779,10 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-common.cc">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-coretext.cc">
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-coretext-font.cc">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-coretext-shape.cc">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-directwrite.cc">

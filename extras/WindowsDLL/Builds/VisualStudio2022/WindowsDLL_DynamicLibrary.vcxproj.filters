@@ -2281,7 +2281,10 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-common.cc">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-coretext.cc">
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-coretext-font.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-coretext-shape.cc">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-directwrite.cc">

@@ -238,8 +238,8 @@ struct tuple_delta_t
   /* compiled data: header and deltas
    * compiled point data is saved in a hashmap within tuple_variations_t cause
    * some point sets might be reused by different tuple variations */
-  hb_vector_t<char> compiled_tuple_header;
-  hb_vector_t<char> compiled_deltas;
+  hb_vector_t<unsigned char> compiled_tuple_header;
+  hb_vector_t<unsigned char> compiled_deltas;
 
   /* compiled peak coords, empty for non-gvar tuples */
   hb_vector_t<char> compiled_peak_coords;
@@ -517,7 +517,7 @@ struct tuple_delta_t
   static bool compile_deltas (const hb_vector_t<bool> &point_indices,
 			      const hb_vector_t<double> &x_deltas,
 			      const hb_vector_t<double> &y_deltas,
-			      hb_vector_t<char> &compiled_deltas /* OUT */)
+			      hb_vector_t<unsigned char> &compiled_deltas /* OUT */)
   {
     hb_vector_t<int> rounded_deltas;
     if (unlikely (!rounded_deltas.alloc (point_indices.length)))
@@ -560,7 +560,7 @@ struct tuple_delta_t
     return compiled_deltas.resize (encoded_len);
   }
 
-  static unsigned compile_deltas (hb_array_t<char> encoded_bytes,
+  static unsigned compile_deltas (hb_array_t<unsigned char> encoded_bytes,
 				  hb_array_t<const int> deltas)
   {
     return TupleValues::compile (deltas, encoded_bytes);
@@ -705,20 +705,20 @@ struct tuple_delta_t
         opt_indices.arrayZ[i] = false;
     }
 
-    hb_vector_t<char> opt_point_data;
+    hb_vector_t<unsigned char> opt_point_data;
     if (!compile_point_set (opt_indices, opt_point_data))
       return false;
-    hb_vector_t<char> opt_deltas_data;
+    hb_vector_t<unsigned char> opt_deltas_data;
     if (!compile_deltas (opt_indices,
                          is_comp_glyph_wo_deltas ? opt_deltas_x : deltas_x,
                          is_comp_glyph_wo_deltas ? opt_deltas_y : deltas_y,
                          opt_deltas_data))
       return false;
 
-    hb_vector_t<char> point_data;
+    hb_vector_t<unsigned char> point_data;
     if (!compile_point_set (indices, point_data))
       return false;
-    hb_vector_t<char> deltas_data;
+    hb_vector_t<unsigned char> deltas_data;
     if (!compile_deltas (indices, deltas_x, deltas_y, deltas_data))
       return false;
 
@@ -740,7 +740,7 @@ struct tuple_delta_t
   }
 
   static bool compile_point_set (const hb_vector_t<bool> &point_indices,
-                                 hb_vector_t<char>& compiled_points /* OUT */)
+                                 hb_vector_t<unsigned char>& compiled_points /* OUT */)
   {
     unsigned num_points = 0;
     for (bool i : point_indices)
@@ -1134,7 +1134,7 @@ struct TupleVariationData
           continue;
         }
 
-        hb_vector_t<char> compiled_point_data;
+        hb_vector_t<unsigned char> compiled_point_data;
         if (!tuple_delta_t::compile_point_set (*points_set, compiled_point_data))
           return false;
 
@@ -1663,7 +1663,9 @@ struct item_variations_t
       }
     }
 
-    if (!all_regions || !all_unique_regions) return false;
+    /* regions are empty means no variation data, return true */
+    if (!all_regions || !all_unique_regions) return true;
+
     if (!region_list.alloc (all_regions.get_population ()))
       return false;
 
@@ -1728,7 +1730,8 @@ struct item_variations_t
 
   bool as_item_varstore (bool optimize=true, bool use_no_variation_idx=true)
   {
-    if (!region_list) return false;
+    /* return true if no variation data */
+    if (!region_list) return true;
     unsigned num_cols = region_list.length;
     /* pre-alloc a 2D vector for all sub_table's VarData rows */
     unsigned total_rows = 0;
