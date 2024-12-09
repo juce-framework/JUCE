@@ -112,20 +112,25 @@ void OpenGLTexture::create (const int w, const int h, const void* pixels, GLenum
 template <class PixelType>
 struct Flipper
 {
-    static void flip (HeapBlock<PixelARGB>& dataCopy, const uint8* srcData, const int lineStride,
-                      const int w, const int h)
+    static void flip (HeapBlock<PixelARGB>& dataCopy,
+                      const uint8* srcData,
+                      const int lineStride,
+                      const int pixelStride,
+                      const int w,
+                      const int h)
     {
         dataCopy.malloc (w * h);
 
         for (int y = 0; y < h; ++y)
         {
-            auto* src = (const PixelType*) srcData;
-            auto* dst = (PixelARGB*) (dataCopy + w * (h - 1 - y));
+            auto* srcLine = srcData + lineStride * y;
+            auto* dstLine = dataCopy.get() + w * (h - 1 - y);
 
             for (int x = 0; x < w; ++x)
-                dst[x].set (src[x]);
-
-            srcData += lineStride;
+            {
+                auto* srcPixel = srcLine + x * pixelStride;
+                dstLine[x].set (*unalignedPointerCast<const PixelType*> (srcPixel));
+            }
         }
     }
 };
@@ -140,9 +145,9 @@ void OpenGLTexture::loadImage (const Image& image)
 
     switch (srcData.pixelFormat)
     {
-        case Image::ARGB:           Flipper<PixelARGB> ::flip (dataCopy, srcData.data, srcData.lineStride, imageW, imageH); break;
-        case Image::RGB:            Flipper<PixelRGB>  ::flip (dataCopy, srcData.data, srcData.lineStride, imageW, imageH); break;
-        case Image::SingleChannel:  Flipper<PixelAlpha>::flip (dataCopy, srcData.data, srcData.lineStride, imageW, imageH); break;
+        case Image::ARGB:           Flipper<PixelARGB> ::flip (dataCopy, srcData.data, srcData.lineStride, srcData.pixelStride, imageW, imageH); break;
+        case Image::RGB:            Flipper<PixelRGB>  ::flip (dataCopy, srcData.data, srcData.lineStride, srcData.pixelStride, imageW, imageH); break;
+        case Image::SingleChannel:  Flipper<PixelAlpha>::flip (dataCopy, srcData.data, srcData.lineStride, srcData.pixelStride, imageW, imageH); break;
         case Image::UnknownFormat:
         default: break;
     }
@@ -163,7 +168,7 @@ void OpenGLTexture::loadAlpha (const uint8* pixels, int w, int h)
 void OpenGLTexture::loadARGBFlipped (const PixelARGB* pixels, int w, int h)
 {
     HeapBlock<PixelARGB> flippedCopy;
-    Flipper<PixelARGB>::flip (flippedCopy, (const uint8*) pixels, 4 * w, w, h);
+    Flipper<PixelARGB>::flip (flippedCopy, (const uint8*) pixels, 4 * w, 4, w, h);
 
     create (w, h, flippedCopy, JUCE_RGBA_FORMAT, true);
 }
