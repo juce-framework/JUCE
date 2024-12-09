@@ -127,15 +127,14 @@ public:
                 {
                     messageToSend->post();
 
-                    if (! callbackArrived.wait (300))
-                    {
-                        // Sometimes our message can get discarded by the OS (e.g. when running as an RTAS
-                        // when the app has a modal loop), so this is how long to wait before assuming the
-                        // message has been lost and trying again.
-                        messageToSend->post();
-                    }
+                    // Sometimes our message can get discarded by the OS (e.g.
+                    // when running as an RTAS when the app has a modal loop),
+                    // so this is how long to wait before assuming the message
+                    // has been lost and trying again.
+                    if (callbackArrived.wait (300) || threadShouldExit())
+                        continue;
 
-                    continue;
+                    messageToSend->post();
                 }
             }
 
