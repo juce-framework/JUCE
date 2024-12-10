@@ -505,7 +505,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\juce_DirectSound_windows.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\juce_JackAudio_linux.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\juce_JackAudio.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\juce_Midi_android.cpp">
