@@ -1,69 +1,9 @@
-._*
-*.mode1v3
-*.pbxuser
-*.perspectivev3
-*.user
-*.ncb
-*.suo
-*.ilk
-*.pch
-*.pdb
-*.dep
-*.idb
-*.manifest
-*.manifest.res
-*.o
-*.d
-*.sdf
-*.opensdf
-*.VC.db
-*.VC.opendb
-xcuserdata
-*.xccheckout
-*.xcscmblueprint
-*.xcscheme
-contents.xcworkspacedata
-.DS_Store
-.svn
-.deps
-.dirstamp
-profile
-**/MacOSX/build
-**/iOS/build
-**/IDEWorkspaceChecks.plist
-**/Linux/build
-**/LinuxMakefile/build
-**/VisualStudio[0-9]*/Win32
-**/VisualStudio[0-9]*/x64
-**/Builds/x64
-**/.vs
-**/CodeBlocks/bin
-**/CodeBlocks/obj
-**/CodeBlocks/*.depend
-**/CodeBlocks/*.layout
-**/Builds/Android/.gradle
-**/Builds/Android/.idea
-**/Builds/Android/build
-**/Builds/Android/**/*.iml
-**/Builds/Android/local.properties
-**/Builds/Android/app/build
-**/Builds/Android/app/.externalNativeBuild
-**/Builds/Android/app/.cxx
-**/Builds/Android/lib/build
-**/Builds/Android/lib/.externalNativeBuild
-**/Builds/MacOSX/**/Index
-**/Builds/MacOSX/**/Intermediates.noindex
-**/doxygen/doc
-**/doxygen/build
-**/.idea
-extras/Projucer/JUCECompileEngine.dylib
+# Ignorar la carpeta de compilación y sus archivos generados
+Builds/
 
-.idea
-**/cmake-build*
+# Ignorar la carpeta de código generado por JUCE
+JuceLibraryCode/
 
-.vscode
-/build
-
-CMakeUserPresets.json
-.editorconfig
+# Ignorar archivos específicos de Mac
+**/.DS_Store
 
