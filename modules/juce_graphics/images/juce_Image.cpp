@@ -550,15 +550,8 @@ struct PixelIterator
     static void iterate (const Image::BitmapData& data, const PixelOperation& pixelOp)
     {
         for (int y = 0; y < data.height; ++y)
-        {
-            auto p = data.getLinePointer (y);
-
             for (int x = 0; x < data.width; ++x)
-            {
-                pixelOp (*reinterpret_cast<PixelType*> (p));
-                p += data.pixelStride;
-            }
-        }
+                pixelOp (*reinterpret_cast<PixelType*> (data.getPixelPointer (x, y)));
     }
 };
 
@@ -575,40 +568,20 @@ static void performPixelOp (const Image::BitmapData& data, const PixelOperation&
     }
 }
 
-struct AlphaMultiplyOp
-{
-    float alpha;
-
-    template <class PixelType>
-    void operator() (PixelType& pixel) const
-    {
-        pixel.multiplyAlpha (alpha);
-    }
-};
-
 void Image::multiplyAllAlphas (float amountToMultiplyBy)
 {
     jassert (hasAlphaChannel());
 
     const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), BitmapData::readWrite);
-    performPixelOp (destData, AlphaMultiplyOp { amountToMultiplyBy });
+    performPixelOp (destData, [&] (auto& p) { p.multiplyAlpha (amountToMultiplyBy); });
 }
-
-struct DesaturateOp
-{
-    template <class PixelType>
-    void operator() (PixelType& pixel) const
-    {
-        pixel.desaturate();
-    }
-};
 
 void Image::desaturate()
 {
     if (isARGB() || isRGB())
     {
         const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), BitmapData::readWrite);
-        performPixelOp (destData, DesaturateOp());
+        performPixelOp (destData, [] (auto& p) { p.desaturate(); });
     }
 }
 
