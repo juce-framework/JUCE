@@ -108,11 +108,6 @@ public:
 
     Direct2DMetrics::Ptr metrics;
 
-    //==============================================================================
-    // Min & max frame sizes; same as Direct3D texture size limits
-    static int constexpr minFrameSize = 1;
-    static int constexpr maxFrameSize = 16384;
-
 protected:
     struct SavedState;
     SavedState* currentState = nullptr;

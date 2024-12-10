@@ -432,8 +432,11 @@ public:
         if (chain == nullptr)
             return E_FAIL;
 
-        auto scaledSize = newSize.getUnion ({ Direct2DGraphicsContext::minFrameSize, Direct2DGraphicsContext::minFrameSize })
-                                 .getIntersection ({ Direct2DGraphicsContext::maxFrameSize, Direct2DGraphicsContext::maxFrameSize });
+        constexpr auto minFrameSize = 1;
+        constexpr auto maxFrameSize = 16384;
+
+        auto scaledSize = newSize.getUnion ({ minFrameSize, minFrameSize })
+                                 .getIntersection ({ maxFrameSize, maxFrameSize });
 
         buffer = nullptr;
 
