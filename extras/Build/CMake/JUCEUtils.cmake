@@ -877,6 +877,8 @@ function(_juce_create_windows_package source_target dest_target extension defaul
         set(desktop_ini "${output_folder}/desktop.ini")
         set(plugin_ico "${output_folder}/Plugin.ico")
 
+        target_sources(${dest_target} PRIVATE "${desktop_ini}" "${icon_file}")
+
         file(GENERATE OUTPUT "${desktop_ini}"
             CONTENT
             "[.ShellClassInfo]\nIconResource=Plugin.ico,0\nIconFile=Plugin.ico\nIconIndex=0\n")
@@ -884,7 +886,6 @@ function(_juce_create_windows_package source_target dest_target extension defaul
             COMMAND "${CMAKE_COMMAND}" -E copy "${icon_file}" "${plugin_ico}"
             COMMAND attrib +s "${desktop_ini}"
             COMMAND attrib +s "${output_folder}"
-            DEPENDS "${icon_file}" "${desktop_ini}"
             VERBATIM)
     endif()
 endfunction()
@@ -1309,9 +1310,9 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
             _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_UNITY_COPY_DIR)
         else()
             # On windows and linux, the gui script needs to be copied next to the unity output
+            target_sources(${target_name} PRIVATE "${script_file}")
             add_custom_command(TARGET ${target_name} POST_BUILD
                 COMMAND "${CMAKE_COMMAND}" -E copy "${script_file}" "${products_folder}"
-                DEPENDS "${script_file}"
                 VERBATIM)
 
             _juce_set_copy_properties(${shared_code_target}
