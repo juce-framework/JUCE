@@ -65,27 +65,6 @@ struct PluginUtilities
         static PluginHostType hostType;
         return hostType;
     }
-
-   #if JucePlugin_Build_VST
-     static bool handleManufacturerSpecificVST2Opcode ([[maybe_unused]] int32 index,
-                                                       [[maybe_unused]] pointer_sized_int value,
-                                                       [[maybe_unused]] void* ptr,
-                                                       float)
-    {
-       #if JUCE_VST3_CAN_REPLACE_VST2
-        if ((index == (int32) ByteOrder::bigEndianInt ("stCA") || index == (int32) ByteOrder::bigEndianInt ("stCa"))
-            && value == (int32) ByteOrder::bigEndianInt ("FUID") && ptr != nullptr)
-        {
-            const auto uidString = VST3ClientExtensions::convertVST2PluginId (JucePlugin_VSTUniqueID, JucePlugin_Name, VST3ClientExtensions::InterfaceType::component);
-            MemoryBlock uidValue;
-            uidValue.loadFromHexString (uidString);
-            uidValue.copyTo (ptr, 0, uidValue.getSize());
-            return true;
-        }
-       #endif
-        return false;
-    }
-   #endif
 };
 
 } // namespace juce::detail

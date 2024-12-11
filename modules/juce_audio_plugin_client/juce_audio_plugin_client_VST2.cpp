@@ -1798,10 +1798,34 @@ private:
         return convertHexVersionToDecimal (JucePlugin_VersionCode);
     }
 
+    static std::optional<pointer_sized_int> handleVST3Compatibility ([[maybe_unused]] VstOpCodeArguments args)
+    {
+       #if ! JUCE_VST3_CAN_REPLACE_VST2
+        return {};
+       #else
+        if (args.index != (int32) ByteOrder::bigEndianInt ("stCA")
+            && args.index != (int32) ByteOrder::bigEndianInt ("stCa"))
+            return {};
+
+        if (args.value != (int32) ByteOrder::bigEndianInt ("FUID"))
+            return {};
+
+        if (args.ptr == nullptr)
+            return 0;
+
+        const auto uid = VST3ClientExtensions::convertVST2PluginId (JucePlugin_VSTUniqueID, JucePlugin_Name, VST3ClientExtensions::InterfaceType::component);
+        const auto uidString = String ((const char *) uid.data(), uid.size());
+        MemoryBlock uidValue;
+        uidValue.loadFromHexString (uidString);
+        uidValue.copyTo (args.ptr, 0, uidValue.getSize());
+        return 1;
+       #endif
+    }
+
     pointer_sized_int handleManufacturerSpecific (VstOpCodeArguments args)
     {
-        if (detail::PluginUtilities::handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt))
-            return 1;
+        if (const auto result = handleVST3Compatibility (args))
+            return *result;
 
         if (args.index == (int32) ByteOrder::bigEndianInt ("PreS")
              && args.value == (int32) ByteOrder::bigEndianInt ("AeCs"))
