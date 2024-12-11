@@ -90,8 +90,6 @@ struct HeaderItemComponent final : public PopupMenu::CustomComponent
                                                                idealWidth,
                                                                idealHeight,
                                                                options);
-        idealHeight += idealHeight / 2;
-        idealWidth += idealWidth / 4;
     }
 
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override

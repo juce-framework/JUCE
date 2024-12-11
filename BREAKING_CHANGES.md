@@ -5,6 +5,31 @@
 
 ## Change
 
+HeaderItemComponent::getIdealSize no longer applies modifiers to the result
+directly. Instead, these changes have been moved to the respective LookAndFeel
+methods, enabling better customization.
+
+**Possible Issues**
+
+Code that overrides LookAndFeel::getIdealPopupMenuItemSize and relied on the
+previous modifiers applied in HeaderItemComponent::getIdealSize may now behave
+differently.
+
+**Workaround**
+
+Review any overrides of LookAndFeel::getIdealPopupMenuItemSize and apply the
+necessary adjustments to account for any missing modifiers or changes in
+behavior.
+
+**Rationale**
+
+The previous approach did not allow users to customize the applied modifiers
+through the LookAndFeel class. Moving this logic to LookAndFeel methods ensures
+consistent and flexible customization.
+
+
+## Change
+
 The behavior of AudioTransportSource::hasStreamFinished has been updated to
 correctly return true when the stream has finished.
 
