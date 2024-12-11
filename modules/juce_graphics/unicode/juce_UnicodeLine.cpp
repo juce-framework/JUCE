@@ -70,7 +70,11 @@ public:
             // LB3
             if (isEOT)
             {
-                emit (TextBreakType::soft);
+                if (contains ({ LineBreakType::cr, LineBreakType::lf, LineBreakType::nl }, prev))
+                    emit (TextBreakType::hard);
+                else
+                    emit (TextBreakType::soft);
+
                 break;
             }
 
