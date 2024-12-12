@@ -35,14 +35,155 @@
 namespace juce
 {
 
-struct BitmapDataDetail
+namespace BitmapDataDetail
 {
-    BitmapDataDetail() = delete;
+    template <auto T>
+    using FormatConstant = std::integral_constant<decltype (T), T>;
+
+    using ARGB = FormatConstant<Image::PixelFormat::ARGB>;
+    using RGB  = FormatConstant<Image::PixelFormat::RGB>;
+    using A    = FormatConstant<Image::PixelFormat::SingleChannel>;
+
+    static Colour getPixelColour (const uint8* pixel, A)
+    {
+        return Colour (*((const PixelAlpha*) pixel));
+    }
+
+    static Colour getPixelColour (const uint8* pixel, RGB)
+    {
+        return Colour (*((const PixelRGB*) pixel));
+    }
+
+    static Colour getPixelColour (const uint8* pixel, ARGB)
+    {
+        return Colour (((const PixelARGB*) pixel)->getUnpremultiplied());
+    }
+
+    static void setPixelColour (uint8* pixel, PixelARGB col, A)
+    {
+        ((PixelAlpha*) pixel)->set (col);
+    }
+
+    static void setPixelColour (uint8* pixel, PixelARGB col, RGB)
+    {
+        ((PixelRGB*) pixel)->set (col);
+    }
+
+    static void setPixelColour (uint8* pixel, PixelARGB col, ARGB)
+    {
+        ((PixelARGB*) pixel)->set (col);
+    }
+
+    using ConverterFn = void (*) (const Image::BitmapData& src, const Image::BitmapData& dst, int w, int h);
+
+    template <typename From, typename To>
+    static constexpr ConverterFn makeConverterFn (From, To)
+    {
+        struct GetPixel
+        {
+            explicit GetPixel (const Image::BitmapData& bd)
+                : data (bd.data),
+                  lineStride ((size_t) bd.lineStride),
+                  pixelStride ((size_t) bd.pixelStride) {}
+
+            uint8* operator() (int x, int y) const
+            {
+                return data + (size_t) y * (size_t) lineStride + (size_t) x * (size_t) pixelStride;
+            }
+
+            uint8* data;
+            size_t lineStride, pixelStride;
+        };
+
+        return [] (const Image::BitmapData& src, const Image::BitmapData& dst, int w, int h)
+        {
+            const GetPixel getSrc { src }, getDst { dst };
+
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    const auto srcColour = getPixelColour (getSrc (x, y), From{});
+                    setPixelColour (getDst (x, y), srcColour.getPixelARGB(), To{});
+                }
+            }
+        };
+    }
+
+    template <typename From, typename... To>
+    static constexpr auto makeConverterFns (From from, To... to)
+    {
+        return std::array<ConverterFn, sizeof... (To)> { makeConverterFn (from, to)... };
+    }
+
+    /** This structure holds a 2D array of function pointers.
+        The structure is indexed by source format and destination format, where the function
+        at that index will convert an entire BitmapData array between those two formats.
+
+        This approach is designed to avoid branching, especially switch statements, from
+        the inner loop of the conversion. At time of writing, compilers cannot automatically
+        vectorise loops containing switch statements. Therefore, it's often faster to move
+        switches or table lookups outside tight loops.
+
+        This is the old, slow approach:
+
+        @code
+            for (int y = 0; y < dest.height; ++y)
+                for (int x = 0; x < dest.width; ++x)
+                    dest.setPixelColour (x, y, src.getPixelColour (x, y));
+        @endcode
+
+        This is a faster way to write the same thing:
+
+        @code
+            if (const auto* converter = converterFnTable.getConverterFor (src.pixelFormat, dest.pixelFormat))
+                converter (src, dest, dest.width, dest.height);
+        @endcode
+    */
+    template <typename... Formats>
+    class ConverterFnTable
+    {
+    public:
+        constexpr ConverterFn getConverterFor (Image::PixelFormat src, Image::PixelFormat dst) const
+        {
+            const auto srcIndex = toIndex (src, Formats{}...);
+            const auto dstIndex = toIndex (dst, Formats{}...);
+
+            if (srcIndex >= sizeof... (Formats) || dstIndex >= sizeof... (Formats))
+                return nullptr;
+
+            return table[srcIndex][dstIndex];
+        }
+
+    private:
+        static size_t toIndex (Image::PixelFormat)
+        {
+            return 0;
+        }
+
+        template <typename Head, typename... Tail>
+        static size_t toIndex (Image::PixelFormat src, Head head, Tail... tail)
+        {
+            return src == head() ? 0 : 1 + toIndex (src, tail...);
+        }
+
+        std::array<std::array<ConverterFn, sizeof... (Formats)>, sizeof... (Formats)> table
+        {
+            makeConverterFns (Formats{}, Formats{}...)...
+        };
+    };
+
+    static constexpr auto isConvertible (Image::PixelFormat p)
+    {
+        return p == Image::SingleChannel || p == Image::RGB || p == Image::ARGB;
+    }
 
     static void convert (const Image::BitmapData& src, Image::BitmapData& dest)
     {
         jassert (src.width == dest.width);
         jassert (src.height == dest.height);
+
+        static constexpr auto converterFnTable = ConverterFnTable<RGB, ARGB, A>{};
 
         if (src.pixelStride == dest.pixelStride && src.pixelFormat == dest.pixelFormat)
         {
@@ -51,9 +192,8 @@ struct BitmapDataDetail
         }
         else
         {
-            for (int y = 0; y < dest.height; ++y)
-                for (int x = 0; x < dest.width; ++x)
-                    dest.setPixelColour (x, y, src.getPixelColour (x, y));
+            if (auto* converter = converterFnTable.getConverterFor (src.pixelFormat, dest.pixelFormat))
+                converter (src, dest, dest.width, dest.height);
         }
     }
 
@@ -68,7 +208,7 @@ struct BitmapDataDetail
 
         return result;
     }
-};
+}
 
 class SubsectionPixelData : public ImagePixelData
 {
@@ -464,17 +604,15 @@ Image::BitmapData::~BitmapData()
 
 Colour Image::BitmapData::getPixelColour (int x, int y) const noexcept
 {
-    jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
-
-    auto pixel = getPixelPointer (x, y);
+    auto* pixel = getPixelPointer (x, y);
 
     switch (pixelFormat)
     {
-        case Image::ARGB:           return Colour ( ((const PixelARGB*)  pixel)->getUnpremultiplied());
-        case Image::RGB:            return Colour (*((const PixelRGB*)   pixel));
-        case Image::SingleChannel:  return Colour (*((const PixelAlpha*) pixel));
-        case Image::UnknownFormat:
-        default:                    jassertfalse; break;
+        case ARGB:           return BitmapDataDetail::getPixelColour (pixel, BitmapDataDetail::ARGB{});
+        case RGB:            return BitmapDataDetail::getPixelColour (pixel, BitmapDataDetail::RGB{});
+        case SingleChannel:  return BitmapDataDetail::getPixelColour (pixel, BitmapDataDetail::A{});
+        case UnknownFormat:
+        default:             jassertfalse; break;
     }
 
     return {};
@@ -482,18 +620,16 @@ Colour Image::BitmapData::getPixelColour (int x, int y) const noexcept
 
 void Image::BitmapData::setPixelColour (int x, int y, Colour colour) const noexcept
 {
-    jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
-
-    auto pixel = getPixelPointer (x, y);
+    auto* pixel = getPixelPointer (x, y);
     auto col = colour.getPixelARGB();
 
     switch (pixelFormat)
     {
-        case Image::ARGB:           ((PixelARGB*)  pixel)->set (col); break;
-        case Image::RGB:            ((PixelRGB*)   pixel)->set (col); break;
-        case Image::SingleChannel:  ((PixelAlpha*) pixel)->set (col); break;
-        case Image::UnknownFormat:
-        default:                    jassertfalse; break;
+        case ARGB:           return BitmapDataDetail::setPixelColour (pixel, col, BitmapDataDetail::ARGB{});
+        case RGB:            return BitmapDataDetail::setPixelColour (pixel, col, BitmapDataDetail::RGB{});
+        case SingleChannel:  return BitmapDataDetail::setPixelColour (pixel, col, BitmapDataDetail::A{});
+        case UnknownFormat:
+        default:             jassertfalse; break;
     }
 }
 
