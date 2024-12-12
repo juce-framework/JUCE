@@ -192,18 +192,18 @@ private:
 
             if ((flags & FileBrowserComponent::canSelectDirectories) != 0)
             {
-                if (NSUniquePtr<UTType> ptr {[UTType typeWithIdentifier: @"public.folder"]})
-                    [types.get() addObject: ptr.get()];
+                if (auto* ptr = [UTType typeWithIdentifier: @"public.folder"])
+                    [types.get() addObject: ptr];
             }
             else
             {
                 if (validExtensions.isEmpty())
-                    if (NSUniquePtr<UTType> ptr {[UTType typeWithIdentifier: @"public.data"]})
-                        [types.get() addObject: ptr.get()];
+                    if (auto* ptr = [UTType typeWithIdentifier: @"public.data"])
+                        [types.get() addObject: ptr];
 
                 for (const auto& extension : validExtensions)
-                    if (NSUniquePtr<UTType> ptr {[UTType typeWithFilenameExtension: juceStringToNS (extension)]})
-                        [types.get() addObject: ptr.get()];
+                    if (auto* ptr = [UTType typeWithFilenameExtension: juceStringToNS (extension)])
+                        [types.get() addObject: ptr];
             }
 
             return [[FileChooserControllerClass alloc] initForOpeningContentTypes: types.get()];
