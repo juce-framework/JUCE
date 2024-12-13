@@ -1335,6 +1335,18 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
 
     int pluginCanDo (const char* text) const  { return (int) dispatch (Vst2::effCanDo, 0, 0, (void*) text,  0); }
 
+    std::optional<String> getNameForMidiNoteNumber (int note, int midiChannel) override
+    {
+        Vst2::MidiKeyName keyName{};
+
+        keyName.thisProgramIndex = getCurrentProgram();
+        keyName.thisKeyNumber = note;
+
+        return dispatch (Vst2::effGetMidiKeyName, midiChannel, 0, &keyName, 0.0f) != 0
+             ? std::make_optional (String::createStringFromData (keyName.keyName, Vst2::kVstMaxNameLen))
+             : std::nullopt;
+    }
+
     //==============================================================================
     void prepareToPlay (double rate, int samplesPerBlockExpected) override
     {

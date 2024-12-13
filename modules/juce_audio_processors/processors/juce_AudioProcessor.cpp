@@ -950,6 +950,11 @@ void AudioProcessor::copyXmlToBinary (const XmlElement& xml, juce::MemoryBlock& 
         = ByteOrder::swapIfBigEndian ((uint32) destData.getSize() - 9);
 }
 
+std::optional<String> AudioProcessor::getNameForMidiNoteNumber (int /*note*/, int /*midiChannel*/)
+{
+    return std::nullopt;
+}
+
 std::unique_ptr<XmlElement> AudioProcessor::getXmlFromBinary (const void* data, const int sizeInBytes)
 {
     if (sizeInBytes > 8 && ByteOrder::littleEndianInt (data) == magicXmlNumber)

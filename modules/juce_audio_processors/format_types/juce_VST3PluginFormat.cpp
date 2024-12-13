@@ -3090,6 +3090,22 @@ public:
         return result;
     }
 
+    std::optional<String> getNameForMidiNoteNumber (int note, int /*midiChannel*/) override
+    {
+        if (unitInfo == nullptr || unitInfo->getProgramListCount() == 0)
+            return std::nullopt;
+
+        Vst::String128 name{};
+        Vst::ProgramListInfo programListInfo{};
+
+        const auto nameOk = unitInfo->getProgramListInfo (0, programListInfo)      == kResultOk
+                         && unitInfo->hasProgramPitchNames (programListInfo.id, 0) == kResultTrue
+                         && unitInfo->getProgramPitchName (programListInfo.id, 0, (Steinberg::int16) note, name) == kResultOk;
+
+        return nameOk ? std::make_optional (toString (name))
+                      : std::nullopt;
+    }
+
     //==============================================================================
     void updateTrackProperties (const TrackProperties& properties) override
     {

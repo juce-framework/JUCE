@@ -525,9 +525,27 @@ public:
         return kResultFalse;
     }
 
+    tresult PLUGIN_API hasProgramPitchNames (Vst::ProgramListID, Steinberg::int32) override
+    {
+        for (int i = 0; i <= 127; ++i)
+            if (audioProcessor->getNameForMidiNoteNumber (i, 1))
+                return kResultTrue;
+
+        return kResultFalse;
+    }
+
+    tresult PLUGIN_API getProgramPitchName (Vst::ProgramListID, Steinberg::int32, Steinberg::int16 midiNote, Vst::String128 nameOut) override
+    {
+        if (auto name = audioProcessor->getNameForMidiNoteNumber (midiNote, 1))
+        {
+            toString128 (nameOut, *name);
+            return kResultTrue;
+        }
+
+        return kResultFalse;
+    }
+
     tresult PLUGIN_API getProgramInfo (Vst::ProgramListID, Steinberg::int32, Vst::CString, Vst::String128) override             { return kNotImplemented; }
-    tresult PLUGIN_API hasProgramPitchNames (Vst::ProgramListID, Steinberg::int32) override                                     { return kNotImplemented; }
-    tresult PLUGIN_API getProgramPitchName (Vst::ProgramListID, Steinberg::int32, Steinberg::int16, Vst::String128) override    { return kNotImplemented; }
     tresult PLUGIN_API selectUnit (Vst::UnitID) override                                                                        { return kNotImplemented; }
     tresult PLUGIN_API setUnitProgramData (Steinberg::int32, Steinberg::int32, IBStream*) override                              { return kNotImplemented; }
     Vst::UnitID PLUGIN_API getSelectedUnit() override                                                                           { return Vst::kRootUnitId; }

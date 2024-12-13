@@ -918,6 +918,7 @@ public:
             case Vst2::effSetProcessPrecision:      return handleSetSampleFloatType (args);
             case Vst2::effGetNumMidiInputChannels:  return handleGetNumMidiInputChannels();
             case Vst2::effGetNumMidiOutputChannels: return handleGetNumMidiOutputChannels();
+            case Vst2::effGetMidiKeyName:           return handleGetMidiKeyName (args);
             case Vst2::effEditIdle:                 return handleEditIdle();
             default:                                return 0;
         }
@@ -2044,6 +2045,22 @@ private:
            #else
             return 16;
            #endif
+        }
+
+        return 0;
+    }
+
+    pointer_sized_int handleGetMidiKeyName (VstOpCodeArguments args)
+    {
+        if (processor != nullptr)
+        {
+            auto keyName = (Vst2::MidiKeyName*) args.ptr;
+
+            if (auto name = processor->getNameForMidiNoteNumber (keyName->thisKeyNumber, args.index))
+            {
+                name->copyToUTF8 (keyName->keyName, Vst2::kVstMaxNameLen);
+                return 1;
+            }
         }
 
         return 0;

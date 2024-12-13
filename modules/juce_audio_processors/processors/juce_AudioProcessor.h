@@ -1327,6 +1327,21 @@ public:
     */
     virtual void updateTrackProperties (const TrackProperties& properties);
 
+    /** Returns a custom name for a MIDI note number.
+
+        This method allows the host to query your plugin for a custom name to display
+        for a given MIDI note number. It's useful for plugins that work with drum kits,
+        microtonal scales, or other mappings.
+
+        @param note         The MIDI note number for which the name is being requested.
+                            This is an integer in the range [0, 127], representing the
+                            full MIDI note range.
+        @param midiChannel  The MIDI channel associated with the note. This is a 1-based
+                            index (1-16). Use this parameter if your plugin provides
+                            channel-specific note mappings.
+    */
+    virtual std::optional<String> getNameForMidiNoteNumber (int note, int midiChannel);
+
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
 
