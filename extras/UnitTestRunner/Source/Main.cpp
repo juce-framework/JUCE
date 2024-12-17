@@ -125,5 +125,7 @@ int main (int argc, char **argv)
     logger.writeToLog (newLine + "All tests completed successfully");
     Logger::setCurrentLogger (nullptr);
 
+    DeletedAtShutdown::deleteAll();
+
     return 0;
 }
