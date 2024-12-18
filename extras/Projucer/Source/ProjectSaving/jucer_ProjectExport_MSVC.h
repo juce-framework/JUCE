@@ -1910,17 +1910,22 @@ public:
                 const auto pkgScript = copyBuildOutputIntoBundle (segments);
                 const auto copyScript = copyBundleToInstallDirectory (segments, config.getBinaryPath (Ids::vst3BinaryLocation, arch));
 
-                const auto binCopyScript = config.isPluginBinaryCopyStepEnabled()
-                                         ? MSVCScriptBuilder{}.append ("copy /Y \"$(OutDir)$(TargetFileName)\" \""
-                                                                       + config.getBinaryPath (Ids::vstBinaryLocation, arch)
-                                                                       + "\\$(TargetFileName)\"")
-                                         : MSVCScriptBuilder{};
-
                 return MSVCScriptBuilder{}
                     .append (pkgScript)
                     .append (manifestScript)
                     .append (copyScript)
-                    .append (binCopyScript)
+                    .build();
+            }
+
+            if (type == VSTPlugIn && config.isPluginBinaryCopyStepEnabled())
+            {
+                const String copyCommand = "copy /Y \"$(OutDir)$(TargetFileName)\" \""
+                                         + config.getBinaryPath (Ids::vstBinaryLocation, arch)
+                                         + "\\$(TargetFileName)\"";
+
+                return MSVCScriptBuilder{}
+                    .mkdir (config.getBinaryPath (Ids::vstBinaryLocation, arch).quoted())
+                    .append (copyCommand)
                     .build();
             }
 
