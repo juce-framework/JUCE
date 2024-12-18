@@ -173,11 +173,6 @@ namespace BitmapDataDetail
         };
     };
 
-    static constexpr auto isConvertible (Image::PixelFormat p)
-    {
-        return p == Image::SingleChannel || p == Image::RGB || p == Image::ARGB;
-    }
-
     static void convert (const Image::BitmapData& src, Image::BitmapData& dest)
     {
         jassert (src.width == dest.width);
