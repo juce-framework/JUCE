@@ -143,7 +143,12 @@ private:
                 if (name.containsIgnoreCase (choice))
                     return name;
 
-        return names[0];
+        for (auto& name : names)
+            if (name.isNotEmpty())
+                return name;
+
+        jassertfalse;
+        return {};
     }
 
     static String getDefaultSansSerifFontName()
@@ -200,8 +205,11 @@ Typeface::Ptr Font::Native::getDefaultPlatformTypefaceForFont (const Font& font)
 
     const auto name = font.getTypefaceName();
     const auto realName = defaultInfo.getRealFontName (name);
-    f.setTypefaceName (realName);
 
+    if (realName.isEmpty())
+        return nullptr;
+
+    f.setTypefaceName (realName);
     return Typeface::createSystemTypefaceFor (f);
 }
 
