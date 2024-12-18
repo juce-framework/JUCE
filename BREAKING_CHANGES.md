@@ -5,20 +5,23 @@
 
 ## Change
 
-The behavior of AudioTransportSource::hasStreamFinished has been updated to correctly return true when the stream has finished.
+The behavior of AudioTransportSource::hasStreamFinished has been updated to
+correctly return true when the stream has finished.
 
 **Possible Issues**
 
-This change may affect any code that relied on the previous behavior, where the method never returned true.
+This change may affect any code that relied on the previous behavior, where the
+method never returned true.
 
 **Workaround**
 
-Review and update any code that depends on hasStreamFinished or any registered ChangeListeners that respond to stream completion.
+Review and update any code that depends on hasStreamFinished or any registered
+ChangeListeners that respond to stream completion.
 
 **Rationale**
 
-The previous behavior, where hasStreamFinished never returned true, was incorrect.
-This update ensures the method works as intended.
+The previous behavior, where hasStreamFinished never returned true, was
+incorrect. This update ensures the method works as intended.
 
 
 ## Change
@@ -27,11 +30,13 @@ Support for Arm32 in Projucer has been removed for Windows targets.
 
 **Possible Issues**
 
-Projucer projects targeting Arm32 on Windows will no longer be able to select that option.
+Projucer projects targeting Arm32 on Windows will no longer be able to select
+that option.
 
 **Workaround**
 
-Select Arm64 or Arm64EC instead of Arm32, and port any 32-bit specific code to 64-bit.
+Select Arm64 or Arm64EC instead of Arm32, and port any 32-bit specific code to
+64-bit.
 
 **Rationale**
 
@@ -44,7 +49,8 @@ The Javascript implementation has been moved into a independent juce module.
 
 **Possible Issues**
 
-Any existing use of JavascriptEngine, JSCursor, or JSObject will fail to compile.
+Any existing use of JavascriptEngine, JSCursor, or JSObject will fail to
+compile.
 
 **Workaround**
 
