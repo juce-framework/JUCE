@@ -1495,9 +1495,18 @@ struct SimpleShapedTextTests : public UnitTest
 
     void runTest (const char* text, float maxWidth)
     {
+        const auto defaultTypeface = Font::getDefaultTypefaceForFont (FontOptions{});
+
+        if (defaultTypeface == nullptr)
+        {
+            DBG ("Skipping test: No default typeface found!");
+            return;
+        }
+
         String testString { text };
 
-        SimpleShapedText st { &testString, ShapedTextOptions{}.withMaxWidth (maxWidth) };
+        SimpleShapedText st { &testString, ShapedTextOptions{}.withFont (FontOptions { defaultTypeface })
+                                                              .withMaxWidth (maxWidth) };
 
         auto success = true;
 
