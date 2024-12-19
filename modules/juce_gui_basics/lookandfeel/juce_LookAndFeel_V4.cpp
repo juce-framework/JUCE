@@ -884,9 +884,6 @@ void LookAndFeel_V4::getIdealPopupMenuItemSize (const String& text, const bool i
         idealHeight = standardMenuItemHeight > 0 ? standardMenuItemHeight : roundToInt (font.getHeight() * 1.3f);
         idealWidth = GlyphArrangement::getStringWidthInt (font, text) + idealHeight * 2;
     }
-
-    idealHeight += idealHeight / 2;
-    idealWidth += idealWidth / 4;
 }
 
 void LookAndFeel_V4::drawMenuBarBackground (Graphics& g, int width, int height,
