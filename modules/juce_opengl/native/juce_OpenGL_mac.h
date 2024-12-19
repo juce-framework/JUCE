@@ -328,6 +328,11 @@ public:
                 return [[(NSOpenGLView*) self superview] accessibilityHitTest: p];
             });
 
+            addMethod (@selector (hitTest:), [] (id, SEL, NSPoint) -> NSView*
+            {
+                return nil;
+            });
+
             registerClass();
         }
     };
