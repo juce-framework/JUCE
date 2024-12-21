@@ -915,6 +915,7 @@ private:
                                                          args->TryGetWebMessageAsString (std::addressof (message)) == S_OK)
                                                      {
                                                          owner.impl->handleNativeEvent (JSON::fromString (StringRef { CharPointer_UTF16 (message) }));
+                                                         CoTaskMemFree(message);
                                                      }
 
                                                      return S_OK;
