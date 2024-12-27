@@ -1334,8 +1334,8 @@ public:
         microtonal scales, or other mappings.
 
         @param note         The MIDI note number for which the name is being requested.
-                            This is an integer in the range [0, 127], representing the
-                            full MIDI note range.
+                            Some DAWs can request a note range outside of the standard
+                            [0-127]. Ensure your plugin can handle this.
         @param midiChannel  The MIDI channel associated with the note. This is a 1-based
                             index (1-16). Use this parameter if your plugin provides
                             channel-specific note mappings.
