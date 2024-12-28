@@ -263,7 +263,7 @@ public:
     /** Returns true if this variant is an object and if it has the given property. */
     bool hasProperty (const Identifier& propertyName) const noexcept;
     /** Returns property names if this variant is an object. */
-    juce::StringArray getProperties() const;
+    Array<Identifier> getProperties() const;
 
     /** Invokes a named method call with no arguments. */
     var call (const Identifier& method) const;

@@ -708,14 +708,14 @@ bool var::hasProperty (const Identifier& propertyName) const noexcept
     return false;
 }
 
-juce::StringArray var::getProperties() const
+Array<Identifier> var::getProperties() const
 {
     if (auto* o = getDynamicObject())
     {
-        juce::StringArray names;
+        Array<Identifier> names;
 
         for (auto itr : o->getProperties())
-            names.add (itr.name.toString());
+            names.add (itr.name);
 
         return names;
     }
