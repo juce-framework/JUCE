@@ -424,60 +424,82 @@ struct WebViewDelegateClass final : public ObjCClass<NSObject>
         addMethod (@selector (webView:decidePolicyForNavigationAction:decisionHandler:),
                    [] (id self, SEL, WKWebView*, WKNavigationAction* navigationAction, void (^decisionHandler) (WKNavigationActionPolicy))
                    {
-                       if (getConnector (self)->getBrowser().pageAboutToLoad (nsStringToJuce ([[[navigationAction request] URL] absoluteString])))
-                           decisionHandler (WKNavigationActionPolicyAllow);
-                       else
-                           decisionHandler (WKNavigationActionPolicyCancel);
+                       if (auto* connector = getConnector (self))
+                       {
+                           if (connector->getBrowser().pageAboutToLoad (nsStringToJuce ([[[navigationAction request] URL] absoluteString])))
+                               decisionHandler (WKNavigationActionPolicyAllow);
+                           else
+                               decisionHandler (WKNavigationActionPolicyCancel);
+                       }
                    });
 
         addMethod (@selector (webView:didFinishNavigation:),
                    [] (id self, SEL, WKWebView* webview, WKNavigation*)
                    {
-                       getConnector (self)->getBrowser().pageFinishedLoading (nsStringToJuce ([[webview URL] absoluteString]));
+                       if (auto* connector = getConnector (self))
+                           connector->getBrowser().pageFinishedLoading (nsStringToJuce ([[webview URL] absoluteString]));
                    });
 
         addMethod (@selector (webView:didFailNavigation:withError:),
                    [] (id self, SEL, WKWebView*, WKNavigation*, NSError* error)
                    {
-                       displayError (&getConnector (self)->getBrowser(), error);
+                       if (auto* connector = getConnector (self))
+                           displayError (&connector->getBrowser(), error);
                    });
 
         addMethod (@selector (webView:didFailProvisionalNavigation:withError:),
                    [] (id self, SEL, WKWebView*, WKNavigation*, NSError* error)
                    {
-                       displayError (&getConnector (self)->getBrowser(), error);
+                       if (auto* connector = getConnector (self))
+                           displayError (&connector->getBrowser(), error);
                    });
 
         addMethod (@selector (webViewDidClose:),
                    [] (id self, SEL, WKWebView*)
                    {
-                       getConnector (self)->getBrowser().windowCloseRequest();
+                       if (auto* connector = getConnector (self))
+                           connector->getBrowser().windowCloseRequest();
                    });
 
         addMethod (@selector (webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:),
                    [] (id self, SEL, WKWebView*, WKWebViewConfiguration*, WKNavigationAction* navigationAction, WKWindowFeatures*)
                    {
-                       getConnector (self)->getBrowser().newWindowAttemptingToLoad (nsStringToJuce ([[[navigationAction request] URL] absoluteString]));
+                       if (auto* connector = getConnector (self))
+                           connector->getBrowser().newWindowAttemptingToLoad (nsStringToJuce ([[[navigationAction request] URL] absoluteString]));
+
                        return nil;
                    });
 
         addMethod (@selector (userContentController:didReceiveScriptMessage:),
                    [] (id self, SEL, id, id message)
                    {
-                       const auto object = fromObject ([message body]);
-
-                       if (! object.isString())
+                       if (auto* connector = getConnector (self))
                        {
-                           jassertfalse;
-                           return;
-                       }
+                           const auto object = fromObject ([message body]);
 
-                       getConnector (self)->handleNativeEvent (JSON::fromString (object.toString()));
+                           if (! object.isString())
+                           {
+                               jassertfalse;
+                               return;
+                           }
+
+                           connector->handleNativeEvent (JSON::fromString (object.toString()));
+                       }
                    });
 
         addMethod (@selector (webView:startURLSchemeTask:),
                    [] (id self, SEL, id, id urlSchemeTask)
                    {
+                       auto* connector = getConnector (self);
+
+                       if (connector == nullptr)
+                       {
+                           [urlSchemeTask didFailWithError: [NSError errorWithDomain:NSURLErrorDomain
+                                                                                code:NSURLErrorCancelled
+                                                                            userInfo: nil]];
+                           return;
+                       }
+
                        const auto request = [urlSchemeTask request];
 
                        auto* url = [&]
@@ -488,8 +510,7 @@ struct WebViewDelegateClass final : public ObjCClass<NSObject>
                        }();
 
                        const auto path = nsStringToJuce ([url path]);
-
-                       const auto resource = getConnector (self)->handleResourceRequest (path);
+                       const auto resource = connector->handleResourceRequest (path);
 
                        JUCE_AUTORELEASEPOOL
                        {
@@ -513,7 +534,7 @@ struct WebViewDelegateClass final : public ObjCClass<NSObject>
                                    @"Content-Type" : juceStringToNS (resource->mimeType),
                                } mutableCopy];
 
-                               if (auto allowedOrigin = getConnector (self)->getOptions().getAllowedOrigin())
+                               if (auto allowedOrigin = connector->getOptions().getAllowedOrigin())
                                {
                                    [headers setObject:juceStringToNS (*allowedOrigin)
                                                forKey:@"Access-Control-Allow-Origin"];
@@ -543,7 +564,7 @@ struct WebViewDelegateClass final : public ObjCClass<NSObject>
         if (@available (macOS 10.12, *))
         {
             addMethod (@selector (webView:runOpenPanelWithParameters:initiatedByFrame:completionHandler:),
-                       [] (id, SEL, WKWebView*, WKOpenPanelParameters* parameters, WKFrameInfo*, void (^completionHandler)(NSArray<NSURL*>*))
+                       [] (id self, SEL, WKWebView*, WKOpenPanelParameters* parameters, WKFrameInfo*, void (^completionHandler)(NSArray<NSURL*>*))
                        {
                            using CompletionHandlerType = decltype (completionHandler);
 
@@ -576,6 +597,9 @@ struct WebViewDelegateClass final : public ObjCClass<NSObject>
                                ObjCObjectHandle<CompletionHandlerType> handler;
                                bool handlerCalled = false;
                            };
+
+                           if (getConnector (self) == nullptr)
+                               return;
 
                            auto chooser = std::make_unique<FileChooser> (TRANS ("Select the file you want to upload..."),
                                                                          File::getSpecialLocation (File::userHomeDirectory), "*");
@@ -881,6 +905,8 @@ public:
 
     ~WKWebViewImpl() override
     {
+        WebViewDelegateClass::setConnector (webViewDelegate.get(), nullptr);
+
         setView (nil);
         [webView.get() setNavigationDelegate: nil];
         [webView.get() setUIDelegate:         nil];
