@@ -658,6 +658,9 @@ public:
            #endif
         }();
 
+        if (createWebViewEnvironmentWithOptions == nullptr)
+            return {};
+
         auto webViewOptions = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
 
         const auto userDataFolder = options.getWinWebView2BackendOptions().getUserDataFolder().getFullPathName();
