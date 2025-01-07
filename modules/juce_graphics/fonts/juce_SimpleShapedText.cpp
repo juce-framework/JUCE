@@ -463,10 +463,7 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     auto nativeFont = font.getNativeDetails().font;
 
     if (nativeFont == nullptr)
-    {
-        jassertfalse;
         return {};
-    }
 
     hb_shape (nativeFont.get(), buffer.get(), features.data(), (unsigned int) features.size());
 
@@ -1090,7 +1087,9 @@ struct Shaper
 
         auto glyphsIt = shapedGlyphs.find (startFrom);
 
-        if (glyphsIt == shapedGlyphs.end())
+        // The stored glyphs data can be empty if there are input codepoints for which we failed to
+        // resolve a valid Typeface::Ptr.
+        if (glyphsIt == shapedGlyphs.end() || glyphsIt->value.data->empty())
             return {};
 
         WrappedGlyphs result;

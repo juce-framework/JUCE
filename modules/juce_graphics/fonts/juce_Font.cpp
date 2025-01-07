@@ -105,6 +105,15 @@ public:
 
         const ScopedWriteLock slw (lock);
 
+        auto newFace = CachedFace { key,
+                                    ++counter,
+                                    juce_getTypefaceForFont != nullptr
+                                        ? juce_getTypefaceForFont (font)
+                                        : Font::getDefaultTypefaceForFont (font) };
+
+        if (newFace.typeface == nullptr)
+            return nullptr;
+
         const auto replaceIter = std::min_element (faces.begin(),
                                                    faces.end(),
                                                    [] (const auto& a, const auto& b)
@@ -114,13 +123,8 @@ public:
 
         jassert (replaceIter != faces.end());
         auto& face = *replaceIter;
-        face = CachedFace { key,
-                            ++counter,
-                            juce_getTypefaceForFont != nullptr
-                                ? juce_getTypefaceForFont (font)
-                                : Font::getDefaultTypefaceForFont (font) };
 
-        jassert (face.typeface != nullptr); // the look and feel must return a typeface!
+        face = std::move (newFace);
 
         if (defaultFace == nullptr && key == Key{})
             defaultFace = face.typeface;
@@ -206,10 +210,7 @@ public:
         const ScopedLock lock (mutex);
 
         if (typeface == nullptr)
-        {
             typeface = options.getTypeface() != nullptr ? options.getTypeface() : TypefaceCache::getInstance()->findTypefaceFor (f);
-            jassert (typeface != nullptr);
-        }
 
         return typeface;
     }
