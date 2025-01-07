@@ -836,9 +836,19 @@ Font Font::findSuitableFontForText (const String& text, const String& language) 
             return copy;
     }
 
-    if (auto current = getTypefacePtr())
+    const auto fallbackTypefacePtr = std::invoke ([&]
     {
-        if (auto suggested = current->createSystemFallback (text, language))
+        if (auto current = getTypefacePtr())
+            return current;
+
+        auto copy = *this;
+        copy.setTypefaceName (Font::getDefaultSansSerifFontName());
+        return copy.getTypefacePtr();
+    });
+
+    if (fallbackTypefacePtr != nullptr)
+    {
+        if (auto suggested = fallbackTypefacePtr->createSystemFallback (text, language))
         {
             auto copy = *this;
 
