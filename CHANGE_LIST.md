@@ -3,6 +3,16 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.5
+
+  - Added Windows Arm support
+  - Added support for local notifications
+  - Added passthrough compiler options to juceaide
+  - Added support for VST3 parameter migrations
+  - Fixed some Windows mouse events and window dragging behaviour
+  - Added Ranges functionality
+  - Added VST2 and VST3 MIDI note names
+
 ## Version 8.0.4
 
   - Simplified singleton creation

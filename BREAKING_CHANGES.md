@@ -1,7 +1,6 @@
 # JUCE breaking changes
 
-# Version 8.0.4
-
+# Version 8.0.5
 
 ## Change
 
@@ -86,6 +85,8 @@ Select Arm64 or Arm64EC instead of Arm32, and port any 32-bit specific code to
 
 32-bit Arm support has been deprecated in current versions of Windows 11.
 
+
+# Version 8.0.4
 
 ## Change
 
