@@ -1956,15 +1956,12 @@ public:
             if (arch == Architecture::win64)
             {
                 const auto x86ToolchainErrorMessage =
-                    "echo : Error: Toolchain configuration error!\r\n"
-                    "echo : Error: ------ WARNING ------\r\n"
-                    "echo You are using a 32-bit toolchain to compile a 64-bit target on a 64-bit system.\r\n"
-                    "echo This may cause problems with the build system.\r\n"
-                    "echo To resolve this, use the x64 version of MSBuild. You can invoke it directly at:\r\n"
-                    "echo \"<VisualStudioPathHere>/MSBuild/Current/Bin/amd64/MSBuild.exe\"\r\n"
-                    "echo Or, use the \"x64 Native Tools Command Prompt\" script.\r\n"
-                    "echo : Error: ------ WARNING ------\r\n"
-                    "exit 1";
+                    "echo : Warning: Toolchain configuration issue!"
+                    " You are using a 32-bit toolchain to compile a 64-bit target on a 64-bit system."
+                    " This may cause problems with the build system."
+                    " To resolve this, use the x64 version of MSBuild. You can invoke it directly at:"
+                    " \"<VisualStudioPathHere>/MSBuild/Current/Bin/amd64/MSBuild.exe\""
+                    " Or, use the \"x64 Native Tools Command Prompt\" script.";
 
                 builder.ifAllConditionsTrue (
                 {
