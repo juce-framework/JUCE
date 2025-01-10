@@ -103,6 +103,7 @@ const char* PluginHostType::getHostDescription() const noexcept
         case AbletonLive9:             return "Ableton Live 9";
         case AbletonLive10:            return "Ableton Live 10";
         case AbletonLive11:            return "Ableton Live 11";
+        case AbletonLive12:            return "Ableton Live 12";
         case AbletonLiveGeneric:       return "Ableton Live";
         case AdobeAudition:            return "Adobe Audition";
         case AdobePremierePro:         return "Adobe Premiere";
@@ -183,6 +184,7 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostPath.containsIgnoreCase       ("Live 9"))                   return AbletonLive9;
     if (hostPath.containsIgnoreCase       ("Live 10"))                  return AbletonLive10;
     if (hostPath.containsIgnoreCase       ("Live 11"))                  return AbletonLive11;
+    if (hostPath.containsIgnoreCase       ("Live 12"))                  return AbletonLive12;
     if (hostFilename.containsIgnoreCase   ("Live"))                     return AbletonLiveGeneric;
     if (hostFilename.containsIgnoreCase   ("Audition"))                 return AdobeAudition;
     if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))           return AdobePremierePro;
@@ -252,6 +254,7 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostFilename.containsIgnoreCase   ("Live 9"))                return AbletonLive9;
     if (hostFilename.containsIgnoreCase   ("Live 10"))               return AbletonLive10;
     if (hostFilename.containsIgnoreCase   ("Live 11"))               return AbletonLive11;
+    if (hostFilename.containsIgnoreCase   ("Live 12"))               return AbletonLive12;
     if (hostFilename.containsIgnoreCase   ("Live "))                 return AbletonLiveGeneric;
     if (hostFilename.containsIgnoreCase   ("Audition"))              return AdobeAudition;
     if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))        return AdobePremierePro;
