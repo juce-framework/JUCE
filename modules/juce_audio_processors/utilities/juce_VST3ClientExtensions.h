@@ -234,7 +234,7 @@ struct VST3ClientExtensions
         Internally JUCE will use this method to assign an ID for the component
         and controller interfaces when JUCE_VST3_CAN_REPLACE_VST2 is enabled.
 
-        @convertJucePluginId, getCompatibleClasses, getCompatibleParameterIds
+        @see convertJucePluginId, getCompatibleClasses, getCompatibleParameterIds
     */
     static InterfaceId convertVST2PluginId (uint32_t pluginCode,
                                             const String& pluginName,
