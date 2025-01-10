@@ -3,6 +3,10 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.6
+
+  - Changed a Visual Studio toolchain error into a warning 
+
 ## Version 8.0.5
 
   - Added Windows Arm support

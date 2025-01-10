@@ -44,7 +44,7 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            8.0.5
+  version:            8.0.6
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce

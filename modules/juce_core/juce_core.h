@@ -44,7 +44,7 @@
 
   ID:                 juce_core
   vendor:             juce
-  version:            8.0.5
+  version:            8.0.6
   name:               JUCE core classes
   description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:            http://www.juce.com/juce

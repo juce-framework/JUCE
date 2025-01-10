@@ -44,7 +44,7 @@
 
   ID:                 juce_animation
   vendor:             juce
-  version:            8.0.5
+  version:            8.0.6
   name:               JUCE Animation classes
   description:        Classes for defining and handling animations.
   website:            http://www.juce.com/juce
