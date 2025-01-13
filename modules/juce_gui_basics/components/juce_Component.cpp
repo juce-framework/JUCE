@@ -1073,6 +1073,16 @@ void Component::getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
     allowsClicksOnChildComponents = flags.allowChildMouseClicksFlag;
 }
 
+void Component::setDisableInternalMouseEvents(bool disableInternalMouseEvents) noexcept
+{
+	flags.disableInternalMouseEventsFlag = disableInternalMouseEvents;
+}
+
+bool Component::getDisableInternalMouseEvents() const noexcept
+{
+    return flags.disableInternalMouseEventsFlag;
+}
+
 bool Component::contains (Point<int> point)
 {
     return contains (point.toFloat());
@@ -2107,7 +2117,7 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
                                     false);
 
     HierarchyChecker checker (this, me);
-    mouseEnter (me);
+    if(!flags.disableInternalMouseEventsFlag) mouseEnter (me);
 
     flags.cachedMouseInsideComponent = true;
 
@@ -2144,7 +2154,7 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
                                     false);
 
     HierarchyChecker checker (this, me);
-    mouseExit (me);
+    if (!flags.disableInternalMouseEventsFlag) mouseExit (me);
 
     if (checker.shouldBailOut())
         return;
@@ -2211,7 +2221,7 @@ void Component::internalMouseDown (MouseInputSource source,
     if (flags.repaintOnMouseActivityFlag)
         repaint();
 
-    mouseDown (me);
+    if (!flags.disableInternalMouseEventsFlag) mouseDown (me);
 
     if (checker.shouldBailOut())
         return;
@@ -2250,7 +2260,7 @@ void Component::internalMouseUp (MouseInputSource source,
     if (flags.repaintOnMouseActivityFlag)
         repaint();
 
-    mouseUp (me);
+    if (!flags.disableInternalMouseEventsFlag) mouseUp (me);
 
     if (checker.shouldBailOut())
         return;
@@ -2267,7 +2277,7 @@ void Component::internalMouseUp (MouseInputSource source,
     if (me.getNumberOfClicks() >= 2)
     {
         if (checker.nearestNonNullParent() == this)
-            mouseDoubleClick (checker.eventWithNearestParent());
+            if (!flags.disableInternalMouseEventsFlag) mouseDoubleClick (checker.eventWithNearestParent());
 
         if (checker.shouldBailOut())
             return;
@@ -2294,7 +2304,7 @@ void Component::internalMouseDrag (MouseInputSource source, const detail::Pointe
 
         HierarchyChecker checker (this, me);
 
-        mouseDrag (me);
+        if (!flags.disableInternalMouseEventsFlag) mouseDrag (me);
 
         if (checker.shouldBailOut())
             return;
@@ -2328,7 +2338,7 @@ void Component::internalMouseMove (MouseInputSource source, Point<float> relativ
 
         HierarchyChecker checker (this, me);
 
-        mouseMove (me);
+        if (!flags.disableInternalMouseEventsFlag) mouseMove (me);
 
         if (checker.shouldBailOut())
             return;
