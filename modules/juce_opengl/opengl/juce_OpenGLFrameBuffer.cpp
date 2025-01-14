@@ -356,7 +356,7 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     glViewport (0, 0, pimpl->width, pimpl->height);
     pimpl->context.copyTexture (area, Rectangle<int> (area.getX(), area.getY(),
                                                       tex.getWidth(), tex.getHeight()),
-                                pimpl->width, pimpl->height, true);
+                                pimpl->width, pimpl->height, true, false);
 
     JUCE_CHECK_OPENGL_ERROR
     return true;

@@ -1525,14 +1525,22 @@ struct DepthTestDisabler
 void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                                  const Rectangle<int>& anchorPosAndTextureSize,
                                  const int contextWidth, const int contextHeight,
-                                 bool flippedVertically)
+                                 bool flippedVertically,
+                                 bool blend)
 {
     if (contextWidth <= 0 || contextHeight <= 0)
         return;
 
     JUCE_CHECK_OPENGL_ERROR
-    glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable (GL_BLEND);
+    if (blend)
+    {
+        glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable (GL_BLEND);
+    }
+    else
+    {
+        glDisable (GL_BLEND);
+    }
 
     DepthTestDisabler depthDisabler;
 

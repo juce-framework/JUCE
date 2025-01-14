@@ -332,8 +332,8 @@ public:
     void copyTexture (const Rectangle<int>& targetClipArea,
                       const Rectangle<int>& anchorPosAndTextureSize,
                       int contextWidth, int contextHeight,
-                      bool textureOriginIsBottomLeft);
-
+                      bool textureOriginIsBottomLeft,
+                      bool blend = true);
 
     /** Changes the amount of GPU memory that the internal cache for Images is allowed to use. */
     void setImageCacheSize (size_t cacheSizeBytes) noexcept;
