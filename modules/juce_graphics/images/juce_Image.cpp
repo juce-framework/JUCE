@@ -747,6 +747,20 @@ bool Image::BitmapData::convertFrom (const BitmapData& source)
     return BitmapDataDetail::convert (source, *this);
 }
 
+bool Image::setBackupEnabled (bool enabled)
+{
+    if (auto ptr = image)
+    {
+        if (auto* ext = ptr->getBackupExtensions())
+        {
+            ext->setBackupEnabled (enabled);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 //==============================================================================
 void Image::clear (const Rectangle<int>& area, Colour colourToClearTo)
 {

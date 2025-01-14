@@ -199,9 +199,9 @@ static bool readFromDirect2DBitmap (ComSmartPtr<ID2D1DeviceContext1> context,
                                             target->pixelFormat,
                                             (int) size.width,
                                             (int) size.height } };
-    Image::BitmapData srcBitmap { srcImage, Image::BitmapData::readOnly };
-    Image::BitmapData dstBitmap { Image { target }, Image::BitmapData::writeOnly };
-    BitmapDataDetail::convert (srcBitmap, dstBitmap);
+
+    Image::BitmapData dstData { Image { target }, Image::BitmapData::writeOnly };
+    dstData.convertFrom ({ srcImage, Image::BitmapData::readOnly });
 
     return true;
 }
@@ -225,9 +225,12 @@ static ImagePixelData::Ptr readFromDirect2DBitmap (ComSmartPtr<ID2D1DeviceContex
     return result;
 }
 
-Direct2DPixelDataPages::Direct2DPixelDataPages (ComSmartPtr<ID2D1Bitmap1> bitmap,
+//==============================================================================
+Direct2DPixelDataPages::Direct2DPixelDataPages (ImagePixelDataBackupExtensions* parent,
+                                                ComSmartPtr<ID2D1Bitmap1> bitmap,
                                                 ImagePixelData::Ptr image)
-    : backingData (image),
+    : parentBackupExtensions (parent),
+      backingData (image),
       pages { Page { bitmap, {} } },
       upToDate (true)
 {
@@ -235,10 +238,12 @@ Direct2DPixelDataPages::Direct2DPixelDataPages (ComSmartPtr<ID2D1Bitmap1> bitmap
     jassert (image->createType()->getTypeID() == SoftwareImageType{}.getTypeID());
 }
 
-Direct2DPixelDataPages::Direct2DPixelDataPages (ComSmartPtr<ID2D1Device1> device,
+Direct2DPixelDataPages::Direct2DPixelDataPages (ImagePixelDataBackupExtensions* parent,
+                                                ComSmartPtr<ID2D1Device1> device,
                                                 ImagePixelData::Ptr image,
                                                 State initialState)
-    : backingData (image),
+    : parentBackupExtensions (parent),
+      backingData (image),
       pages (makePages (device, backingData, initialState == State::cleared)),
       upToDate (initialState != State::unsuitableToRead)
 {
@@ -246,10 +251,23 @@ Direct2DPixelDataPages::Direct2DPixelDataPages (ComSmartPtr<ID2D1Device1> device
     jassert (image->createType()->getTypeID() == SoftwareImageType{}.getTypeID());
 }
 
+auto Direct2DPixelDataPages::getPagesWithoutSync() const -> Span<const Page>
+{
+    // Accessing page data which is out-of-date!
+    jassert (upToDate);
+    return pages;
+}
+
 auto Direct2DPixelDataPages::getPages() -> Span<const Page>
 {
-    if (std::exchange (upToDate, true))
+    const ScopeGuard scope { [this] { upToDate = true; } };
+
+    if (upToDate)
         return pages;
+
+    // We need to make sure that the parent image is up-to-date, otherwise we'll end up
+    // fetching outdated image data.
+    parentBackupExtensions->backupNow();
 
     auto sourceToUse = backingData->pixelFormat == Image::RGB
                      ? Image { backingData }.convertedToFormat (Image::ARGB)
@@ -287,7 +305,7 @@ Direct2DPixelData::Direct2DPixelData (ComSmartPtr<ID2D1Device1> device,
                                       ComSmartPtr<ID2D1Bitmap1> page)
     : Direct2DPixelData (readFromDirect2DBitmap (Direct2DDeviceContext::create (device), page), State::drawn)
 {
-    pagesForDevice.emplace (device, Direct2DPixelDataPages { page, backingData });
+    pagesForDevice.emplace (device, Direct2DPixelDataPages { this, page, backingData });
 }
 
 Direct2DPixelData::Direct2DPixelData (Image::PixelFormat formatToUse, int w, int h, bool clearIn)
@@ -309,6 +327,10 @@ bool Direct2DPixelData::createPersistentBackup (ComSmartPtr<ID2D1Device1> device
         jassertfalse;
         return false;
     }
+
+    // If the backup is not outdated, then it must be up-to-date
+    if (state != State::outdated)
+        return true;
 
     const auto iter = deviceHint != nullptr
                     ? pagesForDevice.find (deviceHint)
@@ -334,13 +356,15 @@ bool Direct2DPixelData::createPersistentBackup (ComSmartPtr<ID2D1Device1> device
         return false;
     }
 
-    const auto result = readFromDirect2DBitmap (context, pages.getPages().front().bitmap, backingData);
-    state = State::drawn;
+    const auto result = readFromDirect2DBitmap (context, pages.getPagesWithoutSync().front().bitmap, backingData);
+    state = result ? State::drawn : State::outdated;
     return result;
 }
 
 auto Direct2DPixelData::getIteratorForDevice (ComSmartPtr<ID2D1Device1> device)
 {
+    mostRecentDevice = device;
+
     if (device == nullptr)
         return pagesForDevice.end();
 
@@ -377,6 +401,11 @@ auto Direct2DPixelData::getIteratorForDevice (ComSmartPtr<ID2D1Device1> device)
             case State::drawing:
                 jassertfalse;
                 return Pages::State::unsuitableToRead;
+
+            // If this is hit, the pages will need to be synced through main memory before they are
+            // suitable for reading.
+            case State::outdated:
+                return Pages::State::unsuitableToRead;
         }
 
         // Unhandled switch case?
@@ -384,7 +413,7 @@ auto Direct2DPixelData::getIteratorForDevice (ComSmartPtr<ID2D1Device1> device)
         return Pages::State::unsuitableToRead;
     }();
 
-    const auto pair = pagesForDevice.emplace (device, Pages { device, backingData, initialState });
+    const auto pair = pagesForDevice.emplace (device, Pages { this, device, backingData, initialState });
     return pair.first;
 }
 
@@ -408,7 +437,10 @@ struct Direct2DPixelData::Context : public Direct2DImageContext
 
         endFrame();
 
-        self->createPersistentBackup (D2DUtilities::getDeviceForContext (getDeviceContext()));
+        self->state = State::outdated;
+
+        if (self->sync)
+            self->createPersistentBackup (D2DUtilities::getDeviceForContext (getDeviceContext()));
     }
 
     Ptr self;
@@ -422,12 +454,18 @@ auto Direct2DPixelData::createNativeContext() -> std::unique_ptr<Context>
 
     sendDataChangeMessage();
 
-    const auto adapter = directX->adapters.getDefaultAdapter();
+    const auto device = std::invoke ([this]() -> ComSmartPtr<ID2D1Device1>
+    {
+        if (mostRecentDevice != nullptr)
+            return mostRecentDevice;
 
-    if (adapter == nullptr)
-        return nullptr;
+        const auto adapter = directX->adapters.getDefaultAdapter();
 
-    const auto device = adapter->direct2DDevice;
+        if (adapter == nullptr)
+            return nullptr;
+
+        return adapter->direct2DDevice;
+    });
 
     if (device == nullptr)
         return nullptr;
@@ -526,11 +564,17 @@ void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap,
                                               int y,
                                               Image::BitmapData::ReadWriteMode mode)
 {
+    // If this is hit, there's already another BitmapData or Graphics context active on this
+    // image. Only one BitmapData or Graphics context may be active on an Image at a time.
+    jassert (state != State::drawing);
+
+    // If we're about to read from the image, and the main-memory copy of the image is outdated,
+    // then we must force a backup so that we can return up-to-date data
+    if (mode != Image::BitmapData::writeOnly && state == State::outdated)
+        createPersistentBackup (nullptr);
+
     backingData->initialiseBitmapData (bitmap, x, y, mode);
 
-    // If we're only reading, then we can assume that the bitmap data was flushed to the software
-    // image directly after it was last modified by d2d, so we can just use the BitmapData
-    // initialised by the backing data.
     // If we're writing, then we'll need to update our textures next time we try to use them, so
     // mark them as outdated.
     if (mode == Image::BitmapData::readOnly)
@@ -538,12 +582,9 @@ void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap,
 
     struct Releaser : public Image::BitmapData::BitmapDataReleaser
     {
-        Releaser (std::unique_ptr<BitmapDataReleaser> wrappedIn, Direct2DPixelData::Ptr selfIn)
+        Releaser (std::unique_ptr<BitmapDataReleaser> wrappedIn, Ptr selfIn)
             : wrapped (std::move (wrappedIn)), self (std::move (selfIn))
         {
-            // If this is hit, there's already another BitmapData or Graphics context active on this
-            // image. Only one BitmapData or Graphics context may be active on an Image at a time.
-            jassert (self->state != State::drawing);
             self->state = State::drawing;
         }
 
@@ -556,7 +597,7 @@ void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap,
         }
 
         std::unique_ptr<BitmapDataReleaser> wrapped;
-        Direct2DPixelData::Ptr self;
+        Ptr self;
     };
 
     bitmap.dataReleaser = std::make_unique<Releaser> (std::move (bitmap.dataReleaser), this);
@@ -712,6 +753,34 @@ void Direct2DPixelData::desaturateInArea (Rectangle<int> b)
 auto Direct2DPixelData::getPagesForDevice (ComSmartPtr<ID2D1Device1> device) -> Span<const Page>
 {
     return getIteratorForDevice (device)->second.getPages();
+}
+
+void Direct2DPixelData::setBackupEnabled (bool x)
+{
+    sync = x;
+}
+
+bool Direct2DPixelData::isBackupEnabled() const
+{
+    return sync;
+}
+
+bool Direct2DPixelData::backupNow()
+{
+    return createPersistentBackup (nullptr);
+}
+
+bool Direct2DPixelData::needsBackup() const
+{
+    return state == State::outdated;
+}
+
+bool Direct2DPixelData::canBackup() const
+{
+    return std::any_of (pagesForDevice.begin(), pagesForDevice.end(), [] (const auto& pair)
+    {
+        return pair.second.isUpToDate();
+    });
 }
 
 //==============================================================================

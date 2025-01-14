@@ -49,6 +49,8 @@ void DropShadow::drawForImage (Graphics& g, const Image& srcImage) const
         return;
 
     auto blurred = srcImage.convertedToFormat (Image::SingleChannel);
+    blurred.setBackupEnabled (false);
+
     blurred.getPixelData()->applySingleChannelBoxBlurEffect (radius);
 
     g.setColour (colour);
@@ -66,6 +68,7 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
     if (area.getWidth() > 2 && area.getHeight() > 2)
     {
         Image pathImage { Image::SingleChannel, area.getWidth(), area.getHeight(), true };
+        pathImage.setBackupEnabled (false);
 
         {
             Graphics g2 (pathImage);

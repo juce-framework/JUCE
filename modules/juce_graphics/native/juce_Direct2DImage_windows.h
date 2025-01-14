@@ -69,7 +69,7 @@ public:
     /*  Creates a single page containing the provided bitmap and main-memory storage, marking the
         hardware data as up-to-date.
     */
-    Direct2DPixelDataPages (ComSmartPtr<ID2D1Bitmap1>, ImagePixelData::Ptr);
+    Direct2DPixelDataPages (ImagePixelDataBackupExtensions*, ComSmartPtr<ID2D1Bitmap1>, ImagePixelData::Ptr);
 
     /*  Allocates hardware storage for the provided software bitmap.
         Depending on the initial state, will:
@@ -77,7 +77,7 @@ public:
         - mark the GPU images as up-to-date, or
         - clear the GPU images, then mark them as up-to-date
     */
-    Direct2DPixelDataPages (ComSmartPtr<ID2D1Device1>, ImagePixelData::Ptr, State);
+    Direct2DPixelDataPages (ImagePixelDataBackupExtensions*, ComSmartPtr<ID2D1Device1>, ImagePixelData::Ptr, State);
 
     /*  Returns all pages included in this set.
         This will be called before reading from the pages (e.g. when drawing them).
@@ -85,6 +85,9 @@ public:
         copy from the software image if necessary before returning.
     */
     Span<const Page> getPages();
+
+    /** Returns all pages without first syncing from main memory. */
+    Span<const Page> getPagesWithoutSync() const;
 
     /*  Marks this set as needing to be updated from the software image.
         We don't actually do the copy until the next time that we need to read the hardware pages.
@@ -102,6 +105,7 @@ public:
     }
 
 private:
+    ImagePixelDataBackupExtensions* parentBackupExtensions = nullptr;
     ImagePixelData::Ptr backingData;
     std::vector<Direct2DPixelDataPage> pages;
     bool upToDate = false;
@@ -126,7 +130,8 @@ private:
     render target are marked as outdated.
 */
 class Direct2DPixelData : public ImagePixelData,
-                          private DxgiAdapterListener
+                          private DxgiAdapterListener,
+                          private ImagePixelDataBackupExtensions
 {
 public:
     using Ptr = ReferenceCountedObjectPtr<Direct2DPixelData>;
@@ -196,6 +201,9 @@ public:
         return ! pages.empty() ? pages.front().bitmap : nullptr;
     }
 
+    BackupExtensions* getBackupExtensions() override { return this; }
+    const BackupExtensions* getBackupExtensions() const override { return this; }
+
 private:
     enum class State
     {
@@ -203,6 +211,7 @@ private:
         initiallyCleared,
         drawing,
         drawn,
+        outdated,
     };
 
     Direct2DPixelData (ImagePixelData::Ptr, State);
@@ -232,17 +241,28 @@ private:
     template <typename Fn>
     bool applyEffectInArea (Rectangle<int>, Fn&&);
 
+    void setBackupEnabled (bool) override;
+    bool isBackupEnabled() const override;
+    bool backupNow() override;
+    bool needsBackup() const override;
+    bool canBackup() const override;
+
     void adapterCreated (DxgiAdapter::Ptr) override {}
     void adapterRemoved (DxgiAdapter::Ptr adapter) override
     {
         if (adapter != nullptr)
             pagesForDevice.erase (adapter->direct2DDevice);
+
+        if (mostRecentDevice == adapter->direct2DDevice)
+            mostRecentDevice = nullptr;
     }
 
     SharedResourcePointer<DirectX> directX;
     ImagePixelData::Ptr backingData;
+    ComSmartPtr<ID2D1Device1> mostRecentDevice;
     std::map<ComSmartPtr<ID2D1Device1>, Pages> pagesForDevice;
     State state;
+    bool sync = true;
 
     JUCE_LEAK_DETECTOR (Direct2DPixelData)
 };

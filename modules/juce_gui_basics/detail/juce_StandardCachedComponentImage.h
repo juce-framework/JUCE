@@ -55,9 +55,17 @@ struct StandardCachedComponentImage : public CachedComponentImage
                            jmax (1, imageBounds.getWidth()),
                            jmax (1, imageBounds.getHeight()),
                            ! owner.isOpaque());
-
+            image.setBackupEnabled (false);
             validArea.clear();
         }
+
+        // If the cached image is outdated but cannot be backed-up, this indicates that the graphics
+        // device holding the most recent copy of the cached image has gone away. Therefore, we've
+        // effectively lost the contents of the cache, and we must repaint the entire component.
+        if (auto ptr = image.getPixelData())
+            if (auto* extensions = ptr->getBackupExtensions())
+                if (extensions->needsBackup() && ! extensions->canBackup())
+                    validArea.clear();
 
         if (! validArea.containsRectangle (compBounds))
         {
@@ -81,6 +89,7 @@ struct StandardCachedComponentImage : public CachedComponentImage
 
         validArea = compBounds;
 
+        // TODO(reuk) test dragging/sharing between multiple graphics devices
         g.setColour (Colours::black.withAlpha (owner.getAlpha()));
         g.drawImageTransformed (image, AffineTransform::scale ((float) compBounds.getWidth()  / (float) imageBounds.getWidth(),
                                                                (float) compBounds.getHeight() / (float) imageBounds.getHeight()), false);
