@@ -60,8 +60,8 @@ public:
         auto colourSpace = detail::ColorSpacePtr { CGColorSpaceCreateWithName ((format == Image::SingleChannel) ? kCGColorSpaceGenericGrayGamma2_2
                                                                                                                 : kCGColorSpaceSRGB) };
 
-        context = detail::ContextPtr { CGBitmapContextCreate (imageData->data, (size_t) width, (size_t) height, 8, (size_t) lineStride,
-                                                              colourSpace.get(), getCGImageFlags (format)) };
+        context.reset (CGBitmapContextCreate (imageData->data, (size_t) width, (size_t) height, 8, (size_t) lineStride,
+                                              colourSpace.get(), getCGImageFlags (format)));
     }
 
     ~CoreGraphicsPixelData() override
@@ -100,6 +100,46 @@ public:
     }
 
     std::unique_ptr<ImageType> createType() const override    { return std::make_unique<NativeImageType>(); }
+
+    void applyGaussianBlurEffectInArea (Rectangle<int> area, float radius) override
+    {
+        const auto buildFilter = [radius]
+        {
+            return [CIFilter filterWithName: @"CIGaussianBlur"
+                        withInputParameters: @{ kCIInputRadiusKey: [NSNumber numberWithFloat: radius] }];
+        };
+        applyFilterInArea (area, buildFilter);
+    }
+
+    void applySingleChannelBoxBlurEffectInArea (Rectangle<int> area, int radius) override
+    {
+        const auto buildFilter = [radius]
+        {
+            return [CIFilter filterWithName: @"CIBoxBlur"
+                        withInputParameters: @{ kCIInputRadiusKey: [NSNumber numberWithFloat: (float) radius] }];
+        };
+        applyFilterInArea (area, buildFilter);
+    }
+
+    void multiplyAllAlphasInArea (Rectangle<int> area, float amount) override
+    {
+        const auto buildFilter = [amount]
+        {
+            return [CIFilter filterWithName: @"CIColorMatrix"
+                        withInputParameters: @{ @"inputAVector": [CIVector vectorWithX: 0 Y: 0 Z: 0 W: amount] }];
+        };
+        applyFilterInArea (area, buildFilter);
+    }
+
+    void desaturateInArea (Rectangle<int> area) override
+    {
+        const auto buildFilter = []
+        {
+            return [CIFilter filterWithName: @"CIColorControls"
+                        withInputParameters: @{ kCIInputSaturationKey: [NSNumber numberWithFloat: 0] }];
+        };
+        applyFilterInArea (area, buildFilter);
+    }
 
     //==============================================================================
     static CGImageRef getCachedImageRef (const Image& juceImage, CGColorSpaceRef colourSpace)
@@ -148,6 +188,7 @@ public:
     //==============================================================================
     detail::ContextPtr context;
     detail::ImagePtr cachedImageRef;
+    NSUniquePtr<CIContext> ciContext;
 
     struct ImageDataContainer final : public ReferenceCountedObject
     {
@@ -161,6 +202,49 @@ public:
     int pixelStride, lineStride;
 
 private:
+    template <typename BuildFilter>
+    bool applyFilterInArea (Rectangle<int> area, BuildFilter&& buildFilter)
+    {
+        // This function might be called on the OpenGL rendering thread, or some other background
+        // thread that doesn't necessarily have an autorelease pool in scope.
+        // Note that buildFilter is called within this pool, to ensure that the filter is released
+        // upon leaving the pool's scope.
+        JUCE_AUTORELEASEPOOL
+        {
+            auto* filter = buildFilter();
+
+            if (filter == nullptr || context == nullptr)
+                return false;
+
+            const ImagePtr content { CGBitmapContextCreateImage (context.get()) };
+
+            if (content == nullptr)
+                return false;
+
+            const auto cgArea = makeCGRect (area);
+            auto* ciImage = [[CIImage imageWithCGImage: content.get()] imageByCroppingToRect: cgArea];
+
+            if (ciImage == nullptr)
+                return false;
+
+            if (ciContext == nullptr)
+                ciContext.reset ([[CIContext contextWithCGContext: context.get() options: nullptr] retain]);
+
+            if (ciContext == nullptr)
+                return false;
+
+            [filter setValue: ciImage forKey: kCIInputImageKey];
+            auto* output = [filter outputImage];
+
+            if (output == nullptr)
+                return false;
+
+            CGContextClearRect (context.get(), cgArea);
+            [ciContext.get() drawImage: output inRect: cgArea fromRect: cgArea];
+            return true;
+        }
+    }
+
     void freeCachedImageRef()
     {
         cachedImageRef.reset();

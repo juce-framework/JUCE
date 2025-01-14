@@ -44,6 +44,8 @@ public:
 
     ~Direct2DImageContext() override;
 
+    ComSmartPtr<ID2D1DeviceContext1> getDeviceContext() const;
+
 private:
     struct ImagePimpl;
     std::unique_ptr<ImagePimpl> pimpl;

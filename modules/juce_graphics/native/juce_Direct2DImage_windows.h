@@ -96,6 +96,11 @@ public:
         upToDate = false;
     }
 
+    bool isUpToDate() const
+    {
+        return upToDate;
+    }
+
 private:
     ImagePixelData::Ptr backingData;
     std::vector<Direct2DPixelDataPage> pages;
@@ -170,8 +175,10 @@ public:
     */
     void initialiseBitmapData (Image::BitmapData&, int, int, Image::BitmapData::ReadWriteMode) override;
 
-    void applyGaussianBlurEffect (float radius, Image& result) override;
-    void applySingleChannelBoxBlurEffect (int radius, Image& result) override;
+    void applyGaussianBlurEffectInArea (Rectangle<int>, float) override;
+    void applySingleChannelBoxBlurEffectInArea (Rectangle<int>, int) override;
+    void multiplyAllAlphasInArea (Rectangle<int>, float) override;
+    void desaturateInArea (Rectangle<int>) override;
 
     /*  This returns image data that is suitable for use when drawing with the provided context.
         This image data should be treated as a read-only view - making modifications directly
@@ -200,6 +207,30 @@ private:
 
     Direct2DPixelData (ImagePixelData::Ptr, State);
     auto getIteratorForDevice (ComSmartPtr<ID2D1Device1>);
+
+    /*  Attempts to copy the content of the corresponding texture in graphics storage into
+        persistent software storage.
+        The argument specifies the device holding the texture that should be backed up.
+        Passing null will instead search through all devices to find which device has the most
+        recent copy of the image data.
+
+        In most cases it is unnecessary to call this function directly.
+
+        Returns true on success, i.e. the backup is already up-to-date or the backup was updated
+        successfully.
+
+        Returns false on failure. The backup process may fail if the graphics storage became
+        unavailable for some reason, such as an external GPU being disconnected, or a remote desktop
+        session ending. If this happens, the image content is *irrevocably lost* and will need to
+        be recreated.
+    */
+    bool createPersistentBackup (ComSmartPtr<ID2D1Device1> deviceHint);
+
+    struct Context;
+    std::unique_ptr<Context> createNativeContext();
+
+    template <typename Fn>
+    bool applyEffectInArea (Rectangle<int>, Fn&&);
 
     void adapterCreated (DxgiAdapter::Ptr) override {}
     void adapterRemoved (DxgiAdapter::Ptr adapter) override

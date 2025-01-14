@@ -357,6 +357,15 @@ public:
         /** Returns the size of the bitmap. */
         Rectangle<int> getBounds() const noexcept                           { return Rectangle<int> (width, height); }
 
+        /** Attempts to copy the contents of src into this bitmap data.
+            Returns true on success, and false otherwise.
+
+            The source BitmapData must be readable, and the destination (current) BitmapData must
+            be writeable. This function cannot check for this precondition, so you must ensure this
+            yourself!
+        */
+        bool convertFrom (const Image::BitmapData& src);
+
         uint8* data;             /**< The raw pixel data, packed according to the image's pixel format. */
         size_t size;             /**< The number of valid/allocated bytes after data. May be smaller than "lineStride * height" if this is a section of a larger image. */
         PixelFormat pixelFormat; /**< The format of the data. */
@@ -477,26 +486,58 @@ public:
         This blur applies to all channels of the input image. It may be more expensive to
         calculate than a box blur, but should produce higher-quality results.
 
-        Implementations should attempt to re-use the storage provided in the result out-parameter
-        when possible.
-
-        If native blurs are unsupported, or if creating a blur fails for any other reason,
-        the result out-parameter will be reset to an invalid image.
+        The default implementation will modify the image pixel-by-pixel on the CPU, which will be slow.
+        Native image types may provide optimised implementations.
     */
-    virtual void applyGaussianBlurEffect (float radius, Image& result);
+    virtual void applyGaussianBlurEffectInArea (Rectangle<int> bounds, float radius);
+
+    /** @see applyGaussianBlurEffectInArea() */
+    void applyGaussianBlurEffect (float radius)
+    {
+        applyGaussianBlurEffectInArea ({ width, height }, radius);
+    }
 
     /** Applies a native blur effect to this image, if available.
         This is intended for blurring single-channel images, which is useful when rendering drop
         shadows. This is implemented as several box-blurs in series. The results should be visually
         similar to a Gaussian blur, but less accurate.
 
-        Implementations should attempt to re-use the storage provided in the result out-parameter
-        when possible.
-
-        If native blurs are unsupported, or if creating a blur fails for any other reason,
-        the result out-parameter will be reset to an invalid image.
+        The default implementation will modify the image pixel-by-pixel on the CPU, which will be slow.
+        Native image types may provide optimised implementations.
     */
-    virtual void applySingleChannelBoxBlurEffect (int radius, Image& result);
+    virtual void applySingleChannelBoxBlurEffectInArea (Rectangle<int> bounds, int radius);
+
+    /** @see applySingleChannelBoxBlurEffectInArea() */
+    void applySingleChannelBoxBlurEffect (int radius)
+    {
+        applySingleChannelBoxBlurEffectInArea ({ width, height }, radius);
+    }
+
+    /** Multiples all alpha-channel values in the image by the specified amount.
+
+        The default implementation will modify the image pixel-by-pixel on the CPU, which will be slow.
+        Native image types may provide optimised implementations.
+    */
+    virtual void multiplyAllAlphasInArea (Rectangle<int> bounds, float amount);
+
+    /** @see multiplyAllAlphasInArea() */
+    void multiplyAllAlphas (float amount)
+    {
+        multiplyAllAlphasInArea ({ width, height }, amount);
+    }
+
+    /** Changes all the colours to be shades of grey, based on their current luminosity.
+
+        The default implementation will modify the image pixel-by-pixel on the CPU, which will be slow.
+        Native image types may provide optimised implementations.
+    */
+    virtual void desaturateInArea (Rectangle<int> bounds);
+
+    /** @see desaturateInArea() */
+    void desaturate()
+    {
+        desaturateInArea ({ width, height });
+    }
 
     /** The pixel format of the image data. */
     const Image::PixelFormat pixelFormat;
@@ -586,45 +627,6 @@ public:
 
     ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
     int getTypeID() const override;
-};
-
-//==============================================================================
-/**
-    Utility functions for applying effects to images. These effects may or may not
-    be hardware-accelerated.
-
-    @tags{Graphics}
-*/
-struct ImageEffects
-{
-    ImageEffects() = delete;
-
-    /** Applies a blur to this image, placing the blurred image in the result out-parameter.
-        This will attempt to call the applyGaussianBlurEffect() member of the input image's
-        underlying ImagePixelData, which will use hardware acceleration if available. If this
-        fails, then a software blur will be applied instead.
-
-        This blur applies to all channels of the input image. It may be more expensive to
-        calculate than a box blur, but should produce higher-quality results.
-
-        If result is already the correct size, then its storage will be reused directly.
-        Otherwise, new storage may be allocated for the blurred image.
-    */
-    static void applyGaussianBlurEffect (float radius, const Image& input, Image& result);
-
-    /** Applies a blur to this image, placing the blurred image in the result out-parameter.
-        This will attempt to call the applySingleChannelBoxBlurEffect() member of the input image's
-        underlying ImagePixelData, which will use hardware acceleration if available. If this
-        fails, then a software blur will be applied instead.
-
-        This kind of blur is only capable of blurring single-channel images, which is useful when
-        rendering drop shadows. The blur is implemented as several box-blurs in series. The results
-        should be visually similar to a Gaussian blur, but less accurate.
-
-        If result is already the correct size, then its storage will be reused directly.
-        Otherwise, new storage may be allocated for the blurred image.
-    */
-    static void applySingleChannelBoxBlurEffect (int radius, const Image& input, Image& result);
 };
 
 } // namespace juce

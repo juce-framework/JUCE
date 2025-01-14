@@ -94,6 +94,11 @@ Direct2DImageContext::Direct2DImageContext (ComSmartPtr<ID2D1DeviceContext1> con
 
 Direct2DImageContext::~Direct2DImageContext() = default;
 
+ComSmartPtr<ID2D1DeviceContext1> Direct2DImageContext::getDeviceContext() const
+{
+    return getPimpl()->getDeviceContext();
+}
+
 Direct2DGraphicsContext::Pimpl* Direct2DImageContext::getPimpl() const noexcept
 {
     return pimpl.get();

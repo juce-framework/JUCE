@@ -47,10 +47,11 @@ void GlowEffect::setGlowProperties (float newRadius, Colour newColour, Point<int
 
 void GlowEffect::applyEffect (Image& image, Graphics& g, float scaleFactor, float alpha)
 {
-    ImageEffects::applyGaussianBlurEffect (radius * scaleFactor, image, cachedImage);
+    auto blurred = image.createCopy();
+    blurred.getPixelData()->applyGaussianBlurEffect (radius * scaleFactor);
 
     g.setColour (colour.withMultipliedAlpha (alpha));
-    g.drawImageAt (cachedImage, offset.x, offset.y, true);
+    g.drawImageAt (blurred, offset.x, offset.y, true);
 
     g.setOpacity (alpha);
     g.drawImageAt (image, offset.x, offset.y, false);

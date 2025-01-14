@@ -173,10 +173,10 @@ namespace BitmapDataDetail
         };
     };
 
-    static void convert (const Image::BitmapData& src, Image::BitmapData& dest)
+    static bool convert (const Image::BitmapData& src, Image::BitmapData& dest)
     {
-        jassert (src.width == dest.width);
-        jassert (src.height == dest.height);
+        if (std::tuple (src.width, src.height) != std::tuple (dest.width, dest.height))
+            return false;
 
         static constexpr auto converterFnTable = ConverterFnTable<RGB, ARGB, A>{};
 
@@ -190,18 +190,75 @@ namespace BitmapDataDetail
             if (auto* converter = converterFnTable.getConverterFor (src.pixelFormat, dest.pixelFormat))
                 converter (src, dest, dest.width, dest.height);
         }
+
+        return true;
     }
 
     static Image convert (const Image::BitmapData& src, const ImageType& type)
     {
         Image result (type.create (src.pixelFormat, src.width, src.height, false));
-
-        {
-            Image::BitmapData dest (result, Image::BitmapData::writeOnly);
-            BitmapDataDetail::convert (src, dest);
-        }
+        Image::BitmapData (result, Image::BitmapData::writeOnly).convertFrom (src);
 
         return result;
+    }
+
+    static void blurDataTriplets (uint8* d, int num, const int delta) noexcept
+    {
+        uint32 last = d[0];
+        d[0] = (uint8) ((d[0] + d[delta] + 1) / 3);
+        d += delta;
+
+        num -= 2;
+
+        do
+        {
+            const uint32 newLast = d[0];
+            d[0] = (uint8) ((last + d[0] + d[delta] + 1) / 3);
+            d += delta;
+            last = newLast;
+        }
+        while (--num > 0);
+
+        d[0] = (uint8) ((last + d[0] + 1) / 3);
+    }
+
+    static void blurSingleChannelImage (uint8* const data, const int w, const int h,
+                                        const int lineStride, const int repetitions) noexcept
+    {
+        jassert (w > 2 && h > 2);
+
+        for (int y = 0; y < h; ++y)
+            for (int i = repetitions; --i >= 0;)
+                blurDataTriplets (data + lineStride * y, w, 1);
+
+        for (int x = 0; x < w; ++x)
+            for (int i = repetitions; --i >= 0;)
+                blurDataTriplets (data + x, h, lineStride);
+    }
+
+    template <class PixelType>
+    struct PixelIterator
+    {
+        template <class PixelOperation>
+        static void iterate (const Image::BitmapData& data, const PixelOperation& pixelOp)
+        {
+            for (int y = 0; y < data.height; ++y)
+                for (int x = 0; x < data.width; ++x)
+                    pixelOp (*reinterpret_cast<PixelType*> (data.getPixelPointer (x, y)));
+        }
+    };
+
+    template <class PixelOperation>
+    static void performPixelOp (const Image::BitmapData& data, const PixelOperation& pixelOp)
+    {
+        switch (data.pixelFormat)
+        {
+            case Image::ARGB:           PixelIterator<PixelARGB> ::iterate (data, pixelOp); break;
+            case Image::RGB:            PixelIterator<PixelRGB>  ::iterate (data, pixelOp); break;
+            case Image::SingleChannel:  PixelIterator<PixelAlpha>::iterate (data, pixelOp); break;
+            case Image::UnknownFormat:
+            default:                    jassertfalse; break;
+        }
     }
 }
 
@@ -250,10 +307,35 @@ public:
 
     std::unique_ptr<ImageType> createType() const override { return sourceImage->createType(); }
 
+    void applySingleChannelBoxBlurEffectInArea (Rectangle<int> b, int radius) override
+    {
+        sourceImage->applySingleChannelBoxBlurEffectInArea (getIntersection (b), radius);
+    }
+
+    void applyGaussianBlurEffectInArea (Rectangle<int> b, float radius) override
+    {
+        sourceImage->applyGaussianBlurEffectInArea (getIntersection (b), radius);
+    }
+
+    void multiplyAllAlphasInArea (Rectangle<int> b, float amount) override
+    {
+        sourceImage->multiplyAllAlphasInArea (getIntersection (b), amount);
+    }
+
+    void desaturateInArea (Rectangle<int> b) override
+    {
+        sourceImage->desaturateInArea (getIntersection (b));
+    }
+
     /* as we always hold a reference to image, don't double count */
     int getSharedCount() const noexcept override { return getReferenceCount() + sourceImage->getSharedCount() - 1; }
 
 private:
+    Rectangle<int> getIntersection (Rectangle<int> b) const
+    {
+        return area.getIntersection (b + area.getTopLeft());
+    }
+
     friend class Image;
     const ImagePixelData::Ptr sourceImage;
     const Rectangle<int> area;
@@ -284,14 +366,40 @@ int ImagePixelData::getSharedCount() const noexcept
     return getReferenceCount();
 }
 
-void ImagePixelData::applyGaussianBlurEffect ([[maybe_unused]] float radius, Image& result)
+void ImagePixelData::applySingleChannelBoxBlurEffectInArea (Rectangle<int> bounds, int radius)
 {
-    result = {};
+    if (pixelFormat == Image::SingleChannel)
+    {
+        const Image::BitmapData bm (Image { this }, bounds, Image::BitmapData::readWrite);
+        BitmapDataDetail::blurSingleChannelImage (bm.data, bm.width, bm.height, bm.lineStride, 2 * radius);
+    }
 }
 
-void ImagePixelData::applySingleChannelBoxBlurEffect ([[maybe_unused]] int radius, juce::Image &result)
+void ImagePixelData::applyGaussianBlurEffectInArea (Rectangle<int> bounds, float radius)
 {
-    result = {};
+    ImageConvolutionKernel blurKernel (roundToInt (radius * 2.0f));
+    blurKernel.createGaussianBlur (radius);
+
+    Image target { this };
+    blurKernel.applyToImage (target, Image { this }.createCopy(), bounds);
+}
+
+void ImagePixelData::multiplyAllAlphasInArea (Rectangle<int> b, float amount)
+{
+    if (pixelFormat == Image::ARGB || pixelFormat == Image::SingleChannel)
+    {
+        const Image::BitmapData destData (Image { this }, b, Image::BitmapData::readWrite);
+        BitmapDataDetail::performPixelOp (destData, [&] (auto& p) { p.multiplyAlpha (amount); });
+    }
+}
+
+void ImagePixelData::desaturateInArea (Rectangle<int> b)
+{
+    if (pixelFormat == Image::ARGB || pixelFormat == Image::RGB)
+    {
+        const Image::BitmapData destData (Image { this }, b, Image::BitmapData::readWrite);
+        BitmapDataDetail::performPixelOp (destData, [] (auto& p) { p.desaturate(); });
+    }
 }
 
 //==============================================================================
@@ -634,6 +742,11 @@ void Image::BitmapData::setPixelColour (int x, int y, Colour colour) const noexc
     }
 }
 
+bool Image::BitmapData::convertFrom (const BitmapData& source)
+{
+    return BitmapDataDetail::convert (source, *this);
+}
+
 //==============================================================================
 void Image::clear (const Rectangle<int>& area, Colour colourToClearTo)
 {
@@ -680,46 +793,16 @@ void Image::multiplyAlphaAt (int x, int y, float multiplier)
     }
 }
 
-template <class PixelType>
-struct PixelIterator
-{
-    template <class PixelOperation>
-    static void iterate (const Image::BitmapData& data, const PixelOperation& pixelOp)
-    {
-        for (int y = 0; y < data.height; ++y)
-            for (int x = 0; x < data.width; ++x)
-                pixelOp (*reinterpret_cast<PixelType*> (data.getPixelPointer (x, y)));
-    }
-};
-
-template <class PixelOperation>
-static void performPixelOp (const Image::BitmapData& data, const PixelOperation& pixelOp)
-{
-    switch (data.pixelFormat)
-    {
-        case Image::ARGB:           PixelIterator<PixelARGB> ::iterate (data, pixelOp); break;
-        case Image::RGB:            PixelIterator<PixelRGB>  ::iterate (data, pixelOp); break;
-        case Image::SingleChannel:  PixelIterator<PixelAlpha>::iterate (data, pixelOp); break;
-        case Image::UnknownFormat:
-        default:                    jassertfalse; break;
-    }
-}
-
 void Image::multiplyAllAlphas (float amountToMultiplyBy)
 {
-    jassert (hasAlphaChannel());
-
-    const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), BitmapData::readWrite);
-    performPixelOp (destData, [&] (auto& p) { p.multiplyAlpha (amountToMultiplyBy); });
+    if (auto ptr = image)
+        ptr->multiplyAllAlphas (amountToMultiplyBy);
 }
 
 void Image::desaturate()
 {
-    if (isARGB() || isRGB())
-    {
-        const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), BitmapData::readWrite);
-        performPixelOp (destData, [] (auto& p) { p.desaturate(); });
-    }
+    if (auto ptr = image)
+        ptr->desaturate();
 }
 
 void Image::createSolidAreaMask (RectangleList<int>& result, float alphaThreshold) const
@@ -840,111 +923,6 @@ void Image::moveImageSection (int dx, int dy,
             }
         }
     }
-}
-
-void ImageEffects::applyGaussianBlurEffect (float radius, const Image& input, Image& result)
-{
-    auto image = input.getPixelData();
-
-    if (image == nullptr)
-    {
-        result = {};
-        return;
-    }
-
-    auto copy = result;
-    image->applyGaussianBlurEffect (radius, copy);
-
-    if (copy.isValid())
-    {
-        result = std::move (copy);
-        return;
-    }
-
-    const auto tie = [] (const auto& x) { return std::tuple (x.getFormat(), x.getWidth(), x.getHeight()); };
-
-    if (tie (input) != tie (result))
-        result = Image { input.getFormat(), input.getWidth(), input.getHeight(), false };
-
-    ImageConvolutionKernel blurKernel (roundToInt (radius * 2.0f));
-
-    blurKernel.createGaussianBlur (radius);
-
-    blurKernel.applyToImage (result, input, result.getBounds());
-}
-
-static void blurDataTriplets (uint8* d, int num, const int delta) noexcept
-{
-    uint32 last = d[0];
-    d[0] = (uint8) ((d[0] + d[delta] + 1) / 3);
-    d += delta;
-
-    num -= 2;
-
-    do
-    {
-        const uint32 newLast = d[0];
-        d[0] = (uint8) ((last + d[0] + d[delta] + 1) / 3);
-        d += delta;
-        last = newLast;
-    }
-    while (--num > 0);
-
-    d[0] = (uint8) ((last + d[0] + 1) / 3);
-}
-
-static void blurSingleChannelImage (uint8* const data, const int width, const int height,
-                                    const int lineStride, const int repetitions) noexcept
-{
-    jassert (width > 2 && height > 2);
-
-    for (int y = 0; y < height; ++y)
-        for (int i = repetitions; --i >= 0;)
-            blurDataTriplets (data + lineStride * y, width, 1);
-
-    for (int x = 0; x < width; ++x)
-        for (int i = repetitions; --i >= 0;)
-            blurDataTriplets (data + x, height, lineStride);
-}
-
-static void blurSingleChannelImage (Image& image, int radius)
-{
-    const Image::BitmapData bm (image, Image::BitmapData::readWrite);
-    blurSingleChannelImage (bm.data, bm.width, bm.height, bm.lineStride, 2 * radius);
-}
-
-void ImageEffects::applySingleChannelBoxBlurEffect (int radius, const Image& input, Image& result)
-{
-    auto image = input.getPixelData();
-
-    if (image == nullptr)
-    {
-        result = {};
-        return;
-    }
-
-    auto copy = result;
-    image->applySingleChannelBoxBlurEffect (radius, copy);
-
-    if (copy.isValid())
-    {
-        result = std::move (copy);
-        return;
-    }
-
-    const auto inputConfig = std::tuple (Image::SingleChannel, input.getWidth(), input.getHeight());
-    const auto outputConfig = std::tuple (result.getFormat(), result.getWidth(), result.getHeight());
-
-    if (inputConfig != outputConfig)
-        result = Image { Image::SingleChannel, input.getWidth(), input.getHeight(), false };
-
-    {
-        Image::BitmapData source { input, Image::BitmapData::readOnly };
-        Image::BitmapData dest { result, Image::BitmapData::writeOnly };
-        BitmapDataDetail::convert (source, dest);
-    }
-
-    blurSingleChannelImage (result, radius);
 }
 
 //==============================================================================
