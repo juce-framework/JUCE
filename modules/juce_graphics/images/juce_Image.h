@@ -326,9 +326,9 @@ public:
         };
 
         BitmapData (Image& image, int x, int y, int w, int h, ReadWriteMode mode);
+        BitmapData (const Image& image, Rectangle<int>, ReadWriteMode mode);
         BitmapData (const Image& image, int x, int y, int w, int h);
         BitmapData (const Image& image, ReadWriteMode mode);
-        ~BitmapData();
 
         /** Returns a pointer to the start of a line in the image.
             The coordinate you provide here isn't checked, so it's the caller's responsibility to make

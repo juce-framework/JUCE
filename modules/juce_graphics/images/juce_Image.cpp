@@ -342,7 +342,7 @@ public:
             sendDataChangeMessage();
     }
 
-    ImagePixelData::Ptr clone() override
+    Ptr clone() override
     {
         auto s = new SoftwarePixelData (pixelFormat, width, height, false);
         memcpy (s->imageData, imageData, (size_t) lineStride * (size_t) height);
@@ -515,8 +515,8 @@ Image Image::convertedToFormat (PixelFormat newFormat) const
         }
         else
         {
-            const BitmapData destData (newImage, 0, 0, w, h, BitmapData::writeOnly);
-            const BitmapData srcData (*this, 0, 0, w, h);
+            const BitmapData destData (newImage, { w, h }, BitmapData::writeOnly);
+            const BitmapData srcData (*this, { w, h }, BitmapData::readOnly);
 
             for (int y = 0; y < h; ++y)
             {
@@ -530,8 +530,8 @@ Image Image::convertedToFormat (PixelFormat newFormat) const
     }
     else if (image->pixelFormat == SingleChannel && newFormat == Image::ARGB)
     {
-        const BitmapData destData (newImage, 0, 0, w, h, BitmapData::writeOnly);
-        const BitmapData srcData (*this, 0, 0, w, h);
+        const BitmapData destData (newImage, { w, h }, BitmapData::writeOnly);
+        const BitmapData srcData (*this, { w, h }, BitmapData::readOnly);
 
         for (int y = 0; y < h; ++y)
         {
@@ -560,14 +560,24 @@ NamedValueSet* Image::getProperties() const
 }
 
 //==============================================================================
-Image::BitmapData::BitmapData (Image& im, int x, int y, int w, int h, BitmapData::ReadWriteMode mode)
-    : width (w), height (h)
+Image::BitmapData::BitmapData (Image& im, int x, int y, int w, int h, ReadWriteMode mode)
+    : BitmapData (im, { x, y, w, h }, mode)
+{
+}
+
+Image::BitmapData::BitmapData (const Image& im, Rectangle<int> bounds, ReadWriteMode mode)
+    : width (bounds.getWidth()), height (bounds.getHeight())
 {
     // The BitmapData class must be given a valid image, and a valid rectangle within it!
     jassert (im.image != nullptr);
-    jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= im.getWidth() && y + h <= im.getHeight());
+    jassert (bounds.getX() >= 0);
+    jassert (bounds.getY() >= 0);
+    jassert (bounds.getWidth() > 0);
+    jassert (bounds.getHeight() > 0);
+    jassert (bounds.getRight() <= im.getWidth());
+    jassert (bounds.getBottom() <= im.getHeight());
 
-    im.image->initialiseBitmapData (*this, x, y, mode);
+    im.image->initialiseBitmapData (*this, bounds.getX(), bounds.getY(), mode);
     jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
 }
 
@@ -582,7 +592,7 @@ Image::BitmapData::BitmapData (const Image& im, int x, int y, int w, int h)
     jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
 }
 
-Image::BitmapData::BitmapData (const Image& im, BitmapData::ReadWriteMode mode)
+Image::BitmapData::BitmapData (const Image& im, ReadWriteMode mode)
     : width (im.getWidth()),
       height (im.getHeight())
 {
@@ -591,10 +601,6 @@ Image::BitmapData::BitmapData (const Image& im, BitmapData::ReadWriteMode mode)
 
     im.image->initialiseBitmapData (*this, 0, 0, mode);
     jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
-}
-
-Image::BitmapData::~BitmapData()
-{
 }
 
 Colour Image::BitmapData::getPixelColour (int x, int y) const noexcept
