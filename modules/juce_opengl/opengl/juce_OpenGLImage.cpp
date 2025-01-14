@@ -38,11 +38,12 @@ namespace juce
 class OpenGLFrameBufferImage final : public ImagePixelData
 {
 public:
+    using Ptr = ReferenceCountedObjectPtr<OpenGLFrameBufferImage>;
+
     OpenGLFrameBufferImage (OpenGLContext& c, int w, int h)
         : ImagePixelData (Image::ARGB, w, h),
           context (c),
-          pixelStride (4),
-          lineStride (width * pixelStride)
+          pixelStride (4)
     {
     }
 
@@ -80,16 +81,17 @@ public:
     void initialiseBitmapData (Image::BitmapData& bitmapData, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
         bitmapData.pixelFormat = pixelFormat;
-        bitmapData.lineStride  = lineStride;
         bitmapData.pixelStride = pixelStride;
 
-        switch (mode)
-        {
-            case Image::BitmapData::writeOnly:  DataReleaser<Dummy,  Writer>::initialise (frameBuffer, bitmapData, x, y); break;
-            case Image::BitmapData::readOnly:   DataReleaser<Reader, Dummy> ::initialise (frameBuffer, bitmapData, x, y); break;
-            case Image::BitmapData::readWrite:  DataReleaser<Reader, Writer>::initialise (frameBuffer, bitmapData, x, y); break;
-            default:                            jassertfalse; break;
-        }
+        auto releaser = std::make_unique<DataReleaser> (this, Rectangle { x, y, bitmapData.width, bitmapData.height }, mode);
+
+        bitmapData.data = (uint8*) releaser->data.get();
+        bitmapData.size = (size_t) bitmapData.width
+                        * (size_t) bitmapData.height
+                        * sizeof (PixelARGB);
+        bitmapData.lineStride = (bitmapData.width * bitmapData.pixelStride + 3) & ~3;
+
+        bitmapData.dataReleaser = std::move (releaser);
 
         if (mode != Image::BitmapData::readOnly)
             sendDataChangeMessage();
@@ -99,99 +101,39 @@ public:
     OpenGLFrameBuffer frameBuffer;
 
 private:
-    int pixelStride, lineStride;
+    int pixelStride;
 
-    struct Dummy
-    {
-        Dummy (OpenGLFrameBuffer&, int, int, int, int) noexcept {}
-        static void read (OpenGLFrameBuffer&, Image::BitmapData& , int, int) noexcept {}
-        static void write (const PixelARGB*) noexcept {}
-    };
-
-    struct Reader
-    {
-        static void read (OpenGLFrameBuffer& frameBuffer, Image::BitmapData& bitmapData, int x, int y)
-        {
-            frameBuffer.readPixels ((PixelARGB*) bitmapData.data,
-                                    Rectangle<int> (x, frameBuffer.getHeight() - (y + bitmapData.height), bitmapData.width, bitmapData.height));
-
-            verticalRowFlip ((PixelARGB*) bitmapData.data, bitmapData.width, bitmapData.height);
-        }
-
-        static void verticalRowFlip (PixelARGB* const data, const int w, const int h)
-        {
-            HeapBlock<PixelARGB> tempRow (w);
-            auto rowSize = (size_t) w * sizeof (PixelARGB);
-
-            for (int y = 0; y < h / 2; ++y)
-            {
-                PixelARGB* const row1 = data + y * w;
-                PixelARGB* const row2 = data + (h - 1 - y) * w;
-                memcpy (tempRow, row1, rowSize);
-                memcpy (row1, row2, rowSize);
-                memcpy (row2, tempRow, rowSize);
-            }
-        }
-    };
-
-    struct Writer
-    {
-        Writer (OpenGLFrameBuffer& fb, int x, int y, int w, int h) noexcept
-            : frameBuffer (fb), area (x, y, w, h)
-        {}
-
-        void write (const PixelARGB* const data) const noexcept
-        {
-            HeapBlock<PixelARGB> invertedCopy (area.getWidth() * area.getHeight());
-            auto rowSize = (size_t) area.getWidth() * sizeof (PixelARGB);
-
-            for (int y = 0; y < area.getHeight(); ++y)
-                memcpy (invertedCopy + area.getWidth() * y,
-                        data + area.getWidth() * (area.getHeight() - 1 - y), rowSize);
-
-            frameBuffer.writePixels (invertedCopy, area);
-        }
-
-        OpenGLFrameBuffer& frameBuffer;
-        const Rectangle<int> area;
-
-        JUCE_DECLARE_NON_COPYABLE (Writer)
-    };
-
-    template <class ReaderType, class WriterType>
     struct DataReleaser final : public Image::BitmapData::BitmapDataReleaser
     {
-        DataReleaser (OpenGLFrameBuffer& fb, int x, int y, int w, int h)
-            : data ((size_t) (w * h)),
-              writer (fb, x, y, w, h)
-        {}
-
-        ~DataReleaser()
+        DataReleaser (Ptr selfIn, Rectangle<int> areaIn, Image::BitmapData::ReadWriteMode modeIn)
+            : self (selfIn),
+              data ((size_t) (areaIn.getWidth() * areaIn.getHeight())),
+              area (areaIn),
+              mode (modeIn)
         {
-            writer.write (data);
+            if (mode != Image::BitmapData::writeOnly)
+                self->frameBuffer.readPixels (data.get(), getArea());
         }
 
-        static void initialise (OpenGLFrameBuffer& frameBuffer, Image::BitmapData& bitmapData, int x, int y)
+        ~DataReleaser() override
         {
-            auto* r = new DataReleaser (frameBuffer, x, y, bitmapData.width, bitmapData.height);
-            bitmapData.dataReleaser.reset (r);
-
-            bitmapData.data = (uint8*) r->data.get();
-            bitmapData.size = (size_t) bitmapData.width
-                              * (size_t) bitmapData.height
-                              * sizeof (PixelARGB);
-            bitmapData.lineStride = (bitmapData.width * bitmapData.pixelStride + 3) & ~3;
-
-            ReaderType::read (frameBuffer, bitmapData, x, y);
+            if (mode != Image::BitmapData::readOnly)
+                self->frameBuffer.writePixels (data, getArea());
         }
 
+        Rectangle<int> getArea() const
+        {
+            return area.withBottomY (self->frameBuffer.getHeight() - area.getY());
+        }
+
+        Ptr self;
         HeapBlock<PixelARGB> data;
-        WriterType writer;
+        Rectangle<int> area;
+        Image::BitmapData::ReadWriteMode mode;
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLFrameBufferImage)
 };
-
 
 //==============================================================================
 OpenGLImageType::OpenGLImageType() {}
