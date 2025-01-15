@@ -35,19 +35,6 @@
 namespace juce
 {
 
-/*  A single bitmap that represents a subsection of a virtual bitmap. */
-struct Direct2DPixelDataPage
-{
-    /*  The bounds of the stored bitmap inside the virtual bitmap. */
-    Rectangle<int> getBounds() const;
-
-    /*  The stored subsection bitmap. */
-    ComSmartPtr<ID2D1Bitmap1> bitmap;
-
-    /*  The top-left position of this virtual bitmap inside the virtual bitmap. */
-    Point<int> topLeft;
-};
-
 /*  A set of pages that together represent a full virtual bitmap.
     All pages in the set always share the same resource context.
     Additionally, stores a reference to a software-backed bitmap, the content of which will
@@ -203,6 +190,8 @@ public:
 
     BackupExtensions* getBackupExtensions() override { return this; }
     const BackupExtensions* getBackupExtensions() const override { return this; }
+
+    ImagePixelDataNativeExtensions getNativeExtensions() override;
 
 private:
     enum class State

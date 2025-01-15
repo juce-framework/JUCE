@@ -95,6 +95,8 @@
   #pragma comment(lib, "dxguid.lib")
  #endif
 
+ #include "native/juce_Direct2DPixelDataPage_windows.h"
+
 #elif JUCE_IOS
  #import <QuartzCore/QuartzCore.h>
  #import <CoreText/CoreText.h>

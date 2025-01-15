@@ -245,6 +245,33 @@ private:
     // layer stack accordingly.
 };
 
+struct PagesAndArea
+{
+    Image imageHandle;
+    Span<const Direct2DPixelDataPage> pages;
+    Rectangle<int> area;
+
+    static PagesAndArea make (const Image& image, ComSmartPtr<ID2D1Device1> device)
+    {
+        using GetImage = Image (*) (const Image&);
+        constexpr GetImage converters[] { [] (const Image& i) { return i; },
+                                          [] (const Image& i) { return NativeImageType{}.convert (i); } };
+
+        for (auto* getImage : converters)
+        {
+            const auto converted = getImage (image);
+            const auto native = converted.getPixelData()->getNativeExtensions();
+
+            if (auto pages = native.getPages (device); ! pages.empty())
+                return PagesAndArea { converted, std::move (pages), converted.getBounds().withPosition (native.getTopLeft()) };
+        }
+
+        // Not sure how this could happen unless the NativeImageType no longer provides Windows native details...
+        jassertfalse;
+        return {};
+    }
+};
+
 struct Direct2DGraphicsContext::SavedState
 {
 public:
@@ -338,30 +365,30 @@ public:
             if (fillType.image.isNull())
                 return;
 
-            const auto d2d1Bitmap = [&]
-            {
-                if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (fillType.image.getPixelData().get()))
-                    if (const auto page = direct2DPixelData->getFirstPageForDevice (D2DUtilities::getDeviceForContext (context)))
-                        if (page->GetPixelFormat().format == DXGI_FORMAT_B8G8R8A8_UNORM)
-                            return page;
+            const auto device = D2DUtilities::getDeviceForContext (context);
+            const auto imageFormat = fillType.image.getFormat();
+            const auto targetFormat = imageFormat == Image::SingleChannel ? Image::ARGB : imageFormat;
+            const auto pagesAndArea = PagesAndArea::make (fillType.image.convertedToFormat (targetFormat), device);
 
-                JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (Direct2DMetricsHub::getInstance()->imageContextMetrics, createBitmapTime);
+            if (pagesAndArea.pages.empty())
+                return;
 
-                return Direct2DBitmap::toBitmap (fillType.image, context, Image::ARGB);
-            }();
+            const auto bitmap = pagesAndArea.pages.front().bitmap;
 
-            if (d2d1Bitmap != nullptr)
-            {
-                D2D1_BRUSH_PROPERTIES brushProps { fillType.getOpacity(), D2DUtilities::transformToMatrix (fillType.transform) };
-                auto bmProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP);
-                if (const auto hr = context->CreateBitmapBrush (d2d1Bitmap,
-                                                                bmProps,
-                                                                brushProps,
-                                                                bitmapBrush.resetAndGetPointerAddress()); SUCCEEDED (hr))
-                {
-                    currentBrush = bitmapBrush;
-                }
-            }
+            if (bitmap == nullptr)
+                return;
+
+            D2D1_BRUSH_PROPERTIES brushProps { fillType.getOpacity(), D2DUtilities::transformToMatrix (fillType.transform) };
+            auto bmProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP);
+            const auto hr = context->CreateBitmapBrush (bitmap,
+                                                        bmProps,
+                                                        brushProps,
+                                                        bitmapBrush.resetAndGetPointerAddress());
+
+            if (FAILED (hr))
+                return;
+
+            currentBrush = bitmapBrush;
         }
         else if (fillType.isGradient())
         {
@@ -1170,42 +1197,38 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
             return;
         }
 
-        // Is this a Direct2D image already?
-        ComSmartPtr<ID2D1Bitmap> d2d1Bitmap;
+        const auto device = D2DUtilities::getDeviceForContext (deviceContext);
+        const auto pagesAndArea = PagesAndArea::make (sourceImage, device);
 
-        if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (sourceImage.getPixelData().get()))
-            d2d1Bitmap = direct2DPixelData->getFirstPageForDevice (D2DUtilities::getDeviceForContext (deviceContext));
+        if (pagesAndArea.pages.empty())
+            return;
 
-        if (! d2d1Bitmap)
-        {
-            // Convert sourceImage to single-channel alpha-only maskImage
-            d2d1Bitmap = Direct2DBitmap::toBitmap (sourceImage, deviceContext, Image::SingleChannel);
-        }
+        const auto bitmap = pagesAndArea.pages.front().bitmap;
 
-        if (d2d1Bitmap)
-        {
-            // Make a transformed bitmap brush using the bitmap
-            // As usual, apply the current transform first *then* the transform parameter
-            ComSmartPtr<ID2D1BitmapBrush> brush;
-            auto matrix = D2DUtilities::transformToMatrix (brushTransform);
-            D2D1_BRUSH_PROPERTIES brushProps = { 1.0f, matrix };
+        if (bitmap == nullptr)
+            return;
 
-            auto bitmapBrushProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP);
-            auto hr = deviceContext->CreateBitmapBrush (d2d1Bitmap, bitmapBrushProps, brushProps, brush.resetAndGetPointerAddress());
+        // Make a transformed bitmap brush using the bitmap
+        // As usual, apply the current transform first *then* the transform parameter
+        ComSmartPtr<ID2D1BitmapBrush> brush;
+        auto matrix = D2DUtilities::transformToMatrix (brushTransform);
+        D2D1_BRUSH_PROPERTIES brushProps = { 1.0f, matrix };
 
-            if (SUCCEEDED (hr))
-            {
-                // Push the clipping layer onto the layer stack
-                // Don't set maskTransform in the LayerParameters struct; that only applies to geometry clipping
-                // Do set the contentBounds member, transformed appropriately
-                auto layerParams = D2D1::LayerParameters1();
-                auto transformedBounds = sourceImage.getBounds().toFloat().transformedBy (brushTransform);
-                layerParams.contentBounds = D2DUtilities::toRECT_F (transformedBounds);
-                layerParams.opacityBrush = brush;
+        auto bitmapBrushProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP);
+        auto hr = deviceContext->CreateBitmapBrush (bitmap, bitmapBrushProps, brushProps, brush.resetAndGetPointerAddress());
 
-                currentState->pushLayer (layerParams);
-            }
-        }
+        if (FAILED (hr))
+            return;
+
+        // Push the clipping layer onto the layer stack
+        // Don't set maskTransform in the LayerParameters struct; that only applies to geometry clipping
+        // Do set the contentBounds member, transformed appropriately
+        auto layerParams = D2D1::LayerParameters1();
+        auto transformedBounds = sourceImage.getBounds().toFloat().transformedBy (brushTransform);
+        layerParams.contentBounds = D2DUtilities::toRECT_F (transformedBounds);
+        layerParams.opacityBrush = brush;
+
+        currentState->pushLayer (layerParams);
     }
 }
 
@@ -1451,53 +1474,36 @@ void Direct2DGraphicsContext::drawImage (const Image& imageIn, const AffineTrans
 
     if (auto deviceContext = getPimpl()->getDeviceContext())
     {
-        auto image = NativeImageType{}.convert (imageIn);
-        Direct2DPixelData* nativeBitmap = nullptr;
-        Rectangle<int> imageClipArea;
+        const auto device = D2DUtilities::getDeviceForContext (deviceContext);
+        const auto pagesAndArea = PagesAndArea::make (imageIn, device);
 
-        const auto imageTransform = currentState->currentTransform.getTransformWith (transform);
-
-        if (auto* subsectionPixelData = dynamic_cast<SubsectionPixelData*> (image.getPixelData().get()))
-        {
-            if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (subsectionPixelData->getSourcePixelData().get()))
-            {
-                nativeBitmap  = direct2DPixelData;
-                imageClipArea = subsectionPixelData->getSubsection();
-            }
-        }
-        else if (auto direct2DPixelData = dynamic_cast<Direct2DPixelData*> (image.getPixelData().get()))
-        {
-            nativeBitmap  = direct2DPixelData;
-            imageClipArea = { direct2DPixelData->width, direct2DPixelData->height };
-        }
-        else
-        {
-            // This shouldn't happen, we converted the image to a native type already
-            jassertfalse;
-        }
-
-        if (! nativeBitmap)
+        if (pagesAndArea.pages.empty())
         {
             jassertfalse;
             return;
         }
 
-        auto drawTiles = [&] (const auto& pixelData, auto&& getRect)
+        const auto imageTransform = currentState->currentTransform.getTransformWith (transform);
+
+        auto drawTiles = [&] (auto&& getRect)
         {
-            for (const auto& page : pixelData->getPagesForDevice (D2DUtilities::getDeviceForContext (deviceContext)))
+            for (const auto& page : pagesAndArea.pages)
             {
+                if (page.bitmap == nullptr)
+                    continue;
+
                 const auto pageBounds = page.getBounds();
-                const auto intersection = pageBounds.toFloat().getIntersection (imageClipArea.toFloat());
+                const auto intersection = pageBounds.toFloat().getIntersection (pagesAndArea.area.toFloat());
 
                 if (intersection.isEmpty())
                     continue;
 
                 const auto src = intersection - pageBounds.getPosition().toFloat();
-                const auto dst = getRect (intersection - imageClipArea.getPosition().toFloat());
+                const auto dst = getRect (intersection - pagesAndArea.area.getPosition().toFloat());
                 const auto [srcConverted, dstConverted] = std::tuple (D2DUtilities::toRECT_F (src),
                                                                       D2DUtilities::toRECT_F (dst));
 
-                if (nativeBitmap->pixelFormat == Image::SingleChannel)
+                if (page.bitmap->GetPixelFormat().format == DXGI_FORMAT_A8_UNORM)
                 {
                     const auto lastColour = currentState->colourBrush->GetColor();
                     const auto lastMode = deviceContext->GetAntialiasMode();
@@ -1526,7 +1532,7 @@ void Direct2DGraphicsContext::drawImage (const Image& imageIn, const AffineTrans
 
         if (imageTransform.isOnlyTranslation() || D2DHelpers::isTransformAxisAligned (imageTransform))
         {
-            drawTiles (nativeBitmap, [&] (auto intersection)
+            drawTiles ([&] (auto intersection)
             {
                 return intersection.transformedBy (imageTransform);
             });
@@ -1536,7 +1542,7 @@ void Direct2DGraphicsContext::drawImage (const Image& imageIn, const AffineTrans
 
         ScopedTransform scopedTransform { *getPimpl(), currentState, transform };
 
-        drawTiles (nativeBitmap, [] (auto intersection)
+        drawTiles ([] (auto intersection)
         {
             return intersection;
         });

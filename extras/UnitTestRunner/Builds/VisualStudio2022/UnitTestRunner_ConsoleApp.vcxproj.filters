@@ -7122,6 +7122,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DMetrics_windows.h">
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DPixelDataPage_windows.h">
+      <Filter>JUCE Modules\juce_graphics\native</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_DirectX_windows.h">
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClInclude>

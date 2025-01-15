@@ -276,14 +276,22 @@ public:
     /*  For subsection images, this returns the top-left pixel inside the root image */
     Point<int> getTopLeft() const { return impl->getTopLeft(); }
 
+   #if JUCE_WINDOWS
+    Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1> x) const { return impl->getPages (x); }
+   #endif
+
 private:
     struct Base
     {
         virtual ~Base() = default;
         virtual Point<int> getTopLeft() const = 0;
-    };
 
-    template <typename Impl>
+       #if JUCE_WINDOWS
+        virtual Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1>) const = 0;
+       #endif
+   };
+
+   template <typename Impl>
     class Concrete : public Base
     {
     public:
@@ -291,6 +299,10 @@ private:
             : impl (std::move (x)) {}
 
         Point<int> getTopLeft() const override { return impl.getTopLeft(); }
+
+       #if JUCE_WINDOWS
+        Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1> x) const override { return impl.getPages (x); }
+       #endif
 
     private:
         Impl impl;
@@ -376,6 +388,13 @@ public:
         {
             explicit Wrapped (Ptr selfIn)
                 : self (selfIn) {}
+
+           #if JUCE_WINDOWS
+            Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1> x) const
+            {
+                return self->sourceImage->getNativeExtensions().getPages (x);
+            }
+           #endif
 
             Point<int> getTopLeft() const
             {
@@ -465,6 +484,10 @@ auto ImagePixelData::getNativeExtensions() -> NativeExtensions
     struct Wrapped
     {
         Point<int> getTopLeft() const { return {}; }
+
+       #if JUCE_WINDOWS
+        Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1>) const { return {}; }
+       #endif
     };
 
     return NativeExtensions { Wrapped{} };

@@ -35,13 +35,6 @@
 namespace juce
 {
 
-Rectangle<int> Direct2DPixelDataPage::getBounds() const
-{
-    return bitmap != nullptr ? D2DUtilities::rectFromSize (bitmap->GetPixelSize()).withPosition (topLeft)
-                             : Rectangle<int>{};
-}
-
-//==============================================================================
 static std::vector<Direct2DPixelDataPage> makePages (ComSmartPtr<ID2D1Device1> device,
                                                      ImagePixelData::Ptr backingData,
                                                      bool needsClear)
@@ -781,6 +774,29 @@ bool Direct2DPixelData::canBackup() const
     {
         return pair.second.isUpToDate();
     });
+}
+
+auto Direct2DPixelData::getNativeExtensions() -> NativeExtensions
+{
+    struct Wrapped
+    {
+        explicit Wrapped (Ptr s)
+            : self (s) {}
+
+        Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1> x) const
+        {
+            return self->getPagesForDevice (x);
+        }
+
+        Point<int> getTopLeft() const
+        {
+            return {};
+        }
+
+        Ptr self;
+    };
+
+    return NativeExtensions { Wrapped { this } };
 }
 
 //==============================================================================

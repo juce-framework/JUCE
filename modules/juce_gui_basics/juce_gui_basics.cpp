@@ -199,6 +199,7 @@
  #include <juce_graphics/native/juce_Direct2DGraphicsContext_windows.h>
  #include <juce_graphics/native/juce_Direct2DHwndContext_windows.h>
  #include <juce_graphics/native/juce_DirectX_windows.h>
+ #include <juce_graphics/native/juce_Direct2DPixelDataPage_windows.h>
  #include <juce_graphics/native/juce_Direct2DImage_windows.h>
  #include <juce_graphics/native/juce_Direct2DImageContext_windows.h>
 
