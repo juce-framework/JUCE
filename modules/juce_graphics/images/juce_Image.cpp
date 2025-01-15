@@ -280,6 +280,11 @@ public:
     Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1> x) const { return impl->getPages (x); }
    #endif
 
+   #if JUCE_MAC || JUCE_IOS
+    CGContextRef getCGContext() const { return impl->getCGContext(); }
+    CGImageRef getCGImage (CGColorSpaceRef x) const { return impl->getCGImage (x); }
+   #endif
+
 private:
     struct Base
     {
@@ -289,9 +294,14 @@ private:
        #if JUCE_WINDOWS
         virtual Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1>) const = 0;
        #endif
-   };
 
-   template <typename Impl>
+       #if JUCE_MAC || JUCE_IOS
+        virtual CGContextRef getCGContext() const = 0;
+        virtual CGImageRef getCGImage (CGColorSpaceRef x) const = 0;
+       #endif
+    };
+
+    template <typename Impl>
     class Concrete : public Base
     {
     public:
@@ -302,6 +312,11 @@ private:
 
        #if JUCE_WINDOWS
         Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1> x) const override { return impl.getPages (x); }
+       #endif
+
+       #if JUCE_MAC || JUCE_IOS
+        CGContextRef getCGContext() const override { return impl.getCGContext(); }
+        CGImageRef getCGImage (CGColorSpaceRef x) const override { return impl.getCGImage (x); }
        #endif
 
     private:
@@ -396,6 +411,18 @@ public:
             }
            #endif
 
+           #if JUCE_MAC || JUCE_IOS
+            CGContextRef getCGContext() const
+            {
+                return self->sourceImage->getNativeExtensions().getCGContext();
+            }
+
+            CGImageRef getCGImage (CGColorSpaceRef colourSpace) const
+            {
+                return self->sourceImage->getNativeExtensions().getCGImage (colourSpace);
+            }
+           #endif
+
             Point<int> getTopLeft() const
             {
                 return self->sourceImage->getNativeExtensions().getTopLeft() + self->area.getTopLeft();
@@ -487,6 +514,11 @@ auto ImagePixelData::getNativeExtensions() -> NativeExtensions
 
        #if JUCE_WINDOWS
         Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1>) const { return {}; }
+       #endif
+
+       #if JUCE_MAC || JUCE_IOS
+        CGContextRef getCGContext() const { return {}; }
+        CGImageRef getCGImage (CGColorSpaceRef) const { return {}; }
        #endif
     };
 
