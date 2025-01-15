@@ -123,7 +123,7 @@ public:
 
         if (preview != nullptr)
         {
-            nsViewPreview = [[NSView alloc] initWithFrame: makeNSRect (preview->getLocalBounds())];
+            nsViewPreview = [[NSView alloc] initWithFrame: makeCGRect (preview->getLocalBounds())];
             [panel setAccessoryView: nsViewPreview];
 
             preview->addToDesktop (0, (void*) nsViewPreview);

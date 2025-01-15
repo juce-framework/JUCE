@@ -1687,7 +1687,7 @@ public:
         static NSView* createViewFor (AudioProcessor* filter, JuceAU* au, AudioProcessorEditor* const editor)
         {
             auto* editorCompHolder = new EditorCompHolder (editor);
-            auto r = convertToHostBounds (makeNSRect (editorCompHolder->getSizeToContainChild()));
+            auto r = convertToHostBounds (makeCGRect (editorCompHolder->getSizeToContainChild()));
 
             static JuceUIViewClass cls;
             auto* view = [[cls.createInstance() initWithFrame: r] autorelease];
@@ -1766,7 +1766,7 @@ public:
             [CATransaction begin];
             [CATransaction setValue: (id) kCFBooleanTrue forKey:kCATransactionDisableActions];
 
-            auto rect = convertToHostBounds (makeNSRect (lastBounds));
+            auto rect = convertToHostBounds (makeCGRect (lastBounds));
             auto* view = (NSView*) getWindowHandle();
 
             auto superRect = [[view superview] frame];

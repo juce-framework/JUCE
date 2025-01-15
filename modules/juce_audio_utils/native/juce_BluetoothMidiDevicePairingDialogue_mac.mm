@@ -94,7 +94,7 @@ private:
     {
         if (bounds != nullptr)
         {
-            auto nsBounds = makeNSRect (*bounds);
+            auto nsBounds = makeCGRect (*bounds);
 
             auto mainScreenHeight = []
             {

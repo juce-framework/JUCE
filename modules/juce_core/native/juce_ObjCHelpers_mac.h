@@ -141,16 +141,19 @@ inline var nsDictionaryToVar (const NSDictionary* dictionary)
     return jsonDataToVar (jsonObjectToData (dictionary));
 }
 
-#if JUCE_MAC
+// NSRect is just another name for CGRect, but CGRect is available on iOS *and* macOS.
+// Use makeCGRect below.
 template <typename RectangleType>
-NSRect makeNSRect (const RectangleType& r) noexcept
+CGRect makeNSRect (const RectangleType& r) noexcept = delete;
+
+template <typename RectangleType>
+CGRect makeCGRect (const RectangleType& r) noexcept
 {
-    return NSMakeRect (static_cast<CGFloat> (r.getX()),
+    return CGRectMake (static_cast<CGFloat> (r.getX()),
                        static_cast<CGFloat> (r.getY()),
                        static_cast<CGFloat> (r.getWidth()),
                        static_cast<CGFloat> (r.getHeight()));
 }
-#endif
 
 #if JUCE_INTEL
  template <typename T>

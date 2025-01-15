@@ -160,8 +160,8 @@ private:
         {
             auto* view = static_cast<NSView*> (getView());
             const auto newArea = peer->getAreaCoveredBy (*this);
-            [view setFrame: makeNSRect (newArea.withHeight (newArea.getHeight() + 1))];
-            [view setFrame: makeNSRect (newArea)];
+            [view setFrame: makeCGRect (newArea.withHeight (newArea.getHeight() + 1))];
+            [view setFrame: makeCGRect (newArea)];
         }
     }
 
