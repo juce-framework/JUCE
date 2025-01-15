@@ -262,9 +262,49 @@ namespace BitmapDataDetail
     }
 }
 
+//==============================================================================
+/*  Allows access to ImagePixelData implementation details by LowLevelGraphicsContext instances.
+    The internal templating is mainly to facilitate returning a type with dynamic implementation by value.
+*/
+class ImagePixelDataNativeExtensions
+{
+public:
+    template <typename Impl>
+    explicit ImagePixelDataNativeExtensions (Impl x)
+        : impl (std::make_unique<Concrete<Impl>> (std::move (x))) {}
+
+    /*  For subsection images, this returns the top-left pixel inside the root image */
+    Point<int> getTopLeft() const { return impl->getTopLeft(); }
+
+private:
+    struct Base
+    {
+        virtual ~Base() = default;
+        virtual Point<int> getTopLeft() const = 0;
+    };
+
+    template <typename Impl>
+    class Concrete : public Base
+    {
+    public:
+        explicit Concrete (Impl x)
+            : impl (std::move (x)) {}
+
+        Point<int> getTopLeft() const override { return impl.getTopLeft(); }
+
+    private:
+        Impl impl;
+    };
+
+    std::unique_ptr<Base> impl;
+};
+
+//==============================================================================
 class SubsectionPixelData : public ImagePixelData
 {
 public:
+    using Ptr = ReferenceCountedObjectPtr<SubsectionPixelData>;
+
     SubsectionPixelData (ImagePixelData::Ptr source, Rectangle<int> r)
         : ImagePixelData (source->pixelFormat, r.getWidth(), r.getHeight()),
           sourceImage (std::move (source)),
@@ -329,6 +369,24 @@ public:
 
     /* as we always hold a reference to image, don't double count */
     int getSharedCount() const noexcept override { return getReferenceCount() + sourceImage->getSharedCount() - 1; }
+
+    NativeExtensions getNativeExtensions() override
+    {
+        struct Wrapped
+        {
+            explicit Wrapped (Ptr selfIn)
+                : self (selfIn) {}
+
+            Point<int> getTopLeft() const
+            {
+                return self->sourceImage->getNativeExtensions().getTopLeft() + self->area.getTopLeft();
+            }
+
+            Ptr self;
+        };
+
+        return NativeExtensions { Wrapped { this } };
+    }
 
 private:
     Rectangle<int> getIntersection (Rectangle<int> b) const
@@ -400,6 +458,16 @@ void ImagePixelData::desaturateInArea (Rectangle<int> b)
         const Image::BitmapData destData (Image { this }, b, Image::BitmapData::readWrite);
         BitmapDataDetail::performPixelOp (destData, [] (auto& p) { p.desaturate(); });
     }
+}
+
+auto ImagePixelData::getNativeExtensions() -> NativeExtensions
+{
+    struct Wrapped
+    {
+        Point<int> getTopLeft() const { return {}; }
+    };
+
+    return NativeExtensions { Wrapped{} };
 }
 
 //==============================================================================

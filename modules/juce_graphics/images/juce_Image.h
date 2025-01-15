@@ -555,6 +555,11 @@ protected:
     ~ImagePixelDataBackupExtensions() = default;
 };
 
+/** @internal
+    @tags{Graphics}
+ */
+class ImagePixelDataNativeExtensions;
+
 //==============================================================================
 /**
     This is a base class for holding image data in implementation-specific ways.
@@ -572,6 +577,7 @@ class JUCE_API  ImagePixelData  : public ReferenceCountedObject
 {
 public:
     using BackupExtensions = ImagePixelDataBackupExtensions;
+    using NativeExtensions = ImagePixelDataNativeExtensions;
 
     ImagePixelData (Image::PixelFormat, int width, int height);
     ~ImagePixelData() override;
@@ -678,6 +684,9 @@ public:
     ListenerList<Listener> listeners;
 
     void sendDataChangeMessage();
+
+    /** @internal intentionally not callable from user code */
+    virtual NativeExtensions getNativeExtensions();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePixelData)
