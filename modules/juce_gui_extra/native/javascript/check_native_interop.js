@@ -105,7 +105,7 @@ if (
       return [eventId, id];
     }
 
-    removeEventListener([eventId, id]) {
+    removeEventListener(eventId, id) {
       if (this.eventListeners.has(eventId)) {
         this.eventListeners.get(eventId).removeListener(id);
       }
