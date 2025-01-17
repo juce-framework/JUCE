@@ -686,7 +686,6 @@ public:
         if (webView == nullptr)
         {
             scriptsWaitingForExecution.push_back ({ script, std::move (callbackIn) });
-            triggerAsyncUpdate();
             return;
         }
 
@@ -1059,6 +1058,7 @@ private:
                     {
                         if (weakThis != nullptr)
                         {
+                            weakThis->triggerAsyncUpdate();
                             webView2ConstructionHelper.webView2BeingCreated = nullptr;
 
                             if (controller != nullptr)
@@ -1156,15 +1156,9 @@ private:
     //==============================================================================
     void handleAsyncUpdate() override
     {
-        if (webView == nullptr && ! webViewBeingCreated)
+        if (webView == nullptr)
         {
-            webViewBeingCreated = true;
             createWebView();
-        }
-
-        if (webView == nullptr && ! scriptsWaitingForExecution.empty())
-        {
-            triggerAsyncUpdate();
             return;
         }
 
@@ -1206,7 +1200,6 @@ private:
     WebViewHandle webViewHandle;
     ComSmartPtr<ICoreWebView2Controller> webViewController;
     ComSmartPtr<ICoreWebView2> webView;
-    bool webViewBeingCreated = false;
 
     EventRegistrationToken navigationStartingToken   { 0 },
                            newWindowRequestedToken   { 0 },
