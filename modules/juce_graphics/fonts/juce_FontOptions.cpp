@@ -93,6 +93,8 @@ auto FontOptions::tie() const
                        typeface.get(),
                        fallbacks,
                        metricsKind,
+                       ascentOverride,
+                       descentOverride,
                        height,
                        pointHeight,
                        tracking,

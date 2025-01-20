@@ -185,7 +185,7 @@ public:
 
     auto* getFont() const { return font; }
 
-    TypefaceAscentDescent getMetrics (TypefaceMetricsKind kind) const
+    TypefaceAscentDescent getAscentDescent (TypefaceMetricsKind kind) const
     {
         switch (kind)
         {
@@ -199,10 +199,9 @@ public:
         return {};
     }
 
-    HbFont getFontAtSizeAndScale (TypefaceMetricsKind kind, float height, float horizontalScale) const
+    HbFont getFontAtPointSizeAndScale (float points, float horizontalScale) const
     {
         HbFont subFont { hb_font_create_sub_font (font) };
-        const auto points = height * getMetrics (kind).getHeightToPointsFactor();
 
         hb_font_set_ptem (subFont.get(), points);
         hb_font_set_scale (subFont.get(), HbScale::juceToHb (points * horizontalScale), HbScale::juceToHb (points));
@@ -405,8 +404,10 @@ void Typeface::getOutlineForGlyph (TypefaceMetricsKind kind, int glyphNumber, Pa
 {
     const auto native = getNativeDetails();
     auto* font = native.getFont();
-    const auto metrics = native.getMetrics (kind);
-    const auto scale = metrics.getHeightToPointsFactor() / (float) hb_face_get_upem (hb_font_get_face (font));
+    const auto metrics = native.getAscentDescent (kind);
+    const auto factor = metrics.getHeightToPointsFactor();
+    jassert (! std::isinf (factor));
+    const auto scale = factor / (float) hb_face_get_upem (hb_font_get_face (font));
 
     // getTypefaceGlyph returns glyphs in em space, getOutlineForGlyph returns glyphs in "special JUCE units" space
     path = getGlyphPathInGlyphUnits ((hb_codepoint_t) glyphNumber, getNativeDetails().getFont());
@@ -422,8 +423,10 @@ Rectangle<float> Typeface::getGlyphBounds (TypefaceMetricsKind kind, int glyphNu
         return {};
 
     const auto native = getNativeDetails();
-    const auto metrics = native.getMetrics (kind);
-    const auto scale = metrics.getHeightToPointsFactor() / (float) hb_face_get_upem (hb_font_get_face (font));
+    const auto metrics = native.getAscentDescent (kind);
+    const auto factor = metrics.getHeightToPointsFactor();
+    jassert (! std::isinf (factor));
+    const auto scale = factor / (float) hb_face_get_upem (hb_font_get_face (font));
 
     return Rectangle { (float) extents.width, (float) extents.height }
             .withPosition ((float) extents.x_bearing, (float) extents.y_bearing)
@@ -524,8 +527,10 @@ static std::vector<GlyphLayer> getBitmapLayer (const Typeface& typeface, int gly
 std::vector<GlyphLayer> Typeface::getLayersForGlyph (TypefaceMetricsKind kind, int glyphNumber, const AffineTransform& transform, float) const
 {
     auto* font = getNativeDetails().getFont();
-    const auto metrics = getNativeDetails().getMetrics (kind);
-    const auto scale = metrics.getHeightToPointsFactor() / (float) hb_face_get_upem (hb_font_get_face (font));
+    const auto metrics = getNativeDetails().getAscentDescent (kind);
+    const auto factor = metrics.getHeightToPointsFactor();
+    jassert (! std::isinf (factor));
+    const auto scale = factor / (float) hb_face_get_upem (hb_font_get_face (font));
     const auto combinedTransform = AffineTransform::scale (scale, -scale).followedBy (transform);
 
     if (auto bitmapLayer = getBitmapLayer (*this, glyphNumber, combinedTransform); ! bitmapLayer.empty())
@@ -558,7 +563,7 @@ int Typeface::getColourGlyphFormats() const
 
 TypefaceMetrics Typeface::getMetrics (TypefaceMetricsKind kind) const
 {
-    return getNativeDetails().getMetrics (kind).getTypefaceMetrics();
+    return getNativeDetails().getAscentDescent (kind).getTypefaceMetrics();
 }
 
 Typeface::Ptr Typeface::createSystemTypefaceFor (const void* fontFileData, size_t fontFileDataSize)
@@ -601,7 +606,8 @@ static float doSimpleShapeWithNoBreaks (const Typeface& typeface,
     hb_buffer_guess_segment_properties (buffer.get());
 
     const auto& native = typeface.getNativeDetails();
-    const auto sized = native.getFontAtSizeAndScale (kind, height, horizontalScale);
+    const auto points = typeface.getMetrics (kind).heightToPoints * height;
+    const auto sized = native.getFontAtPointSizeAndScale (points, horizontalScale);
     auto* font = sized.get();
 
     // Disable ligatures, because TextEditor requires a 1:1 codepoint/glyph mapping for caret

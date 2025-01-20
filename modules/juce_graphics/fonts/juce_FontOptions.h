@@ -161,8 +161,20 @@ public:
     /** Returns a copy of these options with underline enabled or disabled, defaults to disabled. */
     [[nodiscard]] FontOptions withUnderline       (bool x = true)          const { return withMember (*this, &FontOptions::underlined, x); }
 
-    /** Returns a copy of these options the specified metrics kind. */
+    /** Returns a copy of these options with the specified metrics kind. */
     [[nodiscard]] FontOptions withMetricsKind     (TypefaceMetricsKind x)  const { return withMember (*this, &FontOptions::metricsKind, x); }
+
+    /** Returns a copy of these options with the specified font metrics value override.
+        std::nullopt indicates that the font should use the built-in typeface metric; otherwise,
+        the ascent value will be found by multiplying the provided value by the font size in points.
+    */
+    [[nodiscard]] FontOptions withAscentOverride  (std::optional<float> x) const { return withMember (*this, &FontOptions::ascentOverride, x.value_or (-1.0f)); }
+
+    /** Returns a copy of these options with the specified font metrics value override.
+        std::nullopt indicates that the font should use the built-in typeface metric; otherwise,
+        the descent value will be found by multiplying the provided value by the font size in points.
+    */
+    [[nodiscard]] FontOptions withDescentOverride (std::optional<float> x) const { return withMember (*this, &FontOptions::descentOverride, x.value_or (-1.0f)); }
 
     /** @see withName() */
     [[nodiscard]] auto getName()            const { return name; }
@@ -186,6 +198,10 @@ public:
     [[nodiscard]] auto getUnderline()       const { return underlined; }
     /** @see withMetricsKind() */
     [[nodiscard]] auto getMetricsKind()     const { return metricsKind; }
+    /** @see withAscentOverride() */
+    [[nodiscard]] auto getAscentOverride()  const { return ascentOverride >= 0.0f ? std::make_optional (ascentOverride) : std::nullopt; }
+    /** @see withDescentOverride() */
+    [[nodiscard]] auto getDescentOverride() const { return descentOverride >= 0.0f ? std::make_optional (descentOverride) : std::nullopt; }
 
     /** Equality operator. */
     [[nodiscard]] bool operator== (const FontOptions& other) const;
@@ -211,6 +227,8 @@ private:
     float pointHeight = -1.0f;
     float tracking{};
     float horizontalScale = 1.0f;
+    float ascentOverride = -1.0f;
+    float descentOverride = -1.0f;
     bool fallbackEnabled = true;
     bool underlined{};
 };

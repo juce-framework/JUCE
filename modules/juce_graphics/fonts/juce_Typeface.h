@@ -96,7 +96,7 @@ enum class TypefaceMetricsKind
 */
 struct TypefaceMetrics
 {
-    /** The proportion of the typeface's height that it above the baseline, as a value between 0 and 1.
+    /** The proportion of the typeface's height that is above the baseline, as a value between 0 and 1.
         Note that 'height' here refers to the result of adding the absolute ascent and descent values.
         That is, the sum of the ascent and descent will equal 1.
         The sum of the ascent and descent will normally differ from the em size of the font.
@@ -107,6 +107,8 @@ struct TypefaceMetrics
 
     /** The factor by which a JUCE font height should be multiplied in order to convert to a font
         size in points.
+
+        May be inf if the font ascent and descent overrides have both been set to 0!
     */
     float heightToPoints{};
 };

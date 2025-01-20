@@ -434,6 +434,50 @@ public:
     */
     void setExtraKerningFactor (float extraKerning);
 
+    /** @see setAscentOverride() */
+    std::optional<float> getAscentOverride() const noexcept;
+
+    /** This is designed to mirror CSS's ascent-override property.
+
+        When the font size is specified in points (using setPointHeight(),
+        FontOptions::withPointHeight(), etc.), then the font's ascent value in points will be equal
+        to the font's size in points multiplied by the override value. That is, if the font size
+        is 14pt and the ascent override is 0.5f, then the ascent will be 7pt.
+
+        When the font size is *not* specified in points (using setHeight(),
+        FontOptions::withHeight(), etc.), then the behaviour is more subtle.
+        The ascent override still specifies the size of the font's ascender as a proportion of the
+        font's em size.
+        However, the point size of the font is now found by multiplying the JUCE height by the
+        height-to-point factor, where this factor is equal to
+        (1.0f / (ascent-in-em-units + descent-in-em-units)).
+        As an example, if the JUCE font height is 14, the ascent override is 0.5f, and the
+        descent override is 0.5f, then the font size will be 14pt and the ascent will be 7pt.
+        Changing the ascent override to 1.0f and the descent override to 0.0f will preserve the
+        font size of 14pt but give an ascender of 14pt and a descender of 0pt.
+        Changing the ascent and descent overrides both to 1.0f will result in the
+        font's size changing to 7pt with an ascent of 3.5pt.
+
+        @see setDescentOverride()
+    */
+    void setAscentOverride (std::optional<float>);
+
+    /** @see setDescentOverride() */
+    std::optional<float> getDescentOverride() const noexcept;
+
+    /** This is designed to mirror CSS's descent-override property.
+
+        Specifies a value to replace the built-in typeface descent metric.
+        The final descent value will be found by multiplying the provided value by the font
+        size. You may also pass std::nullopt to use the descent value specified in the typeface.
+
+        The documentation for setAscentOverride() includes a more thorough discussion
+        of the mechanism used for overriding.
+
+        @see setAscentOverride()
+    */
+    void setDescentOverride (std::optional<float>);
+
     //==============================================================================
     /** Changes all the font's characteristics with one call. */
     void setSizeAndStyle (float newHeight,
