@@ -610,7 +610,7 @@ public:
         popAllSavedStates();
     }
 
-    virtual SavedState* startFrame (float dpiScale)
+    virtual SavedState* startFrame()
     {
         prepare();
 
@@ -635,9 +635,6 @@ public:
 
         // Init device context transform
         resetTransform (deviceContext);
-
-        const auto effectiveDpi = USER_DEFAULT_SCREEN_DPI * dpiScale;
-        deviceContext->SetDpi (effectiveDpi, effectiveDpi);
 
         // Start drawing
         deviceContext->SetTarget (getDeviceContextTarget());
@@ -899,7 +896,7 @@ bool Direct2DGraphicsContext::startFrame (float dpiScale)
 {
     const auto pimpl = getPimpl();
     const auto paintAreas = pimpl->getPaintAreas();
-    currentState = pimpl->startFrame (dpiScale);
+    currentState = pimpl->startFrame();
 
     if (currentState == nullptr)
         return false;
