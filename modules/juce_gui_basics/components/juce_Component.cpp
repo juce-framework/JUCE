@@ -215,7 +215,10 @@ public:
         auto scaledBounds = c.getLocalBounds() * scale;
 
         if (effectImage.getBounds() != scaledBounds)
+        {
             effectImage = Image { c.isOpaque() ? Image::RGB : Image::ARGB, scaledBounds.getWidth(), scaledBounds.getHeight(), false };
+            effectImage.setBackupEnabled (false);
+        }
 
         if (! c.isOpaque())
             effectImage.clear (effectImage.getBounds());
