@@ -653,6 +653,11 @@ public:
         values.clear();
     }
 
+    Ranges::Operations shift (int64 from, int64 amount)
+    {
+        return ranges.shift (from, amount);
+    }
+
     Ranges::Operations eraseFrom (int64 i)
     {
         if (ranges.isEmpty())
