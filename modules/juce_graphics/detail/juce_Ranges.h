@@ -70,9 +70,15 @@ struct Ranges final
 
         struct Split
         {
-            explicit Split (size_t x) : index { x } {}
+            Split (size_t x, Range<int64> leftRangeIn, Range<int64> rightRangeIn)
+                : index { x },
+                  leftRange { leftRangeIn },
+                  rightRange { rightRangeIn }
+            {}
 
             size_t index;
+            Range<int64> leftRange;
+            Range<int64> rightRange;
         };
 
         struct Erase
@@ -84,9 +90,15 @@ struct Ranges final
 
         struct Change
         {
-            explicit Change (size_t x) : index { x } {}
+            Change (size_t x, Range<int64> oldRangeIn, Range<int64> newRangeIn)
+                : index { x },
+                  oldRange { oldRangeIn },
+                  newRange { newRangeIn }
+            {}
 
             size_t index;
+            Range<int64> oldRange;
+            Range<int64> newRange;
         };
     };
 
@@ -137,7 +149,9 @@ struct Ranges final
         if (elem.getStart() == i)
             return {};
 
-        ops = withOperationsFrom (ops, Ops::Split { *elemIndex });
+        ops = withOperationsFrom (ops, Ops::Split { *elemIndex,
+                                                    elem.withEnd (i),
+                                                    elem.withStart (i) });
 
         const auto oldLength = elem.getLength();
         elem.setEnd (i);
@@ -202,8 +216,9 @@ struct Ranges final
 
         for (auto it = shiftStartingFrom; it < ranges.end(); ++it)
         {
+            const auto oldRange = *it;
             *it += amount;
-            ops = withOperationsFrom (ops, Ops::Change { getIndex (it) });
+            ops = withOperationsFrom (ops, Ops::Change { getIndex (it), oldRange, *it });
         }
 
         return ops;
@@ -286,8 +301,9 @@ struct Ranges final
 
         Operations ops;
 
-        ops = withOperationsFrom (ops, Ops::Change { start });
+        const auto oldRange = ranges[start];
         ranges[start].setEnd (ranges[end].getEnd());
+        ops = withOperationsFrom (ops, Ops::Change { start, oldRange, ranges[start] });
 
         ops = withOperationsFrom (ops, Ops::Erase { { end, end + 1 } });
 
