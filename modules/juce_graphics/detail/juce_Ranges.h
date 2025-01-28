@@ -384,6 +384,11 @@ struct Ranges final
         return ranges.cend();
     }
 
+    auto* data() const
+    {
+        return ranges.data();
+    }
+
     /* Returns an iterator for the Range element which includes the provided value. */
     auto find (int64 i) const
     {
@@ -442,6 +447,95 @@ constexpr auto hasEqualityOperator = false;
 template <typename T>
 constexpr auto hasEqualityOperator<T, std::void_t<decltype (std::declval<T>() == std::declval<T>())>> = true;
 
+//==============================================================================
+template <typename T>
+struct RangedValuesIteratorItem
+{
+    Range<int64> range;
+    T& value;
+};
+
+//==============================================================================
+template <typename T>
+class RangedValuesIterator
+{
+private:
+    using InternalIterator = const Range<int64>*;
+
+public:
+    using value_type = std::pair<Range<int64>, T>;
+    using difference_type = std::ptrdiff_t;
+    using reference = RangedValuesIteratorItem<T>;
+
+    struct PointerProxy
+    {
+        PointerProxy (reference r) : ref { r } {}
+
+        auto operator->() const { return &ref; }
+
+        reference ref;
+    };
+
+    using pointer = PointerProxy;
+    using iterator_category = std::random_access_iterator_tag;
+
+    RangedValuesIterator (T* valuesIn, InternalIterator iteratorBaseIn, InternalIterator iteratorIn)
+        : values { valuesIn },
+          iteratorBase { iteratorBaseIn },
+          iterator { iteratorIn }
+    {}
+
+    RangedValuesIterator& operator+= (difference_type distance)
+    {
+        iterator += distance;
+        return *this;
+    }
+
+    friend RangedValuesIterator operator+ (RangedValuesIterator i, difference_type d) { return i += d; }
+    friend RangedValuesIterator operator+ (difference_type d, RangedValuesIterator i) { return i += d; }
+
+    RangedValuesIterator& operator-= (difference_type distance)
+    {
+        iterator -= distance;
+        return *this;
+    }
+
+    friend RangedValuesIterator operator- (RangedValuesIterator i, difference_type d) { return i -= d; }
+
+    reference operator[] (difference_type d) const
+    {
+        auto it = iterator[d];
+        return makeReference (it);
+    }
+
+    friend difference_type operator- (RangedValuesIterator a, RangedValuesIterator b)   { return a.iterator - b.iterator; }
+
+    friend bool operator<  (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator <  b.iterator; }
+    friend bool operator<= (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator <= b.iterator; }
+    friend bool operator>  (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator >  b.iterator; }
+    friend bool operator>= (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator >= b.iterator; }
+    friend bool operator== (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator == b.iterator; }
+    friend bool operator!= (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator != b.iterator; }
+
+    RangedValuesIterator& operator++()           { ++iterator; return *this; }
+    RangedValuesIterator& operator--()           { --iterator; return *this; }
+    RangedValuesIterator  operator++ (int) const { RangedValuesIterator copy (*this); ++(*this); return copy; }
+    RangedValuesIterator  operator-- (int) const { RangedValuesIterator copy (*this); --(*this); return copy; }
+
+    reference operator* () const { return makeReference (iterator); }
+    pointer   operator->() const { return PointerProxy { makeReference (iterator) }; }
+
+private:
+    reference makeReference (const InternalIterator& it) const
+    {
+        const auto valueIt = values + (size_t) std::distance (iteratorBase, it);
+
+        return { *it, *valueIt };
+    }
+
+    T* values{};
+    InternalIterator iteratorBase, iterator;
+};
 
 /*  Data structure for storing values associated with non-overlapping ranges.
 
@@ -471,117 +565,40 @@ public:
     static constexpr bool canMergeEqualItems = hasEqualityOperator<T>;
 
     template <typename RangedValuesType>
-    class RangedValuesIterator
+    static auto makeIterator (RangedValuesType* rv, const Range<int64>* base, const Range<int64>* iterator)
     {
-    private:
-        using InternalIterator = decltype (std::declval<RangedValuesType>().ranges.cbegin());
-
-    public:
-        using value_type = std::pair<Range<int64>, T>;
-        using difference_type = typename std::iterator_traits<typename std::vector<T>::iterator>::difference_type;
-        using reference = decltype (std::declval<RangedValuesType>().getItem (0));
-
-        struct PointerProxy
-        {
-            PointerProxy (reference r) : ref { r } {}
-
-            auto operator->() const { return &ref; }
-
-            reference ref;
-        };
-
-        using pointer = PointerProxy;
-        using iterator_category = std::random_access_iterator_tag;
-
-        RangedValuesIterator (RangedValuesType* ownerIn, InternalIterator iteratorIn)
-            : owner { ownerIn },
-              iterator { iteratorIn }
-        {}
-
-        RangedValuesIterator& operator+= (difference_type distance)
-        {
-            iterator += distance;
-            return *this;
-        }
-
-        friend RangedValuesIterator operator+ (RangedValuesIterator i, difference_type d) { return i += d; }
-        friend RangedValuesIterator operator+ (difference_type d, RangedValuesIterator i) { return i += d; }
-
-        RangedValuesIterator& operator-= (difference_type distance)
-        {
-            iterator -= distance;
-            return *this;
-        }
-
-        friend RangedValuesIterator operator- (RangedValuesIterator i, difference_type d) { return i -= d; }
-
-        reference makeReference (const InternalIterator& it) const
-        {
-            const auto valueIt = iteratorWithAdvance (owner->values.begin(), std::distance (owner->ranges.cbegin(), it));
-
-            return { *it, *valueIt };
-        }
-
-        reference operator[] (difference_type d) const
-        {
-            auto it = iterator[d];
-            return makeReference (it);
-        }
-
-        friend difference_type operator- (RangedValuesIterator a, RangedValuesIterator b)   { return a.iterator - b.iterator; }
-
-        friend bool operator<  (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator <  b.iterator; }
-        friend bool operator<= (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator <= b.iterator; }
-        friend bool operator>  (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator >  b.iterator; }
-        friend bool operator>= (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator >= b.iterator; }
-        friend bool operator== (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator == b.iterator; }
-        friend bool operator!= (RangedValuesIterator a, RangedValuesIterator b) { return a.iterator != b.iterator; }
-
-        RangedValuesIterator& operator++()           { ++iterator; return *this; }
-        RangedValuesIterator& operator--()           { --iterator; return *this; }
-        RangedValuesIterator  operator++ (int) const { RangedValuesIterator copy (*this); ++(*this); return copy; }
-        RangedValuesIterator  operator-- (int) const { RangedValuesIterator copy (*this); --(*this); return copy; }
-
-        reference operator* () const { return makeReference (iterator); }
-        pointer   operator->() const { return PointerProxy { makeReference (iterator) }; }
-
-    private:
-        RangedValuesType* owner{};
-        InternalIterator iterator;
-    };
-
-    template <typename X, typename Y>
-    static auto makeIterator (X* x, Y y) { return RangedValuesIterator<X> (x, y); }
+        return RangedValuesIterator<std::remove_pointer_t<decltype (rv->values.data())>> (rv->values.data(), base, iterator);
+    }
 
     //==============================================================================
     auto begin()
     {
-        return makeIterator (this, ranges.cbegin());
+        return makeIterator (this, ranges.data(), ranges.data());
     }
 
     auto begin() const
     {
-        return makeIterator (this, ranges.cbegin());
+        return makeIterator (this, ranges.data(), ranges.data());
     }
 
     auto cbegin() const
     {
-        return makeIterator (this, ranges.cbegin());
+        return makeIterator (this, ranges.data(), ranges.data());
     }
 
     auto end()
     {
-        return makeIterator (this, ranges.cend());
+        return makeIterator (this, ranges.data(), ranges.data() + ranges.size());
     }
 
     auto end() const
     {
-        return makeIterator (this, ranges.cend());
+        return makeIterator (this, ranges.data(), ranges.data() + ranges.size());
     }
 
     auto cend() const
     {
-        return makeIterator (this, ranges.cend());
+        return makeIterator (this, ranges.data(), ranges.data() + ranges.size());
     }
 
     struct Item
