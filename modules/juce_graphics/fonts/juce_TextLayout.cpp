@@ -325,23 +325,6 @@ static auto castTo (const Range<U>& r)
     return Range<T> (static_cast<T> (r.getStart()), static_cast<T> (r.getEnd()));
 }
 
-static auto getFontsForRange (const detail::RangedValues<Font>& fonts)
-{
-    using namespace detail;
-
-    std::vector<FontForRange> result;
-    result.reserve (fonts.size());
-
-    std::transform (fonts.begin(),
-                    fonts.end(),
-                    std::back_inserter (result),
-                    [] (auto entry) {
-                        return FontForRange { entry.range, entry.value };
-                    });
-
-    return result;
-}
-
 static Range<int64> getInputRange (const detail::ShapedText& st, Range<int64> glyphRange)
 {
     if (glyphRange.isEmpty())
@@ -425,7 +408,7 @@ void TextLayout::createStandardLayout (const AttributedString& text)
         colours.set (range, attribute.colour);
     }
 
-    auto shapedTextOptions = ShapedTextOptions{}.withFontsForRange (getFontsForRange (fonts))
+    auto shapedTextOptions = ShapedTextOptions{}.withFonts (fonts)
                                                 .withLanguage (SystemStats::getUserLanguage())
                                                 .withTrailingWhitespacesShouldFit (false)
                                                 .withJustification (justification)

@@ -494,19 +494,19 @@ static auto makeSpan (T& array)
     return Span { array.getRawDataPointer(), (size_t) array.size() };
 }
 
-static std::vector<FontForRange> findSuitableFontsForText (const Font& font,
-                                                           const String& text,
-                                                           const String& language = {})
+static detail::RangedValues<Font> findSuitableFontsForText (const Font& font,
+                                                            const String& text,
+                                                            const String& language = {})
 {
     detail::RangedValues<std::optional<Font>> fonts;
     fonts.set ({ 0, (int64) text.length() }, font);
 
     const auto getResult = [&]
     {
-        std::vector<FontForRange> result;
+        detail::RangedValues<Font> result;
 
         for (const auto [r, v] : fonts)
-            result.emplace_back (r, v.value_or (font));
+            result.set (r, v.value_or (font));
 
         return result;
     };
@@ -540,7 +540,7 @@ static std::vector<FontForRange> findSuitableFontsForText (const Font& font,
     // can't find any more suitable fonts or all codepoints have one
     for (auto numMissingGlyphs = markMissingGlyphs(); numMissingGlyphs > 0;)
     {
-        std::vector<FontForRange> changes;
+        std::vector<std::pair<Range<int64>, Font>> changes;
 
         for (const auto [r, f] : fonts)
         {
@@ -575,10 +575,8 @@ static RangedValues<Font> resolveFontsWithFallback (const String& string, const 
         auto rf = findSuitableFontsForText (f, string.substring ((int) r.getStart(),
                                                                  (int) std::min (r.getEnd(), (int64) string.length())));
 
-        for (auto& item : rf)
-            item.first += r.getStart();
-
-        resolved.setForEach<MergeEqualItems::no> (rf.begin(), rf.end());
+        for (const auto [subRange, font] : rf)
+            resolved.set<MergeEqualItems::no> (subRange + r.getStart(), font);
     }
 
     return resolved;
@@ -785,16 +783,11 @@ private:
 };
 
 template <typename T>
-static auto createRangedValues (const std::vector<std::pair<Range<int64>, T>>& pairs, int64 offset = 0)
+static auto rangedValuesWithOffset (detail::RangedValues<T> rv, int64 offset = 0)
 {
-    detail::RangedValues<T> result;
-
-    for (const auto& [range, value] : pairs)
-        result.insert (range.movedToStartAt (range.getStart() - offset), value);
-
-    result.eraseUpTo (0);
-
-    return result;
+    rv.shift (std::numeric_limits<int64>::min(), -offset);
+    rv.eraseUpTo (0);
+    return rv;
 }
 
 struct Shaper
@@ -819,8 +812,8 @@ struct Shaper
         const auto bidiLevels = bidiParagraph.getResolvedLevels();
 
         const auto fonts = resolveFontsWithFallback (string,
-                                                     createRangedValues (options.getFontsForRange(),
-                                                                         shapingRange.getStart()));
+                                                     rangedValuesWithOffset (options.getFontsForRange(),
+                                                                             shapingRange.getStart()));
 
         for (Unicode::LineBreakIterator lineIter { makeSpan (analysis) }; auto lineRun = lineIter.next();)
         {

@@ -35,8 +35,6 @@
 namespace juce::detail
 {
 
-using FontForRange = std::pair<Range<int64>, Font>;
-
 /** Types of text direction. This may also be applied to characters. */
 enum class TextDirection
 {
@@ -64,12 +62,13 @@ public:
 
     [[nodiscard]] ShapedTextOptions withFont (Font x) const
     {
-        return withMember (*this, &ShapedTextOptions::fontsForRange,
-                           std::vector<FontForRange> { { { 0, std::numeric_limits<int64>::max() },
-                                                         x } });
+        RangedValues<Font> fonts;
+        fonts.set ({ 0, std::numeric_limits<int64>::max() }, x);
+
+        return withMember (*this, &ShapedTextOptions::fontsForRange, std::move (fonts));
     }
 
-    [[nodiscard]] ShapedTextOptions withFontsForRange (const std::vector<FontForRange>& x) const
+    [[nodiscard]] ShapedTextOptions withFonts (const detail::RangedValues<Font>& x) const
     {
         return withMember (*this, &ShapedTextOptions::fontsForRange, x);
     }
@@ -151,8 +150,14 @@ private:
     std::optional<TextDirection> readingDir;
     std::optional<float> maxWidth;
     std::optional<float> height;
-    std::vector<FontForRange> fontsForRange { { { 0, std::numeric_limits<int64>::max() },
-                                                FontOptions { 15.0f } } };
+
+    detail::RangedValues<Font> fontsForRange = std::invoke ([&]
+    {
+        detail::RangedValues<Font> result;
+        result.set ({ 0, std::numeric_limits<int64>::max() }, FontOptions { 15.0f });
+        return result;
+    });
+
     String language = SystemStats::getDisplayLanguage();
     float firstLineIndent = 0.0f;
     float leading = 1.0f;
