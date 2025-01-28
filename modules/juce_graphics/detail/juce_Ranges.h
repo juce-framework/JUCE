@@ -903,9 +903,9 @@ public:
     /*  We pass a pointer rather than a reference here to make it clearer that the pointed-to object
         must outlive the RangedIteratorWrapper, otherwise the wrapped iterators will dangle.
     */
-    explicit RangedIteratorWrapper (const RangedValues<T>* rv)
-        : iterator { rv->cbegin() },
-          end { rv->cend() }
+    RangedIteratorWrapper (RangedValuesIterator<T> iteratorIn, RangedValuesIterator<T> endIn)
+        : iterator { std::move (iteratorIn) },
+          end { std::move (endIn) }
     {}
 
     //==============================================================================
@@ -917,11 +917,8 @@ public:
     const T& getValue() const { return iterator->value; }
 
 private:
-    decltype (std::declval<const RangedValues<T>&>().cbegin()) iterator, end;
+    RangedValuesIterator<T> iterator, end;
 };
-
-template <typename... Values>
-class IntersectingRangedValues;
 
 /*  A wrapper type encapsulating multiple RangedValues objects and providing iterator support.
 
@@ -949,36 +946,31 @@ class IntersectingRangedValues;
     @endcode
 */
 template <typename... Values>
-class IntersectingRangedValues<RangedValues<Values>...>
+class IntersectingRangedValues
 {
-private:
+public:
     static_assert (sizeof...(Values) > 0, "IntersectingRangedValues() must wrap at least one RangedValues object");
 
-    static auto createIteratorWrappers (const RangedValues<Values>*... containers)
-    {
-        return std::make_tuple (RangedIteratorWrapper { containers }...);
-    }
-
-public:
     /*  This constructor takes a pointer rather than a reference to make it clearer that the pointed-to
         objects must outlive the IntersectingRangedValues instance. Passing a pointer also makes
         it harder to accidentally reference a temporary when constructing IntersectingRangedValues.
     */
-    explicit IntersectingRangedValues (const RangedValues<Values>*... t)
-        : items { t... }
+    template <typename... Iterables>
+    explicit IntersectingRangedValues (Iterables*... iterable)
+        : iteratorWrappers { std::make_tuple (RangedIteratorWrapper<Values> { iterable->begin(), iterable->end() }...) }
     {
     }
 
     struct IntersectionIteratorSentinel {};
+
+    using IteratorWrappersType = std::tuple<RangedIteratorWrapper<Values>...>;
 
     struct IntersectionIterator
     {
         using reference  = std::tuple<Range<int64>, const Values&...>;
         using iterator_category = std::forward_iterator_tag;
 
-        using IteratorWrappersType = decltype (createIteratorWrappers (std::declval<const RangedValues<Values>*>()...));
-
-        explicit IntersectionIterator (IteratorWrappersType&& wrappers)
+        explicit IntersectionIterator (IteratorWrappersType wrappers)
             : iteratorWrappers { std::move (wrappers) }
         {
             std::apply ([this] (auto&&... args)
@@ -1065,11 +1057,7 @@ public:
 
     auto begin() const
     {
-        auto wrappers = std::apply ([] (auto&&... args)
-                                    { return createIteratorWrappers (std::forward<decltype (args)> (args)...); },
-                                    items);
-
-        return IntersectionIterator { std::move (wrappers) };
+        return IntersectionIterator { iteratorWrappers };
     }
 
     auto end() const
@@ -1078,17 +1066,17 @@ public:
     }
 
 private:
-    std::tuple<const RangedValues<Values>*...> items;
+    IteratorWrappersType iteratorWrappers;
 };
 
 /*  See IntersectingRangedValues.
 */
-template <typename... Values>
-[[nodiscard]] auto makeIntersectingRangedValues (const RangedValues<Values>*... rvs)
+template <typename... Iterables>
+[[nodiscard]] auto makeIntersectingRangedValues (Iterables*... iterables)
 {
-    static_assert (sizeof...(Values) > 0, "makeIntersectingRangedValues() requires at least one parameter");
+    static_assert (sizeof...(Iterables) > 0, "makeIntersectingRangedValues() requires at least one parameter");
 
-    return IntersectingRangedValues<RangedValues<Values>...> { rvs... };
+    return IntersectingRangedValues<std::remove_reference_t<decltype (std::declval<Iterables>().begin()->value)>...> { iterables... };
 }
 
 } // namespace juce::detail
