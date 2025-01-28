@@ -44,11 +44,6 @@ public:
     {
     }
 
-    void access (const std::function<void (Span<const ShapedGlyph>, Span<Point<float>>, Font, Range<int64>, int64)>& cb) const
-    {
-        justifiedText.access (cb);
-    }
-
     void draw (const Graphics& g, AffineTransform transform) const
     {
         drawJustifiedText (justifiedText, g, transform);
@@ -78,7 +73,7 @@ private:
     ShapedTextOptions options;
     String text;
     SimpleShapedText simpleShapedText { &text, options };
-    JustifiedText justifiedText { simpleShapedText, options };
+    JustifiedText justifiedText { &simpleShapedText, options };
 };
 
 ShapedText::ShapedText() : ShapedText ("", {})
@@ -92,11 +87,6 @@ ShapedText::ShapedText (String text) : ShapedText (std::move (text), {})
 ShapedText::ShapedText (String text, Options options)
 {
     impl = std::make_shared<Impl> (std::move (text), std::move (options));
-}
-
-void ShapedText::access (const std::function<void (Span<const ShapedGlyph>, Span<Point<float>>, Font, Range<int64>, int64)>& cb) const
-{
-    impl->access (cb);
 }
 
 void ShapedText::draw (const Graphics& g, AffineTransform transform) const
@@ -119,24 +109,8 @@ Span<const float> ShapedText::getMinimumRequiredWidthForLines() const
     return impl->getMinimumRequiredWidthForLines();
 }
 
-class ShapedText::Detail
-{
-public:
-    explicit Detail (const ShapedText* shapedTextIn)
-        : shapedText (*shapedTextIn)
-    {}
+const JustifiedText& ShapedText::getJustifiedText() const { return impl->getJustifiedText(); }
 
-    auto& getJustifiedText() const { return shapedText.impl->getJustifiedText(); }
-
-    auto& getSimpleShapedText() const { return shapedText.impl->getSimpleShapedText(); }
-
-private:
-    const ShapedText& shapedText;
-};
-
-ShapedText::Detail ShapedText::getDetail() const
-{
-    return Detail { this };
-}
+const SimpleShapedText& ShapedText::getSimpleShapedText() const { return impl->getSimpleShapedText(); }
 
 } // namespace juce::detail

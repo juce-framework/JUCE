@@ -57,8 +57,26 @@ private:
     };
 
 public:
-    JustifiedText (const SimpleShapedText& t, const ShapedTextOptions& options);
+    JustifiedText (const SimpleShapedText* t, const ShapedTextOptions& options);
 
+    /*  Provides access to the data stored in the ShapedText.
+
+        The provided callable will be called multiple times for "uniform glyph runs", for which all
+        callback parameters are the same.
+
+        Between each subsequent callback at least one of the provided parameters will be different.
+
+        The callbacks happen in visual order i.e. left to right, which is irrespective of the
+        underlying text's writing direction.
+
+        The callback parameters in order are:
+        - the glyphs
+        - the positions for each glyph in the previous parameter
+        - the Font with which these glyphs should be rendered
+        - the range in all glyphs this ShapedText object holds, that correspond to the current glyphs
+        - a line number which increases by one for each new line
+        - followed by any number of ValueType parameters for the supplied RangedValues<ValueType> arguments
+    */
     template <typename Callable, typename... RangedValues>
     void accessTogetherWith (Callable&& callback, RangedValues&&... rangedValues) const
     {
@@ -114,17 +132,6 @@ public:
             std::apply (invokeNullChecked, callbackParameters);
         }
     }
-
-    /* The callback receives (Span<const ShapedGlyph> glyphs,
-                              Span<Point<float>> positions,
-                              Font font,
-                              Range<int64> glyphRange,
-                              int64 lineNumber) // So far this has been indexed from 0 per SimpleShapedText
-                                                // object, but maybe we'll find we want global text level
-                                                // line numbers, so only assume they are increasing by one
-    */
-    template <typename Callable>
-    void access (Callable&& callback) const;
 
     /*  This is how much cumulative widths glyphs take up in each line. Whether the trailing
         whitespace is included depends on the ShapedTextOptions::getWhitespaceShouldFitInLine()

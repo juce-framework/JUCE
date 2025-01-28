@@ -214,8 +214,8 @@ static float getCrossAxisStartingAnchor (Justification justification,
     return minimumTop;
 }
 
-JustifiedText::JustifiedText (const SimpleShapedText& t, const ShapedTextOptions& options)
-    : shapedText (t)
+JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions& options)
+    : shapedText (*t)
 {
     const auto leading = options.getLeading() - 1.0f;
 
@@ -443,32 +443,26 @@ JustifiedText::JustifiedText (const SimpleShapedText& t, const ShapedTextOptions
                            realign.extraWhitespaceAdvance);
 }
 
-template <typename Callable>
-void JustifiedText::access (Callable&& callback) const
-{
-    accessTogetherWith (std::forward<Callable> (callback));
-}
-
 void drawJustifiedText (const JustifiedText& text, const Graphics& g, AffineTransform transform)
 {
     auto& context = g.getInternalContext();
     context.saveState();
     const ScopeGuard restoreGraphicsContext { [&context] { context.restoreState(); } };
 
-    text.access ([&] (auto glyphs, auto positions, auto font, auto, auto)
-                 {
-                     if (context.getFont() != font)
-                         context.setFont (font);
+    text.accessTogetherWith ([&] (auto glyphs, auto positions, auto font, auto, auto)
+                             {
+                                 if (context.getFont() != font)
+                                     context.setFont (font);
 
-                     std::vector<uint16_t> glyphIds (glyphs.size());
+                                 std::vector<uint16_t> glyphIds (glyphs.size());
 
-                     std::transform (glyphs.begin(),
-                                     glyphs.end(),
-                                     glyphIds.begin(),
-                                     [] (auto& glyph) { return (uint16_t) glyph.glyphId; });
+                                 std::transform (glyphs.begin(),
+                                                 glyphs.end(),
+                                                 glyphIds.begin(),
+                                                 [] (auto& glyph) { return (uint16_t) glyph.glyphId; });
 
-                     context.drawGlyphs (glyphIds, positions, transform);
-                 });
+                                 context.drawGlyphs (glyphIds, positions, transform);
+                             });
 }
 
 } // namespace juce::detail

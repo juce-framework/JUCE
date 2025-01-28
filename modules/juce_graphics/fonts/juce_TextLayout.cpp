@@ -362,9 +362,9 @@ static Range<int64> getLineInputRange (const detail::ShapedText& st, int64 lineN
 {
     using namespace detail;
 
-    return getInputRange (st, ShapedText::Detail { &st }.getSimpleShapedText()
-                                                        .getLineNumbers()
-                                                        .getItem ((size_t) lineNumber).range);
+    return getInputRange (st, st.getSimpleShapedText()
+                                .getLineNumbers()
+                                .getItem ((size_t) lineNumber).range);
 }
 
 struct MaxFontAscentAndDescent
@@ -375,7 +375,7 @@ struct MaxFontAscentAndDescent
 static MaxFontAscentAndDescent getMaxFontAscentAndDescentInEnclosingLine (const detail::ShapedText& st,
                                                                           Range<int64> lineChunkRange)
 {
-    const auto sst = detail::ShapedText::Detail { &st }.getSimpleShapedText();
+    const auto sst = st.getSimpleShapedText();
 
     const auto lineRange = sst.getLineNumbers()
                               .getItemWithEnclosingRange (lineChunkRange.getStart())->range;
@@ -435,13 +435,12 @@ void TextLayout::createStandardLayout (const AttributedString& text)
     if (text.getWordWrap() != AttributedString::none)
         shapedTextOptions = shapedTextOptions.withMaxWidth (width);
 
-    ShapedText shapedText { text.getText(), shapedTextOptions };
+    ShapedText st { text.getText(), shapedTextOptions };
 
     std::optional<int64> lastLineNumber;
     std::unique_ptr<Line> line;
 
-    auto& jt = ShapedText::Detail { &shapedText }.getJustifiedText();
-    jt.accessTogetherWith ([&] (Span<const ShapedGlyph> glyphs,
+    st.accessTogetherWith ([&] (Span<const ShapedGlyph> glyphs,
                                 Span<Point<float>> positions,
                                 Font font,
                                 Range<int64> glyphRange,
@@ -453,10 +452,10 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                    if (line != nullptr)
                                        addLine (std::move (line));
 
-                                   const auto ascentAndDescent = getMaxFontAscentAndDescentInEnclosingLine (shapedText,
+                                   const auto ascentAndDescent = getMaxFontAscentAndDescentInEnclosingLine (st,
                                                                                                             glyphRange);
 
-                                   line = std::make_unique<Line> (castTo<int> (getLineInputRange (shapedText, lineNumber)),
+                                   line = std::make_unique<Line> (castTo<int> (getLineInputRange (st, lineNumber)),
                                                                   positions[0],
                                                                   ascentAndDescent.ascent,
                                                                   ascentAndDescent.descent,
@@ -464,7 +463,7 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                                                   0);
                                }
 
-                               auto run = std::make_unique<Run> (castTo<int> (getInputRange (shapedText, glyphRange)), 0);
+                               auto run = std::make_unique<Run> (castTo<int> (getInputRange (st, glyphRange)), 0);
 
                                run->font = font;
                                run->colour = colour;

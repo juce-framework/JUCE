@@ -35,7 +35,7 @@
 namespace juce::detail
 {
 
-/** Class that can visually shape a Unicode string provided a list of Fonts corresponding to
+/*  Class that can visually shape a Unicode string provided a list of Fonts corresponding to
     sub-ranges of the string.
 */
 class JUCE_API  ShapedText
@@ -49,17 +49,17 @@ public:
 
     ShapedText (String text, Options options);
 
-    /** Returns the text which was used to construct this object. */
+    /*  Returns the text which was used to construct this object. */
     const String& getText() const;
 
-    /** Returns the text's codepoint range, to which the glyph under the provided index belongs.
+    /*  Returns the text's codepoint range, to which the glyph under the provided index belongs.
 
         This range will have a length of at least one, and potentially more than one if ligatures
         are enabled.
     */
     Range<int64> getTextRange (int64 glyphIndex) const;
 
-    /** Returns the widths for each line, that the glyphs would require to be rendered without being
+    /*  Returns the widths for each line, that the glyphs would require to be rendered without being
         truncated. This will or will not include the space required by trailing whitespaces in the
         line based on the ShapedTextOptions::withTrailingWhitespacesShouldFit() value.
 
@@ -68,33 +68,22 @@ public:
      */
     Span<const float> getMinimumRequiredWidthForLines() const;
 
-    /** Provides access to the data stored in the ShapedText.
+    /*  @see JustifiedText::accessTogetherWith */
+    template <typename Callable, typename... RangedValues>
+    void accessTogetherWith (Callable&& callback, RangedValues&&... rangedValues) const
+    {
+        getJustifiedText().accessTogetherWith (std::forward<Callable> (callback),
+                                               std::forward<RangedValues> (rangedValues)...);
+    }
 
-        The provided function callback will be called multiple times for "uniform glyph runs", for which all
-        callback parameters are the same.
-
-        Between each subsequent callback at least one of the provided parameters will be different.
-
-        The callbacks happen in visual order i.e. left to right, which is irrespective of the
-        underlying text's writing direction.
-
-        The callback parameters in order are:
-        - the glyphs
-        - the positions for each glyph in the previous parameter
-        - the Font with which these glyphs should be rendered
-        - the range in all glyphs this ShapedText object holds, that correspond to the current glyphs
-        - a line number which increases by one for each new line
-    */
-    void access (const std::function<void (Span<const ShapedGlyph>, Span<Point<float>>, Font, Range<int64>, int64)>&) const;
-
-    /** Draws the text. */
+    /*  Draws the text. */
     void draw (const Graphics& g, AffineTransform transform) const;
 
-    /** @internal */
-    class Detail;
+    /*  @internal */
+    const JustifiedText& getJustifiedText() const;
 
-    /** @internal */
-    Detail getDetail() const;
+    /*  @internal */
+    const SimpleShapedText& getSimpleShapedText() const;
 
 private:
     class Impl;
