@@ -49,6 +49,11 @@ public:
         drawJustifiedText (justifiedText, g, transform);
     }
 
+    float getHeight() const
+    {
+        return justifiedText.getHeight();
+    }
+
     auto& getText() const
     {
         return text;
@@ -92,6 +97,11 @@ ShapedText::ShapedText (String text, Options options)
 void ShapedText::draw (const Graphics& g, AffineTransform transform) const
 {
     impl->draw (g, transform);
+}
+
+float ShapedText::getHeight() const
+{
+    return impl->getHeight();
 }
 
 const String& ShapedText::getText() const

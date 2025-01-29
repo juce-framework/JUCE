@@ -79,6 +79,8 @@ public:
     /*  Draws the text. */
     void draw (const Graphics& g, AffineTransform transform) const;
 
+    float getHeight() const;
+
     /*  @internal */
     const JustifiedText& getJustifiedText() const;
 

@@ -427,10 +427,10 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                 Span<Point<float>> positions,
                                 Font font,
                                 Range<int64> glyphRange,
-                                int64 lineNumber,
+                                LineMetrics lineMetrics,
                                 Colour colour)
                            {
-                               if (std::exchange (lastLineNumber, lineNumber) != lineNumber)
+                               if (std::exchange (lastLineNumber, lineMetrics.lineNumber) != lineMetrics.lineNumber)
                                {
                                    if (line != nullptr)
                                        addLine (std::move (line));
@@ -438,7 +438,7 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                    const auto ascentAndDescent = getMaxFontAscentAndDescentInEnclosingLine (st,
                                                                                                             glyphRange);
 
-                                   line = std::make_unique<Line> (castTo<int> (getLineInputRange (st, lineNumber)),
+                                   line = std::make_unique<Line> (castTo<int> (getLineInputRange (st, lineMetrics.lineNumber)),
                                                                   positions[0],
                                                                   ascentAndDescent.ascent,
                                                                   ascentAndDescent.descent,

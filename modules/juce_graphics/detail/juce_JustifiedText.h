@@ -47,6 +47,21 @@ constexpr auto partiallyUnpack (Tuple&& tuple)
     return partiallyUnpackImpl<StartingAt> (std::forward<Tuple> (tuple), std::make_index_sequence<NumElems>{});
 }
 
+//==============================================================================
+struct LineMetrics
+{
+    int64 lineNumber;
+    Point<float> anchor;
+    float maxAscent;
+    float maxDescent;
+
+    /*  This will be below the current line's visual bottom if non-default leading or additive
+        line spacing is used.
+    */
+    float nextLineTop;
+};
+
+//==============================================================================
 class JustifiedText
 {
 private:
@@ -83,18 +98,17 @@ public:
         std::optional<int64> lastLine;
         Point<float> anchor {};
 
-        for (const auto item : makeIntersectingRangedValues (&shapedText.getLineNumbers(),
-                                                             &shapedText.getResolvedFonts(),
-                                                             &lineAnchors,
+        for (const auto item : makeIntersectingRangedValues (&shapedText.getResolvedFonts(),
+                                                             &linesMetrics,
                                                              &rangesToDraw,
                                                              &whitespaceStretch,
                                                              (&rangedValues)...))
         {
-            const auto& [range, line, font, lineAnchor, drawType, stretch] = partiallyUnpack<0, 6> (item);
-            const auto& rest = partiallyUnpack<6, std::tuple_size_v<decltype (item)> - 6> (item);
+            const auto& [range, font, lineMetrics, drawType, stretch] = partiallyUnpack<0, 5> (item);
+            const auto& rest = partiallyUnpack<5, std::tuple_size_v<decltype (item)> - 5> (item);
 
-            if (std::exchange (lastLine, line) != line)
-                anchor = lineAnchor;
+            if (std::exchange (lastLine, lineMetrics.lineNumber) != lineMetrics.lineNumber)
+                anchor = lineMetrics.anchor;
 
             const auto glyphs = [this, r = range, dt = drawType]() -> Span<const ShapedGlyph>
             {
@@ -124,7 +138,7 @@ public:
             const auto callbackFont =
                 drawType == DrawType::ellipsis ? ellipsis->getResolvedFonts().front().value : font;
             const auto callbackParameters =
-                std::tuple_cat (std::tie (glyphs, positions, callbackFont, range, line), rest);
+                std::tuple_cat (std::tie (glyphs, positions, callbackFont, range, lineMetrics), rest);
 
             const auto invokeNullChecked = [&] (auto&... params)
             { NullCheckedInvocation::invoke (callback, params...); };
@@ -139,9 +153,19 @@ public:
     */
     auto& getMinimumRequiredWidthForLines() const { return minimumRequiredWidthsForLine; }
 
+    /*  Returns the vertical distance from the baseline of the first line to the bottom of the last
+        plus any additional line spacing that follows from the leading and additiveLineSpacing
+        members of the ShapedTextOptions object.
+
+        This guarantees that if ShapedText object1 is drawn at y = 0 and object2 is drawn at
+        y = object1.getHeight(), then the two texts will be spaced exactly as if they were a single
+        ShapedText object containing both texts.
+    */
+    float getHeight() const;
+
 private:
     const SimpleShapedText& shapedText;
-    detail::RangedValues<Point<float>> lineAnchors;
+    detail::RangedValues<LineMetrics> linesMetrics;
     std::optional<SimpleShapedText> ellipsis;
     detail::RangedValues<DrawType> rangesToDraw;
     detail::RangedValues<float> whitespaceStretch;

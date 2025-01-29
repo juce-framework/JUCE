@@ -270,18 +270,26 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
                                                                                           : lineLength.withoutTrailingWhitespaces);
     }
 
-    auto y = options.isBaselineAtZero() ? 0.0f
-                                        : getCrossAxisStartingAnchor (options.getJustification(),
-                                                                      lineInfos,
-                                                                      options.getHeight(),
-                                                                      leading);
+    auto baseline = options.isBaselineAtZero() ? 0.0f
+                                               : getCrossAxisStartingAnchor (options.getJustification(),
+                                                                             lineInfos,
+                                                                             options.getHeight(),
+                                                                             leading);
 
     for (const auto [lineIndex, lineInfo] : enumerate (lineInfos))
     {
-        const auto range = shapedText.getLineNumbers().getItem ((size_t) lineIndex).range;
+        const auto lineNumber = shapedText.getLineNumbers().getItem ((size_t) lineIndex);
+        const auto range = lineNumber.range;
 
-        lineAnchors.set<detail::MergeEqualItems::no> (range,
-                                                      { lineInfo.mainAxisLineAlignment.anchor, y });
+        const auto maxDescent = lineInfo.lineHeight - lineInfo.maxAscent;
+        const auto nextLineTop = baseline + (1.0f + leading) * maxDescent + options.getAdditiveLineSpacing();
+
+        linesMetrics.set<detail::MergeEqualItems::no> (range,
+                                                       { lineNumber.value,
+                                                         { lineInfo.mainAxisLineAlignment.anchor, baseline },
+                                                         lineInfo.maxAscent,
+                                                         lineInfo.lineHeight - lineInfo.maxAscent,
+                                                         nextLineTop });
 
         whitespaceStretch.set (range, 0.0f);
         const auto stretchRange = lineInfo.mainAxisLineAlignment.stretchableWhitespaces + range.getStart();
@@ -289,10 +297,8 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
         whitespaceStretch.set (stretchRange,
                                lineInfo.mainAxisLineAlignment.extraWhitespaceAdvance);
 
-        const auto maxDescent = lineInfo.lineHeight - lineInfo.maxAscent;
         const auto nextLineMaxAscent = lineIndex < (int) lineInfos.size() - 1 ? lineInfos[(size_t) lineIndex + 1].maxAscent : 0.0f;
-
-        y += (1.0f + leading) * (maxDescent + nextLineMaxAscent) + options.getAdditiveLineSpacing();
+        baseline = nextLineTop + (1.0f + leading) * nextLineMaxAscent;
     }
 
     rangesToDraw.set ({ 0, (int64) shapedText.getGlyphs().size() }, DrawType::normal);
@@ -303,11 +309,11 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
     // The remaining logic below is for supporting
     // GlyphArrangement::addFittedText() when the maximum number of lines is
     // constrained.
-    if (lineAnchors.isEmpty())
+    if (linesMetrics.isEmpty())
         return;
 
-    const auto lastLineAlignment = lineAnchors.back();
-    const auto lastLineGlyphRange = lastLineAlignment.range;
+    const auto lastLineMetrics = linesMetrics.back();
+    const auto lastLineGlyphRange = lastLineMetrics.range;
     const auto lastLineGlyphs = shapedText.getGlyphs (lastLineGlyphRange);
     const auto lastLineLengths = getMainAxisLineLength (lastLineGlyphs);
 
@@ -318,7 +324,7 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
         || effectiveLength <= *options.getMaxWidth() + maxWidthTolerance)
         return;
 
-    const auto cutoffAtFront = lastLineAlignment.value.getX() < 0.0f - maxWidthTolerance;
+    const auto cutoffAtFront = lastLineMetrics.value.anchor.getX() < 0.0f - maxWidthTolerance;
 
     const auto getLastLineVisibleRange = [&] (float ellipsisLength)
     {
@@ -437,10 +443,18 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
                                          options.getTrailingWhitespacesShouldFit());
     }();
 
-    lastLineAlignment.value.setX (realign.anchor);
+    lastLineMetrics.value.anchor.setX (realign.anchor);
     whitespaceStretch.set (lastLineGlyphRange, 0.0f);
     whitespaceStretch.set (realign.stretchableWhitespaces + lastLineVisibleRange.getStart(),
                            realign.extraWhitespaceAdvance);
+}
+
+float JustifiedText::getHeight() const
+{
+    if (linesMetrics.isEmpty())
+        return 0.0f;
+
+    return linesMetrics.back().value.nextLineTop;
 }
 
 void drawJustifiedText (const JustifiedText& text, const Graphics& g, AffineTransform transform)
