@@ -800,6 +800,13 @@ public:
         return result;
     }
 
+    RangedValues<T> getIntersectionsStartingAtZeroWith (Range<int64> r) const
+    {
+        auto result = getIntersectionsWith (r);
+        result.drop ({ (int64) 0, r.getStart() });
+        return result;
+    }
+
     const auto& getRanges() const { return ranges; }
 
     size_t size() const
