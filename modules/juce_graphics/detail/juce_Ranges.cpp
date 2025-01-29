@@ -557,15 +557,15 @@ public:
             {
                 const auto intersections = rangedValues.getIntersectionsWith ({ 5, 43 });
 
-                expectRangedValuesItem (intersections[0], { 5, 10 }, 'a');
-                expectRangedValuesItem (intersections[1], { 11, 20 }, 'b');
-                expectRangedValuesItem (intersections[2], { 23, 30 }, 'c');
+                expectRangedValuesItem (intersections.getItem (0), { 5, 10 }, 'a');
+                expectRangedValuesItem (intersections.getItem (1), { 11, 20 }, 'b');
+                expectRangedValuesItem (intersections.getItem (2), { 23, 30 }, 'c');
             }
 
             {
                 const auto intersections = rangedValues.getIntersectionsWith ({ -10, 3 });
 
-                expectRangedValuesItem (intersections[0], { 0, 3 }, 'a');
+                expectRangedValuesItem (intersections.getItem (0), { 0, 3 }, 'a');
             }
         }
 

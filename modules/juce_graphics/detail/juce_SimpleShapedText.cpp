@@ -832,7 +832,7 @@ struct Shaper
                     const auto bidiLength = (int64) std::distance (it, next);
                     const auto bidiRange = Range<int64>::withStartAndLength (bidiStart, bidiLength);
 
-                    for (const auto& [range, font] : fonts.getIntersectionsWith (bidiRange))
+                    for (const auto [range, font] : fonts.getIntersectionsWith (bidiRange))
                     {
                         shaperRuns.set<MergeEqualItems::no> (range,
                                                              { scriptRun->front().script,

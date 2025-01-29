@@ -784,18 +784,17 @@ public:
     /*  Returns the stored values together with the overlapping range, that overlap with the
         provided range.
     */
-    std::vector<ConstItem> getIntersectionsWith (Range<int64> r) const
+    RangedValues<T> getIntersectionsWith (Range<int64> r) const
     {
         const auto intersections = ranges.getIntersectionsWith (r);
 
-        std::vector<ConstItem> result;
-        result.reserve (intersections.size());
+        RangedValues<T> result;
 
         for (const auto& is : intersections)
         {
             auto valueIndex = ranges.getIndexForEnclosingRange (is.getStart());
             jassert (valueIndex.has_value());
-            result.push_back ({ is, values[*valueIndex] });
+            result.template set<MergeEqualItems::no> (is, values[*valueIndex]);
         }
 
         return result;
