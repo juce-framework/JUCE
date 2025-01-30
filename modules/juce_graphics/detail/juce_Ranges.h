@@ -133,6 +133,9 @@ struct Ranges final
        #endif
     }
 
+    auto& getRanges()       { return ranges; }
+    auto& getRanges() const { return ranges; }
+
     //==============================================================================
     // Basic operations
     Operations split (int64 i)
