@@ -154,7 +154,7 @@ public:
                             if (levelAccumulator >= 255)
                                 iterationCallback.handleEdgeTablePixelFull (x);
                             else
-                                iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
+                                iterationCallback.handleEdgeTablePixel (x, static_cast<uint8_t> (levelAccumulator));
                         }
 
                         // if there's a run of similar pixels, do it all in one go..
@@ -164,7 +164,7 @@ public:
                             const int numPix = endOfRun - ++x;
 
                             if (numPix > 0)
-                                iterationCallback.handleEdgeTableLine (x, numPix, level);
+                                iterationCallback.handleEdgeTableLine (x, numPix, static_cast<uint8_t> (level));
                         }
 
                         // save the bit at the end to be drawn next time round the loop.
@@ -184,7 +184,7 @@ public:
                     if (levelAccumulator >= 255)
                         iterationCallback.handleEdgeTablePixelFull (x);
                     else
-                        iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
+                        iterationCallback.handleEdgeTablePixel (x, static_cast<uint8_t> (levelAccumulator));
                 }
             }
         }

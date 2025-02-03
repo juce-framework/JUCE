@@ -884,7 +884,13 @@ public:
     {
         beginTest ("Render image subsection");
         {
-            renderImageSubsection (NativeImageType{}, NativeImageType{});
+            const SoftwareImageType softwareImageType;
+            const NativeImageType nativeImageType;
+            const ImageType* types[] { &softwareImageType, &nativeImageType };
+
+            for (auto* sourceType : types)
+                for (auto* targetType : types)
+                    renderImageSubsection (*sourceType, *targetType);
         }
     }
 
@@ -904,6 +910,8 @@ private:
         {
             // Render the subsection image so that it fills 'target'
             Graphics g { target };
+            // Use low resampling quality, because we want to avoid our pixel getting blurry when it's scaled up
+            g.setImageResamplingQuality (Graphics::lowResamplingQuality);
             g.drawImage (subsection,
                          0, 0, target.getWidth(), target.getHeight(),
                          0, 0, 1, 1);

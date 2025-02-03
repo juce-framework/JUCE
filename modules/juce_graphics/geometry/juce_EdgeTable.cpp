@@ -102,7 +102,7 @@ EdgeTable::EdgeTable (Rectangle<int> area, const Path& path, const AffineTransfo
                 {
                     auto step = jmin (stepSize, y2 - y1, 256 - (y1 & 255));
                     auto x = static_cast<int64_t> (startX + multiplier * static_cast<double> ((y1 + (step >> 1)) - startY));
-                    auto clampedX = static_cast<int> (jlimit (leftLimit, rightLimit - 1, x));
+                    auto clampedX = static_cast<int> (jlimit (leftLimit, rightLimit, x));
 
                     addEdgePoint (clampedX, static_cast<int> (y1 / scale), static_cast<int> (direction * step));
                     y1 += step;
@@ -885,13 +885,43 @@ public:
             }();
 
             expect (! contains (edgeTableContainingAPath, { 6, 2 }),
-                    "The path doesn't enclose the point (6, 2) so it's EdgeTable shouldn't contain it");
+                    "The path doesn't enclose the point (6, 2) so its EdgeTable shouldn't contain it");
 
             expect (contains (edgeTableFromRectangle, { 6, 2 }),
-                    "The Rectangle covers the point (6, 2) so it's EdgeTable should contain it");
+                    "The Rectangle covers the point (6, 2) so its EdgeTable should contain it");
 
             expect (! contains (intersection, { 6, 2 }),
                     "The intersecting EdgeTable shouldn't contain (6, 2) because one of its constituents doesn't contain it either");
+        }
+
+        beginTest ("An EdgeTable constructed from a pixel-aligned Rectangle should not anti-alias");
+        {
+            Rectangle<int> area { 5, 5 };
+            Path p;
+            p.addRectangle (area.reduced (1));
+            EdgeTable bordered { area, p, {} };
+
+            // Pixels at edges should be clear
+            expect (getLevel (bordered, { 0, 0 }) == 0);
+            expect (getLevel (bordered, { 0, 4 }) == 0);
+            expect (getLevel (bordered, { 4, 0 }) == 0);
+            expect (getLevel (bordered, { 4, 4 }) == 0);
+
+            // Corners of filled area should have max level
+            expect (getLevel (bordered, { 1, 1 }) == 255);
+            expect (getLevel (bordered, { 1, 3 }) == 255);
+            expect (getLevel (bordered, { 3, 1 }) == 255);
+            expect (getLevel (bordered, { 3, 3 }) == 255);
+
+            Path q;
+            q.addRectangle (area);
+            EdgeTable filled { area, q, {} };
+
+            // Pixels at edges should have max level
+            expect (getLevel (filled, { 0, 0 }) == 255);
+            expect (getLevel (filled, { 0, 4 }) == 255);
+            expect (getLevel (filled, { 4, 0 }) == 255);
+            expect (getLevel (filled, { 4, 4 }) == 255);
         }
     }
 
@@ -911,47 +941,47 @@ private:
 
         void handleEdgeTablePixelFull (int x)
         {
+            handleEdgeTablePixel (x, 255);
+        }
+
+        void handleEdgeTablePixel (int x, uint8_t level)
+        {
             if (! (y < height && x < width))
                 return;
 
             auto* ptr = data.data() + width * y + x;
-            *ptr = 1;
-        }
-
-        void handleEdgeTablePixel (int x, int)
-        {
-            handleEdgeTablePixelFull (x);
+            *ptr = level;
         }
 
         void handleEdgeTableLineFull (int x, int w)
         {
+            handleEdgeTableLine (x, w, 255);
+        }
+
+        void handleEdgeTableLine (int x, int w, uint8_t level)
+        {
             if (! (y < height && x < width))
                 return;
 
             auto* ptr = data.data() + width * y + x;
-            std::fill (ptr, ptr + std::min (w, width - x), 1);
-        }
-
-        void handleEdgeTableLine (int x, int w, int)
-        {
-            handleEdgeTableLineFull (x, w);
+            std::fill (ptr, ptr + std::min (w, width - x), level);
         }
 
         void handleEdgeTableRectangleFull (int x, int yIn, int w, int h) noexcept
         {
+            handleEdgeTableRectangle (x, yIn, w, h, 255);
+        }
+
+        void handleEdgeTableRectangle (int x, int yIn, int w, int h, uint8_t level) noexcept
+        {
             for (int j = yIn; j < std::min (yIn + h, height); ++j)
             {
                 auto* ptr = data.data() + width * j + x;
-                std::fill (ptr, ptr + std::min (w, width - x), 1);
+                std::fill (ptr, ptr + std::min (w, width - x), level);
             }
         }
 
-        void handleEdgeTableRectangle (int x, int yIn, int w, int h, int) noexcept
-        {
-            handleEdgeTableRectangleFull (x, yIn, w, h);
-        }
-
-        int get (int x, int yIn) const
+        uint8_t get (int x, int yIn) const
         {
             const auto index = (size_t) (width * yIn + x);
 
@@ -963,17 +993,22 @@ private:
 
     private:
         const int width, height = 0;
-        std::vector<int> data;
+        std::vector<uint8_t> data;
         int y = 0;
     };
 
-    static bool contains (const EdgeTable& et, Point<int> p)
+    static uint8_t getLevel (const EdgeTable& et, Point<int> p)
     {
         EdgeTableFiller filler { p.getX() + 2, p.getY() + 2 };
         et.iterate (filler);
-
-        return filler.get (p.getX(), p.getY()) == 1;
+        return filler.get (p.getX(), p.getY());
     }
+
+    static bool contains (const EdgeTable& et, Point<int> p)
+    {
+        return getLevel (et, p) == 255;
+    }
+
 };
 
 static EdgeTableTests edgeTableTests;
