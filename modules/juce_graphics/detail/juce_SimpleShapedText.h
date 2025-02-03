@@ -187,7 +187,7 @@ private:
     float additiveLineSpacing = 0.0f;
     bool baselineAtZero = false;
     bool allowBreakingInsideWord = false;
-    bool trailingWhitespacesShouldFit;
+    bool trailingWhitespacesShouldFit = true;
     int64 maxNumLines = std::numeric_limits<int64>::max();
     String ellipsis;
 };
