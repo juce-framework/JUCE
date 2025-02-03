@@ -635,6 +635,11 @@ public:
     auto getTextRange()   const { return textRange; }
     const auto& getFont() const { return subOwnedGlyphsSpan.font; }
 
+    void setTextRange (Range<int64> newRange)
+    {
+        textRange = newRange;
+    }
+
 private:
     GlyphsStorage subOwnedGlyphsSpan;
     Span<const ShapedGlyph> glyphs;
@@ -931,9 +936,14 @@ struct Shaper
             while (end < endIt && end->cluster < nextSoftBreakBefore)
                 ++end;
 
+            const auto startingCluster = std::max (startFrom, start->cluster);
+
+            if (! result.empty())
+                result.back().setTextRange (result.back().getTextRange().withEnd (startingCluster));
+
             result.push_back ({ glyphsIt->value,
                                 Span<const ShapedGlyph> { start, (size_t) std::distance (start, end) },
-                                { startFrom, nextSoftBreakBefore },
+                                { startingCluster, nextSoftBreakBefore },
                                 visualOrder[(size_t) start->cluster] });
 
             if (end != endIt && end->cluster >= nextSoftBreakBefore)
