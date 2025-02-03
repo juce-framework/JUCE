@@ -871,4 +871,68 @@ Graphics::ScopedSaveState::~ScopedSaveState()
     context.restoreState();
 }
 
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class GraphicsTests : public UnitTest
+{
+public:
+    GraphicsTests() : UnitTest ("Graphics", UnitTestCategories::graphics) {}
+
+    void runTest() override
+    {
+        beginTest ("Render image subsection");
+        {
+            renderImageSubsection (NativeImageType{}, NativeImageType{});
+        }
+    }
+
+private:
+    void renderImageSubsection (const ImageType& sourceType, const ImageType& targetType)
+    {
+        const auto sourceColour = Colours::cyan;
+        const auto sourceOffset = 49;
+
+        const Image source { Image::ARGB, 50, 50, true, sourceType };
+        const Image target { Image::ARGB, 50, 50, true, targetType };
+
+        const auto subsection = source.getClippedImage (Rectangle { sourceOffset, sourceOffset, 1, 1 });
+
+        Image::BitmapData { subsection, Image::BitmapData::writeOnly }.setPixelColour (0, 0, sourceColour);
+
+        {
+            // Render the subsection image so that it fills 'target'
+            Graphics g { target };
+            g.drawImage (subsection,
+                         0, 0, target.getWidth(), target.getHeight(),
+                         0, 0, 1, 1);
+        }
+
+        {
+            // Check that all pixels in 'target' match the bottom right pixel of 'source'
+            const Image::BitmapData bitmap { target, Image::BitmapData::readOnly };
+
+            int numFailures = 0;
+
+            for (auto y = 0; y < bitmap.height; ++y)
+            {
+                for (auto x = 0; x < bitmap.width; ++x)
+                {
+                    const auto targetColour = bitmap.getPixelColour (x, y);
+
+                    if (targetColour != sourceColour)
+                        ++numFailures;
+                }
+            }
+
+            expect (numFailures == 0);
+        }
+    }
+};
+
+static GraphicsTests graphicsTests;
+
+#endif
+
 } // namespace juce

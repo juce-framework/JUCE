@@ -282,7 +282,7 @@ public:
 
    #if JUCE_MAC || JUCE_IOS
     CGContextRef getCGContext() const { return impl->getCGContext(); }
-    CGImageRef getCGImage (CGColorSpaceRef x) const { return impl->getCGImage (x); }
+    CFUniquePtr<CGImageRef> getCGImage (CGColorSpaceRef x) const { return impl->getCGImage (x); }
    #endif
 
 private:
@@ -297,7 +297,7 @@ private:
 
        #if JUCE_MAC || JUCE_IOS
         virtual CGContextRef getCGContext() const = 0;
-        virtual CGImageRef getCGImage (CGColorSpaceRef x) const = 0;
+        virtual CFUniquePtr<CGImageRef> getCGImage (CGColorSpaceRef x) const = 0;
        #endif
     };
 
@@ -316,7 +316,7 @@ private:
 
        #if JUCE_MAC || JUCE_IOS
         CGContextRef getCGContext() const override { return impl.getCGContext(); }
-        CGImageRef getCGImage (CGColorSpaceRef x) const override { return impl.getCGImage (x); }
+        CFUniquePtr<CGImageRef> getCGImage (CGColorSpaceRef x) const override { return impl.getCGImage (x); }
        #endif
 
     private:
@@ -417,9 +417,12 @@ public:
                 return self->sourceImage->getNativeExtensions().getCGContext();
             }
 
-            CGImageRef getCGImage (CGColorSpaceRef colourSpace) const
+            CFUniquePtr<CGImageRef> getCGImage (CGColorSpaceRef colourSpace) const
             {
-                return self->sourceImage->getNativeExtensions().getCGImage (colourSpace);
+                const auto& parentNative = self->sourceImage->getNativeExtensions();
+                const auto parentImage = parentNative.getCGImage (colourSpace);
+                return CFUniquePtr<CGImageRef> { CGImageCreateWithImageInRect (parentImage.get(),
+                                                                               makeCGRect (self->area + parentNative.getTopLeft())) };
             }
            #endif
 
@@ -518,7 +521,7 @@ auto ImagePixelData::getNativeExtensions() -> NativeExtensions
 
        #if JUCE_MAC || JUCE_IOS
         CGContextRef getCGContext() const { return {}; }
-        CGImageRef getCGImage (CGColorSpaceRef) const { return {}; }
+        CFUniquePtr<CGImageRef> getCGImage (CGColorSpaceRef) const { return {}; }
        #endif
     };
 

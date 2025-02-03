@@ -144,9 +144,9 @@ public:
     }
 
     //==============================================================================
-    static CGImageRef getCachedImageRef (const Image& juceImage, CGColorSpaceRef colourSpace)
+    static CFUniquePtr<CGImageRef> getCachedImageRef (const Image& juceImage, CGColorSpaceRef colourSpace)
     {
-        auto* cgim = std::invoke ([&]() -> CGImageRef
+        auto cgim = std::invoke ([&]() -> CFUniquePtr<CGImageRef>
         {
             if (auto ptr = juceImage.getPixelData())
                 return ptr->getNativeExtensions().getCGImage (colourSpace);
@@ -155,7 +155,7 @@ public:
         });
 
         if (cgim != nullptr)
-            return CGImageRetain (cgim);
+            return cgim;
 
         const Image::BitmapData srcData (juceImage, Image::BitmapData::readOnly);
 
@@ -163,13 +163,17 @@ public:
         CFUniquePtr<CFDataRef> data (CFDataCreate (nullptr, (const UInt8*) srcData.data, (CFIndex) usableSize));
         detail::DataProviderPtr provider { CGDataProviderCreateWithCFData (data.get()) };
 
-        return CGImageCreate ((size_t) srcData.width,
-                              (size_t) srcData.height,
-                              8,
-                              (size_t) srcData.pixelStride * 8,
-                              (size_t) srcData.lineStride,
-                              colourSpace, getCGImageFlags (juceImage.getFormat()), provider.get(),
-                              nullptr, true, kCGRenderingIntentDefault);
+        return CFUniquePtr<CGImageRef> { CGImageCreate ((size_t) srcData.width,
+                                                        (size_t) srcData.height,
+                                                        8,
+                                                        (size_t) srcData.pixelStride * 8,
+                                                        (size_t) srcData.lineStride,
+                                                        colourSpace,
+                                                        getCGImageFlags (juceImage.getFormat()),
+                                                        provider.get(),
+                                                        nullptr,
+                                                        true,
+                                                        kCGRenderingIntentDefault) };
     }
 
     //==============================================================================
@@ -185,10 +189,10 @@ public:
         HeapBlock<uint8> data;
     };
 
-    CGImageRef getCGImage (CGColorSpaceRef colourSpace)
+    CFUniquePtr<CGImageRef> getCGImage (CGColorSpaceRef colourSpace)
     {
         if (cachedImageRef != nullptr)
-            return cachedImageRef.get();
+            return CFUniquePtr<CGImageRef> { CGImageRetain (cachedImageRef.get()) };
 
         const Image::BitmapData srcData { Image { this }, Image::BitmapData::readOnly };
 
@@ -205,7 +209,7 @@ public:
                                              colourSpace, getCGImageFlags (pixelFormat), provider.get(),
                                              nullptr, true, kCGRenderingIntentDefault));
 
-        return cachedImageRef.get();
+        return CFUniquePtr<CGImageRef> { CGImageRetain (cachedImageRef.get()) };
     }
 
     ImageDataContainer::Ptr imageData = new ImageDataContainer();
@@ -222,7 +226,7 @@ public:
                 return self->context.get();
             }
 
-            CGImageRef getCGImage (CGColorSpaceRef x) const
+            CFUniquePtr<CGImageRef> getCGImage (CGColorSpaceRef x) const
             {
                 return self->getCGImage (x);
             }
@@ -1200,7 +1204,7 @@ Image juce_createImageFromCIImage (CIImage* im, int w, int h)
 
 CGImageRef juce_createCoreGraphicsImage (const Image& juceImage, CGColorSpaceRef colourSpace)
 {
-    return CoreGraphicsPixelData::getCachedImageRef (juceImage, colourSpace);
+    return CoreGraphicsPixelData::getCachedImageRef (juceImage, colourSpace).release();
 }
 
 CGContextRef juce_getImageContext (const Image& image)
