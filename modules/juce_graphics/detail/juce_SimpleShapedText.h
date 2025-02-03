@@ -44,7 +44,30 @@ enum class TextDirection
 
 class ShapedTextOptions
 {
+private:
+    auto tie() const
+    {
+        return std::tie (justification,
+                         readingDir,
+                         maxWidth,
+                         height,
+                         fontsForRange,
+                         language,
+                         firstLineIndent,
+                         leading,
+                         additiveLineSpacing,
+                         baselineAtZero,
+                         allowBreakingInsideWord,
+                         trailingWhitespacesShouldFit,
+                         maxNumLines,
+                         ellipsis);
+    }
+
 public:
+    bool operator== (const ShapedTextOptions& other) const { return tie() == other.tie(); }
+    bool operator!= (const ShapedTextOptions& other) const { return tie() != other.tie(); }
+
+    //==============================================================================
     [[nodiscard]] ShapedTextOptions withJustification (Justification x) const
     {
         return withMember (*this, &ShapedTextOptions::justification, x);
