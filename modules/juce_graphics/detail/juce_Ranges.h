@@ -133,6 +133,9 @@ struct Ranges final
        #endif
     }
 
+    bool operator== (const Ranges& other) const { return ranges == other.ranges; }
+    bool operator!= (const Ranges& other) const { return ranges != other.ranges; }
+
     auto& getRanges()       { return ranges; }
     auto& getRanges() const { return ranges; }
 
@@ -564,6 +567,8 @@ class RangedValues
         return j ? std::make_optional (self.getItem (*j)) : std::nullopt;
     }
 
+    auto tie() const { return std::make_tuple (ranges, values); }
+
 public:
     static constexpr bool canMergeEqualItems = hasEqualityOperator<T>;
 
@@ -572,6 +577,10 @@ public:
     {
         return RangedValuesIterator<std::remove_pointer_t<decltype (rv->values.data())>> (rv->values.data(), base, iterator);
     }
+
+    //==============================================================================
+    bool operator== (const RangedValues& other) const { return tie() == other.tie(); }
+    bool operator!= (const RangedValues& other) const { return tie() != other.tie(); }
 
     //==============================================================================
     auto begin()
