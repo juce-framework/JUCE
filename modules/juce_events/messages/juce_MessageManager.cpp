@@ -161,47 +161,9 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 #endif
 
 //==============================================================================
-class AsyncFunctionCallback final : public MessageManager::MessageBase
-{
-public:
-    AsyncFunctionCallback (MessageCallbackFunction* const f, void* const param)
-        : func (f), parameter (param)
-    {}
-
-    void messageCallback() override
-    {
-        result = (*func) (parameter);
-        finished.signal();
-    }
-
-    WaitableEvent finished;
-    std::atomic<void*> result { nullptr };
-
-private:
-    MessageCallbackFunction* const func;
-    void* const parameter;
-
-    JUCE_DECLARE_NON_COPYABLE (AsyncFunctionCallback)
-};
-
 void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func, void* parameter)
 {
-    if (isThisTheMessageThread())
-        return func (parameter);
-
-    // If this thread has the message manager locked, then this will deadlock!
-    jassert (! currentThreadHasLockedMessageManager());
-
-    const ReferenceCountedObjectPtr<AsyncFunctionCallback> message (new AsyncFunctionCallback (func, parameter));
-
-    if (message->post())
-    {
-        message->finished.wait();
-        return message->result.load();
-    }
-
-    jassertfalse; // the OS message queue failed to send the message!
-    return nullptr;
+    return callSync ([func, parameter] { return func (parameter); }).value_or (nullptr);
 }
 
 //==============================================================================
