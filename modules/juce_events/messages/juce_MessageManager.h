@@ -103,10 +103,24 @@ public:
     //==============================================================================
     /** Asynchronously invokes a function or C++11 lambda on the message thread.
 
-        @returns  true if the message was successfully posted to the message queue,
-                  or false otherwise.
+        @param function  the function to call, which should have no arguments
+        @returns         true if the message was successfully posted to the message queue,
+                         or false otherwise.
     */
-    static bool callAsync (std::function<void()> functionToCall);
+    template <typename Function>
+    static bool callAsync (Function&& function)
+    {
+        using NonRef = std::remove_cv_t<std::remove_reference_t<Function>>;
+
+        struct AsyncCallInvoker final : public MessageBase
+        {
+            explicit AsyncCallInvoker (NonRef f) : fn (std::move (f)) {}
+            void messageCallback() override { fn(); }
+            NonRef fn;
+        };
+
+        return (new AsyncCallInvoker { std::move (function) })->post();
+    }
 
     /** Calls a function using the message-thread.
 
