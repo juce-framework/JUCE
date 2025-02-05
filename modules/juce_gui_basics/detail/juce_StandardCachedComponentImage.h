@@ -89,7 +89,6 @@ struct StandardCachedComponentImage : public CachedComponentImage
 
         validArea = compBounds;
 
-        // TODO(reuk) test dragging/sharing between multiple graphics devices
         g.setColour (Colours::black.withAlpha (owner.getAlpha()));
         g.drawImageTransformed (image, AffineTransform::scale ((float) compBounds.getWidth()  / (float) imageBounds.getWidth(),
                                                                (float) compBounds.getHeight() / (float) imageBounds.getHeight()), false);
