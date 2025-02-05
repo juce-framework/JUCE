@@ -119,7 +119,7 @@ public:
 private:
     //==============================================================================
     File file;
-    void* fileHandle = nullptr;
+    detail::NativeFileHandle fileHandle{};
     Result status { Result::ok() };
     int64 currentPosition = 0;
     size_t bufferSize, bytesInBuffer = 0;

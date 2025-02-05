@@ -949,9 +949,9 @@ private:
 
 void FileOutputStream::flushInternal()
 {
-    if (fileHandle != nullptr)
+    if (fileHandle.isValid())
     {
-        if (fsync (getFD (fileHandle)) == -1)
+        if (fsync (fileHandle.get()) == -1)
             status = getResultForErrno();
 
         // This stuff tells the OS to asynchronously update the metadata

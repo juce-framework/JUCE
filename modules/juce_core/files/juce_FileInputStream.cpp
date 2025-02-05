@@ -35,7 +35,7 @@
 namespace juce
 {
 
-int64 juce_fileSetPosition (void* handle, int64 pos);
+int64 juce_fileSetPosition (detail::NativeFileHandle handle, int64 pos);
 
 
 //==============================================================================

@@ -241,9 +241,6 @@ namespace
     {
         return value == -1 ? getResultForErrno() : Result::ok();
     }
-
-    int getFD (void* handle) noexcept        { return (int) (pointer_sized_int) handle; }
-    void* fdToVoidPointer (int fd) noexcept  { return (void*) (pointer_sized_int) fd; }
 }
 
 bool File::isDirectory() const
@@ -442,9 +439,9 @@ Result File::createDirectoryInternal (const String& fileName) const
 }
 
 //==============================================================================
-int64 juce_fileSetPosition (void* handle, int64 pos)
+int64 juce_fileSetPosition (detail::NativeFileHandle handle, int64 pos)
 {
-    if (handle != nullptr && lseek (getFD (handle), (off_t) pos, SEEK_SET) == pos)
+    if (handle.isValid() && lseek (handle.get(), (off_t) pos, SEEK_SET) == pos)
         return pos;
 
     return -1;
@@ -455,24 +452,24 @@ void FileInputStream::openHandle()
     auto f = open (file.getFullPathName().toUTF8(), O_RDONLY);
 
     if (f != -1)
-        fileHandle = fdToVoidPointer (f);
+        fileHandle.set (f);
     else
         status = getResultForErrno();
 }
 
 FileInputStream::~FileInputStream()
 {
-    if (fileHandle != nullptr)
-        close (getFD (fileHandle));
+    if (fileHandle.isValid())
+        close (fileHandle.get());
 }
 
 size_t FileInputStream::readInternal (void* buffer, size_t numBytes)
 {
     ssize_t result = 0;
 
-    if (fileHandle != nullptr)
+    if (fileHandle.isValid())
     {
-        result = ::read (getFD (fileHandle), buffer, numBytes);
+        result = ::read (fileHandle.get(), buffer, numBytes);
 
         if (result < 0)
         {
@@ -497,7 +494,7 @@ void FileOutputStream::openHandle()
 
             if (currentPosition >= 0)
             {
-                fileHandle = fdToVoidPointer (f);
+                fileHandle.set (f);
             }
             else
             {
@@ -515,7 +512,7 @@ void FileOutputStream::openHandle()
         auto f = open (file.getFullPathName().toUTF8(), O_RDWR | O_CREAT, 00644);
 
         if (f != -1)
-            fileHandle = fdToVoidPointer (f);
+            fileHandle.set (f);
         else
             status = getResultForErrno();
     }
@@ -523,19 +520,19 @@ void FileOutputStream::openHandle()
 
 void FileOutputStream::closeHandle()
 {
-    if (fileHandle != nullptr)
+    if (fileHandle.isValid())
     {
-        close (getFD (fileHandle));
-        fileHandle = nullptr;
+        close (fileHandle.get());
+        fileHandle.invalidate();
     }
 }
 
 ssize_t FileOutputStream::writeInternal (const void* data, size_t numBytes)
 {
-    if (fileHandle == nullptr)
+    if (! fileHandle.isValid())
         return 0;
 
-    auto result = ::write (getFD (fileHandle), data, numBytes);
+    auto result = ::write (fileHandle.get(), data, numBytes);
 
     if (result == -1)
         status = getResultForErrno();
@@ -546,18 +543,18 @@ ssize_t FileOutputStream::writeInternal (const void* data, size_t numBytes)
 #ifndef JUCE_ANDROID
 void FileOutputStream::flushInternal()
 {
-    if (fileHandle != nullptr && fsync (getFD (fileHandle)) == -1)
+    if (fileHandle.isValid() && fsync (fileHandle.get()) == -1)
         status = getResultForErrno();
 }
 #endif
 
 Result FileOutputStream::truncate()
 {
-    if (fileHandle == nullptr)
+    if (! fileHandle.isValid())
         return status;
 
     flush();
-    return getResultForReturnValue (ftruncate (getFD (fileHandle), (off_t) currentPosition));
+    return getResultForReturnValue (ftruncate (fileHandle.get(), (off_t) currentPosition));
 }
 
 //==============================================================================

@@ -318,6 +318,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "files/juce_File.h"
 #include "files/juce_DirectoryIterator.h"
 #include "files/juce_RangedDirectoryIterator.h"
+#include "detail/juce_NativeFileHandle.h"
 #include "files/juce_FileInputStream.h"
 #include "files/juce_FileOutputStream.h"
 #include "files/juce_FileSearchPath.h"
