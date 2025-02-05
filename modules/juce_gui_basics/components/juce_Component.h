@@ -2692,14 +2692,14 @@ private:
     uint8 componentTransparency = 0;
 
     //==============================================================================
-    void internalMouseEnter (MouseInputSource, Point<float>, Time);
-    void internalMouseExit  (MouseInputSource, Point<float>, Time);
-    void internalMouseDown  (MouseInputSource, const detail::PointerState&, Time);
-    void internalMouseUp    (MouseInputSource, const detail::PointerState&, Time, ModifierKeys oldModifiers);
-    void internalMouseDrag  (MouseInputSource, const detail::PointerState&, Time);
-    void internalMouseMove  (MouseInputSource, Point<float>, Time);
-    void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
-    void internalMagnifyGesture (MouseInputSource, Point<float>, Time, float);
+    static void internalMouseEnter (SafePointer<Component>, MouseInputSource, Point<float>, Time);
+    static void internalMouseExit  (SafePointer<Component>, MouseInputSource, Point<float>, Time);
+    static void internalMouseDown  (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time);
+    static void internalMouseUp    (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time, ModifierKeys oldModifiers);
+    static void internalMouseDrag  (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time);
+    static void internalMouseMove  (SafePointer<Component>, MouseInputSource, Point<float>, Time);
+    static void internalMouseWheel (SafePointer<Component>, MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
+    static void internalMagnifyGesture (SafePointer<Component>, MouseInputSource, Point<float>, Time, float);
     void internalBroughtToFront();
     void internalKeyboardFocusGain (FocusChangeType, const WeakReference<Component>&, FocusChangeDirection);
     void internalKeyboardFocusGain (FocusChangeType);

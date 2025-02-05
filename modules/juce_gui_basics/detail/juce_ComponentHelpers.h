@@ -259,7 +259,7 @@ struct ComponentHelpers
         for (auto& ms : Desktop::getInstance().getMouseSources())
             if (auto* c = ms.getComponentUnderMouse())
                 if (modalWouldBlockComponent (*c, &modal))
-                    (c->*function) (ms, SH::screenPosToLocalPos (*c, ms.getScreenPosition()), Time::getCurrentTime());
+                    function (c, ms, SH::screenPosToLocalPos (*c, ms.getScreenPosition()), Time::getCurrentTime());
     }
 
     class ModalComponentManagerChangeNotifier
