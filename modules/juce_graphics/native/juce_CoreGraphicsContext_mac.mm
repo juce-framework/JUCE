@@ -113,16 +113,6 @@ public:
         applyFilterInArea (area, buildFilter);
     }
 
-    void applySingleChannelBoxBlurEffectInArea (Rectangle<int> area, int radius) override
-    {
-        const auto buildFilter = [radius]
-        {
-            return [CIFilter filterWithName: @"CIBoxBlur"
-                        withInputParameters: @{ kCIInputRadiusKey: [NSNumber numberWithFloat: (float) radius] }];
-        };
-        applyFilterInArea (area, buildFilter);
-    }
-
     void multiplyAllAlphasInArea (Rectangle<int> area, float amount) override
     {
         const auto buildFilter = [amount]
