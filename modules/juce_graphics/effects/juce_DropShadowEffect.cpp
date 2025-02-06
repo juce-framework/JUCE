@@ -61,7 +61,6 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
 {
     jassert (radius > 0);
 
-    const auto scale = g.getInternalContext().getPhysicalPixelScaleFactor();
     auto area = (path.getBounds().getSmallestIntegerContainer() + offset)
             .expanded (radius + 1)
             .getIntersection (g.getClipBounds().expanded (radius + 1));
@@ -69,14 +68,11 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
     if (area.getWidth() <= 2 || area.getHeight() <= 2)
         return;
 
-    const auto scaledArea = (area * scale).getSmallestIntegerContainer();
-
-    Image pathImage { Image::SingleChannel, scaledArea.getWidth(), scaledArea.getHeight(), true };
+    Image pathImage { Image::SingleChannel, area.getWidth(), area.getHeight(), true };
     pathImage.setBackupEnabled (false);
 
     {
         Graphics g2 (pathImage);
-        g2.addTransform (AffineTransform::scale (scale));
         g2.setColour (Colours::white);
         g2.fillPath (path, AffineTransform::translation ((float) (offset.x - area.getX()),
                                                          (float) (offset.y - area.getY())));
@@ -85,7 +81,7 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
     pathImage.getPixelData()->applySingleChannelBoxBlurEffect (radius);
 
     g.setColour (colour);
-    g.drawImage (pathImage, area.toFloat(), RectanglePlacement::stretchToFit, true);
+    g.drawImageAt (pathImage, area.getX(), area.getY(), true);
 }
 
 static void drawShadowSection (Graphics& g, ColourGradient& cg, Rectangle<float> area,
