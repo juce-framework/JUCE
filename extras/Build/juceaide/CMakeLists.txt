@@ -55,8 +55,7 @@ if(JUCE_BUILD_HELPER_TOOLS)
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
 
-    set_target_properties(juceaide PROPERTIES
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set_target_properties(juceaide PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
     export(TARGETS juceaide
            NAMESPACE juce_tools::
@@ -131,7 +130,8 @@ else()
             "-B${JUCE_BINARY_DIR}/tools"
             "-G${CMAKE_GENERATOR}"
             "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}"
-            "-DCMAKE_BUILD_TYPE=Debug"
+            "-DCMAKE_CONFIGURATION_TYPES=Custom"
+            "-DCMAKE_BUILD_TYPE=Custom"
             "-DJUCE_BUILD_HELPER_TOOLS=ON"
             "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
             ${PASSTHROUGH_ARGS}
@@ -148,7 +148,7 @@ else()
 
     execute_process(COMMAND "${CMAKE_COMMAND}"
             --build "${JUCE_BINARY_DIR}/tools"
-            --config Debug
+            --config Custom
         OUTPUT_VARIABLE command_output
         ERROR_VARIABLE command_output
         RESULT_VARIABLE result_variable)
@@ -163,7 +163,7 @@ else()
     include("${JUCE_BINARY_DIR}/tools/JUCEToolsExport.cmake")
 
     add_executable(juceaide IMPORTED GLOBAL)
-    get_target_property(imported_location juce_tools::juceaide IMPORTED_LOCATION_DEBUG)
+    get_target_property(imported_location juce_tools::juceaide IMPORTED_LOCATION_CUSTOM)
     set_target_properties(juceaide PROPERTIES IMPORTED_LOCATION "${imported_location}")
 
     add_executable(juce::juceaide ALIAS juceaide)
