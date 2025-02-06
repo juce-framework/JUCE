@@ -113,26 +113,6 @@ public:
         applyFilterInArea (area, buildFilter);
     }
 
-    void multiplyAllAlphasInArea (Rectangle<int> area, float amount) override
-    {
-        const auto buildFilter = [amount]
-        {
-            return [CIFilter filterWithName: @"CIColorMatrix"
-                        withInputParameters: @{ @"inputAVector": [CIVector vectorWithX: 0 Y: 0 Z: 0 W: amount] }];
-        };
-        applyFilterInArea (area, buildFilter);
-    }
-
-    void desaturateInArea (Rectangle<int> area) override
-    {
-        const auto buildFilter = []
-        {
-            return [CIFilter filterWithName: @"CIColorControls"
-                        withInputParameters: @{ kCIInputSaturationKey: [NSNumber numberWithFloat: 0] }];
-        };
-        applyFilterInArea (area, buildFilter);
-    }
-
     //==============================================================================
     static CFUniquePtr<CGImageRef> getCachedImageRef (const Image& juceImage, CGColorSpaceRef colourSpace)
     {
