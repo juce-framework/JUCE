@@ -86,26 +86,6 @@ static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
 
 #endif
 
-template <typename Callback>
-void callOnMessageThread (Callback&& callback)
-{
-    if (MessageManager::getInstance()->existsAndIsLockedByCurrentThread())
-    {
-        callback();
-        return;
-    }
-
-    WaitableEvent completionEvent;
-
-    MessageManager::callAsync ([&callback, &completionEvent]
-                               {
-                                   callback();
-                                   completionEvent.signal();
-                               });
-
-    completionEvent.wait();
-}
-
 #if JUCE_MAC
 
 //==============================================================================

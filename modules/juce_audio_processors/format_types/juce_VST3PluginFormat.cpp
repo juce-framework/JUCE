@@ -2621,7 +2621,7 @@ public:
 
     ~VST3PluginInstance() override
     {
-        callOnMessageThread ([this] { cleanup(); });
+        MessageManager::callSync ([this] { cleanup(); });
     }
 
     void cleanup()

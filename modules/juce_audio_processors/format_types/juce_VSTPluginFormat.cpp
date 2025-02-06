@@ -1117,7 +1117,7 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
     ~VSTPluginInstance() override
     {
         if (vstEffect != nullptr && vstEffect->magic == 0x56737450 /* 'VstP' */)
-            callOnMessageThread ([this] { cleanup(); });
+            MessageManager::callSync ([this] { cleanup(); });
     }
 
     void cleanup()
