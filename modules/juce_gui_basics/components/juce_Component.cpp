@@ -928,7 +928,8 @@ void Component::setSize (int w, int h)                  { setBounds (getX(), get
 void Component::setTopLeftPosition (int x, int y)       { setTopLeftPosition ({ x, y }); }
 void Component::setTopLeftPosition (Point<int> pos)     { setBounds (pos.x, pos.y, getWidth(), getHeight()); }
 
-void Component::setTopRightPosition (int x, int y)      { setTopLeftPosition (x - getWidth(), y); }
+void Component::setTopRightPosition (int x, int y)      { setTopRightPosition ({ x, y }); }
+void Component::setTopRightPosition (Point<int> pos)    { setTopLeftPosition (pos.x - getWidth(), pos.y); }
 void Component::setBounds (Rectangle<int> r)            { setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight()); }
 
 void Component::setCentrePosition (Point<int> p)        { setBounds (getBounds().withCentre (p.transformedBy (getTransform().inverted()))); }
