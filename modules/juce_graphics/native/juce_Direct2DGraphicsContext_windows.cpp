@@ -1211,7 +1211,7 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
         auto matrix = D2DUtilities::transformToMatrix (brushTransform);
         D2D1_BRUSH_PROPERTIES brushProps = { 1.0f, matrix };
 
-        auto bitmapBrushProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP);
+        auto bitmapBrushProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_CLAMP, D2D1_EXTEND_MODE_CLAMP);
         auto hr = deviceContext->CreateBitmapBrush (bitmap, bitmapBrushProps, brushProps, brush.resetAndGetPointerAddress());
 
         if (FAILED (hr))
