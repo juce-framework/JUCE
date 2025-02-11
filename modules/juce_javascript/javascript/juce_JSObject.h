@@ -57,7 +57,7 @@ public:
         To create a new JSObject pointing at the root object of the engine's context use
         JavascriptEngine::getRootObject().
     */
-    explicit JSObject (const detail::QuickJSWrapper* engine);
+    explicit JSObject (detail::QuickJSWrapper* engine);
 
     /** Destructor. */
     ~JSObject();
