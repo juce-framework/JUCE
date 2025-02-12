@@ -480,7 +480,67 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
     double trySampleRate (double rate)
     {
         auto session = [AVAudioSession sharedInstance];
+
+        if (exactlyEqual (session.sampleRate, rate))
+            return rate;
+
+        const auto startingSampleRate = session.sampleRate;
+
+        setAudioSessionActive (false);
+
         JUCE_NSERROR_CHECK ([session setPreferredSampleRate: rate error: &error]);
+
+        setAudioSessionActive (true);
+
+        if (! exactlyEqual (startingSampleRate, session.sampleRate))
+            return session.sampleRate;
+
+        AudioStreamBasicDescription stream{};
+        stream.mFormatID = kAudioFormatLinearPCM;
+        stream.mSampleRate = rate;
+        stream.mChannelsPerFrame = 2;
+        stream.mBitsPerChannel = 32;
+        stream.mFramesPerPacket = 1;
+        stream.mBytesPerFrame = stream.mChannelsPerFrame * stream.mBitsPerChannel / 8;
+        stream.mBytesPerPacket = stream.mBytesPerFrame * stream.mFramesPerPacket;
+        stream.mFormatFlags = stream.mBitsPerChannel;
+        stream.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger
+                            | kLinearPCMFormatFlagIsBigEndian
+                            | kLinearPCMFormatFlagIsPacked;
+
+        AudioQueueRef audioQueue;
+
+        auto err = AudioQueueNewOutput (&stream,
+                                        [] (auto, auto, auto) {},
+                                        nullptr,
+                                        nullptr,
+                                        kCFRunLoopCommonModes,
+                                        0,
+                                        &audioQueue);
+
+        if (err != noErr || audioQueue == nullptr)
+        {
+            jassertfalse;
+            return session.sampleRate;
+        }
+
+        const ScopeGuard disposeAudioQueueOnReturn { [&]
+        {
+            AudioQueueDispose (audioQueue, true);
+        }};
+
+        Float64 deviceSampleRate{};
+        UInt32 size = sizeof (deviceSampleRate);
+
+        err = AudioQueueGetProperty (audioQueue,
+                                     kAudioQueueDeviceProperty_SampleRate,
+                                     &deviceSampleRate,
+                                     &size);
+
+        if (err == noErr && size == sizeof (deviceSampleRate))
+            return deviceSampleRate;
+
+        jassertfalse;
         return session.sampleRate;
     }
 
