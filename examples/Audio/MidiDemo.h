@@ -31,7 +31,9 @@
  version:          1.0.0
  vendor:           JUCE
  website:          http://juce.com
- description:      Handles incoming and outcoming midi messages.
+ description:      Handles incoming and outcoming midi messages in
+                   MIDI 1.0 bytestream format. For an example of handling MIDI 2.0
+                   messages in Universal Midi Packet format, see the UMPDemo.
 
  dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
                    juce_audio_processors, juce_audio_utils, juce_core,
@@ -52,6 +54,12 @@
 
 #pragma once
 
+// This demo shows how to use the MidiInput and MidiOutput types to send and receive
+// messages using the traditional bytestream format.
+// New programs should prefer to use the newer Universal Midi Packet format whenever
+// possible.
+// For an example showing how UMP messages can be sent and received, see the UMPDemo,
+// as well as the ump::Session, ump::Input, and ump::Output types.
 
 //==============================================================================
 struct MidiDeviceListEntry final : ReferenceCountedObject
@@ -126,6 +134,9 @@ public:
         setSize (732, 520);
 
         updateDeviceLists();
+
+        if (virtualIn != nullptr)
+            virtualIn->start();
     }
 
     ~MidiDemo() override
@@ -362,6 +373,9 @@ private:
         for (auto midiOutput : midiOutputs)
             if (midiOutput->outDevice != nullptr)
                 midiOutput->outDevice->sendMessageNow (msg);
+
+        if (auto* o = virtualOut.get())
+            o->sendMessageNow (msg);
     }
 
     //==============================================================================
@@ -479,6 +493,9 @@ private:
 
     CriticalSection midiMonitorLock;
     Array<MidiMessage> incomingMessages;
+
+    std::unique_ptr<MidiInput> virtualIn = MidiInput::createNewDevice ("MidiDemo Virtual In", this);
+    std::unique_ptr<MidiOutput> virtualOut = MidiOutput::createNewDevice ("MidiDemo Virtual Out");
 
     MidiDeviceListConnection connection = MidiDeviceListConnection::make ([this]
     {
