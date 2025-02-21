@@ -481,11 +481,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
     {
         auto session = [AVAudioSession sharedInstance];
 
-        setAudioSessionActive (false);
-
         JUCE_NSERROR_CHECK ([session setPreferredSampleRate: rate error: &error]);
-
-        setAudioSessionActive (true);
 
         if (@available (ios 18, *))
         {
