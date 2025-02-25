@@ -253,7 +253,7 @@ static var tryQuickJSToJuce (const qjs::QuickJSContext::ValuePtr& ptr,
         {
             int64_t i = 0;
             JS_ToBigInt64 (ptr.context, std::addressof (i), ptr.value);
-            return i;
+            return var((juce::int64)i);
         }if(JS_IsInteger(ptr.value))
         {
             int32_t i = 0;
