@@ -405,6 +405,9 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
     int tryBufferSize (const double currentSampleRate, const int newBufferSize)
     {
+        if (newBufferSize == getBufferSize (currentSampleRate))
+            return newBufferSize;
+
         const auto extraOffset = std::invoke ([&]
         {
             // Older iOS versions (iOS 12) seem to require that the requested buffer size is a bit
@@ -420,17 +423,13 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
         auto session = [AVAudioSession sharedInstance];
 
-        // According to the apple docs, it's best to set preferred sample rates and block sizes
-        // while the device is inactive, and then to query the real values after activation.
-        // Unfortunately, on iOS 18.0, the real block size isn't immediately available after
-        // a call to setActive, so we also need to wait for the first audio callback.
-        // This will be slow!
-        // https://developer.apple.com/library/archive/qa/qa1631/_index.html
-        setAudioSessionActive (false);
-
         JUCE_NSERROR_CHECK ([session setPreferredIOBufferDuration: bufferDuration error: &error]);
 
-        setAudioSessionActive (true);
+        // iOS requires additional effort to observe the actual buffer size
+        // change however, it seems the buffer size change will always work
+        // so instead we just assume the change will apply eventually
+        if (@available (ios 18, *))
+            return newBufferSize;
 
         return getBufferSize (currentSampleRate);
     }
@@ -1033,6 +1032,10 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
     OSStatus process (AudioUnitRenderActionFlags* flags, const AudioTimeStamp* time,
                       const UInt32 numFrames, AudioBufferList* data)
     {
+        // If you hit this assertion please contact the JUCE team and let us
+        // know the iOS version/device and audio device that you're using
+        jassert (bufferSize == (int) numFrames);
+
         OSStatus err = noErr;
 
         recordXruns (time, numFrames);
