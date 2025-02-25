@@ -476,63 +476,81 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         JUCE_IOS_AUDIO_LOG ("Buffer size after detecting available buffer sizes: " << bufferSize);
     }
 
+    API_AVAILABLE (ios (18))
+    std::optional<double> getSampleRateFromAudioQueue() const
+    {
+        AudioStreamBasicDescription stream{};
+        stream.mFormatID = kAudioFormatLinearPCM;
+        stream.mChannelsPerFrame = 2;
+        stream.mBitsPerChannel = 32;
+        stream.mFramesPerPacket = 1;
+        stream.mBytesPerFrame = stream.mChannelsPerFrame * stream.mBitsPerChannel / 8;
+        stream.mBytesPerPacket = stream.mBytesPerFrame * stream.mFramesPerPacket;
+        stream.mFormatFlags = stream.mBitsPerChannel;
+        stream.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger
+                            | kLinearPCMFormatFlagIsBigEndian
+                            | kLinearPCMFormatFlagIsPacked;
+
+        AudioQueueRef audioQueue;
+
+        const auto err = AudioQueueNewOutput (&stream,
+                                              [] (auto, auto, auto) {},
+                                              nullptr,
+                                              nullptr,
+                                              kCFRunLoopCommonModes,
+                                              0,
+                                              &audioQueue);
+
+        if (err != noErr || audioQueue == nullptr)
+        {
+            jassertfalse;
+            return {};
+        }
+
+        const ScopeGuard disposeAudioQueueOnReturn { [&]
+        {
+            AudioQueueDispose (audioQueue, true);
+        }};
+
+        double result{};
+
+        UInt32 size = sizeof (sampleRate);
+        const auto propErr = AudioQueueGetProperty (audioQueue,
+                                                    kAudioQueueDeviceProperty_SampleRate,
+                                                    &result,
+                                                    &size);
+
+        if (propErr != noErr || size != sizeof (result))
+        {
+            jassertfalse;
+            return {};
+        }
+
+        return result;
+    }
+
+    double getSampleRate() const
+    {
+        const auto session = [AVAudioSession sharedInstance];
+
+        // On iOS 18 the AVAudioSession sample rate is not always accurate but
+        // probing the sample rate via an AudioQueue seems to work reliably
+        if (@available (ios 18, *))
+            return getSampleRateFromAudioQueue().value_or (session.sampleRate);
+
+        return session.sampleRate;
+    }
+
     double trySampleRate (double rate)
     {
+        if (exactlyEqual (rate, getSampleRate()))
+            return rate;
+
         auto session = [AVAudioSession sharedInstance];
 
         JUCE_NSERROR_CHECK ([session setPreferredSampleRate: rate error: &error]);
 
-        if (@available (ios 18, *))
-        {
-            AudioStreamBasicDescription stream{};
-            stream.mFormatID = kAudioFormatLinearPCM;
-            stream.mSampleRate = rate;
-            stream.mChannelsPerFrame = 2;
-            stream.mBitsPerChannel = 32;
-            stream.mFramesPerPacket = 1;
-            stream.mBytesPerFrame = stream.mChannelsPerFrame * stream.mBitsPerChannel / 8;
-            stream.mBytesPerPacket = stream.mBytesPerFrame * stream.mFramesPerPacket;
-            stream.mFormatFlags = stream.mBitsPerChannel;
-            stream.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger
-                                | kLinearPCMFormatFlagIsBigEndian
-                                | kLinearPCMFormatFlagIsPacked;
-
-            AudioQueueRef audioQueue;
-
-            auto err = AudioQueueNewOutput (&stream,
-                                            [] (auto, auto, auto) {},
-                                            nullptr,
-                                            nullptr,
-                                            kCFRunLoopCommonModes,
-                                            0,
-                                            &audioQueue);
-
-            if (err != noErr || audioQueue == nullptr)
-            {
-                jassertfalse;
-                return session.sampleRate;
-            }
-
-            const ScopeGuard disposeAudioQueueOnReturn { [&]
-            {
-                AudioQueueDispose (audioQueue, true);
-            }};
-
-            Float64 deviceSampleRate{};
-            UInt32 size = sizeof (deviceSampleRate);
-
-            err = AudioQueueGetProperty (audioQueue,
-                                         kAudioQueueDeviceProperty_SampleRate,
-                                         &deviceSampleRate,
-                                         &size);
-
-            if (err == noErr && size == sizeof (deviceSampleRate))
-                return deviceSampleRate;
-
-            jassertfalse;
-        }
-
-        return session.sampleRate;
+        return getSampleRate();
     }
 
     // Important: the supported audio sample rates change on the iPhone 6S
@@ -545,51 +563,77 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
             return;
         }
 
-        availableSampleRates.clear();
-
-        AudioUnitRemovePropertyListenerWithUserData (audioUnit,
-                                                     kAudioUnitProperty_StreamFormat,
-                                                     dispatchAudioUnitPropertyChange,
-                                                     this);
-
-        const double lowestRate = trySampleRate (4000);
-        availableSampleRates.add (lowestRate);
-        const double highestRate = trySampleRate (192000);
-
-        JUCE_IOS_AUDIO_LOG ("Lowest supported sample rate: "  << lowestRate);
-        JUCE_IOS_AUDIO_LOG ("Highest supported sample rate: " << highestRate);
-
-        for (double rate = lowestRate + 1000; rate < highestRate; rate += 1000)
+        const auto deviceId = std::invoke ([]
         {
-            const double supportedRate = trySampleRate (rate);
-            JUCE_IOS_AUDIO_LOG ("Trying a sample rate of " << rate << ", got " << supportedRate);
-            availableSampleRates.addIfNotAlreadyThere (supportedRate);
-            rate = jmax (rate, supportedRate);
-        }
+            const auto route = [AVAudioSession sharedInstance].currentRoute;
 
-        availableSampleRates.addIfNotAlreadyThere (highestRate);
+            const auto describePorts = [] (auto ports, auto& id)
+            {
+                String description;
+                auto count = 0;
 
-        AudioUnitAddPropertyListener (audioUnit,
-                                      kAudioUnitProperty_StreamFormat,
-                                      dispatchAudioUnitPropertyChange,
-                                      this);
+                for (AVAudioSessionPortDescription* port in ports)
+                    description << nsStringToJuce (port.UID) << id << count++;
 
-        // Check the current stream format in case things have changed whilst we
-        // were going through the sample rates
-        handleStreamFormatChange();
+                return description;
+            };
 
-       #if JUCE_IOS_AUDIO_LOGGING
+            return describePorts (route.inputs, "i")
+                 + describePorts (route.outputs, "o");
+        });
+
+        availableSampleRates = deviceSampleRatesCache.get (deviceId, [&] ([[maybe_unused]] auto key)
         {
-            String info ("Available sample rates:");
+            JUCE_IOS_AUDIO_LOG ("Finding supported sample rates for: " << key);
 
-            for (auto rate : availableSampleRates)
-                info << " " << rate;
+            Array<double> sampleRates;
 
-            JUCE_IOS_AUDIO_LOG (info);
-        }
-       #endif
+            AudioUnitRemovePropertyListenerWithUserData (audioUnit,
+                                                         kAudioUnitProperty_StreamFormat,
+                                                         dispatchAudioUnitPropertyChange,
+                                                         this);
 
-        JUCE_IOS_AUDIO_LOG ("Sample rate after detecting available sample rates: " << sampleRate);
+            const double lowestRate = trySampleRate (4000);
+            sampleRates.add (lowestRate);
+            const double highestRate = trySampleRate (192000);
+
+            JUCE_IOS_AUDIO_LOG ("Lowest supported sample rate: "  << lowestRate);
+            JUCE_IOS_AUDIO_LOG ("Highest supported sample rate: " << highestRate);
+
+            for (double rate = lowestRate + 1000; rate < highestRate; rate += 1000)
+            {
+                const double supportedRate = trySampleRate (rate);
+                JUCE_IOS_AUDIO_LOG ("Trying a sample rate of " << rate << ", got " << supportedRate);
+                sampleRates.addIfNotAlreadyThere (supportedRate);
+                rate = jmax (rate, supportedRate);
+            }
+
+            sampleRates.addIfNotAlreadyThere (highestRate);
+
+            AudioUnitAddPropertyListener (audioUnit,
+                                          kAudioUnitProperty_StreamFormat,
+                                          dispatchAudioUnitPropertyChange,
+                                          this);
+
+            // Check the current stream format in case things have changed whilst we
+            // were going through the sample rates
+            handleStreamFormatChange();
+
+           #if JUCE_IOS_AUDIO_LOGGING
+            {
+                String info ("Available sample rates:");
+
+                for (auto rate : availableSampleRates)
+                    info << " " << rate;
+
+                JUCE_IOS_AUDIO_LOG (info);
+            }
+           #endif
+
+            JUCE_IOS_AUDIO_LOG ("Sample rate after detecting available sample rates: " << sampleRate);
+
+            return sampleRates;
+        });
     }
 
     void updateHardwareInfo (bool forceUpdate = false)
@@ -1543,6 +1587,8 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
     Array<double> availableSampleRates;
     Array<int> availableBufferSizes;
+
+    static inline LruCache<String, Array<double>> deviceSampleRatesCache;
 
     bool interAppAudioConnected = false;
 
