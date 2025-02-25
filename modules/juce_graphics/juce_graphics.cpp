@@ -159,6 +159,8 @@ extern "C"
 #endif
 
 //==============================================================================
+#include "juce_core/zip/juce_zlib.h"
+
 #include "fonts/juce_FunctionPointerDestructor.h"
 #include "native/juce_EventTracing.h"
 

@@ -161,6 +161,7 @@
  #include "native/juce_Files_windows.cpp"
 #endif
 
+#include "zip/juce_zlib.h"
 #include "network/juce_NamedPipe.cpp"
 #include "network/juce_Socket.cpp"
 #include "network/juce_IPAddress.cpp"

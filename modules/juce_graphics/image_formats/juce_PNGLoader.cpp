@@ -37,20 +37,6 @@ namespace juce
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4390 4611 4365 4267 4616 2544 2545 6297)
 
-namespace zlibNamespace
-{
-#if JUCE_INCLUDE_ZLIB_CODE
-  #undef OS_CODE
-  #undef fdopen
-  #define ZLIB_INTERNAL
-  #define NO_DUMMY_DECL
-  #include <juce_core/zip/zlib/zlib.h>
-  #undef OS_CODE
-#else
-  #include JUCE_ZLIB_INCLUDE_PATH
-#endif
-}
-
 #if ! defined (jmp_buf) || ! defined (longjmp)
  #include <setjmp.h>
 #endif
