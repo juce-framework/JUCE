@@ -694,8 +694,8 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         setAudioSessionCategory (requestedInputChannels > 0 ? AVAudioSessionCategoryPlayAndRecord
                                                             : AVAudioSessionCategoryPlayback);
         channelData.reconfigure (requestedInputChannels, requestedOutputChannels);
-        updateHardwareInfo (true);
         setTargetSampleRateAndBufferSize();
+        updateHardwareInfo (true);
         fixAudioRouteIfSetToReceiver();
 
         isRunning = true;
@@ -1348,8 +1348,8 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
         }
 
-        updateHardwareInfo();
         setTargetSampleRateAndBufferSize();
+        updateHardwareInfo();
 
         if (isRunning)
         {
