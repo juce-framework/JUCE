@@ -587,6 +587,10 @@ void AudioDeviceManager::insertDefaultDeviceNames (AudioDeviceSetup& setup) cons
         if (setup.inputDeviceName.isEmpty() && ! inputsToTest.isEmpty())
             setup.inputDeviceName = inputsToTest[0];
 
+        // No pairs to validate
+        if (outputsToTest.size() < 2 && inputsToTest.size() < 2)
+            return;
+
         // We check all possible in-out pairs until the first validation pass. If no pair passes we
         // leave the setup unchanged.
         for (const auto& out : outputsToTest)
