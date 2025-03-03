@@ -47,12 +47,6 @@ namespace pnglibNamespace
 
 #if JUCE_INCLUDE_PNGLIB_CODE || ! defined (JUCE_INCLUDE_PNGLIB_CODE)
 
-  #if _MSC_VER != 1310
-   using std::calloc; // (causes conflict in VS.NET 2003)
-   using std::malloc;
-   using std::free;
-  #endif
-
    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcomma",
                                         "-Wfloat-equal",
                                         "-Wimplicit-fallthrough",
@@ -63,7 +57,6 @@ namespace pnglibNamespace
                                         "-Wzero-as-null-pointer-constant")
 
   #undef check
-  using std::abs;
   #define NO_DUMMY_DECL
   #define PNGLCONF_H 1
 
