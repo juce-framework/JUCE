@@ -1405,7 +1405,7 @@ public:
 private:
     Point<int> lastMousePos;
     double scrollAcceleration = 0;
-    uint32 lastScrollTime, lastMouseMoveTime = 0;
+    uint32 lastScrollTime;
     bool isDown = false;
 
     // Although most mouse movements can be handled inside mouse event callbacks, scrolling of menus
@@ -1436,7 +1436,7 @@ private:
             window.showSubMenuFor (window.currentChild);
         }
 
-        highlightItemUnderMouse (globalMousePos, localMousePos, timeNow);
+        highlightItemUnderMouse (globalMousePos, localMousePos);
 
         const bool overScrollArea = scrollIfNecessary (localMousePos, timeNow);
         const bool isOverAny = window.isOverAnyMenu();
@@ -1480,56 +1480,53 @@ private:
         }
     }
 
-    void highlightItemUnderMouse (Point<int> globalMousePos, Point<int> localMousePos, const uint32 timeNow)
+    void highlightItemUnderMouse (Point<int> globalMousePos, Point<int> localMousePos)
     {
-        if (globalMousePos != lastMousePos || timeNow > lastMouseMoveTime + 350)
+        const auto mouseHasMoved = 2 < lastMousePos.getDistanceFrom (globalMousePos);
+
+        if (! mouseHasMoved)
+            return;
+
+        const auto isMouseOver = window.reallyContains (localMousePos, true);
+
+        if (isMouseOver)
+            window.disableMouseMoves = false;
+
+        if (window.disableMouseMoves || (window.activeSubMenu != nullptr && window.activeSubMenu->isOverChildren()))
+            return;
+
+        const bool isMovingTowardsMenu = isMouseOver && globalMousePos != lastMousePos
+                                            && isMovingTowardsSubmenu (globalMousePos);
+
+        lastMousePos = globalMousePos;
+
+        if (! isMovingTowardsMenu)
         {
-            const auto isMouseOver = window.reallyContains (localMousePos, true);
+            auto* c = window.getComponentAt (localMousePos);
 
-            if (lastMousePos.getDistanceFrom (globalMousePos) > 2)
+            if (c == &window)
+                c = nullptr;
+
+            auto* itemUnderMouse = dynamic_cast<ItemComponent*> (c);
+
+            if (itemUnderMouse == nullptr && c != nullptr)
+                itemUnderMouse = c->findParentComponentOfClass<ItemComponent>();
+
+            if (itemUnderMouse != window.currentChild
+                  && (isMouseOver || (window.activeSubMenu == nullptr) || ! window.activeSubMenu->isVisible()))
             {
-                lastMouseMoveTime = timeNow;
+                if (isMouseOver && (c != nullptr) && (window.activeSubMenu != nullptr))
+                    window.activeSubMenu->hide (nullptr, true);
 
-                if (window.disableMouseMoves && isMouseOver)
-                    window.disableMouseMoves = false;
-            }
-
-            if (window.disableMouseMoves || (window.activeSubMenu != nullptr && window.activeSubMenu->isOverChildren()))
-                return;
-
-            const bool isMovingTowardsMenu = isMouseOver && globalMousePos != lastMousePos
-                                                && isMovingTowardsSubmenu (globalMousePos);
-
-            lastMousePos = globalMousePos;
-
-            if (! isMovingTowardsMenu)
-            {
-                auto* c = window.getComponentAt (localMousePos);
-
-                if (c == &window)
-                    c = nullptr;
-
-                auto* itemUnderMouse = dynamic_cast<ItemComponent*> (c);
-
-                if (itemUnderMouse == nullptr && c != nullptr)
-                    itemUnderMouse = c->findParentComponentOfClass<ItemComponent>();
-
-                if (itemUnderMouse != window.currentChild
-                      && (isMouseOver || (window.activeSubMenu == nullptr) || ! window.activeSubMenu->isVisible()))
+                if (! isMouseOver)
                 {
-                    if (isMouseOver && (c != nullptr) && (window.activeSubMenu != nullptr))
-                        window.activeSubMenu->hide (nullptr, true);
+                    if (! window.mouseHasBeenOver())
+                        return;
 
-                    if (! isMouseOver)
-                    {
-                        if (! window.mouseHasBeenOver())
-                            return;
-
-                        itemUnderMouse = nullptr;
-                    }
-
-                    window.setCurrentlyHighlightedChild (itemUnderMouse);
+                    itemUnderMouse = nullptr;
                 }
+
+                window.setCurrentlyHighlightedChild (itemUnderMouse);
             }
         }
     }
