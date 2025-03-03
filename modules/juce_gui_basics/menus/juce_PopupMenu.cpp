@@ -375,9 +375,12 @@ struct MenuWindow final : public Component
             addToDesktop (ComponentPeer::windowIsTemporary
                           | ComponentPeer::windowIgnoresKeyPresses
                           | lf.getMenuWindowFlags());
-
-            Desktop::getInstance().addGlobalMouseListener (this);
         }
+
+        // Using a global mouse listener means that we get notifications about all mouse events.
+        // Without this, drags that are started on a button that displays a menu won't reach the
+        // menu, because they *only* target the component that initiated the drag interaction.
+        Desktop::getInstance().addGlobalMouseListener (this);
 
         if (options.getParentComponent() == nullptr && parentWindow == nullptr && lf.shouldPopupMenuScaleWithTargetComponent (options))
             if (auto* targetComponent = options.getTargetComponent())
