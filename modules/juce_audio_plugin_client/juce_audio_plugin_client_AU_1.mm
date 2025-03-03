@@ -1749,11 +1749,13 @@ public:
 
                         auto* view = (NSView*) getWindowHandle();
                         auto* hostView = [view superview];
-                        auto* hostWindow = [hostView window];
 
-                        [hostWindow makeFirstResponder: hostView];
+                        [[hostView window] makeFirstResponder: hostView];
                         [hostView keyDown: currentEvent];
-                        [hostWindow makeFirstResponder: view];
+
+                        if ((hostView = [view superview]))
+                            if (auto* hostWindow = [hostView window])
+                                [hostWindow makeFirstResponder: view];
                     }
                 }
             }
