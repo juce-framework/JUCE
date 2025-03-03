@@ -234,7 +234,7 @@ private:
         {
             auto onFocus = [&item]
             {
-                item.parentWindow.disableTimerUntilMouseMoves();
+                item.parentWindow.disableMouseMovesOnMenuAndAncestors();
                 item.parentWindow.ensureItemComponentIsVisible (item, -1);
                 item.parentWindow.setCurrentlyHighlightedChild (&item);
             };
@@ -617,7 +617,7 @@ struct MenuWindow final : public Component
                 if (parentWindow != nullptr)
                     parentWindow->setCurrentlyHighlightedChild (currentChildOfParent);
 
-                disableTimerUntilMouseMoves();
+                disableMouseMovesOnMenuAndAncestors();
             }
             else if (componentAttachedTo != nullptr)
             {
@@ -626,7 +626,7 @@ struct MenuWindow final : public Component
         }
         else if (key.isKeyCode (KeyPress::rightKey))
         {
-            disableTimerUntilMouseMoves();
+            disableMouseMovesOnMenuAndAncestors();
 
             if (showSubMenuFor (currentChild))
             {
@@ -660,7 +660,7 @@ struct MenuWindow final : public Component
 
         for (auto* ms : mouseSourceStates)
         {
-            ms->timerCallback();
+            ms->handleMouseEventWithPosition (ms->source.getScreenPosition().roundToInt());
 
             if (deletionChecker == nullptr)
                 return;
@@ -760,8 +760,10 @@ struct MenuWindow final : public Component
 
         for (auto* ms : mouseSourceStates)
         {
-            if      (ms->source == source)                        mouseState = ms;
-            else if (ms->source.getType() != source.getType())    ms->stopTimer();
+            if (ms->source == source)
+                mouseState = ms;
+            else if (ms->source.getType() != source.getType())
+                ms->stopTimer();
         }
 
         if (mouseState == nullptr)
@@ -1243,7 +1245,7 @@ struct MenuWindow final : public Component
 
     void selectNextItem (MenuSelectionDirection direction)
     {
-        disableTimerUntilMouseMoves();
+        disableMouseMovesOnMenuAndAncestors();
 
         auto start = [&]
         {
@@ -1277,12 +1279,12 @@ struct MenuWindow final : public Component
         }
     }
 
-    void disableTimerUntilMouseMoves()
+    void disableMouseMovesOnMenuAndAncestors()
     {
         disableMouseMoves = true;
 
         if (parent != nullptr)
-            parent->disableTimerUntilMouseMoves();
+            parent->disableMouseMovesOnMenuAndAncestors();
     }
 
     bool canScroll() const noexcept                 { return childYOffset != 0 || needsToScroll; }
@@ -1322,8 +1324,15 @@ struct MenuWindow final : public Component
         return getLookAndFeel();
     }
 
-    bool mouseHasBeenOver() const { return mouseWasOver; }
-    bool allowMouseUpToTriggerItem() const { return mouseUpCanTrigger; }
+    bool mouseHasBeenOver() const
+    {
+        return mouseWasOver;
+    }
+
+    bool allowMouseUpToTriggerItem() const
+    {
+        return mouseUpCanTrigger;
+    }
 
     //==============================================================================
     MenuWindow* parent;
@@ -1347,7 +1356,7 @@ private:
     void handleMouseEvent (const MouseEvent& e)
     {
         mouseWasOver |= reallyContains (getLocalPoint (nullptr, e.getScreenPosition()), true);
-        getMouseState (e.source).handleMouseEvent (e);
+        getMouseState (e.source).handleMouseEventWithPosition (e.getScreenPosition());
     }
 
     bool mouseWasOver = false;
@@ -1357,7 +1366,7 @@ private:
 };
 
 //==============================================================================
-class MouseSourceState final : public Timer
+class MouseSourceState final : private Timer
 {
 public:
     MouseSourceState (MenuWindow& w, MouseInputSource s)
@@ -1366,32 +1375,26 @@ public:
         startTimerHz (20);
     }
 
-    void handleMouseEvent (const MouseEvent& e)
+    ~MouseSourceState() override
+    {
+        stopTimer();
+    }
+
+    void handleMouseEventWithPosition (const Point<int>& e)
     {
         if (! window.windowIsStillValid())
             return;
 
         startTimerHz (20);
-        handleMousePosition (e.getScreenPosition());
-    }
-
-    void timerCallback() override
-    {
-       #if JUCE_WINDOWS
-        // touch and pen devices on Windows send an offscreen mouse move after mouse up events
-        // but we don't want to forward these on as they will dismiss the menu
-        if ((source.isTouch() || source.isPen()) && ! isValidMousePosition())
-            return;
-       #endif
-
-        if (window.windowIsStillValid())
-            handleMousePosition (source.getScreenPosition().roundToInt());
+        handleMousePosition (e);
     }
 
     bool isOver() const
     {
         return window.reallyContains (window.getLocalPoint (nullptr, source.getScreenPosition()).roundToInt(), true);
     }
+
+    using Timer::stopTimer;
 
     MenuWindow& window;
     MouseInputSource source;
@@ -1401,6 +1404,21 @@ private:
     double scrollAcceleration = 0;
     uint32 lastScrollTime, lastMouseMoveTime = 0;
     bool isDown = false;
+
+    // Although most mouse movements can be handled inside mouse event callbacks, scrolling of menus
+    // may happen while the mouse is not moving, so periodic timer callbacks are required in this
+    // scenario.
+    void timerCallback() override
+    {
+       #if JUCE_WINDOWS
+        // touch and pen devices on Windows send an offscreen mouse move after mouse up events
+        // but we don't want to forward these on as they will dismiss the menu
+        if ((source.isTouch() || source.isPen()) && ! isValidMousePosition())
+            return;
+       #endif
+
+        handleMouseEventWithPosition (source.getScreenPosition().roundToInt());
+    }
 
     void handleMousePosition (Point<int> globalMousePos)
     {
