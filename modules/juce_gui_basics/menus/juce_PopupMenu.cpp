@@ -32,6 +32,24 @@
   ==============================================================================
 */
 
+// Some things to keep in mind when modifying this file:
+// - Popup menus may be free-floating or parented. Make sure to test both!
+// - Menus may open while the mouse button is down, in which case the following mouse-up may
+//   trigger a hovered menu item if the mouse has moved since the menu was displayed.
+// - Consider a long menu attached to a button. It's possible for a such a menu to open underneath
+//   the mouse cursor. In this case, the menu item underneath the mouse should *not* be initially
+//   selected or clickable. Instead, wait until the mouse cursor is moved, which we interpret as the
+//   user signalling intent to trigger a menu item.
+// - Menu items may be navigated with the cursor keys. The most recent input mechanism should
+//   generally win, so pressing a cursor key should cause the mouse state to be ignored until
+//   the mouse is next moved.
+// - It's possible for menus to overlap, especially in the case of nested submenus. Of course,
+//   clicking an overlapping menu should only trigger the topmost menu item.
+// - Long menus must update properly when the mouse is completely stationary inside the scroll area
+//   at the end of the menu. This means it's not sufficient to drive all menu updates from mouse
+//   and keyboard input callbacks. Scrolling must be driven by some other periodic update mechanism
+//   such as a timer.
+
 namespace juce
 {
 
