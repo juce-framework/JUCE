@@ -52,7 +52,7 @@ void Direct2DMetricsHub::HubPipeServer::messageReceived (const MemoryBlock& mess
         {
             ScopedLock locker { owner.lock };
 
-            auto foregroundWindow = GetForegroundWindow();
+            auto foregroundWindow = GetFocus();
             Direct2DMetrics::Ptr metrics = nullptr;
             for (int i = 0; i < owner.metricsArray.size(); ++i)
             {
