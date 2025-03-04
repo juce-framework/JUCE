@@ -1,0 +1,26 @@
+name: Job Wrapper
+description: Setup and cleanup for build jobs
+inputs:
+  artifacts:
+    description: Required artifacts
+    required: false
+    default: ''
+  command:
+    description: The build command
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Get artifacts
+      uses: ./.github/actions/download_artifacts
+      with:
+        keys: |
+          JUCE-utils
+          ${{ inputs.artifacts }}
+    - run: ${{ inputs.command }}
+      shell: ${{ runner.os == 'Windows' && 'powershell' || 'bash' }}
+    - name: Handle job failure
+      if: failure()
+      run: python3 JUCE-utils/.github/workflows/post_job.py
+      shell: ${{ runner.os == 'Windows' && 'powershell' || 'bash' }}
+
