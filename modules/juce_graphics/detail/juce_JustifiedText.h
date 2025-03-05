@@ -153,6 +153,14 @@ public:
     */
     auto& getMinimumRequiredWidthForLines() const { return minimumRequiredWidthsForLine; }
 
+    int64 getGlyphIndexAt (Point<float> p) const;
+
+    /*  If the passed in index parameter is greater than the index of the last contained glyph,
+        then the returned anchor specifies the location where the next glyph would have to be
+        placed i.e. lastGlyphAnchor + lastGlyphAdvance.
+    */
+    Point<float> getGlyphAnchor (int64 index) const;
+
     /*  Returns the vertical distance from the baseline of the first line to the bottom of the last
         plus any additional line spacing that follows from the leading and additiveLineSpacing
         members of the ShapedTextOptions object.

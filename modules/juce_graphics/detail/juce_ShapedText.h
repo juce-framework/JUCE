@@ -59,6 +59,13 @@ public:
     */
     Range<int64> getTextRange (int64 glyphIndex) const;
 
+    int64 getGlyphIndexAt (Point<float> p) const;
+
+    std::vector<Range<int64>> getGlyphRanges (Range<int64> textRange) const;
+
+    /*  @see JustifiedText::getGlyphAnchor() */
+    Point<float> getGlyphAnchor (int64 index) const;
+
     /*  Returns the widths for each line, that the glyphs would require to be rendered without being
         truncated. This will or will not include the space required by trailing whitespaces in the
         line based on the ShapedTextOptions::withTrailingWhitespacesShouldFit() value.
@@ -79,7 +86,11 @@ public:
     /*  Draws the text. */
     void draw (const Graphics& g, AffineTransform transform) const;
 
+    /*  @see JustifiedText::getHeight
+    */
     float getHeight() const;
+
+    int64 getNumGlyphs() const;
 
     /*  @internal */
     const JustifiedText& getJustifiedText() const;

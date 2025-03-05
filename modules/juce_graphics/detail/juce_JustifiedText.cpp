@@ -449,6 +449,69 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
                            realign.extraWhitespaceAdvance);
 }
 
+int64 JustifiedText::getGlyphIndexAt (Point<float> p) const
+{
+    auto lineIt = linesMetrics.begin();
+    float lineTop = 0.0f;
+
+    while (lineIt != linesMetrics.end())
+    {
+        const auto nextLineTop = lineIt->value.nextLineTop;
+
+        if (lineTop <= p.getY() && p.getY() < nextLineTop)
+            break;
+
+        lineTop = nextLineTop;
+        ++lineIt;
+    }
+
+    if (lineIt == linesMetrics.end())
+        return 0;
+
+    const auto glyphsInLine = shapedText.getGlyphs (lineIt->range);
+
+    auto glyphIndex = lineIt->range.getStart();
+    auto glyphX = lineIt->value.anchor.getX();
+
+    for (const auto& glyph : glyphsInLine)
+    {
+        if (   p.getX() <= glyphX
+            || glyph.newline
+            || (glyphIndex - lineIt->range.getStart() == (int64) glyphsInLine.size() - 1 && glyph.whitespace))
+        {
+            break;
+        }
+
+        ++glyphIndex;
+        glyphX += glyph.advance.getX();
+    }
+
+    return glyphIndex;
+}
+
+Point<float> JustifiedText::getGlyphAnchor (int64 index) const
+{
+    jassert (index >= 0);
+
+    if (linesMetrics.isEmpty())
+        return {};
+
+    const auto lineItem = linesMetrics.getItemWithEnclosingRange (index).value_or (linesMetrics.back());
+    const auto indexInLine = index - lineItem.range.getStart();
+
+    auto anchor = lineItem.value.anchor;
+
+    for (auto [i, glyph] : enumerate (shapedText.getGlyphs (lineItem.range), int64{}))
+    {
+        if (i == indexInLine)
+            return anchor + glyph.offset;
+
+        anchor += glyph.advance;
+    }
+
+    return anchor;
+}
+
 float JustifiedText::getHeight() const
 {
     if (linesMetrics.isEmpty())

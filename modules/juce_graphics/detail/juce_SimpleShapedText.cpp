@@ -343,6 +343,16 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
                                 && font.getTypefacePtr()->getGlyphBounds (font.getMetricsKind(), (int) glyphId).isEmpty()
                                 && xAdvance > 0;
 
+        const auto newline = std::invoke ([&controlChars, &shapingInfos = infos, j]
+        {
+           const auto it = controlChars.find ((size_t) shapingInfos[j].cluster);
+
+           if (it == controlChars.end())
+               return false;
+
+           return it->second == ControlCharacter::cr || it->second == ControlCharacter::lf;
+        });
+
         // Tracking is only applied at the beginning of a new cluster to avoid inserting it before
         // diacritic marks.
         const auto appliedTracking = std::exchange (lastCluster, infos[j].cluster) != infos[j].cluster
@@ -354,6 +364,7 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
             (int64) infos[j].cluster + range.getStart(),
             (infos[j].mask & HB_GLYPH_FLAG_UNSAFE_TO_BREAK) != 0,
             whitespace,
+            newline,
             Point<float> { HbScale::hbToJuce (xAdvance) + appliedTracking, -HbScale::hbToJuce (positions[j].y_advance) },
             Point<float> { HbScale::hbToJuce (positions[j].x_offset), -HbScale::hbToJuce (positions[j].y_offset) },
         });
@@ -1284,6 +1295,75 @@ Range<int64> SimpleShapedText::getTextRange (int64 glyphIndex) const
     }();
 
     return Range<int64>::withStartAndLength (cluster, std::max ((int64) 1, nextAdjacentCluster - cluster));
+}
+
+/*  Returns the last element that is smaller than value or equal to it. Returns begin of no such
+    element is found.
+
+    NB: lower_bound:     equal or greater
+        upper_bound:     greater
+        lessThanOrEqual: less than or equal
+*/
+template <typename It, typename Value, typename Callback>
+auto lessThanOrEqual (It begin, It end, Value v, Callback extractValue)
+{
+    auto it = std::lower_bound (begin,
+                                end,
+                                v,
+                                [&extractValue] (auto& elem, auto& value)
+                                {
+                                    return extractValue (elem) < value;
+                                });
+
+    if (it == end || it == begin || extractValue (*it) == v)
+        return it;
+
+    --it;
+
+    return it;
+}
+
+std::vector<Range<int64>> SimpleShapedText::getGlyphRanges (Range<int64> textRange) const
+{
+    Ranges glyphRanges;
+
+    for (const auto is : glyphLookup.getIntersectionsWith (textRange))
+    {
+        const auto textSubRange = is.range;
+        const auto glyphsSubRange = is.value.glyphRange;
+        const auto& subRangeLookup = is.value;
+        const auto glyphs = getGlyphs (glyphsSubRange);
+
+        const auto getGlyphSubRange = [&] (auto begin, auto end)
+        {
+            auto startIt = lessThanOrEqual (begin,
+                                            end,
+                                            textSubRange.getStart(),
+                                            [] (auto& elem) -> auto& { return elem.cluster; });
+
+            auto endIt = std::lower_bound (begin,
+                                           end,
+                                           textSubRange.getEnd(),
+                                           [] (auto& elem, auto& value) { return elem.cluster < value; });
+
+            return Range<int64> { (int64) std::distance (begin, startIt), std::distance (begin, endIt) };
+        };
+
+        if (subRangeLookup.ltr)
+        {
+            glyphRanges.set (getGlyphSubRange (glyphs.begin(), glyphs.end()) + glyphsSubRange.getStart());
+        }
+        else
+        {
+            const auto reverseRange = getGlyphSubRange (std::reverse_iterator { glyphs.end() },
+                                                        std::reverse_iterator { glyphs.begin() });
+
+            glyphRanges.set ({ glyphsSubRange.getEnd() - reverseRange.getEnd(),
+                               glyphsSubRange.getEnd() - reverseRange.getStart() });
+        }
+    }
+
+    return glyphRanges.getRanges();
 }
 
 #if JUCE_UNIT_TESTS

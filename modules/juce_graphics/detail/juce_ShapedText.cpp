@@ -54,6 +54,11 @@ public:
         return justifiedText.getHeight();
     }
 
+    int64 getNumGlyphs() const
+    {
+        return simpleShapedText.getNumGlyphs();
+    }
+
     auto& getText() const
     {
         return text;
@@ -62,6 +67,21 @@ public:
     auto getTextRange (int64 glyphIndex) const
     {
         return simpleShapedText.getTextRange (glyphIndex);
+    }
+
+    int64 getGlyphIndexAt (Point<float> p) const
+    {
+        return justifiedText.getGlyphIndexAt (p);
+    }
+
+    auto getGlyphRanges (Range<int64> textRange) const
+    {
+        return simpleShapedText.getGlyphRanges (textRange);
+    }
+
+    auto getGlyphAnchor (int64 index) const
+    {
+        return justifiedText.getGlyphAnchor (index);
     }
 
     Span<const float> getMinimumRequiredWidthForLines() const
@@ -104,6 +124,11 @@ float ShapedText::getHeight() const
     return impl->getHeight();
 }
 
+int64 ShapedText::getNumGlyphs() const
+{
+    return impl->getNumGlyphs();
+}
+
 const String& ShapedText::getText() const
 {
     return impl->getText();
@@ -112,6 +137,21 @@ const String& ShapedText::getText() const
 Range<int64> ShapedText::getTextRange (int64 glyphIndex) const
 {
     return impl->getTextRange (glyphIndex);
+}
+
+int64 ShapedText::getGlyphIndexAt (Point<float> p) const
+{
+    return impl->getGlyphIndexAt (p);
+}
+
+std::vector<Range<int64>> ShapedText::getGlyphRanges (Range<int64> textRange) const
+{
+    return impl->getGlyphRanges (textRange);
+}
+
+Point<float> ShapedText::getGlyphAnchor (int64 index) const
+{
+    return impl->getGlyphAnchor (index);
 }
 
 Span<const float> ShapedText::getMinimumRequiredWidthForLines() const

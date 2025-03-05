@@ -175,6 +175,7 @@ struct ShapedGlyph
     int64 cluster;
     bool unsafeToBreak;
     bool whitespace;
+    bool newline;
     Point<float> advance;
     Point<float> offset;
 };
@@ -202,6 +203,8 @@ public:
     const auto& getResolvedFonts() const { return resolvedFonts; }
 
     Range<int64> getTextRange (int64 glyphIndex) const;
+
+    std::vector<Range<int64>> getGlyphRanges (Range<int64> textRange) const;
 
     int64 getNumLines() const { return (int64) lineNumbers.getRanges().size(); }
     int64 getNumGlyphs() const { return (int64) glyphsInVisualOrder.size(); }
