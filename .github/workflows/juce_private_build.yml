@@ -47,7 +47,7 @@ jobs:
     uses: juce-framework/JUCE-utils/.github/workflows/docs.yml@master
     secrets: inherit
   notify:
-    if: ${{ inputs.nightly-targets == '[]' }}
+    if: ${{ always() && inputs.nightly-targets == '[]' }}
     needs: [docs]
     name: Notify
     uses: juce-framework/JUCE-utils/.github/workflows/notify.yml@master
