@@ -35,6 +35,163 @@
 namespace juce
 {
 
+enum class SysexExtractorCallbackKind
+{
+    notSysex,
+    ongoingSysex,
+    lastSysex,
+};
+
+class BytestreamSysexExtractor
+{
+public:
+    void reset()
+    {
+        state = RunningStatus{};
+    }
+
+    template <typename Callback>
+    void push (Span<const std::byte> bytes, Callback&& callback)
+    {
+        for (const auto pair : enumerate (bytes))
+        {
+            const auto index = pair.index;
+            const auto byte = pair.value;
+
+            state = std::invoke ([&]() -> State
+            {
+                if (auto* inSysex = std::get_if<InSysex> (&state))
+                {
+                    if (byte == std::byte { 0xf0 })
+                    {
+                        callback (SysexExtractorCallbackKind::lastSysex,
+                                  Span { bytes.data() + index - inSysex->numBytes, inSysex->numBytes });
+                        return InSysex { 1 };
+                    }
+
+                    if (byte == std::byte { 0xf7 })
+                    {
+                        callback (SysexExtractorCallbackKind::lastSysex,
+                                  Span { bytes.data() + index - inSysex->numBytes, inSysex->numBytes + 1 });
+                        return RunningStatus{};
+                    }
+
+                    if (isRealtimeMessage (byte))
+                    {
+                        callback (SysexExtractorCallbackKind::ongoingSysex,
+                                  Span { bytes.data() + index - inSysex->numBytes, inSysex->numBytes });
+                        callback (SysexExtractorCallbackKind::notSysex,
+                                  Span { bytes.data() + index, 1 });
+                        return InSysex{};
+                    }
+
+                    if (isStatusByte (byte))
+                    {
+                        callback (SysexExtractorCallbackKind::lastSysex,
+                                  Span { bytes.data() + index - inSysex->numBytes, inSysex->numBytes });
+                        return RunningStatus { 1, { byte } };
+                    }
+
+                    return InSysex { inSysex->numBytes + 1 };
+                }
+
+                if (auto* runningStatus = std::get_if<RunningStatus> (&state))
+                {
+                    if (byte == std::byte { 0xf0 })
+                        return InSysex { 1 };
+
+                    const auto nextRunningStatus = std::invoke ([&]
+                    {
+                        if (isRealtimeMessage (byte))
+                        {
+                            callback (SysexExtractorCallbackKind::notSysex,
+                                      Span { bytes.data() + index, 1 });
+                            return *runningStatus;
+                        }
+
+                        if (isInitialByte (byte))
+                            return RunningStatus{}.withAppendedByte (byte);
+
+                        if (0 < runningStatus->size && runningStatus->size < runningStatus->data.size())
+                            return runningStatus->withAppendedByte (byte);
+
+                        // If we get to this branch, we're trying to process a non-status byte
+                        // without having seen any previous status byte, so ignore the current byte
+                        return RunningStatus{};
+                    });
+
+                    if (const auto completeMessage = nextRunningStatus.getCompleteMessage(); ! completeMessage.empty())
+                    {
+                        callback (SysexExtractorCallbackKind::notSysex,
+                                  completeMessage);
+                        return RunningStatus{}.withAppendedByte (nextRunningStatus.data[0]);
+                    }
+
+                    return nextRunningStatus;
+                }
+
+                // Can only happen if the variant is valueless by exception, which indicates a much
+                // more severe problem!
+                std::terminate();
+            });
+        }
+
+        if (auto* inSysex = std::get_if<InSysex> (&state))
+        {
+            callback (SysexExtractorCallbackKind::ongoingSysex,
+                      Span { bytes.data() + bytes.size() - inSysex->numBytes, inSysex->numBytes });
+            state = InSysex{};
+        }
+    }
+
+private:
+    static bool isRealtimeMessage (std::byte byte)  { return std::byte (0xf8) <= byte && byte <= std::byte (0xfe); }
+    static bool isStatusByte      (std::byte byte)  { return std::byte (0x80) <= byte; }
+    static bool isInitialByte     (std::byte byte)  { return isStatusByte (byte) && byte != std::byte (0xf7); }
+
+    struct InSysex
+    {
+        size_t numBytes{};
+    };
+
+    struct RunningStatus
+    {
+        // These constructors are required to work around a bug in GCC 7
+        RunningStatus() {}
+
+        RunningStatus (uint8_t sizeIn, std::array<std::byte, 3> dataIn)
+            : size (sizeIn), data (dataIn) {}
+
+        uint8_t size{};
+        std::array<std::byte, 3> data{};
+
+        Span<const std::byte> getCompleteMessage() const
+        {
+            if (size == 0)
+                return {};
+
+            const auto expectedSize = MidiMessage::getMessageLengthFromFirstByte ((uint8_t) data[0]);
+            return Span { data.data(), size == expectedSize ? size : (size_t) 0 };
+        }
+
+        void appendByte (std::byte x)
+        {
+            jassert (size < data.size());
+            data[size++] = x;
+        }
+
+        RunningStatus withAppendedByte (std::byte x) const
+        {
+            auto result = *this;
+            result.appendByte (x);
+            return result;
+        }
+    };
+
+    using State = std::variant<RunningStatus, InSysex>;
+    State state;
+};
+
 //==============================================================================
 /**
     Helper class that takes chunks of incoming midi bytes, packages them into
@@ -46,153 +203,93 @@ class MidiDataConcatenator
 {
 public:
     MidiDataConcatenator (int initialBufferSize)
-        : pendingSysexData ((size_t) initialBufferSize)
     {
+        pendingSysexData.reserve ((size_t) initialBufferSize);
     }
+
+    MidiDataConcatenator (MidiDataConcatenator&&) noexcept = default;
+    MidiDataConcatenator& operator= (MidiDataConcatenator&&) noexcept = default;
 
     void reset()
     {
-        currentMessageLen = 0;
-        pendingSysexSize = 0;
+        extractor.reset();
+        pendingSysexData.clear();
         pendingSysexTime = 0;
     }
 
     template <typename UserDataType, typename CallbackType>
-    void pushMidiData (const void* inputData, int numBytes, double time,
-                       UserDataType* input, CallbackType& callback)
+    void pushMidiData (Span<const std::byte> bytes,
+                       double time,
+                       UserDataType* input,
+                       CallbackType& callback)
     {
-        auto d = static_cast<const uint8*> (inputData);
-
-        while (numBytes > 0)
+        extractor.push (bytes, [&] (SysexExtractorCallbackKind kind, Span<const std::byte> bytesThisTime)
         {
-            auto nextByte = *d;
-
-            if (pendingSysexSize != 0 || nextByte == 0xf0)
+            switch (kind)
             {
-                processSysex (d, numBytes, time, input, callback);
-                currentMessageLen = 0;
-                continue;
-            }
+                case SysexExtractorCallbackKind::notSysex:
+                    callback.handleIncomingMidiMessage (input,
+                                                        MidiMessage (bytesThisTime.data(),
+                                                                     (int) bytesThisTime.size(),
+                                                                     time));
+                    return;
 
-            ++d;
-            --numBytes;
+                case SysexExtractorCallbackKind::ongoingSysex:
+                {
+                    if (pendingSysexData.empty())
+                        pendingSysexTime = time;
 
-            if (isRealtimeMessage (nextByte))
-            {
-                callback.handleIncomingMidiMessage (input, MidiMessage (nextByte, time));
-                // These can be embedded in the middle of a normal message, so we won't
-                // reset the currentMessageLen here.
-                continue;
-            }
+                    pendingSysexData.insert (pendingSysexData.end(), bytesThisTime.begin(), bytesThisTime.end());
+                    return;
+                }
 
-            if (isInitialByte (nextByte))
-            {
-                currentMessage[0] = nextByte;
-                currentMessageLen = 1;
-            }
-            else if (currentMessageLen > 0 && currentMessageLen < 3)
-            {
-                currentMessage[currentMessageLen++] = nextByte;
-            }
-            else
-            {
-                // message is too long or invalid MIDI - abandon it and start again with the next byte
-                currentMessageLen = 0;
-                continue;
-            }
+                case SysexExtractorCallbackKind::lastSysex:
+                {
+                    pendingSysexData.insert (pendingSysexData.end(), bytesThisTime.begin(), bytesThisTime.end());
 
-            auto expectedLength = MidiMessage::getMessageLengthFromFirstByte (currentMessage[0]);
+                    if (pendingSysexData.empty())
+                    {
+                        jassertfalse;
+                        return;
+                    }
 
-            if (expectedLength == currentMessageLen)
-            {
-                callback.handleIncomingMidiMessage (input, MidiMessage (currentMessage, expectedLength, time));
-                currentMessageLen = 1; // reset, but leave the first byte to use as the running status byte
+                    if (pendingSysexData.back() == std::byte { 0xf7 })
+                    {
+                        callback.handleIncomingMidiMessage (input,
+                                                            MidiMessage (pendingSysexData.data(),
+                                                                         (int) pendingSysexData.size(),
+                                                                         pendingSysexTime));
+                    }
+                    else
+                    {
+                        callback.handlePartialSysexMessage (input,
+                                                            unalignedPointerCast<const uint8*> (pendingSysexData.data()),
+                                                            (int) pendingSysexData.size(),
+                                                            pendingSysexTime);
+                    }
+
+                    pendingSysexData.clear();
+
+                    return;
+                }
             }
-        }
+        });
+    }
+
+    template <typename UserDataType, typename CallbackType>
+    void pushMidiData (const void* inputData,
+                       int numBytes,
+                       double time,
+                       UserDataType* input,
+                       CallbackType& callback)
+    {
+        pushMidiData ({ static_cast<const std::byte*> (inputData), (size_t) numBytes }, time, input, callback);
     }
 
 private:
-    template <typename UserDataType, typename CallbackType>
-    void processSysex (const uint8*& d, int& numBytes, double time,
-                       UserDataType* input, CallbackType& callback)
-    {
-        if (*d == 0xf0)
-        {
-            pendingSysexSize = 0;
-            pendingSysexTime = time;
-        }
-
-        pendingSysexData.ensureSize ((size_t) (pendingSysexSize + numBytes), false);
-        auto totalMessage = static_cast<uint8*> (pendingSysexData.getData());
-        auto dest = totalMessage + pendingSysexSize;
-
-        do
-        {
-            if (pendingSysexSize > 0 && isStatusByte (*d))
-            {
-                if (*d == 0xf7)
-                {
-                    *dest++ = *d++;
-                    ++pendingSysexSize;
-                    --numBytes;
-                    break;
-                }
-
-                if (*d >= 0xfa || *d == 0xf8)
-                {
-                    callback.handleIncomingMidiMessage (input, MidiMessage (*d, time));
-                    ++d;
-                    --numBytes;
-                }
-                else
-                {
-                    pendingSysexSize = 0;
-                    int used = 0;
-                    const MidiMessage m (d, numBytes, used, 0, time);
-
-                    if (used > 0)
-                    {
-                        callback.handleIncomingMidiMessage (input, m);
-                        numBytes -= used;
-                        d += used;
-                    }
-
-                    break;
-                }
-            }
-            else
-            {
-                *dest++ = *d++;
-                ++pendingSysexSize;
-                --numBytes;
-            }
-        }
-        while (numBytes > 0);
-
-        if (pendingSysexSize > 0)
-        {
-            if (totalMessage [pendingSysexSize - 1] == 0xf7)
-            {
-                callback.handleIncomingMidiMessage (input, MidiMessage (totalMessage, pendingSysexSize, pendingSysexTime));
-                pendingSysexSize = 0;
-            }
-            else
-            {
-                callback.handlePartialSysexMessage (input, totalMessage, pendingSysexSize, pendingSysexTime);
-            }
-        }
-    }
-
-    static bool isRealtimeMessage (uint8 byte)  { return byte >= 0xf8 && byte <= 0xfe; }
-    static bool isStatusByte (uint8 byte)       { return byte >= 0x80; }
-    static bool isInitialByte (uint8 byte)      { return isStatusByte (byte) && byte != 0xf7; }
-
-    uint8 currentMessage[3];
-    int currentMessageLen = 0;
-
-    MemoryBlock pendingSysexData;
+    BytestreamSysexExtractor extractor;
+    std::vector<std::byte> pendingSysexData;
     double pendingSysexTime = 0;
-    int pendingSysexSize = 0;
 
     JUCE_DECLARE_NON_COPYABLE (MidiDataConcatenator)
 };

@@ -54,7 +54,7 @@ public:
 
         beginTest ("Short bytestream midi messages can be round-tripped through the UMP converter");
         {
-            Midi1ToBytestreamTranslator translator (0);
+            SingleGroupMidi1ToBytestreamTranslator translator (0);
 
             forEachNonSysExTestMessage (random, [&] (const MidiMessage& m)
             {
@@ -208,7 +208,7 @@ public:
             {
                 const auto newPacket = createRandomRealtimeUMP (random);
                 modifiedPackets.add (View (newPacket.data()));
-                realtimeMessages.addEvent (Midi1ToBytestreamTranslator::fromUmp (newPacket), 0);
+                realtimeMessages.addEvent (SingleGroupMidi1ToBytestreamExtractor::fromUmp (newPacket), 0);
             };
 
             for (const auto& packet : originalPackets)
@@ -264,7 +264,7 @@ public:
             {
                 const auto newPacket = createRandomRealtimeUMP (random);
                 modifiedPackets.add (View (newPacket.data()));
-                realtimeMessages.addEvent (Midi1ToBytestreamTranslator::fromUmp (newPacket), 0);
+                realtimeMessages.addEvent (SingleGroupMidi1ToBytestreamExtractor::fromUmp (newPacket), 0);
             };
 
             const auto addRandomUtilityUMP = [&]

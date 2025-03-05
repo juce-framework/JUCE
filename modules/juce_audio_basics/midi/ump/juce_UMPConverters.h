@@ -190,7 +190,7 @@ namespace juce::universal_midi_packets
 
         void reset() { translator.reset(); }
 
-        Midi1ToBytestreamTranslator translator;
+        SingleGroupMidi1ToBytestreamTranslator translator;
     };
 } // namespace juce::universal_midi_packets
 
