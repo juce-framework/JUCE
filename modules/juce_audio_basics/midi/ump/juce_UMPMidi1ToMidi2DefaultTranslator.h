@@ -62,7 +62,7 @@ public:
         const auto firstWord = v[0];
         const auto messageType = Utils::getMessageType (firstWord);
 
-        if (messageType != 0x2)
+        if (messageType != Utils::MessageKind::channelVoice1)
         {
             callback (v);
             return;
@@ -76,7 +76,7 @@ public:
             std::byte ((firstWord >> 0x00) & 0x7f),
         };
 
-        switch (Utils::getStatus (firstWord))
+        switch ((uint8_t) Utils::getStatus (firstWord))
         {
             case 0x8:
             case 0x9:

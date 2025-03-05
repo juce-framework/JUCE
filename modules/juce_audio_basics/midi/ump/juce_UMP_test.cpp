@@ -62,8 +62,10 @@ public:
                 expect (packets.size() == 1);
 
                 // Make sure that the message type is correct
-                const auto msgType = Utils::getMessageType (packets.data()[0]);
-                expect (msgType == ((m.getRawData()[0] >> 0x4) == 0xf ? 0x1 : 0x2));
+                expect (Utils::getMessageType (packets.data()[0])
+                        == ((m.getRawData()[0] >> 0x4) == 0xf
+                            ? Utils::MessageKind::commonRealtime
+                            : Utils::MessageKind::channelVoice1));
 
                 translator.dispatch (View {packets.data() },
                                      0,

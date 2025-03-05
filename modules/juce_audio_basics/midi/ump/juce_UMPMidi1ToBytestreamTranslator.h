@@ -81,7 +81,7 @@ public:
             case 1:
             {
                 // Utility messages don't translate to bytestream format
-                if (Utils::getMessageType (firstWord) != 0x00)
+                if (Utils::getMessageType (firstWord) != Utils::MessageKind::utility)
                 {
                     const auto message = fromUmp (PacketX1 { firstWord }, time);
                     callback (BytestreamMidiView (&message));
@@ -92,7 +92,7 @@ public:
 
             case 2:
             {
-                if (Utils::getMessageType (firstWord) == 0x3)
+                if (Utils::getMessageType (firstWord) == Utils::MessageKind::sysex7)
                     processSysEx (PacketX2 { packet[0], packet[1] }, time, callback);
 
                 break;
@@ -199,12 +199,12 @@ private:
 
     static bool isJROrNOP (uint32_t word)
     {
-        return Utils::getMessageType (word) == 0x0;
+        return Utils::getMessageType (word) == Utils::MessageKind::utility;
     }
 
     static bool isSysExContinuation (uint32_t word)
     {
-        if (Utils::getMessageType (word) != 0x3)
+        if (Utils::getMessageType (word) != Utils::MessageKind::sysex7)
             return false;
 
         const auto kind = getSysEx7Kind (word);
@@ -213,7 +213,7 @@ private:
 
     static bool isSystemRealTime (uint32_t word)
     {
-        return Utils::getMessageType (word) == 0x1 && ((word >> 0x10) & 0xff) >= 0xf8;
+        return Utils::getMessageType (word) == Utils::MessageKind::commonRealtime && ((word >> 0x10) & 0xff) >= 0xf8;
     }
 
     std::vector<std::byte> pendingSysExData;
