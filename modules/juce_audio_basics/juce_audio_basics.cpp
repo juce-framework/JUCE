@@ -112,5 +112,6 @@
 
 #if JUCE_UNIT_TESTS
  #include "utilities/juce_ADSR_test.cpp"
+ #include "midi/juce_MidiDataConcatenator_test.cpp"
  #include "midi/ump/juce_UMP_test.cpp"
 #endif

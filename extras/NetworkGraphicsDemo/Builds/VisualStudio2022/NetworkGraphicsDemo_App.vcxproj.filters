@@ -721,6 +721,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.cpp">
       <Filter>JUCE Modules\juce_audio_basics\midi</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiDataConcatenator_test.cpp">
+      <Filter>JUCE Modules\juce_audio_basics\midi</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiFile.cpp">
       <Filter>JUCE Modules\juce_audio_basics\midi</Filter>
     </ClCompile>
