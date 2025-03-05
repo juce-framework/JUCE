@@ -434,6 +434,15 @@ attributes directly to these creation functions, rather than adding them later.
   are set on a JUCE target. By default, we don't link StoreKit because you might not need it, but
   if you get linker or include errors that reference StoreKit, just set this argument to `TRUE`.
 
+`NEEDS_WINDOWS_MIDI_SERVICES`
+- On Windows, JUCE can use the Windows MIDI Services library to support MIDI 2.0 protocol
+  communications with hardware and other applications. By default this is not enabled because the
+  MIDI services require additional packages to be installed in order to function, both at build-time
+  and at run-time. If you enable this flag but don't have the correct dependencies installed, CMake
+  will emit an error message during configuration explaining how to get everything set up. This
+  option will automatically set the JUCE_USE_WINDOWS_MIDI_SERVICES=1 preprocessor definition on the
+  new target.
+
 `PUSH_NOTIFICATIONS_ENABLED`
 - Sets app entitlements to allow push notifications. May be either `TRUE`
   or `FALSE`. Defaults to `FALSE`.
