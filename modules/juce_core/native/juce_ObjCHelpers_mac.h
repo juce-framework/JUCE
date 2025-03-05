@@ -317,12 +317,22 @@ struct ObjCClass
         jassert (cls != nil);
     }
 
-    virtual ~ObjCClass()
+    ~ObjCClass()
     {
         auto kvoSubclassName = String ("NSKVONotifying_") + class_getName (cls);
 
         if (objc_getClass (kvoSubclassName.toUTF8()) == nullptr)
             objc_disposeClassPair (cls);
+    }
+
+    ObjCClass (ObjCClass&& other) noexcept
+        : cls (std::exchange (other.cls, {})) {}
+
+    ObjCClass& operator= (ObjCClass&& other) noexcept
+    {
+        auto tmp = std::move (other);
+        std::swap (tmp.cls, cls);
+        return *this;
     }
 
     void registerClass()
