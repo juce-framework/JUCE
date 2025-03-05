@@ -29,7 +29,7 @@ runs:
         input_paths = """${{ inputs.paths }}"""
         logger.debug(f'Input paths: {input_paths}')
         paths = filter(None, [x.strip() for x in input_paths.split('\n')])
-        logger.debug(f'Parsed paths: {paths}')
+        logger.info(f'Uploading paths: {paths}')
         mkdir('tmp_artifact_upload')
         archive_path = 'tmp_artifact_upload/${{ inputs.key }}.tar'
         logger.debug(f'Creating archive: {archive_path}')

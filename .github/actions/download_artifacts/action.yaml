@@ -28,7 +28,7 @@ runs:
         input_keys = """${{ inputs.keys }}"""
         logger.debug(f'Input keys: {input_keys}')
         artifact_keys = filter(None, [x.strip() for x in input_keys.split('\n')])
-        logger.debug(f'Parsed keys: {artifact_keys}')
+        logger.info(f'Downloading keys: {artifact_keys}')
 
         api_prefix = 'actions'
         artifacts_info = json_github_api_request(f'{api_prefix}/runs/{environ["GITHUB_RUN_ID"]}/artifacts')
