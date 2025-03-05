@@ -53,7 +53,7 @@ public:
     Iterator() noexcept = default;
 
     /** Creates an iterator pointing at `ptr`. */
-    explicit Iterator (const uint32_t* ptr, size_t bytes) noexcept;
+    explicit Iterator (const uint32_t* ptr, size_t words) noexcept;
 
     using difference_type    = std::iterator_traits<const uint32_t*>::difference_type;
     using value_type         = View;
@@ -70,8 +70,8 @@ public:
         // If you hit this, the memory region contained a truncated or otherwise
         // malformed Universal MIDI Packet.
         // The Iterator can only be used on regions containing complete packets!
-        jassert (increment <= bytesRemaining);
-        bytesRemaining -= increment;
+        jassert (increment <= wordsRemaining);
+        wordsRemaining -= increment;
        #endif
 
         view = View (view.data() + increment);
@@ -110,20 +110,20 @@ public:
 
         The View can be queried for its size and content.
     */
-    reference operator*() noexcept { return view; }
+    reference operator*() const noexcept { return view; }
 
     /** Returns a pointer to a View of the packet currently
         pointed-to by this iterator.
 
         The View can be queried for its size and content.
     */
-    pointer operator->() noexcept { return &view; }
+    pointer operator->() const noexcept { return &view; }
 
 private:
     View view;
 
    #if JUCE_DEBUG
-    size_t bytesRemaining = 0;
+    size_t wordsRemaining = 0;
    #endif
 };
 

@@ -35,10 +35,10 @@
 namespace juce::universal_midi_packets
 {
 
-Iterator::Iterator (const uint32_t* ptr, [[maybe_unused]] size_t bytes) noexcept
+Iterator::Iterator (const uint32_t* ptr, [[maybe_unused]] size_t words) noexcept
     : view (ptr)
    #if JUCE_DEBUG
-    , bytesRemaining (bytes)
+    , wordsRemaining (words)
    #endif
 {
 }
