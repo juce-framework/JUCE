@@ -229,7 +229,7 @@ struct Conversion
     {
         const auto firstWord = v[0];
 
-        if (Utils::getMessageType (firstWord) != 0x4)
+        if (Utils::getMessageType (firstWord) != Utils::MessageKind::channelVoice2)
         {
             callback (v);
             return;
@@ -238,7 +238,7 @@ struct Conversion
         const auto status = Utils::getStatus (firstWord);
         const auto typeAndGroup = ((std::byte { 0x2 } << 0x4) | std::byte { Utils::getGroup (firstWord) });
 
-        switch (status)
+        switch ((uint8_t) status)
         {
             case 0x8:   // note off
             case 0x9:   // note on
@@ -251,10 +251,10 @@ struct Conversion
 
                 // If this is a note-on, and the scaled byte is 0,
                 // the scaled velocity should be 1 instead of 0
-                const auto needsCorrection = status == 0x9 && byte3 == std::byte { 0 };
+                const auto needsCorrection = status == std::byte { 0x9 } && byte3 == std::byte { 0 };
                 const auto correctedByte = needsCorrection ? std::byte { 1 } : byte3;
 
-                const auto shouldIgnore = status == 0xb && [&]
+                const auto shouldIgnore = status == std::byte { 0xb } && [&]
                 {
                     switch (uint8_t (byte2))
                     {
@@ -299,8 +299,8 @@ struct Conversion
             case 0x2:   // rpn
             case 0x3:   // nrpn
             {
-                const auto ccX = status == 0x2 ? std::byte { 101 } : std::byte { 99 };
-                const auto ccY = status == 0x2 ? std::byte { 100 } : std::byte { 98 };
+                const auto ccX = status == std::byte { 0x2 } ? std::byte { 101 } : std::byte { 99 };
+                const auto ccY = status == std::byte { 0x2 } ? std::byte { 100 } : std::byte { 98 };
                 const auto statusAndChannel = std::byte ((0xb << 0x4) | Utils::getChannel (firstWord));
                 const auto data = scaleTo14 (v[1]);
 
