@@ -52,6 +52,8 @@ public:
     /*  Returns the text which was used to construct this object. */
     const String& getText() const;
 
+    Span<const ShapedGlyph> getGlyphs() const;
+
     /*  Returns the text's codepoint range, to which the glyph under the provided index belongs.
 
         This range will have a length of at least one, and potentially more than one if ligatures
@@ -59,7 +61,9 @@ public:
     */
     Range<int64> getTextRange (int64 glyphIndex) const;
 
-    int64 getGlyphIndexAt (Point<float> p) const;
+    bool isLtr (int64 glyphIndex) const;
+
+    int64 getTextIndexForCaret (Point<float> p) const;
 
     void getGlyphRanges (Range<int64> textRange, std::vector<Range<int64>>& outRanges) const;
 
@@ -94,7 +98,9 @@ public:
 
     int64 getNumGlyphs() const;
 
-    const detail::RangedValues<LineMetrics>& getLinesMetrics() const;
+    const detail::RangedValues<LineMetrics>& getLineMetricsForGlyphRange() const;
+
+    const detail::Ranges& getLineTextRanges() const;
 
     /*  @internal */
     const JustifiedText& getJustifiedText() const;

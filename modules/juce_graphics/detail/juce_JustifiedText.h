@@ -113,10 +113,11 @@ public:
     void accessTogetherWith (Callable&& callback, RangedValues&&... rangedValues) const
     {
         std::optional<int64> lastLine;
+        int64 lastGlyph = 0;
         Point<float> anchor {};
 
         for (const auto item : makeIntersectingRangedValues (&shapedText.getResolvedFonts(),
-                                                             &linesMetrics,
+                                                             &lineMetricsForGlyphRange,
                                                              &rangesToDraw,
                                                              &whitespaceStretch,
                                                              (&rangedValues)...))
@@ -126,6 +127,34 @@ public:
 
             if (std::exchange (lastLine, lineMetrics.lineNumber) != lineMetrics.lineNumber)
                 anchor = lineMetrics.anchor;
+
+            if (range.getStart() != lastGlyph)
+            {
+                detail::RangedValues<int8_t> glyphMask;
+                Ranges::Operations ops;
+
+                const auto firstGlyphInCurrentLine = shapedText.getLineNumbersForGlyphRanges().getItem ((size_t) lineMetrics.lineNumber)
+                                                                                              .range
+                                                                                              .getStart();
+
+                glyphMask.set ({ std::max (lastGlyph, firstGlyphInCurrentLine), range.getStart() }, 1, ops);
+
+                for (const auto [skippedRange, skippedStretch, _] : makeIntersectingRangedValues (&whitespaceStretch,
+                                                                                                  &glyphMask))
+                {
+                    ignoreUnused (_);
+
+                    for (const auto& skippedGlyph : shapedText.getGlyphs (skippedRange))
+                    {
+                        anchor += skippedGlyph.advance;
+
+                        if (skippedGlyph.isWhitespace())
+                            anchor.addXY (skippedStretch, 0.0f);
+                    }
+                }
+            }
+
+            lastGlyph = range.getEnd();
 
             const auto glyphs = [this, r = range, dt = drawType]() -> Span<const ShapedGlyph>
             {
@@ -170,7 +199,7 @@ public:
     */
     auto& getMinimumRequiredWidthForLines() const { return minimumRequiredWidthsForLine; }
 
-    int64 getGlyphIndexAt (Point<float> p) const;
+    int64 getGlyphIndexToTheRightOf (Point<float> p) const;
 
     /*  If the passed in index parameter is greater than the index of the last contained glyph,
         then the returned anchor specifies the location where the next glyph would have to be
@@ -190,11 +219,11 @@ public:
     */
     float getHeight() const;
 
-    const auto& getLinesMetrics() const { return linesMetrics; }
+    const auto& getLineMetricsForGlyphRange() const { return lineMetricsForGlyphRange; }
 
 private:
     const SimpleShapedText& shapedText;
-    detail::RangedValues<LineMetrics> linesMetrics;
+    detail::RangedValues<LineMetrics> lineMetricsForGlyphRange;
     std::optional<SimpleShapedText> ellipsis;
     detail::RangedValues<DrawType> rangesToDraw;
     detail::RangedValues<float> whitespaceStretch;

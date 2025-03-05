@@ -221,7 +221,7 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
 
     std::vector<LineInfo> lineInfos;
 
-    for (const auto [range, lineNumber] : shapedText.getLineNumbers())
+    for (const auto [range, lineNumber] : shapedText.getLineNumbersForGlyphRanges())
     {
         // This is guaranteed by the RangedValues implementation. You can't assign a value to an
         // empty range.
@@ -259,7 +259,7 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
         const auto containsHardBreak = shapedText.getCodepoint (range.getEnd() - 1) == 0xa
                                        || shapedText.getCodepoint (range.getStart()) == 0xa;
 
-        if (containsHardBreak || lineNumber == shapedText.getLineNumbers().back().value)
+        if (containsHardBreak || lineNumber == shapedText.getLineNumbersForGlyphRanges().back().value)
         {
             m.extraWhitespaceAdvance = {};
             m.stretchableWhitespaces = {};
@@ -282,7 +282,7 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
 
     for (const auto [lineIndex, lineInfo] : enumerate (lineInfos))
     {
-        const auto lineNumber = shapedText.getLineNumbers().getItem ((size_t) lineIndex);
+        const auto lineNumber = shapedText.getLineNumbersForGlyphRanges().getItem ((size_t) lineIndex);
         const auto range = lineNumber.range;
 
         const auto maxDescent = lineInfo.lineHeight - lineInfo.maxAscent;
@@ -291,16 +291,17 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
         if (! top.has_value())
             top = baseline - (1.0f + leading) * lineInfo.maxAscent;
 
-        linesMetrics.set (range,
-                          { lineNumber.value,
-                            { lineInfo.mainAxisLineAlignment.anchor, baseline },
-                            lineInfo.maxAscent,
-                            lineInfo.lineHeight - lineInfo.maxAscent,
-                            lineInfo.mainAxisLineAlignment.effectiveLineLength + lineInfo.mainAxisLineAlignment.extraWhitespaceAdvance,
-                            *top,
-                            nextLineTop },
-                          ops,
-                          MergeEqualItemsNo{});
+        lineMetricsForGlyphRange.set (range,
+                                      { lineNumber.value,
+                                        { lineInfo.mainAxisLineAlignment.anchor, baseline },
+                                        lineInfo.maxAscent,
+                                        lineInfo.lineHeight - lineInfo.maxAscent,
+                                        lineInfo.mainAxisLineAlignment.effectiveLineLength
+                                            + lineInfo.mainAxisLineAlignment.extraWhitespaceAdvance,
+                                        *top,
+                                        nextLineTop },
+                                      ops,
+                                      MergeEqualItemsNo{});
 
         whitespaceStretch.set (range, 0.0f, ops);
         const auto stretchRange = lineInfo.mainAxisLineAlignment.stretchableWhitespaces + range.getStart();
@@ -324,10 +325,10 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
     // The remaining logic below is for supporting
     // GlyphArrangement::addFittedText() when the maximum number of lines is
     // constrained.
-    if (linesMetrics.isEmpty())
+    if (lineMetricsForGlyphRange.isEmpty())
         return;
 
-    const auto lastLineMetrics = linesMetrics.back();
+    const auto lastLineMetrics = lineMetricsForGlyphRange.back();
     const auto lastLineGlyphRange = lastLineMetrics.range;
     const auto lastLineGlyphs = shapedText.getGlyphs (lastLineGlyphRange);
     const auto lastLineLengths = getMainAxisLineLength (lastLineGlyphs);
@@ -469,12 +470,12 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
                            realign.extraWhitespaceAdvance, ops);
 }
 
-int64 JustifiedText::getGlyphIndexAt (Point<float> p) const
+int64 JustifiedText::getGlyphIndexToTheRightOf (Point<float> p) const
 {
-    auto lineIt = linesMetrics.begin();
+    auto lineIt = lineMetricsForGlyphRange.begin();
     float lineTop = 0.0f;
 
-    while (lineIt != linesMetrics.end())
+    while (lineIt != lineMetricsForGlyphRange.end())
     {
         const auto nextLineTop = lineIt->value.nextLineTop;
 
@@ -485,7 +486,7 @@ int64 JustifiedText::getGlyphIndexAt (Point<float> p) const
         ++lineIt;
     }
 
-    if (lineIt == linesMetrics.end())
+    if (lineIt == lineMetricsForGlyphRange.end())
         return 0;
 
     const auto glyphsInLine = shapedText.getGlyphs (lineIt->range);
@@ -495,7 +496,7 @@ int64 JustifiedText::getGlyphIndexAt (Point<float> p) const
 
     for (const auto& glyph : glyphsInLine)
     {
-        if (   p.getX() <= glyphX
+        if (   p.getX() < glyphX + glyph.advance.getX() / 2.0f
             || glyph.isNewline()
             || (glyphIndex - lineIt->range.getStart() == (int64) glyphsInLine.size() - 1 && glyph.isWhitespace()))
         {
@@ -513,10 +514,12 @@ GlyphAnchorResult JustifiedText::getGlyphAnchor (int64 index) const
 {
     jassert (index >= 0);
 
-    if (linesMetrics.isEmpty())
+    if (lineMetricsForGlyphRange.isEmpty())
         return {};
 
-    const auto lineItem = linesMetrics.getItemWithEnclosingRange (index).value_or (linesMetrics.back());
+    const auto lineItem = lineMetricsForGlyphRange.getItemWithEnclosingRange (index)
+                                                  .value_or (lineMetricsForGlyphRange.back());
+
     const auto indexInLine = index - lineItem.range.getStart();
 
     GlyphAnchorResult anchor { lineItem.value.anchor, lineItem.value.maxAscent, lineItem.value.maxDescent };
@@ -539,7 +542,7 @@ RectangleList<float> JustifiedText::getGlyphsBounds (Range<int64> glyphRange) co
 {
     RectangleList<float> bounds;
 
-    if (linesMetrics.isEmpty())
+    if (lineMetricsForGlyphRange.isEmpty())
         return bounds;
 
     const auto getBounds = [&] (const LineMetrics& line, int64 lineStart, int64 boundsStart, int64 boundsEnd) -> Rectangle<float>
@@ -569,7 +572,7 @@ RectangleList<float> JustifiedText::getGlyphsBounds (Range<int64> glyphRange) co
 
     for (auto consumeFrom = glyphRange.getStart(); consumeFrom < glyphRange.getEnd();)
     {
-        const auto lineItem = linesMetrics.getItemWithEnclosingRange (consumeFrom);
+        const auto lineItem = lineMetricsForGlyphRange.getItemWithEnclosingRange (consumeFrom);
 
         if (! lineItem.has_value())
             break;
@@ -585,10 +588,10 @@ RectangleList<float> JustifiedText::getGlyphsBounds (Range<int64> glyphRange) co
 
 float JustifiedText::getHeight() const
 {
-    if (linesMetrics.isEmpty())
+    if (lineMetricsForGlyphRange.isEmpty())
         return 0.0f;
 
-    return linesMetrics.back().value.nextLineTop;
+    return lineMetricsForGlyphRange.back().value.nextLineTop;
 }
 
 void drawJustifiedText (const JustifiedText& text, const Graphics& g, AffineTransform transform)

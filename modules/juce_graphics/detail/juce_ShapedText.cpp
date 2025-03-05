@@ -59,9 +59,14 @@ public:
         return simpleShapedText.getNumGlyphs();
     }
 
-    const detail::RangedValues<LineMetrics>& getLinesMetrics() const
+    const detail::RangedValues<LineMetrics>& getLineMetricsForGlyphRange() const
     {
-        return justifiedText.getLinesMetrics();
+        return justifiedText.getLineMetricsForGlyphRange();
+    }
+
+    const detail::Ranges& getLineTextRanges() const
+    {
+        return simpleShapedText.getLineTextRanges();
     }
 
     auto& getText() const
@@ -74,9 +79,40 @@ public:
         return simpleShapedText.getTextRange (glyphIndex);
     }
 
-    int64 getGlyphIndexAt (Point<float> p) const
+    auto isLtr (int64 glyphIndex) const
     {
-        return justifiedText.getGlyphIndexAt (p);
+        return simpleShapedText.isLtr (glyphIndex);
+    }
+
+    int64 getTextIndexForCaret (Point<float> p) const
+    {
+        const auto getGlyph = [&] (int64 i)
+        {
+            return simpleShapedText.getGlyphs()[(size_t) i];
+        };
+
+        if (getNumGlyphs() == 0)
+            return 0;
+
+        const auto glyphOnTheRight = justifiedText.getGlyphIndexToTheRightOf (p);
+
+        if (glyphOnTheRight >= getNumGlyphs())
+        {
+            const auto glyphOnTheLeft = glyphOnTheRight - 1;
+            const auto ltr = simpleShapedText.getGlyphLookup().find (getGlyph (glyphOnTheLeft).cluster)->value.ltr;
+
+            if (ltr)
+                return simpleShapedText.getTextIndexAfterGlyph (glyphOnTheLeft);
+
+            return simpleShapedText.getGlyphs()[(size_t) glyphOnTheLeft].cluster;
+        }
+
+        const auto ltr = simpleShapedText.getGlyphLookup().find (getGlyph (glyphOnTheRight).cluster)->value.ltr;
+
+        if (ltr)
+            return simpleShapedText.getGlyphs()[(size_t) glyphOnTheRight].cluster;
+
+        return simpleShapedText.getTextIndexAfterGlyph (glyphOnTheRight);
     }
 
     void getGlyphRanges (Range<int64> textRange, std::vector<Range<int64>>& outRanges) const
@@ -139,9 +175,14 @@ int64 ShapedText::getNumGlyphs() const
     return impl->getNumGlyphs();
 }
 
-const detail::RangedValues<LineMetrics>& ShapedText::getLinesMetrics() const
+const detail::RangedValues<LineMetrics>& ShapedText::getLineMetricsForGlyphRange() const
 {
-    return impl->getLinesMetrics();
+    return impl->getLineMetricsForGlyphRange();
+}
+
+const detail::Ranges& ShapedText::getLineTextRanges() const
+{
+    return impl->getLineTextRanges();
 }
 
 const String& ShapedText::getText() const
@@ -154,9 +195,14 @@ Range<int64> ShapedText::getTextRange (int64 glyphIndex) const
     return impl->getTextRange (glyphIndex);
 }
 
-int64 ShapedText::getGlyphIndexAt (Point<float> p) const
+bool ShapedText::isLtr (int64 glyphIndex) const
 {
-    return impl->getGlyphIndexAt (p);
+    return impl->isLtr (glyphIndex);
+}
+
+int64 ShapedText::getTextIndexForCaret (Point<float> p) const
+{
+    return impl->getTextIndexForCaret (p);
 }
 
 void ShapedText::getGlyphRanges (Range<int64> textRange, std::vector<Range<int64>>& outRanges) const

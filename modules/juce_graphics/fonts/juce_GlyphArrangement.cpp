@@ -182,6 +182,9 @@ static void addGlyphsFromShapedText (GlyphArrangement& ga, const detail::ShapedT
                                    auto& glyph = shapedGlyphs[i];
                                    auto& position = positions[i];
 
+                                   if (glyph.isPlaceholderForLigature())
+                                       continue;
+
                                    PositionedGlyph pg { font,
                                                         st.getText()[(int) st.getTextRange (glyphIndex).getStart()],
                                                         (int) glyph.glyphId,

@@ -317,14 +317,28 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     std::vector<size_t> characterLookup;
     std::vector<ShapedGlyph> glyphs;
 
-    std::optional<uint32_t> lastCluster;
+    std::optional<int64> lastCluster;
 
-    for (size_t i = 0; i < infos.size(); ++i)
+    const auto ltr = (embeddingLevel % 2) == 0;
+
+    const auto getNextCluster = [&ltr, &infosCapt = infos, &range] (size_t visualIndex)
     {
-        const auto j = (embeddingLevel % 2) == 0 ? i : infos.size() - 1 - i;
+        const auto next = (int64) visualIndex + (ltr ? 1 : -1);
 
-        const auto glyphId = infos[j].codepoint;
-        const auto xAdvance = positions[j].x_advance;
+        if (next < 0)
+            return ltr ? range.getStart() : range.getEnd();
+
+        if (next >= (int64) infosCapt.size())
+            return ltr ? range.getEnd() : range.getStart();
+
+        return (int64) infosCapt[(size_t) next].cluster + range.getStart();
+    };
+
+    for (size_t visualIndex = 0; visualIndex < infos.size(); ++visualIndex)
+    {
+        const auto glyphId = infos[visualIndex].codepoint;
+        const auto xAdvanceBase = HbScale::hbToJuce (positions[visualIndex].x_advance);
+        const auto yAdvanceBase = -HbScale::hbToJuce (positions[visualIndex].y_advance);
 
         // For certain OS, Font and glyph ID combinations harfbuzz will not find extents data and
         // hb_font_get_glyph_extents will return false. In such cases Typeface::getGlyphBounds
@@ -341,11 +355,11 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
 
         const auto whitespace = extentsDataAvailable
                                 && font.getTypefacePtr()->getGlyphBounds (font.getMetricsKind(), (int) glyphId).isEmpty()
-                                && xAdvance > 0;
+                                && xAdvanceBase > 0;
 
-        const auto newline = std::invoke ([&controlChars, &shapingInfos = infos, j]
+        const auto newline = std::invoke ([&controlChars, &shapingInfos = infos, visualIndex]
         {
-           const auto it = controlChars.find ((size_t) shapingInfos[j].cluster);
+           const auto it = controlChars.find ((size_t) shapingInfos[visualIndex].cluster);
 
            if (it == controlChars.end())
                return false;
@@ -353,22 +367,55 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
            return it->second == ControlCharacter::cr || it->second == ControlCharacter::lf;
         });
 
+        const auto cluster = (int64) infos[visualIndex].cluster + range.getStart();
+
+        const auto numLigaturePlaceholders = std::max ((int64) 0,
+                                                       std::abs (getNextCluster (visualIndex) - cluster) - 1);
+
         // Tracking is only applied at the beginning of a new cluster to avoid inserting it before
         // diacritic marks.
-        const auto appliedTracking = std::exchange (lastCluster, infos[j].cluster) != infos[j].cluster
+        const auto appliedTracking = std::exchange (lastCluster, cluster) != cluster
                                    ? trackingAmount
                                    : 0;
 
+        const auto advanceMultiplier = numLigaturePlaceholders == 0 ? 1.0f
+                                                                    : 1.0f / (float) (numLigaturePlaceholders + 1);
+
+        Point<float> advance { xAdvanceBase * advanceMultiplier + appliedTracking, yAdvanceBase * advanceMultiplier };
+
+        const auto ligatureClusterNumber = cluster + (ltr ? 0 : numLigaturePlaceholders);
+
         glyphs.push_back ({
             glyphId,
-            (int64) infos[j].cluster + range.getStart(),
-            (infos[j].mask & HB_GLYPH_FLAG_UNSAFE_TO_BREAK) != 0,
+            ligatureClusterNumber,
+            (infos[visualIndex].mask & HB_GLYPH_FLAG_UNSAFE_TO_BREAK) != 0,
             whitespace,
             newline,
-            Point<float> { HbScale::hbToJuce (xAdvance) + appliedTracking, -HbScale::hbToJuce (positions[j].y_advance) },
-            Point<float> { HbScale::hbToJuce (positions[j].x_offset), -HbScale::hbToJuce (positions[j].y_offset) },
+            numLigaturePlaceholders == 0 ? (int8_t) 0 : (int8_t) -numLigaturePlaceholders ,
+            advance,
+            Point<float> { HbScale::hbToJuce (positions[visualIndex].x_offset),
+                           -HbScale::hbToJuce (positions[visualIndex].y_offset) },
         });
+
+        for (int l = 0; l < numLigaturePlaceholders; ++l)
+        {
+            const auto clusterDiff = l + 1;
+
+            glyphs.push_back ({
+                glyphId,
+                ligatureClusterNumber + (ltr ? clusterDiff : -clusterDiff),
+                true,
+                whitespace,
+                newline,
+                (int8_t) (l + 1),
+                advance,
+                Point<float>{},
+            });
+        }
     }
+
+    if (! ltr)
+        std::reverse (glyphs.begin(), glyphs.end());
 
     return glyphs;
 }
@@ -1229,9 +1276,9 @@ void SimpleShapedText::shape (const String& data,
                                                     .fillLines (shaper);
         auto& lineData = lineDataAndStorage.lines;
 
-        foldLinesBeyondLineLimit (lineData, (size_t) options.getMaxNumLines() - lineNumbers.size());
+        foldLinesBeyondLineLimit (lineData, (size_t) options.getMaxNumLines() - lineNumbersForGlyphRanges.size());
 
-        if (lineNumbers.size() >= (size_t) options.getMaxNumLines())
+        if (lineNumbersForGlyphRanges.size() >= (size_t) options.getMaxNumLines())
             break;
 
         for (const auto& line : lineData)
@@ -1269,8 +1316,23 @@ void SimpleShapedText::shape (const String& data,
                 ops.clear();
             }
 
+            const auto lineTextRange = std::accumulate (glyphSpansInLine.begin(),
+                                                        glyphSpansInLine.end(),
+                                                        std::make_pair (std::numeric_limits<int64>::max(),
+                                                                        std::numeric_limits<int64>::min()),
+                                                        [&] (auto& sum, auto& elem) -> std::pair<int64, int64>
+                                                        {
+                                                            const auto r = elem.textRange + lineRange.getStart();
+
+                                                            return { std::min (sum.first, r.getStart()),
+                                                                     std::max (sum.second, r.getEnd()) };
+                                                        });
+
+            lineTextRanges.set ({ lineTextRange.first, lineTextRange.second }, ops);
+            ops.clear();
+
             const auto lineEnd = (int64) glyphsInVisualOrder.size();
-            lineNumbers.set ({ lineStart, lineEnd}, (int64) lineNumbers.size(), ops);
+            lineNumbersForGlyphRanges.set ({ lineStart, lineEnd}, (int64) lineNumbersForGlyphRanges.size(), ops);
             ops.clear();
         }
     }
@@ -1339,6 +1401,13 @@ Range<int64> SimpleShapedText::getTextRange (int64 glyphIndex) const
     return Range<int64>::withStartAndLength (cluster, std::max ((int64) 1, nextAdjacentCluster - cluster));
 }
 
+bool SimpleShapedText::isLtr (int64 glyphIndex) const
+{
+    const auto it = glyphLookup.find (glyphsInVisualOrder[(size_t) glyphIndex].cluster);
+    jassert (it != glyphLookup.end());
+    return it->value.ltr;
+}
+
 /*  Returns the first element that equals value, if such an element exists.
 
     Otherwise, returns the last element that is smaller than value, if such an element exists.
@@ -1351,8 +1420,11 @@ Range<int64> SimpleShapedText::getTextRange (int64 glyphIndex) const
         lessThanOrEqual: less than or equal
 */
 template <typename It, typename Value, typename Callback>
-auto lessThanOrEqual (It begin, It end, Value v, Callback extractValue)
+auto equalOrLessThan (It begin, It end, Value v, Callback extractValue)
 {
+    if (begin == end)
+        return end;
+
     auto it = std::lower_bound (begin,
                                 end,
                                 v,
@@ -1361,7 +1433,7 @@ auto lessThanOrEqual (It begin, It end, Value v, Callback extractValue)
                                     return extractValue (elem) < value;
                                 });
 
-    if (it == end || it == begin || extractValue (*it) == v)
+    if (it == begin || (it != end && extractValue (*it) == v))
         return it;
 
     --it;
@@ -1384,7 +1456,7 @@ void SimpleShapedText::getGlyphRanges (Range<int64> textRange, std::vector<Range
 
         const auto getGlyphSubRange = [&] (auto begin, auto end)
         {
-            auto startIt = lessThanOrEqual (begin,
+            auto startIt = equalOrLessThan (begin,
                                             end,
                                             textSubRange.getStart(),
                                             [] (auto& elem) -> auto& { return elem.cluster; });
@@ -1415,6 +1487,27 @@ void SimpleShapedText::getGlyphRanges (Range<int64> textRange, std::vector<Range
     }
 
     outRanges = std::move (glyphRanges.getRanges());
+}
+
+int64 SimpleShapedText::getTextIndexAfterGlyph (int64 glyphIndex) const
+{
+    const auto& cluster = glyphsInVisualOrder[(size_t) glyphIndex].cluster;
+    auto it = glyphLookup.find (glyphsInVisualOrder[(size_t) glyphIndex].cluster);
+
+    if (it->value.ltr)
+    {
+        for (auto i = glyphIndex + 1; i < it->value.glyphRange.getEnd(); ++i)
+            if (const auto nextCluster = glyphsInVisualOrder[(size_t) i].cluster; nextCluster != cluster)
+                return nextCluster;
+    }
+    else
+    {
+        for (auto i = glyphIndex - 1; i >= it->value.glyphRange.getStart(); --i)
+            if (const auto nextCluster = glyphsInVisualOrder[(size_t) i].cluster; nextCluster != cluster)
+                return nextCluster;
+    }
+
+    return it->range.getEnd();
 }
 
 #if JUCE_UNIT_TESTS

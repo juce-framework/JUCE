@@ -201,6 +201,7 @@ struct ShapedGlyph
                  bool unsafeToBreakIn,
                  bool whitespaceIn,
                  bool newlineIn,
+                 int8_t distanceFromLigatureIn,
                  Point<float> advanceIn,
                  Point<float> offsetIn)
         : advance (advanceIn),
@@ -209,11 +210,19 @@ struct ShapedGlyph
           glyphId (glyphIdIn),
           unsafeToBreak (unsafeToBreakIn),
           whitespace (whitespaceIn),
-          newline (newlineIn) {}
+          newline (newlineIn),
+          distanceFromLigature (distanceFromLigatureIn) {}
 
     bool isUnsafeToBreak() const { return unsafeToBreak; }
     bool isWhitespace() const { return whitespace; }
     bool isNewline() const { return newline; }
+
+    bool isNonLigature() const { return distanceFromLigature == 0; }
+    bool isLigature() const { return distanceFromLigature < 0; }
+    bool isPlaceholderForLigature() const { return distanceFromLigature > 0; }
+
+    int8_t getDistanceFromLigature() const { return distanceFromLigature; }
+    int8_t getNumTrailingLigaturePlaceholders() const { return -distanceFromLigature; }
 
     Point<float> advance;
     Point<float> offset;
@@ -225,6 +234,7 @@ private:
     int8_t unsafeToBreak;
     int8_t whitespace;
     int8_t newline;
+    int8_t distanceFromLigature;
 };
 
 struct GlyphLookupEntry
@@ -242,18 +252,30 @@ public:
     SimpleShapedText (const String* data,
                       const ShapedTextOptions& options);
 
-    /*  The returned container associates line numbers with the range of glyphs (not input codepoints)
-        that make up the line.
-    */
-    const auto& getLineNumbers() const { return lineNumbers; }
+    const auto& getLineNumbersForGlyphRanges() const { return lineNumbersForGlyphRanges; }
+
+    const auto& getLineTextRanges() const { return lineTextRanges; }
 
     const auto& getResolvedFonts() const { return resolvedFonts; }
 
     Range<int64> getTextRange (int64 glyphIndex) const;
 
+    /*  Returns true if the specified glyph is inside to an LTR run.
+    */
+    bool isLtr (int64 glyphIndex) const;
+
     void getGlyphRanges (Range<int64> textRange, std::vector<Range<int64>>& outRanges) const;
 
-    int64 getNumLines() const { return (int64) lineNumbers.getRanges().size(); }
+    /*  Returns the input codepoint index that follows the glyph in a logical sense. So for LTR text
+        this is the cluster number of the glyph to the right. For RTL text it's the one on the left.
+
+        If there is no subsequent glyph, the returned number is the first Unicode codepoint index
+        that isn't covered by the cluster to which the selected glyph belongs, so for the glyph 'o'
+        in "hello" this would be 5, given there are no ligatures in use.
+    */
+    int64 getTextIndexAfterGlyph (int64 glyphIndex) const;
+
+    int64 getNumLines() const { return (int64) lineNumbersForGlyphRanges.getRanges().size(); }
     int64 getNumGlyphs() const { return (int64) glyphsInVisualOrder.size(); }
 
     juce_wchar getCodepoint (int64 glyphIndex) const;
@@ -262,13 +284,16 @@ public:
 
     Span<const ShapedGlyph> getGlyphs() const;
 
+    const auto& getGlyphLookup() const { return glyphLookup; }
+
 private:
     void shape (const String& data,
                 const ShapedTextOptions& options);
 
     const String& string;
     std::vector<ShapedGlyph> glyphsInVisualOrder;
-    detail::RangedValues<int64> lineNumbers;
+    detail::RangedValues<int64> lineNumbersForGlyphRanges;
+    detail::Ranges lineTextRanges;
     detail::RangedValues<Font> resolvedFonts;
     detail::RangedValues<GlyphLookupEntry> glyphLookup;
 

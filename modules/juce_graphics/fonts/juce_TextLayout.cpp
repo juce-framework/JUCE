@@ -346,7 +346,7 @@ static Range<int64> getLineInputRange (const detail::ShapedText& st, int64 lineN
     using namespace detail;
 
     return getInputRange (st, st.getSimpleShapedText()
-                                .getLineNumbers()
+                                .getLineNumbersForGlyphRanges()
                                 .getItem ((size_t) lineNumber).range);
 }
 
@@ -360,7 +360,7 @@ static MaxFontAscentAndDescent getMaxFontAscentAndDescentInEnclosingLine (const 
 {
     const auto sst = st.getSimpleShapedText();
 
-    const auto lineRange = sst.getLineNumbers()
+    const auto lineRange = sst.getLineNumbersForGlyphRanges()
                               .getItemWithEnclosingRange (lineChunkRange.getStart())->range;
 
     const auto fonts = sst.getResolvedFonts().getIntersectionsWith (lineRange);
@@ -427,7 +427,7 @@ void TextLayout::createStandardLayout (const AttributedString& text)
     std::unique_ptr<Line> line;
 
     st.accessTogetherWith ([&] (Span<const ShapedGlyph> glyphs,
-                                Span<Point<float>> positions,
+                                Span<const Point<float>> positions,
                                 Font font,
                                 Range<int64> glyphRange,
                                 LineMetrics lineMetrics,
@@ -470,7 +470,14 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                }();
 
                                for (size_t i = 0; i < beyondLastNonWhitespace; ++i)
-                                   run->glyphs.add ({ (int) glyphs[i].glyphId, positions[i] - line->lineOrigin, glyphs[i].advance.x });
+                               {
+                                   if (glyphs[i].isPlaceholderForLigature())
+                                       continue;
+
+                                   run->glyphs.add ({ (int) glyphs[i].glyphId,
+                                                      positions[i] - line->lineOrigin,
+                                                      glyphs[i].advance.x });
+                               }
 
                                line->runs.add (std::move (run));
                            },
