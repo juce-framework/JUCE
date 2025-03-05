@@ -397,6 +397,8 @@ void TextLayout::createStandardLayout (const AttributedString& text)
 {
     using namespace detail;
 
+    detail::Ranges::Operations ops;
+
     RangedValues<Font> fonts;
     RangedValues<Colour> colours;
 
@@ -404,8 +406,9 @@ void TextLayout::createStandardLayout (const AttributedString& text)
     {
         const auto& attribute = text.getAttribute (i);
         const auto range = castTo<int64> (attribute.range);
-        fonts.set (range, attribute.font);
-        colours.set (range, attribute.colour);
+        fonts.set (range, attribute.font, ops);
+        colours.set (range, attribute.colour, ops);
+        ops.clear();
     }
 
     auto shapedTextOptions = ShapedTextOptions{}.withFonts (fonts)
@@ -457,7 +460,7 @@ void TextLayout::createStandardLayout (const AttributedString& text)
 
                                    for (auto it  = std::reverse_iterator { glyphs.end() },
                                              end = std::reverse_iterator { glyphs.begin() };
-                                        it != end && it->whitespace;
+                                        it != end && it->isWhitespace();
                                         ++it)
                                    {
                                        --i;

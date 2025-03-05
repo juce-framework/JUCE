@@ -61,10 +61,12 @@ public:
 
     int64 getGlyphIndexAt (Point<float> p) const;
 
-    std::vector<Range<int64>> getGlyphRanges (Range<int64> textRange) const;
+    void getGlyphRanges (Range<int64> textRange, std::vector<Range<int64>>& outRanges) const;
+
+    RectangleList<float> getGlyphsBounds (Range<int64> glyphRange) const;
 
     /*  @see JustifiedText::getGlyphAnchor() */
-    Point<float> getGlyphAnchor (int64 index) const;
+    GlyphAnchorResult getGlyphAnchor (int64 index) const;
 
     /*  Returns the widths for each line, that the glyphs would require to be rendered without being
         truncated. This will or will not include the space required by trailing whitespaces in the
@@ -91,6 +93,8 @@ public:
     float getHeight() const;
 
     int64 getNumGlyphs() const;
+
+    const detail::RangedValues<LineMetrics>& getLinesMetrics() const;
 
     /*  @internal */
     const JustifiedText& getJustifiedText() const;

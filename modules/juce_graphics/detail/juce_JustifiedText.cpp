@@ -44,7 +44,7 @@ static int64 getNumLeadingWhitespaces (Span<const ShapedGlyph> glyphs)
 {
     const auto it = std::find_if_not (glyphs.begin(),
                                       glyphs.end(),
-                                      [&] (const auto& g) { return g.whitespace; });
+                                      [&] (const auto& g) { return g.isWhitespace(); });
 
     return (int64) std::distance (glyphs.begin(), it);
 }
@@ -56,7 +56,7 @@ static int64 getNumTrailingWhitespaces (Span<const ShapedGlyph> glyphs)
 
     int64 trailingWhitespaces = 0;
 
-    for (auto it = glyphs.end(); --it >= glyphs.begin() && it->whitespace;)
+    for (auto it = glyphs.end(); --it >= glyphs.begin() && it->isWhitespace();)
         ++trailingWhitespaces;
 
     return trailingWhitespaces;
@@ -71,7 +71,7 @@ static NumWhitespaces getNumWhitespaces (Span<const ShapedGlyph> glyphs)
 {
     const auto total = std::count_if (glyphs.begin(),
                                       glyphs.end(),
-                                      [] (const auto& g) { return g.whitespace; });
+                                      [] (const auto& g) { return g.isWhitespace(); });
 
     return { total, getNumLeadingWhitespaces (glyphs), getNumTrailingWhitespaces (glyphs) };
 }
@@ -93,7 +93,7 @@ static LineLength getMainAxisLineLength (Span<const ShapedGlyph> glyphs)
     if (glyphs.empty())
         return {};
 
-    for (auto it = glyphs.end(); --it >= glyphs.begin() && it->whitespace;)
+    for (auto it = glyphs.end(); --it >= glyphs.begin() && it->isWhitespace();)
         trailingWhitespacesLength += it->advance.getX();
 
     return { total, total - trailingWhitespacesLength };
@@ -108,7 +108,7 @@ static float getMainAxisLineLength (Span<const ShapedGlyph> glyphs, bool trailin
 
 struct MainAxisLineAlignment
 {
-    float anchor{}, extraWhitespaceAdvance{};
+    float anchor{}, extraWhitespaceAdvance{}, effectiveLineLength;
     Range<int64> stretchableWhitespaces;
 };
 
@@ -175,7 +175,7 @@ static MainAxisLineAlignment getMainAxisLineAlignment (Justification justificati
                                               : 0.0f;
     }();
 
-    return { mainAxisLineOffset, extraWhitespaceAdvance, stretchableWhitespaces };
+    return { mainAxisLineOffset, extraWhitespaceAdvance, effectiveLineLength, stretchableWhitespaces };
 }
 
 struct LineInfo
@@ -276,6 +276,10 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
                                                                              options.getHeight(),
                                                                              leading);
 
+    detail::Ranges::Operations ops;
+
+    std::optional<float> top;
+
     for (const auto [lineIndex, lineInfo] : enumerate (lineInfos))
     {
         const auto lineNumber = shapedText.getLineNumbers().getItem ((size_t) lineIndex);
@@ -284,24 +288,35 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
         const auto maxDescent = lineInfo.lineHeight - lineInfo.maxAscent;
         const auto nextLineTop = baseline + (1.0f + leading) * maxDescent + options.getAdditiveLineSpacing();
 
-        linesMetrics.set<detail::MergeEqualItems::no> (range,
-                                                       { lineNumber.value,
-                                                         { lineInfo.mainAxisLineAlignment.anchor, baseline },
-                                                         lineInfo.maxAscent,
-                                                         lineInfo.lineHeight - lineInfo.maxAscent,
-                                                         nextLineTop });
+        if (! top.has_value())
+            top = baseline - (1.0f + leading) * lineInfo.maxAscent;
 
-        whitespaceStretch.set (range, 0.0f);
+        linesMetrics.set (range,
+                          { lineNumber.value,
+                            { lineInfo.mainAxisLineAlignment.anchor, baseline },
+                            lineInfo.maxAscent,
+                            lineInfo.lineHeight - lineInfo.maxAscent,
+                            lineInfo.mainAxisLineAlignment.effectiveLineLength + lineInfo.mainAxisLineAlignment.extraWhitespaceAdvance,
+                            *top,
+                            nextLineTop },
+                          ops,
+                          MergeEqualItemsNo{});
+
+        whitespaceStretch.set (range, 0.0f, ops);
         const auto stretchRange = lineInfo.mainAxisLineAlignment.stretchableWhitespaces + range.getStart();
 
         whitespaceStretch.set (stretchRange,
-                               lineInfo.mainAxisLineAlignment.extraWhitespaceAdvance);
+                               lineInfo.mainAxisLineAlignment.extraWhitespaceAdvance,
+                               ops);
+
+        ops.clear();
 
         const auto nextLineMaxAscent = lineIndex < (int) lineInfos.size() - 1 ? lineInfos[(size_t) lineIndex + 1].maxAscent : 0.0f;
         baseline = nextLineTop + (1.0f + leading) * nextLineMaxAscent;
+        top = nextLineTop;
     }
 
-    rangesToDraw.set ({ 0, (int64) shapedText.getGlyphs().size() }, DrawType::normal);
+    rangesToDraw.set ({ 0, (int64) shapedText.getGlyphs().size() }, DrawType::normal, ops);
 
     //==============================================================================
     // Everything above this line should work well given none of the lines were too
@@ -372,11 +387,13 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
 
     const auto eraseLastLineFromRangesToDraw = [&]
     {
-        rangesToDraw.eraseFrom (lastLineGlyphRange.getStart());
+        rangesToDraw.eraseFrom (lastLineGlyphRange.getStart(), ops);
+        ops.clear();
     };
 
     eraseLastLineFromRangesToDraw();
-    rangesToDraw.set (lastLineVisibleRangeWithoutEllipsis, DrawType::normal);
+    rangesToDraw.set (lastLineVisibleRangeWithoutEllipsis, DrawType::normal, ops);
+    ops.clear();
 
     if (options.getEllipsis().isEmpty())
     {
@@ -401,12 +418,15 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
                                                                                       options.getTrailingWhitespacesShouldFit()));
 
     eraseLastLineFromRangesToDraw();
-    rangesToDraw.set (lastLineVisibleRange, DrawType::normal);
+    rangesToDraw.set (lastLineVisibleRange, DrawType::normal, ops);
+    ops.clear();
 
     if (cutoffAtFront)
-        rangesToDraw.set (Range<int64>::withStartAndLength (lastLineVisibleRange.getStart() - 1, 1), DrawType::ellipsis);
+        rangesToDraw.set (Range<int64>::withStartAndLength (lastLineVisibleRange.getStart() - 1, 1), DrawType::ellipsis, ops);
     else
-        rangesToDraw.set (Range<int64>::withStartAndLength (lastLineVisibleRange.getEnd(), 1), DrawType::ellipsis);
+        rangesToDraw.set (Range<int64>::withStartAndLength (lastLineVisibleRange.getEnd(), 1), DrawType::ellipsis, ops);
+
+    ops.clear();
 
     const auto lineWithEllipsisGlyphs = [&]
     {
@@ -444,9 +464,9 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
     }();
 
     lastLineMetrics.value.anchor.setX (realign.anchor);
-    whitespaceStretch.set (lastLineGlyphRange, 0.0f);
+    whitespaceStretch.set (lastLineGlyphRange, 0.0f, ops);
     whitespaceStretch.set (realign.stretchableWhitespaces + lastLineVisibleRange.getStart(),
-                           realign.extraWhitespaceAdvance);
+                           realign.extraWhitespaceAdvance, ops);
 }
 
 int64 JustifiedText::getGlyphIndexAt (Point<float> p) const
@@ -476,8 +496,8 @@ int64 JustifiedText::getGlyphIndexAt (Point<float> p) const
     for (const auto& glyph : glyphsInLine)
     {
         if (   p.getX() <= glyphX
-            || glyph.newline
-            || (glyphIndex - lineIt->range.getStart() == (int64) glyphsInLine.size() - 1 && glyph.whitespace))
+            || glyph.isNewline()
+            || (glyphIndex - lineIt->range.getStart() == (int64) glyphsInLine.size() - 1 && glyph.isWhitespace()))
         {
             break;
         }
@@ -489,7 +509,7 @@ int64 JustifiedText::getGlyphIndexAt (Point<float> p) const
     return glyphIndex;
 }
 
-Point<float> JustifiedText::getGlyphAnchor (int64 index) const
+GlyphAnchorResult JustifiedText::getGlyphAnchor (int64 index) const
 {
     jassert (index >= 0);
 
@@ -499,17 +519,68 @@ Point<float> JustifiedText::getGlyphAnchor (int64 index) const
     const auto lineItem = linesMetrics.getItemWithEnclosingRange (index).value_or (linesMetrics.back());
     const auto indexInLine = index - lineItem.range.getStart();
 
-    auto anchor = lineItem.value.anchor;
+    GlyphAnchorResult anchor { lineItem.value.anchor, lineItem.value.maxAscent, lineItem.value.maxDescent };
 
     for (auto [i, glyph] : enumerate (shapedText.getGlyphs (lineItem.range), int64{}))
     {
         if (i == indexInLine)
-            return anchor + glyph.offset;
+        {
+            anchor.anchor += glyph.offset;
+            return anchor;
+        }
 
-        anchor += glyph.advance;
+        anchor.anchor += glyph.advance;
     }
 
     return anchor;
+}
+
+RectangleList<float> JustifiedText::getGlyphsBounds (Range<int64> glyphRange) const
+{
+    RectangleList<float> bounds;
+
+    if (linesMetrics.isEmpty())
+        return bounds;
+
+    const auto getBounds = [&] (const LineMetrics& line, int64 lineStart, int64 boundsStart, int64 boundsEnd) -> Rectangle<float>
+    {
+        const auto glyphsBefore = shapedText.getGlyphs ({ lineStart, boundsStart });
+
+        const auto xStart = std::accumulate (glyphsBefore.begin(),
+                                             glyphsBefore.end(),
+                                             line.anchor.getX(),
+                                             [] (auto sum, auto glyph)
+                                             {
+                                                 return sum + glyph.advance.getX();
+                                             });
+
+        const auto glyphs = shapedText.getGlyphs ({ boundsStart, boundsEnd });
+
+        const auto xEnd = std::accumulate (glyphs.begin(),
+                                           glyphs.end(),
+                                           xStart,
+                                           [&] (auto sum, auto glyph)
+                                           {
+                                               return sum + glyph.advance.getX();
+                                           });
+
+        return { { xStart, line.top }, { xEnd, line.nextLineTop } };
+    };
+
+    for (auto consumeFrom = glyphRange.getStart(); consumeFrom < glyphRange.getEnd();)
+    {
+        const auto lineItem = linesMetrics.getItemWithEnclosingRange (consumeFrom);
+
+        if (! lineItem.has_value())
+            break;
+
+        const auto consumeTo = std::min (glyphRange.getEnd(), lineItem->range.getEnd());
+        bounds.add (getBounds (lineItem->value, lineItem->range.getStart(), consumeFrom, consumeTo));
+
+        consumeFrom = consumeTo;
+    }
+
+    return bounds;
 }
 
 float JustifiedText::getHeight() const

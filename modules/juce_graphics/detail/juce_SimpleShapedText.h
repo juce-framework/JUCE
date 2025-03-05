@@ -86,7 +86,8 @@ public:
     [[nodiscard]] ShapedTextOptions withFont (Font x) const
     {
         RangedValues<Font> fonts;
-        fonts.set ({ 0, std::numeric_limits<int64>::max() }, x);
+        detail::Ranges::Operations ops;
+        fonts.set ({ 0, std::numeric_limits<int64>::max() }, x, ops);
 
         return withMember (*this, &ShapedTextOptions::fontsForRange, std::move (fonts));
     }
@@ -177,7 +178,8 @@ private:
     detail::RangedValues<Font> fontsForRange = std::invoke ([&]
     {
         detail::RangedValues<Font> result;
-        result.set ({ 0, std::numeric_limits<int64>::max() }, FontOptions { 15.0f });
+        detail::Ranges::Operations ops;
+        result.set ({ 0, std::numeric_limits<int64>::max() }, FontOptions { 15.0f }, ops);
         return result;
     });
 
@@ -194,13 +196,35 @@ private:
 
 struct ShapedGlyph
 {
-    uint32_t glyphId;
-    int64 cluster;
-    bool unsafeToBreak;
-    bool whitespace;
-    bool newline;
+    ShapedGlyph (uint32_t glyphIdIn,
+                 int64 clusterIn,
+                 bool unsafeToBreakIn,
+                 bool whitespaceIn,
+                 bool newlineIn,
+                 Point<float> advanceIn,
+                 Point<float> offsetIn)
+        : advance (advanceIn),
+          offset (offsetIn),
+          cluster (clusterIn),
+          glyphId (glyphIdIn),
+          unsafeToBreak (unsafeToBreakIn),
+          whitespace (whitespaceIn),
+          newline (newlineIn) {}
+
+    bool isUnsafeToBreak() const { return unsafeToBreak; }
+    bool isWhitespace() const { return whitespace; }
+    bool isNewline() const { return newline; }
+
     Point<float> advance;
     Point<float> offset;
+    int64 cluster;
+    uint32_t glyphId;
+
+private:
+    // These are effectively bools, pack into a single int once we have more than four flags.
+    int8_t unsafeToBreak;
+    int8_t whitespace;
+    int8_t newline;
 };
 
 struct GlyphLookupEntry
@@ -227,7 +251,7 @@ public:
 
     Range<int64> getTextRange (int64 glyphIndex) const;
 
-    std::vector<Range<int64>> getGlyphRanges (Range<int64> textRange) const;
+    void getGlyphRanges (Range<int64> textRange, std::vector<Range<int64>>& outRanges) const;
 
     int64 getNumLines() const { return (int64) lineNumbers.getRanges().size(); }
     int64 getNumGlyphs() const { return (int64) glyphsInVisualOrder.size(); }

@@ -188,7 +188,7 @@ static void addGlyphsFromShapedText (GlyphArrangement& ga, const detail::ShapedT
                                                         position.getX() + x,
                                                         position.getY() + y,
                                                         glyph.advance.getX(),
-                                                        glyph.whitespace };
+                                                        glyph.isWhitespace() };
 
                                    ga.addGlyph (std::move (pg));
                                }

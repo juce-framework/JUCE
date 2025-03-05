@@ -55,10 +55,27 @@ struct LineMetrics
     float maxAscent;
     float maxDescent;
 
+    /*  Effective suggests the length of trailing whitespaces will be included or not depending on
+        ShapedTextOptions::getTrailingWhitespacesShouldFit().
+    */
+    float effectiveLineLength;
+
+    /*  These values seem redundant given the relation between the baseline, ascent and top, but
+        we want to ensure exactlyEquals (top, nextLineTop) for subsequent lines.
+    */
+    float top;
+
     /*  This will be below the current line's visual bottom if non-default leading or additive
         line spacing is used.
     */
     float nextLineTop;
+};
+
+struct GlyphAnchorResult
+{
+    Point<float> anchor;
+    float maxAscent{};
+    float maxDescent{};
 };
 
 //==============================================================================
@@ -129,7 +146,7 @@ public:
 
                                 anchor += glyph.advance;
 
-                                if (glyph.whitespace)
+                                if (glyph.isWhitespace())
                                     anchor.addXY (s, 0.0f);
 
                                 return result;
@@ -159,7 +176,9 @@ public:
         then the returned anchor specifies the location where the next glyph would have to be
         placed i.e. lastGlyphAnchor + lastGlyphAdvance.
     */
-    Point<float> getGlyphAnchor (int64 index) const;
+    GlyphAnchorResult getGlyphAnchor (int64 glyphIndex) const;
+
+    RectangleList<float> getGlyphsBounds (Range<int64> glyphRange) const;
 
     /*  Returns the vertical distance from the baseline of the first line to the bottom of the last
         plus any additional line spacing that follows from the leading and additiveLineSpacing
@@ -170,6 +189,8 @@ public:
         ShapedText object containing both texts.
     */
     float getHeight() const;
+
+    const auto& getLinesMetrics() const { return linesMetrics; }
 
 private:
     const SimpleShapedText& shapedText;

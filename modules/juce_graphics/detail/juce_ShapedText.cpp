@@ -59,6 +59,11 @@ public:
         return simpleShapedText.getNumGlyphs();
     }
 
+    const detail::RangedValues<LineMetrics>& getLinesMetrics() const
+    {
+        return justifiedText.getLinesMetrics();
+    }
+
     auto& getText() const
     {
         return text;
@@ -74,9 +79,14 @@ public:
         return justifiedText.getGlyphIndexAt (p);
     }
 
-    auto getGlyphRanges (Range<int64> textRange) const
+    void getGlyphRanges (Range<int64> textRange, std::vector<Range<int64>>& outRanges) const
     {
-        return simpleShapedText.getGlyphRanges (textRange);
+        simpleShapedText.getGlyphRanges (textRange, outRanges);
+    }
+
+    RectangleList<float> getGlyphsBounds (Range<int64> glyphRange) const
+    {
+        return justifiedText.getGlyphsBounds (glyphRange);
     }
 
     auto getGlyphAnchor (int64 index) const
@@ -129,6 +139,11 @@ int64 ShapedText::getNumGlyphs() const
     return impl->getNumGlyphs();
 }
 
+const detail::RangedValues<LineMetrics>& ShapedText::getLinesMetrics() const
+{
+    return impl->getLinesMetrics();
+}
+
 const String& ShapedText::getText() const
 {
     return impl->getText();
@@ -144,12 +159,17 @@ int64 ShapedText::getGlyphIndexAt (Point<float> p) const
     return impl->getGlyphIndexAt (p);
 }
 
-std::vector<Range<int64>> ShapedText::getGlyphRanges (Range<int64> textRange) const
+void ShapedText::getGlyphRanges (Range<int64> textRange, std::vector<Range<int64>>& outRanges) const
 {
-    return impl->getGlyphRanges (textRange);
+    return impl->getGlyphRanges (textRange, outRanges);
 }
 
-Point<float> ShapedText::getGlyphAnchor (int64 index) const
+RectangleList<float> ShapedText::getGlyphsBounds (Range<int64> glyphRange) const
+{
+    return impl->getGlyphsBounds (glyphRange);
+}
+
+GlyphAnchorResult ShapedText::getGlyphAnchor (int64 index) const
 {
     return impl->getGlyphAnchor (index);
 }
