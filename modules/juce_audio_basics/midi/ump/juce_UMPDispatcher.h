@@ -93,9 +93,10 @@ public:
         Channel messages will be converted to the requested protocol format `pp`.
         `storageSize` bytes will be allocated to store incomplete messages.
     */
-    explicit BytestreamToUMPDispatcher (PacketProtocol pp, int storageSize)
+    BytestreamToUMPDispatcher (uint8_t targetGroup, PacketProtocol pp, int storageSize)
         : concatenator (storageSize),
-          converter (pp)
+          converter (pp),
+          group (targetGroup)
     {}
 
     void reset()
@@ -124,13 +125,16 @@ public:
 
             void handleIncomingMidiMessage (void*, const MidiMessage& msg) const
             {
-                Conversion::toMidi1 ({ 0, msg.asSpan() }, [&] (const View& view)
+                Conversion::toMidi1 ({ dispatch.group, msg.asSpan() }, [&] (const View& view)
                 {
-                    dispatch.converter.convert (view, *callbackPtr);
+                    dispatch.converter.convert (view, [&] (const View& v)
+                    {
+                        (*callbackPtr) (v, msg.getTimeStamp());
+                    });
                 });
             }
 
-            void handlePartialSysexMessage (void*, const uint8_t*, int, double) const {}
+            void handlePartialSysexMessage (void*, const uint8*, int, double) const {}
 
             BytestreamToUMPDispatcher& dispatch;
             CallbackPtr callbackPtr = nullptr;
@@ -140,9 +144,15 @@ public:
         concatenator.pushMidiData (bytes, timestamp, (void*) nullptr, inputCallback);
     }
 
+    PacketProtocol getProtocol() const
+    {
+        return converter.getProtocol();
+    }
+
 private:
     MidiDataConcatenator concatenator;
     GenericUMPConverter converter;
+    uint8_t group{};
 };
 
 //==============================================================================

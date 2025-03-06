@@ -108,7 +108,7 @@ struct BytestreamToBytestreamHandler : public BytestreamInputHandler
 struct BytestreamToUMPHandler : public BytestreamInputHandler
 {
     BytestreamToUMPHandler (PacketProtocol protocol, Receiver& c)
-        : recipient (c), dispatcher (protocol, 2048) {}
+        : recipient (c), dispatcher (0, protocol, 2048) {}
 
     /**
         Provides an `operator()` which can create an input handler for a given
@@ -138,9 +138,9 @@ struct BytestreamToUMPHandler : public BytestreamInputHandler
     void pushMidiData (const void* data, int bytes, double time) override
     {
         const auto* ptr = static_cast<const std::byte*> (data);
-        dispatcher.dispatch (Span { ptr, (size_t) bytes }, time, [&] (const View& v)
+        dispatcher.dispatch (Span { ptr, (size_t) bytes }, time, [&] (const View& v, double t)
         {
-            recipient.packetReceived (v, time);
+            recipient.packetReceived (v, t);
         });
     }
 
