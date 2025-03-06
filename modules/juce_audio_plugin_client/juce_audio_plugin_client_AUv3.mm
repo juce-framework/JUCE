@@ -1489,9 +1489,9 @@ private:
                         converter.dispatch ({ reinterpret_cast<const uint32_t*> (packet->words),
                                               (size_t) packet->wordCount },
                                             static_cast<int> (packet->timeStamp - (MIDITimeStamp) startTime),
-                                            [this] (const ump::BytestreamMidiView& message)
+                                            [this] (const ump::BytesOnGroup& x, double t)
                                             {
-                                                midiMessages.addEvent (message.getMessage(), (int) message.timestamp);
+                                                midiMessages.addEvent ({ x.bytes.data(), (int) x.bytes.size(), t }, (int) t);
                                             });
 
                         packet = MIDIEventPacketNext (packet);

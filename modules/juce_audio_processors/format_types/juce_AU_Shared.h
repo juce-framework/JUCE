@@ -715,7 +715,7 @@ struct AudioUnitHelpers
 
             for (const auto metadata : buffer)
             {
-                toUmp1Converter.convert (ump::BytestreamMidiView (metadata), [&] (const ump::View& view)
+                toUmp1Converter.convert ({ 0, metadata.asSpan() }, [&] (const ump::View& view)
                 {
                     add (view, metadata.samplePosition);
 

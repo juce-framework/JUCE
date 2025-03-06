@@ -85,7 +85,7 @@ struct Conversion
         `callback` is a function which accepts a single View argument.
     */
     template <typename PacketCallbackFunction>
-    static void toMidi1 (const BytestreamMidiView& m, PacketCallbackFunction&& callback)
+    static void toMidi1 (const BytesOnGroup& m, PacketCallbackFunction&& callback)
     {
         const auto size = m.bytes.size();
 

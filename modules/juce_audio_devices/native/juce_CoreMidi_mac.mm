@@ -75,7 +75,7 @@ namespace CoreMidiHelpers
     {
         virtual ~SenderBase() noexcept = default;
 
-        virtual void send (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytestreamMidiView& m) = 0;
+        virtual void send (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytesOnGroup& m) = 0;
         virtual void send (MIDIPortRef port, MIDIEndpointRef endpoint, ump::Iterator b, ump::Iterator e) = 0;
     };
 
@@ -85,7 +85,7 @@ namespace CoreMidiHelpers
     template <>
     struct API_AVAILABLE (macos (11.0), ios (14.0)) Sender<ImplementationStrategy::onlyNew> final : public SenderBase
     {
-        void send (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytestreamMidiView& m) override
+        void send (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytesOnGroup& m) override
         {
             newSendImpl (port, endpoint, m);
         }
@@ -171,7 +171,7 @@ namespace CoreMidiHelpers
     template <>
     struct Sender<ImplementationStrategy::onlyOld> final : public SenderBase
     {
-        void send (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytestreamMidiView& m) override
+        void send (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytesOnGroup& m) override
         {
             oldSendImpl (port, endpoint, m);
         }
@@ -180,7 +180,7 @@ namespace CoreMidiHelpers
         {
             std::for_each (b, e, [&] (const ump::View& v)
             {
-                bytestreamConverter.convert (v, 0.0, [&] (const ump::BytestreamMidiView& m)
+                bytestreamConverter.convert (v, 0.0, [&] (const ump::BytesOnGroup& m, double)
                 {
                     send (port, endpoint, m);
                 });
@@ -190,7 +190,7 @@ namespace CoreMidiHelpers
     private:
         ump::ToBytestreamConverter bytestreamConverter { 2048 };
 
-        void oldSendImpl (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytestreamMidiView& message)
+        void oldSendImpl (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytesOnGroup& message)
         {
            #if JUCE_IOS
             const MIDITimeStamp timeStamp = mach_absolute_time();
@@ -203,7 +203,10 @@ namespace CoreMidiHelpers
             auto* packetToSend = &stackPacket;
             auto dataSize = message.bytes.size();
 
-            if (message.isSysEx())
+            const auto bytes = message.bytes;
+            const auto isSysEx = ! bytes.empty() && bytes.front() == std::byte { 0xf0 };
+
+            if (isSysEx)
             {
                 const int maxPacketSize = 256;
                 int pos = 0, bytesLeft = (int) dataSize;
@@ -262,7 +265,7 @@ namespace CoreMidiHelpers
             : sender (makeImpl())
         {}
 
-        void send (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytestreamMidiView& m)
+        void send (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytesOnGroup& m)
         {
             sender->send (port, endpoint, m);
         }
@@ -358,7 +361,7 @@ namespace CoreMidiHelpers
                 endpoint.release();
         }
 
-        void send (const ump::BytestreamMidiView& m)
+        void send (const ump::BytesOnGroup& m)
         {
             sender.send (*port, *endpoint, m);
         }
@@ -1266,7 +1269,7 @@ MidiOutput::~MidiOutput()
 
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
-    internal->send (ump::BytestreamMidiView (&message));
+    internal->send ({ 0, message.asSpan() });
 }
 
 MidiDeviceListConnection MidiDeviceListConnection::make (std::function<void()> cb)
