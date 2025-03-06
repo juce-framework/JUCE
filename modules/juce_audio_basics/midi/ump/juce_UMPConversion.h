@@ -52,13 +52,11 @@ struct BytestreamMidiView
         to a temporary.
     */
     explicit BytestreamMidiView (const MidiMessage* msg)
-        : bytes (unalignedPointerCast<const std::byte*> (msg->getRawData()),
-                 static_cast<size_t> (msg->getRawDataSize())),
+        : bytes (msg->asSpan()),
           timestamp (msg->getTimeStamp()) {}
 
     explicit BytestreamMidiView (const MidiMessageMetadata msg)
-        : bytes (unalignedPointerCast<const std::byte*> (msg.data),
-                 static_cast<size_t> (msg.numBytes)),
+        : bytes (msg.asSpan()),
           timestamp (msg.samplePosition) {}
 
     MidiMessage getMessage() const

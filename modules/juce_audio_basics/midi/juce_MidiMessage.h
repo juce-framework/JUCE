@@ -987,6 +987,13 @@ public:
     static uint16 pitchbendToPitchwheelPos (float pitchbendInSemitones,
                                             float pitchbendRangeInSemitones) noexcept;
 
+    Span<const std::byte> asSpan() const&
+    {
+        return { reinterpret_cast<const std::byte*> (getRawData()), (size_t) getRawDataSize() };
+    }
+
+    Span<const std::byte> asSpan() const&& = delete;
+
 private:
     //==============================================================================
    #ifndef DOXYGEN
