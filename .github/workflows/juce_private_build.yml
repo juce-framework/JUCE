@@ -35,19 +35,19 @@ jobs:
       cpp-std: ${{ inputs.cpp-std }}
     secrets: inherit
   deploy:
-    if: ${{ contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.nightly-targets == '[]' }}
+    if: ${{ contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
     needs: [build]
     name: Deploy
     uses: juce-framework/JUCE-utils/.github/workflows/deploy.yml@master
     secrets: inherit
   docs:
-    if: ${{ contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.nightly-targets == '[]' }}
+    if: ${{ contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
     needs: [deploy]
     name: Docs
     uses: juce-framework/JUCE-utils/.github/workflows/docs.yml@master
     secrets: inherit
   notify:
-    if: ${{ always() && inputs.nightly-targets == '[]' }}
+    if: ${{ !(cancelled() || failure()) && inputs.nightly-targets == '[]' }}
     needs: [docs]
     name: Notify
     uses: juce-framework/JUCE-utils/.github/workflows/notify.yml@master
