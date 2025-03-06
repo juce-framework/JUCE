@@ -67,12 +67,10 @@ public:
                             ? Utils::MessageKind::commonRealtime
                             : Utils::MessageKind::channelVoice1));
 
-                translator.dispatch (View {packets.data() },
-                                     0,
-                                     [&] (const BytestreamMidiView& roundTripped)
-                                     {
-                                         expect (equal (m, roundTripped.getMessage()));
-                                     });
+                translator.dispatch (View { packets.data() }, 0, [&] (const BytestreamMidiView& roundTripped)
+                {
+                    expect (equal (m, roundTripped.getMessage()));
+                });
             });
         }
 
@@ -146,13 +144,10 @@ public:
                 Conversion::toMidi1 (ump::BytestreamMidiView (meta), [&] (const auto p) { packets.add (p); });
 
             MidiBuffer output;
-            converter.dispatch (packets.data(),
-                                packets.data() + packets.size(),
-                                0,
-                                [&] (const BytestreamMidiView& roundTripped)
-                                {
-                                    output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
-                                });
+            converter.dispatch (packets, 0, [&] (const BytestreamMidiView& roundTripped)
+            {
+                output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
+            });
             packets.clear();
 
             expect (equal (expected, output));
@@ -189,13 +184,10 @@ public:
             }
 
             MidiBuffer output;
-            converter.dispatch (modifiedPackets.data(),
-                                modifiedPackets.data() + modifiedPackets.size(),
-                                0,
-                                [&] (const BytestreamMidiView& roundTripped)
-                                {
-                                    output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
-                                });
+            converter.dispatch (modifiedPackets, 0, [&] (const BytestreamMidiView& roundTripped)
+            {
+                output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
+            });
 
             // All Utility messages should have been ignored
             expect (output.getNumEvents() == 1);
@@ -227,13 +219,10 @@ public:
             }
 
             MidiBuffer output;
-            converter.dispatch (modifiedPackets.data(),
-                                modifiedPackets.data() + modifiedPackets.size(),
-                                0,
-                                [&] (const BytestreamMidiView& roundTripped)
-                                {
-                                    output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
-                                });
+            converter.dispatch (modifiedPackets, 0, [&] (const BytestreamMidiView& roundTripped)
+            {
+                output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
+            });
 
             const auto numOutputs = output.getNumEvents();
             const auto numInputs = realtimeMessages.getNumEvents();
@@ -294,13 +283,10 @@ public:
             }
 
             MidiBuffer output;
-            converter.dispatch (modifiedPackets.data(),
-                                modifiedPackets.data() + modifiedPackets.size(),
-                                0,
-                                [&] (const BytestreamMidiView& roundTripped)
-                                {
-                                    output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
-                                });
+            converter.dispatch (modifiedPackets, 0, [&] (const BytestreamMidiView& roundTripped)
+            {
+                output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
+            });
 
             const auto numOutputs = output.getNumEvents();
             const auto numInputs = realtimeMessages.getNumEvents();
@@ -377,13 +363,10 @@ public:
 
             const auto pushToOutput = [&] (const Packets& p)
             {
-                converter.dispatch (p.data(),
-                                    p.data() + p.size(),
-                                    0,
-                                    [&] (const BytestreamMidiView& roundTripped)
-                                    {
-                                        output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
-                                    });
+                converter.dispatch (p, 0, [&] (const BytestreamMidiView& roundTripped)
+                {
+                    output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
+                });
             };
 
             pushToOutput (modifiedPackets);

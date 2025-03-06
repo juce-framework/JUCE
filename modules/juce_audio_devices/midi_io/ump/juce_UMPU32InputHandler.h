@@ -48,7 +48,7 @@ struct U32InputHandler
     virtual ~U32InputHandler() noexcept = default;
 
     virtual void reset() = 0;
-    virtual void pushMidiData (const uint32_t* begin, const uint32_t* end, double time) = 0;
+    virtual void pushMidiData (Span<const uint32_t>, double time) = 0;
 };
 
 /**
@@ -90,9 +90,9 @@ struct U32ToBytestreamHandler : public U32InputHandler
 
     void reset() override { dispatcher.reset(); }
 
-    void pushMidiData (const uint32_t* begin, const uint32_t* end, double time) override
+    void pushMidiData (Span<const uint32_t> words, double time) override
     {
-        dispatcher.dispatch (begin, end, time, [this] (const BytestreamMidiView& m)
+        dispatcher.dispatch (words, time, [this] (const BytestreamMidiView& m)
         {
             callback.handleIncomingMidiMessage (&input, m.getMessage());
         });
@@ -143,9 +143,9 @@ struct U32ToUMPHandler : public U32InputHandler
         converter.reset();
     }
 
-    void pushMidiData (const uint32_t* begin, const uint32_t* end, double time) override
+    void pushMidiData (Span<const uint32_t> words, double time) override
     {
-        dispatcher.dispatch (begin, end, time, [this] (const View& view, double thisTime)
+        dispatcher.dispatch (words, time, [this] (const View& view, double thisTime)
         {
             converter.convert (view, [&] (const View& converted)
             {

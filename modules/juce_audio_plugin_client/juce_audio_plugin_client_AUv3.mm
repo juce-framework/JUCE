@@ -1480,8 +1480,8 @@ private:
 
                     for (uint32_t i = 0; i < list.numPackets; ++i)
                     {
-                        converter.dispatch (reinterpret_cast<const uint32_t*> (packet->words),
-                                            reinterpret_cast<const uint32_t*> (packet->words + packet->wordCount),
+                        converter.dispatch ({ reinterpret_cast<const uint32_t*> (packet->words),
+                                              (size_t) packet->wordCount },
                                             static_cast<int> (packet->timeStamp - (MIDITimeStamp) startTime),
                                             [this] (const ump::BytestreamMidiView& message)
                                             {

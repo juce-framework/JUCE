@@ -1588,8 +1588,8 @@ public:
 
         for (uint32_t i = 0; i < list->numPackets; ++i)
         {
-            toBytestreamDispatcher.dispatch (reinterpret_cast<const uint32_t*> (packet->words),
-                                             reinterpret_cast<const uint32_t*> (packet->words + packet->wordCount),
+            toBytestreamDispatcher.dispatch ({ reinterpret_cast<const uint32_t*> (packet->words),
+                                               (size_t) packet->wordCount },
                                              static_cast<double> (packet->timeStamp + inOffsetSampleFrame),
                                              [this] (const ump::BytestreamMidiView& message)
                                              {
