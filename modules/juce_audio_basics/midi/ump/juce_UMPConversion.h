@@ -125,7 +125,7 @@ struct Conversion
 
         if (numMessages <= 1)
         {
-            const auto packet = Factory::makeSysExIn1Packet (0, (uint8_t) numSysExBytes, dataOffset);
+            const auto packet = Factory::makeSysExIn1Packet (0, { dataOffset, (size_t) numSysExBytes });
             callback (View (packet.data()));
             return;
         }
@@ -146,7 +146,7 @@ struct Conversion
             }();
 
             const auto bytesNow = std::min (byteIncrement, i);
-            const auto packet = func (0, (uint8_t) bytesNow, dataOffset);
+            const auto packet = func (0, { dataOffset, (size_t) bytesNow });
             callback (View (packet.data()));
         }
     }

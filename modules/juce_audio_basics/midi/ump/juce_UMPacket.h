@@ -83,9 +83,9 @@ public:
         jassert (Utils::getNumWordsForMessageType (fullPacket.front()) == numWords);
     }
 
-    Packet withMessageType (uint8_t type) const noexcept
+    Packet withMessageType (Utils::MessageKind type) const noexcept
     {
-        return withU4<0> (type);
+        return withU4<0> (uint8_t (type));
     }
 
     Packet withGroup (uint8_t group) const noexcept
@@ -93,9 +93,9 @@ public:
         return withU4<1> (group);
     }
 
-    Packet withStatus (uint8_t status) const noexcept
+    Packet withStatus (std::byte status) const noexcept
     {
-        return withU4<2> (status);
+        return withU4<2> (uint8_t (status));
     }
 
     Packet withChannel (uint8_t channel) const noexcept
@@ -103,11 +103,11 @@ public:
         return withU4<3> (channel);
     }
 
-    uint8_t getMessageType() const noexcept { return getU4<0>(); }
+    Utils::MessageKind getMessageType() const noexcept { return Utils::MessageKind (getU4<0>()); }
 
     uint8_t getGroup() const noexcept { return getU4<1>(); }
 
-    uint8_t getStatus() const noexcept { return getU4<2>(); }
+    std::byte getStatus() const noexcept { return getU4<2>(); }
 
     uint8_t getChannel() const noexcept { return getU4<3>(); }
 
@@ -182,6 +182,7 @@ public:
     const_iterator cend()                     const noexcept { return contents.end(); }
 
     const uint32_t* data()                    const noexcept { return contents.data(); }
+    size_t size()                             const noexcept { return contents.size(); }
 
     const uint32_t& front()                   const noexcept { return contents.front(); }
     const uint32_t& back()                    const noexcept { return contents.back(); }
