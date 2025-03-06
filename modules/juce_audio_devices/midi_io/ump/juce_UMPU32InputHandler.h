@@ -92,9 +92,9 @@ struct U32ToBytestreamHandler : public U32InputHandler
 
     void pushMidiData (Span<const uint32_t> words, double time) override
     {
-        dispatcher.dispatch (words, time, [this] (const BytestreamMidiView& m)
+        dispatcher.dispatch (words, time, [&] (const BytesOnGroup& roundTripped, double t)
         {
-            callback.handleIncomingMidiMessage (&input, m.getMessage());
+            callback.handleIncomingMidiMessage (&input, MidiMessage { roundTripped.bytes.data(), (int) roundTripped.bytes.size(), t });
         });
     }
 

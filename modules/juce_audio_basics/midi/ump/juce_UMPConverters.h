@@ -45,7 +45,7 @@ namespace juce::universal_midi_packets
     struct ToUMP1Converter
     {
         template <typename Fn>
-        void convert (const BytestreamMidiView& m, Fn&& fn)
+        void convert (const BytesOnGroup& m, Fn&& fn)
         {
             Conversion::toMidi1 (m, std::forward<Fn> (fn));
         }
@@ -66,7 +66,7 @@ namespace juce::universal_midi_packets
     struct ToUMP2Converter
     {
         template <typename Fn>
-        void convert (const BytestreamMidiView& m, Fn&& fn)
+        void convert (const BytesOnGroup& m, Fn&& fn)
         {
             Conversion::toMidi1 (m, [&] (const View& v)
             {
@@ -117,7 +117,7 @@ namespace juce::universal_midi_packets
         }
 
         template <typename Converter, typename Fn>
-        static void convertImpl (Converter& converter, const BytestreamMidiView& m, Fn&& fn)
+        static void convertImpl (Converter& converter, const BytesOnGroup& m, Fn&& fn)
         {
             converter.convert (m, std::forward<Fn> (fn));
         }
@@ -138,7 +138,7 @@ namespace juce::universal_midi_packets
         }
 
         template <typename Fn>
-        void convert (const BytestreamMidiView& m, Fn&& fn)
+        void convert (const BytesOnGroup& m, Fn&& fn)
         {
             visit (*this, m, std::forward<Fn> (fn));
         }

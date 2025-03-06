@@ -261,7 +261,7 @@ public:
             switch (kind)
             {
                 case SysexExtractorCallbackKind::notSysex:
-                    callback (BytestreamMidiView (bytes, time));
+                    callback (BytesOnGroup { 0, bytes }, time);
                     return;
 
                 case SysexExtractorCallbackKind::ongoingSysex:
@@ -283,7 +283,7 @@ public:
                     // If this is not true, then the sysex message was truncated somehow and we
                     // probably shouldn't allow it to propagate
                     if (pendingSysExData.back() == std::byte { 0xf7 })
-                        callback (BytestreamMidiView (Span<const std::byte> (pendingSysExData), pendingSysExTime));
+                        callback (BytesOnGroup { 0, Span<const std::byte> (pendingSysExData) }, pendingSysExTime);
 
                     pendingSysExData.clear();
 

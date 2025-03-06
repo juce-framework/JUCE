@@ -124,7 +124,7 @@ public:
 
             void handleIncomingMidiMessage (void*, const MidiMessage& msg) const
             {
-                Conversion::toMidi1 (BytestreamMidiView (&msg), [&] (const View& view)
+                Conversion::toMidi1 ({ 0, msg.asSpan() }, [&] (const View& view)
                 {
                     dispatch.converter.convert (view, *callbackPtr);
                 });
