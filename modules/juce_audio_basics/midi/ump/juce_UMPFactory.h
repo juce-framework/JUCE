@@ -47,22 +47,20 @@ struct Factory
     /** @internal */
     struct Detail
     {
-        static PacketX1 makeSystem()   { return PacketX1{}.withMessageType (1); }
-        static PacketX1 makeV1()       { return PacketX1{}.withMessageType (2); }
-        static PacketX2 makeV2()       { return PacketX2{}.withMessageType (4); }
+        static PacketX1 makeSystem()   { return PacketX1{}.withMessageType (Utils::MessageKind::commonRealtime); }
+        static PacketX1 makeV1()       { return PacketX1{}.withMessageType (Utils::MessageKind::channelVoice1); }
+        static PacketX2 makeV2()       { return PacketX2{}.withMessageType (Utils::MessageKind::channelVoice2); }
+        static PacketX4 makeStream()   { return PacketX4{}.withMessageType (Utils::MessageKind::stream); }
 
-        static PacketX2 makeSysEx (uint8_t group,
-                                   uint8_t status,
-                                   uint8_t numBytes,
-                                   const std::byte* data)
+        static PacketX2 makeSysEx (uint8_t group, SysEx7::Kind status, Span<const std::byte> data)
         {
-            jassert (numBytes <= 6);
+            jassert (data.size() <= 6);
 
-            std::array<uint8_t, 8> bytes{{}};
-            bytes[0] = (0x3 << 0x4) | group;
-            bytes[1] = (uint8_t) (status << 0x4) | numBytes;
+            std::array<std::byte, 8> bytes { {} };
+            bytes[0] = std::byte (0x3 << 0x4) | std::byte (group);
+            bytes[1] = std::byte ((uint8_t) status << 0x4) | std::byte (data.size());
 
-            std::memcpy (bytes.data() + 2, data, numBytes);
+            std::memcpy (bytes.data() + 2, data.data(), data.size());
 
             std::array<uint32_t, 2> words;
 
@@ -73,18 +71,17 @@ struct Factory
         }
 
         static PacketX4 makeSysEx8 (uint8_t group,
-                                    uint8_t status,
-                                    uint8_t numBytes,
+                                    std::byte status,
                                     uint8_t dataStart,
-                                    const uint8_t* data)
+                                    Span<const std::byte> data)
         {
-            jassert (numBytes <= 16 - dataStart);
+            jassert (data.size() <= (size_t) (16 - dataStart));
 
-            std::array<uint8_t, 16> bytes{{}};
-            bytes[0] = (0x5 << 0x4) | group;
-            bytes[1] = (uint8_t) (status << 0x4) | numBytes;
+            std::array<std::byte, 16> bytes{{}};
+            bytes[0] = std::byte (0x5 << 0x4) | std::byte (group);
+            bytes[1] = std::byte (status << 0x4) | std::byte (data.size());
 
-            std::memcpy (bytes.data() + dataStart, data, numBytes);
+            std::memcpy (bytes.data() + dataStart, data.data(), data.size());
 
             std::array<uint32_t, 4> words;
 
@@ -102,12 +99,12 @@ struct Factory
 
     static PacketX1 makeJRClock (uint8_t group, uint16_t time)
     {
-        return PacketX1 { time }.withStatus (1).withGroup (group);
+        return PacketX1 { time }.withStatus (std::byte { 1 }).withGroup (group);
     }
 
     static PacketX1 makeJRTimestamp (uint8_t group, uint16_t time)
     {
-        return PacketX1 { time }.withStatus (2).withGroup (group);
+        return PacketX1 { time }.withStatus (std::byte { 2 }).withGroup (group);
     }
 
     static PacketX1 makeTimeCode (uint8_t group, uint8_t code)
@@ -180,7 +177,7 @@ struct Factory
                                    uint8_t velocity)
     {
         return Detail::makeV1().withGroup (group)
-                               .withStatus (0x8)
+                               .withStatus (std::byte { 0x8 })
                                .withChannel (channel)
                                .withU8<2> (note & 0x7f)
                                .withU8<3> (velocity & 0x7f);
@@ -192,7 +189,7 @@ struct Factory
                                   uint8_t velocity)
     {
         return Detail::makeV1().withGroup (group)
-                               .withStatus (0x9)
+                               .withStatus (std::byte { 0x9 })
                                .withChannel (channel)
                                .withU8<2> (note & 0x7f)
                                .withU8<3> (velocity & 0x7f);
@@ -204,7 +201,7 @@ struct Factory
                                         uint8_t pressure)
     {
         return Detail::makeV1().withGroup (group)
-                               .withStatus (0xa)
+                               .withStatus (std::byte { 0xa })
                                .withChannel (channel)
                                .withU8<2> (note & 0x7f)
                                .withU8<3> (pressure & 0x7f);
@@ -216,7 +213,7 @@ struct Factory
                                          uint8_t value)
     {
         return Detail::makeV1().withGroup (group)
-                               .withStatus (0xb)
+                               .withStatus (std::byte { 0xb })
                                .withChannel (channel)
                                .withU8<2> (controller & 0x7f)
                                .withU8<3> (value & 0x7f);
@@ -227,7 +224,7 @@ struct Factory
                                          uint8_t program)
     {
         return Detail::makeV1().withGroup (group)
-                               .withStatus (0xc)
+                               .withStatus (std::byte { 0xc })
                                .withChannel (channel)
                                .withU8<2> (program & 0x7f);
     }
@@ -237,7 +234,7 @@ struct Factory
                                            uint8_t pressure)
     {
         return Detail::makeV1().withGroup (group)
-                               .withStatus (0xd)
+                               .withStatus (std::byte { 0xd })
                                .withChannel (channel)
                                .withU8<2> (pressure & 0x7f);
     }
@@ -247,38 +244,34 @@ struct Factory
                                    uint16_t pitchbend)
     {
         return Detail::makeV1().withGroup (group)
-                               .withStatus (0xe)
+                               .withStatus (std::byte { 0xe })
                                .withChannel (channel)
                                .withU8<2> (pitchbend & 0x7f)
                                .withU8<3> ((pitchbend >> 7) & 0x7f);
     }
 
     static PacketX2 makeSysExIn1Packet (uint8_t group,
-                                        uint8_t numBytes,
-                                        const std::byte* data)
+                                        Span<const std::byte> data)
     {
-        return Detail::makeSysEx (group, 0x0, numBytes, data);
+        return Detail::makeSysEx (group, SysEx7::Kind::complete, data);
     }
 
     static PacketX2 makeSysExStart (uint8_t group,
-                                    uint8_t numBytes,
-                                    const std::byte* data)
+                                    Span<const std::byte> data)
     {
-        return Detail::makeSysEx (group, 0x1, numBytes, data);
+        return Detail::makeSysEx (group, SysEx7::Kind::begin, data);
     }
 
     static PacketX2 makeSysExContinue (uint8_t group,
-                                       uint8_t numBytes,
-                                       const std::byte* data)
+                                       Span<const std::byte> data)
     {
-        return Detail::makeSysEx (group, 0x2, numBytes, data);
+        return Detail::makeSysEx (group, SysEx7::Kind::continuation, data);
     }
 
     static PacketX2 makeSysExEnd (uint8_t group,
-                                  uint8_t numBytes,
-                                  const std::byte* data)
+                                  Span<const std::byte> data)
     {
-        return Detail::makeSysEx (group, 0x3, numBytes, data);
+        return Detail::makeSysEx (group, SysEx7::Kind::end, data);
     }
 
     static PacketX2 makeRegisteredPerNoteControllerV2 (uint8_t group,
@@ -288,7 +281,7 @@ struct Factory
                                                        uint32_t data)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0x0)
+                               .withStatus (std::byte { 0x0 })
                                .withChannel (channel)
                                .withU8<2> (note & 0x7f)
                                .withU8<3> (controller & 0x7f)
@@ -302,7 +295,7 @@ struct Factory
                                                        uint32_t data)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0x1)
+                               .withStatus (std::byte { 0x1 })
                                .withChannel (channel)
                                .withU8<2> (note & 0x7f)
                                .withU8<3> (controller & 0x7f)
@@ -316,7 +309,7 @@ struct Factory
                                                 uint32_t data)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0x2)
+                               .withStatus (std::byte { 0x2 })
                                .withChannel (channel)
                                .withU8<2> (bank & 0x7f)
                                .withU8<3> (index & 0x7f)
@@ -330,7 +323,7 @@ struct Factory
                                                 uint32_t data)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0x3)
+                               .withStatus (std::byte { 0x3 })
                                .withChannel (channel)
                                .withU8<2> (bank & 0x7f)
                                .withU8<3> (index & 0x7f)
@@ -344,7 +337,7 @@ struct Factory
                                                         uint32_t data)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0x4)
+                               .withStatus (std::byte { 0x4 })
                                .withChannel (channel)
                                .withU8<2> (bank & 0x7f)
                                .withU8<3> (index & 0x7f)
@@ -358,7 +351,7 @@ struct Factory
                                                         uint32_t data)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0x5)
+                               .withStatus (std::byte { 0x5 })
                                .withChannel (channel)
                                .withU8<2> (bank & 0x7f)
                                .withU8<3> (index & 0x7f)
@@ -371,7 +364,7 @@ struct Factory
                                             uint32_t data)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0x6)
+                               .withStatus (std::byte { 0x6 })
                                .withChannel (channel)
                                .withU8<2> (note & 0x7f)
                                .withU32<1> (data);
@@ -393,7 +386,7 @@ struct Factory
                                    uint16_t attributeValue)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0x8)
+                               .withStatus (std::byte { 0x8 })
                                .withChannel (channel)
                                .withU8<2> (note & 0x7f)
                                .withU8<3> ((uint8_t) attribute)
@@ -409,7 +402,7 @@ struct Factory
                                   uint16_t attributeValue)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0x9)
+                               .withStatus (std::byte { 0x9 })
                                .withChannel (channel)
                                .withU8<2> (note & 0x7f)
                                .withU8<3> ((uint8_t) attribute)
@@ -423,7 +416,7 @@ struct Factory
                                         uint32_t data)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0xa)
+                               .withStatus (std::byte { 0xa })
                                .withChannel (channel)
                                .withU8<2> (note & 0x7f)
                                .withU32<1> (data);
@@ -435,7 +428,7 @@ struct Factory
                                          uint32_t data)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0xb)
+                               .withStatus (std::byte { 0xb })
                                .withChannel (channel)
                                .withU8<2> (controller & 0x7f)
                                .withU32<1> (data);
@@ -449,7 +442,7 @@ struct Factory
                                          uint8_t bankLsb)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0xc)
+                               .withStatus (std::byte { 0xc })
                                .withChannel (channel)
                                .withU8<3> (optionFlags)
                                .withU8<4> (program)
@@ -462,7 +455,7 @@ struct Factory
                                            uint32_t data)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0xd)
+                               .withStatus (std::byte { 0xd })
                                .withChannel (channel)
                                .withU32<1> (data);
     }
@@ -472,7 +465,7 @@ struct Factory
                                      uint32_t data)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0xe)
+                               .withStatus (std::byte { 0xe })
                                .withChannel (channel)
                                .withU32<1> (data);
     }
@@ -480,60 +473,67 @@ struct Factory
     static PacketX2 makePerNoteManagementV2 (uint8_t group,
                                              uint8_t channel,
                                              uint8_t note,
-                                             uint8_t optionFlags)
+                                             std::byte optionFlags)
     {
         return Detail::makeV2().withGroup (group)
-                               .withStatus (0xf)
+                               .withStatus (std::byte { 0xf })
                                .withChannel (channel)
                                .withU8<2> (note)
-                               .withU8<3> (optionFlags);
+                               .withU8<3> (uint8_t (optionFlags));
     }
 
 
     static PacketX4 makeSysEx8in1Packet (uint8_t group,
-                                         uint8_t numBytes,
                                          uint8_t streamId,
-                                         const uint8_t* data)
+                                         Span<const std::byte> data)
     {
-        return Detail::makeSysEx8 (group, 0x0, numBytes, 3, data).withU8<2> (streamId);
+        return Detail::makeSysEx8 (group, std::byte { 0x0 }, 3, data).withU8<2> (streamId);
     }
 
     static PacketX4 makeSysEx8Start (uint8_t group,
-                                     uint8_t numBytes,
                                      uint8_t streamId,
-                                     const uint8_t* data)
+                                     Span<const std::byte> data)
     {
-        return Detail::makeSysEx8 (group, 0x1, numBytes, 3, data).withU8<2> (streamId);
+        return Detail::makeSysEx8 (group, std::byte { 0x1 }, 3, data).withU8<2> (streamId);
     }
 
     static PacketX4 makeSysEx8Continue (uint8_t group,
-                                        uint8_t numBytes,
                                         uint8_t streamId,
-                                        const uint8_t* data)
+                                        Span<const std::byte> data)
     {
-        return Detail::makeSysEx8 (group, 0x2, numBytes, 3, data).withU8<2> (streamId);
+        return Detail::makeSysEx8 (group, std::byte { 0x2 }, 3, data).withU8<2> (streamId);
     }
 
     static PacketX4 makeSysEx8End (uint8_t group,
-                                   uint8_t numBytes,
                                    uint8_t streamId,
-                                   const uint8_t* data)
+                                   Span<const std::byte> data)
     {
-        return Detail::makeSysEx8 (group, 0x3, numBytes, 3, data).withU8<2> (streamId);
+        return Detail::makeSysEx8 (group, std::byte { 0x3 }, 3, data).withU8<2> (streamId);
     }
 
-    static PacketX4 makeMixedDataSetHeader (uint8_t group,
-                                            uint8_t dataSetId,
-                                            const uint8_t* data)
+    static PacketX4 makeEndpointDiscovery (uint8_t versionMajor,
+                                           uint8_t versionMinor,
+                                           std::byte filterBitmap)
     {
-        return Detail::makeSysEx8 (group, 0x8, 14, 2, data).withChannel (dataSetId);
+        return Detail::makeStream().withU8<2> (versionMajor)
+                                   .withU8<3> (versionMinor)
+                                   .withU8<7> ((uint8_t) filterBitmap);
     }
 
-    static PacketX4 makeDataSetPayload (uint8_t group,
-                                        uint8_t dataSetId,
-                                        const uint8_t* data)
+    static PacketX4 makeDeviceIdentityNotification (DeviceInfo info)
     {
-        return Detail::makeSysEx8 (group, 0x9, 14, 2, data).withChannel (dataSetId);
+        return Detail::makeStream().withU8<0x1> (2)
+                                   .withU8<0x5> ((uint8_t) info.manufacturer[0])
+                                   .withU8<0x6> ((uint8_t) info.manufacturer[1])
+                                   .withU8<0x7> ((uint8_t) info.manufacturer[2])
+                                   .withU8<0x8> ((uint8_t) info.family[0])
+                                   .withU8<0x9> ((uint8_t) info.family[1])
+                                   .withU8<0xa> ((uint8_t) info.modelNumber[0])
+                                   .withU8<0xb> ((uint8_t) info.modelNumber[1])
+                                   .withU8<0xc> ((uint8_t) info.revision[0])
+                                   .withU8<0xd> ((uint8_t) info.revision[1])
+                                   .withU8<0xe> ((uint8_t) info.revision[2])
+                                   .withU8<0xf> ((uint8_t) info.revision[3]);
     }
 };
 
