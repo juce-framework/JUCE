@@ -41,6 +41,12 @@ namespace juce
 
 namespace CoreMidiHelpers
 {
+    struct Consumer
+    {
+        virtual ~Consumer() = default;
+        virtual void consume (ump::Iterator, ump::Iterator, double) = 0;
+    };
+
     static bool checkError (OSStatus err, [[maybe_unused]] int lineNum)
     {
         if (err == noErr)
@@ -627,12 +633,8 @@ namespace CoreMidiHelpers
     template <>
     struct Receiver<ImplementationStrategy::onlyNew>
     {
-        Receiver (ump::PacketProtocol protocol, ump::Receiver& receiver)
-            : u32InputHandler (std::make_unique<ump::U32ToUMPHandler> (protocol, receiver))
-        {}
-
-        Receiver (MidiInput& input, MidiInputCallback& callback)
-            : u32InputHandler (std::make_unique<ump::U32ToBytestreamHandler> (input, callback))
+        explicit Receiver (Consumer& cb)
+            : callback (cb)
         {}
 
         void dispatch (const MIDIEventList* list, double time) const
@@ -644,45 +646,49 @@ namespace CoreMidiHelpers
                 static_assert (sizeof (uint32_t) == sizeof (UInt32)
                                && alignof (uint32_t) == alignof (UInt32),
                                "If this fails, the cast below will be broken too!");
-                u32InputHandler->pushMidiData ({ reinterpret_cast<const uint32_t*> (packet->words),
-                                                 (size_t) packet->wordCount },
-                                               time);
+
+                callback.consume (ump::Iterator { packet->words, packet->wordCount },
+                                  ump::Iterator { packet->words + packet->wordCount, 0 },
+                                  time);
 
                 packet = MIDIEventPacketNext (packet);
             }
         }
 
     private:
-        std::unique_ptr<ump::U32InputHandler> u32InputHandler;
+        Consumer& callback;
     };
 
    #if JUCE_HAS_OLD_COREMIDI_API
     template <>
     struct Receiver<ImplementationStrategy::onlyOld>
     {
-        Receiver (ump::PacketProtocol protocol, ump::Receiver& receiver)
-            : bytestreamInputHandler (std::make_unique<ump::BytestreamToUMPHandler> (protocol, receiver))
-        {}
+        explicit Receiver (Consumer& cb)
+            : dispatcher (0, ump::PacketProtocol::MIDI_1_0, 4096), callback (cb) {}
 
-        Receiver (MidiInput& input, MidiInputCallback& callback)
-            : bytestreamInputHandler (std::make_unique<ump::BytestreamToBytestreamHandler> (input, callback))
-        {}
-
-        void dispatch (const MIDIPacketList* list, double time) const
+        void dispatch (const MIDIPacketList* list, double time)
         {
             auto* packet = list->packet;
 
             for (unsigned int i = 0; i < list->numPackets; ++i)
             {
-                auto len = readUnaligned<decltype (packet->length)> (&(packet->length));
-                bytestreamInputHandler->pushMidiData (packet->data, len, time);
+                const auto* bytes = unalignedPointerCast<const std::byte*> (packet->data);
+                const auto len = readUnaligned<decltype (packet->length)> (&(packet->length));
+
+                dispatcher.dispatch (Span (bytes, len), time, [this] (const ump::View& v, double t)
+                {
+                    ump::Iterator b { v.data(), v.size() };
+                    auto e = std::next (b);
+                    callback.consume (b, e, t);
+                });
 
                 packet = MIDIPacketNext (packet);
             }
         }
 
     private:
-        std::unique_ptr<ump::BytestreamInputHandler> bytestreamInputHandler;
+        ump::BytestreamToUMPDispatcher dispatcher;
+        Consumer& callback;
     };
    #endif
 
@@ -690,20 +696,16 @@ namespace CoreMidiHelpers
     template <>
     struct Receiver<ImplementationStrategy::both>
     {
-        Receiver (ump::PacketProtocol protocol, ump::Receiver& receiver)
-            : newReceiver (protocol, receiver), oldReceiver (protocol, receiver)
+        explicit Receiver (Consumer& cb)
+            : newReceiver (cb), oldReceiver (cb)
         {}
 
-        Receiver (MidiInput& input, MidiInputCallback& callback)
-            : newReceiver (input, callback), oldReceiver (input, callback)
-        {}
-
-        void dispatch (const MIDIEventList* list, double time) const
+        void dispatch (const MIDIEventList* list, double time)
         {
             newReceiver.dispatch (list, time);
         }
 
-        void dispatch (const MIDIPacketList* list, double time) const
+        void dispatch (const MIDIPacketList* list, double time)
         {
             oldReceiver.dispatch (list, time);
         }
@@ -720,14 +722,14 @@ namespace CoreMidiHelpers
     CriticalSection callbackLock;
     Array<MidiPortAndCallback*> activeCallbacks;
 
-    class MidiPortAndCallback
+    class MidiPortAndCallback : private Consumer
     {
     public:
-        MidiPortAndCallback (MidiInput& inputIn, ReceiverToUse receiverIn)
-            : input (&inputIn), receiver (std::move (receiverIn))
+        MidiPortAndCallback (MidiInput& inputIn, MidiInputCallback& cb)
+            : input (&inputIn), callback (cb), receiver (*this)
         {}
 
-        ~MidiPortAndCallback()
+        ~MidiPortAndCallback() override
         {
             active = false;
 
@@ -752,6 +754,7 @@ namespace CoreMidiHelpers
         }
 
         MidiInput* input = nullptr;
+        MidiInputCallback& callback;
         std::atomic<bool> active { false };
 
         ReceiverToUse receiver;
@@ -759,6 +762,19 @@ namespace CoreMidiHelpers
         std::unique_ptr<MidiPortAndEndpoint> portAndEndpoint;
 
     private:
+        void consume (ump::Iterator b, ump::Iterator e, double t) override
+        {
+            for (auto view : makeRange (b, e))
+            {
+                bytestreamConverter.convert (view, t, [this] (ump::BytesOnGroup x, double time)
+                {
+                    callback.handleIncomingMidiMessage (input, { x.bytes.data(), (int) x.bytes.size(), time });
+                });
+            }
+        }
+
+        ump::ToBytestreamConverter bytestreamConverter { 2048 };
+
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiPortAndCallback)
     };
 
@@ -955,19 +971,12 @@ public:
     using MidiPortAndCallback::MidiPortAndCallback;
 
     static std::unique_ptr<Pimpl> makePimpl (MidiInput& midiInput,
-                                             ump::PacketProtocol packetProtocol,
-                                             ump::Receiver& umpReceiver)
-    {
-        return std::make_unique<Pimpl> (midiInput, CoreMidiHelpers::ReceiverToUse (packetProtocol, umpReceiver));
-    }
-
-    static std::unique_ptr<Pimpl> makePimpl (MidiInput& midiInput,
                                              MidiInputCallback* midiInputCallback)
     {
         if (midiInputCallback == nullptr)
             return {};
 
-        return std::make_unique<Pimpl> (midiInput, CoreMidiHelpers::ReceiverToUse (midiInput, *midiInputCallback));
+        return std::make_unique<Pimpl> (midiInput, *midiInputCallback);
     }
 
     template <typename... Args>
