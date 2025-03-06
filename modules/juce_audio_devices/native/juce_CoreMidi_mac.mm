@@ -641,8 +641,8 @@ namespace CoreMidiHelpers
                 static_assert (sizeof (uint32_t) == sizeof (UInt32)
                                && alignof (uint32_t) == alignof (UInt32),
                                "If this fails, the cast below will be broken too!");
-                u32InputHandler->pushMidiData (reinterpret_cast<const uint32_t*> (packet->words),
-                                               reinterpret_cast<const uint32_t*> (packet->words + packet->wordCount),
+                u32InputHandler->pushMidiData ({ reinterpret_cast<const uint32_t*> (packet->words),
+                                                 (size_t) packet->wordCount },
                                                time);
 
                 packet = MIDIEventPacketNext (packet);

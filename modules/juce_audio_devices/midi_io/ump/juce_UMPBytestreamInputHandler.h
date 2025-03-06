@@ -136,8 +136,8 @@ struct BytestreamToUMPHandler : public BytestreamInputHandler
 
     void pushMidiData (const void* data, int bytes, double time) override
     {
-        const auto* ptr = static_cast<const uint8_t*> (data);
-        dispatcher.dispatch (ptr, ptr + bytes, time, [&] (const View& v)
+        const auto* ptr = static_cast<const std::byte*> (data);
+        dispatcher.dispatch (Span { ptr, (size_t) bytes }, time, [&] (const View& v)
         {
             recipient.packetReceived (v, time);
         });
