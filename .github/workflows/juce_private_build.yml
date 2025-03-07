@@ -78,7 +78,7 @@ jobs:
           description: ${{ env.result }}
           targetUrl: ${{ env.target_url }}
   notify:
-    if: ${{ always() && inputs.nightly-targets == '[]' }}
+    if: ${{ always() && !contains(needs.*.result, 'cancelled') && inputs.nightly-targets == '[]' }}
     needs: [setup, build, deploy, docs]
     name: Notify
     uses: juce-framework/JUCE-utils/.github/workflows/notify.yml@master
