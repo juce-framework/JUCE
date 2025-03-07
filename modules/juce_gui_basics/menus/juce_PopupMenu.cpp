@@ -120,11 +120,13 @@ struct HeaderItemComponent final : public PopupMenu::CustomComponent
 };
 
 //==============================================================================
-struct ItemComponent final : public Component
+struct ItemComponent final : public Component, public SettableTooltipClient
 {
     ItemComponent (const PopupMenu::Item& i, const PopupMenu::Options& o, MenuWindow& parent)
         : item (i), parentWindow (parent), options (o), customComp (i.customComponent)
     {
+        SettableTooltipClient::setTooltip(item.tooltipText);
+
         if (item.isSectionHeader)
             customComp = *new HeaderItemComponent (item.text, options);
 
@@ -1708,6 +1710,7 @@ PopupMenu::Item& PopupMenu::Item::operator= (Item&&) = default;
 
 PopupMenu::Item::Item (const Item& other)
   : text (other.text),
+    tooltipText(other.tooltipText),
     itemID (other.itemID),
     action (other.action),
     subMenu (createCopyIfNotNull (other.subMenu.get())),
@@ -1727,6 +1730,7 @@ PopupMenu::Item::Item (const Item& other)
 PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
 {
     text = other.text;
+    tooltipText = other.tooltipText;
     itemID = other.itemID;
     action = other.action;
     subMenu.reset (createCopyIfNotNull (other.subMenu.get()));
