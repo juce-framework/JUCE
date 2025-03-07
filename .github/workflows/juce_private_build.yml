@@ -19,10 +19,26 @@ on:
         default: ""
         description: The C++ standard to use (optional [20, 23])
 
+env:
+  target_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
 run-name: "[${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}] ${{ github.sha }}"
 
 jobs:
+  setup:
+    if: ${{ inputs.nightly-targets == '[]' }}
+    name: Set pending commit status
+    runs-on: ubuntu-latest
+    steps:
+      - uses: myrotvorets/set-commit-status-action@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          sha: ${{ github.sha }}
+          status: pending
+          context: CI
+          targetUrl: ${{ env.target_url }}
   build:
+    needs: [setup]
     name: .
     # Not having the ability to do a dynamic 'uses' call is a real pain. To
     # test some new CI configuration you must set the branch in both places
@@ -46,12 +62,28 @@ jobs:
     name: Docs
     uses: juce-framework/JUCE-utils/.github/workflows/docs.yml@master
     secrets: inherit
+  set-commit-status:
+    if: ${{ always() && inputs.nightly-targets == '[]' }}
+    needs: [setup, build, deploy, docs]
+    runs-on: ubuntu-latest
+    env:
+      result: ${{ contains(needs.*.result, 'cancelled') && 'cancelled' || (contains(needs.*.result, 'failure') && 'failure' || 'success') }}
+    steps:
+      - uses: myrotvorets/set-commit-status-action@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          sha: ${{ github.sha }}
+          status: ${{ contains(fromJSON('["cancelled", "failure"]'), env.result) && 'failure' || env.result }}
+          context: CI
+          description: ${{ env.result }}
+          targetUrl: ${{ env.target_url }}
   notify:
-    if: ${{ !(cancelled() || failure()) && inputs.nightly-targets == '[]' }}
-    needs: [docs]
+    if: ${{ always() && inputs.nightly-targets == '[]' }}
+    needs: [setup, build, deploy, docs]
     name: Notify
     uses: juce-framework/JUCE-utils/.github/workflows/notify.yml@master
     with:
       triggerer: ${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}
+      context: ${{ toJson(needs) }}
     secrets: inherit
 
