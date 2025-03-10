@@ -86,4 +86,9 @@ jobs:
       triggerer: ${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}
       context: ${{ toJson(needs) }}
     secrets: inherit
-
+  cleanup:
+      if: ${{ always() }}
+      needs: [setup, build, deploy, docs]
+      name: Cleanup
+      uses: juce-framework/JUCE-utils/.github/workflows/cleanup.yml@master
+      secrets: inherit
