@@ -41,6 +41,7 @@ runs:
       with:
         name: ${{ inputs.key }}
         path: tmp_artifact_upload
+        retention-days: 1
     - name: Clean up
       shell: python3 {0}
       run: |
