@@ -134,7 +134,7 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIA
     endif()
 
     if(needs_debug_flag)
-        target_compile_options(juce_recommended_config_flags INTERFACE $<${debug_config}:/Zi>)
+        target_compile_options(juce_recommended_config_flags INTERFACE $<${debug_config}:/Z7>)
     endif()
 elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
        OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
