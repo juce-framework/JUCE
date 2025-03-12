@@ -362,6 +362,9 @@ public:
 
     /** Changes the write-permission of a file or directory.
 
+        Note that on Windows, there is no notion of a directory itself being read-only or not, and
+        the function will always return true when called with the non-recursive option.
+
         @param shouldBeReadOnly     whether to add or remove write-permission
         @param applyRecursively     if the file is a directory and this is true, it will
                                     recurse through all the subfolders changing the permissions
