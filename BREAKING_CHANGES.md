@@ -4,6 +4,30 @@
 
 ## Change
 
+The default Visual Studio project settings for "Debug Information Format" and
+"Force Generation of Debug Symbols" have changed in the Projucer. By default
+debug symbols are generated using the /Z7 flag.
+
+**Possible Issues**
+
+PDB file generation may change depending on the combination of "Debug
+Information Format" and "Force Generation of Debug Symbols" settings.
+
+**Workaround**
+
+Change the "Debug Information Format" and "Force Generation of Debug Symbols"
+settings for each Visual Studio configuration as required.
+
+**Rationale**
+
+The default behaviour of using "Program Database (/Zi)" is incompatible with
+some CI workflows and caching mechanisms. Enabling "Force Generation of Debug
+Symbols" by default also ensures /Z7 behaves more like /Zi by always generating
+a PDB file.
+
+
+## Change
+
 The signatures of virtual functions ImagePixelData::applyGaussianBlurEffect()
 and ImagePixelData::applySingleChannelBoxBlurEffect() have changed.
 ImageEffects::applyGaussianBlurEffect() and

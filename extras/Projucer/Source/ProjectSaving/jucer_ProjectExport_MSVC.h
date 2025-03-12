@@ -468,7 +468,7 @@ public:
               warningsAreErrorsValue         (config, Ids::warningsAreErrors,          getUndoManager(), false),
               prebuildCommandValue           (config, Ids::prebuildCommand,            getUndoManager()),
               postbuildCommandValue          (config, Ids::postbuildCommand,           getUndoManager()),
-              generateDebugSymbolsValue      (config, Ids::alwaysGenerateDebugSymbols, getUndoManager(), false),
+              generateDebugSymbolsValue      (config, Ids::alwaysGenerateDebugSymbols, getUndoManager(), true),
               enableIncrementalLinkingValue  (config, Ids::enableIncrementalLinking,   getUndoManager(), false),
               useRuntimeLibDLLValue          (config, Ids::useRuntimeLibDLL,           getUndoManager(), true),
               multiProcessorCompilationValue (config, Ids::multiProcessorCompilation,  getUndoManager(), true),
@@ -476,7 +476,7 @@ public:
               characterSetValue              (config, Ids::characterSet,               getUndoManager()),
               architectureTypeValue          (config, Ids::winArchitecture,            getUndoManager(), Array<var> { getArchitectureValueString (Architecture::win64) }, ","),
               fastMathValue                  (config, Ids::fastMath,                   getUndoManager()),
-              debugInformationFormatValue    (config, Ids::debugInformationFormat,     getUndoManager(), isDebug() ? "ProgramDatabase" : "None"),
+              debugInformationFormatValue    (config, Ids::debugInformationFormat,     getUndoManager(), "OldStyle"),
               pluginBinaryCopyStepValue      (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false),
               vstBinaryLocation              (config, Ids::vstBinaryLocation,          getUndoManager()),
               vst3BinaryLocation             (config, Ids::vst3BinaryLocation,         getUndoManager()),
@@ -1085,11 +1085,11 @@ public:
 
                         cl->createNewChildElement ("Optimization")->addTextElement (getOptimisationLevelString (config.getOptimisationLevelInt()));
 
-                        if (isDebug || config.shouldGenerateDebugSymbols())
-                        {
-                            cl->createNewChildElement ("DebugInformationFormat")
-                              ->addTextElement (config.getDebugInformationFormatString());
-                        }
+                        const auto debugInfoFormat = isDebug || config.shouldGenerateDebugSymbols()
+                                                   ? config.getDebugInformationFormatString()
+                                                   : "OldStyle";
+
+                        cl->createNewChildElement ("DebugInformationFormat")->addTextElement (debugInfoFormat);
 
                         addIncludePathsAndPreprocessorDefinitions (*cl, EscapeQuotes::no);
 
