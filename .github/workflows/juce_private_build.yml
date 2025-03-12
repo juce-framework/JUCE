@@ -88,7 +88,9 @@ jobs:
     secrets: inherit
   cleanup:
       if: ${{ always() }}
-      needs: [setup, build, deploy, docs]
+      needs: [setup, build, deploy, docs, set-commit-status, notify]
       name: Cleanup
       uses: juce-framework/JUCE-utils/.github/workflows/cleanup.yml@master
+      with:
+        status: ${{ contains(needs.*.result, 'cancelled') && 'cancelled' || (contains(needs.*.result, 'failure') && 'failure' || 'success') }}
       secrets: inherit
