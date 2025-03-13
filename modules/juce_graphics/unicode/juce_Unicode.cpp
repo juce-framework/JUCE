@@ -204,4 +204,23 @@ private:
     }
 };
 
+namespace detail
+{
+
+std::vector<int> UnicodeHelpers::getLineBreaks (const String& data)
+{
+    std::vector<int> lineBreaks;
+    const auto analysis = Unicode::performAnalysis (data);
+
+    for (const auto [index, codepoint] : enumerate (analysis, int{}))
+    {
+        if (codepoint.breaking == TextBreakType::hard)
+            lineBreaks.push_back (index);
+    }
+
+    return lineBreaks;
+}
+
+} // namespace detail
+
 } // namespace juce

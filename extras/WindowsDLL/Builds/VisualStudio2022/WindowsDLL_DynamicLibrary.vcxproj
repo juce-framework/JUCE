@@ -3576,6 +3576,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\detail\juce_Ranges.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\detail\juce_ShapedText.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\detail\juce_SimpleShapedText.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\detail\juce_Unicode.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\effects\juce_DropShadowEffect.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\effects\juce_GlowEffect.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\effects\juce_ImageEffectFilter.h"/>

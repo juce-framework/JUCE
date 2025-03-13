@@ -5988,6 +5988,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\detail\juce_SimpleShapedText.h">
       <Filter>JUCE Modules\juce_graphics\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\detail\juce_Unicode.h">
+      <Filter>JUCE Modules\juce_graphics\detail</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\effects\juce_DropShadowEffect.h">
       <Filter>JUCE Modules\juce_graphics\effects</Filter>
     </ClInclude>
