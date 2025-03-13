@@ -32,61 +32,8 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::detail
 {
-
-template <size_t StartingAt, typename Tuple, size_t... Is>
-constexpr auto partiallyUnpackImpl (Tuple&& tuple, std::index_sequence<Is...>)
-{
-    return std::tie (std::get<StartingAt + Is> (tuple)...);
-}
-
-template <size_t StartingAt, size_t NumElems, typename Tuple>
-constexpr auto partiallyUnpack (Tuple&& tuple)
-{
-    return partiallyUnpackImpl<StartingAt> (std::forward<Tuple> (tuple), std::make_index_sequence<NumElems>{});
-}
-
-class JustifiedText
-{
-private:
-    enum class DrawType
-    {
-        normal,
-        ellipsis
-    };
-
-public:
-    JustifiedText (const SimpleShapedText& t, const ShapedTextOptions& options);
-
-    template <typename Callable, typename... RangedValues>
-    void accessTogetherWith (Callable&& callback, RangedValues&&... rangedValues) const;
-
-    /* The callback receives (Span<const ShapedGlyph> glyphs,
-                              Span<Point<float>> positions,
-                              Font font,
-                              Range<int64> glyphRange,
-                              int64 lineNumber) // So far this has been indexed from 0 per SimpleShapedText
-                                                // object, but maybe we'll find we want global text level
-                                                // line numbers, so only assume they are increasing by one
-    */
-    template <typename Callable>
-    void access (Callable&& callback) const;
-
-    /*  This is how much cumulative widths glyphs take up in each line. Whether the trailing
-        whitespace is included depends on the ShapedTextOptions::getWhitespaceShouldFitInLine()
-        setting.
-    */
-    auto& getMinimumRequiredWidthForLines() const { return minimumRequiredWidthsForLine; }
-
-private:
-    const SimpleShapedText& shapedText;
-    detail::RangedValues<Point<float>> lineAnchors;
-    std::optional<SimpleShapedText> ellipsis;
-    detail::RangedValues<DrawType> rangesToDraw;
-    detail::RangedValues<float> whitespaceStretch;
-    std::vector<float> minimumRequiredWidthsForLine;
-};
 
 void drawJustifiedText (const JustifiedText& text, const Graphics& g, AffineTransform);
 
@@ -496,59 +443,6 @@ JustifiedText::JustifiedText (const SimpleShapedText& t, const ShapedTextOptions
                            realign.extraWhitespaceAdvance);
 }
 
-template <typename Callable, typename... RangedValues>
-void JustifiedText::accessTogetherWith (Callable&& callback, RangedValues&&... rangedValues) const
-{
-    std::optional<int64> lastLine;
-    Point<float> anchor{};
-
-    for (const auto item : makeIntersectingRangedValues (&shapedText.getLineNumbers(),
-                                                         &shapedText.getResolvedFonts(),
-                                                         &lineAnchors,
-                                                         &rangesToDraw,
-                                                         &whitespaceStretch,
-                                                         (&rangedValues)...))
-    {
-        const auto& [range, line, font, lineAnchor, drawType, stretch] = partiallyUnpack<0, 6> (item);
-        const auto& rest = partiallyUnpack<6, std::tuple_size_v<decltype(item)> - 6> (item);
-
-        if (std::exchange (lastLine, line) != line)
-            anchor = lineAnchor;
-
-        const auto glyphs = [this, r = range, dt = drawType]() -> Span<const ShapedGlyph>
-        {
-            if (dt == DrawType::ellipsis)
-                return ellipsis->getGlyphs();
-
-            return shapedText.getGlyphs (r);
-        }();
-
-        std::vector<Point<float>> positions (glyphs.size());
-
-        std::transform (glyphs.begin(), glyphs.end(), positions.begin(), [&anchor, &s = stretch] (auto& glyph)
-                        {
-                            auto result = anchor + glyph.offset;
-
-                            anchor += glyph.advance;
-
-                            if (glyph.whitespace)
-                                anchor.addXY (s, 0.0f);
-
-                            return result;
-                        });
-
-        const auto callbackFont = drawType == DrawType::ellipsis ? ellipsis->getResolvedFonts().front().value : font;
-        const auto callbackParameters = std::tuple_cat (std::tie (glyphs, positions, callbackFont, range, line), rest);
-
-        const auto invokeNullChecked = [&] (auto&... params)
-        {
-            NullCheckedInvocation::invoke (callback, params...);
-        };
-
-        std::apply (invokeNullChecked, callbackParameters);
-    }
-}
-
 template <typename Callable>
 void JustifiedText::access (Callable&& callback) const
 {
@@ -577,4 +471,4 @@ void drawJustifiedText (const JustifiedText& text, const Graphics& g, AffineTran
                  });
 }
 
-} // namespace juce
+} // namespace juce::detail

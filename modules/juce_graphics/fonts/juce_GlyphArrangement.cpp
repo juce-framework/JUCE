@@ -43,7 +43,7 @@ static constexpr bool isNonBreakingSpace (const juce_wchar c)
         || c == 0x2060;
 }
 
-static bool areAllRequiredWidthsSmallerThanMax (const ShapedText& shapedText, float width)
+static bool areAllRequiredWidthsSmallerThanMax (const detail::ShapedText& shapedText, float width)
 {
     const auto lineWidths = shapedText.getMinimumRequiredWidthForLines();
     return std::all_of (lineWidths.begin(), lineWidths.end(), [width] (auto& w) { return w <= width; });
@@ -51,7 +51,7 @@ static bool areAllRequiredWidthsSmallerThanMax (const ShapedText& shapedText, fl
 
 // ShapedText truncates the last line by default, even if it requires larger width than the maximum
 // allowed.
-static bool areAllRequiredWidthsExceptTheLastSmallerThanMax (const ShapedText& shapedText, float width)
+static bool areAllRequiredWidthsExceptTheLastSmallerThanMax (const detail::ShapedText& shapedText, float width)
 {
     const auto lineWidths = shapedText.getMinimumRequiredWidthForLines();
 
@@ -171,7 +171,7 @@ void GlyphArrangement::addLineOfText (const Font& font, const String& text, floa
     addCurtailedLineOfText (font, text, xOffset, yOffset, 1.0e10f, false);
 }
 
-static void addGlyphsFromShapedText (GlyphArrangement& ga, const ShapedText& st, float x, float y)
+static void addGlyphsFromShapedText (GlyphArrangement& ga, const detail::ShapedText& st, float x, float y)
 {
     st.access ([&] (auto shapedGlyphs, auto positions, auto font, auto glyphRange, auto)
                {
@@ -199,6 +199,8 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font, const String& t
                                                float xOffset, float yOffset,
                                                float maxWidthPixels, bool useEllipsis)
 {
+    using namespace detail;
+
     auto options = ShapedText::Options{}.withMaxNumLines (1)
                                         .withMaxWidth (maxWidthPixels)
                                         .withFont (font)
@@ -218,6 +220,8 @@ void GlyphArrangement::addJustifiedText (const Font& font, const String& text,
                                          Justification horizontalLayout,
                                          float leading)
 {
+    using namespace detail;
+
     ShapedText st { text, ShapedText::Options{}.withMaxWidth (maxLineWidth)
                                                .withJustification (horizontalLayout)
                                                .withFont (font)
@@ -235,8 +239,10 @@ static auto createFittedText (const Font& f,
                               Justification layout,
                               int maximumLines,
                               float minimumRelativeHorizontalScale,
-                              ShapedText::Options baseOptions = {})
+                              detail::ShapedText::Options baseOptions = {})
 {
+    using namespace detail;
+
     if (! layout.testFlags (Justification::bottom | Justification::top))
         layout = layout.getOnlyHorizontalFlags() | Justification::verticallyCentred;
 
@@ -472,7 +478,7 @@ void GlyphArrangement::addFittedText (const Font& f,
                                                     layout,
                                                     maximumLines,
                                                     minimumHorizontalScale,
-                                                    ShapedText::Options{}.withAllowBreakingInsideWord());
+                                                    detail::ShapedText::Options{}.withAllowBreakingInsideWord());
 
     addGlyphsFromShapedText (*this, stWithWordBreaks, x, y);
 }

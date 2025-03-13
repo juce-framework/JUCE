@@ -32,7 +32,7 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::detail
 {
 
 /** Class that can visually shape a Unicode string provided a list of Fonts corresponding to
@@ -101,108 +101,4 @@ private:
     std::shared_ptr<Impl> impl;
 };
 
-class ShapedText::Impl
-{
-public:
-    Impl (String textIn, Options optionsIn)
-        : options { std::move (optionsIn) },
-          text { std::move (textIn) }
-    {
-    }
-
-    void access (const std::function<void (Span<const ShapedGlyph>, Span<Point<float>>, Font, Range<int64>, int64)>& cb) const
-    {
-        justifiedText.access (cb);
-    }
-
-    void draw (const Graphics& g, AffineTransform transform) const
-    {
-        drawJustifiedText (justifiedText, g, transform);
-    }
-
-    auto& getText() const
-    {
-        return text;
-    }
-
-    auto getTextRange (int64 glyphIndex) const
-    {
-        return simpleShapedText.getTextRange (glyphIndex);
-    }
-
-    Span<const float> getMinimumRequiredWidthForLines() const
-    {
-        return justifiedText.getMinimumRequiredWidthForLines();
-    }
-
-    //==============================================================================
-    auto& getSimpleShapedText() const { return simpleShapedText; }
-
-    auto& getJustifiedText() const { return justifiedText; }
-
-private:
-    ShapedTextOptions options;
-    String text;
-    SimpleShapedText simpleShapedText { &text, options };
-    JustifiedText justifiedText { simpleShapedText, options };
-};
-
-ShapedText::ShapedText() : ShapedText ("", {})
-{
-}
-
-ShapedText::ShapedText (String text) : ShapedText (std::move (text), {})
-{
-}
-
-ShapedText::ShapedText (String text, Options options)
-{
-    impl = std::make_shared<Impl> (std::move (text), std::move (options));
-}
-
-void ShapedText::access (const std::function<void (Span<const ShapedGlyph>, Span<Point<float>>, Font, Range<int64>, int64)>& cb) const
-{
-    impl->access (cb);
-}
-
-void ShapedText::draw (const Graphics& g, AffineTransform transform) const
-{
-    impl->draw (g, transform);
-}
-
-const String& ShapedText::getText() const
-{
-    return impl->getText();
-}
-
-Range<int64> ShapedText::getTextRange (int64 glyphIndex) const
-{
-    return impl->getTextRange (glyphIndex);
-}
-
-Span<const float> ShapedText::getMinimumRequiredWidthForLines() const
-{
-    return impl->getMinimumRequiredWidthForLines();
-}
-
-class ShapedText::Detail
-{
-public:
-    explicit Detail (const ShapedText* shapedTextIn)
-        : shapedText (*shapedTextIn)
-    {}
-
-    auto& getJustifiedText() const { return shapedText.impl->getJustifiedText(); }
-
-    auto& getSimpleShapedText() const { return shapedText.impl->getSimpleShapedText(); }
-
-private:
-    const ShapedText& shapedText;
-};
-
-ShapedText::Detail ShapedText::getDetail() const
-{
-    return Detail { this };
-}
-
-} // namespace juce
+} // namespace juce::detail

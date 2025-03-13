@@ -227,7 +227,7 @@ private:
             if (filter == nullptr || context == nullptr)
                 return false;
 
-            const ImagePtr content { CGBitmapContextCreateImage (context.get()) };
+            const detail::ImagePtr content { CGBitmapContextCreateImage (context.get()) };
 
             if (content == nullptr)
                 return false;

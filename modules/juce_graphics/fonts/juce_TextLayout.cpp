@@ -327,6 +327,8 @@ static auto castTo (const Range<U>& r)
 
 static auto getFontsForRange (const detail::RangedValues<Font>& fonts)
 {
+    using namespace detail;
+
     std::vector<FontForRange> result;
     result.reserve (fonts.size());
 
@@ -340,7 +342,7 @@ static auto getFontsForRange (const detail::RangedValues<Font>& fonts)
     return result;
 }
 
-static Range<int64> getInputRange (const ShapedText& st, Range<int64> glyphRange)
+static Range<int64> getInputRange (const detail::ShapedText& st, Range<int64> glyphRange)
 {
     if (glyphRange.isEmpty())
     {
@@ -356,8 +358,10 @@ static Range<int64> getInputRange (const ShapedText& st, Range<int64> glyphRange
              std::max (startInputRange.getEnd(), endInputRange.getEnd()) };
 }
 
-static Range<int64> getLineInputRange (const ShapedText& st, int64 lineNumber)
+static Range<int64> getLineInputRange (const detail::ShapedText& st, int64 lineNumber)
 {
+    using namespace detail;
+
     return getInputRange (st, ShapedText::Detail { &st }.getSimpleShapedText()
                                                         .getLineNumbers()
                                                         .getItem ((size_t) lineNumber).range);
@@ -368,10 +372,10 @@ struct MaxFontAscentAndDescent
     float ascent{}, descent{};
 };
 
-static MaxFontAscentAndDescent getMaxFontAscentAndDescentInEnclosingLine (const ShapedText& st,
+static MaxFontAscentAndDescent getMaxFontAscentAndDescentInEnclosingLine (const detail::ShapedText& st,
                                                                           Range<int64> lineChunkRange)
 {
-    const auto sst = ShapedText::Detail { &st }.getSimpleShapedText();
+    const auto sst = detail::ShapedText::Detail { &st }.getSimpleShapedText();
 
     const auto lineRange = sst.getLineNumbers()
                               .getItemWithEnclosingRange (lineChunkRange.getStart())->range;
@@ -389,8 +393,10 @@ static MaxFontAscentAndDescent getMaxFontAscentAndDescentInEnclosingLine (const 
     return result;
 }
 
-static std::optional<TextDirection> getTextDirection (const AttributedString& text)
+static std::optional<detail::TextDirection> getTextDirection (const AttributedString& text)
 {
+    using namespace detail;
+
     using ReadingDirection = AttributedString::ReadingDirection;
 
     const auto dir = text.getReadingDirection();
@@ -406,8 +412,10 @@ static std::optional<TextDirection> getTextDirection (const AttributedString& te
 
 void TextLayout::createStandardLayout (const AttributedString& text)
 {
-    detail::RangedValues<Font> fonts;
-    detail::RangedValues<Colour> colours;
+    using namespace detail;
+
+    RangedValues<Font> fonts;
+    RangedValues<Colour> colours;
 
     for (auto i = 0, iMax = text.getNumAttributes(); i < iMax; ++i)
     {

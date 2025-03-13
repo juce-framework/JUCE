@@ -177,13 +177,13 @@ public:
         return text.size();
     }
 
-    BidiParagraph createParagraph (size_t offset, std::optional<TextDirection> d = {}) const
+    BidiParagraph createParagraph (size_t offset, std::optional<detail::TextDirection> d = {}) const
     {
         BidiParagraph::ParagraphPtr result { SBAlgorithmCreateParagraph (algorithm.get(), offset, text.size() - offset, [&]() -> SBLevel
         {
             if (! d.has_value())
                 return SBLevelDefaultLTR;
-            return *d == TextDirection::rtl ? 1 : 0;
+            return *d == detail::TextDirection::rtl ? 1 : 0;
         }()) };
 
         jassert (result != nullptr);
@@ -192,7 +192,7 @@ public:
     }
 
     template <typename Fn>
-    void forEachParagraph (Fn&& callback, std::optional<TextDirection> dir = {}) const
+    void forEachParagraph (Fn&& callback, std::optional<detail::TextDirection> dir = {}) const
     {
         for (size_t i = 0; i < text.size();)
         {
