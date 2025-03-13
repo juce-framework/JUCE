@@ -106,7 +106,7 @@ struct TextEditor::RemoveAction final : public UndoableAction
         return std::accumulate (removedText.texts.begin(),
                                 removedText.texts.end(),
                                 0,
-                                [] (auto& sum, auto& value)
+                                [] (auto sum, auto& value)
                                 {
                                     return sum + (int) value.getNumBytesAsUTF8();
                                 });

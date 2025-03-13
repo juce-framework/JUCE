@@ -1320,7 +1320,7 @@ void SimpleShapedText::shape (const String& data,
                                                         glyphSpansInLine.end(),
                                                         std::make_pair (std::numeric_limits<int64>::max(),
                                                                         std::numeric_limits<int64>::min()),
-                                                        [&] (auto& sum, auto& elem) -> std::pair<int64, int64>
+                                                        [&] (auto sum, auto& elem) -> std::pair<int64, int64>
                                                         {
                                                             const auto r = elem.textRange + lineRange.getStart();
 
