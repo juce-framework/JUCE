@@ -369,6 +369,7 @@
 #include "widgets/juce_Slider.cpp"
 #include "widgets/juce_TableHeaderComponent.cpp"
 #include "widgets/juce_TableListBox.cpp"
+#include "widgets/juce_TextEditorModel.cpp"
 #include "widgets/juce_TextEditor.cpp"
 #include "widgets/juce_Toolbar.cpp"
 #include "widgets/juce_ToolbarItemComponent.cpp"
