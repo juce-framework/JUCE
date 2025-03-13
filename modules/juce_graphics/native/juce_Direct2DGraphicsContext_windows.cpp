@@ -1680,7 +1680,16 @@ void Direct2DGraphicsContext::drawGlyphs (Span<const uint16_t> glyphNumbers,
     if (fontFace == nullptr)
         return;
 
-    const auto brush = currentState->getBrush (SavedState::BrushTransformFlags::applyFillTypeTransform);
+    const auto fontScale = font.getHorizontalScale();
+    const auto scaledTransform = AffineTransform::scale (fontScale, 1.0f).followedBy (transform);
+    const auto glyphRunTransform = scaledTransform.followedBy (currentState->currentTransform.getTransform());
+    const auto onlyTranslated = glyphRunTransform.isOnlyTranslation();
+
+    const auto fillTransform = onlyTranslated
+                             ? SavedState::BrushTransformFlags::applyWorldAndFillTypeTransforms
+                             : SavedState::BrushTransformFlags::applyFillTypeTransform;
+
+    const auto brush = currentState->getBrush (fillTransform);
 
     if (! brush)
         return;
@@ -1688,11 +1697,6 @@ void Direct2DGraphicsContext::drawGlyphs (Span<const uint16_t> glyphNumbers,
     applyPendingClipList();
 
     D2D1_POINT_2F baselineOrigin { 0.0f, 0.0f };
-
-    const auto fontScale = font.getHorizontalScale();
-    const auto scaledTransform = AffineTransform::scale (fontScale, 1.0f).followedBy (transform);
-    const auto glyphRunTransform = scaledTransform.followedBy (currentState->currentTransform.getTransform());
-    const auto onlyTranslated = glyphRunTransform.isOnlyTranslation();
 
     if (onlyTranslated)
         baselineOrigin = { glyphRunTransform.getTranslationX(), glyphRunTransform.getTranslationY() };
