@@ -33,11 +33,11 @@
 */
 
 @interface FileChooserControllerClass : UIDocumentPickerViewController
-- (void) setParent: (FileChooser::Native*) ptr;
+- (void) setParent: (std::shared_ptr<FileChooser::Native>) ptr;
 @end
 
 @interface FileChooserDelegateClass : NSObject<UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate>
-- (id) initWithOwner: (FileChooser::Native*) owner;
+- (void) setParent: (std::shared_ptr<FileChooser::Native>) owner;
 @end
 
 namespace juce
@@ -56,7 +56,8 @@ public:
             Note that we can't call this directly inside the class constructor, because
             the owning shared_ptr might not yet exist.
         */
-        [result->controller.get() setParent: result.get()];
+        [result->controller.get() setParent: result];
+        [result->delegate.get() setParent: result];
         return result;
     }
 
@@ -247,7 +248,7 @@ private:
         : owner (fileChooser),
           savedFlags (flags)
     {
-        delegate.reset ([[FileChooserDelegateClass alloc] initWithOwner: this]);
+        delegate.reset ([[FileChooserDelegateClass alloc] init]);
 
         const auto validExtensions = getValidExtensionsForWildcards (owner.filters);
 
@@ -355,7 +356,7 @@ private:
 
     //==============================================================================
     FileChooser& owner;
-    NSUniquePtr<NSObject<UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate>> delegate;
+    NSUniquePtr<FileChooserDelegateClass> delegate;
     NSUniquePtr<FileChooserControllerClass> controller;
     int savedFlags = 0;
 
@@ -386,43 +387,39 @@ std::shared_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser
     std::weak_ptr<FileChooser::Native> ptr;
 }
 
-- (void) setParent: (FileChooser::Native*) parent
+- (void) setParent: (std::shared_ptr<FileChooser::Native>) parent
 {
-    jassert (parent != nullptr);
-    jassert (parent->shared_from_this() != nullptr);
-    ptr = parent->weak_from_this();
+    ptr = parent;
 }
 
 @end
 
 @implementation FileChooserDelegateClass
 {
-    FileChooser::Native* owner;
+    std::weak_ptr<FileChooser::Native> weak;
 }
 
-- (id) initWithOwner: (FileChooser::Native*) o
+- (void) setParent: (std::shared_ptr<FileChooser::Native>) o
 {
-    self = [super init];
-    owner = o;
-    return self;
+    weak = o;
 }
 
 - (void) documentPicker: (UIDocumentPickerViewController*) controller didPickDocumentsAtURLs: (NSArray<NSURL*>*) urls
 {
-    if (owner != nullptr)
-        owner->didPickDocumentsAtURLs (urls);
+    if (auto strong = weak.lock())
+        strong->didPickDocumentsAtURLs (urls);
 }
 
 - (void) documentPickerWasCancelled: (UIDocumentPickerViewController*) controller
 {
-    if (owner != nullptr)
-        owner->pickerWasCancelled();
+    if (auto strong = weak.lock())
+        strong->pickerWasCancelled();
 }
 
 - (void) presentationControllerDidDismiss: (UIPresentationController *) presentationController
 {
-    if (owner != nullptr)
-        owner->pickerWasCancelled();
+    if (auto strong = weak.lock())
+        strong->pickerWasCancelled();
 }
 
 @end
