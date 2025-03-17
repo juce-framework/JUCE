@@ -93,7 +93,7 @@
         <MODULEPATH id="juce_javascript" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
-    <ANDROIDSTUDIO targetFolder="Builds/Android" androidMinimumSDK="23" microphonePermissionNeeded="1"
+    <ANDROIDSTUDIO targetFolder="Builds/Android" androidMinimumSDK="24" microphonePermissionNeeded="1"
                    androidExternalWriteNeeded="1" androidEnableContentSharing="1"
                    androidExtraAssetsFolder="../Assets" smallIcon="YyqWd2" bigIcon="YyqWd2"
                    cameraPermissionNeeded="1" androidReadMediaAudioPermission="1"

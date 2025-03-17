@@ -131,7 +131,7 @@ public:
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
           androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
-          androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "21"),
+          androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "24"),
           androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "34"),
           androidTheme                         (settings, Ids::androidTheme,                         getUndoManager()),
           androidExtraAssetsFolder             (settings, Ids::androidExtraAssetsFolder,             getUndoManager()),
@@ -1145,7 +1145,7 @@ private:
                    "An integer value that represents the version of the application code, relative to other versions.");
 
         props.add (new TextPropertyComponent (androidMinimumSDK, "Minimum SDK Version", 32, false),
-                   "The number of the minimum version of the Android SDK that the app requires (must be 21 or higher).");
+                   "The number of the minimum version of the Android SDK that the app requires (must be 24 or higher).");
 
         props.add (new TextPropertyComponent (androidTargetSDK, "Target SDK Version", 32, false),
                    "The number of the version of the Android SDK that the app is targeting.");
@@ -1571,8 +1571,7 @@ private:
         if (isContentSharingEnabled())
             defines.set ("JUCE_CONTENT_SHARING", "1");
 
-        if (supportsGLv3())
-            defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
+        defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
 
         if (areRemoteNotificationsEnabled())
         {
@@ -1628,7 +1627,7 @@ private:
 
         libraries.add ("log");
         libraries.add ("android");
-        libraries.add (supportsGLv3() ? "GLESv3" : "GLESv2");
+        libraries.add ("GLESv3");
         libraries.add ("EGL");
 
         return libraries;
@@ -1812,7 +1811,7 @@ private:
             if (glVersion == nullptr)
                 glVersion = manifest.createNewChildElement ("uses-feature");
 
-            setAttributeIfNotPresent (*glVersion, "android:glEsVersion", (static_cast<int> (androidMinimumSDK.get()) >= 18 ? "0x00030000" : "0x00020000"));
+            setAttributeIfNotPresent (*glVersion, "android:glEsVersion", "0x00030000");
             setAttributeIfNotPresent (*glVersion, "android:required", "true");
         }
     }
@@ -1851,8 +1850,7 @@ private:
 
         if (androidScreenOrientation.get() == "landscape")
         {
-            setAttributeIfNotPresent (*act, "android:screenOrientation",
-                                      static_cast<int> (androidMinimumSDK.get()) < 18 ? "sensorLandscape" : "userLandscape");
+            setAttributeIfNotPresent (*act, "android:screenOrientation", "userLandscape");
         }
         else
         {
@@ -2013,11 +2011,6 @@ private:
             escapedArray.add ("\"" + element.replace ("\\", "\\\\").replace ("\"", "\\\"") + "\"");
 
         return escapedArray.joinIntoString (", ");
-    }
-
-    bool supportsGLv3() const
-    {
-        return (static_cast<int> (androidMinimumSDK.get()) >= 18);
     }
 
     //==============================================================================

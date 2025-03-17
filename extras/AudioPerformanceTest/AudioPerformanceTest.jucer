@@ -90,7 +90,7 @@
     </LINUX_MAKE>
     <ANDROIDSTUDIO androidActivityClass="com.juce.audioperformancetest.AudioPerformanceTest"
                    androidCpp11="1" targetFolder="Builds/Android" extraCompilerFlags="-mfpu=neon -mfloat-abi=hard -ffast-math -funroll-loops --param max-unroll-times=8 -mhard-float -D_NDK_MATH_NO_SOFTFP=1 -DJUCE_DISABLE_ASSERTIONS=1"
-                   gradleToolchainVersion="3.6" androidMinimumSDK="23">
+                   gradleToolchainVersion="3.6" androidMinimumSDK="24">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPerformanceTest"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="6"

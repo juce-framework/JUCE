@@ -74,7 +74,7 @@ of the target you wish to build.
 - __Windows__: Windows 10 (x86_64, x86, Arm64, Arm64EC)
 - __Linux__: Mainstream Linux distributions (x86_64, Arm64/aarch64, (32 bit Arm systems like armv7 should work but are not regularly tested))
 - __iOS__: iOS 12 (Arm64, Arm64e, x86_64 (Simulator))
-- __Android__: Android 5 - Lollipop (API Level 21) (arm64-v8a, armeabi-v7a, x86_64, x86)
+- __Android__: Android 7 - Nougat (API Level 24) (arm64-v8a, armeabi-v7a, x86_64, x86)
 
 ## Contributing
 
