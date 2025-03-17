@@ -247,7 +247,7 @@ void RuntimePermissions::request (PermissionID permission, Callback callback)
 
     auto alreadyGranted = isGranted (permission);
 
-    if (alreadyGranted || getAndroidSDKVersion() < 23)
+    if (alreadyGranted)
     {
         callback (alreadyGranted);
         return;
@@ -276,7 +276,7 @@ void RuntimePermissions::request (PermissionID permission, Callback callback)
 
 bool RuntimePermissions::isRequired (PermissionID /*permission*/)
 {
-    return getAndroidSDKVersion() >= 23;
+    return true;
 }
 
 bool RuntimePermissions::isGranted (PermissionID permission)

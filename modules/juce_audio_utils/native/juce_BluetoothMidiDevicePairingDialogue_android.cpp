@@ -38,7 +38,7 @@ namespace juce
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  STATICMETHOD (getAndroidBluetoothManager, "getAndroidBluetoothManager", "(Landroid/content/Context;)Lcom/rmsl/juce/JuceMidiSupport$BluetoothMidiManager;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidJuceMidiSupport, "com/rmsl/juce/JuceMidiSupport", 23)
+DECLARE_JNI_CLASS (AndroidJuceMidiSupport, "com/rmsl/juce/JuceMidiSupport")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -49,7 +49,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidJuceMidiSupport, "com/rmsl/juce/JuceMidiS
  METHOD (getBluetoothDeviceStatus, "getBluetoothDeviceStatus", "(Ljava/lang/String;)I") \
  METHOD (startStopScan, "startStopScan", "(Z)V")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidBluetoothManager, "com/rmsl/juce/JuceMidiSupport$BluetoothMidiManager", 23)
+DECLARE_JNI_CLASS (AndroidBluetoothManager, "com/rmsl/juce/JuceMidiSupport$BluetoothMidiManager")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -501,9 +501,6 @@ bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* 
 {
     std::unique_ptr<ModalComponentManager::Callback> exitCallback (exitCallbackPtr);
 
-    if (getAndroidSDKVersion() < 23)
-        return false;
-
     auto boundsToUse = (btBounds != nullptr ? *btBounds : Rectangle<int> {});
 
     if (! RuntimePermissions::isGranted (RuntimePermissions::bluetoothMidi))
@@ -521,9 +518,6 @@ bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* 
 
 bool BluetoothMidiDevicePairingDialogue::isAvailable()
 {
-    if (getAndroidSDKVersion() < 23)
-        return false;
-
     auto* env = getEnv();
 
     LocalRef<jobject> btManager (env->CallStaticObjectMethod (AndroidJuceMidiSupport, AndroidJuceMidiSupport.getAndroidBluetoothManager, getAppContext().get()));

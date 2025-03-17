@@ -63,7 +63,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationChannelGroup, "android/app/Notificat
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   FIELD (extras, "extras", "Landroid/os/Bundle;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidNotification, "android/app/Notification", 19)
+DECLARE_JNI_CLASS (AndroidNotification, "android/app/Notification")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -72,74 +72,48 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidNotification, "android/app/Notification",
   METHOD (constructor,    "<init>",         "(ILjava/lang/CharSequence;Landroid/app/PendingIntent;)V") \
   METHOD (build,          "build",          "()Landroid/app/Notification$Action;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationActionBuilder, "android/app/Notification$Action$Builder", 20)
+DECLARE_JNI_CLASS (NotificationActionBuilder, "android/app/Notification$Action$Builder")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-  METHOD (getNotification,  "getNotification",  "()Landroid/app/Notification;") \
-  METHOD (setAutoCancel,    "setAutoCancel",    "(Z)Landroid/app/Notification$Builder;") \
-  METHOD (setContentInfo,   "setContentInfo",   "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;") \
-  METHOD (setContentIntent, "setContentIntent", "(Landroid/app/PendingIntent;)Landroid/app/Notification$Builder;") \
-  METHOD (setContentText,   "setContentText",   "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;") \
-  METHOD (setContentTitle,  "setContentTitle",  "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;") \
-  METHOD (setDefaults,      "setDefaults",      "(I)Landroid/app/Notification$Builder;") \
-  METHOD (setDeleteIntent,  "setDeleteIntent",  "(Landroid/app/PendingIntent;)Landroid/app/Notification$Builder;") \
-  METHOD (setLargeIcon,     "setLargeIcon",     "(Landroid/graphics/Bitmap;)Landroid/app/Notification$Builder;") \
-  METHOD (setLights,        "setLights",        "(III)Landroid/app/Notification$Builder;") \
-  METHOD (setNumber,        "setNumber",        "(I)Landroid/app/Notification$Builder;") \
-  METHOD (setOngoing,       "setOngoing",       "(Z)Landroid/app/Notification$Builder;") \
-  METHOD (setOnlyAlertOnce, "setOnlyAlertOnce", "(Z)Landroid/app/Notification$Builder;") \
-  METHOD (setProgress,      "setProgress",      "(IIZ)Landroid/app/Notification$Builder;") \
-  METHOD (setSmallIcon,     "setSmallIcon",     "(I)Landroid/app/Notification$Builder;") \
-  METHOD (setSound,         "setSound",         "(Landroid/net/Uri;)Landroid/app/Notification$Builder;") \
-  METHOD (setTicker,        "setTicker",        "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;") \
-  METHOD (setVibrate,       "setVibrate",       "([J)Landroid/app/Notification$Builder;") \
-  METHOD (setWhen,          "setWhen",          "(J)Landroid/app/Notification$Builder;")
-
-DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationBuilderBase, "android/app/Notification$Builder", 11)
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-   METHOD (addAction,          "addAction",          "(ILjava/lang/CharSequence;Landroid/app/PendingIntent;)Landroid/app/Notification$Builder;") \
-   METHOD (build,              "build",              "()Landroid/app/Notification;") \
-   METHOD (setPriority,        "setPriority",        "(I)Landroid/app/Notification$Builder;") \
-   METHOD (setSubText,         "setSubText",         "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;") \
-   METHOD (setUsesChronometer, "setUsesChronometer", "(Z)Landroid/app/Notification$Builder;")
-
-DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationBuilderApi16, "android/app/Notification$Builder", 16)
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-    METHOD (setShowWhen, "setShowWhen", "(Z)Landroid/app/Notification$Builder;")
-
-DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationBuilderApi17, "android/app/Notification$Builder", 17)
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-  METHOD (addAction,       "addAction",       "(Landroid/app/Notification$Action;)Landroid/app/Notification$Builder;") \
-  METHOD (addExtras,       "addExtras",       "(Landroid/os/Bundle;)Landroid/app/Notification$Builder;") \
-  METHOD (setLocalOnly,    "setLocalOnly",    "(Z)Landroid/app/Notification$Builder;") \
-  METHOD (setGroup,        "setGroup",        "(Ljava/lang/String;)Landroid/app/Notification$Builder;") \
-  METHOD (setGroupSummary, "setGroupSummary", "(Z)Landroid/app/Notification$Builder;") \
-  METHOD (setSortKey,      "setSortKey",      "(Ljava/lang/String;)Landroid/app/Notification$Builder;")
-
-DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationBuilderApi20, "android/app/Notification$Builder", 20)
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-  METHOD (addPerson,        "addPerson",        "(Ljava/lang/String;)Landroid/app/Notification$Builder;") \
-  METHOD (setCategory,      "setCategory",      "(Ljava/lang/String;)Landroid/app/Notification$Builder;") \
-  METHOD (setColor,         "setColor",         "(I)Landroid/app/Notification$Builder;") \
-  METHOD (setPublicVersion, "setPublicVersion", "(Landroid/app/Notification;)Landroid/app/Notification$Builder;") \
-  METHOD (setVisibility,    "setVisibility",    "(I)Landroid/app/Notification$Builder;")
-
-DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationBuilderApi21, "android/app/Notification$Builder", 21)
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (getNotification,    "getNotification",    "()Landroid/app/Notification;") \
+  METHOD (setAutoCancel,      "setAutoCancel",      "(Z)Landroid/app/Notification$Builder;") \
+  METHOD (setContentInfo,     "setContentInfo",     "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;") \
+  METHOD (setContentIntent,   "setContentIntent",   "(Landroid/app/PendingIntent;)Landroid/app/Notification$Builder;") \
+  METHOD (setContentText,     "setContentText",     "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;") \
+  METHOD (setContentTitle,    "setContentTitle",    "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;") \
+  METHOD (setDefaults,        "setDefaults",        "(I)Landroid/app/Notification$Builder;") \
+  METHOD (setDeleteIntent,    "setDeleteIntent",    "(Landroid/app/PendingIntent;)Landroid/app/Notification$Builder;") \
+  METHOD (setLargeIcon,       "setLargeIcon",       "(Landroid/graphics/Bitmap;)Landroid/app/Notification$Builder;") \
+  METHOD (setLights,          "setLights",          "(III)Landroid/app/Notification$Builder;") \
+  METHOD (setNumber,          "setNumber",          "(I)Landroid/app/Notification$Builder;") \
+  METHOD (setOngoing,         "setOngoing",         "(Z)Landroid/app/Notification$Builder;") \
+  METHOD (setOnlyAlertOnce,   "setOnlyAlertOnce",   "(Z)Landroid/app/Notification$Builder;") \
+  METHOD (setProgress,        "setProgress",        "(IIZ)Landroid/app/Notification$Builder;") \
+  METHOD (setSmallIcon,       "setSmallIcon",       "(I)Landroid/app/Notification$Builder;") \
+  METHOD (setSound,           "setSound",           "(Landroid/net/Uri;)Landroid/app/Notification$Builder;") \
+  METHOD (setTicker,          "setTicker",          "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;") \
+  METHOD (setVibrate,         "setVibrate",         "([J)Landroid/app/Notification$Builder;") \
+  METHOD (setWhen,            "setWhen",            "(J)Landroid/app/Notification$Builder;") \
+  METHOD (build,              "build",              "()Landroid/app/Notification;") \
+  METHOD (setPriority,        "setPriority",        "(I)Landroid/app/Notification$Builder;") \
+  METHOD (setSubText,         "setSubText",         "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;") \
+  METHOD (setUsesChronometer, "setUsesChronometer", "(Z)Landroid/app/Notification$Builder;") \
+  METHOD (setShowWhen,        "setShowWhen",        "(Z)Landroid/app/Notification$Builder;") \
+  METHOD (addAction,          "addAction",          "(Landroid/app/Notification$Action;)Landroid/app/Notification$Builder;") \
+  METHOD (addExtras,          "addExtras",          "(Landroid/os/Bundle;)Landroid/app/Notification$Builder;") \
+  METHOD (setLocalOnly,       "setLocalOnly",       "(Z)Landroid/app/Notification$Builder;") \
+  METHOD (setGroup,           "setGroup",           "(Ljava/lang/String;)Landroid/app/Notification$Builder;") \
+  METHOD (setGroupSummary,    "setGroupSummary",    "(Z)Landroid/app/Notification$Builder;") \
+  METHOD (setSortKey,         "setSortKey",         "(Ljava/lang/String;)Landroid/app/Notification$Builder;") \
+  METHOD (addPerson,          "addPerson",          "(Ljava/lang/String;)Landroid/app/Notification$Builder;") \
+  METHOD (setCategory,        "setCategory",        "(Ljava/lang/String;)Landroid/app/Notification$Builder;") \
+  METHOD (setColor,           "setColor",           "(I)Landroid/app/Notification$Builder;") \
+  METHOD (setPublicVersion,   "setPublicVersion",   "(Landroid/app/Notification;)Landroid/app/Notification$Builder;") \
+  METHOD (setVisibility,      "setVisibility",      "(I)Landroid/app/Notification$Builder;") \
   METHOD (setChronometerCountDown, "setChronometerCountDown", "(Z)Landroid/app/Notification$Builder;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationBuilderApi24, "android/app/Notification$Builder", 24)
+DECLARE_JNI_CLASS (NotificationBuilderBase, "android/app/Notification$Builder")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -153,21 +127,11 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationBuilderApi26, "android/app/Notificat
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (cancel,    "cancel",    "(Ljava/lang/String;I)V") \
   METHOD (cancelAll, "cancelAll", "()V") \
-  METHOD (notify,    "notify",    "(Ljava/lang/String;ILandroid/app/Notification;)V")
-
-DECLARE_JNI_CLASS (NotificationManagerBase, "android/app/NotificationManager")
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-  METHOD (getActiveNotifications, "getActiveNotifications", "()[Landroid/service/notification/StatusBarNotification;")
-
-DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationManagerApi23, "android/app/NotificationManager", 23)
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (notify,    "notify",    "(Ljava/lang/String;ILandroid/app/Notification;)V") \
+  METHOD (getActiveNotifications, "getActiveNotifications", "()[Landroid/service/notification/StatusBarNotification;") \
   METHOD (areNotificationsEnabled, "areNotificationsEnabled", "()Z")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationManagerApi24, "android/app/NotificationManager", 24)
+DECLARE_JNI_CLASS (NotificationManagerBase, "android/app/NotificationManager")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -180,7 +144,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (NotificationManagerApi26, "android/app/Notificat
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   STATICMETHOD (getResultsFromIntent, "getResultsFromIntent", "(Landroid/content/Intent;)Landroid/os/Bundle;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (RemoteInput, "android/app/RemoteInput", 20)
+DECLARE_JNI_CLASS (RemoteInput, "android/app/RemoteInput")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -190,13 +154,13 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (RemoteInput, "android/app/RemoteInput", 20)
   METHOD (setChoices,            "setChoices",            "([Ljava/lang/CharSequence;)Landroid/app/RemoteInput$Builder;") \
   METHOD (setLabel,              "setLabel",              "(Ljava/lang/CharSequence;)Landroid/app/RemoteInput$Builder;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (RemoteInputBuilder, "android/app/RemoteInput$Builder", 20)
+DECLARE_JNI_CLASS (RemoteInputBuilder, "android/app/RemoteInput$Builder")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (getNotification, "getNotification", "()Landroid/app/Notification;")
 
- DECLARE_JNI_CLASS_WITH_MIN_SDK (StatusBarNotification, "android/service/notification/StatusBarNotification", 23)
+ DECLARE_JNI_CLASS (StatusBarNotification, "android/service/notification/StatusBarNotification")
  #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -287,15 +251,12 @@ struct PushNotifications::Impl
         if (getAndroidSDKVersion() >= 33 && ! RuntimePermissions::isGranted (RuntimePermissions::postNotification))
             return false;
 
-        if (getAndroidSDKVersion() >= 24)
-        {
-            auto* env = getEnv();
+        auto* env = getEnv();
 
-            auto notificationManager = getNotificationManager();
+        auto notificationManager = getNotificationManager();
 
-            if (notificationManager.get() != nullptr)
-                return env->CallBooleanMethod (notificationManager, NotificationManagerApi24.areNotificationsEnabled);
-        }
+        if (notificationManager.get() != nullptr)
+            return env->CallBooleanMethod (notificationManager, NotificationManagerBase.areNotificationsEnabled);
 
         return true;
     }
@@ -347,39 +308,30 @@ struct PushNotifications::Impl
 
     void getDeliveredNotifications() const
     {
-        if (getAndroidSDKVersion() >= 23)
+        auto* env = getEnv();
+
+        Array<Notification> notifications;
+
+        auto notificationManager = getNotificationManager();
+        jassert (notificationManager != nullptr);
+
+        if (notificationManager.get() != nullptr)
         {
-            auto* env = getEnv();
+            auto statusBarNotifications = LocalRef<jobjectArray> ((jobjectArray)env->CallObjectMethod (notificationManager,
+                                                                                                       NotificationManagerBase.getActiveNotifications));
 
-            Array<Notification> notifications;
+            const int numNotifications = env->GetArrayLength (statusBarNotifications.get());
 
-            auto notificationManager = getNotificationManager();
-            jassert (notificationManager != nullptr);
-
-            if (notificationManager.get() != nullptr)
+            for (int i = 0; i < numNotifications; ++i)
             {
-                auto statusBarNotifications = LocalRef<jobjectArray> ((jobjectArray)env->CallObjectMethod (notificationManager,
-                                                                                                           NotificationManagerApi23.getActiveNotifications));
+                auto statusBarNotification = LocalRef<jobject> (env->GetObjectArrayElement (statusBarNotifications.get(), (jsize) i));
+                auto notification = LocalRef<jobject> (env->CallObjectMethod (statusBarNotification, StatusBarNotification.getNotification));
 
-                const int numNotifications = env->GetArrayLength (statusBarNotifications.get());
-
-                for (int i = 0; i < numNotifications; ++i)
-                {
-                    auto statusBarNotification = LocalRef<jobject> (env->GetObjectArrayElement (statusBarNotifications.get(), (jsize) i));
-                    auto notification = LocalRef<jobject> (env->CallObjectMethod (statusBarNotification, StatusBarNotification.getNotification));
-
-                    notifications.add (javaNotificationToJuceNotification (notification));
-                }
+                notifications.add (javaNotificationToJuceNotification (notification));
             }
+        }
 
-            owner.listeners.call ([&] (Listener& l) { l.deliveredNotificationsListReceived (notifications); });
-        }
-        else
-        {
-            // Not supported on this platform
-            jassertfalse;
-            owner.listeners.call ([] (Listener& l) { l.deliveredNotificationsListReceived ({}); });
-        }
+        owner.listeners.call ([&] (Listener& l) { l.deliveredNotificationsListReceived (notifications); });
     }
 
     void notifyListenersAboutLocalNotification (const LocalRef<jobject>& intent)
@@ -643,7 +595,7 @@ struct PushNotifications::Impl
         if (notificationBuilder == nullptr)
             return notificationBuilder;
 
-        return LocalRef<jobject> (env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.build));
+        return LocalRef<jobject> (env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.build));
     }
 
     static LocalRef<jobject> createNotificationBuilder (const Notification& n)
@@ -737,8 +689,8 @@ struct PushNotifications::Impl
             if (publicNotificationBuilder == nullptr)
                 return {};
 
-            auto publicVersion = LocalRef<jobject> (env->CallObjectMethod (publicNotificationBuilder, NotificationBuilderApi16.build));
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi21.setPublicVersion, publicVersion.get());
+            auto publicVersion = LocalRef<jobject> (env->CallObjectMethod (publicNotificationBuilder, NotificationBuilderBase.build));
+            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setPublicVersion, publicVersion.get());
         }
 
         return notificationBuilder;
@@ -863,57 +815,48 @@ struct PushNotifications::Impl
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setOnlyAlertOnce, n.alertOnlyOnce);
 
         if (n.subtitle.isNotEmpty())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.setSubText, javaString (n.subtitle).get());
+            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSubText, javaString (n.subtitle).get());
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.setPriority, n.priority);
-
-        if (getAndroidSDKVersion() < 24)
-        {
-            const bool useChronometer = n.timestampVisibility == Notification::chronometer;
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.setUsesChronometer, useChronometer);
-        }
+        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setPriority, n.priority);
 
         const bool showTimeStamp = n.timestampVisibility != Notification::off;
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderApi17.setShowWhen, showTimeStamp);
+        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setShowWhen, showTimeStamp);
 
         if (n.groupId.isNotEmpty())
         {
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi20.setGroup, javaString (n.groupId).get());
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi20.setGroupSummary, n.groupSummary);
+            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setGroup, javaString (n.groupId).get());
+            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setGroupSummary, n.groupSummary);
         }
 
         if (n.groupSortKey.isNotEmpty())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi20.setSortKey, javaString (n.groupSortKey).get());
+            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSortKey, javaString (n.groupSortKey).get());
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderApi20.setLocalOnly, n.localOnly);
+        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setLocalOnly, n.localOnly);
 
         auto extras = LocalRef<jobject> (env->NewObject (AndroidBundle, AndroidBundle.constructor));
 
         env->CallVoidMethod (extras, AndroidBundle.putBundle, javaString ("notificationData").get(),
                              juceNotificationToBundle (n).get());
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderApi20.addExtras, extras.get());
+        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.addExtras, extras.get());
 
         if (n.person.isNotEmpty())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi21.addPerson, javaString (n.person).get());
+            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.addPerson, javaString (n.person).get());
 
         auto categoryString = typeToCategory (n.type);
         if (categoryString.isNotEmpty())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi21.setCategory, javaString (categoryString).get());
+            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setCategory, javaString (categoryString).get());
 
         if (n.accentColour != Colour())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi21.setColor, n.accentColour.getARGB());
+            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setColor, n.accentColour.getARGB());
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderApi21.setVisibility, n.lockScreenAppearance);
+        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setVisibility, n.lockScreenAppearance);
 
-        if (getAndroidSDKVersion() >= 24)
-        {
-            const bool useChronometer = n.timestampVisibility == Notification::chronometer;
-            const bool useCountDownChronometer = n.timestampVisibility == Notification::countDownChronometer;
+        const bool useChronometer = n.timestampVisibility == Notification::chronometer;
+        const bool useCountDownChronometer = n.timestampVisibility == Notification::countDownChronometer;
 
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi24.setChronometerCountDown, useCountDownChronometer);
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi16.setUsesChronometer, useChronometer | useCountDownChronometer);
-        }
+        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setChronometerCountDown, useCountDownChronometer);
+        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setUsesChronometer, useChronometer | useCountDownChronometer);
 
         if (getAndroidSDKVersion() >= 26)
         {
@@ -1045,7 +988,7 @@ struct PushNotifications::Impl
                                        env->CallObjectMethod (remoteInputBuilder, RemoteInputBuilder.build));
             }
 
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi20.addAction,
+            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.addAction,
                                    env->CallObjectMethod (actionBuilder, NotificationActionBuilder.build));
         }
 
