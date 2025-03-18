@@ -8,7 +8,7 @@ env:
 jobs:
   juce-private-nightly-trigger:
     if: github.repository == 'juce-framework/JUCE-dev'
-    name: JUCE Push Trigger
+    name: JUCE Nightly Trigger
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.2.2

@@ -38,6 +38,7 @@ jobs:
           context: CI
           targetUrl: ${{ env.target_url }}
   build:
+    if: ${{ always() && (needs.setup.result == 'success' || needs.setup.result == 'skipped') }}
     needs: [setup]
     name: .
     # Not having the ability to do a dynamic 'uses' call is a real pain. To
@@ -78,7 +79,7 @@ jobs:
           description: ${{ env.result }}
           targetUrl: ${{ env.target_url }}
   notify:
-    if: ${{ always() && !contains(needs.*.result, 'cancelled') && inputs.nightly-targets == '[]' }}
+    if: ${{ always() && !contains(needs.*.result, 'cancelled') && !startsWith(inputs.triggerer, 'Nightly Build') }}
     needs: [setup, build, deploy, docs]
     name: Notify
     uses: juce-framework/JUCE-utils/.github/workflows/notify.yml@master
