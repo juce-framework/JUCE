@@ -34,7 +34,8 @@
 
 namespace juce
 {
-
+/*  Resulting pages are arranged in rows from left to right, then top to bottom
+*/
 static std::vector<Direct2DPixelDataPage> makePages (ComSmartPtr<ID2D1Device1> device,
                                                      ImagePixelData::Ptr backingData,
                                                      bool needsClear)
@@ -284,6 +285,25 @@ auto Direct2DPixelDataPages::getPages() -> Span<const Page>
     return pages;
 }
 
+std::optional<Direct2DPixelDataPage> Direct2DPixelDataPages::getPageContainingPoint (Point<int> pt) const
+{
+    if (pages.empty() || backingData == nullptr || backingData->width <= 0)
+        return {};
+
+    const auto maxPageBounds = pages.front().getBounds();
+    const auto pageX = pt.x / maxPageBounds.getWidth();
+    const auto pageY = pt.y / maxPageBounds.getHeight();
+    const auto pagesPerRow = 1 + ((backingData->width - 1) / maxPageBounds.getWidth());
+
+    jassert (pages.size() % (size_t) pagesPerRow == 0);
+
+    const auto result = pages[(size_t) (pageX + (pageY * pagesPerRow))];
+
+    jassert (result.getBounds().contains (pt));
+
+    return result;
+}
+
 //==============================================================================
 Direct2DPixelData::Direct2DPixelData (ImagePixelData::Ptr ptr, State initialState)
     : ImagePixelData { ptr->pixelFormat, ptr->width, ptr->height },
@@ -440,6 +460,19 @@ struct Direct2DPixelData::Context : public Direct2DImageContext
     bool frameStarted = false;
 };
 
+ComSmartPtr<ID2D1Device1> Direct2DPixelData::getMostRelevantDevice()
+{
+    if (mostRecentDevice != nullptr)
+        return mostRecentDevice;
+
+    const auto adapter = directX->adapters.getDefaultAdapter();
+
+    if (adapter == nullptr)
+        return nullptr;
+
+    return adapter->direct2DDevice;
+}
+
 auto Direct2DPixelData::createNativeContext() -> std::unique_ptr<Context>
 {
     if (state == State::drawing)
@@ -447,18 +480,7 @@ auto Direct2DPixelData::createNativeContext() -> std::unique_ptr<Context>
 
     sendDataChangeMessage();
 
-    const auto device = std::invoke ([this]() -> ComSmartPtr<ID2D1Device1>
-    {
-        if (mostRecentDevice != nullptr)
-            return mostRecentDevice;
-
-        const auto adapter = directX->adapters.getDefaultAdapter();
-
-        if (adapter == nullptr)
-            return nullptr;
-
-        return adapter->direct2DDevice;
-    });
+    const auto device = getMostRelevantDevice();
 
     if (device == nullptr)
         return nullptr;
@@ -488,6 +510,157 @@ auto Direct2DPixelData::createNativeContext() -> std::unique_ptr<Context>
             i->second.markOutdated();
 
     return std::make_unique<Context> (this, context, pages.front().bitmap);
+}
+
+struct ScopedBackupDisabler
+{
+    explicit ScopedBackupDisabler (Direct2DPixelData& pd)
+        : ScopedBackupDisabler (*pd.getBackupExtensions())
+    {
+        jassert (pd.getBackupExtensions() != nullptr);
+    }
+
+    explicit ScopedBackupDisabler (ImagePixelDataBackupExtensions& ext)
+        : extensions (ext)
+    {
+        extensions.setBackupEnabled (false);
+    }
+
+
+    ~ScopedBackupDisabler()
+    {
+        extensions.setBackupEnabled (initialState);
+    }
+
+private:
+    ImagePixelDataBackupExtensions& extensions;
+    bool initialState = extensions.isBackupEnabled();
+};
+
+void Direct2DPixelData::moveValidatedImageSection (Point<int> destTopLeft, Rectangle<int> sourceRect)
+{
+    auto device = getMostRelevantDevice();
+
+    const auto shouldDoSoftwareCopy = std::invoke ([&]
+    {
+        if (auto exts = getBackupExtensions(); exts != nullptr && ! exts->isBackupEnabled())
+            return true;
+
+        if (device == nullptr || getPagesForDevice (device).empty())
+            return true;
+
+        return false;
+    });
+
+    if (shouldDoSoftwareCopy)
+    {
+        moveValidatedImageSectionInSoftware (*this, destTopLeft, sourceRect);
+        return;
+    }
+
+    Ptr staging = new Direct2DPixelData { pixelFormat,
+                                          sourceRect.getWidth(),
+                                          sourceRect.getHeight(),
+                                          false };
+
+    const ScopedBackupDisabler thisScope { *this };
+    const ScopedBackupDisabler stagingScope { *staging };
+
+    copyPages (device, *staging, *this, {}, sourceRect);
+    copyPages (device, *this, *staging, destTopLeft, sourceRect.withPosition ({}));
+}
+
+template <typename Pages, typename ProcessSubsection>
+static void forEachPageInRect (Rectangle<int> rect,
+                               Pages&& pages,
+                               ProcessSubsection&& processSubsection)
+{
+    for (auto srcY = rect.getY(); srcY < rect.getBottom();)
+    {
+        for (auto srcX = rect.getX(); srcX < rect.getRight();)
+        {
+            const auto srcPage = getPageForPoint (pages, Point { srcX, srcY });
+
+            if (! srcPage.has_value())
+            {
+                jassertfalse;
+                return;
+            }
+
+            const auto srcPageBounds = getBounds (*srcPage);
+            const auto intersection = srcPageBounds.getIntersection (rect);
+
+            processSubsection (*srcPage, intersection - srcPageBounds.getTopLeft());
+
+            srcX = srcPageBounds.getRight();
+        }
+
+        srcY = getBounds (*getPageForPoint (pages, Point { rect.getX(), srcY })).getBottom();
+    }
+}
+
+template <typename Pages, typename DoCopy>
+static void copyAcrossMultiplePages (Pages&& dstPages,
+                                     Point<int> dst,
+                                     Pages&& srcPages,
+                                     Rectangle<int> src,
+                                     DoCopy&& doCopy)
+{
+    const auto globalOffset = dst - src.getTopLeft();
+
+    forEachPageInRect (src, srcPages, [&] (auto& srcPage, Rectangle<int> rectInSrcPage)
+    {
+        const auto srcPageTopLeft = getBounds (srcPage).getTopLeft();
+        const auto srcRectSectionInSrc = rectInSrcPage + srcPageTopLeft;
+        const auto srcRectSectionInDst = srcRectSectionInSrc + globalOffset;
+
+        forEachPageInRect (srcRectSectionInDst, dstPages, [&] (auto& dstPage, Rectangle<int> rectInDstPage)
+        {
+            const auto dstRectSectionInDst = rectInDstPage + getBounds (dstPage).getTopLeft();
+            const auto dstRectSectionInSrc = dstRectSectionInDst - globalOffset;
+            const auto dstRectSectionInSrcPage = dstRectSectionInSrc - srcPageTopLeft;
+
+            doCopy (dstPage, rectInDstPage.getTopLeft(), srcPage, dstRectSectionInSrcPage);
+        });
+    });
+}
+
+static std::optional<Direct2DPixelDataPage> getPageForPoint (const Direct2DPixelDataPages& pages,
+                                                             Point<int> pt)
+{
+    return pages.getPageContainingPoint (pt);
+}
+
+static Rectangle<int> getBounds (const Direct2DPixelDataPage& p)
+{
+    return p.getBounds();
+}
+
+static void copyDstFromSrc (const Direct2DPixelDataPage& dst,
+                            Point<int> dstPoint,
+                            const Direct2DPixelDataPage& src,
+                            Rectangle<int> srcRect)
+{
+    jassert (! srcRect.isEmpty());
+    jassert (dst.bitmap != src.bitmap);
+
+    const auto sourceRect = D2DUtilities::toRECT_U (srcRect);
+    const auto destPoint  = D2DUtilities::toPOINT_2U (dstPoint);
+
+    dst.bitmap->CopyFromBitmap (&destPoint, src.bitmap, &sourceRect);
+}
+
+void Direct2DPixelData::copyPages (ComSmartPtr<ID2D1Device1> deviceToUse,
+                                   Direct2DPixelData& dstData,
+                                   Direct2DPixelData& srcData,
+                                   Point<int> dstPoint,
+                                   Rectangle<int> srcRect)
+{
+    copyAcrossMultiplePages (dstData.getPagesStructForDevice (deviceToUse),
+                             dstPoint,
+                             srcData.getPagesStructForDevice (deviceToUse),
+                             srcRect,
+                             copyDstFromSrc);
 }
 
 std::unique_ptr<LowLevelGraphicsContext> Direct2DPixelData::createLowLevelContext()
@@ -743,9 +916,14 @@ void Direct2DPixelData::desaturateInArea (Rectangle<int> b)
     });
 }
 
+Direct2DPixelDataPages& Direct2DPixelData::getPagesStructForDevice (ComSmartPtr<ID2D1Device1> device)
+{
+    return getIteratorForDevice (device)->second;
+}
+
 auto Direct2DPixelData::getPagesForDevice (ComSmartPtr<ID2D1Device1> device) -> Span<const Page>
 {
-    return getIteratorForDevice (device)->second.getPages();
+    return getPagesStructForDevice (device).getPages();
 }
 
 void Direct2DPixelData::setBackupEnabled (bool x)
@@ -821,6 +999,69 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
+namespace ImageTestHelperTypes
+{
+    /*  A stand-in for Direct2DPixelDataPage */
+    struct TestPage
+    {
+        Rectangle<int> bounds;
+    };
+
+    /*  A stand-in for Direct2DPixelDataPages */
+    struct TestPages
+    {
+        std::vector<TestPage> pages;
+        int width, height;
+    };
+
+    /*  Creates an instance of TestPages with arbitrary dimensions */
+    static TestPages createTestPages (int totalW, int totalH, int pageW, int pageH)
+    {
+        TestPages result { {}, totalW, totalH };
+
+        for (auto y = 0; y < totalH; y += pageH)
+        {
+            for (auto x = 0; x < totalW; x += pageW)
+            {
+                result.pages.push_back ({ Rectangle { x,
+                                                      y,
+                                                      jmin (totalW - x, pageW),
+                                                      jmin (totalH - y, pageH) } });
+            }
+        }
+
+        return result;
+    }
+
+    /*  Used by forEachPageInRect, copyAcrossMultiplePages. Located using argument-dependent lookup. */
+    static Rectangle<int> getBounds (const TestPage& p)
+    {
+        return p.bounds;
+    }
+
+    /*  Used by forEachPageInRect, copyAcrossMultiplePages. Located using argument-dependent lookup. */
+    static std::optional<TestPage> getPageForPoint (const TestPages& testPages, Point<int> pt)
+    {
+        auto& pages = testPages.pages;
+
+        if (pages.empty())
+            return {};
+
+        const auto maxPageBounds = getBounds (pages.front());
+        const auto pageX = pt.x / maxPageBounds.getWidth();
+        const auto pageY = pt.y / maxPageBounds.getHeight();
+        const auto pagesPerRow = 1 + ((testPages.width - 1) / maxPageBounds.getWidth());
+
+        jassert (pages.size() % (size_t) pagesPerRow == 0);
+
+        const auto result = pages[(size_t) (pageX + (pageY * pagesPerRow))];
+
+        jassert (getBounds (result).contains (pt));
+
+        return result;
+    }
+}
+
 class Direct2DImageUnitTest final : public UnitTest
 {
 public:
@@ -883,6 +1124,79 @@ public:
         random = getRandom();
 
         constexpr auto multiPageSize = (1 << 14) + 512 + 3;
+
+        beginTest ("forEachPageInRect");
+        {
+            const auto pages = ImageTestHelperTypes::createTestPages (1000, 2000, 37, 51);
+            const Rectangle innerArea { 100, 100, 500, 500 };
+
+            RectangleList<int> rectangles;
+
+            // Try adding the area of each page to the rectangle list
+            forEachPageInRect (innerArea, pages, [&] (auto& page, Rectangle<int> rectInPage)
+            {
+                const auto rect = rectInPage + getBounds (page).getTopLeft();
+                // No area should overlap with any previously-added area
+                expect (! rectangles.intersectsRectangle (rect));
+                rectangles.add (rect);
+            });
+
+            rectangles.consolidate();
+
+            // After the call, we should have covered the entire area of the passed-in rect
+            expect (rectangles.getNumRectangles() == 1);
+            expect (rectangles.getRectangle (0) == innerArea);
+        }
+
+        beginTest ("copyAcrossMultiplePages");
+        {
+            // Create some test pages with different dimensions
+            // These numbers aren't too important, I'm using primes to make sure there are lots of
+            // unique intersections
+            const auto srcPages = ImageTestHelperTypes::createTestPages (1229, 1231, 73, 79);
+            const auto dstPages = ImageTestHelperTypes::createTestPages (1237, 1249, 83, 89);
+            const Rectangle srcRect { 192, 199, 383, 389 };
+            const Point dstPoint { 599, 601 };
+
+            RectangleList<int> coveredSrcArea, coveredDstArea;
+
+            // For each copied region, keep track of the src and dst areas we've covered
+            const auto doCopy = [&] (auto& dst,
+                                     Point<int> dstPt, // relative to dst
+                                     auto& src,
+                                     Rectangle<int> srcRc) // relative to src
+            {
+                // The destination rectangle, relative to the destination page's bounds
+                const auto dstRect = srcRc.withPosition (dstPt);
+
+                // The src and dst rectangles must fall entirely within their respective pages
+                expect (getBounds (src).withPosition ({}).contains (srcRc));
+                expect (getBounds (dst).withPosition ({}).contains (dstRect));
+
+                // We shouldn't have already visited any part of this srcRc
+                const auto globalSrcRect = srcRc + getBounds (src).getTopLeft();
+                expect (! coveredSrcArea.intersectsRectangle (globalSrcRect));
+                coveredSrcArea.add (globalSrcRect);
+
+                // We shouldn't have already visited any part of this dstRect
+                const auto globalDstRect = dstRect + getBounds (dst).getTopLeft();
+                expect (! coveredDstArea.intersectsRectangle (globalDstRect));
+                coveredDstArea.add (globalDstRect);
+            };
+
+            copyAcrossMultiplePages (dstPages, dstPoint, srcPages, srcRect, doCopy);
+
+            coveredSrcArea.consolidate();
+            coveredDstArea.consolidate();
+
+            // After copying all subregions, we should have visited the full srcRect and dstRect
+
+            expect (coveredSrcArea.getNumRectangles() == 1);
+            expect (coveredSrcArea.getRectangle (0) == srcRect);
+
+            expect (coveredDstArea.getNumRectangles() == 1);
+            expect (coveredDstArea.getRectangle (0) == srcRect.withPosition (dstPoint));
+        }
 
         beginTest ("Direct2DImageUnitTest");
         {
