@@ -2156,6 +2156,14 @@ std::pair<Point<float>, float> TextEditor::getCursorEdge (const CaretState& temp
     if (textStorage->isEmpty())
         return { { getJustificationOffsetX(), 0.0f }, currentFont.getHeight() };
 
+    if (visualIndex == getTotalNumChars())
+    {
+        const auto& lastParagraph = textStorage->back().value;
+
+        return { { getJustificationOffsetX(), lastParagraph->getTop() + lastParagraph->getHeight() },
+                 currentFont.getHeight() };
+    }
+
     return getTextSelectionEdge (visualIndex, tempCaret.getEdge());
 }
 
@@ -2280,17 +2288,19 @@ TextEditor::CaretState TextEditor::CaretState::withPreferredEdge (Edge newEdge) 
 
 void TextEditor::CaretState::updateEdge()
 {
-    jassert (0 <= position && position <= owner.getTotalNumChars());
+    // The position can be temporarily outside the current text's bounds. It's the TextEditor's
+    // responsibility to update the caret position after editing operations.
+    const auto clampedPosition = std::clamp (position, 0, owner.getTotalNumChars());
 
-    if (position == 0)
+    if (clampedPosition == 0)
     {
         edge = Edge::leading;
     }
-    else if (owner.getText()[position - 1] == '\n')
+    else if (owner.getText()[clampedPosition - 1] == '\n')
     {
         edge = Edge::leading;
     }
-    else if (position == owner.getTotalNumChars())
+    else if (clampedPosition == owner.getTotalNumChars())
     {
         edge = Edge::trailing;
     }
