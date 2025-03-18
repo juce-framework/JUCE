@@ -53,6 +53,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type",
                                      "-Wunsafe-loop-optimizations",
                                      "-Wformat-overflow",
                                      "-Woverflow",
+                                     "-Wnontrivial-memcall",
                                      "-Wimplicit-fallthrough")
 
 JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
