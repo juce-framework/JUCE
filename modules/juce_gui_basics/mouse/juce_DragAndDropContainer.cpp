@@ -330,28 +330,31 @@ private:
                 return p->getLocalPoint (nullptr, screenPos - imageOffset);
 
            #if JUCE_WINDOWS
-            // On Windows, the mouse position is continuous in physical pixels across screen boundaries.
-            // i.e. if two screens are set to different scale factors, when the mouse moves horizontally
-            // between those screens, the mouse's physical y coordinate will be preserved, and if
-            // the mouse moves vertically between screens its physical x coordinate will be preserved.
+            if (JUCEApplicationBase::isStandaloneApp())
+            {
+                // On Windows, the mouse position is continuous in physical pixels across screen boundaries.
+                // i.e. if two screens are set to different scale factors, when the mouse moves horizontally
+                // between those screens, the mouse's physical y coordinate will be preserved, and if
+                // the mouse moves vertically between screens its physical x coordinate will be preserved.
 
-            // To avoid the dragged image detaching from the mouse, compute the new top left position
-            // in physical coords and then convert back to logical.
-            // If we were to stay in logical coordinates the whole time, the image may detach from the
-            // mouse because the mouse does not move continuously in logical coordinate space.
+                // To avoid the dragged image detaching from the mouse, compute the new top left position
+                // in physical coords and then convert back to logical.
+                // If we were to stay in logical coordinates the whole time, the image may detach from the
+                // mouse because the mouse does not move continuously in logical coordinate space.
 
-            const auto& displays = Desktop::getInstance().getDisplays();
-            const auto physicalPos = displays.logicalToPhysical (screenPos);
+                const auto& displays = Desktop::getInstance().getDisplays();
+                const auto physicalPos = displays.logicalToPhysical (screenPos);
 
-            float scale = 1.0f;
+                float scale = 1.0f;
 
-            if (auto* p = getPeer())
-                scale = (float) p->getPlatformScaleFactor();
+                if (auto* p = getPeer())
+                    scale = (float) p->getPlatformScaleFactor();
 
-            return displays.physicalToLogical (physicalPos - (imageOffset * scale));
-           #else
-            return screenPos - imageOffset;
+                return displays.physicalToLogical (physicalPos - (imageOffset * scale));
+            }
            #endif
+
+            return screenPos - imageOffset;
         }));
     }
 
