@@ -537,6 +537,28 @@ private:
     bool initialState = extensions.isBackupEnabled();
 };
 
+ImagePixelData::Ptr Direct2DPixelData::clone()
+{
+    auto device = getMostRelevantDevice();
+    auto* exts = getBackupExtensions();
+
+    if (device == nullptr || exts == nullptr || exts->isBackupEnabled())
+        return new Direct2DPixelData { backingData->clone(), State::drawn };
+
+    Ptr clonedPixelData = new Direct2DPixelData { pixelFormat, width, height, false };
+
+    const ScopedBackupDisabler scope { *this };
+    const ScopedBackupDisabler clonedScope { *clonedPixelData };
+
+    copyPages (device,
+               *clonedPixelData,
+               *this,
+               { 0, 0 },
+               { 0, 0, width, height });
+
+    return clonedPixelData;
+}
+
 void Direct2DPixelData::moveValidatedImageSection (Point<int> destTopLeft, Rectangle<int> sourceRect)
 {
     auto device = getMostRelevantDevice();

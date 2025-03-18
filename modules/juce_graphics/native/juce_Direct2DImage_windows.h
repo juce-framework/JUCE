@@ -138,13 +138,8 @@ public:
 
     ~Direct2DPixelData() override;
 
-    /*  Creates new software image storage with content matching the content of this image.
-        Does not copy any hardware resources.
-    */
-    ImagePixelData::Ptr clone() override
-    {
-        return new Direct2DPixelData (backingData->clone(), State::drawn);
-    }
+    /*  Creates new image storage with content matching the content of this image. */
+    ImagePixelData::Ptr clone() override;
 
     std::unique_ptr<ImageType> createType() const override
     {
