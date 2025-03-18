@@ -324,9 +324,14 @@ struct D2DUtilities
         return { c.getFloatRed(), c.getFloatGreen(), c.getFloatBlue(), c.getFloatAlpha() };
     }
 
-    static D2D1::Matrix3x2F transformToMatrix (const AffineTransform& transform)
+    static D2D1::Matrix3x2F transformToMatrix (const AffineTransform& t)
     {
-        return { transform.mat00, transform.mat10, transform.mat01, transform.mat11, transform.mat02, transform.mat12 };
+        return { t.mat00, t.mat10, t.mat01, t.mat11, t.mat02, t.mat12 };
+    }
+
+    static AffineTransform matrixToTransform (const D2D1_MATRIX_3X2_F& m)
+    {
+        return { m._11, m._21, m._31, m._12, m._22, m._32 };
     }
 
     static Rectangle<int> rectFromSize (D2D1_SIZE_U s)

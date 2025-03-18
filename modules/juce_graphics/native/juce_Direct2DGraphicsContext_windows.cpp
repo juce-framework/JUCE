@@ -1681,17 +1681,18 @@ void Direct2DGraphicsContext::drawGlyphs (Span<const uint16_t> glyphNumbers,
         return;
 
     const auto fontScale = font.getHorizontalScale();
-    const auto scaledTransform = AffineTransform::scale (fontScale, 1.0f).followedBy (transform);
-    const auto glyphRunTransform = scaledTransform.followedBy (currentState->currentTransform.getTransform());
-    const auto onlyTranslated = glyphRunTransform.isOnlyTranslation();
+    const auto textTransform = AffineTransform::scale (fontScale, 1.0f).followedBy (transform);
+    const auto worldTransform = currentState->currentTransform.getTransform();
+    const auto textAndWorldTransform = textTransform.followedBy (worldTransform);
+    const auto onlyTranslated = textAndWorldTransform.isOnlyTranslation();
 
     const auto fillTransform = onlyTranslated
                              ? SavedState::BrushTransformFlags::applyWorldAndFillTypeTransforms
                              : SavedState::BrushTransformFlags::applyFillTypeTransform;
 
-    const auto brush = currentState->getBrush (fillTransform);
+    auto brush = currentState->getBrush (fillTransform);
 
-    if (! brush)
+    if (brush == nullptr)
         return;
 
     applyPendingClipList();
@@ -1699,9 +1700,17 @@ void Direct2DGraphicsContext::drawGlyphs (Span<const uint16_t> glyphNumbers,
     D2D1_POINT_2F baselineOrigin { 0.0f, 0.0f };
 
     if (onlyTranslated)
-        baselineOrigin = { glyphRunTransform.getTranslationX(), glyphRunTransform.getTranslationY() };
+    {
+        baselineOrigin = { textAndWorldTransform.getTranslationX(), textAndWorldTransform.getTranslationY() };
+    }
     else
-        getPimpl()->setDeviceContextTransform (glyphRunTransform);
+    {
+        D2D1::Matrix3x2F matrix{};
+        brush->GetTransform (&matrix);
+        const auto brushTransform = D2DUtilities::matrixToTransform (matrix);
+        brush->SetTransform (D2DUtilities::transformToMatrix (brushTransform.followedBy (textTransform.inverted())));
+        getPimpl()->setDeviceContextTransform (textAndWorldTransform);
+    }
 
     auto& run = getPimpl()->glyphRun;
     run.replace (positions, fontScale);
