@@ -107,6 +107,8 @@ public:
             [intents addObject: fileAccessIntent];
         }
 
+        auto strong = shared_from_this();
+
         [fileCoordinator coordinateAccessWithIntents: intents queue: [NSOperationQueue mainQueue] byAccessor: ^(NSError* err)
         {
             if (err != nil)
@@ -148,7 +150,7 @@ public:
                 result.add (std::move (juceUrl));
             }
 
-            passResultsToInitiator (std::move (result));
+            strong->passResultsToInitiator (std::move (result));
         }];
     }
 
