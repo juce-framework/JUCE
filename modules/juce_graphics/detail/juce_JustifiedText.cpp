@@ -108,20 +108,31 @@ static float getMainAxisLineLength (Span<const ShapedGlyph> glyphs, bool trailin
 
 struct MainAxisLineAlignment
 {
-    float anchor{}, extraWhitespaceAdvance{}, effectiveLineLength;
+    float anchor{}, extraWhitespaceAdvance{}, effectiveLineLength{};
     Range<int64> stretchableWhitespaces;
 };
 
 static MainAxisLineAlignment getMainAxisLineAlignment (Justification justification,
                                                        Span<const ShapedGlyph> glyphs,
                                                        LineLength lineLength,
-                                                       float maxWidth,
+                                                       std::optional<float> maxWidthOpt,
+                                                       std::optional<float> alignmentWidthOpt,
                                                        bool trailingWhitespacesShouldFit)
 {
     const auto effectiveLineLength = (trailingWhitespacesShouldFit ? lineLength.total
                                                                    : lineLength.withoutTrailingWhitespaces);
 
-    const auto tooLong = maxWidth + maxWidthTolerance < effectiveLineLength;
+    const auto alignmentWidth = alignmentWidthOpt.value_or (maxWidthOpt.value_or (0.0f));
+    const auto tooLong = alignmentWidth + maxWidthTolerance < effectiveLineLength;
+
+    MainAxisLineAlignment result;
+    result.effectiveLineLength = effectiveLineLength;
+
+    // The alignment width opt is supporting the TextEditor use-case where all text remains visible
+    // with scrolling, even if longer than the alignment width. We don't need to worry about the
+    // front of and RTL text being visually truncated, because nothing is truncated.
+    if (tooLong && alignmentWidthOpt.has_value())
+        return result;
 
     const auto mainAxisLineOffset = [&]
     {
@@ -135,19 +146,21 @@ static MainAxisLineAlignment getMainAxisLineAlignment (Justification justificati
                 return glyphs.front().cluster <= glyphs.back().cluster;
             }();
 
+            // We don't have to align LTR text, but we need to ensure that it's the logical back of
+            // RTL text that falls outside the bounds.
             if (approximateIsLeftToRight)
                 return 0.0f;
 
-            return maxWidth - effectiveLineLength;
+            return alignmentWidth - effectiveLineLength;
         }
 
         if (justification.testFlags (Justification::horizontallyCentred))
         {
-            return (maxWidth - lineLength.withoutTrailingWhitespaces) / 2.0f;
+            return (alignmentWidth - lineLength.withoutTrailingWhitespaces) / 2.0f;
         }
 
         if (justification.testFlags (Justification::right))
-            return maxWidth - effectiveLineLength;
+            return alignmentWidth - effectiveLineLength;
 
         return 0.0f;
     }();
@@ -171,7 +184,7 @@ static MainAxisLineAlignment getMainAxisLineAlignment (Justification justificati
                                                 - numWhitespaces.leading
                                                 - numWhitespaces.trailing;
 
-        return numWhitespacesBetweenWords > 0 ? (maxWidth - effectiveLineLength) / (float) numWhitespacesBetweenWords
+        return numWhitespacesBetweenWords > 0 ? (alignmentWidth - effectiveLineLength) / (float) numWhitespacesBetweenWords
                                               : 0.0f;
     }();
 
@@ -246,13 +259,11 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
 
         auto m = [&]
         {
-            if (! options.getMaxWidth().has_value())
-                return MainAxisLineAlignment{};
-
             return getMainAxisLineAlignment (options.getJustification(),
                                              glyphs,
                                              lineLength,
-                                             *options.getMaxWidth(),
+                                             options.getMaxWidth(),
+                                             options.getAlignmentWidth(),
                                              options.getTrailingWhitespacesShouldFit());
         }();
 
@@ -442,7 +453,6 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
         if (cutoffAtFront)
             pushEllipsisGlyphs();
 
-
         const auto& range = shapedText.getGlyphs (lastLineVisibleRange);
         result.insert (result.end(), range.begin(), range.end());
 
@@ -454,13 +464,11 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
 
     const auto realign = [&]
     {
-        if (! options.getMaxWidth().has_value())
-            return MainAxisLineAlignment{};
-
         return getMainAxisLineAlignment (options.getJustification(),
                                          lineWithEllipsisGlyphs,
                                          getMainAxisLineLength (lineWithEllipsisGlyphs),
-                                         *options.getMaxWidth(),
+                                         options.getMaxWidth(),
+                                         options.getAlignmentWidth(),
                                          options.getTrailingWhitespacesShouldFit());
     }();
 

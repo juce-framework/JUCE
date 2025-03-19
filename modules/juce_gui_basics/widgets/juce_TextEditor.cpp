@@ -917,11 +917,15 @@ std::pair<Point<float>, float> TextEditor::getTextSelectionEdge (int index, Edge
 
 void TextEditor::updateBaseShapedTextOptions()
 {
-    textStorage->setBaseShapedTextOptions (detail::ShapedText::Options{}
-                                               .withMaxWidth ((float) getWordWrapWidth())
-                                               .withTrailingWhitespacesShouldFit (true)
-                                               .withJustification (getJustificationType().getOnlyHorizontalFlags()),
-                                           passwordCharacter);
+    auto options = detail::ShapedText::Options{}.withTrailingWhitespacesShouldFit (true)
+                                                .withJustification (getJustificationType().getOnlyHorizontalFlags());
+
+    if (wordWrap)
+        options = options.withMaxWidth ((float) getMaximumTextWidth());
+    else
+        options = options.withAlignmentWidth ((float) getMaximumTextWidth());
+
+    textStorage->setBaseShapedTextOptions (options, passwordCharacter);
 }
 
 static auto asInt64Range (Range<int> r)

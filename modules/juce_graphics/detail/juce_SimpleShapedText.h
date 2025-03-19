@@ -50,6 +50,7 @@ private:
         return std::tie (justification,
                          readingDir,
                          maxWidth,
+                         alignmentWidth,
                          height,
                          fontsForRange,
                          language,
@@ -73,9 +74,43 @@ public:
         return withMember (*this, &ShapedTextOptions::justification, x);
     }
 
+    /*  This option will use soft wrapping for lines that are longer than the specified value,
+        and it will also align each line to this width, using the Justification provided in
+        withJustification.
+
+        The alignment width can be overriden using withAlignmentWidth, but currently we only need
+        to do this for the TextEditor.
+    */
     [[nodiscard]] ShapedTextOptions withMaxWidth (float x) const
     {
         return withMember (*this, &ShapedTextOptions::maxWidth, x);
+    }
+
+    /*  With this option each line will be aligned only if it's shorter or equal to the alignment
+        width. Otherwise, the line's x anchor will be 0.0f. This is in contrast to using
+        withMaxWidth only, which will modify the x anchor of RTL lines that are too long, to ensure
+        that it's the logical end of the text that falls outside the visible bounds.
+
+        The alignment width is also a distinct value from the value used for soft wrapping which is
+        specified using withMaxWidth.
+
+        This option is specifically meant to support an existing TextEditor behaviour, where text
+        can be aligned even when word wrapping is off. You probably don't need to use this function,
+        unless you want to reproduce the particular behaviour seen in the TextEditor, and should
+        only use withMaxWidth, if alignment is required.
+
+        With this option off, text is either not aligned, or aligned to the width specified using
+        withMaxWidth.
+
+        When this option is in use, it overrides the width specified in withMaxWidth for alignment
+        purposes, but not for line wrapping purposes.
+
+        It also accommodates the fact that the TextEditor has a scrolling feature and text never
+        becomes unreachable, even if the lines are longer than the viewport's width.
+    */
+    [[nodiscard]] ShapedTextOptions withAlignmentWidth (float x) const
+    {
+        return withMember (*this, &ShapedTextOptions::alignmentWidth, x);
     }
 
     [[nodiscard]] ShapedTextOptions withHeight (float x) const
@@ -157,6 +192,7 @@ public:
     const auto& getReadingDirection() const             { return readingDir; }
     const auto& getJustification() const                { return justification; }
     const auto& getMaxWidth() const                     { return maxWidth; }
+    const auto& getAlignmentWidth() const               { return alignmentWidth; }
     const auto& getHeight() const                       { return height; }
     const auto& getFontsForRange() const                { return fontsForRange; }
     const auto& getLanguage() const                     { return language; }
@@ -173,6 +209,7 @@ private:
     Justification justification { Justification::topLeft };
     std::optional<TextDirection> readingDir;
     std::optional<float> maxWidth;
+    std::optional<float> alignmentWidth;
     std::optional<float> height;
 
     detail::RangedValues<Font> fontsForRange = std::invoke ([&]

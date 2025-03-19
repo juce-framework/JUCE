@@ -128,7 +128,7 @@ public:
             if (std::exchange (lastLine, lineMetrics.lineNumber) != lineMetrics.lineNumber)
                 anchor = lineMetrics.anchor;
 
-            if (range.getStart() != lastGlyph)
+            if (range.getStart() != lastGlyph && drawType != DrawType::ellipsis)
             {
                 detail::RangedValues<int8_t> glyphMask;
                 Ranges::Operations ops;
