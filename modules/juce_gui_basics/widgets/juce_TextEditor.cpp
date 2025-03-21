@@ -661,7 +661,7 @@ void TextEditor::repaintText (Range<int> range)
             const auto info = getCursorEdge (caretState.withPosition (range.getEnd())
                                                        .withPreferredEdge (Edge::leading));
 
-            y2 = (int) (info.first.y + lh * 2.0f);
+            y2 = (int) (info.anchor.y + lh * 2.0f);
         }
 
         const auto offset = getYOffset();
@@ -872,7 +872,7 @@ Range<int64> TextEditor::getLineRangeForIndex (int index)
                + lastParagraphItem.range.getStart();
 }
 
-std::pair<Point<float>, float> TextEditor::getTextSelectionEdge (int index, Edge edge) const
+TextEditor::CaretEdge TextEditor::getTextSelectionEdge (int index, Edge edge) const
 {
     jassert (0 <= index && index < getTotalNumChars());
     const auto textRange = Range<int64>::withStartAndLength ((int64) index, 1);
@@ -1702,8 +1702,8 @@ TextEditor::Edge TextEditor::getEdgeTypeCloserToPosition (int indexInText, Point
 {
     const auto testCaret = caretState.withPosition (indexInText);
 
-    const auto leading = getCursorEdge (testCaret.withPreferredEdge (Edge::leading)).first.getDistanceFrom (pos);
-    const auto trailing = getCursorEdge (testCaret.withPreferredEdge (Edge::trailing)).first.getDistanceFrom (pos);
+    const auto leading = getCursorEdge (testCaret.withPreferredEdge (Edge::leading)).anchor.getDistanceFrom (pos);
+    const auto trailing = getCursorEdge (testCaret.withPreferredEdge (Edge::trailing)).anchor.getDistanceFrom (pos);
 
     if (leading < trailing)
         return Edge::leading;
@@ -2139,7 +2139,7 @@ bool TextEditor::isEmpty() const
     return getTotalNumChars() == 0;
 }
 
-std::pair<Point<float>, float> TextEditor::getCursorEdge (const CaretState& tempCaret) const
+TextEditor::CaretEdge TextEditor::getCursorEdge (const CaretState& tempCaret) const
 {
     const auto visualIndex = tempCaret.getVisualIndex();
     jassert (0 <= visualIndex && visualIndex <= getTotalNumChars());
