@@ -190,6 +190,8 @@
   #include "native/juce_NativeMessageBox_mac.mm"
   #include "native/juce_MainMenu_mac.mm"
   #include "native/juce_FileChooser_mac.mm"
+  #include "detail/juce_ComponentPeerHelpers.h"
+  #include "detail/juce_ComponentPeerHelpers.cpp"
  #endif
 
  #include "native/juce_MouseCursor_mac.mm"

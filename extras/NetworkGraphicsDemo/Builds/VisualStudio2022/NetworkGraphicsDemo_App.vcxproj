@@ -2319,6 +2319,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\detail\juce_AccessibilityHelpers.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ComponentPeerHelpers.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\drawables\juce_Drawable.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -4015,6 +4018,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_AlertWindowHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ButtonAccessibilityHandler.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ComponentHelpers.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ComponentPeerHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_CustomMouseCursorInfo.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_FocusHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_FocusRestorer.h"/>

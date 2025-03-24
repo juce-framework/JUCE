@@ -75,6 +75,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
+#include <juce_gui_basics/detail/juce_ComponentPeerHelpers.h>
 
 #if JucePlugin_Enable_ARA
  #include <juce_audio_processors/utilities/ARA/juce_AudioProcessor_ARAExtensions.h>
@@ -1746,6 +1747,10 @@ public:
                     if (! approximatelyEqual (lastEventTime, eventTime))
                     {
                         lastEventTime = eventTime;
+
+                        if (auto* peer = getPeer())
+                            if (detail::ComponentPeerHelpers::isInPerformKeyEquivalent (*peer))
+                                return false;
 
                         auto* view = (NSView*) getWindowHandle();
                         auto* hostView = [view superview];

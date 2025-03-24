@@ -3154,6 +3154,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\detail\juce_AccessibilityHelpers.cpp">
       <Filter>JUCE Modules\juce_gui_basics\detail</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ComponentPeerHelpers.cpp">
+      <Filter>JUCE Modules\juce_gui_basics\detail</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\drawables\juce_Drawable.cpp">
       <Filter>JUCE Modules\juce_gui_basics\drawables</Filter>
     </ClCompile>
@@ -7381,6 +7384,9 @@
       <Filter>JUCE Modules\juce_gui_basics\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ComponentHelpers.h">
+      <Filter>JUCE Modules\juce_gui_basics\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ComponentPeerHelpers.h">
       <Filter>JUCE Modules\juce_gui_basics\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_CustomMouseCursorInfo.h">

@@ -1731,6 +1731,7 @@ public:
     bool isStretchingTop = false, isStretchingLeft = false, isStretchingBottom = false, isStretchingRight = false;
     bool windowRepresentsFile = false;
     bool isAlwaysOnTop = false, wasAlwaysOnTop = false, inBecomeKeyWindow = false;
+    bool inPerformKeyEquivalent = false;
     String stringBeingComposed;
     int startOfMarkedTextInTextInputTarget = 0;
 
@@ -2332,6 +2333,8 @@ struct JuceNSViewClass final : public NSViewComponentPeerWrapper<ObjCClass<NSVie
         {
             if (auto* owner = getOwner (self))
             {
+                const ScopedValueSetter scope { owner->inPerformKeyEquivalent, true };
+
                 const auto ref = owner->safeComponent;
 
                 if (owner->sendEventToInputContextOrComponent (ev))
