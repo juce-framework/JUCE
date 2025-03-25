@@ -310,13 +310,13 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
         writeProjects (modules, specifiedExporterToSave);
         writeProjectFile();
 
-        runPostExportScript();
-
         if (generatedCodeFolder.exists())
         {
             writeReadmeFile();
             deleteUnwantedFilesIn (generatedCodeFolder);
         }
+
+        runPostExportScript();
 
         if (errors.isEmpty())
             return Result::ok();
