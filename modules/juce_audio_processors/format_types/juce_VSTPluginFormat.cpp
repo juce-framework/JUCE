@@ -951,8 +951,19 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
         String getName (int maximumStringLength) const override
         {
             if (name.isEmpty())
-                return pluginInstance.getTextForOpcode (getParameterIndex(),
-                                                        Vst2::effGetParamName);
+            {
+#if 1
+                String name0 = pluginInstance.getTextForOpcode(getParameterIndex(), Vst2::effGetParamName);
+                Vst2::VstParameterProperties props;
+                if (pluginInstance.dispatch(Vst2::effGetParameterProperties, getParameterIndex(), 0, &props, 0) && props.label[0])
+                {
+                    String name1 = String(props.label);
+                    return name1.length() > name0.length() ? name1 : name0;
+                }
+                else
+#endif
+                    return pluginInstance.getTextForOpcode(getParameterIndex(), Vst2::effGetParamName);
+            }
 
             if (name.length() <= maximumStringLength)
                 return name;
@@ -1665,16 +1676,16 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
             case Vst2::audioMasterBeginEdit:
                 if (auto* param = getParameters()[index])
                     param->beginChangeGesture();
-                else
-                    jassertfalse; // Invalid parameter index!
+//                else
+//                    jassertfalse; // Invalid parameter index!
 
                 break;
 
             case Vst2::audioMasterEndEdit:
                 if (auto* param = getParameters()[index])
                     param->endChangeGesture();
-                else
-                    jassertfalse; // Invalid parameter index!
+//                else
+//                    jassertfalse; // Invalid parameter index!
 
                 break;
 
