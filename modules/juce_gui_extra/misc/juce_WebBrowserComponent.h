@@ -49,6 +49,8 @@ class WebBrowserComponent;
     WebBrowserComponent::Options::withWebViewLifetimeListener. This can be useful for
     types using the WebBrowserComponent::Options::withOptionsFrom function as they have to be
     constructed before the WebBrowserComponent.
+
+    @tags{GUI}
 */
 class JUCE_API WebViewLifetimeListener
 {
