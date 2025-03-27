@@ -35,23 +35,6 @@
 namespace juce
 {
 
-Typeface::Ptr Font::Native::getDefaultPlatformTypefaceForFont (const Font& font)
-{
-    Font f (font);
-    f.setTypefaceName ([&]() -> String
-                       {
-                           const auto faceName = font.getTypefaceName();
-
-                           if (faceName == Font::getDefaultSansSerifFontName())    return "Roboto";
-                           if (faceName == Font::getDefaultSerifFontName())        return "Roboto";
-                           if (faceName == Font::getDefaultMonospacedFontName())   return "Roboto";
-
-                           return faceName;
-                       }());
-
-    return Typeface::createSystemTypefaceFor (f);
-}
-
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  STATICMETHOD (create,          "create",           "(Ljava/lang/String;I)Landroid/graphics/Typeface;") \
@@ -99,6 +82,11 @@ DECLARE_JNI_CLASS (JavaMessageDigest, "java/security/MessageDigest")
 
 DECLARE_JNI_CLASS (AndroidAssetManager, "android/content/res/AssetManager")
 #undef JNI_CLASS_MEMBERS
+
+#define JUCE_INTRODUCED_IN_29 \
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE("-Wgnu-zero-variadic-macro-arguments") \
+    __INTRODUCED_IN (29)                                                       \
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 // Defined in juce_core
 std::unique_ptr<InputStream> makeAndroidInputStreamWrapper (LocalRef<jobject> stream);
@@ -313,6 +301,23 @@ public:
         return from (FontOptions{}.withName ("Roboto"));
     }
 
+    static JUCE_INTRODUCED_IN_29 Typeface::Ptr findGenericTypefaceWithMatcher (const char* name)
+    {
+        using AFontMatcherPtr = std::unique_ptr<AFontMatcher, FunctionPointerDestructor<AFontMatcher_destroy>>;
+        using AFontPtr = std::unique_ptr<AFont, FunctionPointerDestructor<AFont_close>>;
+
+        constexpr uint16_t testString[] { 't', 'e', 's', 't' };
+
+        const AFontMatcherPtr matcher { AFontMatcher_create() };
+        const AFontPtr matched { AFontMatcher_match (matcher.get(),
+                                                     name,
+                                                     testString,
+                                                     std::size (testString),
+                                                     nullptr) };
+
+        return fromMatchedFont (matched.get());
+    }
+
 private:
     enum class DoCache
     {
@@ -320,14 +325,7 @@ private:
         yes
     };
 
-    // The definition of __BIONIC_AVAILABILITY was changed in NDK 28.1 and it now has variadic
-    // parameters.
-    //
-    // But __INTRODUCED_IN only has one parameter so there isn't even a way to pass on anything to
-    // to __BIONIC_AVAILABILITY.
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments")
-
-    static __INTRODUCED_IN (29) Typeface::Ptr fromMatchedFont (AFont* matched)
+    static JUCE_INTRODUCED_IN_29 Typeface::Ptr fromMatchedFont (AFont* matched)
     {
         if (matched == nullptr)
         {
@@ -348,24 +346,12 @@ private:
         return cache->get ({ matchedFile, (int) matchedIndex }, &loadCompatibleFont);
     }
 
-    static __INTRODUCED_IN (29) Typeface::Ptr findSystemTypefaceWithMatcher()
+    static JUCE_INTRODUCED_IN_29 Typeface::Ptr findSystemTypefaceWithMatcher()
     {
-        using AFontMatcherPtr = std::unique_ptr<AFontMatcher, FunctionPointerDestructor<AFontMatcher_destroy>>;
-        using AFontPtr = std::unique_ptr<AFont, FunctionPointerDestructor<AFont_close>>;
-
-        constexpr uint16_t testString[] { 't', 'e', 's', 't' };
-
-        const AFontMatcherPtr matcher { AFontMatcher_create() };
-        const AFontPtr matched { AFontMatcher_match (matcher.get(),
-                                                     "system-ui",
-                                                     testString,
-                                                     std::size (testString),
-                                                     nullptr) };
-
-        return fromMatchedFont (matched.get());
+        return findGenericTypefaceWithMatcher ("system-ui");
     }
 
-    __INTRODUCED_IN (29) Typeface::Ptr matchWithAFontMatcher (const String& text, const String& language) const
+    JUCE_INTRODUCED_IN_29 Typeface::Ptr matchWithAFontMatcher (const String& text, const String& language) const
     {
         using AFontMatcherPtr = std::unique_ptr<AFontMatcher, FunctionPointerDestructor<AFontMatcher_destroy>>;
         using AFontPtr = std::unique_ptr<AFont, FunctionPointerDestructor<AFont_close>>;
@@ -390,8 +376,6 @@ private:
 
         return fromMatchedFont (matched.get());
     }
-
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     static bool shouldStoreAndroidFont (hb_face_t* face)
     {
@@ -801,6 +785,39 @@ Typeface::Ptr Typeface::findSystemTypeface()
 void Typeface::scanFolderForFonts (const File&)
 {
     jassertfalse; // not currently available
+}
+
+//==============================================================================
+Typeface::Ptr Font::Native::getDefaultPlatformTypefaceForFont (const Font& font)
+{
+    const auto faceName = font.getTypefaceName();
+
+    const auto idealFace = std::invoke ([&]() -> Typeface::Ptr
+    {
+        if (__builtin_available (android 29, *))
+        {
+            if (faceName == Font::getDefaultSansSerifFontName())    return AndroidTypeface::findGenericTypefaceWithMatcher ("sans-serif");
+            if (faceName == Font::getDefaultSerifFontName())        return AndroidTypeface::findGenericTypefaceWithMatcher ("serif");
+            if (faceName == Font::getDefaultMonospacedFontName())   return AndroidTypeface::findGenericTypefaceWithMatcher ("monospace");
+        }
+
+        return nullptr;
+    });
+
+    if (idealFace != nullptr)
+        return idealFace;
+
+    Font f (font);
+    f.setTypefaceName (std::invoke ([&]() -> String
+    {
+        if (faceName == Font::getDefaultSansSerifFontName())    return "Roboto";
+        if (faceName == Font::getDefaultSerifFontName())        return "Roboto";
+        if (faceName == Font::getDefaultMonospacedFontName())   return "Roboto";
+
+        return faceName;
+    }));
+
+    return Typeface::createSystemTypefaceFor (f);
 }
 
 } // namespace juce
