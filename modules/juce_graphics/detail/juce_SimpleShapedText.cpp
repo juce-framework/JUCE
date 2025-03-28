@@ -989,16 +989,15 @@ struct Shaper
         }
 
         auto glyphsIt = shapedGlyphs.find (startFrom);
-
-        // The stored glyphs data can be empty if there are input codepoints for which we failed to
-        // resolve a valid Typeface::Ptr.
-        if (glyphsIt == shapedGlyphs.end() || glyphsIt->value.data->empty())
-            return {};
-
         WrappedGlyphs result;
 
         while (true)
         {
+            // The stored glyphs data can be empty if there are input codepoints for which we failed to
+            // resolve a valid Typeface::Ptr.
+            if (glyphsIt == shapedGlyphs.end() || glyphsIt->value.data->empty())
+                break;
+
             const ShapedGlyph* start = glyphsIt->value.data->data();
             const ShapedGlyph* const endIt = glyphsIt->value.data->data() + glyphsIt->value.data->size();
 
@@ -1024,9 +1023,6 @@ struct Shaper
                 break;
 
             ++glyphsIt;
-
-            if (glyphsIt == shapedGlyphs.end())
-                break;
         }
 
         return result;
