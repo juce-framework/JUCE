@@ -93,12 +93,12 @@ public:
     const Result& getStatus() const noexcept            { return status; }
 
     /** Returns true if the stream couldn't be opened for some reason.
-        @see getResult()
+        @see getStatus()
     */
     bool failedToOpen() const noexcept                  { return status.failed(); }
 
     /** Returns true if the stream opened without problems.
-        @see getResult()
+        @see getStatus()
     */
     bool openedOk() const noexcept                      { return status.wasOk(); }
 
