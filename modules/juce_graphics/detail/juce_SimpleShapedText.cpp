@@ -872,15 +872,17 @@ static auto rangedValuesWithOffset (detail::RangedValues<T> rv, int64 offset = 0
 
 struct Shaper
 {
-    Shaper (const String& stringIn, Range<int64> shapingRange, const ShapedTextOptions& options)
-        : string { stringIn.substring ((int) shapingRange.getStart(), (int) shapingRange.getEnd()) }
+    Shaper (const String& stringIn, Range<int64> lineRange, const ShapedTextOptions& options)
+        : string { stringIn.substring ((int) lineRange.getStart(), (int) lineRange.getEnd()) }
     {
         const auto analysis = Unicode::performAnalysis (string);
 
         const auto string32 = std::invoke ([this]
                                            {
-                                               std::vector<juce_wchar> s32 ((size_t) string.length());
+                                               std::vector<juce_wchar> s32 (CharPointer_UTF32::getBytesRequiredFor (string.getCharPointer()));
                                                string.copyToUTF32 (s32.data(), s32.size() * sizeof (juce_wchar));
+                                               jassert (! s32.empty());
+                                               s32.pop_back();  // dropping the null terminator
                                                return s32;
                                            });
 
@@ -893,41 +895,45 @@ struct Shaper
 
         const auto fonts = resolveFontsWithFallback (string,
                                                      rangedValuesWithOffset (options.getFontsForRange(),
-                                                                             shapingRange.getStart()));
+                                                                             lineRange.getStart()));
 
         detail::Ranges::Operations ops;
 
-        for (Unicode::LineBreakIterator lineIter { makeSpan (analysis) }; auto lineRun = lineIter.next();)
+        for (Unicode::ScriptRunIterator scriptIter { makeSpan (analysis) }; auto scriptRun = scriptIter.next();)
         {
-            for (Unicode::ScriptRunIterator scriptIter { *lineRun }; auto scriptRun = scriptIter.next();)
+            const auto offsetInText = (size_t) std::distance (analysis.getRawDataPointer(), scriptRun->data());
+            const auto length = scriptRun->size();
+
+            const auto begin = bidiLevels.data() + offsetInText;
+            const auto numRemainingElems = bidiLevels.size() > offsetInText ? bidiLevels.size() - offsetInText
+                                                                            : 0;
+
+            // If this assertion is hit, the input string is probably invalid according to the
+            // Unicode parsing rules. If you know your string is a valid one, please reach out to us
+            jassert (numRemainingElems >= length);
+
+            const auto end = begin + std::min (length, numRemainingElems);
+
+            for (auto it = begin; it != end;)
             {
-                const auto offsetInText = (size_t) std::distance (analysis.getRawDataPointer(), scriptRun->data());
-                const auto length = scriptRun->size();
+                const auto next = std::find_if (it, end, [&] (const auto& l) { return l != *it; });
+                const auto bidiStart = (int64) std::distance (bidiLevels.data(), it);
+                const auto bidiLength = (int64) std::distance (it, next);
+                const auto bidiRange = Range<int64>::withStartAndLength (bidiStart, bidiLength);
 
-                const auto begin = bidiLevels.data() + offsetInText;
-                const auto end = begin + length;
-
-                for (auto it = begin; it != end;)
+                for (const auto [range, font] : fonts.getIntersectionsWith (bidiRange))
                 {
-                    const auto next = std::find_if (it, end, [&] (const auto& l) { return l != *it; });
-                    const auto bidiStart = (int64) std::distance (bidiLevels.data(), it);
-                    const auto bidiLength = (int64) std::distance (it, next);
-                    const auto bidiRange = Range<int64>::withStartAndLength (bidiStart, bidiLength);
-
-                    for (const auto [range, font] : fonts.getIntersectionsWith (bidiRange))
-                    {
-                        shaperRuns.set (range,
-                                        { scriptRun->front().script,
-                                          options.getLanguage(),
-                                          *it,
-                                          font },
-                                        ops,
-                                        MergeEqualItemsNo{});
-                        ops.clear();
-                    }
-
-                    it = next;
+                    shaperRuns.set (range,
+                                    { scriptRun->front().script,
+                                      options.getLanguage(),
+                                      *it,
+                                      font },
+                                    ops,
+                                    MergeEqualItemsNo{});
+                    ops.clear();
                 }
+
+                it = next;
             }
         }
 
