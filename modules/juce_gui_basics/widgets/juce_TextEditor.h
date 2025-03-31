@@ -913,6 +913,8 @@ private:
         float height{};
     };
 
+    float getJustificationOffsetX() const;
+    CaretEdge getDefaultCursorEdge() const;
     CaretEdge getTextSelectionEdge (int index, Edge edge) const;
     CaretEdge getCursorEdge (const CaretState& caret) const;
     void updateCaretPosition();

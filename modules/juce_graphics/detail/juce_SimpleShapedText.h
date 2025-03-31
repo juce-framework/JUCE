@@ -301,6 +301,12 @@ public:
     */
     bool isLtr (int64 glyphIndex) const;
 
+    /*  This function may fail to return an out range, even if the provided textRange falls inside
+        the string range used for the creation of the ShapedText object.
+
+        This is because the shaping process could fail due to insufficient glyph resolution to the
+        point, where it will produce zero glyphs for the provided string.
+    */
     void getGlyphRanges (Range<int64> textRange, std::vector<Range<int64>>& outRanges) const;
 
     /*  Returns the input codepoint index that follows the glyph in a logical sense. So for LTR text

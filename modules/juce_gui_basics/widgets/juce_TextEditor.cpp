@@ -889,13 +889,19 @@ TextEditor::CaretEdge TextEditor::getTextSelectionEdge (int index, Edge edge) co
     auto& paragraph = paragraphIt->value;
     const auto& shapedText = paragraph->getShapedText();
 
-    const auto glyphRange = std::invoke ([&]
+    const auto glyphRange = std::invoke ([&]() -> Range<int64>
     {
         std::vector<Range<int64>> g;
         shapedText.getGlyphRanges (textRange - paragraph->getRange().getStart(), g);
-        jassert (! g.empty());
+
+        if (g.empty())
+            return {};
+
         return g.front();
     });
+
+    if (glyphRange.isEmpty())
+        return getDefaultCursorEdge();
 
     const auto glyphsBounds = shapedText.getGlyphsBounds (glyphRange).getRectangle (0);
     const auto ltr = shapedText.isLtr (glyphRange.getStart());
@@ -2139,6 +2145,21 @@ bool TextEditor::isEmpty() const
     return getTotalNumChars() == 0;
 }
 
+float TextEditor::getJustificationOffsetX() const
+{
+    const auto bottomRightX = (float) getMaximumTextWidth();
+
+    if (justification.testFlags (Justification::horizontallyCentred)) return jmax (0.0f, bottomRightX * 0.5f);
+    if (justification.testFlags (Justification::right))               return jmax (0.0f, bottomRightX);
+
+    return 0.0f;
+}
+
+TextEditor::CaretEdge TextEditor::getDefaultCursorEdge() const
+{
+    return { { getJustificationOffsetX(), 0.0f }, currentFont.getHeight() };
+}
+
 TextEditor::CaretEdge TextEditor::getCursorEdge (const CaretState& tempCaret) const
 {
     const auto visualIndex = tempCaret.getVisualIndex();
@@ -2147,18 +2168,8 @@ TextEditor::CaretEdge TextEditor::getCursorEdge (const CaretState& tempCaret) co
     if (getWordWrapWidth() <= 0)
         return { {}, currentFont.getHeight() };
 
-    const auto getJustificationOffsetX = [&]
-    {
-        const auto bottomRightX = (float) getMaximumTextWidth();
-
-        if (justification.testFlags (Justification::horizontallyCentred)) return jmax (0.0f, bottomRightX * 0.5f);
-        if (justification.testFlags (Justification::right))               return jmax (0.0f, bottomRightX);
-
-        return 0.0f;
-    };
-
     if (textStorage->isEmpty())
-        return { { getJustificationOffsetX(), 0.0f }, currentFont.getHeight() };
+        return getDefaultCursorEdge();
 
     if (visualIndex == getTotalNumChars())
     {
