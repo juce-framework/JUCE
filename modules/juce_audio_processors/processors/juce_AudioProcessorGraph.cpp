@@ -1035,20 +1035,20 @@ private:
     {
         NodeAndChannel channel;
 
-        static AssignedBuffer createReadOnlyEmpty() noexcept    { return { { zeroNodeID(), 0 } }; }
-        static AssignedBuffer createFree() noexcept             { return { { freeNodeID(), 0 } }; }
+        static constexpr AssignedBuffer createReadOnlyEmpty() noexcept    { return { { zeroNodeID, 0 } }; }
+        static constexpr AssignedBuffer createFree() noexcept             { return { { freeNodeID, 0 } }; }
 
-        bool isReadOnlyEmpty() const noexcept                   { return channel.nodeID == zeroNodeID(); }
-        bool isFree() const noexcept                            { return channel.nodeID == freeNodeID(); }
-        bool isAssigned() const noexcept                        { return ! (isReadOnlyEmpty() || isFree()); }
+        constexpr bool isReadOnlyEmpty() const noexcept                   { return channel.nodeID == zeroNodeID; }
+        constexpr bool isFree() const noexcept                            { return channel.nodeID == freeNodeID; }
+        constexpr bool isAssigned() const noexcept                        { return ! (isReadOnlyEmpty() || isFree()); }
 
-        void setFree() noexcept                                 { channel = { freeNodeID(), 0 }; }
-        void setAssignedToNonExistentNode() noexcept            { channel = { anonNodeID(), 0 }; }
+        constexpr void setFree() noexcept                                 { channel = { freeNodeID, 0 }; }
+        constexpr void setAssignedToNonExistentNode() noexcept            { channel = { anonNodeID, 0 }; }
 
     private:
-        static NodeID anonNodeID() { return NodeID (0x7ffffffd); }
-        static NodeID zeroNodeID() { return NodeID (0x7ffffffe); }
-        static NodeID freeNodeID() { return NodeID (0x7fffffff); }
+        constexpr static inline NodeID anonNodeID { 0x7ffffffd };
+        constexpr static inline NodeID zeroNodeID { 0x7ffffffe };
+        constexpr static inline NodeID freeNodeID { 0x7fffffff };
     };
 
     Array<AssignedBuffer> audioBuffers, midiBuffers;
@@ -1675,34 +1675,6 @@ private:
     std::unique_ptr<RenderSequence> mainThreadState, audioThreadState;
     bool isNew = false;
 };
-
-//==============================================================================
-AudioProcessorGraph::Connection::Connection (NodeAndChannel src, NodeAndChannel dst) noexcept
-    : source (src), destination (dst)
-{
-}
-
-bool AudioProcessorGraph::Connection::operator== (const Connection& other) const noexcept
-{
-    return source == other.source && destination == other.destination;
-}
-
-bool AudioProcessorGraph::Connection::operator!= (const Connection& c) const noexcept
-{
-    return ! operator== (c);
-}
-
-bool AudioProcessorGraph::Connection::operator< (const Connection& other) const noexcept
-{
-    const auto tie = [] (auto& x)
-    {
-        return std::tie (x.source.nodeID,
-                         x.destination.nodeID,
-                         x.source.channelIndex,
-                         x.destination.channelIndex);
-    };
-    return tie (*this) < tie (other);
-}
 
 //==============================================================================
 class AudioProcessorGraph::Pimpl

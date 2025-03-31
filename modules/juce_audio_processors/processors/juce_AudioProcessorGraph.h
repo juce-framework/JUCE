@@ -67,14 +67,14 @@ public:
     /** Each node in the graph has a UID of this type. */
     struct NodeID
     {
-        NodeID() {}
-        explicit NodeID (uint32 i) : uid (i) {}
+        constexpr NodeID() = default;
+        explicit constexpr NodeID (uint32 i) : uid (i) {}
 
         uint32 uid = 0;
 
-        bool operator== (const NodeID& other) const noexcept    { return uid == other.uid; }
-        bool operator!= (const NodeID& other) const noexcept    { return uid != other.uid; }
-        bool operator<  (const NodeID& other) const noexcept    { return uid <  other.uid; }
+        constexpr bool operator== (const NodeID& other) const noexcept    { return uid == other.uid; }
+        constexpr bool operator!= (const NodeID& other) const noexcept    { return uid != other.uid; }
+        constexpr bool operator<  (const NodeID& other) const noexcept    { return uid <  other.uid; }
     };
 
     //==============================================================================
@@ -91,17 +91,17 @@ public:
     */
     class NodeAndChannel
     {
-        auto tie() const { return std::tie (nodeID, channelIndex); }
+        constexpr auto tie() const { return std::tie (nodeID, channelIndex); }
 
     public:
         NodeID nodeID;
         int channelIndex;
 
-        bool isMIDI() const noexcept                                    { return channelIndex == midiChannelIndex; }
+        constexpr bool isMIDI() const noexcept                                    { return channelIndex == midiChannelIndex; }
 
-        bool operator== (const NodeAndChannel& other) const noexcept    { return tie() == other.tie(); }
-        bool operator!= (const NodeAndChannel& other) const noexcept    { return tie() != other.tie(); }
-        bool operator<  (const NodeAndChannel& other) const noexcept    { return tie() <  other.tie(); }
+        constexpr bool operator== (const NodeAndChannel& other) const noexcept    { return tie() == other.tie(); }
+        constexpr bool operator!= (const NodeAndChannel& other) const noexcept    { return tie() != other.tie(); }
+        constexpr bool operator<  (const NodeAndChannel& other) const noexcept    { return tie() <  other.tie(); }
     };
 
     //==============================================================================
@@ -192,15 +192,34 @@ public:
     struct JUCE_API  Connection
     {
         //==============================================================================
-        Connection() = default;
-        Connection (NodeAndChannel source, NodeAndChannel destination) noexcept;
+        constexpr Connection() = default;
+        constexpr Connection (NodeAndChannel sourceIn, NodeAndChannel destinationIn) noexcept
+            : source (sourceIn), destination (destinationIn) {}
 
-        Connection (const Connection&) = default;
-        Connection& operator= (const Connection&) = default;
+        constexpr Connection (const Connection&) = default;
+        constexpr Connection& operator= (const Connection&) = default;
 
-        bool operator== (const Connection&) const noexcept;
-        bool operator!= (const Connection&) const noexcept;
-        bool operator<  (const Connection&) const noexcept;
+        constexpr bool operator== (const Connection& other) const noexcept
+        {
+            return source == other.source && destination == other.destination;
+        }
+
+        constexpr bool operator!= (const Connection& other) const noexcept
+        {
+            return ! operator== (other);
+        }
+
+        constexpr bool operator<  (const Connection& other) const noexcept
+        {
+            const auto tie = [] (auto& x)
+            {
+                return std::tie (x.source.nodeID,
+                                 x.destination.nodeID,
+                                 x.source.channelIndex,
+                                 x.destination.channelIndex);
+            };
+            return tie (*this) < tie (other);
+        }
 
         //==============================================================================
         /** The channel and node which is the input source for this connection. */
