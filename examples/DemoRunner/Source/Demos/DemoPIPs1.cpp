@@ -36,6 +36,7 @@
 #include "../../../Audio/AudioSettingsDemo.h"
 #include "../../../Audio/AudioSynthesiserDemo.h"
 #include "../../../Audio/AudioWorkgroupDemo.h"
+#include "../../../Audio/CapabilityInquiryDemo.h"
 #include "../../../Audio/MidiDemo.h"
 #include "../../../Audio/MPEDemo.h"
 #include "../../../Audio/PluckedStringsDemo.h"
@@ -75,6 +76,7 @@ void registerDemos_One() noexcept
     REGISTER_DEMO (AudioSettingsDemo,       Audio,     false)
     REGISTER_DEMO (AudioSynthesiserDemo,    Audio,     false)
     REGISTER_DEMO (AudioWorkgroupDemo,      Audio,     false)
+    REGISTER_DEMO (CapabilityInquiryDemo,   Audio,     false)
     REGISTER_DEMO (MidiDemo,                Audio,     false)
     REGISTER_DEMO (MPEDemo,                 Audio,     false)
     REGISTER_DEMO (PluckedStringsDemo,      Audio,     false)

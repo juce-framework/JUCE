@@ -74,11 +74,12 @@ target_link_libraries(DemoRunner PRIVATE
     juce::juce_audio_utils
     juce::juce_box2d
     juce::juce_dsp
+    juce::juce_javascript
+    juce::juce_midi_ci
     juce::juce_opengl
     juce::juce_osc
     juce::juce_product_unlocking
     juce::juce_video
-    juce::juce_javascript
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
