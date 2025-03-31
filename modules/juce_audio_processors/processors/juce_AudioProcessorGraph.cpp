@@ -919,6 +919,7 @@ private:
 
         void processWithBuffer (const GlobalIO&, bool bypass, AudioBuffer<FloatType>& audio, MidiBuffer& midi) final
         {
+            const ScopedLock lock { this->processor.getCallbackLock() };
             callProcess (bypass, audio, midi);
         }
 
