@@ -195,8 +195,6 @@ public:
         initialiseSynth();
     }
 
-    ~JuceDemoPluginAudioProcessor() override = default;
-
     //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
@@ -250,6 +248,8 @@ public:
         delayBufferFloat .clear();
         delayBufferDouble.clear();
     }
+
+    bool supportsDoublePrecisionProcessing() const override { return true; }
 
     //==============================================================================
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
