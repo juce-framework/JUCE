@@ -1218,6 +1218,12 @@ private:
     });
 };
 
+static constexpr auto ioLabelText = R"(Pick the input and output used to talk to the Capability Inquiry (CI) responder.
+
+In order to use this demo you'll need another program/device that understands MIDI CI.
+You could run a second copy of this CapabilityInquiryDemo, or install and use one of the apps listed below.
+If you want to communicate with a program that doesn't have its own virtual MIDI ports, you may need to set up virtual ports yourself, e.g. by enabling the IAC MIDI driver on macOS.)";
+
 class IOPickerLists : public Component
 {
 public:
@@ -1227,16 +1233,34 @@ public:
     {
         addAndMakeVisible (inputs);
         addAndMakeVisible (outputs);
+
+        addAndMakeVisible (label);
+        addAndMakeVisible (toolsHeader);
+        addAndMakeVisible (workbenchButton);
+        addAndMakeVisible (responderButton);
+        toolsHeader.setJustificationType (Justification::centred);
     }
 
     void resized() override
     {
-        Utils::doColumnLayout (getLocalBounds().reduced (Utils::padding), inputs, outputs);
+        auto bounds = getLocalBounds().reduced (Utils::padding);
+
+        responderButton.setBounds (bounds.removeFromBottom (20));
+        workbenchButton.setBounds (bounds.removeFromBottom (20));
+        toolsHeader.setBounds (bounds.removeFromBottom (20));
+        label.setBounds (bounds.removeFromBottom (200).withSizeKeepingCentre (jmin (600, bounds.getWidth()), 200));
+
+        Utils::doColumnLayout (bounds, inputs, outputs);
     }
 
 private:
     IOPickerList<MidiInput> inputs;
     IOPickerList<MidiOutput> outputs;
+    Label label { "", ioLabelText };
+
+    Label toolsHeader { "", "Other MIDI-CI software for testing:" };
+    HyperlinkButton workbenchButton { "MIDI 2.0 Workbench", URL { "https://github.com/midi2-dev/MIDI2.0Workbench" } };
+    HyperlinkButton responderButton { "Bome MIDI-CI Responder", URL { "https://www.bome.com/products/midi-ci-tools" } };
 };
 
 class SectionHeader : public Component
