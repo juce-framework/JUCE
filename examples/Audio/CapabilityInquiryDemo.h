@@ -2285,10 +2285,9 @@ public:
                 auto updated = *state;
                 auto& props = updated.properties;
 
-                if (auto* item = props.getSelected())
+                if (0 <= props.selection)
                 {
-                    const auto toErase = props.items.begin() + props.selection;
-                    props.items.erase (toErase);
+                    props.items.erase (props.items.begin() + props.selection);
                     props.selection = -1;
 
                     state = std::move (updated);
