@@ -32,24 +32,23 @@
   ==============================================================================
 */
 
-#include "juce_UMPProtocols.h"
-#include "juce_UMPUtils.h"
-#include "juce_UMPacket.h"
-#include "juce_UMPSysEx7.h"
-#include "juce_UMPView.h"
-#include "juce_UMPIterator.h"
-#include "juce_UMPackets.h"
-#include "juce_UMPFactory.h"
-#include "juce_UMPConversion.h"
-#include "juce_UMPMidi1ToBytestreamTranslator.h"
-#include "juce_UMPMidi1ToMidi2DefaultTranslator.h"
-#include "juce_UMPConverters.h"
-#include "juce_UMPDispatcher.h"
-#include "juce_UMPStringUtils.h"
-
-/** @cond */
-namespace juce
+namespace juce::universal_midi_packets
 {
-namespace ump = universal_midi_packets;
-}
-/** @endcond */
+
+/**
+    Holds utility functions for extracting textual representations of Universal
+    MIDI Packets.
+*/
+struct StringUtils
+{
+    /** Return a textual description of this packet. */
+    static String getHexString (const View&);
+
+    /** Return a textual description of this packet. */
+    static String getDescription (const View&);
+
+private:
+    StringUtils() = default;
+};
+
+} // namespace juce::universal_midi_packets
