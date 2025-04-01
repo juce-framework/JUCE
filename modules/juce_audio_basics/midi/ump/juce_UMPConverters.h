@@ -55,6 +55,8 @@ namespace juce::universal_midi_packets
         {
             Conversion::midi2ToMidi1DefaultTranslation (v, std::forward<Fn> (fn));
         }
+
+        void reset() {}
     };
 
     /**
@@ -98,22 +100,24 @@ namespace juce::universal_midi_packets
     */
     class GenericUMPConverter
     {
-        template <typename This, typename... Args>
-        static void visit (This& t, Args&&... args)
+        using Converters = std::variant<ToUMP1Converter, ToUMP2Converter>;
+
+        template <typename This, typename Fn>
+        static void visit (This& t, Fn&& fn)
         {
-            if (t.mode == PacketProtocol::MIDI_1_0)
-                convertImpl (std::get<0> (t.converters), std::forward<Args> (args)...);
-            else
-                convertImpl (std::get<1> (t.converters), std::forward<Args> (args)...);
+            if (auto* converter1 = std::get_if<ToUMP1Converter> (&t.converters))
+                fn (*converter1);
+            else if (auto* converter2 = std::get_if<ToUMP2Converter> (&t.converters))
+                fn (*converter2);
         }
 
     public:
         explicit GenericUMPConverter (PacketProtocol m)
-            : mode (m) {}
+            : converters (m == PacketProtocol::MIDI_1_0 ? Converters (ToUMP1Converter()) : Converters (ToUMP2Converter())) {}
 
         void reset()
         {
-            std::get<1> (converters).reset();
+            visit (*this, [] (auto& c) { c.reset(); });
         }
 
         template <typename Converter, typename Fn>
@@ -137,29 +141,44 @@ namespace juce::universal_midi_packets
             });
         }
 
+        template <typename Converter, typename Fn>
+        static void convertImpl (Converter& converter, const Packets& packets, Fn&& fn)
+        {
+            convertImpl (converter, packets.begin(), packets.end(), std::forward<Fn> (fn));
+        }
+
         template <typename Fn>
         void convert (const BytesOnGroup& m, Fn&& fn)
         {
-            visit (*this, m, std::forward<Fn> (fn));
+            visit (*this, [&] (auto& c) { convertImpl (c, m, std::forward<Fn> (fn)); });
         }
 
         template <typename Fn>
         void convert (const View& v, Fn&& fn)
         {
-            visit (*this, v, std::forward<Fn> (fn));
+            visit (*this, [&] (auto& c) { convertImpl (c, v, std::forward<Fn> (fn)); });
         }
 
         template <typename Fn>
         void convert (Iterator begin, Iterator end, Fn&& fn)
         {
-            visit (*this, begin, end, std::forward<Fn> (fn));
+            visit (*this, [&] (auto& c) { convertImpl (c, begin, end, std::forward<Fn> (fn)); });
         }
 
-        PacketProtocol getProtocol() const noexcept { return mode; }
+        template <typename Fn>
+        void convert (const Packets& packets, Fn&& fn)
+        {
+            visit (*this, [&] (auto& c) { convertImpl (c, packets, std::forward<Fn> (fn)); });
+        }
+
+        PacketProtocol getProtocol() const noexcept
+        {
+            return std::holds_alternative<ToUMP1Converter> (converters) ? PacketProtocol::MIDI_1_0
+                                                                        : PacketProtocol::MIDI_2_0;
+        }
 
     private:
-        std::tuple<ToUMP1Converter, ToUMP2Converter> converters;
-        const PacketProtocol mode{};
+        Converters converters;
     };
 
     /**
