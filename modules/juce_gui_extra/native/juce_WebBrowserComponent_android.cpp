@@ -316,7 +316,7 @@ static const uint8 juceWebViewClasses[] =
   METHOD (stopLoading,         "stopLoading",         "()V") \
   METHOD (disconnectNative,    "disconnectNative",    "()V")
 
-DECLARE_JNI_CLASS_WITH_BYTECODE (JuceWebView, "com/rmsl/juce/JuceWebViewClasses$JuceWebView", 16, juceWebViewClasses)
+DECLARE_JNI_CLASS_WITH_BYTECODE (JuceWebView, "com/rmsl/juce/JuceWebViewClasses$JuceWebView", 24, juceWebViewClasses)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -777,7 +777,7 @@ private:
      CALLBACK (generatedCallback<&Platform::postMessageHandler>,         "postMessage",                "(JLjava/lang/String;)Ljava/lang/String;") \
      CALLBACK (generatedCallback<&Platform::pageAboutToLoad>,            "pageAboutToLoad",            "(JLjava/lang/String;)Z")
 
-     DECLARE_JNI_CLASS_WITH_BYTECODE (NativeInterface, "com/rmsl/juce/JuceWebViewClasses$NativeInterface", 16, juceWebViewClasses)
+     DECLARE_JNI_CLASS_WITH_BYTECODE (NativeInterface, "com/rmsl/juce/JuceWebViewClasses$NativeInterface", 24, juceWebViewClasses)
     #undef JNI_CLASS_MEMBERS
 
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \

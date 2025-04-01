@@ -1712,7 +1712,7 @@ private:
                    CALLBACK (generatedCallback<&StillPictureTaker::cameraCaptureSessionCaptureSequenceAbortedCallback>,   "cameraCaptureSessionCaptureSequenceAborted",   "(JZLandroid/hardware/camera2/CameraCaptureSession;I)V") \
                    CALLBACK (generatedCallback<&StillPictureTaker::cameraCaptureSessionCaptureSequenceCompletedCallback>, "cameraCaptureSessionCaptureSequenceCompleted", "(JZLandroid/hardware/camera2/CameraCaptureSession;IJ)V")
 
-                DECLARE_JNI_CLASS_WITH_BYTECODE (CameraCaptureSessionCaptureCallback, "com/rmsl/juce/CameraCaptureSessionCaptureCallback", 21, CameraSupportByteCode)
+                DECLARE_JNI_CLASS_WITH_BYTECODE (CameraCaptureSessionCaptureCallback, "com/rmsl/juce/CameraCaptureSessionCaptureCallback", 24, CameraSupportByteCode)
                 #undef JNI_CLASS_MEMBERS
 
                 LocalRef<jobject> createCaptureSessionCallback (bool createPreviewSession)

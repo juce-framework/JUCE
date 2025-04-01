@@ -187,7 +187,7 @@ constexpr uint8 activityCallbacksByteCode[]
  CALLBACK (juce_invokeImplementer, "dispatchInvoke", "(JLjava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;") \
  CALLBACK (juce_dispatchDelete, "dispatchFinalize", "(J)V")
 
- DECLARE_JNI_CLASS_WITH_BYTECODE (JuceInvocationHandler, "com/rmsl/juce/JuceInvocationHandler", 10, invocationHandleByteCode)
+ DECLARE_JNI_CLASS_WITH_BYTECODE (JuceInvocationHandler, "com/rmsl/juce/JuceInvocationHandler", 24, invocationHandleByteCode)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -710,7 +710,7 @@ static const uint8 javaFragmentOverlay[] =
  CALLBACK (generatedCallback<&FragmentOverlay::onStartCallback>,                    "onStartNative",                    "(J)V") \
  CALLBACK (generatedCallback<&FragmentOverlay::onRequestPermissionsResultCallback>, "onRequestPermissionsResultNative", "(JI[Ljava/lang/String;[I)V")
 
- DECLARE_JNI_CLASS_WITH_BYTECODE (JuceFragmentOverlay, "com/rmsl/juce/FragmentOverlay", 16, javaFragmentOverlay)
+ DECLARE_JNI_CLASS_WITH_BYTECODE (JuceFragmentOverlay, "com/rmsl/juce/FragmentOverlay", 24, javaFragmentOverlay)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
