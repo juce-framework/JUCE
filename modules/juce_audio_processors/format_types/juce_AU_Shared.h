@@ -47,12 +47,6 @@
  #define JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED 0
 #endif
 
-#include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
-
-#if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
- #include <juce_audio_basics/midi/ump/juce_UMP.h>
-#endif
-
 namespace juce
 {
 

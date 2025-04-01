@@ -110,6 +110,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "midi/juce_MidiFile.h"
 #include "midi/juce_MidiKeyboardState.h"
 #include "midi/juce_MidiRPN.h"
+#include "midi/juce_MidiDataConcatenator.h"
 #include "mpe/juce_MPEValue.h"
 #include "mpe/juce_MPENote.h"
 #include "mpe/juce_MPEZoneLayout.h"

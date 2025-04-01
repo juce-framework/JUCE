@@ -32,10 +32,218 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
 namespace juce::universal_midi_packets
 {
+
+/**
+    Holds the data from a stream configuration notification message, with strong types.
+
+    @tags{Audio}
+*/
+class StreamConfiguration
+{
+public:
+    [[nodiscard]] StreamConfiguration withProtocol (PacketProtocol p) const { return withFlag (isMidi2, p == PacketProtocol::MIDI_2_0); }
+    [[nodiscard]] StreamConfiguration withTransmitTimestamp (bool b)  const { return withFlag (transmitTimestamp, b); }
+    [[nodiscard]] StreamConfiguration withReceiveTimestamp  (bool b)  const { return withFlag (receiveTimestamp,  b); }
+
+    /** The protocol in use by the endpoint. This protocol will be used for sending and receiving messages. */
+    [[nodiscard]] PacketProtocol getProtocol()                    const { return getFlag (isMidi2) ? PacketProtocol::MIDI_2_0 : PacketProtocol::MIDI_1_0; }
+    /** True if this endpoint intends to send JR timestamps. */
+    [[nodiscard]] bool getTransmitTimestamp()                     const { return getFlag (transmitTimestamp); }
+    /** True if this endpoint expects to receive JR timestamps. */
+    [[nodiscard]] bool getReceiveTimestamp()                      const { return getFlag (receiveTimestamp); }
+
+    bool operator== (const StreamConfiguration& other) const { return options == other.options; }
+    bool operator!= (const StreamConfiguration& other) const { return options != other.options; }
+
+private:
+    enum Flags
+    {
+        isMidi2                 = 1 << 0,
+        transmitTimestamp       = 1 << 1,
+        receiveTimestamp        = 1 << 2,
+    };
+
+    StreamConfiguration withFlag (Flags f, bool value) const
+    {
+        return withMember (*this, &StreamConfiguration::options, value ? (options | f) : (options & ~f));
+    }
+
+    bool getFlag (Flags f) const
+    {
+        return (options & f) != 0;
+    }
+
+    int options = 0;
+};
+
+/**
+    Holds the data from an endpoint info notification message, with strong types.
+
+    @tags{Audio}
+*/
+class EndpointInfo
+{
+    auto tie() const { return std::tie (versionMajor, versionMinor, numFunctionBlocks, flags); }
+
+public:
+    [[nodiscard]] EndpointInfo withVersion (uint8_t major, uint8_t minor) const
+    {
+        return withMember (withMember (*this, &EndpointInfo::versionMinor, minor), &EndpointInfo::versionMajor, major);
+    }
+
+    [[nodiscard]] EndpointInfo withNumFunctionBlocks (uint8_t x) const
+    {
+        return withMember (*this, &EndpointInfo::numFunctionBlocks, x);
+    }
+
+    [[nodiscard]] EndpointInfo withStaticFunctionBlocks  (bool b) const       { return withFlag (staticFunctionBlocks, b); }
+    [[nodiscard]] EndpointInfo withMidi1Support          (bool b) const       { return withFlag (supportsMidi1, b); }
+    [[nodiscard]] EndpointInfo withMidi2Support          (bool b) const       { return withFlag (supportsMidi2, b); }
+    [[nodiscard]] EndpointInfo withReceiveJRSupport      (bool b) const       { return withFlag (supportsReceiveJR, b); }
+    [[nodiscard]] EndpointInfo withTransmitJRSupport     (bool b) const       { return withFlag (supportsTransmitJR, b); }
+
+    /** The major version byte. */
+    [[nodiscard]] uint8_t getVersionMajor()       const { return versionMajor; }
+    /** The minor version byte. */
+    [[nodiscard]] uint8_t getVersionMinor()       const { return versionMinor; }
+    /** The number of function blocks declared on this endpoint. */
+    [[nodiscard]] uint8_t getNumFunctionBlocks()  const { return numFunctionBlocks; }
+    /** True if the function block configuration cannot change. */
+    [[nodiscard]] bool hasStaticFunctionBlocks()  const { return getFlag (staticFunctionBlocks); }
+    /** True if this endpoint is capable of supporting the MIDI 1.0 protocol. */
+    [[nodiscard]] bool hasMidi1Support()          const { return getFlag (supportsMidi1); }
+    /** True if this endpoint is capable of supporting the MIDI 2.0 protocol. */
+    [[nodiscard]] bool hasMidi2Support()          const { return getFlag (supportsMidi2); }
+    /** True if this endpoint is capable of receiving JR timestamps. */
+    [[nodiscard]] bool hasReceiveJRSupport()      const { return getFlag (supportsReceiveJR); }
+    /** True if this endpoint is capable of transmitting JR timestamps. */
+    [[nodiscard]] bool hasTransmitJRSupport()     const { return getFlag (supportsTransmitJR); }
+
+    bool operator== (const EndpointInfo& other) const { return tie() == other.tie(); }
+    bool operator!= (const EndpointInfo& other) const { return tie() != other.tie(); }
+
+private:
+    enum Flags
+    {
+        staticFunctionBlocks    = 1 << 0,
+        supportsMidi1           = 1 << 1,
+        supportsMidi2           = 1 << 2,
+        supportsReceiveJR       = 1 << 3,
+        supportsTransmitJR      = 1 << 4,
+    };
+
+    EndpointInfo withFlag (Flags f, bool value) const
+    {
+        return withMember (*this, &EndpointInfo::flags, (uint8_t) (value ? (flags | f) : (flags & ~f)));
+    }
+
+    bool getFlag (Flags f) const
+    {
+        return (flags & f) != 0;
+    }
+
+    uint8_t versionMajor, versionMinor, numFunctionBlocks, flags;
+};
+
+/** Directions that can apply to a Function Block or Group Terminal Block. */
+enum class BlockDirection : uint8_t
+{
+    unknown       = 0b00, ///< Block direction is unknown or undeclared
+    receiver      = 0b01, ///< Block is a receiver of messages
+    sender        = 0b10, ///< Block is a sender of messages
+    bidirectional = 0b11, ///< Block both sends and receives messages
+};
+
+/** UI hints that can apply to a Function Block or Group Terminal Block. */
+enum class BlockUiHint : uint8_t
+{
+    unknown       = 0b00, ///< Block direction is unknown or undeclared
+    receiver      = 0b01, ///< Block is a receiver of messages
+    sender        = 0b10, ///< Block is a sender of messages
+    bidirectional = 0b11, ///< Block both sends and receives messages
+};
+
+/** Describes how a MIDI 1.0 port maps to a given Block, if applicable. */
+enum class BlockMIDI1ProxyKind : uint8_t
+{
+    inapplicable          = 0b00, ///< Block does not represent a MIDI 1.0 port
+    unrestrictedBandwidth = 0b01, ///< Block represents a MIDI 1.0 port and can handle high bandwidth
+    restrictedBandwidth   = 0b10, ///< Block represents a MIDI 1.0 port that requires restricted bandwidth
+};
+
+/**
+    Holds the data from a function block info notification message, with strong types.
+
+    @tags{Audio}
+*/
+class BlockInfo
+{
+public:
+    [[nodiscard]] BlockInfo withEnabled (bool x) const { return withMember (*this, &BlockInfo::enabled, x); }
+    [[nodiscard]] BlockInfo withUiHint (BlockUiHint x) const { return withMember (*this, &BlockInfo::flags, replaceBits<4, 2> (flags, (uint8_t) x)); }
+    [[nodiscard]] BlockInfo withMIDI1ProxyKind (BlockMIDI1ProxyKind x) const { return withMember (*this, &BlockInfo::flags, replaceBits<2, 2> (flags, (uint8_t) x)); }
+    [[nodiscard]] BlockInfo withDirection (BlockDirection x) const { return withMember (*this, &BlockInfo::flags, replaceBits<0, 2> (flags, (uint8_t) x)); }
+    [[nodiscard]] BlockInfo withFirstGroup (uint8_t x) const { return withMember (*this, &BlockInfo::firstGroup, x); }
+    [[nodiscard]] BlockInfo withNumGroups (uint8_t x) const { return withMember (*this, &BlockInfo::numGroups, x); }
+    [[nodiscard]] BlockInfo withCiVersion (uint8_t x) const { return withMember (*this, &BlockInfo::ciVersion, x); }
+    [[nodiscard]] BlockInfo withMaxSysex8Streams (uint8_t x) const { return withMember (*this, &BlockInfo::numSysex8Streams, x); }
+
+    /** True if the block is enabled/active, false otherwise. */
+    bool isEnabled() const { return enabled; }
+    /** The directionality of the block, for display to the user. */
+    BlockUiHint getUiHint() const { return (BlockUiHint) getBits<4, 2> (flags); }
+    /** The kind of MIDI 1.0 proxy represented by this block, if any. */
+    BlockMIDI1ProxyKind getMIDI1ProxyKind() const { return (BlockMIDI1ProxyKind) getBits<2, 2> (flags); }
+    /** The actual directionality of the block. */
+    BlockDirection getDirection() const { return (BlockDirection) getBits<0, 2> (flags); }
+    /** The zero-based index of the first group in the block. */
+    uint8_t getFirstGroup() const { return firstGroup; }
+    /** The number of groups contained in the block, must be one or greater. */
+    uint8_t getNumGroups() const { return numGroups; }
+    /** The CI version supported by this block. Implies a bidirectional block. */
+    uint8_t getCiVersion() const { return ciVersion; }
+    /** The number of simultaneous SysEx8 streams supported on this block. */
+    uint8_t getMaxSysex8Streams() const { return numSysex8Streams; }
+
+    bool operator== (const BlockInfo& other) const
+    {
+        const auto tie = [] (auto& x)
+        {
+            return std::tuple (x.enabled, x.flags, x.firstGroup, x.numGroups, x.ciVersion, x.numSysex8Streams);
+        };
+        return tie (*this) == tie (other);
+    }
+
+    bool operator!= (const BlockInfo& other) const
+    {
+        return ! operator== (other);
+    }
+
+private:
+    template <auto position, auto numBits, typename Value>
+    static Value replaceBits (Value value, Value replacement)
+    {
+        constexpr auto mask = ((Value) 1 << numBits) - 1;
+        const auto maskedValue = value & ~(mask << position);
+        return (Value) (maskedValue | (replacement << position));
+    }
+
+    template <auto position, auto numBits, typename Value>
+    static Value getBits (Value value)
+    {
+        constexpr auto mask = ((Value) 1 << numBits) - 1;
+        return (value >> position) & mask;
+    }
+
+    uint8_t enabled{};
+    uint8_t flags{};
+    uint8_t firstGroup{};
+    uint8_t numGroups{};
+    uint8_t ciVersion{};
+    uint8_t numSysex8Streams{};
+};
 
 /**
     This struct holds functions that can be used to create different kinds
@@ -45,6 +253,36 @@ namespace juce::universal_midi_packets
 */
 struct Factory
 {
+    template <typename Callback>
+    static void splitIntoPackets (Span<const std::byte> bytes, size_t bytesPerPacket, Callback&& callback)
+    {
+        const auto numPackets = (bytes.size() / bytesPerPacket) + ((bytes.size() % bytesPerPacket) != 0);
+        auto* dataOffset = bytes.data();
+
+        if (numPackets <= 1)
+        {
+            callback (SysEx7::Kind::complete, bytes);
+            return;
+        }
+
+        for (auto i = static_cast<ssize_t> (bytes.size()); i > 0; i -= (ssize_t) bytesPerPacket, dataOffset += bytesPerPacket)
+        {
+            const auto kind = [&]
+            {
+                if (i == (ssize_t) bytes.size())
+                    return SysEx7::Kind::begin;
+
+                if (i <= (ssize_t) bytesPerPacket)
+                    return SysEx7::Kind::end;
+
+                return SysEx7::Kind::continuation;
+            }();
+
+            const auto bytesNow = std::min ((ssize_t) bytesPerPacket, i);
+            callback (kind, Span (dataOffset, (size_t) bytesNow));
+        }
+    }
+
     /** @internal */
     struct Detail
     {
@@ -91,6 +329,41 @@ struct Factory
 
             return PacketX4 { words };
         }
+
+        static PacketX4 makePacketX4 (Span<const std::byte> header,
+                                      Span<const std::byte> data)
+        {
+            jassert (data.size() <= 14);
+
+            std::array<std::byte, 16> bytes{{}};
+            std::copy (header.begin(), header.end(), bytes.begin());
+            std::copy (data.begin(), data.end(), std::next (bytes.begin(), (ptrdiff_t) header.size()));
+
+            std::array<uint32_t, 4> words{};
+
+            size_t index = 0;
+
+            for (auto& word : words)
+                word = ByteOrder::bigEndianInt (bytes.data() + 4 * index++);
+
+            return PacketX4 { words };
+        }
+
+        static PacketX4 makeStreamSubpacket (std::byte status,
+                                             SysEx7::Kind kind,
+                                             Span<const std::byte> data)
+        {
+            jassert (data.size() <= 14);
+            const std::byte header[] { std::byte (0xf0) | std::byte ((uint8_t) kind << 2), status, };
+            return makePacketX4 (header, data);
+        }
+
+        static PacketX4 makeStreamConfiguration (StreamConfiguration options)
+        {
+            return Detail::makeStream().withU8<0x2> (options.getProtocol() == PacketProtocol::MIDI_2_0 ? 0x2 : 0x1)
+                                       .withU8<0x3> ((options.getReceiveTimestamp() ? 0x2 : 0x0) | (options.getTransmitTimestamp() ? 0x1 : 0x0));
+        }
+
     };
 
     static PacketX1 makeNoop (uint8_t group)
@@ -521,6 +794,23 @@ struct Factory
                                    .withU8<7> ((uint8_t) filterBitmap);
     }
 
+    static PacketX4 makeEndpointInfoNotification (const EndpointInfo& info)
+    {
+        return Detail::makeStream().withU8<1> (1)
+                                   .withU8<2> (info.getVersionMajor())
+                                   .withU8<3> (info.getVersionMinor())
+                                   .withU8<4> (info.getNumFunctionBlocks() | (info.hasStaticFunctionBlocks() ? 0x80 : 0x00))
+                                   .withU8<6> ((info.hasMidi1Support() ? 0x1 : 0x0) | (info.hasMidi2Support() ? 0x2 : 0x0))
+                                   .withU8<7> ((info.hasTransmitJRSupport() ? 0x1 : 0x0) | (info.hasReceiveJRSupport() ? 0x2 : 0x0));
+    }
+
+    static PacketX4 makeFunctionBlockDiscovery (uint8_t block, std::byte filterBitmap)
+    {
+        return Detail::makeStream().withU8<1> (0x10)
+                                   .withU8<2> (block)
+                                   .withU8<3> ((uint8_t) filterBitmap);
+    }
+
     static PacketX4 makeDeviceIdentityNotification (DeviceInfo info)
     {
         return Detail::makeStream().withU8<0x1> (2)
@@ -536,8 +826,87 @@ struct Factory
                                    .withU8<0xe> ((uint8_t) info.revision[2])
                                    .withU8<0xf> ((uint8_t) info.revision[3]);
     }
+
+    template <typename Fn>
+    static bool makeEndpointNameNotification (const String& bytes, Fn&& fn)
+    {
+        constexpr auto maxSize = 98;
+
+        if (maxSize <= bytes.getNumBytesAsUTF8())
+            return false;
+
+        const Span byteSpan { reinterpret_cast<const std::byte*> (bytes.toRawUTF8()), bytes.getNumBytesAsUTF8() };
+
+        splitIntoPackets (byteSpan, 14, [&] (SysEx7::Kind kind, Span<const std::byte> bytesThisTime)
+        {
+            const auto packet = Detail::makeStreamSubpacket (std::byte (3), kind, bytesThisTime);
+            fn (View (packet.data()));
+        });
+
+        return true;
+    }
+
+    template <typename Fn>
+    static bool makeProductInstanceIdNotification (const String& bytes, Fn&& fn)
+    {
+        constexpr auto maxSize = 42;
+
+        if (maxSize < bytes.getNumBytesAsUTF8())
+            return false;
+
+        const Span byteSpan { reinterpret_cast<const std::byte*> (bytes.toRawUTF8()), bytes.getNumBytesAsUTF8() };
+
+        splitIntoPackets (byteSpan, 14, [&] (SysEx7::Kind kind, Span<const std::byte> bytesThisTime)
+        {
+            const auto packet = Detail::makeStreamSubpacket (std::byte (4), kind, bytesThisTime);
+            fn (View (packet.data()));
+        });
+
+        return true;
+    }
+
+    template <typename Fn>
+    static bool makeFunctionBlockNameNotification (uint8_t index, const String& bytes, Fn&& fn)
+    {
+        constexpr auto maxSize = 91;
+
+        if (maxSize < bytes.getNumBytesAsUTF8())
+            return false;
+
+        const Span byteSpan { reinterpret_cast<const std::byte*> (bytes.toRawUTF8()), bytes.getNumBytesAsUTF8() };
+
+        splitIntoPackets (byteSpan, 13, [&] (SysEx7::Kind kind, Span<const std::byte> bytesThisTime)
+        {
+            const std::byte header[] { std::byte (0xf0) | std::byte ((uint8_t) kind << 2), std::byte (0x12), std::byte (index) };
+            fn (View (Detail::makePacketX4 (header, bytesThisTime).data()));
+        });
+
+        return true;
+    }
+
+    static PacketX4 makeFunctionBlockInfoNotification (uint8_t index, const BlockInfo& info)
+    {
+        const auto flags = ((uint8_t) info.getDirection() << 0)
+                         | ((uint8_t) info.getMIDI1ProxyKind() << 2)
+                         | ((uint8_t) info.getUiHint() << 4);
+        return Detail::makeStream().withU8<0x1> (0x11)
+                                   .withU8<0x2> ((uint8_t) (index | (info.isEnabled() << 7)))
+                                   .withU8<0x3> ((uint8_t) flags)
+                                   .withU8<0x4> (info.getFirstGroup())
+                                   .withU8<0x5> (info.getNumGroups())
+                                   .withU8<0x6> (info.getCiVersion())
+                                   .withU8<0x7> (info.getMaxSysex8Streams());
+    }
+
+    static PacketX4 makeStreamConfigurationRequest (StreamConfiguration options)
+    {
+        return Detail::makeStreamConfiguration (options).withU8<0x1> (5);
+    }
+
+    static PacketX4 makeStreamConfigurationNotification (StreamConfiguration options)
+    {
+        return Detail::makeStreamConfiguration (options).withU8<0x1> (6);
+    }
 };
 
 } // namespace juce::universal_midi_packets
-
-#endif
