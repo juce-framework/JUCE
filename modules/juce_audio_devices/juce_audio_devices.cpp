@@ -57,6 +57,8 @@
 
 #include "juce_audio_devices.h"
 
+#include "midi_io/juce_WaitFreeListeners.h"
+#include "midi_io/juce_WaitFreeListeners.cpp"
 #include "audio_io/juce_SampleRateHelpers.cpp"
 #include "midi_io/juce_MidiDeviceListConnectionBroadcaster.cpp"
 
