@@ -87,7 +87,8 @@ struct MidiDeviceListEntry final : ReferenceCountedObject
 class MidiDemo final : public Component,
                        private MidiKeyboardState::Listener,
                        private MidiInputCallback,
-                       private AsyncUpdater
+                       private AsyncUpdater,
+                       private ump::EndpointsListener
 {
 public:
     //==============================================================================
@@ -134,13 +135,16 @@ public:
         setSize (732, 520);
 
         updateDeviceLists();
+        updateVirtualPorts();
 
-        if (virtualIn != nullptr)
-            virtualIn->start();
+        ump::Endpoints::getInstance()->setVirtualMidiBytestreamServiceActive (true);
+        ump::Endpoints::getInstance()->addListener (*this);
     }
 
     ~MidiDemo() override
     {
+        ump::Endpoints::getInstance()->removeListener (*this);
+
         midiInputs .clear();
         midiOutputs.clear();
         keyboardState.removeListener (this);
@@ -478,6 +482,34 @@ private:
             updateDeviceList (isInput);
     }
 
+    void endpointsChanged() override
+    {
+        updateDeviceLists();
+    }
+
+    void virtualMidiServiceActiveChanged() override
+    {
+        if (ump::Endpoints::getInstance()->isVirtualMidiBytestreamServiceActive())
+        {
+            if (virtualIn == nullptr || virtualOut == nullptr)
+                updateVirtualPorts();
+        }
+        else
+        {
+            virtualIn = nullptr;
+            virtualOut = nullptr;
+        }
+    }
+
+    void updateVirtualPorts()
+    {
+        virtualIn = MidiInput::createNewDevice ("MidiDemo Virtual In", this);
+        virtualOut = MidiOutput::createNewDevice ("MidiDemo Virtual Out");
+
+        if (virtualIn != nullptr)
+            virtualIn->start();
+    }
+
     //==============================================================================
     Label midiInputLabel    { "Midi Input Label",  "MIDI Input:" };
     Label midiOutputLabel   { "Midi Output Label", "MIDI Output:" };
@@ -494,13 +526,8 @@ private:
     CriticalSection midiMonitorLock;
     Array<MidiMessage> incomingMessages;
 
-    std::unique_ptr<MidiInput> virtualIn = MidiInput::createNewDevice ("MidiDemo Virtual In", this);
-    std::unique_ptr<MidiOutput> virtualOut = MidiOutput::createNewDevice ("MidiDemo Virtual Out");
-
-    MidiDeviceListConnection connection = MidiDeviceListConnection::make ([this]
-    {
-        updateDeviceLists();
-    });
+    std::unique_ptr<MidiInput> virtualIn;
+    std::unique_ptr<MidiOutput> virtualOut;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiDemo)

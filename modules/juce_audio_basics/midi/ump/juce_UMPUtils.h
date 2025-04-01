@@ -128,10 +128,20 @@ struct Utils
         stream              = 0xf,
     };
 
+    static constexpr bool hasGroup (MessageKind k)
+    {
+        return ! isGroupless (k);
+    }
+
+    static constexpr bool isGroupless (MessageKind k)
+    {
+        return k == MessageKind::utility || k == MessageKind::stream;
+    }
+
     static constexpr MessageKind getMessageType (uint32_t w) noexcept { return MessageKind { U4<0>::get (w) }; }
-    static constexpr uint8_t     getGroup       (uint32_t w) noexcept { return U4<1>::get (w); }
     static constexpr std::byte   getStatus      (uint32_t w) noexcept { return std::byte { U4<2>::get (w) }; }
     static constexpr uint8_t     getChannel     (uint32_t w) noexcept { return U4<3>::get (w); }
+    static constexpr uint8_t     getGroup       (uint32_t w) noexcept { return U4<1>::get (w); }
 };
 
 } // namespace juce::universal_midi_packets

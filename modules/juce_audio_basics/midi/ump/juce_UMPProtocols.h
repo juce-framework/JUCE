@@ -36,15 +36,25 @@
 namespace juce::universal_midi_packets
 {
 
-/** The kinds of MIDI protocol that can be formatted into Universal MIDI Packets. */
-enum class PacketProtocol
+/** Kinds of MIDI message transport.
+*/
+enum class Transport : uint8_t
+{
+    bytestream, ///< A stream of variable-length messages. Suitable for MIDI 1.0.
+    ump,        ///< A stream of 32-bit words. Suitable for MIDI-1UP and MIDI 2.0.
+};
+
+/** The kinds of MIDI protocol that can be formatted into Universal MIDI Packets.
+*/
+enum class PacketProtocol : uint8_t
 {
     MIDI_1_0,
     MIDI_2_0,
 };
 
-/** All kinds of MIDI protocol understood by JUCE. */
-enum class MidiProtocol
+/** All kinds of MIDI protocol understood by JUCE.
+*/
+enum class MidiProtocol : uint8_t
 {
     bytestream,
     UMP_MIDI_1_0,

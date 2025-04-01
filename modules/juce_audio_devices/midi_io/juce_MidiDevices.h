@@ -35,8 +35,6 @@
 namespace juce
 {
 
-class MidiDeviceListConnectionBroadcaster;
-
 /**
     To find out when the available MIDI devices change, call MidiDeviceListConnection::make(),
     passing a lambda that will be called on each configuration change.
@@ -67,22 +65,6 @@ public:
     */
     MidiDeviceListConnection() = default;
 
-    MidiDeviceListConnection (const MidiDeviceListConnection&) = delete;
-    MidiDeviceListConnection (MidiDeviceListConnection&& other) noexcept
-        : broadcaster (std::exchange (other.broadcaster, nullptr)),
-          key (std::exchange (other.key, Key{}))
-    {
-    }
-
-    MidiDeviceListConnection& operator= (const MidiDeviceListConnection&) = delete;
-    MidiDeviceListConnection& operator= (MidiDeviceListConnection&& other) noexcept
-    {
-        MidiDeviceListConnection (std::move (other)).swap (*this);
-        return *this;
-    }
-
-    ~MidiDeviceListConnection() noexcept;
-
     /** Clears this connection.
 
         If this object had an active connection, that connection will be deactivated, and the
@@ -90,7 +72,7 @@ public:
     */
     void reset() noexcept
     {
-        MidiDeviceListConnection().swap (*this);
+        token.reset();
     }
 
     /** Registers a function to be called whenever the midi device list changes.
@@ -102,22 +84,12 @@ public:
     static MidiDeviceListConnection make (std::function<void()>);
 
 private:
-    MidiDeviceListConnection (MidiDeviceListConnectionBroadcaster* b, const Key k)
-        : broadcaster (b), key (k) {}
-
-    void swap (MidiDeviceListConnection& other) noexcept
-    {
-        std::swap (other.broadcaster, broadcaster);
-        std::swap (other.key, key);
-    }
-
-    MidiDeviceListConnectionBroadcaster* broadcaster = nullptr;
-    Key key = {};
+    ErasedScopeGuard token;
 };
 
 //==============================================================================
 /**
-    This struct contains information about a MIDI input or output device.
+    This struct contains information about a MIDI 1.0 input or output port.
 
     You can get one of these structs by calling the static getAvailableDevices() or
     getDefaultDevice() methods of MidiInput and MidiOutput or by calling getDeviceInfo()
@@ -148,22 +120,29 @@ struct MidiDeviceInfo
 
     /** The identifier for this device.
 
-        This will be provided by the OS and it's format will differ on different systems
+        This will be provided by the OS and its format will differ on different systems
         e.g. on macOS it will be a number whereas on Windows it will be a long alphanumeric string.
     */
     String identifier;
 
+    [[nodiscard]] MidiDeviceInfo withName       (String x) const { return withMember (*this, &MidiDeviceInfo::name, x); }
+    [[nodiscard]] MidiDeviceInfo withIdentifier (String x) const { return withMember (*this, &MidiDeviceInfo::identifier, x); }
+
     //==============================================================================
-    auto tie() const { return std::tie (name, identifier); }
-    bool operator== (const MidiDeviceInfo& other) const noexcept   { return tie() == other.tie(); }
-    bool operator!= (const MidiDeviceInfo& other) const noexcept   { return tie() != other.tie(); }
+    bool operator== (const MidiDeviceInfo& other) const noexcept
+    {
+        const auto tie = [] (auto& x) { return std::tuple (x.name, x.identifier); };
+        return tie (*this) == tie (other);
+    }
+
+    bool operator!= (const MidiDeviceInfo& other) const noexcept   { return ! operator== (other); }
 };
 
 class MidiInputCallback;
 
 //==============================================================================
 /**
-    Represents a midi input device.
+    Represents a midi input device using the old bytestream format.
 
     To create one of these, use the static getAvailableDevices() method to find out what
     inputs are available, and then use the openDevice() method to try to open one.
@@ -175,6 +154,12 @@ class MidiInputCallback;
 class JUCE_API  MidiInput  final
 {
 public:
+    MidiInput (MidiInput&&) = delete;
+
+    MidiInput& operator= (MidiInput&&) = delete;
+
+    ~MidiInput();
+
     //==============================================================================
     /** Returns a list of the available midi input devices.
 
@@ -196,13 +181,14 @@ public:
 
         @param deviceIdentifier  the ID of the device to open - use the getAvailableDevices() method to
                                  find the available devices that can be opened
-        @param callback          the object that will receive the midi messages from this device
+        @param callback          the object that will receive the midi messages from this device,
+                                 you can also add and remove receivers with
+                                 addCallback() and removeCallback()
 
         @see MidiInputCallback, getDevices
     */
-    static std::unique_ptr<MidiInput> openDevice (const String& deviceIdentifier, MidiInputCallback* callback);
+    static std::unique_ptr<MidiInput> openDevice (const String& deviceIdentifier, MidiInputCallback* callback = nullptr);
 
-   #if JUCE_LINUX || JUCE_BSD || JUCE_MAC || JUCE_IOS || DOXYGEN
     /** This will try to create a new midi input device (only available on Linux, macOS and iOS).
 
         This will attempt to create a new midi input device with the specified name for other
@@ -216,13 +202,9 @@ public:
         @param deviceName  the name of the device to create
         @param callback    the object that will receive the midi messages from this device
     */
-    static std::unique_ptr<MidiInput> createNewDevice (const String& deviceName, MidiInputCallback* callback);
-   #endif
+    static std::unique_ptr<MidiInput> createNewDevice (const String& deviceName, MidiInputCallback* callback = nullptr);
 
     //==============================================================================
-    /** Destructor. */
-    ~MidiInput();
-
     /** Starts the device running.
 
         After calling this, the device will start sending midi messages to the MidiInputCallback
@@ -239,37 +221,37 @@ public:
     void stop();
 
     /** Returns the MidiDeviceInfo struct containing some information about this device. */
-    MidiDeviceInfo getDeviceInfo() const noexcept    { return deviceInfo; }
+    MidiDeviceInfo getDeviceInfo() const noexcept;
 
     /** Returns the identifier of this device. */
-    String getIdentifier() const noexcept            { return deviceInfo.identifier; }
+    String getIdentifier() const noexcept            { return getDeviceInfo().identifier; }
 
     /** Returns the name of this device. */
-    String getName() const noexcept                  { return deviceInfo.name; }
+    String getName() const noexcept                  { return getDeviceInfo().name; }
 
     /** Sets a custom name for the device. */
-    void setName (const String& newName) noexcept    { deviceInfo.name = newName; }
+    void setName (const String& newName) noexcept;
 
-    //==============================================================================
-    /** @cond */
-    [[deprecated ("Use getAvailableDevices instead.")]]
-    static StringArray getDevices();
-    [[deprecated ("Use getDefaultDevice instead.")]]
-    static int getDefaultDeviceIndex();
-    [[deprecated ("Use openDevice that takes a device identifier instead.")]]
-    static std::unique_ptr<MidiInput> openDevice (int, MidiInputCallback*);
-    /** @endcond */
+    /** In the case that this input refers to a specific group of a UMP input, this returns the
+        index of the group.
+    */
+    uint8_t getGroup() const;
 
-    /** @internal */
-    class Pimpl;
+    /** Returns the EndpointId that uniquely identifies the UMP endpoint that contains this input. */
+    ump::EndpointId getEndpointId() const;
+
+    /** Adds an input listener. */
+    void addCallback (MidiInputCallback&);
+
+    /** Removed an input listener. */
+    void removeCallback (MidiInputCallback&);
 
 private:
+    class Impl;
+    MidiInput();
+
     //==============================================================================
-    explicit MidiInput (const String&, const String&);
-
-    MidiDeviceInfo deviceInfo;
-
-    std::unique_ptr<Pimpl> internal;
+    std::unique_ptr<Impl> pimpl;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInput)
 };
@@ -316,15 +298,15 @@ public:
         The message passed in will contain the start of a sysex, but won't be finished
         with the terminating 0xf7 byte.
     */
-    virtual void handlePartialSysexMessage (MidiInput* source,
-                                            const uint8* messageData,
-                                            int numBytesSoFar,
-                                            double timestamp);
+    virtual void handlePartialSysexMessage ([[maybe_unused]] MidiInput* source,
+                                            [[maybe_unused]] const uint8* messageData,
+                                            [[maybe_unused]] int numBytesSoFar,
+                                            [[maybe_unused]] double timestamp) {}
 };
 
 //==============================================================================
 /**
-    Represents a midi output device.
+    Represents a midi output device using the old bytestream format.
 
     To create one of these, use the static getAvailableDevices() method to find out what
     outputs are available, and then use the openDevice() method to try to open one.
@@ -333,7 +315,7 @@ public:
 
     @tags{Audio}
 */
-class JUCE_API  MidiOutput  final  : private Thread
+class JUCE_API  MidiOutput  final
 {
 public:
     //==============================================================================
@@ -346,7 +328,10 @@ public:
     static Array<MidiDeviceInfo> getAvailableDevices();
 
     /** Returns the MidiDeviceInfo of the default midi output device to use. */
-    static MidiDeviceInfo getDefaultDevice();
+    static MidiDeviceInfo getDefaultDevice()
+    {
+        return getAvailableDevices().getFirst();
+    }
 
     /** Tries to open one of the midi output devices.
 
@@ -361,7 +346,6 @@ public:
     */
     static std::unique_ptr<MidiOutput> openDevice (const String& deviceIdentifier);
 
-   #if JUCE_LINUX || JUCE_BSD || JUCE_MAC || JUCE_IOS || DOXYGEN
     /** This will try to create a new midi output device (only available on Linux, macOS and iOS).
 
         This will attempt to create a new midi output device with the specified name that other
@@ -375,30 +359,45 @@ public:
         @param deviceName  the name of the device to create
     */
     static std::unique_ptr<MidiOutput> createNewDevice (const String& deviceName);
-   #endif
-
-    //==============================================================================
-    /** Destructor. */
-    ~MidiOutput() override;
 
     /** Returns the MidiDeviceInfo struct containing some information about this device. */
-    MidiDeviceInfo getDeviceInfo() const noexcept    { return deviceInfo; }
+    MidiDeviceInfo getDeviceInfo() const noexcept;
 
     /** Returns the identifier of this device. */
-    String getIdentifier() const noexcept            { return deviceInfo.identifier; }
+    String getIdentifier() const noexcept            { return getDeviceInfo().identifier; }
 
     /** Returns the name of this device. */
-    String getName() const noexcept                  { return deviceInfo.name; }
+    String getName() const noexcept                  { return getDeviceInfo().name; }
 
     /** Sets a custom name for the device. */
-    void setName (const String& newName) noexcept    { deviceInfo.name = newName; }
+    void setName (const String& newName) noexcept    { customName = newName; }
+
+    /** In the case that this output refers to a specific group of a UMP output, this returns the
+        index of the group.
+    */
+    uint8_t getGroup() const { return group; }
+
+    /** Returns the EndpointId that uniquely identifies the UMP endpoint that contains this output. */
+    ump::EndpointId getEndpointId() const { return connection.getEndpointId(); }
 
     //==============================================================================
     /** Sends out a MIDI message immediately. */
-    void sendMessageNow (const MidiMessage& message);
+    void sendMessageNow (const MidiMessage& message)
+    {
+        converter.convert ({ group, message.asSpan() }, [this] (const ump::View& view)
+        {
+            ump::Iterator b (view.data(), view.size());
+            auto e = std::next (b);
+            connection.send (b, e);
+        });
+    }
 
     /** Sends out a sequence of MIDI messages immediately. */
-    void sendBlockOfMessagesNow (const MidiBuffer& buffer);
+    void sendBlockOfMessagesNow (const MidiBuffer& buffer)
+    {
+        for (const auto metadata : buffer)
+            sendMessageNow (metadata.getMessage());
+    }
 
     /** This lets you supply a block of messages that will be sent out at some point
         in the future.
@@ -419,62 +418,60 @@ public:
     */
     void sendBlockOfMessages (const MidiBuffer& buffer,
                               double millisecondCounterToStartAt,
-                              double samplesPerSecondForBuffer);
+                              double samplesPerSecondForBuffer)
+    {
+        // This needs to be a value in the future - check the documentation for this function!
+        jassert (millisecondCounterToStartAt > 0);
 
-    /** Gets rid of any midi messages that had been added by sendBlockOfMessages(). */
-    void clearAllPendingMessages();
+        const auto timeScaleFactor = 1000.0 / samplesPerSecondForBuffer;
+
+        for (const auto item : buffer)
+        {
+            auto msg = item.getMessage();
+            msg.setTimeStamp (millisecondCounterToStartAt + timeScaleFactor * msg.getTimeStamp());
+            outputThread.addEvent (msg);
+        }
+    }
+
+    /** Gets rid of any midi messages that had been added by sendBlockOfMessages().
+    */
+    void clearAllPendingMessages()          { outputThread.clearAllPendingMessages(); }
 
     /** Starts up a background thread so that the device can send blocks of data.
         Call this to get the device ready, before using sendBlockOfMessages().
     */
-    void startBackgroundThread();
+    void startBackgroundThread()            { outputThread.start(); }
 
     /** Stops the background thread, and clears any pending midi events.
         @see startBackgroundThread
     */
-    void stopBackgroundThread();
+    void stopBackgroundThread()             { outputThread.stop(); }
 
     /** Returns true if the background thread used to send blocks of data is running.
+
         @see startBackgroundThread, stopBackgroundThread
     */
-    bool isBackgroundThreadRunning() const noexcept  { return isThreadRunning(); }
-
-    //==============================================================================
-    /** @cond */
-    [[deprecated ("Use getAvailableDevices instead.")]]
-    static StringArray getDevices();
-    [[deprecated ("Use getDefaultDevice instead.")]]
-    static int getDefaultDeviceIndex();
-    [[deprecated ("Use openDevice that takes a device identifier instead.")]]
-    static std::unique_ptr<MidiOutput> openDevice (int);
-    /** @endcond */
-
-    /** @internal */
-    class Pimpl;
+    bool isBackgroundThreadRunning() const  { return outputThread.isRunning(); }
 
 private:
+    MidiOutput (std::shared_ptr<ump::Session>,
+                ump::Output,
+                uint8_t,
+                const MidiDeviceInfo&,
+                ump::LegacyVirtualOutput);
+
     //==============================================================================
-    struct PendingMessage
+    std::shared_ptr<ump::Session> session;
+    ump::LegacyVirtualOutput virtualEndpoint;
+    std::optional<String> customName;
+    ump::Output connection;
+    MidiDeviceInfo storedInfo;
+    ump::ToUMP1Converter converter;
+    uint8_t group{};
+    ScheduledEventThread<MidiMessage> outputThread { [this] (const MidiMessage& message)
     {
-        PendingMessage (const void* data, int len, double timeStamp)
-            : message (data, len, timeStamp)
-        {
-        }
-
-        MidiMessage message;
-        PendingMessage* next;
-    };
-
-    //==============================================================================
-    explicit MidiOutput (const String&, const String&);
-    void run() override;
-
-    MidiDeviceInfo deviceInfo;
-
-    std::unique_ptr<Pimpl> internal;
-
-    CriticalSection lock;
-    PendingMessage* firstMessage = nullptr;
+        sendMessageNow (message);
+    } };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutput)
 };

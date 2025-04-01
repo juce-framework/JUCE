@@ -169,6 +169,16 @@ public:
         return std::get<index> (contents);
     }
 
+    bool operator== (const Packet& other) const
+    {
+        return contents == other.contents;
+    }
+
+    bool operator!= (const Packet& other) const
+    {
+        return contents != other.contents;
+    }
+
     //==============================================================================
     using Contents = std::array<uint32_t, numWords>;
 

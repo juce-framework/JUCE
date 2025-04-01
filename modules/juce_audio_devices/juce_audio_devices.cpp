@@ -59,44 +59,47 @@
 
 #include "midi_io/juce_WaitFreeListeners.h"
 #include "midi_io/juce_WaitFreeListeners.cpp"
-#include "audio_io/juce_SampleRateHelpers.cpp"
 #include "midi_io/juce_MidiDeviceListConnectionBroadcaster.cpp"
+
+#include "midi_io/ump/juce_UMPIOHelpers.cpp"
+#include "midi_io/ump/juce_UMPInput.cpp"
+#include "midi_io/ump/juce_UMPOutput.cpp"
+#include "midi_io/ump/juce_UMPLegacyVirtualInput.cpp"
+#include "midi_io/ump/juce_UMPLegacyVirtualOutput.cpp"
+#include "midi_io/ump/juce_UMPVirtualEndpoint.cpp"
+#include "midi_io/ump/juce_UMPSession.cpp"
+#include "midi_io/ump/juce_UMPEndpoints.cpp"
+
+#include "audio_io/juce_SampleRateHelpers.cpp"
+#include "midi_io/juce_MidiDevices.cpp"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
  #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
  #include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
- #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
- #include <juce_audio_basics/midi/ump/juce_UMP.h>
 #endif
 
 #if JUCE_MAC
  #define Point CarbonDummyPointName
  #define Component CarbonDummyCompName
  #import <CoreAudio/AudioHardware.h>
- #import <CoreMIDI/MIDIServices.h>
+ #import <CoreMIDI/CoreMIDI.h>
  #import <AudioToolbox/AudioServices.h>
  #undef Point
  #undef Component
 
  #include "native/juce_CoreAudio_mac.cpp"
- #include "native/juce_CoreMidi_mac.mm"
 
 #elif JUCE_IOS
  #import <AudioToolbox/AudioToolbox.h>
  #import <AVFoundation/AVFoundation.h>
- #import <CoreMIDI/MIDIServices.h>
-
- #if TARGET_OS_SIMULATOR
-  #import <CoreMIDI/MIDINetworkSession.h>
- #endif
+ #import <CoreMIDI/CoreMIDI.h>
 
  #if JUCE_MODULE_AVAILABLE_juce_graphics
   #include <juce_graphics/native/juce_CoreGraphicsHelpers_mac.h>
  #endif
 
  #include "native/juce_Audio_ios.cpp"
- #include "native/juce_CoreMidi_mac.mm"
 
 //==============================================================================
 #elif JUCE_WINDOWS
@@ -131,9 +134,6 @@
   #include <robuffer.h>
   JUCE_END_IGNORE_WARNINGS_MSVC
  #endif
-
- #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
- #include "native/juce_Midi_windows.cpp"
 
  #if JUCE_ASIO
   /* This is very frustrating - we only need to use a handful of definitions from
@@ -173,6 +173,7 @@
   JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-length-array")
   #include <alsa/asoundlib.h>
   JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+  #include "native/juce_ALSA_weak_linux.h"
   #include "native/juce_ALSA_linux.cpp"
  #endif
 
@@ -191,11 +192,11 @@
 
  #undef SIZEOF
 
- #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
- #include "native/juce_Midi_linux.cpp"
-
 //==============================================================================
 #elif JUCE_ANDROID
+
+ // Currently we're just using this for enum values
+ #include <amidi/AMidi.h>
 
 namespace juce
 {
@@ -203,10 +204,7 @@ namespace juce
     RealtimeThreadFactory getAndroidRealtimeThreadFactory();
 } // namespace juce
 
-#include "native/juce_Audio_android.cpp"
-
- #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
- #include "native/juce_Midi_android.cpp"
+ #include "native/juce_Audio_android.cpp"
 
  #if JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE
   #include "native/juce_HighPerformanceAudioHelpers_android.h"
@@ -264,8 +262,6 @@ namespace juce
  #include "native/juce_JackAudio.cpp"
 #endif
 
-#include "midi_io/juce_MidiDevices.cpp"
-
 #if ! JUCE_SYSTEMAUDIOVOL_IMPLEMENTED
 namespace juce
 {
@@ -283,3 +279,25 @@ namespace juce
 #include "midi_io/juce_MidiMessageCollector.cpp"
 #include "sources/juce_AudioSourcePlayer.cpp"
 #include "sources/juce_AudioTransportSource.cpp"
+
+#if JUCE_LINUX || JUCE_BSD
+ #include "native/juce_Midi_linux.cpp"
+#elif JUCE_ANDROID
+ #include "native/juce_Midi_android.cpp"
+#elif JUCE_MAC || JUCE_IOS
+ #include "native/juce_CoreMidi_mac.mm"
+#elif JUCE_WINDOWS
+ #if JUCE_USE_WINDOWS_MIDI_SERVICES
+  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4265)
+  #include <winrt/Windows.Foundation.h>
+  #include <winrt/Windows.Foundation.Collections.h>
+  #include <winrt/Windows.Devices.Enumeration.h>
+
+  #include <winrt/Microsoft.Windows.Devices.Midi2.h>
+  #include <winrt/Microsoft.Windows.Devices.Midi2.Endpoints.Virtual.h>
+  #include <winmidi/init/Microsoft.Windows.Devices.Midi2.Initialization.hpp>
+  JUCE_END_IGNORE_WARNINGS_MSVC
+ #endif
+
+ #include "native/juce_Midi_windows.cpp"
+#endif
