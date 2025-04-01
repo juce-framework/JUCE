@@ -102,7 +102,7 @@
                    cameraPermissionNeeded="1" androidReadMediaAudioPermission="1"
                    androidReadMediaImagesPermission="1" androidReadMediaVideoPermission="1"
                    androidBluetoothScanNeeded="1" androidBluetoothAdvertiseNeeded="1"
-                   androidBluetoothConnectNeeded="1">
+                   androidBluetoothConnectNeeded="1" androidEnableVirtualMidi="1">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" recommendedWarnings="LLVM" androidAdditionalRawValueResources="Source/accessibilitynotificationicon.png"/>
         <CONFIGURATION isDebug="0" name="Release" recommendedWarnings="LLVM" androidAdditionalRawValueResources="Source/accessibilitynotificationicon.png"/>
