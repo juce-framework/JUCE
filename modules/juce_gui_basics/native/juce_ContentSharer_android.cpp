@@ -148,7 +148,7 @@ private:
      METHOD (constructor, "<init>", "(J[Ljava/lang/String;)V") \
      CALLBACK (generatedCallback<&AndroidContentSharerCursor::cursorClosed>, "contentSharerCursorClosed", "(J)V") \
 
-    DECLARE_JNI_CLASS_WITH_BYTECODE (JuceContentProviderCursor, "com/rmsl/juce/JuceContentProviderCursor", 16, javaJuceContentProviderCursor)
+    DECLARE_JNI_CLASS_WITH_BYTECODE (JuceContentProviderCursor, "com/rmsl/juce/JuceContentProviderCursor", 24, javaJuceContentProviderCursor)
     #undef JNI_CLASS_MEMBERS
 };
 
@@ -220,7 +220,7 @@ private:
      METHOD (stopWatching,  "stopWatching",  "()V") \
      CALLBACK (generatedCallback<&AndroidContentSharerFileObserver::onFileEventCallback>, "contentSharerFileObserverEvent", "(JILjava/lang/String;)V") \
 
-    DECLARE_JNI_CLASS_WITH_BYTECODE (JuceContentProviderFileObserver, "com/rmsl/juce/JuceContentProviderFileObserver", 16, javaJuceContentProviderFileObserver)
+    DECLARE_JNI_CLASS_WITH_BYTECODE (JuceContentProviderFileObserver, "com/rmsl/juce/JuceContentProviderFileObserver", 24, javaJuceContentProviderFileObserver)
     #undef JNI_CLASS_MEMBERS
 
     static void onFileEventCallback (JNIEnv*, AndroidContentSharerFileObserver& t, jint event, jstring path)

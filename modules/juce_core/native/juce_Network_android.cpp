@@ -207,7 +207,7 @@ DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer")
  METHOD (isExhausted, "isExhausted", "()Z") \
  METHOD (setPosition, "setPosition", "(J)Z") \
 
-DECLARE_JNI_CLASS_WITH_BYTECODE (HTTPStream, "com/rmsl/juce/JuceHTTPStream", 16, javaJuceHttpStream)
+DECLARE_JNI_CLASS_WITH_BYTECODE (HTTPStream, "com/rmsl/juce/JuceHTTPStream", 24, javaJuceHttpStream)
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

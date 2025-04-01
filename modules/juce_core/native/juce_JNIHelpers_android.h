@@ -294,6 +294,7 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
 #define DECLARE_JNI_CALLBACK(fieldID, stringName, signature)
 
 #define DECLARE_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData)                                                       \
+    static_assert (minSDK >= 24, "There's no need to supply a min SDK lower than JUCE's minimum requirement");                              \
     class CppClassName ## _Class   : public JNIClassBase                                                                                    \
     {                                                                                                                                       \
     public:                                                                                                                                 \
@@ -312,7 +313,6 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
 
 //==============================================================================
 #define DECLARE_JNI_CLASS_WITH_MIN_SDK(CppClassName, javaPath, minSDK) \
-    static_assert (minSDK >= 24, "There's no need to supply a min SDK lower than JUCE's minimum requirement"); \
     DECLARE_JNI_CLASS_WITH_BYTECODE (CppClassName, javaPath, minSDK, nullptr)
 
 //==============================================================================
