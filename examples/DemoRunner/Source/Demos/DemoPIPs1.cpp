@@ -37,10 +37,11 @@
 #include "../../../Audio/AudioSynthesiserDemo.h"
 #include "../../../Audio/AudioWorkgroupDemo.h"
 #include "../../../Audio/CapabilityInquiryDemo.h"
-#include "../../../Audio/MidiDemo.h"
 #include "../../../Audio/MPEDemo.h"
+#include "../../../Audio/MidiDemo.h"
 #include "../../../Audio/PluckedStringsDemo.h"
 #include "../../../Audio/SimpleFFTDemo.h"
+#include "../../../Audio/UmpDemo.h"
 
 #include "../../../DSP/ConvolutionDemo.h"
 #include "../../../DSP/FIRFilterDemo.h"
@@ -81,6 +82,7 @@ void registerDemos_One() noexcept
     REGISTER_DEMO (MPEDemo,                 Audio,     false)
     REGISTER_DEMO (PluckedStringsDemo,      Audio,     false)
     REGISTER_DEMO (SimpleFFTDemo,           Audio,     false)
+    REGISTER_DEMO (UmpDemo,                 Audio,     false)
 
     REGISTER_DEMO (ConvolutionDemo,         DSP,       false)
     REGISTER_DEMO (FIRFilterDemo,           DSP,       false)
