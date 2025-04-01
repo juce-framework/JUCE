@@ -108,9 +108,9 @@ public class JuceMidiSupport
             appContext = contextToUse;
         }
 
-        public String[] getMidiBluetoothAddresses ()
+        public List<String> getMidiBluetoothAddresses()
         {
-            return bluetoothMidiDevices.toArray (new String[bluetoothMidiDevices.size ()]);
+            return new ArrayList<String> (bluetoothMidiDevices);
         }
 
         public String getHumanReadableStringForBluetoothAddress (String address)
@@ -216,7 +216,7 @@ public class JuceMidiSupport
         private BluetoothLeScanner scanner;
         private static final String bluetoothLEMidiServiceUUID = "03B80E5A-EDE8-4B33-A751-6CE34EC4C700";
 
-        private HashSet<String> bluetoothMidiDevices = new HashSet<String> ();
+        private HashSet<String> bluetoothMidiDevices = new HashSet<>();
         private Context appContext = null;
     }
 
