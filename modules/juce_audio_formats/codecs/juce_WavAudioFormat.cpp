@@ -800,6 +800,10 @@ namespace WavFileHelpers
                         {
                             MemoryBlock mb;
                             input.readIntoMemoryBlock (mb, (ssize_t) infoLength);
+
+                            if (infoLength & 1)
+                                input.skipNextBytes (1);
+
                             values[type] = String::createStringFromData ((const char*) mb.getData(),
                                                                          (int) mb.getSize());
                             break;
