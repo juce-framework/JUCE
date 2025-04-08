@@ -56,7 +56,7 @@ namespace ProjectInfo
 {
     const char* const  projectName    = "DemoRunner";
     const char* const  companyName    = "Raw Material Software Limited";
-    const char* const  versionString  = "8.0.6";
-    const int          versionNumber  = 0x80006;
+    const char* const  versionString  = "8.0.7";
+    const int          versionNumber  = 0x80007;
 }
 #endif
