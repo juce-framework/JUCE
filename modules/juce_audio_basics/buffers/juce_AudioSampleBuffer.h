@@ -1167,6 +1167,15 @@ private:
 
         allocatedBytes = (size_t) numChannels * (size_t) size * sizeof (Type) + channelListSize + 32;
         allocatedData.malloc (allocatedBytes);
+
+        if (allocatedData.get() == nullptr)
+        {
+            // Allocation failure!
+            jassertfalse;
+            allocatedBytes = 0;
+            return;
+        }
+
         channels = unalignedPointerCast<Type**> (allocatedData.get());
         auto chan = unalignedPointerCast<Type*> (allocatedData + channelListSize);
 
@@ -1237,7 +1246,7 @@ private:
 
     int numChannels = 0, size = 0;
     size_t allocatedBytes = 0;
-    Type** channels;
+    Type** channels = nullptr;
     HeapBlock<char, true> allocatedData;
     Type* preallocatedChannelSpace[32];
     bool isClear = false;
