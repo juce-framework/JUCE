@@ -191,10 +191,10 @@ public:
             // numOpenedHandles may get negative if we don't receive open handle event.
             if (fileWasRead && numOpenedHandles <= 0)
             {
-                MessageManager::callAsync ([fileObserver = fileObserver, onClose = onClose]
+                MessageManager::callAsync ([fo = fileObserver, oc = onClose]
                 {
-                    getEnv()->CallVoidMethod (fileObserver, JuceContentProviderFileObserver.stopWatching);
-                    NullCheckedInvocation::invoke (onClose);
+                    getEnv()->CallVoidMethod (fo, JuceContentProviderFileObserver.stopWatching);
+                    NullCheckedInvocation::invoke (oc);
                 });
             }
         }
