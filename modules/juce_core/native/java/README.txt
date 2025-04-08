@@ -28,16 +28,19 @@ Java.class and JuceApp.class which you will probably want to remove).
 
 6. Inside of
 build/intermediates/javac/release_Release/compileRelease_ReleaseJavaWithJavac/classes
-execute the following dx command:
+execute the following d8 command:
 
-    <path-to-your-android-sdk>/build-tools/<latest-build-tool-version>/dx --dex --verbose --min-sdk-version=<your-min-sdk-of-your-classes> --output /tmp/JavaDexByteCode.dex .
+    <path-to-your-android-sdk>/build-tools/<latest-build-tool-version>/d8 --release --lib <path-to-your-android-sdk>/sdk/platforms/<latest-platform-version>/android.jar --min-api <min-api> .
 
     (Replace <your-min-sdk-of-your-classes> with the minimal sdk version you used in step 1.)
 
 7. gzip the output:
 
-    gzip /tmp/JavaDexByteCode.dex
+    gzip ./classes.dex
 
-8. The output /tmp/JavaDexByteCode.dex.gz is now the byte code that can be
+8. The output ./classes.dex.gz is now the byte code that can be
 included into JUCE. You can use the Projucer's BinaryData generator
 functionality to get this into a convenient char array like form.
+On macOS/Linux you could also use the following command:
+
+    xxd --include ./classes.dex.gz
