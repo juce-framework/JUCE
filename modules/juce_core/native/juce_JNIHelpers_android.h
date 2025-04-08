@@ -246,7 +246,8 @@ public:
     JNIClassBase (const char* classPath, int minSDK, const uint8* byteCode, size_t byteCodeSize);
     virtual ~JNIClassBase();
 
-    operator jclass() const noexcept  { return classRef; }
+    jclass getJclass() const { return classRef; }
+    operator jclass() const noexcept  { return getJclass(); }
 
     static void initialiseAllClasses (JNIEnv*, jobject context);
     static void releaseAllClasses (JNIEnv*);
@@ -293,7 +294,7 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
 #define DECLARE_JNI_FIELD(fieldID, stringName, signature)        jfieldID  fieldID;
 #define DECLARE_JNI_CALLBACK(fieldID, stringName, signature)
 
-#define DECLARE_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData)                                                       \
+#define DECLARE_OPTIONAL_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData, allowFailure)                                \
     static_assert (minSDK >= 24, "There's no need to supply a min SDK lower than JUCE's minimum requirement");                              \
     class CppClassName ## _Class   : public JNIClassBase                                                                                    \
     {                                                                                                                                       \
@@ -302,6 +303,19 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
                                                                                                                                             \
         void initialiseFields (JNIEnv* env)                                                                                                 \
         {                                                                                                                                   \
+            if constexpr (allowFailure)                                                                                                     \
+            {                                                                                                                               \
+                if (getJclass() == nullptr)                                                                                                 \
+                {                                                                                                                           \
+                    env->ExceptionClear();                                                                                                  \
+                    return;                                                                                                                 \
+                }                                                                                                                           \
+            }                                                                                                                               \
+            else                                                                                                                            \
+            {                                                                                                                               \
+                jassert (getJclass() != nullptr);                                                                                           \
+            }                                                                                                                               \
+                                                                                                                                            \
             Array<JNINativeMethod> callbacks;                                                                                               \
             JNI_CLASS_MEMBERS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD, CREATE_JNI_FIELD, CREATE_JNI_STATICFIELD, CREATE_JNI_CALLBACK);  \
             resolveCallbacks (env, callbacks);                                                                                              \
@@ -310,6 +324,9 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
         JNI_CLASS_MEMBERS (DECLARE_JNI_METHOD, DECLARE_JNI_METHOD, DECLARE_JNI_FIELD, DECLARE_JNI_FIELD, DECLARE_JNI_CALLBACK)              \
     };                                                                                                                                      \
     static inline const CppClassName ## _Class CppClassName;
+
+#define DECLARE_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData)              \
+    DECLARE_OPTIONAL_JNI_CLASS_WITH_BYTECODE (CppClassName, javaPath, minSDK, byteCodeData, false) \
 
 //==============================================================================
 #define DECLARE_JNI_CLASS_WITH_MIN_SDK(CppClassName, javaPath, minSDK) \

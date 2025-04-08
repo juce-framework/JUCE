@@ -377,7 +377,6 @@ void JNIClassBase::initialise (JNIEnv* env, jobject context)
         if (classRef == nullptr)
             classRef = GlobalRefImpl { LocalRef { env->FindClass (classPath) } };
 
-        jassert (classRef != nullptr);
         initialiseFields (env);
     }
 }
