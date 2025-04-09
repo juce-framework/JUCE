@@ -34,7 +34,7 @@
 #include "zconf.h"
 
 #ifdef __cplusplus
-extern "C" {
+// extern "C" {
 #endif
 
 #define ZLIB_VERSION "1.3.1"
@@ -1932,7 +1932,7 @@ ZEXTERN int            ZEXPORTVA gzvprintf(gzFile file,
 #endif
 
 #ifdef __cplusplus
-}
+// }
 #endif
 
 #endif /* ZLIB_H */
