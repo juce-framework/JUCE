@@ -92,6 +92,7 @@
  #include <windowsx.h>
  #include <dwmapi.h>
  #include <dwrite_3.h>
+ #include <dcomp.h>
 
  #if JUCE_ETW_TRACELOGGING
   #include <TraceLoggingProvider.h>
