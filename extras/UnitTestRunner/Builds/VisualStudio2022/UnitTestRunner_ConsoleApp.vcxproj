@@ -2239,9 +2239,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DGraphicsContext_windows.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DHwndContext_windows.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DImage_windows.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2651,6 +2648,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_ContentSharer_ios.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_Direct2DHwndContext_windows.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_DragAndDrop_linux.cpp">
@@ -4171,12 +4171,12 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImageCache.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImageConvolutionKernel.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImageFileFormat.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImagePixelDataNativeExtensions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ScaledImage.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_CoreGraphicsContext_mac.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_CoreGraphicsHelpers_mac.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DGraphicsContext_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DGraphicsContextImpl_windows.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DHwndContext_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DImage_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DImageContext_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DMetrics_windows.h"/>
@@ -4374,6 +4374,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_UIAWindowProvider_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_WindowsUIAWrapper_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_CGMetalLayerRenderer_mac.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_Direct2DHwndContext_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_MultiTouchMapper.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_NativeModalWrapperComponent_ios.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_PerScreenDisplayLinks_mac.h"/>

@@ -2947,9 +2947,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DGraphicsContext_windows.cpp">
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DHwndContext_windows.cpp">
-      <Filter>JUCE Modules\juce_graphics\native</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DImage_windows.cpp">
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClCompile>
@@ -3374,6 +3371,9 @@
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_ContentSharer_ios.cpp">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_Direct2DHwndContext_windows.cpp">
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_DragAndDrop_linux.cpp">
@@ -7116,6 +7116,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImageFileFormat.h">
       <Filter>JUCE Modules\juce_graphics\images</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImagePixelDataNativeExtensions.h">
+      <Filter>JUCE Modules\juce_graphics\images</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ScaledImage.h">
       <Filter>JUCE Modules\juce_graphics\images</Filter>
     </ClInclude>
@@ -7129,9 +7132,6 @@
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DGraphicsContextImpl_windows.h">
-      <Filter>JUCE Modules\juce_graphics\native</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DHwndContext_windows.h">
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DImage_windows.h">
@@ -7723,6 +7723,9 @@
       <Filter>JUCE Modules\juce_gui_basics\native\accessibility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_CGMetalLayerRenderer_mac.h">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_Direct2DHwndContext_windows.h">
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_MultiTouchMapper.h">
