@@ -803,7 +803,8 @@ public:
                 std::pair { Ids::vstBinaryLocation,  &t.vstBinaryLocation },
                 std::pair { Ids::vst3BinaryLocation, &t.vst3BinaryLocation },
                 std::pair { Ids::aaxBinaryLocation,  &t.aaxBinaryLocation },
-                std::pair { Ids::lv2BinaryLocation,  &t.lv2BinaryLocation }
+                std::pair { Ids::lv2BinaryLocation,  &t.lv2BinaryLocation },
+                std::pair { Ids::unityPluginBinaryLocation, &t.unityPluginBinaryLocation }
             };
 
             const auto iter = std::find_if (properties.begin(),
