@@ -230,6 +230,9 @@ public:
     /** Returns the property ID of the referenced property. */
     Identifier& getPropertyID() noexcept                    { return targetProperty; }
 
+    /** Returns the property ID of the referenced property. */
+    const Identifier& getPropertyID() const noexcept        { return targetProperty; }
+
     /** Returns the UndoManager that is being used. */
     UndoManager* getUndoManager() noexcept                  { return undoManager; }
 
