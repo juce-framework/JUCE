@@ -55,10 +55,7 @@ void CriticalSection::exit() const noexcept         { pthread_mutex_unlock (&loc
 //==============================================================================
 void JUCE_CALLTYPE Thread::sleep (int millisecs)
 {
-    struct timespec time;
-    time.tv_sec = millisecs / 1000;
-    time.tv_nsec = (millisecs % 1000) * 1000000;
-    nanosleep (&time, nullptr);
+    std::this_thread::sleep_for (std::chrono::milliseconds (millisecs));
 }
 
 void JUCE_CALLTYPE Process::terminate()
