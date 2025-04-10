@@ -561,7 +561,7 @@ struct WebViewDelegateClass final : public ObjCClass<NSObject>
                    });
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-        if (@available (macOS 10.12, *))
+        if (@available (macOS 10.12, ios 18.4, *))
         {
             addMethod (@selector (webView:runOpenPanelWithParameters:initiatedByFrame:completionHandler:),
                        [] (id self, SEL, WKWebView*, WKOpenPanelParameters* parameters, WKFrameInfo*, void (^completionHandler)(NSArray<NSURL*>*))
