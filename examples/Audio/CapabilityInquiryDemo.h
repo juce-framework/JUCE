@@ -2650,8 +2650,9 @@ private:
                     return;
                 }
 
+                constexpr auto isEditable = editable == Editable::yes;
                 const auto canSetFull = item->canSet != Model::CanSet::none
-                                        || editable == Editable::yes;
+                                        || isEditable;
                 setFull.setEnabled (canSetFull);
                 setPartial.setEnabled (item->canSet == Model::CanSet::partial);
                 get.setEnabled (item->canGet);
@@ -2704,7 +2705,9 @@ public:
     explicit PropertyInfoPanel (State<Model::Properties> s)
         : state (s)
     {
-        if constexpr (editable == Editable::yes)
+        constexpr auto isEditable = editable == Editable::yes;
+
+        if constexpr (isEditable)
         {
 
             addAndMakeVisible (canSet);
@@ -2719,7 +2722,7 @@ public:
         [&] (auto&&... args)
         {
             (addAndMakeVisible (args), ...);
-            (args.setClickingTogglesState (editable == Editable::yes), ...);
+            (args.setClickingTogglesState (isEditable), ...);
             ((args.onClick = [this] { updateStateFromUI(); }), ...);
         } (canGet,
            canSubscribe,
@@ -2737,7 +2740,7 @@ public:
         [&] (auto&&... args)
         {
             (addAndMakeVisible (args), ...);
-            (args.setReadOnly (editable == Editable::no), ...);
+            (args.setReadOnly (! isEditable), ...);
             (args.setMultiLine (true), ...);
             ((args.onReturnKey = args.onEscapeKey
                                = args.onFocusLost
