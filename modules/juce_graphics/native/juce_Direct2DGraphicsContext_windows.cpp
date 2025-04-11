@@ -1208,7 +1208,8 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
         // Make a transformed bitmap brush using the bitmap
         // As usual, apply the current transform first *then* the transform parameter
         ComSmartPtr<ID2D1BitmapBrush> brush;
-        auto matrix = D2DUtilities::transformToMatrix (brushTransform);
+        const auto pageTransform = AffineTransform::translation (pagesAndArea.area.getTopLeft()).inverted();
+        auto matrix = D2DUtilities::transformToMatrix (pageTransform.followedBy (brushTransform));
         D2D1_BRUSH_PROPERTIES brushProps = { 1.0f, matrix };
 
         auto bitmapBrushProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_CLAMP, D2D1_EXTEND_MODE_CLAMP);
