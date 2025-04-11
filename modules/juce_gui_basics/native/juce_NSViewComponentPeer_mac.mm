@@ -744,6 +744,12 @@ public:
 
     void redirectMouseDrag (NSEvent* ev)
     {
+        // Very rarely we seem to receive mouseDragged messages in between draggingEntered and draggingExited
+        // messages. If our drag target is in a viewport, it can cause it to scroll around, so we ignore these
+        // stray mouseDragged messages.
+        if (draggingActive)
+            return;
+
         ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withFlags (getModifierForButtonNumber ([ev buttonNumber]));
         sendMouseEvent (ev);
     }
@@ -1472,6 +1478,12 @@ public:
 
     BOOL sendDragCallback (bool (ComponentPeer::* callback) (const DragInfo&), id <NSDraggingInfo> sender)
     {
+        if (callback == &NSViewComponentPeer::handleDragMove)
+            draggingActive = true;
+
+        if (callback == &NSViewComponentPeer::handleDragExit || callback == &NSViewComponentPeer::handleDragDrop)
+            draggingActive = false;
+
         NSPasteboard* pasteboard = [sender draggingPasteboard];
         NSString* contentType = [pasteboard availableTypeFromArray: getSupportedDragTypes()];
 
@@ -1732,6 +1744,7 @@ public:
     bool windowRepresentsFile = false;
     bool isAlwaysOnTop = false, wasAlwaysOnTop = false, inBecomeKeyWindow = false;
     bool inPerformKeyEquivalent = false;
+    bool draggingActive = false;
     String stringBeingComposed;
     int startOfMarkedTextInTextInputTarget = 0;
 
