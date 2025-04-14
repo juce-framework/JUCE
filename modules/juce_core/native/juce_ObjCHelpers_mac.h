@@ -183,7 +183,11 @@ template <typename SuperType, typename ReturnType, typename... Params>
 inline ReturnType ObjCMsgSendSuper (id self, SEL sel, Params... params)
 {
     using SuperFn = ReturnType (*) (struct objc_super*, SEL, Params...);
+
+    // objc_msgSendSuper_stret is declared to return void, but will actually return non-void
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type-mismatch")
     const auto fn = reinterpret_cast<SuperFn> (MetaSuperFn<ReturnType>::value);
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     objc_super s = { self, [SuperType class] };
     return fn (&s, sel, params...);
@@ -346,7 +350,11 @@ struct ObjCClass
     void addMethod (SEL selector, Result (*callbackFn) (id, SEL, Args...))
     {
         const auto s = detail::makeCompileTimeStr (@encode (Result), @encode (id), @encode (SEL), @encode (Args)...);
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type-mismatch")
         [[maybe_unused]] const auto b = class_addMethod (cls, selector, (IMP) callbackFn, s.data());
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
         jassert (b);
     }
 
