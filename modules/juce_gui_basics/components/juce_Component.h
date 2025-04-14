@@ -2414,6 +2414,9 @@ public:
         /** If the component is valid, this deletes it and sets this pointer to null. */
         void deleteAndZero()                                  { delete std::exchange (weakRef, nullptr); }
 
+        bool operator== (SafePointer other) const noexcept    { return weakRef == other.weakRef; }
+        bool operator!= (SafePointer other) const noexcept    { return ! operator== (other); }
+
         bool operator== (ComponentType* component) const noexcept   { return weakRef == component; }
         bool operator!= (ComponentType* component) const noexcept   { return weakRef != component; }
 
