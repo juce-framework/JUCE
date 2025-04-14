@@ -440,7 +440,11 @@ struct Grid::Helpers
             Array<StringArray> strings;
 
             for (const auto& areaString : areasStrings)
-                strings.add (StringArray::fromTokens (areaString, false));
+            {
+                auto stringArray = StringArray::fromTokens (areaString, false);
+                stringArray.removeEmptyStrings (true);
+                strings.add (stringArray);
+            }
 
             if (strings.size() > 0)
             {
