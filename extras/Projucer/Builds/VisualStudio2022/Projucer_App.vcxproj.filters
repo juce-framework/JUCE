@@ -4338,6 +4338,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DGraphicsContext_windows.h">
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DGraphicsContextImpl_windows.h">
+      <Filter>JUCE Modules\juce_graphics\native</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DHwndContext_windows.h">
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClInclude>

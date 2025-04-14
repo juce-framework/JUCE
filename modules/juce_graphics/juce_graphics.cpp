@@ -225,6 +225,7 @@ extern "C"
  #include "native/juce_Direct2DHwndContext_windows.h"
  #include "native/juce_DirectX_windows.h"
  #include "native/juce_Direct2DImage_windows.h"
+ #include "native/juce_Direct2DGraphicsContextImpl_windows.h"
  #include "native/juce_Direct2DImageContext_windows.h"
 
  #include "native/juce_DirectWriteTypeface_windows.cpp"

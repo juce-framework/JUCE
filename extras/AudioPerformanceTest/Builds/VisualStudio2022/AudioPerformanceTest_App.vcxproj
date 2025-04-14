@@ -3830,6 +3830,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_CoreGraphicsContext_mac.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_CoreGraphicsHelpers_mac.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DGraphicsContext_windows.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DGraphicsContextImpl_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DHwndContext_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DImage_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_Direct2DImageContext_windows.h"/>
