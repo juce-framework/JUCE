@@ -49,6 +49,8 @@
 
 #include "juce_graphics.h"
 
+#include "fonts/juce_FunctionPointerDestructor.h"
+
 //==============================================================================
 #if JUCE_MAC
  #import <QuartzCore/QuartzCore.h>
@@ -161,7 +163,6 @@ extern "C"
 //==============================================================================
 #include "juce_core/zip/juce_zlib.h"
 
-#include "fonts/juce_FunctionPointerDestructor.h"
 #include "native/juce_EventTracing.h"
 
 #include "unicode/juce_UnicodeGenerated.cpp"
