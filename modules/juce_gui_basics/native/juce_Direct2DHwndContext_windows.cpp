@@ -99,7 +99,10 @@ private:
             {
                 const HANDLE handles[] { swapChainEventHandle, quitEvent.getHandle() };
 
-                const auto waitResult = WaitForMultipleObjects ((DWORD) std::size (handles), handles, FALSE, INFINITE);
+                const auto waitResult = WaitForMultipleObjects ((DWORD) std::size (handles),
+                                                                handles,
+                                                                FALSE,
+                                                                INFINITE);
 
                 switch (waitResult)
                 {
@@ -205,8 +208,10 @@ private:
 
     bool checkPaintReady() override
     {
+        const auto now = Time::getHighResolutionTicks();
+
         // Try not to saturate the message thread; this is a little crude. Perhaps some kind of credit system...
-        if (auto now = Time::getHighResolutionTicks(); Time::highResolutionTicksToSeconds (now - lastFinishFrameTicks) < 0.001)
+        if (Time::highResolutionTicksToSeconds (now - lastFinishFrameTicks) < 0.001)
             return false;
 
         bool ready = Pimpl::checkPaintReady();
@@ -243,7 +248,10 @@ public:
         RECT clientRect;
         GetClientRect (hwnd, &clientRect);
 
-        return Rectangle<int>::leftTopRightBottom (clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
+        return Rectangle<int>::leftTopRightBottom (clientRect.left,
+                                                   clientRect.top,
+                                                   clientRect.right,
+                                                   clientRect.bottom);
     }
 
     Rectangle<int> getFrameSize() const override
@@ -326,7 +334,7 @@ public:
             return;
 
         auto const swapChainSize = swap.getSize();
-        DXGI_PRESENT_PARAMETERS presentParameters{};
+        DXGI_PRESENT_PARAMETERS params{};
 
         if (! dirtyRegionsInBackBuffer.containsRectangle (swapChainSize))
         {
@@ -334,18 +342,22 @@ public:
             dirtyRectangles.resize ((size_t) dirtyRegionsInBackBuffer.getNumRectangles());
 
             // Fill the array of dirty rectangles, intersecting each paint area with the swap chain buffer
-            presentParameters.pDirtyRects = dirtyRectangles.data();
-            presentParameters.DirtyRectsCount = 0;
+            params.pDirtyRects = dirtyRectangles.data();
+            params.DirtyRectsCount = 0;
 
             for (const auto& area : dirtyRegionsInBackBuffer)
             {
-                if (const auto intersection = area.getIntersection (swapChainSize); ! intersection.isEmpty())
-                    presentParameters.pDirtyRects[presentParameters.DirtyRectsCount++] = D2DUtilities::toRECT (intersection);
+                const auto intersection = area.getIntersection (swapChainSize);
+
+                if (! intersection.isEmpty())
+                    params.pDirtyRects[params.DirtyRectsCount++] = D2DUtilities::toRECT (intersection);
             }
         }
 
         // Present the freshly painted buffer
-        const auto hr = swap.getChain()->Present1 (swap.presentSyncInterval, swap.presentFlags, &presentParameters);
+        const auto hr = swap.getChain()->Present1 (swap.presentSyncInterval,
+                                                   swap.presentFlags,
+                                                   &params);
         jassertquiet (SUCCEEDED (hr));
 
         if (FAILED (hr))
@@ -386,7 +398,13 @@ public:
 
         ComSmartPtr<ID2D1Bitmap1> snapshot;
 
-        if (const auto hr = deviceContext->CreateBitmap (size, nullptr, 0, bitmapProperties, snapshot.resetAndGetPointerAddress()); FAILED (hr))
+        auto hr = deviceContext->CreateBitmap (size,
+                                               nullptr,
+                                               0,
+                                               bitmapProperties,
+                                               snapshot.resetAndGetPointerAddress());
+
+        if (FAILED (hr))
             return {};
 
         swap.getChain()->Present (0, DXGI_PRESENT_DO_NOT_WAIT);
@@ -395,10 +413,13 @@ public:
         D2D_POINT_2U p { 0, 0 };
         const auto sourceRect = D2DUtilities::toRECT_U (swapRect);
 
-        if (const auto hr = snapshot->CopyFromBitmap (&p, buffer, &sourceRect); FAILED (hr))
+        hr = snapshot->CopyFromBitmap (&p, buffer, &sourceRect);
+
+        if (FAILED (hr))
             return {};
 
-        const Image result { new Direct2DPixelData { D2DUtilities::getDeviceForContext (deviceContext), snapshot } };
+        const Image result { new Direct2DPixelData { D2DUtilities::getDeviceForContext (deviceContext),
+                                                     snapshot } };
 
         swap.getChain()->Present (0, DXGI_PRESENT_DO_NOT_WAIT);
 
