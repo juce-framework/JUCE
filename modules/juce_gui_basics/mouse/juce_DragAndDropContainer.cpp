@@ -479,7 +479,11 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
         const auto relPos = sourceComponent->getLocalPoint (nullptr, lastMouseDown).toDouble();
         const auto clipped = (image.getBounds().toDouble() / scaleFactor).getConstrainedPoint (relPos);
 
-        Image fade (Image::SingleChannel, image.getWidth(), image.getHeight(), true);
+        Image fade (Image::SingleChannel,
+                    image.getWidth(),
+                    image.getHeight(),
+                    true,
+                    *image.getPixelData()->createType());
         {
             Graphics fadeContext (fade);
 
@@ -495,7 +499,11 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
             fadeContext.fillAll();
         }
 
-        Image composite (Image::ARGB, image.getWidth(), image.getHeight(), true);
+        Image composite (Image::ARGB,
+                         image.getWidth(),
+                         image.getHeight(),
+                         true,
+                         *image.getPixelData()->createType());
         {
             Graphics compositeContext (composite);
 
