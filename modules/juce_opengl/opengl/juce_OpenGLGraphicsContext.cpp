@@ -1839,6 +1839,11 @@ struct ShaderContext final : public RenderingHelpers::StackBasedLowLevelGraphics
         static_cast<SavedState&> (*stack).fillRectWithCustomShader (shader, area);
     }
 
+    std::unique_ptr<ImageType> getPreferredImageTypeForTemporaryImages() const override
+    {
+        return std::make_unique<OpenGLImageType>();
+    }
+
     GLState glState;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShaderContext)
@@ -1850,7 +1855,7 @@ struct NonShaderContext final : public LowLevelGraphicsSoftwareRenderer
         : LowLevelGraphicsSoftwareRenderer (im), target (t), image (im)
     {}
 
-    ~NonShaderContext()
+    ~NonShaderContext() override
     {
         JUCE_CHECK_OPENGL_ERROR
         auto previousFrameBufferTarget = OpenGLFrameBuffer::getCurrentFrameBufferTarget();
@@ -1881,6 +1886,11 @@ struct NonShaderContext final : public LowLevelGraphicsSoftwareRenderer
             target.context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, previousFrameBufferTarget);
 
         JUCE_CHECK_OPENGL_ERROR
+    }
+
+    std::unique_ptr<ImageType> getPreferredImageTypeForTemporaryImages() const noexcept override
+    {
+        return std::make_unique<OpenGLImageType>();
     }
 
 private:

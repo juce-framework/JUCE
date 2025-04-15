@@ -99,6 +99,11 @@ public:
 
     uint64_t getFrameId() const override { return 0; }
 
+    std::unique_ptr<ImageType> getPreferredImageTypeForTemporaryImages() const override
+    {
+        return std::make_unique<NativeImageType>();
+    }
+
     void drawEllipse (const Rectangle<float>& area, float lineThickness) override;
     void fillEllipse (const Rectangle<float>& area) override;
 

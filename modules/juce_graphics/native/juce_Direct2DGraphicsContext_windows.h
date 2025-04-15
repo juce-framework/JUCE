@@ -106,6 +106,11 @@ public:
 
     uint64_t getFrameId() const override { return frame; }
 
+    std::unique_ptr<ImageType> getPreferredImageTypeForTemporaryImages() const override
+    {
+        return std::make_unique<NativeImageType>();
+    }
+
     Direct2DMetrics::Ptr metrics;
 
 protected:

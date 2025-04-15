@@ -729,6 +729,10 @@ std::unique_ptr<LowLevelGraphicsContext> Direct2DPixelData::createLowLevelContex
             void drawGlyphs (Span<const uint16_t>, Span<const Point<float>>, const AffineTransform&) override {}
             uint64_t getFrameId() const override { return 0; }
             Font font { FontOptions{} };
+            std::unique_ptr<ImageType> getPreferredImageTypeForTemporaryImages() const override
+            {
+                return std::make_unique<NativeImageType>();
+            }
         };
 
         return std::make_unique<InertContext>();
