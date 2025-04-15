@@ -2134,10 +2134,11 @@ public:
     DiscoveryInfoPanel (State<ci::MUID> m, State<Model::DeviceInfo> s)
         : muidState (m), state (s)
     {
+        const auto setStateCallback = [this] { setStateFromUI(); };
         [&] (auto&&... item)
         {
             (addAndMakeVisible (item), ...);
-            ((item.onCommit ([this] { setStateFromUI(); })), ...);
+            ((item.onCommit (setStateCallback)), ...);
         } (manufacturer, family, modelNumber, revision, maxSysExSize);
 
         [&] (auto&&... item)
@@ -2719,11 +2720,13 @@ public:
             addAndMakeVisible (canSetField);
         }
 
+        const auto updateStateCallback = [this] { updateStateFromUI(); };
+
         [&] (auto&&... args)
         {
             (addAndMakeVisible (args), ...);
             (args.setClickingTogglesState (isEditable), ...);
-            ((args.onClick = [this] { updateStateFromUI(); }), ...);
+            ((args.onClick = updateStateCallback), ...);
         } (canGet,
            canSubscribe,
            canPaginate,
@@ -2744,7 +2747,7 @@ public:
             (args.setMultiLine (true), ...);
             ((args.onReturnKey = args.onEscapeKey
                                = args.onFocusLost
-                               = [this] { updateStateFromUI(); }), ...);
+                               = updateStateCallback), ...);
         } (schema, mediaTypes, columns);
 
         addAndMakeVisible (name);
