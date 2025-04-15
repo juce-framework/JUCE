@@ -555,7 +555,7 @@ void Direct2DGraphicsContext::fillPath (const Path& p, const AffineTransform& tr
 {
     JUCE_SCOPED_TRACE_EVENT_FRAME (etw::fillPath, etw::direct2dKeyword, getFrameId());
 
-    if (p.isEmpty())
+    if (p.getBounds().withZeroOrigin() == Rectangle<float>{})
         return;
 
     applyPendingClipList();
