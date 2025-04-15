@@ -379,6 +379,37 @@ public:
     TypefaceMetricsKind getMetricsKind() const noexcept;
 
     //==============================================================================
+    /** Returns an Span view of the features configured for this font instance.
+
+        Use Typeface::getSupportedFeatures() to determine what features this font
+        supports.
+
+        @see setFeatureEnabled, setFeatureDisabled, removeFeature,
+             Typeface::getSupportedFeatures
+    */
+    Span<const FontFeatureSetting> getFeatureSettings() const&;
+    Span<const FontFeatureSetting> getFeatureSettings() const&& = delete;
+
+    /** Enables or disables a font feature.
+
+        Use Typeface::getSupportedFeatures() to determine what features this font
+        supports.
+
+        @see setFeatureEnabled, setFeatureDisabled, removeFeature, Typeface::getSupportedFeatures
+    */
+    void setFeatureSetting (FontFeatureSetting featureSetting);
+
+    /** Removes a specific feature setting from this font.
+
+        If `featureToRemove` corresponds to a feature that is typically enabled by default (e.g.,
+        "calt" for contextual alternates, "liga" for standard ligatures), calling this method will
+        reset it to its default-enabled state.
+
+        @see setFeatureEnabled, setFeatureDisabled, Typeface::getSupportedFeatures
+    */
+    void removeFeatureSetting (FontFeatureTag featureToRemove);
+
+    //==============================================================================
     /** Returns the font's horizontal scale.
         A value of 1.0 is the normal scale, less than this will be narrower, greater
         than 1.0 will be stretched out.

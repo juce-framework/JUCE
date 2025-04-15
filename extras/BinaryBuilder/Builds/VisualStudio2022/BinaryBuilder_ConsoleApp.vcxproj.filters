@@ -690,6 +690,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_OptionsHelpers.h">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_OrderedContainerHelpers.h">
+      <Filter>JUCE Modules\juce_core\misc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Result.h">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>

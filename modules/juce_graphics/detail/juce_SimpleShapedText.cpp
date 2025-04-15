@@ -165,6 +165,51 @@ static auto findControlCharacters (Span<const juce_wchar> string)
     return result;
 }
 
+static constexpr hb_feature_t hbFeature (FontFeatureSetting setting)
+{
+    return { setting.tag.getTag(),
+             setting.value,
+             HB_FEATURE_GLOBAL_START,
+             HB_FEATURE_GLOBAL_END };
+}
+
+enum class LigatureEnabledState
+{
+    normal,
+    disabled
+};
+
+static std::vector<hb_feature_t> getHarfbuzzFeatures (Span<const FontFeatureSetting> settings,
+                                                      LigatureEnabledState ligatureEnabledstate)
+{
+    // Font feature settings *should* always be sorted.
+    jassert (std::is_sorted (settings.begin(), settings.end()));
+
+    std::vector<hb_feature_t> features;
+
+    features.reserve (settings.size());
+    std::transform (settings.begin(), settings.end(), std::back_inserter (features), hbFeature);
+
+    if (ligatureEnabledstate == LigatureEnabledState::disabled)
+    {
+        static constexpr FontFeatureTag tagsAffectedByTracking[] { FontFeatureTag { "liga" },
+                                                                   FontFeatureTag { "clig" },
+                                                                   FontFeatureTag { "hlig" },
+                                                                   FontFeatureTag { "dlig" },
+                                                                   FontFeatureTag { "calt" } };
+
+        static constexpr auto less = [] (hb_feature_t a, hb_feature_t b)
+        {
+            return a.tag < b.tag;
+        };
+
+        for (auto tag : tagsAffectedByTracking)
+            OrderedContainerHelpers::insertOrAssign (features, hbFeature ({ tag, 0 }), less);
+    }
+
+    return features;
+}
+
 /*  Returns glyphs in logical order as that favours wrapping. */
 static std::vector<ShapedGlyph> lowLevelShape (Span<const juce_wchar> string,
                                                Range<int64> range,
@@ -201,22 +246,19 @@ static std::vector<ShapedGlyph> lowLevelShape (Span<const juce_wchar> string,
                          0,
                          0);
 
-    std::vector<hb_feature_t> features;
-
-    // Disable ligatures if we're using non-standard tracking
-    const auto tracking           = font.getExtraKerningFactor();
-    const auto trackingIsDefault  = approximatelyEqual (tracking, 0.0f, absoluteTolerance (0.001f));
-
-    if (! trackingIsDefault)
-        for (const auto key : { hbTag ("liga"), hbTag ("clig"), hbTag ("hlig"), hbTag ("dlig"), hbTag ("calt") })
-            features.push_back (hb_feature_t { key, 0, HB_FEATURE_GLOBAL_START, HB_FEATURE_GLOBAL_END });
-
     hb_buffer_guess_segment_properties (buffer.get());
 
     auto nativeFont = font.getNativeDetails().font;
 
     if (nativeFont == nullptr)
         return {};
+
+    const auto tracking = font.getExtraKerningFactor();
+    const auto trackingIsDefault = approximatelyEqual (tracking, 0.0f, absoluteTolerance (0.001f));
+
+    const auto features = getHarfbuzzFeatures (font.getFeatureSettings(),
+                                               trackingIsDefault ? LigatureEnabledState::normal
+                                                                 : LigatureEnabledState::disabled);
 
     hb_shape (nativeFont.get(), buffer.get(), features.data(), (unsigned int) features.size());
 
@@ -1551,7 +1593,138 @@ struct SimpleShapedTextTests : public UnitTest
     }
 };
 
+class HarfbuzzFontFeatureTests : public UnitTest
+{
+public:
+    HarfbuzzFontFeatureTests()
+        : UnitTest ("HarfbuzzFontFeatureTests", UnitTestCategories::text)
+    {
+    }
+
+    void runTest() override
+    {
+        static constexpr FontFeatureSetting input[] =
+        {
+            FontFeatureSetting { "calt", 1 },
+            FontFeatureSetting { "clig", 1 },
+            FontFeatureSetting { "dlig", 1 },
+            FontFeatureSetting { "hlig", 1 },
+            FontFeatureSetting { "liga", 1 }
+        };
+
+        static constexpr auto compare = [] (hb_feature_t a, hb_feature_t b)
+        {
+            return a.value == b.value;
+        };
+
+        beginTest ("Disabling ligatures overrides existing ligature feature values in feature set");
+        {
+            static constexpr hb_feature_t expected[] =
+            {
+                hbFeature ({ "calt", 0 }),
+                hbFeature ({ "clig", 0 }),
+                hbFeature ({ "dlig", 0 }),
+                hbFeature ({ "hlig", 0 }),
+                hbFeature ({ "liga", 0 })
+            };
+
+            auto result = getHarfbuzzFeatures (input, LigatureEnabledState::disabled);
+
+            expect (std::equal (result.begin(),
+                                result.end(),
+                                std::begin (expected),
+                                std::end (expected),
+                                compare));
+        }
+
+        beginTest ("Disabling ligatures appends ligature features in a disabled state to an empty feature set");
+        {
+            static constexpr hb_feature_t expected[] =
+            {
+                hbFeature ({ "calt", 0 }),
+                hbFeature ({ "clig", 0 }),
+                hbFeature ({ "dlig", 0 }),
+                hbFeature ({ "hlig", 0 }),
+                hbFeature ({ "liga", 0 })
+            };
+
+            auto result = getHarfbuzzFeatures ({}, LigatureEnabledState::disabled);
+
+            expect (std::equal (result.begin(),
+                                result.end(),
+                                std::begin (expected),
+                                std::end (expected),
+                                compare));
+        }
+
+        beginTest ("Enabling ligatures has no effect on ligature features in feature set");
+        {
+            static constexpr FontFeatureSetting featureSet[] =
+            {
+                FontFeatureSetting { "calt", 1 },
+                FontFeatureSetting { "clig", 0 },
+                FontFeatureSetting { "dlig", 1 },
+                FontFeatureSetting { "hlig", 0 },
+                FontFeatureSetting { "liga", 1 }
+            };
+
+            static constexpr hb_feature_t expected[] =
+            {
+                hbFeature ({ "calt", 1 }),
+                hbFeature ({ "clig", 0 }),
+                hbFeature ({ "dlig", 1 }),
+                hbFeature ({ "hlig", 0 }),
+                hbFeature ({ "liga", 1 })
+            };
+
+            auto result = getHarfbuzzFeatures (featureSet, LigatureEnabledState::normal);
+
+            expect (std::equal (result.begin(),
+                                result.end(),
+                                std::begin (expected),
+                                std::end (expected),
+                                compare));
+        }
+
+        beginTest ("Only ligature features are disabled in an existing feature set");
+        {
+            static constexpr FontFeatureSetting featureSet[] =
+            {
+                FontFeatureSetting { "calt", 1 },
+                FontFeatureSetting { "fak1", 0 },
+                FontFeatureSetting { "fak2", 1 }
+            };
+
+            static constexpr hb_feature_t expected[] =
+            {
+                hbFeature ({ "calt", 0 }),
+                hbFeature ({ "clig", 0 }),
+                hbFeature ({ "dlig", 0 }),
+                hbFeature ({ "fak1", 0 }),
+                hbFeature ({ "fak2", 1 }),
+                hbFeature ({ "hlig", 0 }),
+                hbFeature ({ "liga", 0 })
+            };
+
+            auto result = getHarfbuzzFeatures (featureSet, LigatureEnabledState::disabled);
+
+            expect (std::equal (result.begin(),
+                                result.end(),
+                                std::begin (expected),
+                                std::end (expected),
+                                compare));
+        }
+
+        beginTest ("An empty feature set is not mutated when ligatures are enabled");
+        {
+            auto result = getHarfbuzzFeatures ({}, LigatureEnabledState::normal);
+            expect (result.empty());
+        }
+    }
+};
+
 static SimpleShapedTextTests simpleShapedTextTests;
+static HarfbuzzFontFeatureTests harfbuzzFontFeatureTests;
 
 #endif
 

@@ -1339,6 +1339,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\juce_Font.cpp">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\juce_FontFeatures.cpp">
+      <Filter>JUCE Modules\juce_graphics\fonts</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\juce_FontOptions.cpp">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClCompile>
@@ -2913,6 +2916,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_OptionsHelpers.h">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_OrderedContainerHelpers.h">
+      <Filter>JUCE Modules\juce_core\misc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Result.h">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
@@ -4213,6 +4219,9 @@
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_Font.h">
+      <Filter>JUCE Modules\juce_graphics\fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_FontFeatures.h">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_FontOptions.h">

@@ -384,6 +384,16 @@ public:
     */
     static Typeface::Ptr findSystemTypeface();
 
+    /** Returns the OpenType features supported by this typeface.
+
+        This method returns a list of all OpenType font features (such as ligatures,
+        small caps, stylistic alternates, etc.) that are available in the current
+        typeface.
+
+        @see FontFeatureTag, FontFeatureSetting, FontOptions, Font
+     */
+    std::vector<FontFeatureTag> getSupportedFeatures() const;
+
 private:
     //==============================================================================
     String name;

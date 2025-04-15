@@ -236,6 +236,7 @@ namespace juce
 }
 
 #include "misc/juce_EnumHelpers.h"
+#include "misc/juce_OrderedContainerHelpers.h"
 #include "memory/juce_Memory.h"
 #include "maths/juce_MathsFunctions.h"
 #include "memory/juce_ByteOrder.h"
