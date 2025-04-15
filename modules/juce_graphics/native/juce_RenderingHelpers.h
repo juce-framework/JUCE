@@ -2429,7 +2429,15 @@ public:
         {
             auto layerBounds = clip->getClipBounds();
 
-            s->image = Image (Image::ARGB, layerBounds.getWidth(), layerBounds.getHeight(), true);
+            const auto imageType = image.getPixelData()->createLowLevelContext()
+                                                       ->getPreferredImageTypeForTemporaryImages();
+
+            s->image = Image (Image::ARGB,
+                              layerBounds.getWidth(),
+                              layerBounds.getHeight(),
+                              true,
+                              *imageType);
+
             s->transparencyLayerAlpha = opacity;
             s->transform.moveOriginInDeviceSpace (-layerBounds.getPosition());
             s->cloneClipIfMultiplyReferenced();
