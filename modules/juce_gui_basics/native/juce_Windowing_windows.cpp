@@ -1202,7 +1202,7 @@ namespace IconConverters
                 for (int i = 0; i < numPixels; ++i)
                     opacityMask[i] = (bitmapImageData[i] == 0);
 
-                Image result = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
+                Image result = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true, SoftwareImageType{});
                 Image::BitmapData imageData (result, Image::BitmapData::readWrite);
 
                 memset (bitmapImageData, 0, numColourComponents);
