@@ -1147,7 +1147,7 @@ public:
 
     /** Generates a snapshot of part of this component.
 
-        This will return a new Image, the size of the rectangle specified,
+        This will return a new Image of type imageType, the size of the rectangle specified,
         containing a snapshot of the specified area of the component and all
         its children.
 
@@ -1162,7 +1162,8 @@ public:
     */
     Image createComponentSnapshot (Rectangle<int> areaToGrab,
                                    bool clipImageToComponentBounds = true,
-                                   float scaleFactor = 1.0f);
+                                   float scaleFactor = 1.0f,
+                                   const ImageType& imageType = NativeImageType{});
 
     /** Draws this component and all its subcomponents onto the specified graphics
         context.

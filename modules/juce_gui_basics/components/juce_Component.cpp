@@ -216,7 +216,12 @@ public:
 
         if (effectImage.getBounds() != scaledBounds)
         {
-            effectImage = Image { c.isOpaque() ? Image::RGB : Image::ARGB, scaledBounds.getWidth(), scaledBounds.getHeight(), false };
+            auto tempImageType = g.getInternalContext().getPreferredImageTypeForTemporaryImages();
+            effectImage = Image { c.isOpaque() ? Image::RGB : Image::ARGB,
+                                  scaledBounds.getWidth(),
+                                  scaledBounds.getHeight(),
+                                  false,
+                                  *tempImageType };
             effectImage.setBackupEnabled (false);
         }
 
@@ -1814,7 +1819,9 @@ bool Component::isPaintingUnclipped() const noexcept
 
 //==============================================================================
 Image Component::createComponentSnapshot (Rectangle<int> areaToGrab,
-                                          bool clipImageToComponentBounds, float scaleFactor)
+                                          bool clipImageToComponentBounds,
+                                          float scaleFactor,
+                                          const ImageType& imageType)
 {
     auto r = areaToGrab;
 
@@ -1827,7 +1834,7 @@ Image Component::createComponentSnapshot (Rectangle<int> areaToGrab,
     auto w = roundToInt (scaleFactor * (float) r.getWidth());
     auto h = roundToInt (scaleFactor * (float) r.getHeight());
 
-    Image image (flags.opaqueFlag ? Image::RGB : Image::ARGB, w, h, true);
+    Image image (flags.opaqueFlag ? Image::RGB : Image::ARGB, w, h, true, imageType);
 
     Graphics g (image);
 

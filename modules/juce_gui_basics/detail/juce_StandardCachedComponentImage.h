@@ -50,11 +50,13 @@ struct StandardCachedComponentImage : public CachedComponentImage
 
         if (image.isNull() || image.getBounds() != imageBounds)
         {
+            auto tempImageType = g.getInternalContext().getPreferredImageTypeForTemporaryImages();
             image = Image (owner.isOpaque() ? Image::RGB
                                             : Image::ARGB,
                            jmax (1, imageBounds.getWidth()),
                            jmax (1, imageBounds.getHeight()),
-                           ! owner.isOpaque());
+                           ! owner.isOpaque(),
+                           *tempImageType);
             image.setBackupEnabled (false);
             validArea.clear();
         }
