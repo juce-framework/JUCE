@@ -38,17 +38,18 @@ namespace juce
 struct Direct2DHwndContext::HwndPimpl : public Direct2DGraphicsContext::Pimpl
 {
 private:
-    struct SwapChainThread : private AsyncUpdater
+    struct SwapChainThread
     {
         SwapChainThread (Direct2DHwndContext::HwndPimpl& ownerIn, HANDLE swapHandle)
             : owner (ownerIn),
               swapChainEventHandle (swapHandle)
         {
+            SetWindowSubclass (owner.hwnd, subclassWindowProc, (UINT_PTR) this, (DWORD_PTR) this);
         }
 
-        ~SwapChainThread() override
+        ~SwapChainThread()
         {
-            cancelPendingUpdate();
+            RemoveWindowSubclass (owner.hwnd, subclassWindowProc, (UINT_PTR) this);
             SetEvent (quitEvent.getHandle());
             thread.join();
         }
@@ -62,10 +63,32 @@ private:
         WindowsScopedEvent quitEvent;
         std::thread thread { [&] { threadLoop(); } };
 
-        void handleAsyncUpdate() override
+        static constexpr uint32_t swapchainReadyMessageID = WM_USER + 124;
+
+        bool handleWindowProcMessage (UINT message)
         {
-            owner.swapEventReceived = true;
-            owner.present();
+            if (message == swapchainReadyMessageID)
+            {
+                owner.onSwapchainEvent();
+                return true;
+            }
+
+            return false;
+        }
+
+        static LRESULT CALLBACK subclassWindowProc (HWND hwnd,
+                                                    UINT message,
+                                                    WPARAM wParam,
+                                                    LPARAM lParam,
+                                                    UINT_PTR,
+                                                    DWORD_PTR referenceData)
+        {
+            auto* that = reinterpret_cast<SwapChainThread*> (referenceData);
+
+            if (that != nullptr && that->handleWindowProcMessage (message))
+                return 0;
+
+            return DefSubclassProc (hwnd, message, wParam, lParam);
         }
 
         void threadLoop()
@@ -82,7 +105,7 @@ private:
                 {
                     case WAIT_OBJECT_0:
                     {
-                        triggerAsyncUpdate();
+                        PostMessage (owner.hwnd, swapchainReadyMessageID, 0, 0);
                         break;
                     }
 
@@ -98,10 +121,12 @@ private:
         }
     };
 
+    HWND hwnd;
     SwapChain swap;
     ComSmartPtr<ID2D1DeviceContext1> deviceContext;
     std::unique_ptr<SwapChainThread> swapChainThread;
     std::optional<CompositionTree> compositionTree;
+    SwapchainDelegate& delegate;
 
     // Areas that must be repainted during the next paint call, between startFrame/endFrame
     RectangleList<int> deferredRepaints;
@@ -111,11 +136,16 @@ private:
 
     std::vector<RECT> dirtyRectangles;
     int64 lastFinishFrameTicks = 0;
-    HWND hwnd = nullptr;
 
     // Set to true after the swap event is signalled, indicating that we're allowed to try presenting
     // a new frame.
     bool swapEventReceived = false;
+
+    void onSwapchainEvent()
+    {
+        swapEventReceived = true;
+        delegate.onSwapchainEvent();
+    }
 
     bool prepare() override
     {
@@ -182,6 +212,7 @@ private:
         bool ready = Pimpl::checkPaintReady();
         ready &= swap.canPaint();
         ready &= compositionTree.has_value();
+        ready &= swapEventReceived;
 
         return ready;
     }
@@ -189,9 +220,10 @@ private:
     JUCE_DECLARE_WEAK_REFERENCEABLE (HwndPimpl)
 
 public:
-    HwndPimpl (Direct2DHwndContext& ownerIn, HWND hwndIn)
+    HwndPimpl (Direct2DHwndContext& ownerIn, HWND hwndIn, SwapchainDelegate& swapDelegate)
         : Pimpl (ownerIn),
-          hwnd (hwndIn)
+          hwnd (hwndIn),
+          delegate (swapDelegate)
     {
     }
 
@@ -375,7 +407,7 @@ public:
 };
 
 //==============================================================================
-Direct2DHwndContext::Direct2DHwndContext (HWND windowHandle)
+Direct2DHwndContext::Direct2DHwndContext (HWND windowHandle, SwapchainDelegate& swapDelegate)
 {
    #if JUCE_DIRECT2D_METRICS
     metrics = new Direct2DMetrics { Direct2DMetricsHub::getInstance()->lock,
@@ -384,7 +416,7 @@ Direct2DHwndContext::Direct2DHwndContext (HWND windowHandle)
     Direct2DMetricsHub::getInstance()->add (metrics);
    #endif
 
-    pimpl = std::make_unique<HwndPimpl> (*this, windowHandle);
+    pimpl = std::make_unique<HwndPimpl> (*this, windowHandle, swapDelegate);
 }
 
 Direct2DHwndContext::~Direct2DHwndContext()
