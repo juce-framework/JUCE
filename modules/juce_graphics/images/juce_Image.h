@@ -605,6 +605,10 @@ public:
     */
     virtual int getSharedCount() const noexcept;
 
+    //==============================================================================
+    /** Copies a section of the image to somewhere else within itself. */
+    void moveImageSection (Point<int> destTopLeft, Rectangle<int> sourceRect);
+
     /** Applies a native blur effect to this image, if available.
         This blur applies to all channels of the input image. It may be more expensive to
         calculate than a box blur, but should produce higher-quality results.
@@ -689,6 +693,12 @@ public:
     virtual NativeExtensions getNativeExtensions();
 
 private:
+    /*  Called by moveImageSection().
+        The source and destination rects are both guaranteed to be within the image bounds, and
+        non-empty.
+    */
+    virtual void moveValidatedImageSection (Point<int> destTopLeft, Rectangle<int> sourceRect);
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePixelData)
 };
 

@@ -464,6 +464,97 @@ auto ImagePixelData::getNativeExtensions() -> NativeExtensions
     return NativeExtensions { Wrapped{} };
 }
 
+struct MoveImageParams
+{
+    Rectangle<int> src{};
+    Point<int> dst{};
+
+    MoveImageParams constrained (int width, int height) const
+    {
+        const auto intersectedSrc = src.getIntersection ({ width, height });
+        const auto srcOffset = intersectedSrc.getPosition() - src.getPosition();
+        const auto intersectedDst = intersectedSrc.withPosition (dst + srcOffset).getIntersection ({ width, height });
+
+        if (intersectedDst.isEmpty())
+            return {};
+
+        const MoveImageParams result { intersectedDst.withPosition (intersectedDst.getPosition() + src.getPosition() - dst),
+                                       intersectedDst.getPosition() };
+
+        // postconditions
+        jassert ((juce::Rectangle { width, height }.contains (result.src)));
+        jassert ((juce::Rectangle { width, height }.contains (result.src.withPosition (result.dst))));
+
+        return result;
+    }
+
+    bool operator== (const MoveImageParams& other) const
+    {
+        const auto tie = [] (auto& x) { return std::tuple (x.src, x.dst); };
+        return tie (*this) == tie (other);
+    }
+
+    bool operator!= (const MoveImageParams& other) const
+    {
+        return ! operator== (other);
+    }
+};
+
+static void moveValidatedImageSectionInSoftware (ImagePixelData& img,
+                                                 Point<int> destTopLeft,
+                                                 Rectangle<int> sourceRect)
+{
+    const auto minX = jmin (destTopLeft.x, sourceRect.getX());
+    const auto minY = jmin (destTopLeft.y, sourceRect.getY());
+
+    Image tempImage { &img };
+    const Image::BitmapData destData (tempImage,
+                                      minX,
+                                      minY,
+                                      sourceRect.getWidth(),
+                                      sourceRect.getHeight(),
+                                      Image::BitmapData::readWrite);
+
+    const auto dstPos = destTopLeft - Point { minX, minY };
+    const auto srcPos = sourceRect.getPosition() - Point { minX, minY };
+
+          auto* dst = destData.getPixelPointer (dstPos.x, dstPos.y);
+    const auto* src = destData.getPixelPointer (srcPos.x, srcPos.y);
+
+    const auto lineSize = (size_t) destData.pixelStride * (size_t) sourceRect.getWidth();
+
+    if (destTopLeft.y > sourceRect.getY())
+    {
+        for (auto h = sourceRect.getHeight(); --h >= 0;)
+        {
+            const auto offset = h * destData.lineStride;
+            memmove (dst + offset, src + offset, lineSize);
+        }
+    }
+    else if (dst != src)
+    {
+        for (auto h = sourceRect.getHeight(); --h >= 0;)
+        {
+            memmove (dst, src, lineSize);
+            dst += destData.lineStride;
+            src += destData.lineStride;
+        }
+    }
+}
+
+void ImagePixelData::moveImageSection (Point<int> destTopLeft, Rectangle<int> sourceRect)
+{
+    const auto constrained = MoveImageParams { sourceRect, destTopLeft }.constrained (width, height);
+
+    if (! constrained.src.isEmpty())
+        moveValidatedImageSection (constrained.dst, constrained.src);
+}
+
+void ImagePixelData::moveValidatedImageSection (Point<int> destTopLeft, Rectangle<int> sourceRect)
+{
+    moveValidatedImageSectionInSoftware (*this, destTopLeft, sourceRect);
+}
+
 //==============================================================================
 ImageType::ImageType() = default;
 ImageType::~ImageType() = default;
@@ -931,74 +1022,10 @@ void Image::createSolidAreaMask (RectangleList<int>& result, float alphaThreshol
     }
 }
 
-void Image::moveImageSection (int dx, int dy,
-                              int sx, int sy,
-                              int w, int h)
+void Image::moveImageSection (int dx, int dy, int sx, int sy, int w, int h)
 {
-    if (dx < 0)
-    {
-        w += dx;
-        sx -= dx;
-        dx = 0;
-    }
-
-    if (dy < 0)
-    {
-        h += dy;
-        sy -= dy;
-        dy = 0;
-    }
-
-    if (sx < 0)
-    {
-        w += sx;
-        dx -= sx;
-        sx = 0;
-    }
-
-    if (sy < 0)
-    {
-        h += sy;
-        dy -= sy;
-        sy = 0;
-    }
-
-    const int minX = jmin (dx, sx);
-    const int minY = jmin (dy, sy);
-
-    w = jmin (w, getWidth()  - jmax (sx, dx));
-    h = jmin (h, getHeight() - jmax (sy, dy));
-
-    if (w > 0 && h > 0)
-    {
-        auto maxX = jmax (dx, sx) + w;
-        auto maxY = jmax (dy, sy) + h;
-
-        const BitmapData destData (*this, minX, minY, maxX - minX, maxY - minY, BitmapData::readWrite);
-
-        auto dst = destData.getPixelPointer (dx - minX, dy - minY);
-        auto src = destData.getPixelPointer (sx - minX, sy - minY);
-
-        auto lineSize = (size_t) destData.pixelStride * (size_t) w;
-
-        if (dy > sy)
-        {
-            while (--h >= 0)
-            {
-                const int offset = h * destData.lineStride;
-                memmove (dst + offset, src + offset, lineSize);
-            }
-        }
-        else if (dst != src)
-        {
-            while (--h >= 0)
-            {
-                memmove (dst, src, lineSize);
-                dst += destData.lineStride;
-                src += destData.lineStride;
-            }
-        }
-    }
+    if (image != nullptr)
+        image->moveImageSection ({ dx, dy }, { sx, sy, w, h });
 }
 
 //==============================================================================
@@ -1009,6 +1036,35 @@ JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 const Image Image::null;
 
 JUCE_END_IGNORE_DEPRECATION_WARNINGS
+
+#endif
+
+#if JUCE_UNIT_TESTS
+
+class ImagePixelDataClippingTests : public UnitTest
+{
+public:
+    ImagePixelDataClippingTests()
+        : UnitTest ("ImagePixelDataClippingTests", UnitTestCategories::graphics)
+    {
+    }
+
+    void runTest() override
+    {
+        beginTest ("MoveImageParams constrains arguments appropriately");
+        {
+            expect ((MoveImageParams { { 300, 400 }, { 5, 5 } }.constrained (350, 450) == MoveImageParams { { 300, 400 }, { 5, 5 } }));
+            expect ((MoveImageParams { { 350, 450 }, { 5, 5 } }.constrained (300, 400) == MoveImageParams { { 295, 395 }, { 5, 5 } }));
+            expect ((MoveImageParams { { -5, -10, 20, 30 }, { 0, 0 } }.constrained (100, 100) == MoveImageParams { { 15, 20 }, { 5, 10 } }));
+            expect ((MoveImageParams { { 1, 2, 10, 10 }, { -5, -5 } }.constrained (20, 20) == MoveImageParams { { 6, 7, 5, 5 }, { 0, 0 } }));
+            expect ((MoveImageParams { { 40, 50, 100, 100 }, { 10, 10 } }.constrained (100, 100) == MoveImageParams { { 40, 50, 60, 50 }, { 10, 10 } }));
+            expect ((MoveImageParams { { 20, 20, 10, 10 }, { -20, -20 } }.constrained (20, 20) == MoveImageParams { { 0, 0, 0, 0 }, { 0, 0 } }));
+            expect ((MoveImageParams { { -20, -30, 100, 100 }, { -30, -40 } }.constrained (100, 100) == MoveImageParams { { 10, 10, 70, 60 }, { 0, 0 } }));
+        }
+    }
+};
+
+static ImagePixelDataClippingTests imagePixelDataClippingTests;
 
 #endif
 
