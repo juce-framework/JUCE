@@ -152,7 +152,7 @@ private:
 
     bool prepare() override
     {
-        const auto adapter = directX->adapters.getAdapterForHwnd (hwnd);
+        const auto adapter = directX->adapters.getDefaultAdapter();
 
         if (adapter == nullptr)
             return false;
