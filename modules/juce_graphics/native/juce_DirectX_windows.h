@@ -963,14 +963,14 @@ public:
     }
 
     template <typename TransformRectangle>
-    void fillRectangles (ComSmartPtr<ID2D1DeviceContext1> deviceContext,
+    bool fillRectangles (ComSmartPtr<ID2D1DeviceContext1> deviceContext,
                          const RectangleList<float>& rectangles,
                          const Colour colour,
                          TransformRectangle&& transformRectangle,
                          [[maybe_unused]] Direct2DMetrics* metrics)
     {
         if (rectangles.isEmpty())
-            return;
+            return true;
 
         JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (metrics, spriteBatchTime)
 
@@ -995,6 +995,10 @@ public:
                 {
                     auto r = rectangles.getRectangle (i);
                     r = transformRectangle (r);
+
+                    if (r.getWidth() < 1.0f || r.getHeight() < 1.0f)
+                        return false;
+
                     *destination = D2DUtilities::toRECT_F (r);
                     ++destination;
                 }
@@ -1009,7 +1013,7 @@ public:
                                                                        D2D1_PIXEL_FORMAT { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED },
                                                                        whiteRectangle.resetAndGetPointerAddress());
                 if (FAILED (hr))
-                    return;
+                    return false;
 
                 whiteRectangle->BeginDraw();
                 whiteRectangle->Clear (D2D1_COLOR_F { 1.0f, 1.0f, 1.0f, 1.0f });
@@ -1017,16 +1021,18 @@ public:
             }
 
             ComSmartPtr<ID2D1Bitmap> bitmap;
+
             if (auto hr = whiteRectangle->GetBitmap (bitmap.resetAndGetPointerAddress()); SUCCEEDED (hr))
             {
                 ComSmartPtr<ID2D1DeviceContext3> deviceContext3;
+
                 if (hr = deviceContext->QueryInterface<ID2D1DeviceContext3> (deviceContext3.resetAndGetPointerAddress()); SUCCEEDED (hr))
                 {
                     auto d2dColour = D2DUtilities::toCOLOR_F (colour);
                     auto spriteBatch = getSpriteBatch (*deviceContext3, (uint32) spriteBatchSize);
 
                     if (spriteBatch == nullptr)
-                        return;
+                        return false;
 
                     auto setCount = jmin ((uint32) spriteBatchSize, spriteBatch->GetSpriteCount());
                     auto addCount = (uint32) spriteBatchSize > setCount ? (uint32) spriteBatchSize - setCount : 0;
@@ -1055,6 +1061,8 @@ public:
 
             numRectanglesPainted += spriteBatchSize;
         }
+
+        return true;
     }
 
 private:

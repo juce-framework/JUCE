@@ -763,12 +763,11 @@ public:
                 return transform.translated (r);
             };
 
-            rectangleListSpriteBatch->fillRectangles (deviceContext,
-                                                      list,
-                                                      owner.currentState->fillType.colour,
-                                                      translateRectangle,
-                                                      owner.metrics.get());
-            return true;
+            return rectangleListSpriteBatch->fillRectangles (deviceContext,
+                                                             list,
+                                                             owner.currentState->fillType.colour,
+                                                             translateRectangle,
+                                                             owner.metrics.get());
         }
 
         if (owner.currentState->isCurrentTransformAxisAligned())
@@ -778,12 +777,11 @@ public:
                 return transform.boundsAfterTransform (r);
             };
 
-            rectangleListSpriteBatch->fillRectangles (deviceContext,
-                                                      list,
-                                                      owner.currentState->fillType.colour,
-                                                      transformRectangle,
-                                                      owner.metrics.get());
-            return true;
+            return rectangleListSpriteBatch->fillRectangles (deviceContext,
+                                                             list,
+                                                             owner.currentState->fillType.colour,
+                                                             transformRectangle,
+                                                             owner.metrics.get());
         }
 
         auto checkRectangleWithoutTransforming = [&] (const Rectangle<float>& r) -> Rectangle<float>
@@ -792,13 +790,11 @@ public:
         };
 
         ScopedTransform scopedTransform { *this, owner.currentState };
-        rectangleListSpriteBatch->fillRectangles (deviceContext,
-                                                  list,
-                                                  owner.currentState->fillType.colour,
-                                                  checkRectangleWithoutTransforming,
-                                                  owner.metrics.get());
-
-        return true;
+        return rectangleListSpriteBatch->fillRectangles (deviceContext,
+                                                         list,
+                                                         owner.currentState->fillType.colour,
+                                                         checkRectangleWithoutTransforming,
+                                                         owner.metrics.get());
     }
 
     static Line<float> offsetShape (Line<float> a, Point<float> b)
