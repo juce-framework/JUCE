@@ -13,7 +13,7 @@ If you are not licensing the JUCE Framework modules under the
 [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html) then by downloading,
 installing, or using the JUCE Framework, or combining the JUCE Framework with
 any other source code, object code, content or any other copyrightable work, you
-agree to the terms of the the [JUCE 8 End User Licence
+agree to the terms of the [JUCE 8 End User Licence
 Agreement](https://juce.com/legal/juce-8-licence/), and all incorporated terms
 including the [JUCE Privacy Policy](https://juce.com/legal/juce-privacy-policy/)
 and the [JUCE Website Terms of

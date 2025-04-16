@@ -101,10 +101,10 @@ struct JUCE_API FloatVectorOperationsBase
     /** Multiplies each source1 value by the corresponding source2 value, then adds it to the destination value. */
     static void JUCE_CALLTYPE addWithMultiply (FloatType* dest, const FloatType* src1, const FloatType* src2, CountType num) noexcept;
 
-    /** Multiplies each source value by the given multiplier, then subtracts it to the destination value. */
+    /** Multiplies each source value by the given multiplier, then subtracts it from the destination value. */
     static void JUCE_CALLTYPE subtractWithMultiply (FloatType* dest, const FloatType* src, FloatType multiplier, CountType numValues) noexcept;
 
-    /** Multiplies each source1 value by the corresponding source2 value, then subtracts it to the destination value. */
+    /** Multiplies each source1 value by the corresponding source2 value, then subtracts it from the destination value. */
     static void JUCE_CALLTYPE subtractWithMultiply (FloatType* dest, const FloatType* src1, const FloatType* src2, CountType num) noexcept;
 
     /** Multiplies the destination values by the source values. */

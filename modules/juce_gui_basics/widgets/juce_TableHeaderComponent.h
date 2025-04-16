@@ -388,7 +388,7 @@ public:
                                                          It's up to the LookAndFeel how this is used. */
         outlineColourId                = 0x1003820, /**< The colour of the table header's outline. */
         highlightColourId              = 0x1003830, /**< The colour of the table header background when
-                                                         the mouse is over or down above the the table
+                                                         the mouse is over or down above the table
                                                          header. It's up to the LookAndFeel to use a
                                                          variant of this colour to distinguish between
                                                          the down and hover state. */

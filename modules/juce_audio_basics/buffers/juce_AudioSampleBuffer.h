@@ -370,13 +370,13 @@ public:
         @param keepExistingContent  if this is true, it will try to preserve as much of the
                                     old data as it can in the new buffer.
         @param clearExtraSpace      if this is true, then any extra channels or space that is
-                                    allocated will be also be cleared. If false, then this space is left
+                                    allocated will also be cleared. If false, then this space is left
                                     uninitialised.
         @param avoidReallocating    if this is true, then changing the buffer's size won't reduce the
                                     amount of memory that is currently allocated (but it will still
                                     increase it if the new size is bigger than the amount it currently has).
                                     If this is false, then a new allocation will be done so that the buffer
-                                    uses takes up the minimum amount of memory that it needs.
+                                    uses the minimum amount of memory that it needs.
     */
     void setSize (int newNumChannels,
                   int newNumSamples,
