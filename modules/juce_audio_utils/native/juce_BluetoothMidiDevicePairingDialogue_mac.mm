@@ -111,6 +111,9 @@ private:
         }
 
         [getController (self) showWindow: nil];
+
+        if (WindowUtils::areThereAnyAlwaysOnTopWindows())
+            [getController (self).window setLevel: NSFloatingWindowLevel];
     }
 
     static void receivedWindowWillClose (id self, SEL, NSNotification*)
