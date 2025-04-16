@@ -85,7 +85,11 @@
 #elif JUCE_ARM
 
  #ifndef JUCE_USE_SIMD
-  #define JUCE_USE_SIMD 1
+  #if JUCE_USE_ARM_NEON
+   #define JUCE_USE_SIMD 1
+  #else
+   #define JUCE_USE_SIMD 0
+  #endif
  #endif
 
  #if JUCE_64BIT && JUCE_WINDOWS
