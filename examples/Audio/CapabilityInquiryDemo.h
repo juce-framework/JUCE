@@ -3713,11 +3713,15 @@ public:
 
     void resized() override
     {
-        tabs.setBounds (getLocalBounds());
+        auto bounds = getLocalBounds();
+        auto buttonStrip = bounds.getWidth() < 650 ? bounds.removeFromTop (tabs.getTabBarDepth())
+                                                   : getLocalBounds().removeFromTop (tabs.getTabBarDepth());
 
-        const auto buttonBounds = getLocalBounds().removeFromTop (tabs.getTabBarDepth())
-                                                  .removeFromRight (300)
-                                                  .reduced (2);
+        tabs.setBounds (bounds);
+
+        const auto buttonBounds = buttonStrip.removeFromTop (tabs.getTabBarDepth())
+                                             .removeFromRight (300)
+                                             .reduced (2);
         Utils::doColumnLayout (buttonBounds, loadButton, saveButton);
     }
 
