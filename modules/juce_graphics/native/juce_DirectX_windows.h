@@ -506,22 +506,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryFontFileLoader)
 };
 
-class FontFileEnumerator final : public ComBaseClassHelper<IDWriteFontFileEnumerator>
-{
-public:
-    FontFileEnumerator (IDWriteFactory& factoryIn, ComSmartPtr<MemoryFontFileLoader> loaderIn);
-
-    HRESULT WINAPI GetCurrentFontFile (IDWriteFontFile** fontFile) noexcept override;
-    HRESULT WINAPI MoveNext (BOOL* hasCurrentFile) noexcept override;
-
-private:
-    IDWriteFactory& factory;
-    ComSmartPtr<MemoryFontFileLoader> loader;
-    size_t rawDataIndex = std::numeric_limits<size_t>::max();
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FontFileEnumerator)
-};
-
 class DirectWriteCustomFontCollectionLoader final : public ComBaseClassHelper<IDWriteFontCollectionLoader>
 {
 public:

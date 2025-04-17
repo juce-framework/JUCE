@@ -884,30 +884,40 @@ HRESULT WINAPI MemoryFontFileLoader::CreateStreamFromKey (const void* fontFileRe
 }
 
 //==============================================================================
-FontFileEnumerator::FontFileEnumerator (IDWriteFactory& factoryIn,
-                                        ComSmartPtr<MemoryFontFileLoader> loaderIn)
-    : factory (factoryIn), loader (loaderIn) {}
-
-HRESULT WINAPI FontFileEnumerator::GetCurrentFontFile (IDWriteFontFile** fontFile) noexcept
+class FontFileEnumerator final : public ComBaseClassHelper<IDWriteFontFileEnumerator>
 {
-    *fontFile = nullptr;
+public:
+    FontFileEnumerator (IDWriteFactory& factoryIn, ComSmartPtr<MemoryFontFileLoader> loaderIn)
+        : factory (factoryIn), loader (loaderIn) {}
 
-    if (! isPositiveAndBelow (rawDataIndex, 1))
-        return E_FAIL;
+    HRESULT WINAPI GetCurrentFontFile (IDWriteFontFile** fontFile) noexcept override
+    {
+        *fontFile = nullptr;
 
-    const auto uuid = loader->getUuid();
-    return factory.CreateCustomFontFileReference (uuid.getRawData(),
-                                                  (UINT32) uuid.size(),
-                                                  loader,
-                                                  fontFile);
-}
+        if (! isPositiveAndBelow (rawDataIndex, 1))
+            return E_FAIL;
 
-HRESULT WINAPI FontFileEnumerator::MoveNext (BOOL* hasCurrentFile) noexcept
-{
-    ++rawDataIndex;
-    *hasCurrentFile = rawDataIndex < 1 ? TRUE : FALSE;
-    return S_OK;
-}
+        const auto uuid = loader->getUuid();
+        return factory.CreateCustomFontFileReference (uuid.getRawData(),
+                                                      (UINT32) uuid.size(),
+                                                      loader,
+                                                      fontFile);
+    }
+
+    HRESULT WINAPI MoveNext (BOOL* hasCurrentFile) noexcept override
+    {
+        ++rawDataIndex;
+        *hasCurrentFile = rawDataIndex < 1 ? TRUE : FALSE;
+        return S_OK;
+    }
+
+private:
+    IDWriteFactory& factory;
+    ComSmartPtr<MemoryFontFileLoader> loader;
+    size_t rawDataIndex = std::numeric_limits<size_t>::max();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FontFileEnumerator)
+};
 
 //==============================================================================
 DirectWriteCustomFontCollectionLoader::DirectWriteCustomFontCollectionLoader (IDWriteFactory& factoryIn)
