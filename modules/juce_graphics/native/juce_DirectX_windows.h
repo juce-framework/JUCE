@@ -409,21 +409,6 @@ private:
 };
 
 //==============================================================================
-String getLocalisedName (IDWriteLocalizedStrings* names);
-String getFontFamilyName (IDWriteFontFamily* family);
-String getFontFaceName (IDWriteFont* font);
-
-template <typename Range>
-static StringArray stringArrayFromRange (Range&& range)
-{
-    StringArray result;
-
-    for (const auto& item : range)
-        result.add (item);
-
-    return result;
-}
-
 class AggregateFontCollection
 {
 public:

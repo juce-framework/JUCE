@@ -599,7 +599,7 @@ std::optional<Direct2DDeviceResources> Direct2DDeviceResources::create (ComSmart
 }
 
 //==============================================================================
-String getLocalisedName (IDWriteLocalizedStrings* names)
+static String getLocalisedName (IDWriteLocalizedStrings* names)
 {
     jassert (names != nullptr);
 
@@ -619,7 +619,7 @@ String getLocalisedName (IDWriteLocalizedStrings* names)
     return static_cast<const wchar_t*> (name);
 }
 
-String getFontFamilyName (IDWriteFontFamily* family)
+static String getFontFamilyName (IDWriteFontFamily* family)
 {
     jassert (family != nullptr);
     ComSmartPtr<IDWriteLocalizedStrings> familyNames;
@@ -628,13 +628,24 @@ String getFontFamilyName (IDWriteFontFamily* family)
     return getLocalisedName (familyNames);
 }
 
-String getFontFaceName (IDWriteFont* font)
+static String getFontFaceName (IDWriteFont* font)
 {
     jassert (font != nullptr);
     ComSmartPtr<IDWriteLocalizedStrings> faceNames;
     auto hr = font->GetFaceNames (faceNames.resetAndGetPointerAddress());
     jassertquiet (SUCCEEDED (hr));
     return getLocalisedName (faceNames);
+}
+
+template <typename Range>
+static StringArray stringArrayFromRange (Range&& range)
+{
+    StringArray result;
+
+    for (const auto& item : range)
+        result.add (item);
+
+    return result;
 }
 
 //==============================================================================
