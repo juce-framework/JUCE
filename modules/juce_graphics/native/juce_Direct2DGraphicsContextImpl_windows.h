@@ -566,156 +566,32 @@ protected:
 
     std::vector<std::unique_ptr<Direct2DGraphicsContext::SavedState>> savedClientStates;
 
-    virtual bool prepare()
-    {
-        if (! deviceResources.has_value())
-            deviceResources = Direct2DDeviceResources::create (getDeviceContext());
-
-        return deviceResources.has_value();
-    }
-
-    virtual void teardown()
-    {
-        deviceResources.reset();
-    }
-
-    virtual bool checkPaintReady()
-    {
-        return deviceResources.has_value();
-    }
+    virtual bool prepare();
+    virtual void teardown();
+    virtual bool checkPaintReady();
 
 public:
-    explicit Pimpl (Direct2DGraphicsContext& ownerIn)
-        : owner (ownerIn)
-    {
-        directX->adapters.addListener (*this);
-    }
+    explicit Pimpl (Direct2DGraphicsContext& ownerIn);
+    ~Pimpl() override;
 
-    ~Pimpl() override
-    {
-        directX->adapters.removeListener (*this);
+    virtual SavedState* startFrame();
+    virtual HRESULT finishFrame();
 
-        popAllSavedStates();
-    }
+    SavedState* getCurrentSavedState() const;
+    SavedState* pushFirstSavedState (Rectangle<int> initialClipRegion);
 
-    virtual SavedState* startFrame()
-    {
-        prepare();
+    SavedState* pushSavedState();
+    SavedState* popSavedState();
 
-        // Anything to paint?
-        const auto paintAreas = getPaintAreas();
-        const auto paintBounds = paintAreas.getBounds();
-
-        if (! getFrameSize().intersects (paintBounds) || paintBounds.isEmpty() || paintAreas.isEmpty())
-            return nullptr;
-
-        // Is Direct2D ready to paint?
-        if (! checkPaintReady())
-            return nullptr;
-
-       #if JUCE_DIRECT2D_METRICS
-        owner.metrics->startFrame();
-       #endif
-
-        JUCE_TRACE_EVENT_INT_RECT_LIST (etw::startD2DFrame, etw::direct2dKeyword, owner.getFrameId(), paintAreas);
-
-        const auto deviceContext = getDeviceContext();
-
-        // Init device context transform
-        resetTransform (deviceContext);
-
-        // Start drawing
-        deviceContext->SetTarget (getDeviceContextTarget());
-        deviceContext->BeginDraw();
-
-        // Init the save state stack and return the first saved state
-        return pushFirstSavedState (paintBounds);
-    }
-
-    virtual HRESULT finishFrame()
-    {
-        // Fully pop the state stack
-        popAllSavedStates();
-
-        // Finish drawing
-        // SetTarget(nullptr) so the device context doesn't hold a reference to the swap chain buffer
-        HRESULT hr = S_OK;
-        {
-            JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (owner.metrics, endDrawDuration)
-            JUCE_SCOPED_TRACE_EVENT_FRAME (etw::endDraw, etw::direct2dKeyword, owner.getFrameId());
-
-            const auto deviceContext = getDeviceContext();
-            hr = deviceContext->EndDraw();
-            deviceContext->SetTarget (nullptr);
-        }
-
-        jassert (SUCCEEDED (hr));
-
-        if (FAILED (hr))
-            teardown();
-
-       #if JUCE_DIRECT2D_METRICS
-        owner.metrics->finishFrame();
-       #endif
-
-        return hr;
-    }
-
-    SavedState* getCurrentSavedState() const
-    {
-        return ! savedClientStates.empty() ? savedClientStates.back().get() : nullptr;
-    }
-
-    SavedState* pushFirstSavedState (Rectangle<int> initialClipRegion)
-    {
-        jassert (savedClientStates.empty());
-
-        savedClientStates.push_back (std::make_unique<SavedState> (owner,
-                                                                   initialClipRegion,
-                                                                   getDeviceContext(),
-                                                                   deviceResources->colourBrush,
-                                                                   *deviceResources));
-
-        return getCurrentSavedState();
-    }
-
-    SavedState* pushSavedState()
-    {
-        jassert (! savedClientStates.empty());
-
-        savedClientStates.push_back (std::make_unique<SavedState> (*savedClientStates.back()));
-
-        return getCurrentSavedState();
-    }
-
-    SavedState* popSavedState()
-    {
-        savedClientStates.back()->popLayers();
-        savedClientStates.pop_back();
-
-        return getCurrentSavedState();
-    }
-
-    void popAllSavedStates()
-    {
-        while (! savedClientStates.empty())
-            popSavedState();
-    }
+    void popAllSavedStates();
 
     virtual RectangleList<int> getPaintAreas() const = 0;
     virtual Rectangle<int> getFrameSize() const = 0;
     virtual ComSmartPtr<ID2D1DeviceContext1> getDeviceContext() const = 0;
     virtual ComSmartPtr<ID2D1Image> getDeviceContextTarget() const = 0;
 
-    void setDeviceContextTransform (AffineTransform transform)
-    {
-        setTransform (getDeviceContext(), transform);
-    }
-
-    void resetDeviceContextTransform()
-    {
-        resetTransform (getDeviceContext());
-    }
+    void setDeviceContextTransform (AffineTransform transform);
+    void resetDeviceContextTransform();
 
     auto getDirect2DFactory()
     {
@@ -737,81 +613,11 @@ public:
         return directWrite->getFonts();
     }
 
-    bool fillSpriteBatch (const RectangleList<float>& list)
-    {
-        if (! owner.currentState->fillType.isColour())
-            return false;
+    bool fillSpriteBatch (const RectangleList<float>& list);
 
-        auto* rectangleListSpriteBatch = deviceResources->rectangleListSpriteBatch.get();
-
-        if (rectangleListSpriteBatch == nullptr)
-            return false;
-
-        const auto deviceContext = getDeviceContext();
-
-        if (deviceContext == nullptr)
-            return false;
-
-        owner.applyPendingClipList();
-
-        const auto& transform = owner.currentState->currentTransform;
-
-        if (transform.isOnlyTranslated)
-        {
-            auto translateRectangle = [&] (const Rectangle<float>& r) -> Rectangle<float>
-            {
-                return transform.translated (r);
-            };
-
-            return rectangleListSpriteBatch->fillRectangles (deviceContext,
-                                                             list,
-                                                             owner.currentState->fillType.colour,
-                                                             translateRectangle,
-                                                             owner.metrics.get());
-        }
-
-        if (owner.currentState->isCurrentTransformAxisAligned())
-        {
-            auto transformRectangle = [&] (const Rectangle<float>& r) -> Rectangle<float>
-            {
-                return transform.boundsAfterTransform (r);
-            };
-
-            return rectangleListSpriteBatch->fillRectangles (deviceContext,
-                                                             list,
-                                                             owner.currentState->fillType.colour,
-                                                             transformRectangle,
-                                                             owner.metrics.get());
-        }
-
-        auto checkRectangleWithoutTransforming = [&] (const Rectangle<float>& r) -> Rectangle<float>
-        {
-            return r;
-        };
-
-        ScopedTransform scopedTransform { *this, owner.currentState };
-        return rectangleListSpriteBatch->fillRectangles (deviceContext,
-                                                         list,
-                                                         owner.currentState->fillType.colour,
-                                                         checkRectangleWithoutTransforming,
-                                                         owner.metrics.get());
-    }
-
-    static Line<float> offsetShape (Line<float> a, Point<float> b)
-    {
-        return Line<float> { a.getStart() + b, a.getEnd() + b };
-    }
-
-    static Rectangle<float> offsetShape (Rectangle<float> a, Point<float> b)
-    {
-        return a + b;
-    }
-
-    static RectangleList<float> offsetShape (RectangleList<float> a, Point<float> b)
-    {
-        a.offsetAll (b);
-        return a;
-    }
+    static Line<float> offsetShape (Line<float> a, Point<float> b);
+    static Rectangle<float> offsetShape (Rectangle<float> a, Point<float> b);
+    static RectangleList<float> offsetShape (RectangleList<float> a, Point<float> b);
 
     template <typename Shape, typename Fn>
     void paintPrimitive (const Shape& shape, Fn&& primitiveOp)
@@ -848,36 +654,13 @@ public:
     DirectWriteGlyphRun glyphRun;
 
 private:
-    static void resetTransform (ID2D1DeviceContext1* context)
-    {
-        context->SetTransform (D2D1::IdentityMatrix());
-    }
+    static void resetTransform (ID2D1DeviceContext1* context);
+    static void setTransform (ID2D1DeviceContext1* context, AffineTransform newTransform);
 
-    static void setTransform (ID2D1DeviceContext1* context, AffineTransform newTransform)
-    {
-        context->SetTransform (D2DUtilities::transformToMatrix (newTransform));
-    }
+    DxgiAdapter::Ptr findAdapter() const;
 
-    DxgiAdapter::Ptr findAdapter() const
-    {
-        return Direct2DDeviceResources::findAdapter (directX->adapters, getDeviceContext());
-    }
-
-    void adapterCreated (DxgiAdapter::Ptr newAdapter) override
-    {
-        const auto adapter = findAdapter();
-
-        if (adapter == nullptr || ! adapter->uniqueIDMatches (newAdapter))
-            teardown();
-    }
-
-    void adapterRemoved (DxgiAdapter::Ptr expiringAdapter) override
-    {
-        const auto adapter = findAdapter();
-
-        if (adapter != nullptr && adapter->uniqueIDMatches (expiringAdapter))
-            teardown();
-    }
+    void adapterCreated (DxgiAdapter::Ptr newAdapter) override;
+    void adapterRemoved (DxgiAdapter::Ptr expiringAdapter) override;
 
     HWND hwnd = nullptr;
 
