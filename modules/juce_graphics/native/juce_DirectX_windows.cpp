@@ -599,40 +599,6 @@ std::optional<Direct2DDeviceResources> Direct2DDeviceResources::create (ComSmart
 }
 
 //==============================================================================
-std::optional<CompositionTree> CompositionTree::create (IDXGIDevice* dxgiDevice,
-                                                        HWND hwnd,
-                                                        IDXGISwapChain1* swapChain)
-{
-    if (dxgiDevice == nullptr)
-        return {};
-
-    CompositionTree result;
-
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-    if (const auto hr = DCompositionCreateDevice (dxgiDevice,
-                                                  __uuidof (IDCompositionDevice),
-                                                  reinterpret_cast<void**> (result.compositionDevice.resetAndGetPointerAddress()));
-            FAILED (hr))
-    {
-        return {};
-    }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-    if (const auto hr = result.compositionDevice->CreateTargetForHwnd (hwnd, FALSE, result.compositionTarget.resetAndGetPointerAddress()); FAILED (hr))
-        return {};
-    if (const auto hr = result.compositionDevice->CreateVisual (result.compositionVisual.resetAndGetPointerAddress()); FAILED (hr))
-        return {};
-    if (const auto hr = result.compositionTarget->SetRoot (result.compositionVisual); FAILED (hr))
-        return {};
-    if (const auto hr = result.compositionVisual->SetContent (swapChain); FAILED (hr))
-        return {};
-    if (const auto hr = result.compositionDevice->Commit(); FAILED (hr))
-        return {};
-
-    return result;
-}
-
-//==============================================================================
 String getLocalisedName (IDWriteLocalizedStrings* names)
 {
     jassert (names != nullptr);

@@ -245,6 +245,58 @@ private:
 };
 
 //==============================================================================
+/*  DirectComposition
+    Using DirectComposition enables transparent windows and smoother window
+    resizing
+
+    This class builds a simple DirectComposition tree that ultimately contains
+    the swap chain
+*/
+class CompositionTree
+{
+public:
+    static std::optional<CompositionTree> create (IDXGIDevice* dxgiDevice,
+                                                  HWND hwnd,
+                                                  IDXGISwapChain1* swapChain)
+    {
+        if (dxgiDevice == nullptr)
+            return {};
+
+        CompositionTree result;
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        if (const auto hr = DCompositionCreateDevice (dxgiDevice,
+                                                      __uuidof (IDCompositionDevice),
+                                                      reinterpret_cast<void**> (result.compositionDevice.resetAndGetPointerAddress()));
+                FAILED (hr))
+        {
+            return {};
+        }
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        if (const auto hr = result.compositionDevice->CreateTargetForHwnd (hwnd, FALSE, result.compositionTarget.resetAndGetPointerAddress()); FAILED (hr))
+            return {};
+        if (const auto hr = result.compositionDevice->CreateVisual (result.compositionVisual.resetAndGetPointerAddress()); FAILED (hr))
+            return {};
+        if (const auto hr = result.compositionTarget->SetRoot (result.compositionVisual); FAILED (hr))
+            return {};
+        if (const auto hr = result.compositionVisual->SetContent (swapChain); FAILED (hr))
+            return {};
+        if (const auto hr = result.compositionDevice->Commit(); FAILED (hr))
+            return {};
+
+        return result;
+    }
+
+private:
+    CompositionTree() = default;
+
+    ComSmartPtr<IDCompositionDevice> compositionDevice;
+    ComSmartPtr<IDCompositionTarget> compositionTarget;
+    ComSmartPtr<IDCompositionVisual> compositionVisual;
+};
+
+//==============================================================================
 struct Direct2DHwndContext::HwndPimpl : public Direct2DGraphicsContext::Pimpl
 {
 private:

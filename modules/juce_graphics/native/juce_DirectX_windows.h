@@ -409,26 +409,6 @@ private:
 };
 
 //==============================================================================
-/*  DirectComposition
-    Using DirectComposition enables transparent windows and smoother window
-    resizing
-
-    This class builds a simple DirectComposition tree that ultimately contains
-    the swap chain
-*/
-class CompositionTree
-{
-public:
-    static std::optional<CompositionTree> create (IDXGIDevice* dxgiDevice, HWND hwnd, IDXGISwapChain1* swapChain);
-
-private:
-    CompositionTree() = default;
-
-    ComSmartPtr<IDCompositionDevice> compositionDevice;
-    ComSmartPtr<IDCompositionTarget> compositionTarget;
-    ComSmartPtr<IDCompositionVisual> compositionVisual;
-};
-
 String getLocalisedName (IDWriteLocalizedStrings* names);
 String getFontFamilyName (IDWriteFontFamily* family);
 String getFontFaceName (IDWriteFont* font);
