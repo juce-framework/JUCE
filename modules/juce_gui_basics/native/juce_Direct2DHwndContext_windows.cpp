@@ -35,6 +35,193 @@
 namespace juce
 {
 
+class SwapChain
+{
+public:
+    SwapChain() = default;
+
+    HRESULT create (HWND hwnd, Rectangle<int> size, DxgiAdapter::Ptr adapter)
+    {
+        if (chain != nullptr || hwnd == nullptr)
+            return S_OK;
+
+        auto dxgiFactory = directX->adapters.getFactory();
+
+        if (dxgiFactory == nullptr || adapter->direct3DDevice == nullptr)
+            return E_FAIL;
+
+        buffer = nullptr;
+        chain = nullptr;
+
+        // Make the waitable swap chain
+        // Create the swap chain with premultiplied alpha support for transparent windows
+        DXGI_SWAP_CHAIN_DESC1 swapChainDescription = {};
+        swapChainDescription.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        swapChainDescription.Width = (UINT) size.getWidth();
+        swapChainDescription.Height = (UINT) size.getHeight();
+        swapChainDescription.SampleDesc.Count = 1;
+        swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        swapChainDescription.BufferCount = 2;
+        swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+        swapChainDescription.Flags = swapChainFlags;
+
+        swapChainDescription.Scaling = DXGI_SCALING_STRETCH;
+        swapChainDescription.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
+
+        if (const auto hr = dxgiFactory->CreateSwapChainForComposition (adapter->direct3DDevice,
+                                                                        &swapChainDescription,
+                                                                        nullptr,
+                                                                        chain.resetAndGetPointerAddress());
+            FAILED (hr))
+        {
+            return hr;
+        }
+
+        // Get the waitable swap chain presentation event and set the maximum frame latency
+        ComSmartPtr<IDXGISwapChain2> chain2;
+        if (const auto hr = chain.QueryInterface (chain2); FAILED (hr))
+            return hr;
+
+        if (chain2 == nullptr)
+            return E_FAIL;
+
+        swapChainEvent.emplace (chain2->GetFrameLatencyWaitableObject());
+        if (swapChainEvent->getHandle() == INVALID_HANDLE_VALUE)
+            return E_NOINTERFACE;
+
+        chain2->SetMaximumFrameLatency (1);
+
+        createBuffer (adapter);
+        return buffer != nullptr ? S_OK : E_FAIL;
+    }
+
+    bool canPaint() const
+    {
+        return chain != nullptr && buffer != nullptr;
+    }
+
+    HRESULT resize (Rectangle<int> newSize)
+    {
+        if (chain == nullptr)
+            return E_FAIL;
+
+        constexpr auto minFrameSize = 1;
+        constexpr auto maxFrameSize = 16384;
+
+        auto scaledSize = newSize.getUnion ({ minFrameSize, minFrameSize })
+                                 .getIntersection ({ maxFrameSize, maxFrameSize });
+
+        buffer = nullptr;
+
+        if (const auto hr = chain->ResizeBuffers (0, (UINT) scaledSize.getWidth(), (UINT) scaledSize.getHeight(), DXGI_FORMAT_B8G8R8A8_UNORM, swapChainFlags); FAILED (hr))
+            return hr;
+
+        ComSmartPtr<IDXGIDevice> device;
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        chain->GetDevice (__uuidof (device), (void**) device.resetAndGetPointerAddress());
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        createBuffer (Direct2DDeviceResources::findAdapter (directX->adapters, device));
+
+        return buffer != nullptr ? S_OK : E_FAIL;
+    }
+
+    Rectangle<int> getSize() const
+    {
+        const auto surface = getSurface();
+
+        if (surface == nullptr)
+            return {};
+
+        DXGI_SURFACE_DESC desc{};
+        if (FAILED (surface->GetDesc (&desc)))
+            return {};
+
+        return { (int) desc.Width, (int) desc.Height };
+    }
+
+    WindowsScopedEvent* getEvent()
+    {
+        if (swapChainEvent.has_value())
+            return &*swapChainEvent;
+
+        return nullptr;
+    }
+
+    auto getChain() const
+    {
+        return chain;
+    }
+
+    ComSmartPtr<ID2D1Bitmap1> getBuffer() const
+    {
+        return buffer;
+    }
+
+    static constexpr uint32 swapChainFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+    static constexpr uint32 presentSyncInterval = 1;
+    static constexpr uint32 presentFlags = 0;
+
+private:
+    ComSmartPtr<IDXGISurface> getSurface() const
+    {
+        if (chain == nullptr)
+            return nullptr;
+
+        ComSmartPtr<IDXGISurface> surface;
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        if (const auto hr = chain->GetBuffer (0, __uuidof (surface), reinterpret_cast<void**> (surface.resetAndGetPointerAddress())); FAILED (hr))
+            return nullptr;
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        return surface;
+    }
+
+    void createBuffer (DxgiAdapter::Ptr adapter)
+    {
+        buffer = nullptr;
+
+        const auto deviceContext = Direct2DDeviceContext::create (adapter);
+
+        if (deviceContext == nullptr)
+            return;
+
+        const auto surface = getSurface();
+
+        if (surface == nullptr)
+            return;
+
+        D2D1_BITMAP_PROPERTIES1 bitmapProperties{};
+        bitmapProperties.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
+        bitmapProperties.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        bitmapProperties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
+
+        deviceContext->CreateBitmapFromDxgiSurface (surface, bitmapProperties, buffer.resetAndGetPointerAddress());
+    }
+
+    class AssignableDirectX
+    {
+    public:
+        AssignableDirectX() = default;
+        AssignableDirectX (const AssignableDirectX&) {}
+        AssignableDirectX (AssignableDirectX&&) noexcept {}
+        AssignableDirectX& operator= (const AssignableDirectX&) { return *this; }
+        AssignableDirectX& operator= (AssignableDirectX&&) noexcept { return *this; }
+        ~AssignableDirectX() = default;
+
+        DirectX* operator->() const { return directX.operator->(); }
+
+    private:
+        SharedResourcePointer<DirectX> directX;
+    };
+
+    AssignableDirectX directX;
+    ComSmartPtr<IDXGISwapChain1> chain;
+    ComSmartPtr<ID2D1Bitmap1> buffer;
+    std::optional<WindowsScopedEvent> swapChainEvent;
+};
+
+//==============================================================================
 struct Direct2DHwndContext::HwndPimpl : public Direct2DGraphicsContext::Pimpl
 {
 private:

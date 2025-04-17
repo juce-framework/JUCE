@@ -434,61 +434,6 @@ private:
     Direct2DDeviceResources() = default;
 };
 
-class SwapChain
-{
-public:
-    SwapChain() = default;
-
-    HRESULT create (HWND hwnd, Rectangle<int> size, DxgiAdapter::Ptr adapter);
-
-    bool canPaint() const;
-
-    HRESULT resize (Rectangle<int> newSize);
-
-    Rectangle<int> getSize() const;
-
-    WindowsScopedEvent* getEvent();
-
-    auto getChain() const
-    {
-        return chain;
-    }
-
-    ComSmartPtr<ID2D1Bitmap1> getBuffer() const
-    {
-        return buffer;
-    }
-
-    static constexpr uint32 swapChainFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
-    static constexpr uint32 presentSyncInterval = 1;
-    static constexpr uint32 presentFlags = 0;
-
-private:
-    ComSmartPtr<IDXGISurface> getSurface() const;
-    void createBuffer (DxgiAdapter::Ptr adapter);
-
-    class AssignableDirectX
-    {
-    public:
-        AssignableDirectX() = default;
-        AssignableDirectX (const AssignableDirectX&) {}
-        AssignableDirectX (AssignableDirectX&&) noexcept {}
-        AssignableDirectX& operator= (const AssignableDirectX&) { return *this; }
-        AssignableDirectX& operator= (AssignableDirectX&&) noexcept { return *this; }
-        ~AssignableDirectX() = default;
-
-        DirectX* operator->() const { return directX.operator->(); }
-
-    private:
-        SharedResourcePointer<DirectX> directX;
-    };
-
-    AssignableDirectX directX;
-    ComSmartPtr<IDXGISwapChain1> chain;
-    ComSmartPtr<ID2D1Bitmap1> buffer;
-    std::optional<WindowsScopedEvent> swapChainEvent;
-};
-
 //==============================================================================
 /*  DirectComposition
     Using DirectComposition enables transparent windows and smoother window
