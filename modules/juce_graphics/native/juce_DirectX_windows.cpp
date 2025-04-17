@@ -38,27 +38,6 @@ namespace juce
 constexpr auto enableDirectXDebugLayer = false;
 
 //==============================================================================
-ScopedGeometryWithSink::ScopedGeometryWithSink (ID2D1Factory* factory, D2D1_FILL_MODE fillMode)
-{
-    if (const auto hr = factory->CreatePathGeometry (geometry.resetAndGetPointerAddress()); FAILED (hr))
-        return;
-
-    if (const auto hr = geometry->Open (sink.resetAndGetPointerAddress()); FAILED (hr))
-        return;
-
-    sink->SetFillMode (fillMode);
-}
-
-ScopedGeometryWithSink::~ScopedGeometryWithSink()
-{
-    if (sink == nullptr)
-        return;
-
-    const auto hr = sink->Close();
-    jassertquiet (SUCCEEDED (hr));
-}
-
-//==============================================================================
 void DirectWriteGlyphRun::replace (Span<const Point<float>> positions, float scale)
 {
     advances.resize (positions.size(), 0.0f);

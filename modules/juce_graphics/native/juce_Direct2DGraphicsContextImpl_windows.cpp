@@ -35,6 +35,35 @@
 namespace juce
 {
 
+/*  ScopedGeometryWithSink creates an ID2D1PathGeometry object with an open sink. */
+struct ScopedGeometryWithSink
+{
+    ScopedGeometryWithSink (ID2D1Factory* factory, D2D1_FILL_MODE fillMode)
+    {
+        if (const auto hr = factory->CreatePathGeometry (geometry.resetAndGetPointerAddress()); FAILED (hr))
+            return;
+
+        if (const auto hr = geometry->Open (sink.resetAndGetPointerAddress()); FAILED (hr))
+            return;
+
+        sink->SetFillMode (fillMode);
+    }
+
+    ~ScopedGeometryWithSink()
+    {
+        if (sink == nullptr)
+            return;
+
+        const auto hr = sink->Close();
+        jassertquiet (SUCCEEDED (hr));
+    }
+
+    ComSmartPtr<ID2D1PathGeometry> geometry;
+    ComSmartPtr<ID2D1GeometrySink> sink;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedGeometryWithSink)
+};
+
 struct ScopedBlendCopy
 {
     explicit ScopedBlendCopy (ComSmartPtr<ID2D1DeviceContext1> c)

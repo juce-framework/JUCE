@@ -35,19 +35,6 @@
 namespace juce
 {
 
-/*  ScopedGeometryWithSink creates an ID2D1PathGeometry object with an open sink. */
-struct ScopedGeometryWithSink
-{
-    ScopedGeometryWithSink (ID2D1Factory* factory, D2D1_FILL_MODE fillMode);
-
-    ~ScopedGeometryWithSink();
-
-    ComSmartPtr<ID2D1PathGeometry> geometry;
-    ComSmartPtr<ID2D1GeometrySink> sink;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedGeometryWithSink)
-};
-
 class WindowsScopedEvent
 {
 public:
