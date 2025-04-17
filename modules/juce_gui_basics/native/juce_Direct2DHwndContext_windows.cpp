@@ -152,7 +152,7 @@ private:
 
     bool prepare() override
     {
-        const auto adapter = directX->adapters.getDefaultAdapter();
+        const auto adapter = getDefaultAdapter();
 
         if (adapter == nullptr)
             return false;
@@ -163,10 +163,7 @@ private:
         if (deviceContext == nullptr)
             return false;
 
-        if (! deviceResources.has_value())
-            deviceResources = Direct2DDeviceResources::create (deviceContext);
-
-        if (! deviceResources.has_value())
+        if (! Pimpl::prepare())
             return false;
 
         if (! hwnd || getClientRect().isEmpty())

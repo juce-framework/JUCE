@@ -557,25 +557,21 @@ public:
 
 struct Direct2DGraphicsContext::Pimpl : private DxgiAdapterListener
 {
-protected:
-    Direct2DGraphicsContext& owner;
-    SharedResourcePointer<DirectX> directX;
-    SharedResourcePointer<Direct2DFactories> directWrite;
-
-    std::optional<Direct2DDeviceResources> deviceResources;
-
-    std::vector<std::unique_ptr<Direct2DGraphicsContext::SavedState>> savedClientStates;
-
-    virtual bool prepare();
-    virtual void teardown();
-    virtual bool checkPaintReady();
-
 public:
     explicit Pimpl (Direct2DGraphicsContext& ownerIn);
     ~Pimpl() override;
 
     virtual SavedState* startFrame();
     virtual HRESULT finishFrame();
+
+    virtual bool prepare();
+    virtual void teardown();
+    virtual bool checkPaintReady();
+
+    virtual RectangleList<int> getPaintAreas() const = 0;
+    virtual Rectangle<int> getFrameSize() const = 0;
+    virtual ComSmartPtr<ID2D1DeviceContext1> getDeviceContext() const = 0;
+    virtual ComSmartPtr<ID2D1Image> getDeviceContextTarget() const = 0;
 
     SavedState* getCurrentSavedState() const;
     SavedState* pushFirstSavedState (Rectangle<int> initialClipRegion);
@@ -585,30 +581,30 @@ public:
 
     void popAllSavedStates();
 
-    virtual RectangleList<int> getPaintAreas() const = 0;
-    virtual Rectangle<int> getFrameSize() const = 0;
-    virtual ComSmartPtr<ID2D1DeviceContext1> getDeviceContext() const = 0;
-    virtual ComSmartPtr<ID2D1Image> getDeviceContextTarget() const = 0;
-
     void setDeviceContextTransform (AffineTransform transform);
     void resetDeviceContextTransform();
 
-    auto getDirect2DFactory()
+    DxgiAdapter::Ptr getDefaultAdapter() const
+    {
+        return directX->adapters.getDefaultAdapter();
+    }
+
+    auto getDirect2DFactory() const
     {
         return directX->getD2DFactory();
     }
 
-    auto getDirectWriteFactory()
+    auto getDirectWriteFactory() const
     {
         return directWrite->getDWriteFactory();
     }
 
-    auto getDirectWriteFactory4()
+    auto getDirectWriteFactory4() const
     {
         return directWrite->getDWriteFactory4();
     }
 
-    auto& getFontCollection()
+    auto& getFontCollection() const
     {
         return directWrite->getFonts();
     }
@@ -661,6 +657,14 @@ private:
 
     void adapterCreated (DxgiAdapter::Ptr newAdapter) override;
     void adapterRemoved (DxgiAdapter::Ptr expiringAdapter) override;
+
+    Direct2DGraphicsContext& owner;
+    SharedResourcePointer<DirectX> directX;
+    SharedResourcePointer<Direct2DFactories> directWrite;
+
+    std::optional<Direct2DDeviceResources> deviceResources;
+
+    std::vector<std::unique_ptr<Direct2DGraphicsContext::SavedState>> savedClientStates;
 
    #if JUCE_DIRECT2D_METRICS
     int64 paintStartTicks = 0;
