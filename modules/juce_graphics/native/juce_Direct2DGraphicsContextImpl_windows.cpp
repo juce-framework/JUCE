@@ -761,22 +761,6 @@ bool Direct2DGraphicsContext::Pimpl::fillSpriteBatch (const RectangleList<float>
                                                      owner.metrics.get());
 }
 
-Line<float> Direct2DGraphicsContext::Pimpl::offsetShape (Line<float> a, Point<float> b)
-{
-    return Line<float> { a.getStart() + b, a.getEnd() + b };
-}
-
-Rectangle<float> Direct2DGraphicsContext::Pimpl::offsetShape (Rectangle<float> a, Point<float> b)
-{
-    return a + b;
-}
-
-RectangleList<float> Direct2DGraphicsContext::Pimpl::offsetShape (RectangleList<float> a, Point<float> b)
-{
-    a.offsetAll (b);
-    return a;
-}
-
 void Direct2DGraphicsContext::Pimpl::resetTransform (ID2D1DeviceContext1* context)
 {
     context->SetTransform (D2D1::IdentityMatrix());

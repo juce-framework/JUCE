@@ -472,6 +472,54 @@ void Direct2DGraphicsContext::setInterpolationQuality (Graphics::ResamplingQuali
     }
 }
 
+Line<float> Direct2DGraphicsContext::offsetShape (Line<float> a, Point<float> b)
+{
+    return { a.getStart() + b, a.getEnd() + b };
+}
+
+Rectangle<float> Direct2DGraphicsContext::offsetShape (Rectangle<float> a, Point<float> b)
+{
+    return a + b;
+}
+
+RectangleList<float> Direct2DGraphicsContext::offsetShape (RectangleList<float> a, Point<float> b)
+{
+    a.offsetAll (b);
+    return a;
+}
+
+template <typename Shape, typename Fn>
+void Direct2DGraphicsContext::paintPrimitive (const Shape& shape, Fn&& primitiveOp)
+{
+    const auto& transform = currentState->currentTransform;
+
+    applyPendingClipList();
+
+    auto deviceContext = getPimpl()->getDeviceContext();
+
+    if (deviceContext == nullptr)
+        return;
+
+    const auto fillTransform = transform.isOnlyTranslated
+                             ? SavedState::BrushTransformFlags::applyWorldAndFillTypeTransforms
+                             : SavedState::BrushTransformFlags::applyFillTypeTransform;
+
+    const auto brush = currentState->getBrush (fillTransform);
+
+    if (transform.isOnlyTranslated)
+    {
+        const auto translated = offsetShape (shape, transform.offset.toFloat());
+
+        if (currentState->doesIntersectClipList (translated))
+            primitiveOp (translated, deviceContext, brush);
+    }
+    else if (currentState->doesIntersectClipList (transform.boundsAfterTransform (shape)))
+    {
+        ScopedTransform scopedTransform { *getPimpl(), currentState };
+        primitiveOp (shape, deviceContext, brush);
+    }
+}
+
 void Direct2DGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExistingContents)
 {
     if (r.isEmpty())
@@ -505,7 +553,7 @@ void Direct2DGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExi
             deviceContext->FillRectangle (D2DUtilities::toRECT_F (rect), brush);
     };
 
-    getPimpl()->paintPrimitive (r.toFloat(), fill);
+    paintPrimitive (r.toFloat(), fill);
 }
 
 void Direct2DGraphicsContext::fillRect (const Rectangle<float>& r)
@@ -519,7 +567,7 @@ void Direct2DGraphicsContext::fillRect (const Rectangle<float>& r)
             deviceContext->FillRectangle (D2DUtilities::toRECT_F (rect), brush);
     };
 
-    getPimpl()->paintPrimitive (r, fill);
+    paintPrimitive (r, fill);
 }
 
 void Direct2DGraphicsContext::fillRectList (const RectangleList<float>& list)
@@ -534,7 +582,7 @@ void Direct2DGraphicsContext::fillRectList (const RectangleList<float>& list)
                 deviceContext->FillRectangle (D2DUtilities::toRECT_F (r), brush);
     };
 
-    getPimpl()->paintPrimitive (list, fill);
+    paintPrimitive (list, fill);
 }
 
 void Direct2DGraphicsContext::drawRect (const Rectangle<float>& r, float lineThickness)
@@ -548,7 +596,7 @@ void Direct2DGraphicsContext::drawRect (const Rectangle<float>& r, float lineThi
             deviceContext->DrawRectangle (D2DUtilities::toRECT_F (rect.reduced (lineThickness * 0.5f)), brush, lineThickness);
     };
 
-    getPimpl()->paintPrimitive (r, draw);
+    paintPrimitive (r, draw);
 }
 
 void Direct2DGraphicsContext::fillPath (const Path& p, const AffineTransform& transform)
@@ -713,7 +761,7 @@ void Direct2DGraphicsContext::drawLineWithThickness (const Line<float>& line, fl
                                  lineThickness);
     };
 
-    getPimpl()->paintPrimitive (line, draw);
+    paintPrimitive (line, draw);
 }
 
 void Direct2DGraphicsContext::setFont (const Font& newFont)
@@ -749,7 +797,7 @@ void Direct2DGraphicsContext::drawRoundedRectangle (const Rectangle<float>& area
         deviceContext->DrawRoundedRectangle (roundedRect, brush, lineThickness);
     };
 
-    getPimpl()->paintPrimitive (area, draw);
+    paintPrimitive (area, draw);
 }
 
 void Direct2DGraphicsContext::fillRoundedRectangle (const Rectangle<float>& area, float cornerSize)
@@ -763,7 +811,7 @@ void Direct2DGraphicsContext::fillRoundedRectangle (const Rectangle<float>& area
         deviceContext->FillRoundedRectangle (roundedRect, brush);
     };
 
-    getPimpl()->paintPrimitive (area, fill);
+    paintPrimitive (area, fill);
 }
 
 void Direct2DGraphicsContext::drawEllipse (const Rectangle<float>& area, float lineThickness)
@@ -778,7 +826,7 @@ void Direct2DGraphicsContext::drawEllipse (const Rectangle<float>& area, float l
         deviceContext->DrawEllipse (ellipse, brush, lineThickness);
     };
 
-    getPimpl()->paintPrimitive (area, draw);
+    paintPrimitive (area, draw);
 }
 
 void Direct2DGraphicsContext::fillEllipse (const Rectangle<float>& area)
@@ -793,7 +841,7 @@ void Direct2DGraphicsContext::fillEllipse (const Rectangle<float>& area)
         deviceContext->FillEllipse (ellipse, brush);
     };
 
-    getPimpl()->paintPrimitive (area, fill);
+    paintPrimitive (area, fill);
 }
 
 void Direct2DGraphicsContext::drawGlyphs (Span<const uint16_t> glyphNumbers,

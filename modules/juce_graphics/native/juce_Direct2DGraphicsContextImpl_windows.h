@@ -91,42 +91,6 @@ public:
 
     bool fillSpriteBatch (const RectangleList<float>& list);
 
-    static Line<float> offsetShape (Line<float> a, Point<float> b);
-    static Rectangle<float> offsetShape (Rectangle<float> a, Point<float> b);
-    static RectangleList<float> offsetShape (RectangleList<float> a, Point<float> b);
-
-    template <typename Shape, typename Fn>
-    void paintPrimitive (const Shape& shape, Fn&& primitiveOp)
-    {
-        const auto& transform = owner.currentState->currentTransform;
-
-        owner.applyPendingClipList();
-
-        auto deviceContext = getDeviceContext();
-
-        if (deviceContext == nullptr)
-            return;
-
-        const auto fillTransform = transform.isOnlyTranslated
-                                 ? SavedState::BrushTransformFlags::applyWorldAndFillTypeTransforms
-                                 : SavedState::BrushTransformFlags::applyFillTypeTransform;
-
-        const auto brush = owner.currentState->getBrush (fillTransform);
-
-        if (transform.isOnlyTranslated)
-        {
-            const auto translated = offsetShape (shape, transform.offset.toFloat());
-
-            if (owner.currentState->doesIntersectClipList (translated))
-                primitiveOp (translated, deviceContext, brush);
-        }
-        else if (owner.currentState->doesIntersectClipList (transform.boundsAfterTransform (shape)))
-        {
-            ScopedTransform scopedTransform { *this, owner.currentState };
-            primitiveOp (shape, deviceContext, brush);
-        }
-    }
-
     DirectWriteGlyphRun glyphRun;
 
 private:
