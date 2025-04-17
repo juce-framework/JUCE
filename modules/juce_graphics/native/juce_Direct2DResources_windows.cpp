@@ -371,7 +371,6 @@ public:
         if (chain != nullptr || hwnd == nullptr)
             return S_OK;
 
-        SharedResourcePointer<DirectX> directX;
         auto dxgiFactory = directX->adapters.getFactory();
 
         if (dxgiFactory == nullptr || adapter->direct3DDevice == nullptr)
@@ -448,7 +447,6 @@ public:
         chain->GetDevice (__uuidof (device), (void**) device.resetAndGetPointerAddress());
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        SharedResourcePointer<DirectX> directX;
         createBuffer (Direct2DDeviceResources::findAdapter (directX->adapters, device));
 
         return buffer != nullptr ? S_OK : E_FAIL;
@@ -527,6 +525,23 @@ private:
         deviceContext->CreateBitmapFromDxgiSurface (surface, bitmapProperties, buffer.resetAndGetPointerAddress());
     }
 
+    class AssignableDirectX
+    {
+    public:
+        AssignableDirectX() = default;
+        AssignableDirectX (const AssignableDirectX&) {}
+        AssignableDirectX (AssignableDirectX&&) noexcept {}
+        AssignableDirectX& operator= (const AssignableDirectX&) { return *this; }
+        AssignableDirectX& operator= (AssignableDirectX&&) noexcept { return *this; }
+        ~AssignableDirectX() = default;
+
+        DirectX* operator->() const { return directX.operator->(); }
+
+    private:
+        SharedResourcePointer<DirectX> directX;
+    };
+
+    AssignableDirectX directX;
     ComSmartPtr<IDXGISwapChain1> chain;
     ComSmartPtr<ID2D1Bitmap1> buffer;
     std::optional<WindowsScopedEvent> swapChainEvent;
