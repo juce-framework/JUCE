@@ -662,8 +662,6 @@ private:
     void adapterCreated (DxgiAdapter::Ptr newAdapter) override;
     void adapterRemoved (DxgiAdapter::Ptr expiringAdapter) override;
 
-    HWND hwnd = nullptr;
-
    #if JUCE_DIRECT2D_METRICS
     int64 paintStartTicks = 0;
    #endif
