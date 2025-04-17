@@ -37,17 +37,6 @@ namespace juce
 
 constexpr auto enableDirectXDebugLayer = false;
 
-ScopedMultithread::ScopedMultithread (ID2D1Multithread* multithreadIn)
-    : multithread (addComSmartPtrOwner (multithreadIn))
-{
-    multithreadIn->Enter();
-}
-
-ScopedMultithread::~ScopedMultithread()
-{
-    multithread->Leave();
-}
-
 //==============================================================================
 ScopedGeometryWithSink::ScopedGeometryWithSink (ID2D1Factory* factory, D2D1_FILL_MODE fillMode)
 {

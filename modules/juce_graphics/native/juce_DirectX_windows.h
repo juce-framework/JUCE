@@ -35,19 +35,6 @@
 namespace juce
 {
 
-class ScopedMultithread
-{
-public:
-    explicit ScopedMultithread (ID2D1Multithread* multithreadIn);
-
-    ~ScopedMultithread();
-
-private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedMultithread)
-
-    ComSmartPtr<ID2D1Multithread> multithread;
-};
-
 /*  ScopedGeometryWithSink creates an ID2D1PathGeometry object with an open sink. */
 struct ScopedGeometryWithSink
 {
