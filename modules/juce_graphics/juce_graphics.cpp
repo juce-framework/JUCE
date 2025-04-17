@@ -228,6 +228,7 @@ extern "C"
  #include "native/juce_Direct2DGraphicsContextImpl_windows.h"
  #include "native/juce_Direct2DImageContext_windows.h"
 
+ #include "native/juce_DirectX_windows.cpp"
  #include "native/juce_DirectWriteTypeface_windows.cpp"
  #include "native/juce_IconHelpers_windows.cpp"
  #include "native/juce_Direct2DGraphicsContext_windows.cpp"
