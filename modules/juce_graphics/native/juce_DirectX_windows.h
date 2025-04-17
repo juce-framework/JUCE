@@ -71,41 +71,6 @@ private:
 };
 
 //==============================================================================
-struct D2DHelpers
-{
-    static bool isTransformAxisAligned (const AffineTransform& transform);
-
-    static void pathToGeometrySink (const Path& path,
-                                    ID2D1GeometrySink* sink,
-                                    const AffineTransform& transform,
-                                    D2D1_FIGURE_BEGIN figureMode);
-
-    static D2D1_POINT_2F pointTransformed (Point<float> pt, const AffineTransform& transform);
-
-    static void rectToGeometrySink (const Rectangle<float>& rect,
-                                    ID2D1GeometrySink* sink,
-                                    const AffineTransform& transform,
-                                    D2D1_FIGURE_BEGIN figureMode);
-
-    static ComSmartPtr<ID2D1Geometry> rectListToPathGeometry (ID2D1Factory* factory,
-                                                              const RectangleList<float>& clipRegion,
-                                                              const AffineTransform& transform,
-                                                              D2D1_FILL_MODE fillMode,
-                                                              D2D1_FIGURE_BEGIN figureMode,
-                                                              [[maybe_unused]] Direct2DMetrics* metrics);
-
-    static ComSmartPtr<ID2D1Geometry> pathToPathGeometry (ID2D1Factory* factory,
-                                                          const Path& path,
-                                                          const AffineTransform& transform,
-                                                          D2D1_FIGURE_BEGIN figureMode,
-                                                          [[maybe_unused]] Direct2DMetrics* metrics);
-
-    static ComSmartPtr<ID2D1StrokeStyle1> pathStrokeTypeToStrokeStyle (ID2D1Factory1* factory,
-                                                                       const PathStrokeType& strokeType);
-
-};
-
-//==============================================================================
 /** Heap storage for a DirectWrite glyph run */
 class DirectWriteGlyphRun
 {
