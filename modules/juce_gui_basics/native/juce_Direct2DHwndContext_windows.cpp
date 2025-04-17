@@ -35,6 +35,29 @@
 namespace juce
 {
 
+class WindowsScopedEvent
+{
+public:
+    explicit WindowsScopedEvent (HANDLE handleIn)
+        : handle (handleIn)
+    {
+    }
+
+    WindowsScopedEvent()
+        : WindowsScopedEvent (CreateEvent (nullptr, FALSE, FALSE, nullptr))
+    {
+    }
+
+    HANDLE getHandle() const noexcept
+    {
+        return handle.get();
+    }
+
+private:
+    std::unique_ptr<std::remove_pointer_t<HANDLE>, FunctionPointerDestructor<CloseHandle>> handle;
+};
+
+//==============================================================================
 class SwapChain
 {
 public:
