@@ -402,9 +402,9 @@ void UpdateRegion::findRECTAndValidate (HWND windowHandle)
 }
 
 //==============================================================================
-ComSmartPtr<ID2D1GradientStopCollection> makeGradientStopCollection (const ColourGradient& gradient,
-                                                                     ComSmartPtr<ID2D1DeviceContext1> deviceContext,
-                                                                     [[maybe_unused]] Direct2DMetrics* metrics) noexcept
+static ComSmartPtr<ID2D1GradientStopCollection> makeGradientStopCollection (const ColourGradient& gradient,
+                                                                            ComSmartPtr<ID2D1DeviceContext1> deviceContext,
+                                                                            [[maybe_unused]] Direct2DMetrics* metrics) noexcept
 {
     JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (metrics, createGradientTime);
 

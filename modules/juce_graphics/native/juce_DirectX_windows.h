@@ -244,10 +244,6 @@ private:
     uint32 numRect = 0;
 };
 
-ComSmartPtr<ID2D1GradientStopCollection> makeGradientStopCollection (const ColourGradient& gradient,
-                                                                     ComSmartPtr<ID2D1DeviceContext1> deviceContext,
-                                                                     [[maybe_unused]] Direct2DMetrics* metrics) noexcept;
-
 class LinearGradientCache
 {
 public:
