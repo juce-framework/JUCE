@@ -470,24 +470,6 @@ private:
     std::mutex mutex;
 };
 
-class MemoryFontFileStream final : public ComBaseClassHelper<IDWriteFontFileStream>
-{
-public:
-    explicit MemoryFontFileStream (std::shared_ptr<const MemoryBlock> blockIn);
-
-    JUCE_COMRESULT GetFileSize (UINT64* fileSize) noexcept override;
-    JUCE_COMRESULT GetLastWriteTime (UINT64* lastWriteTime) noexcept override;
-    JUCE_COMRESULT ReadFileFragment (const void** fragmentStart,
-                                     UINT64 fileOffset,
-                                     UINT64 fragmentSize,
-                                     void** fragmentContext) noexcept override;
-
-    void WINAPI ReleaseFileFragment (void*) noexcept override {}
-
-private:
-    std::shared_ptr<const MemoryBlock> block;
-};
-
 class MemoryFontFileLoader final : public ComBaseClassHelper<IDWriteFontFileLoader>
 {
 public:

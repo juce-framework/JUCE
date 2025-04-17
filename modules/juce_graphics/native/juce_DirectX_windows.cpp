@@ -825,39 +825,48 @@ auto AggregateFontCollection::mapCharacters (IDWriteFontFallback* fallback,
 }
 
 //==============================================================================
-MemoryFontFileStream::MemoryFontFileStream (std::shared_ptr<const MemoryBlock> blockIn)
-    : block (std::move (blockIn))
+class MemoryFontFileStream final : public ComBaseClassHelper<IDWriteFontFileStream>
 {
-}
-
-JUCE_COMRESULT MemoryFontFileStream::GetFileSize (UINT64* fileSize) noexcept
-{
-    *fileSize = block->getSize();
-    return S_OK;
-}
-
-JUCE_COMRESULT MemoryFontFileStream::GetLastWriteTime (UINT64* lastWriteTime) noexcept
-{
-    *lastWriteTime = 0;
-    return S_OK;
-}
-
-JUCE_COMRESULT MemoryFontFileStream::ReadFileFragment (const void** fragmentStart,
-                                                       UINT64 fileOffset,
-                                                       UINT64 fragmentSize,
-                                                       void** fragmentContext) noexcept
-{
-    if (fileOffset + fragmentSize > block->getSize())
+public:
+    explicit MemoryFontFileStream (std::shared_ptr<const MemoryBlock> blockIn)
+        : block (std::move (blockIn))
     {
-        *fragmentStart   = nullptr;
-        *fragmentContext = nullptr;
-        return E_INVALIDARG;
     }
 
-    *fragmentStart   = addBytesToPointer (block->getData(), fileOffset);
-    *fragmentContext = this;
-    return S_OK;
-}
+    JUCE_COMRESULT GetFileSize (UINT64* fileSize) noexcept override
+    {
+        *fileSize = block->getSize();
+        return S_OK;
+    }
+
+    JUCE_COMRESULT GetLastWriteTime (UINT64* lastWriteTime) noexcept override
+    {
+        *lastWriteTime = 0;
+        return S_OK;
+    }
+
+    JUCE_COMRESULT ReadFileFragment (const void** fragmentStart,
+                                     UINT64 fileOffset,
+                                     UINT64 fragmentSize,
+                                     void** fragmentContext) noexcept override
+    {
+        if (fileOffset + fragmentSize > block->getSize())
+        {
+            *fragmentStart   = nullptr;
+            *fragmentContext = nullptr;
+            return E_INVALIDARG;
+        }
+
+        *fragmentStart   = addBytesToPointer (block->getData(), fileOffset);
+        *fragmentContext = this;
+        return S_OK;
+    }
+
+    void WINAPI ReleaseFileFragment (void*) noexcept override {}
+
+private:
+    std::shared_ptr<const MemoryBlock> block;
+};
 
 //==============================================================================
 MemoryFontFileLoader::MemoryFontFileLoader (MemoryBlock blob)
