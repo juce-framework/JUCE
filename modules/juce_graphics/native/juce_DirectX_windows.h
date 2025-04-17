@@ -470,24 +470,6 @@ private:
     std::mutex mutex;
 };
 
-class MemoryFontFileLoader final : public ComBaseClassHelper<IDWriteFontFileLoader>
-{
-public:
-    explicit MemoryFontFileLoader (MemoryBlock blob);
-
-    HRESULT WINAPI CreateStreamFromKey (const void* fontFileReferenceKey,
-                                        UINT32 keySize,
-                                        IDWriteFontFileStream** fontFileStream) noexcept override;
-
-    Uuid getUuid() const { return uuid; }
-
-private:
-    std::shared_ptr<const MemoryBlock> block;
-    Uuid uuid;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryFontFileLoader)
-};
-
 class DirectWriteCustomFontCollectionLoader final : public ComBaseClassHelper<IDWriteFontCollectionLoader>
 {
 public:
@@ -503,6 +485,9 @@ public:
                                             IDWriteFontFileEnumerator** fontFileEnumerator) noexcept override;
 
 private:
+    class MemoryFontFileLoader;
+    class FontFileEnumerator;
+
     IDWriteFactory& factory;
     std::vector<ComSmartPtr<MemoryFontFileLoader>> fileLoaders;
 };

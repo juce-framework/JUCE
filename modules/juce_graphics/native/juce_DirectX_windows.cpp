@@ -869,31 +869,43 @@ private:
 };
 
 //==============================================================================
-MemoryFontFileLoader::MemoryFontFileLoader (MemoryBlock blob)
-    : block (std::make_shared<const MemoryBlock> (std::move (blob)))
+class DirectWriteCustomFontCollectionLoader::MemoryFontFileLoader final : public ComBaseClassHelper<IDWriteFontFileLoader>
 {
-}
-
-HRESULT WINAPI MemoryFontFileLoader::CreateStreamFromKey (const void* fontFileReferenceKey,
-                                                          UINT32 keySize,
-                                                          IDWriteFontFileStream** fontFileStream) noexcept
-{
-    if (keySize != Uuid::size())
-        return E_INVALIDARG;
-
-    Uuid requestedKey { static_cast<const uint8*> (fontFileReferenceKey) };
-
-    if (requestedKey == uuid)
+public:
+    explicit MemoryFontFileLoader (MemoryBlock blob)
+        : block (std::make_shared<const MemoryBlock> (std::move (blob)))
     {
-        *fontFileStream = new MemoryFontFileStream { block };
-        return S_OK;
     }
 
-    return E_INVALIDARG;
-}
+    HRESULT WINAPI CreateStreamFromKey (const void* fontFileReferenceKey,
+                                        UINT32 keySize,
+                                        IDWriteFontFileStream** fontFileStream) noexcept override
+    {
+        if (keySize != Uuid::size())
+            return E_INVALIDARG;
+
+        Uuid requestedKey { static_cast<const uint8*> (fontFileReferenceKey) };
+
+        if (requestedKey == uuid)
+        {
+            *fontFileStream = new MemoryFontFileStream { block };
+            return S_OK;
+        }
+
+        return E_INVALIDARG;
+    }
+
+    Uuid getUuid() const { return uuid; }
+
+private:
+    std::shared_ptr<const MemoryBlock> block;
+    Uuid uuid;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryFontFileLoader)
+};
 
 //==============================================================================
-class FontFileEnumerator final : public ComBaseClassHelper<IDWriteFontFileEnumerator>
+class DirectWriteCustomFontCollectionLoader::FontFileEnumerator final : public ComBaseClassHelper<IDWriteFontFileEnumerator>
 {
 public:
     FontFileEnumerator (IDWriteFactory& factoryIn, ComSmartPtr<MemoryFontFileLoader> loaderIn)
