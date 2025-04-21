@@ -557,7 +557,7 @@ class ControlParameterIndexUpdater {
     /** @type {Element | null} */
     this.lastElement = null;
     /** @type {number} */
-    this.lastControlParameterIndex = null;
+    this.lastControlParameterIndex = -1;
   }
 
   /**
@@ -597,7 +597,7 @@ class ControlParameterIndexUpdater {
 
     while (isValidNonRootElement(element)) {
       if (element.hasAttribute(this.controlParameterIndexAnnotation)) {
-        return element.getAttribute(this.controlParameterIndexAnnotation);
+        return Number(element.getAttribute(this.controlParameterIndexAnnotation));
       }
 
       element = element.parentElement;
