@@ -36,7 +36,9 @@ import "./check_native_interop.js";
 
 class PromiseHandler {
   constructor() {
+    /** @type {number} */
     this.lastPromiseId = 0;
+    /** @type {Map<number, any>} */
     this.promises = new Map();
 
     window.__JUCE__.backend.addEventListener(
@@ -50,6 +52,9 @@ class PromiseHandler {
     );
   }
 
+  /**
+   * @returns {[number, Promise<any>]}
+   */
   createPromise() {
     const promiseId = this.lastPromiseId++;
     const result = new Promise((resolve, reject) => {
@@ -68,7 +73,7 @@ const promiseHandler = new PromiseHandler();
  * The provided name should be the same as the name argument passed to
  * WebBrowserComponent::Options.withNativeFunction() on the backend.
  *
- * @param {String} name
+ * @param {string} name
  */
 function getNativeFunction(name) {
   if (!window.__JUCE__.initialisationData.__juce__functions.includes(name))
@@ -95,16 +100,23 @@ function getNativeFunction(name) {
 
 class ListenerList {
   constructor() {
+    /** @type {Map<number, (args: any) => any>} */
     this.listeners = new Map();
     this.listenerId = 0;
   }
 
+  /**
+   * @param {(args: any) => any} fn
+   */
   addListener(fn) {
     const newListenerId = this.listenerId++;
     this.listeners.set(newListenerId, fn);
     return newListenerId;
   }
 
+  /**
+   * @param {number} id
+   */
   removeListener(id) {
     if (this.listeners.has(id)) {
       this.listeners.delete(id);
@@ -129,10 +141,11 @@ const SliderControl_sliderDragEndedEventId = "sliderDragEnded";
  *
  * Use getSliderState() to create a SliderState object. This object will be synchronised with the
  * WebSliderRelay backend object that was created using the same unique name.
- *
- * @param {String} name
  */
 class SliderState {
+  /**
+   * @param {string} name
+   */
   constructor(name) {
     if (!window.__JUCE__.initialisationData.__juce__sliders.includes(name))
       console.warn(
@@ -173,7 +186,7 @@ class SliderState {
    * The meaning of this range is the same as in the case of
    * AudioProcessorParameter::getValue() (C++).
    *
-   * @param {String} name
+   * @param {number} newValue
    */
   setNormalisedValue(newValue) {
     this.scaledValue = this.snapToLegalValue(
@@ -233,8 +246,6 @@ class SliderState {
    *
    * The meaning of this range is the same as in the case of
    * AudioProcessorParameter::getValue() (C++).
-   *
-   * @param {String} name
    */
   getNormalisedValue() {
     return Math.pow(
@@ -244,7 +255,11 @@ class SliderState {
     );
   }
 
-  /** Internal. */
+  /**
+   * @param {number} normalisedValue
+   * @returns {number}
+   * @internal
+   */
   normalisedToScaledValue(normalisedValue) {
     return (
       Math.pow(normalisedValue, 1 / this.properties.skew) *
@@ -253,7 +268,11 @@ class SliderState {
     );
   }
 
-  /** Internal. */
+  /**
+   * @param {number} value
+   * @returns {number}
+   * @internal
+   */
   snapToLegalValue(value) {
     const interval = this.properties.interval;
 
@@ -270,6 +289,7 @@ class SliderState {
   }
 }
 
+/** @type {Map<string, SliderState>} */
 const sliderStates = new Map();
 
 for (const sliderName of window.__JUCE__.initialisationData.__juce__sliders)
@@ -282,7 +302,7 @@ for (const sliderName of window.__JUCE__.initialisationData.__juce__sliders)
  * To register a WebSliderRelay object create one with the right name and add it to the
  * WebBrowserComponent::Options struct using withOptionsFrom.
  *
- * @param {String} name
+ * @param {string} name
  */
 function getSliderState(name) {
   if (!sliderStates.has(name)) sliderStates.set(name, new SliderState(name));
@@ -296,10 +316,11 @@ function getSliderState(name) {
  *
  * Use getToggleState() to create a ToggleState object. This object will be synchronised with the
  * WebToggleRelay backend object that was created using the same unique name.
- *
- * @param {String} name
  */
 class ToggleState {
+  /**
+   * @param {string} name
+   */
   constructor(name) {
     if (!window.__JUCE__.initialisationData.__juce__toggles.includes(name))
       console.warn(
@@ -332,7 +353,10 @@ class ToggleState {
     return this.value;
   }
 
-  /** Informs the backend to change the associated WebToggleRelay's (C++) state. */
+  /**
+   * Informs the backend to change the associated WebToggleRelay's (C++) state.
+   * @param {boolean} newValue
+   */
   setValue(newValue) {
     this.value = newValue;
 
@@ -357,6 +381,7 @@ class ToggleState {
   }
 }
 
+/** @type {Map<string, ToggleState>} */
 const toggleStates = new Map();
 
 for (const name of window.__JUCE__.initialisationData.__juce__toggles)
@@ -369,7 +394,7 @@ for (const name of window.__JUCE__.initialisationData.__juce__toggles)
  * To register a WebToggleButtonRelay object create one with the right name and add it to the
  * WebBrowserComponent::Options struct using withOptionsFrom.
  *
- * @param {String} name
+ * @param {string} name
  */
 function getToggleState(name) {
   if (!toggleStates.has(name)) toggleStates.set(name, new ToggleState(name));
@@ -383,10 +408,11 @@ function getToggleState(name) {
  *
  * Use getComboBoxState() to create a ComboBoxState object. This object will be synchronised with the
  * WebComboBoxRelay backend object that was created using the same unique name.
- *
- * @param {String} name
  */
 class ComboBoxState {
+  /**
+   * @param {string} name
+   */
   constructor(name) {
     if (!window.__JUCE__.initialisationData.__juce__comboBoxes.includes(name))
       console.warn(
@@ -401,6 +427,7 @@ class ComboBoxState {
     this.properties = {
       name: "",
       parameterIndex: -1,
+      /** @type {string[]} */
       choices: [],
     };
     this.valueChangedEvent = new ListenerList();
@@ -430,6 +457,8 @@ class ComboBoxState {
    *
    * This should be called with the index identifying the selected element from the
    * properties.choices array.
+   *
+   * @param {number} index
    */
   setChoiceIndex(index) {
     const numItems = this.properties.choices.length;
@@ -456,6 +485,7 @@ class ComboBoxState {
   }
 }
 
+/** @type {Map<string, ComboBoxState>} */
 const comboBoxStates = new Map();
 
 for (const name of window.__JUCE__.initialisationData.__juce__comboBoxes)
@@ -468,7 +498,7 @@ for (const name of window.__JUCE__.initialisationData.__juce__comboBoxes)
  * To register a WebComboBoxRelay object create one with the right name and add it to the
  * WebBrowserComponent::Options struct using withOptionsFrom.
  *
- * @param {String} name
+ * @param {string} name
  */
 function getComboBoxState(name) {
   if (!comboBoxStates.has(name))
@@ -480,7 +510,7 @@ function getComboBoxState(name) {
 /**
  * Appends a platform-specific prefix to the path to ensure that a request sent to this address will
  * be received by the backend's ResourceProvider.
- * @param {String} path
+ * @param {string} path
  */
 function getBackendResourceAddress(path) {
   const platform =
@@ -516,16 +546,23 @@ function getBackendResourceAddress(path) {
  *
  * Whenever there is a change in this value, an event is emitted to the frontend with the new value.
  * You can use a ControlParameterIndexReceiver object on the backend to listen to these events.
- *
- * @param {String} controlParameterIndexAnnotation
  */
 class ControlParameterIndexUpdater {
+  /**
+   * @param {string} controlParameterIndexAnnotation
+   */
   constructor(controlParameterIndexAnnotation) {
+    /** @type {string} */
     this.controlParameterIndexAnnotation = controlParameterIndexAnnotation;
+    /** @type {Element | null} */
     this.lastElement = null;
+    /** @type {number} */
     this.lastControlParameterIndex = null;
   }
 
+  /**
+   * @param {MouseEvent} event
+   */
   handleMouseMove(event) {
     const currentElement = document.elementFromPoint(
       event.clientX,
@@ -550,6 +587,9 @@ class ControlParameterIndexUpdater {
   }
 
   //==============================================================================
+  /**
+   * @param {Element} element
+   */
   #getControlParameterIndex(element) {
     const isValidNonRootElement = (e) => {
       return e !== null && e !== document.documentElement;
