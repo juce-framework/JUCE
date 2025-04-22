@@ -200,12 +200,12 @@ struct LineInfo
 static float getCrossAxisStartingAnchor (Justification justification,
                                          Span<const LineInfo> lineInfos,
                                          std::optional<float> height,
-                                         float leadingInHeight)
+                                         float leading)
 {
     if (lineInfos.empty())
         return 0.0f;
 
-    const auto minimumTop = lineInfos.front().maxAscent + lineInfos.front().lineHeight * leadingInHeight;
+    const auto minimumTop = lineInfos.front().maxAscent * leading;
 
     if (! height.has_value())
         return minimumTop;
@@ -213,15 +213,14 @@ static float getCrossAxisStartingAnchor (Justification justification,
     const auto textHeight = std::accumulate (lineInfos.begin(),
                                              lineInfos.end(),
                                              0.0f,
-                                             [] (auto acc, const auto info) { return acc + info.lineHeight; });
+                                             [leading] (auto acc, const auto info) { return acc + info.lineHeight * leading; });
 
     if (justification.testFlags (Justification::verticallyCentred))
         return (*height - textHeight) / 2.0f + lineInfos.front().maxAscent;
 
     if (justification.testFlags (Justification::bottom))
     {
-        const auto bottomLeading = 0.5f * lineInfos.back().lineHeight * leadingInHeight;
-        return *height - textHeight - bottomLeading + lineInfos.front().maxAscent;
+        return *height - textHeight + lineInfos.front().maxAscent * leading;
     }
 
     return minimumTop;
@@ -230,8 +229,6 @@ static float getCrossAxisStartingAnchor (Justification justification,
 JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions& options)
     : shapedText (*t)
 {
-    const auto leading = options.getLeading() - 1.0f;
-
     std::vector<LineInfo> lineInfos;
 
     for (const auto [range, lineNumber] : shapedText.getLineNumbersForGlyphRanges())
@@ -285,7 +282,7 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
                                                : getCrossAxisStartingAnchor (options.getJustification(),
                                                                              lineInfos,
                                                                              options.getHeight(),
-                                                                             leading);
+                                                                             options.getLeading());
 
     detail::Ranges::Operations ops;
 
@@ -297,16 +294,16 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
         const auto range = lineNumber.range;
 
         const auto maxDescent = lineInfo.lineHeight - lineInfo.maxAscent;
-        const auto nextLineTop = baseline + (1.0f + leading) * maxDescent + options.getAdditiveLineSpacing();
+        const auto nextLineTop = baseline + options.getLeading() * maxDescent + options.getAdditiveLineSpacing();
 
         if (! top.has_value())
-            top = baseline - (1.0f + leading) * lineInfo.maxAscent;
+            top = baseline - options.getLeading() * lineInfo.maxAscent;
 
         lineMetricsForGlyphRange.set (range,
                                       { lineNumber.value,
                                         { lineInfo.mainAxisLineAlignment.anchor, baseline },
-                                        lineInfo.maxAscent,
-                                        lineInfo.lineHeight - lineInfo.maxAscent,
+                                        lineInfo.maxAscent * options.getLeading(),
+                                        (lineInfo.lineHeight - lineInfo.maxAscent) * options.getLeading(),
                                         lineInfo.mainAxisLineAlignment.effectiveLineLength
                                             + lineInfo.mainAxisLineAlignment.extraWhitespaceAdvance,
                                         *top,
@@ -324,7 +321,7 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
         ops.clear();
 
         const auto nextLineMaxAscent = lineIndex < (int) lineInfos.size() - 1 ? lineInfos[(size_t) lineIndex + 1].maxAscent : 0.0f;
-        baseline = nextLineTop + (1.0f + leading) * nextLineMaxAscent;
+        baseline = nextLineTop + options.getLeading() * nextLineMaxAscent;
         top = nextLineTop;
     }
 

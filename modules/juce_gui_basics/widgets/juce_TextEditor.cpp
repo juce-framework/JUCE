@@ -377,6 +377,12 @@ void TextEditor::setJustification (Justification j)
     }
 }
 
+void TextEditor::setLineSpacing (float newLineSpacing) noexcept
+{
+    lineSpacing = jmax (1.0f, newLineSpacing);
+    updateBaseShapedTextOptions();
+}
+
 //==============================================================================
 void TextEditor::setFont (const Font& newFont)
 {
@@ -924,7 +930,8 @@ TextEditor::CaretEdge TextEditor::getTextSelectionEdge (int index, Edge edge) co
 void TextEditor::updateBaseShapedTextOptions()
 {
     auto options = detail::ShapedText::Options{}.withTrailingWhitespacesShouldFit (true)
-                                                .withJustification (getJustificationType().getOnlyHorizontalFlags());
+                                                .withJustification (getJustificationType().getOnlyHorizontalFlags())
+                                                .withLeading (lineSpacing);
 
     if (wordWrap)
         options = options.withMaxWidth ((float) getMaximumTextWidth());

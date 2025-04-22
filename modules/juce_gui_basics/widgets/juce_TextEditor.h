@@ -551,7 +551,7 @@ public:
         The default (and minimum) value is 1.0 and values > 1.0 will increase the line spacing as a
         multiple of the line height e.g. for double-spacing call this method with an argument of 2.0.
     */
-    void setLineSpacing (float newLineSpacing) noexcept             { lineSpacing = jmax (1.0f, newLineSpacing); }
+    void setLineSpacing (float newLineSpacing) noexcept;
 
     /** Returns the current line spacing of the TextEditor. */
     float getLineSpacing() const noexcept                           { return lineSpacing; }
