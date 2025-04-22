@@ -1459,7 +1459,7 @@ void TextEditor::drawContent (Graphics& g)
                                                            selectedTextRanges.getIntersectionsStartingAtZeroWith (glyphsRange));
 
             paragraph->getShapedText().accessTogetherWith (drawGlyphRuns,
-                                                           glyphColours,
+                                                           glyphColours.getIntersectionsStartingAtZeroWith (glyphsRange),
                                                            textSelectionMask.getIntersectionsStartingAtZeroWith (glyphsRange),
                                                            underlining.getIntersectionsStartingAtZeroWith (glyphsRange));
         }
