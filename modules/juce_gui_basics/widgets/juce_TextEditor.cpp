@@ -2164,7 +2164,7 @@ float TextEditor::getJustificationOffsetX() const
 
 TextEditor::CaretEdge TextEditor::getDefaultCursorEdge() const
 {
-    return { { getJustificationOffsetX(), 0.0f }, currentFont.getHeight() };
+    return { { getJustificationOffsetX(), 0.0f }, currentFont.getHeight() * lineSpacing };
 }
 
 TextEditor::CaretEdge TextEditor::getCursorEdge (const CaretState& tempCaret) const
@@ -2183,7 +2183,7 @@ TextEditor::CaretEdge TextEditor::getCursorEdge (const CaretState& tempCaret) co
         const auto& lastParagraph = textStorage->back().value;
 
         return { { getJustificationOffsetX(), lastParagraph->getTop() + lastParagraph->getHeight() },
-                 currentFont.getHeight() };
+                 currentFont.getHeight() * lineSpacing };
     }
 
     return getTextSelectionEdge (visualIndex, tempCaret.getEdge());
