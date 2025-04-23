@@ -817,8 +817,24 @@ float TextEditor::getYOffset() const
 {
     const auto bottomY = getMaximumTextHeight();
 
+    const auto juce7LineSpacingOffset = std::invoke ([&]
+    {
+         if (approximatelyEqual (lineSpacing, 1.0f) || textStorage->isEmpty())
+             return 0.0f;
+
+         const auto& lineMetrics = textStorage->front().value->getShapedText().getLineMetricsForGlyphRange();
+
+         if (lineMetrics.isEmpty())
+             return 0.0f;
+
+         const auto& line = lineMetrics.front().value;
+
+         jassert (lineSpacing >= 1.0f);
+         return line.maxAscent * (1.0f / lineSpacing - 1.0f);
+    });
+
     if (justification.testFlags (Justification::top) || isTextStorageHeightGreaterEqualThan ((float) bottomY))
-        return 0;
+        return juce7LineSpacingOffset;
 
     auto bottom = jmax (0.0f, (float) bottomY - getTextStorageHeight());
 

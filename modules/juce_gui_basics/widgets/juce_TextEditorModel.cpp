@@ -202,6 +202,12 @@ public:
 
     bool isEmpty() const { return storage.empty(); }
 
+    ParagraphItem front() const
+    {
+        jassert (! ranges.isEmpty());
+        return { ranges.get (0), storage.front() };
+    }
+
     ParagraphItem back() const
     {
         jassert (! ranges.isEmpty());
@@ -417,6 +423,7 @@ public:
     auto end() const { return paragraphs.end(); }
 
     auto isEmpty() const { return paragraphs.isEmpty(); }
+    auto front() const { return paragraphs.front(); }
     auto back() const { return paragraphs.back(); }
 
     std::optional<Font> getLastFont() const
