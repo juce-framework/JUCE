@@ -1277,16 +1277,18 @@ public:
                     // read the format chunk
                     auto format = (unsigned short) input->readShort();
                     numChannels = (unsigned int) input->readShort();
-                    sampleRate = input->readInt();
-                    auto bytesPerSec = input->readInt();
+                    const auto intSampleRate = (uint32_t) input->readInt();
+                    sampleRate = intSampleRate;
+                    auto bytesPerSec = (uint32_t) input->readInt();
                     input->skipNextBytes (2);
                     bitsPerSample = (unsigned int) (int) input->readShort();
 
-                    if (bitsPerSample > 64 && (int) sampleRate != 0)
+                    if (bitsPerSample > 64 && intSampleRate > 0)
                     {
-                        bytesPerFrame = bytesPerSec / (int) sampleRate;
+                        bytesPerFrame = (int) (bytesPerSec / intSampleRate);
+                        jassert (bytesPerFrame >= 0);
 
-                        if (numChannels != 0)
+                        if (numChannels > 0)
                             bitsPerSample = 8 * (unsigned int) bytesPerFrame / numChannels;
                     }
                     else
