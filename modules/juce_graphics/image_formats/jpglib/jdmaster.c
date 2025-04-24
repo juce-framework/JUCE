@@ -319,7 +319,8 @@ master_selection (j_decompress_ptr cinfo)
     if (cinfo->raw_data_out)
       ERREXIT(cinfo, JERR_NOTIMPL);
     /* 2-pass quantizer only works in 3-component color space. */
-    if (cinfo->out_color_components != 3) {
+    if (cinfo->out_color_components != 3 ||
+        cinfo->out_color_space == JCS_RGB565) {
       cinfo->enable_1pass_quant = TRUE;
       cinfo->enable_external_quant = FALSE;
       cinfo->enable_2pass_quant = FALSE;

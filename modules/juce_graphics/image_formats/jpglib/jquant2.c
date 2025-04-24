@@ -1256,7 +1256,8 @@ jinit_2pass_quantizer (j_decompress_ptr cinfo)
   cquantize->error_limiter = NULL;
 
   /* Make sure jdmaster didn't give me a case I can't handle */
-  if (cinfo->out_color_components != 3)
+  if (cinfo->out_color_components != 3 ||
+      cinfo->out_color_space == JCS_RGB565)
     ERREXIT(cinfo, JERR_NOTIMPL);
 
   /* Allocate the histogram/inverse colormap storage */
