@@ -176,13 +176,7 @@ private:
 
 struct Direct2DScopedElapsedTime
 {
-    Direct2DScopedElapsedTime (Direct2DMetrics::Ptr& metricsIn, size_t accumulatorIndexIn)
-        : metrics (metricsIn.get()),
-          accumulatorIndex (accumulatorIndexIn)
-    {
-    }
-
-    Direct2DScopedElapsedTime (Direct2DMetrics* metricsIn, size_t accumulatorIndexIn)
+    Direct2DScopedElapsedTime (Direct2DMetrics::Ptr metricsIn, size_t accumulatorIndexIn)
         : metrics (metricsIn),
           accumulatorIndex (accumulatorIndexIn)
     {
@@ -195,7 +189,7 @@ struct Direct2DScopedElapsedTime
     }
 
     int64 startTicks = Time::getHighResolutionTicks();
-    Direct2DMetrics* metrics;
+    Direct2DMetrics::Ptr metrics;
     size_t accumulatorIndex;
 };
 

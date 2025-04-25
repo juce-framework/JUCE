@@ -554,7 +554,7 @@ public:
     {
         deferredRepaints.add (deferredRepaint);
 
-        JUCE_TRACE_EVENT_INT_RECT (etw::repaint, etw::paintKeyword, snappedRectangle);
+        JUCE_TRACE_EVENT_INT_RECT (etw::repaint, etw::paintKeyword, deferredRepaint);
     }
 
     SavedState* startFrame() override
@@ -572,7 +572,7 @@ public:
         dirtyRegionsInBackBuffer.add (deferredRepaints);
         deferredRepaints.clear();
 
-        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintStart, owner.getFrameId());
+        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintStart, getFrameId());
 
         return savedState;
     }
@@ -587,7 +587,7 @@ public:
 
     void present()
     {
-        JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (owner.metrics, present1Duration);
+        JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (getMetrics(), present1Duration);
 
         if (swap.getBuffer() == nullptr || dirtyRegionsInBackBuffer.isEmpty() || ! swapEventReceived)
             return;
@@ -629,7 +629,7 @@ public:
         // There's nothing waiting to be displayed in the backbuffer.
         dirtyRegionsInBackBuffer.clear();
 
-        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintEnd, owner.getFrameId());
+        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintEnd, getFrameId());
     }
 
     Image createSnapshot() const

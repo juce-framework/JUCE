@@ -89,6 +89,16 @@ public:
         return directWrite->getFonts();
     }
 
+    uint64_t getFrameId() const
+    {
+        return owner.getFrameId();
+    }
+
+    Direct2DMetrics::Ptr getMetrics() const
+    {
+        return owner.metrics;
+    }
+
     bool fillSpriteBatch (const RectangleList<float>& list);
 
     DirectWriteGlyphRun glyphRun;
