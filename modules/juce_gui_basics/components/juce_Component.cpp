@@ -209,7 +209,7 @@ public:
         return std::exchange (effect, &i) != &i;
     }
 
-    void paint (Graphics& g, Component& c, bool ignoreAlphaLevel)
+    void paint (Graphics& g, Component& c, bool ignoreAlphaLevel, OpaqueLayer& opaqueLayer)
     {
         auto scale = g.getInternalContext().getPhysicalPixelScaleFactor();
         auto scaledBounds = c.getLocalBounds() * scale;
@@ -238,7 +238,7 @@ public:
             Graphics g2 (effectImage);
             g2.addTransform (AffineTransform::scale ((float) scaledBounds.getWidth()  / (float) c.getWidth(),
                                                      (float) scaledBounds.getHeight() / (float) c.getHeight()));
-            c.paintComponentAndChildren (g2);
+            c.paintComponentAndChildren (g2, opaqueLayer);
         }
 
         Graphics::ScopedSaveState ss (g);
@@ -255,6 +255,133 @@ public:
 private:
     Image effectImage;
     ImageEffectFilter* effect;
+};
+
+//==============================================================================
+class Component::OpaqueLayer
+{
+public:
+    explicit OpaqueLayer (const Component&& c) = delete;
+    explicit OpaqueLayer (const Component& c)
+    {
+        appendOpaqueChildren (c);
+    }
+
+    enum class ObscuredByKind
+    {
+        children,
+        siblings
+    };
+
+    void popComponent (Component& c)
+    {
+        // The most likely scenario is that a component isn't opaque
+        if (! c.isOpaque())
+            return;
+
+        // As the component is opaque chances are it's the next item in the list
+        // of opaque components.
+        // If not, it has been skipped, probably because it's covered by another opaque component.
+        // Chances are that the component is only one or two steps away in the list.
+        for (auto i = currentPosition; i < opaqueComponents.size(); ++i)
+        {
+            if (opaqueComponents[i] == &c)
+            {
+                currentPosition = i + 1;
+                return;
+            }
+        }
+
+        // This suggests we've encountered an opaque component that should be
+        // in the list but isn't! Please contact the JUCE team if you encounter
+        // this assertion.
+        jassert (c.getAlpha() < 1.0f);
+    }
+
+    Rectangle<int> getNonObscuredBoundsFor (const Component& component,
+                                            Rectangle<int> clipBounds,
+                                            ObscuredByKind obscuredBy) const
+    {
+        auto visibleBounds = component.getBounds().getIntersection (clipBounds);
+
+        if (visibleBounds.isEmpty())
+            return {};
+
+        RectangleList visibleRegions { visibleBounds };
+
+        const auto obscureWith = [&] (const Component& opaqueComponent)
+        {
+            const auto offset = positionOffsets[&opaqueComponent] - positionOffsets[&component];
+            const auto opaqueBounds = opaqueComponent.getBounds() + offset;
+
+            if (! opaqueBounds.intersects (visibleBounds))
+                return;
+
+            if (opaqueBounds.contains (visibleBounds))
+                visibleRegions.clear();
+            else
+                visibleRegions.subtract (opaqueBounds);
+
+            visibleBounds = visibleRegions.getBounds();
+        };
+
+        if (obscuredBy == ObscuredByKind::children)
+        {
+            for (auto i = currentPosition; i < opaqueComponents.size(); ++i)
+            {
+                const auto* opaqueComponent = opaqueComponents.getUnchecked (i);
+
+                if (! component.isParentOf (opaqueComponent))
+                    break;
+
+                obscureWith (*opaqueComponent);
+
+                if (visibleBounds.isEmpty())
+                    return {};
+            }
+        }
+        else
+        {
+            for (int i = opaqueComponents.size(); --i >= currentPosition;)
+            {
+                const auto* opaqueComponent = opaqueComponents.getUnchecked (i);
+
+                if (component.isParentOf (opaqueComponent))
+                    break;
+
+                obscureWith (*opaqueComponent);
+
+                if (visibleBounds.isEmpty())
+                    return {};
+            }
+        }
+
+        return visibleBounds;
+    }
+
+private:
+    void appendOpaqueChildren (const Component& parent, Point<int> offset = {})
+    {
+        for (auto* child : parent.getChildren())
+        {
+            positionOffsets.set (child, offset);
+
+            if (! detail::ComponentHelpers::isVisible (*child, false)
+                || child->isTransformed())
+            {
+                continue;
+            }
+
+            if (child->isOpaque())
+                opaqueComponents.add (child);
+
+            appendOpaqueChildren (*child, child->getPosition() + offset);
+        }
+    }
+
+    Array<Component*> opaqueComponents;
+    int currentPosition = 0;
+    HashMap<const Component*, Point<int>> positionOffsets;
 };
 
 //==============================================================================
@@ -1701,17 +1828,17 @@ void Component::paintOverChildren (Graphics&)
 }
 
 //==============================================================================
-void Component::paintWithinParentContext (Graphics& g)
+void Component::paintWithinParentContext (Graphics& g, OpaqueLayer& opaqueLayer)
 {
     g.setOrigin (getPosition());
 
     if (cachedImage != nullptr)
         cachedImage->paint (g);
     else
-        paintEntireComponent (g, false);
+        paintEntireComponent (g, false, opaqueLayer);
 }
 
-void Component::paintComponentAndChildren (Graphics& g)
+void Component::paintComponentAndChildren (Graphics& g, OpaqueLayer& opaqueLayer)
 {
    #if JUCE_ETW_TRACELOGGING
     {
@@ -1727,70 +1854,69 @@ void Component::paintComponentAndChildren (Graphics& g)
     }
    #endif
 
-    auto clipBounds = g.getClipBounds();
+    using ObscuredByKind = OpaqueLayer::ObscuredByKind;
 
-    if (flags.dontClipGraphicsFlag && getNumChildComponents() == 0)
-    {
-        paint (g);
-    }
-    else
+    const auto parentClipBounds = opaqueLayer.getNonObscuredBoundsFor (*this, g.getClipBounds() + getPosition(), ObscuredByKind::children);
+
+    if (! parentClipBounds.isEmpty())
     {
         Graphics::ScopedSaveState ss (g);
 
-        if (! (detail::ComponentHelpers::clipObscuredRegions (*this, g, clipBounds, {}) && g.isClipEmpty()))
-            paint (g);
+        if (! isPaintingUnclipped())
+            g.reduceClipRegion (parentClipBounds - getPosition());
+
+        paint (g);
     }
 
-    for (int i = 0; i < childComponentList.size(); ++i)
+    for (auto* child : getChildren())
     {
-        auto& child = *childComponentList.getUnchecked (i);
+        if (! detail::ComponentHelpers::isVisible (*child))
+            continue;
 
-        if (child.isVisible())
+        if (child->isTransformed())
         {
-            if (child.affineTransform != nullptr)
-            {
-                Graphics::ScopedSaveState ss (g);
+            Graphics::ScopedSaveState ss (g);
 
-                g.addTransform (*child.affineTransform);
+            if (auto& transform = child->affineTransform)
+                g.addTransform (*transform);
 
-                if ((child.flags.dontClipGraphicsFlag && ! g.isClipEmpty()) || g.reduceClipRegion (child.getBounds()))
-                    child.paintWithinParentContext (g);
-            }
-            else if (clipBounds.intersects (child.getBounds()))
-            {
-                Graphics::ScopedSaveState ss (g);
+            child->paintWithinParentContext (g, opaqueLayer);
+        }
+        else
+        {
+            opaqueLayer.popComponent (*child);
 
-                if (child.flags.dontClipGraphicsFlag)
-                {
-                    child.paintWithinParentContext (g);
-                }
-                else if (g.reduceClipRegion (child.getBounds()))
-                {
-                    bool nothingClipped = true;
+            const auto clipBounds = opaqueLayer.getNonObscuredBoundsFor (*child,
+                                                                         g.getClipBounds(),
+                                                                         ObscuredByKind::siblings);
 
-                    for (int j = i + 1; j < childComponentList.size(); ++j)
-                    {
-                        auto& sibling = *childComponentList.getUnchecked (j);
+            if (clipBounds.isEmpty())
+                continue;
 
-                        if (sibling.flags.opaqueFlag && sibling.isVisible() && sibling.affineTransform == nullptr)
-                        {
-                            nothingClipped = false;
-                            g.excludeClipRegion (sibling.getBounds());
-                        }
-                    }
+            Graphics::ScopedSaveState ss (g);
 
-                    if (nothingClipped || ! g.isClipEmpty())
-                        child.paintWithinParentContext (g);
-                }
-            }
+            if (! child->isPaintingUnclipped())
+                g.reduceClipRegion (clipBounds);
+
+            child->paintWithinParentContext (g, opaqueLayer);
         }
     }
 
     Graphics::ScopedSaveState ss (g);
+
+    if (! isPaintingUnclipped())
+        g.reduceClipRegion (getLocalBounds());
+
     paintOverChildren (g);
 }
 
 void Component::paintEntireComponent (Graphics& g, bool ignoreAlphaLevel)
+{
+    OpaqueLayer opaqueLayer { *this };
+    paintEntireComponent (g, ignoreAlphaLevel, opaqueLayer);
+}
+
+void Component::paintEntireComponent (Graphics& g, bool ignoreAlphaLevel, OpaqueLayer& opaqueLayer)
 {
     // If sizing a top-level-window and the OS paint message is delivered synchronously
     // before resized() is called, then we'll invoke the callback here, to make sure
@@ -1806,20 +1932,26 @@ void Component::paintEntireComponent (Graphics& g, bool ignoreAlphaLevel)
 
     if (effectState != nullptr)
     {
-        effectState->paint (g, *this, ignoreAlphaLevel);
+        effectState->paint (g, *this, ignoreAlphaLevel, opaqueLayer);
     }
     else if (componentTransparency > 0 && ! ignoreAlphaLevel)
     {
         if (componentTransparency < 255)
         {
+            OpaqueLayer transparentOpaqueLayer { *this };
             g.beginTransparencyLayer (getAlpha());
-            paintComponentAndChildren (g);
+            paintComponentAndChildren (g, transparentOpaqueLayer);
             g.endTransparencyLayer();
         }
     }
+    else if (isTransformed())
+    {
+        OpaqueLayer transformedOpaqueLayer { *this };
+        paintComponentAndChildren (g, transformedOpaqueLayer);
+    }
     else
     {
-        paintComponentAndChildren (g);
+        paintComponentAndChildren (g, opaqueLayer);
     }
 
    #if JUCE_DEBUG

@@ -1194,7 +1194,7 @@ public:
 
         If you enable this mode, you'll need to make sure your paint method doesn't call anything like
         Graphics::fillAll(), and doesn't draw beyond the component's bounds, because that'll produce
-        artifacts. This option will have no effect on components that contain any child components.
+        artifacts.
     */
     void setPaintingIsUnclipped (bool shouldPaintWithoutClipping) noexcept;
 
@@ -1276,14 +1276,19 @@ public:
     /** Indicates whether any parts of the component might be transparent.
 
         Components that always paint all of their contents with solid colour and
-        thus completely cover any components behind them should use this method
+        thus completely cover any components behind them, can use this method to
         to tell the repaint system that they are opaque.
 
         This information is used to optimise drawing, because it means that
-        objects underneath opaque windows don't need to be painted.
+        objects underneath opaque components or windows don't need to be painted
+        or can have their clip bounds reduced to a smaller size.
 
-        By default, components are considered transparent, unless this is used to
-        make it otherwise.
+        Note however that there is a cost for every other component to check if
+        it is being obscured by opaque components. This cost should be carefully
+        weighed up against the benefits before deciding to enable this.
+
+        By default, components are considered transparent, unless this is used
+        to make it otherwise.
 
         @see isOpaque
     */
@@ -2712,6 +2717,8 @@ private:
     uint8 componentTransparency = 0;
 
     //==============================================================================
+    class OpaqueLayer;
+
     static void internalMouseEnter (SafePointer<Component>, MouseInputSource, Point<float>, Time);
     static void internalMouseExit  (SafePointer<Component>, MouseInputSource, Point<float>, Time);
     static void internalMouseDown  (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time);
@@ -2733,8 +2740,9 @@ private:
     void internalRepaintUnchecked (Rectangle<int>, bool);
     Component* removeChildComponent (int index, bool sendParentEvents, bool sendChildEvents);
     void reorderChildInternal (int sourceIndex, int destIndex);
-    void paintComponentAndChildren (Graphics&);
-    void paintWithinParentContext (Graphics&);
+    void paintEntireComponent (Graphics&, bool, OpaqueLayer&);
+    void paintComponentAndChildren (Graphics&, OpaqueLayer&);
+    void paintWithinParentContext (Graphics&, OpaqueLayer&);
     void sendMovedResizedMessages (bool wasMoved, bool wasResized);
     void sendMovedResizedMessagesIfPending();
     void repaintParent();
