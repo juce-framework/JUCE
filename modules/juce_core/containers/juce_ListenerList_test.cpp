@@ -485,6 +485,38 @@ public:
             expect (numberOfCallbacks == 2);
             expect (listeners.size() == 2);
         }
+
+        beginTest ("ThreadSafeListenerList stress test");
+        {
+            struct Listener { void callback(){} };
+
+            ThreadPool threadPool { 10 };
+            ThreadSafeListenerList<Listener> listeners;
+
+            for (int i = 0; i < 1'000; ++i)
+            {
+                threadPool.addJob ([&]
+                {
+                    std::vector<std::unique_ptr<Listener>> listenersToAdd;
+
+                    for (int j = 0; j < 1'000; ++j)
+                    {
+                        listenersToAdd.push_back (std::make_unique<Listener>());
+                        listeners.add (listenersToAdd.back().get());
+                    }
+
+                    for (auto& listener : listenersToAdd)
+                        listeners.remove (listener.get());
+                });
+
+                threadPool.addJob ([&]
+                {
+                    listeners.call (&Listener::callback);
+                });
+            }
+
+            expect (threadPool.removeAllJobs (false, 30'000));
+        }
     }
 
 private:
