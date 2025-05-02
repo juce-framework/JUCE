@@ -211,10 +211,12 @@ public:
         return params.contains (param);
     }
 
+    // SD Hack: make this public
+    Array<AudioProcessorParameter*> params;
+
 private:
     const AudioProcessorParameterGroup* processorGroup = nullptr;
     AudioProcessorParameterGroup ownedGroup;
-    Array<AudioProcessorParameter*> params;
     bool legacyParamIDs = false, usingManagedParameters = false;
 };
 

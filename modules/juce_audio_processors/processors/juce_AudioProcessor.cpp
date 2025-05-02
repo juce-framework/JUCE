@@ -596,7 +596,9 @@ void AudioProcessor::processBypassed (AudioBuffer<floatType>& buffer, MidiBuffer
     // an identical amount of latency. Without identical latency in
     // processBlockBypassed a host's latency compensation could shift the audio
     // passing through your bypassed plug-in forward in time.
-    jassert (getLatencySamples() == 0);
+
+    // SD commented this out to avoid too many debug breaks when working with random plug-ins
+    //jassert (getLatencySamples() == 0);
 
     for (int ch = getMainBusNumInputChannels(); ch < getTotalNumOutputChannels(); ++ch)
         buffer.clear (ch, 0, buffer.getNumSamples());

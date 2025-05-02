@@ -423,6 +423,9 @@ public:
     /** Scrolls if necessary to make sure that a particular row is visible. */
     void scrollToEnsureRowIsOnscreen (int row);
 
+    // SD Added
+    void scrollToEnsureRowIsVisibleAndCentred (const int row);
+
     /** Returns a reference to the vertical scrollbar. */
     ScrollBar& getVerticalScrollBar() const noexcept;
 

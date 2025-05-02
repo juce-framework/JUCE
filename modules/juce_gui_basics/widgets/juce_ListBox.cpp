@@ -471,8 +471,14 @@ public:
         else if (row >= lastWholeIndex)
         {
             setViewPosition (getViewPositionX(),
-                             jmax (0, (row  + 1) * rowH - getMaximumVisibleHeight()));
+                             jmax (0, (row  + 1) * rowH));
         }
+    }
+
+    // SD added
+    void scrollToEnsureRowIsVisibleAndCentred(const int row, const int rowH)
+    {
+        setViewPosition(getViewPositionX(), jmax(0, row * rowH - getMaximumVisibleHeight() / 2));
     }
 
     void paint (Graphics& g) override
@@ -915,6 +921,12 @@ int ListBox::getVisibleRowWidth() const noexcept
 void ListBox::scrollToEnsureRowIsOnscreen (const int row)
 {
     viewport->scrollToEnsureRowIsOnscreen (row, getRowHeight());
+}
+
+// SD added
+void juce::ListBox::scrollToEnsureRowIsVisibleAndCentred (const int row)
+{
+    viewport->scrollToEnsureRowIsVisibleAndCentred(row, getRowHeight());
 }
 
 //==============================================================================

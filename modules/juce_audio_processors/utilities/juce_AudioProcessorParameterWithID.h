@@ -174,7 +174,9 @@ public:
     const String paramID;
 
     /** Provides access to the parameter's name. */
-    const String name;
+    // SD make this volatile and add setName()
+    /*const*/ String name;
+    void setName(String newName) { name = newName; }
 
     /** Provides access to the parameter's label. */
     const String label;
