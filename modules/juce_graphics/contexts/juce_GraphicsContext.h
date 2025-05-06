@@ -220,7 +220,8 @@ public:
                          int x, int y, int width, int height,
                          Justification justificationFlags,
                          int maximumNumberOfLines,
-                         float minimumHorizontalScale = 0.0f) const;
+                         float minimumHorizontalScale = 0.0f,
+                         GlyphArrangementOptions options = {}) const;
 
     /** Tries to draw a text string inside a given space.
 
@@ -245,7 +246,8 @@ public:
                          Rectangle<int> area,
                          Justification justificationFlags,
                          int maximumNumberOfLines,
-                         float minimumHorizontalScale = 0.0f) const;
+                         float minimumHorizontalScale = 0.0f,
+                         GlyphArrangementOptions options = {}) const;
 
     //==============================================================================
     /** Fills the context's entire clip region with the current colour or brush.
