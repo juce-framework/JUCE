@@ -1814,11 +1814,10 @@ private:
         if (args.ptr == nullptr)
             return 0;
 
-        const auto uid = VST3ClientExtensions::convertVST2PluginId (JucePlugin_VSTUniqueID, JucePlugin_Name, VST3ClientExtensions::InterfaceType::component);
-        const auto uidString = String ((const char *) uid.data(), uid.size());
-        MemoryBlock uidValue;
-        uidValue.loadFromHexString (uidString);
-        uidValue.copyTo (args.ptr, 0, uidValue.getSize());
+        const auto uid = VST3ClientExtensions::convertVST2PluginId (JucePlugin_VSTUniqueID,
+                                                                    JucePlugin_Name,
+                                                                    VST3ClientExtensions::InterfaceType::component);
+        std::copy (uid.begin(), uid.end(), reinterpret_cast<std::byte*> (args.ptr));
         return 1;
        #endif
     }
