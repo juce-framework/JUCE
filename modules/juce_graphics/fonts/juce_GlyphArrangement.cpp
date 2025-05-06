@@ -228,7 +228,7 @@ void GlyphArrangement::addJustifiedText (const Font& font, const String& text,
     ShapedText st { text, ShapedText::Options{}.withMaxWidth (maxLineWidth)
                                                .withJustification (horizontalLayout)
                                                .withFont (font)
-                                               .withLeading (1.0f + leading / font.getHeight())
+                                               .withAdditiveLineSpacing (leading)
                                                .withBaselineAtZero()
                                                .withTrailingWhitespacesShouldFit (false) };
 
