@@ -683,6 +683,8 @@ void Direct2DPixelData::copyPages (ComSmartPtr<ID2D1Device1> deviceToUse,
                              srcData.getPagesStructForDevice (deviceToUse),
                              srcRect,
                              copyDstFromSrc);
+
+    dstData.state = State::outdated;
 }
 
 std::unique_ptr<LowLevelGraphicsContext> Direct2DPixelData::createLowLevelContext()
