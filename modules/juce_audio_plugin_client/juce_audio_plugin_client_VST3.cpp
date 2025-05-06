@@ -1140,6 +1140,12 @@ public:
                                              Vst::ParamID oldParamID,
                                              Vst::ParamID& newParamID) override
     {
+        if (audioProcessor == nullptr)
+        {
+            jassertfalse;
+            return kResultFalse;
+        }
+
         const auto parameterMap = audioProcessor->getParameterMap (toVST3InterfaceId (pluginToReplaceUID));
         const auto iter = parameterMap.find (oldParamID);
 
@@ -1215,24 +1221,26 @@ public:
         // As an IEditController member, the host should only call this from the message thread.
         assertHostMessageThread();
 
-        if (auto* pluginInstance = getPluginInstance())
+        if (audioProcessor != nullptr)
         {
+            auto* pluginInstance = getPluginInstance();
+
             for (auto vstParamId : audioProcessor->getParamIDs())
             {
-                auto paramValue = [&]
+                auto paramValue = std::invoke ([&]
                 {
-                    if (vstParamId == audioProcessor->getProgramParamID())
+                    if (vstParamId == audioProcessor->getProgramParamID() && pluginInstance != nullptr)
                         return EditController::plainParamToNormalized (audioProcessor->getProgramParamID(),
                                                                        pluginInstance->getCurrentProgram());
 
                     return (double) audioProcessor->getParamForVSTParamID (vstParamId)->getValue();
-                }();
+                });
 
                 setParamNormalized (vstParamId, paramValue);
             }
-        }
 
-        audioProcessor->updateParameterMapping();
+            audioProcessor->updateParameterMapping();
+        }
 
         if (auto* handler = getComponentHandler())
             handler->restartComponent (Vst::kParamValuesChanged | Vst::kParamIDMappingChanged);
