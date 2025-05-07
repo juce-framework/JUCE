@@ -879,7 +879,7 @@ struct Shaper
 
         const auto string32 = std::invoke ([this]
                                            {
-                                               std::vector<juce_wchar> s32 (CharPointer_UTF32::getBytesRequiredFor (string.getCharPointer()));
+                                               std::vector<juce_wchar> s32 ((size_t) string.length() + 1);
                                                string.copyToUTF32 (s32.data(), s32.size() * sizeof (juce_wchar));
                                                jassert (! s32.empty());
                                                s32.pop_back();  // dropping the null terminator
