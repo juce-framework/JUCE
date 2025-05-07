@@ -183,7 +183,7 @@ public:
         {
             if (! d.has_value())
                 return SBLevelDefaultLTR;
-            return *d == detail::TextDirection::rtl ? 1 : 0;
+            return *d == detail::TextDirection::rtl ? SBLevelDefaultRTL : SBLevelDefaultLTR;
         }()) };
 
         jassert (result != nullptr);
