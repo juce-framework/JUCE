@@ -121,6 +121,7 @@
 
 //==============================================================================
 #include "format/juce_AudioFormatReader.h"
+#include "format/juce_AudioFormatWriterOptions.h"
 #include "format/juce_AudioFormatWriter.h"
 #include "format/juce_MemoryMappedAudioFormatReader.h"
 #include "format/juce_AudioFormat.h"

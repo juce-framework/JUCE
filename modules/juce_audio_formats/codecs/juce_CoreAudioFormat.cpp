@@ -665,6 +665,13 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (OutputStream*,
     return nullptr;
 }
 
+std::unique_ptr<AudioFormatWriter> CoreAudioFormat::createWriterFor (std::unique_ptr<OutputStream>&,
+                                                                     const AudioFormatWriterOptions&)
+{
+    jassertfalse; // not yet implemented!
+    return nullptr;
+}
+
 
 //==============================================================================
 //==============================================================================

@@ -1031,4 +1031,20 @@ AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
     return nullptr;
 }
 
+std::unique_ptr<AudioFormatWriter> AiffAudioFormat::createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
+                                                                     const AudioFormatWriterOptions& options)
+{
+    if (streamToWriteTo == nullptr || ! getPossibleBitDepths().contains (options.getBitsPerSample()))
+        return nullptr;
+
+    StringPairArray metadata;
+    metadata.addUnorderedMap (options.getMetadataValues());
+
+    return std::make_unique<AiffAudioFormatWriter> (std::exchange (streamToWriteTo, {}).release(),
+                                                    options.getSampleRate(),
+                                                    (unsigned int) options.getNumChannels(),
+                                                    (unsigned int) options.getBitsPerSample(),
+                                                    metadata);
+}
+
 } // namespace juce

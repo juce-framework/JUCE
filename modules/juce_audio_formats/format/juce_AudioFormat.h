@@ -127,6 +127,26 @@ public:
 
     /** Tries to create an object that can write to a stream with this audio format.
 
+        If the writer can't be created for some reason (e.g. the parameters passed in
+        here aren't suitable), this will return nullptr.
+
+        @param streamToWriteTo  a reference to a unique_ptr that owns the output stream. If creating
+                                the writer succeeds, then ownership of the stream will be
+                                transferred to the writer, and this argument will be set to nullptr.
+                                If creating the writer fails, then streamToWriteTo will remain
+                                unchanged, allowing it to be reused to create a writer of a
+                                different format.
+        @param options          options that specify details of the output file. If the audio format
+                                does not support these settings, then this function may return
+                                nullptr.
+
+        @see AudioFormatWriterOptions
+    */
+    virtual std::unique_ptr<AudioFormatWriter> createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
+                                                                const AudioFormatWriterOptions& options) = 0;
+
+    /** Tries to create an object that can write to a stream with this audio format.
+
         The writer object that is returned can be used to write to the stream, and
         should then be deleted by the caller.
 
@@ -217,6 +237,8 @@ protected:
     AudioFormat (StringRef formatName, StringRef fileExtensions);
 
 private:
+    AudioFormatWriter* createWriterForRawPtr (OutputStream*, const AudioFormatWriterOptions&);
+
     //==============================================================================
     String formatName;
     StringArray fileExtensions;

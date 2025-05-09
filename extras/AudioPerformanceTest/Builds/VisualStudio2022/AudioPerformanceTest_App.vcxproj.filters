@@ -4236,6 +4236,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\format\juce_AudioFormatWriter.h">
       <Filter>JUCE Modules\juce_audio_formats\format</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\format\juce_AudioFormatWriterOptions.h">
+      <Filter>JUCE Modules\juce_audio_formats\format</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\format\juce_AudioSubsectionReader.h">
       <Filter>JUCE Modules\juce_audio_formats\format</Filter>
     </ClInclude>

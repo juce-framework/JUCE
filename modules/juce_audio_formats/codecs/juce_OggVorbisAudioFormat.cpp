@@ -463,6 +463,28 @@ AudioFormatReader* OggVorbisAudioFormat::createReaderFor (InputStream* in, bool 
     return nullptr;
 }
 
+std::unique_ptr<AudioFormatWriter> OggVorbisAudioFormat::createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
+                                                                          const AudioFormatWriterOptions& options)
+{
+    if (streamToWriteTo == nullptr)
+        return nullptr;
+
+    StringPairArray metadata;
+    metadata.addUnorderedMap (options.getMetadataValues());
+
+    auto w = std::make_unique<OggWriter> (std::exchange (streamToWriteTo, {}).release(),
+                                          options.getSampleRate(),
+                                          (unsigned int) options.getNumChannels(),
+                                          (unsigned int) options.getBitsPerSample(),
+                                          options.getQualityOptionIndex(),
+                                          metadata);
+
+    if (! w->ok)
+        return nullptr;
+
+    return w;
+}
+
 AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
                                                           double sampleRate,
                                                           unsigned int numChannels,

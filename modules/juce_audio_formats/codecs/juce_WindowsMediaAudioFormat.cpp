@@ -365,6 +365,13 @@ AudioFormatWriter* WindowsMediaAudioFormat::createWriterFor (OutputStream* /*str
     return nullptr;
 }
 
+std::unique_ptr<AudioFormatWriter> WindowsMediaAudioFormat::createWriterFor (std::unique_ptr<OutputStream>&,
+                                                                             const AudioFormatWriterOptions&)
+{
+    jassertfalse; // not yet implemented!
+    return nullptr;
+}
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS

@@ -3173,6 +3173,13 @@ AudioFormatReader* MP3AudioFormat::createReaderFor (InputStream* sourceStream, c
     return nullptr;
 }
 
+std::unique_ptr<AudioFormatWriter> MP3AudioFormat::createWriterFor (std::unique_ptr<OutputStream>&,
+                                                                    const AudioFormatWriterOptions&)
+{
+    jassertfalse; // not yet implemented!
+    return nullptr;
+}
+
 AudioFormatWriter* MP3AudioFormat::createWriterFor (OutputStream*, double /*sampleRateToUse*/,
                                                     unsigned int /*numberOfChannels*/, int /*bitsPerSample*/,
                                                     const StringPairArray& /*metadataValues*/, int /*qualityOptionIndex*/)
