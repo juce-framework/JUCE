@@ -39,7 +39,7 @@ namespace juce
 
     @see GlyphArrangement::addFittedText
 */
-class GlyphArrangementOptions
+class JUCE_API GlyphArrangementOptions final
 {
 public:
     /** We increment the distance between the baselines of subsequent lines with this value.
