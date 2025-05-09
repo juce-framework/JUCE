@@ -135,11 +135,6 @@ public:
     {
     }
 
-    size_t getOffset() const
-    {
-        return SBParagraphGetOffset (paragraph.get());
-    }
-
     size_t getLength() const
     {
         return SBParagraphGetLength (paragraph.get());
@@ -150,12 +145,12 @@ public:
         return { SBParagraphGetLevelsPtr (paragraph.get()), getLength() };
     }
 
-    BidiLine createLine (size_t offset, size_t length) const
+    BidiLine createLine (size_t length) const
     {
-        jassert (getOffset() <= offset);
+        jassert (SBParagraphGetOffset (paragraph.get()) == 0);
         jassert (length <= getLength());
         return BidiLine { ParagraphPtr { SBParagraphRetain (paragraph.get()) },
-                          BidiLine::LinePtr { SBParagraphCreateLine (paragraph.get(), offset, length) } };
+                          BidiLine::LinePtr { SBParagraphCreateLine (paragraph.get(), 0, length) } };
     }
 
 private:
@@ -177,9 +172,9 @@ public:
         return text.size();
     }
 
-    BidiParagraph createParagraph (size_t offset, std::optional<detail::TextDirection> d = {}) const
+    BidiParagraph createParagraph (std::optional<detail::TextDirection> d = {}) const
     {
-        BidiParagraph::ParagraphPtr result { SBAlgorithmCreateParagraph (algorithm.get(), offset, text.size() - offset, [&]() -> SBLevel
+        BidiParagraph::ParagraphPtr result { SBAlgorithmCreateParagraph (algorithm.get(), 0, text.size(), [&]() -> SBLevel
         {
             if (! d.has_value())
                 return SBLevelDefaultLTR;
@@ -189,17 +184,6 @@ public:
         jassert (result != nullptr);
 
         return BidiParagraph { std::move (result) };
-    }
-
-    template <typename Fn>
-    void forEachParagraph (Fn&& callback, std::optional<detail::TextDirection> dir = {}) const
-    {
-        for (size_t i = 0; i < text.size();)
-        {
-            const auto paragraph = createParagraph (i, dir);
-            callback (paragraph);
-            i += paragraph.getLength();
-        }
     }
 
 private:
@@ -269,8 +253,8 @@ public:
             chars.push_back (t);
 
         BidiAlgorithm algorithm { chars };
-        auto paragraph = algorithm.createParagraph (0);
-        auto line = paragraph.createLine (0, paragraph.getLength());
+        auto paragraph = algorithm.createParagraph();
+        auto line = paragraph.createLine (paragraph.getLength());
 
         std::vector<size_t> order;
         line.computeVisualOrder (order);

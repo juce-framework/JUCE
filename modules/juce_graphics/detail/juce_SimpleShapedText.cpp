@@ -887,8 +887,8 @@ struct Shaper
                                            });
 
         const BidiAlgorithm bidiAlgorithm { string32 };
-        const auto bidiParagraph = bidiAlgorithm.createParagraph (0, options.getReadingDirection());
-        const auto bidiLine = bidiParagraph.createLine (0, bidiParagraph.getLength());
+        const auto bidiParagraph = bidiAlgorithm.createParagraph (options.getReadingDirection());
+        const auto bidiLine = bidiParagraph.createLine (bidiParagraph.getLength());
         bidiLine.computeVisualOrder (visualOrder);
 
         const auto bidiLevels = bidiParagraph.getResolvedLevels();
@@ -1019,6 +1019,14 @@ struct Shaper
 
             if (! result.empty())
                 result.back().setTextRange (result.back().getTextRange().withEnd (startingCluster));
+
+            if ((int64) visualOrder.size() <= start->cluster)
+            {
+                // If this assertion is hit, the input string is probably invalid according to the
+                // Unicode parsing rules. If you know your string is a valid one, please reach out to us.
+                jassertfalse;
+                return result;
+            }
 
             result.push_back ({ glyphsIt->value,
                                 Span<const ShapedGlyph> { start, (size_t) std::distance (start, end) },
