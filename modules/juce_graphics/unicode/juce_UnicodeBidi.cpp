@@ -57,67 +57,37 @@ public:
         if (runs.empty())
             return;
 
-        return computeResultVector (SBLineGetOffset (line.get()),
-                                    SBLineGetLength (line.get()),
-                                    SBParagraphGetBaseLevel (paragraph.get()),
-                                    runs,
-                                    result);
-    }
+        thread_local std::vector<size_t> codepointIndicesInVisualOrder;
+        codepointIndicesInVisualOrder.clear();
+        codepointIndicesInVisualOrder.reserve ((size_t) SBLineGetLength (line.get()));
 
-    static void computeResultVector (SBUInteger offset,
-                                     SBUInteger length,
-                                     SBLevel baseLevel,
-                                     Span<const SBRun> runs,
-                                     std::vector<size_t>& result)
-    {
-        const auto level = [] (const SBRun& x)
+        jassert (SBLineGetOffset (line.get()) == 0);
+
+        for (const auto& run : runs)
         {
-            return x.level;
-        };
+            const auto ltr = run.level % 2 == 0;
+            const auto increment = ltr ? 1 : -1;
+            auto start = (int) (ltr ? run.offset : run.offset + run.length - 1);
 
-        const auto high = level (*std::max_element (runs.begin(), runs.end(), [&] (const auto& a, const auto& b)
-        {
-            return level (a) < level (b);
-        }));
-
-        const auto pseudoLevel = [] (const SBRun& x)
-        {
-            const auto l = x.level;
-            return (l % 2) == 1 ? l : 0xff;
-        };
-
-        const auto low = pseudoLevel (*std::min_element (runs.begin(), runs.end(), [&] (const auto& a, const auto& b)
-        {
-            return pseudoLevel (a) < pseudoLevel (b);
-        }));
-
-        result.resize (length);
-        std::iota (result.begin(), result.end(), offset);
-
-        for (auto currentLevel = high; currentLevel >= low; --currentLevel)
-        {
-            const auto doFlip = [&] (auto beginRuns, auto endRuns)
+            for (SBUInteger i = 0; i < run.length; ++i)
             {
-                const auto getStartOfRunInResult = [&] (const auto runIterator)
-                {
-                    return runIterator == endRuns ? result.end()
-                                                  : result.begin() + (ptrdiff_t) (runIterator->offset - offset);
-                };
-
-                for (auto it = beginRuns; it != endRuns;)
-                {
-                    const auto begin = std::find_if (it, endRuns, [&] (const SBRun& x) { return currentLevel <= x.level; });
-                    it = std::find_if (begin, endRuns, [&] (const SBRun& x) { return x.level < currentLevel; });
-
-                    std::reverse (getStartOfRunInResult (begin), getStartOfRunInResult (it));
-                }
-            };
-
-            if (baseLevel % 2 == 0)
-                doFlip (runs.begin(), runs.end());
-            else
-                doFlip (std::make_reverse_iterator (runs.end()), std::make_reverse_iterator (runs.begin()));
+                codepointIndicesInVisualOrder.push_back ((size_t) start);
+                start += increment;
+            }
         }
+
+        result.assign (codepointIndicesInVisualOrder.size(), 0);
+
+        if (std::any_of (codepointIndicesInVisualOrder.begin(),
+                         codepointIndicesInVisualOrder.end(),
+                         [s = result.size()] (auto i) { return i >= s; }))
+        {
+            jassertfalse;
+            return;
+        }
+
+        for (const auto [i, index] : enumerate (codepointIndicesInVisualOrder, size_t{}))
+            result[index] = i;
     }
 
 private:
@@ -211,7 +181,8 @@ public:
         {
             const CharPointer_UTF8 text ("\xd9\x85\xd9\x85\xd9\x85 colour "
                                          "\xd9\x85\xd9\x85\xd9\x85\xd9\x85\xd9\x85\xd9\x85\xd9\x85\xd9\x85\n");
-            const std::vector<size_t> result { 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 4, 5, 6, 7, 8, 9, 3, 2, 1, 0 };
+            const std::vector<size_t> result { 19, 18, 17, 16, 10, 11, 12, 13, 14, 15, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+
             expect (computeVisualOrder (text) == result);
         }
 
@@ -222,26 +193,63 @@ public:
             expect (computeVisualOrder (text) == result);
         }
 
-        beginTest ("visual order core algorithm");
+        beginTest ("multi-level bidi text");
         {
-            const char testInput[] { "DID YOU SAY 'he said \"car MEANS CAR\"'?" };
-            const int testLevels[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 1 };
-            const char expectedOutput[] { "?'he said \"RAC SNAEM car\"' YAS UOY DID" };
+            const CharPointer_UTF8 text ("LOOPS 4 \xd7\xa1X \xd7\xa1""4");
+            const std::vector<size_t> result { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11 };
+            expect (computeVisualOrder (text) == result);
+        }
 
-            static_assert (std::size (testInput) == std::size (expectedOutput));
-            static_assert (std::size (testInput) - 1 == std::size (testLevels)); // ignore null terminator
+        beginTest ("bidi text with 5 embedding levels");
+        {
+            // pop directional formatting
+            String PDF { CharPointer_UTF8 { "\xe2\x80\xac" } };
 
-            const auto [baseLevel, runs] = createRunsFromLevels (testLevels);
+            // left to right override
+            String LRO { CharPointer_UTF8 { "\xe2\x80\xad" } };
 
-            std::vector<size_t> result;
-            BidiLine::computeResultVector (0, std::size (testLevels), baseLevel, runs, result);
+            // right to left override
+            String RLO { CharPointer_UTF8 { "\xe2\x80\xae" } };
 
-            std::vector<char> output;
+            const auto replacements = std::array {
+                std::make_pair (String { "[PDF]" }, PDF),
+                std::make_pair (String { "[LRO]" }, LRO),
+                std::make_pair (String { "[RLO]" }, RLO),
+            };
 
-            for (auto i : result)
-                output.push_back (testInput[i]);
+            auto getText = [&] (StringRef templateText)
+            {
+                String text = templateText;
 
-            expect (std::equal (output.begin(), output.end(), expectedOutput));
+                for (const auto& [placeholder, replacement] : replacements)
+                    text = text.replace (placeholder, replacement);
+
+                return text;
+            };
+
+            const CharPointer_UTF8 templ { "[RLO]DID YOU SAY '[LRO]he said \"[RLO][LRO]car[PDF] MEANS CAR[PDF]\"[PDF]'?[PDF]" };
+            const auto text = getText (templ);
+            const auto lookup = computeVisualOrder (text);
+
+            std::vector<juce_wchar> reorderedText ((size_t) text.length());
+
+            for (const auto [i, c] : enumerate (text, size_t{}))
+                reorderedText[lookup[i]] = c;
+
+            // The visual order of the control characters is not defined, so we can only compare the
+            // ascii part.
+            std::vector<juce_wchar> asciiPartOfReorderedText;
+
+            for (const auto c : reorderedText)
+            {
+                if (c >= 0x20 && c <= 0x7e)
+                    asciiPartOfReorderedText.push_back (c);
+            }
+
+            const String expected { "?'he said \"RAC SNAEM car\"' YAS UOY DID" };
+            const String result { CharPointer_UTF32 { asciiPartOfReorderedText.data() }, asciiPartOfReorderedText.size() };
+
+            expect (result == expected);
         }
     }
 
@@ -259,36 +267,6 @@ public:
         std::vector<size_t> order;
         line.computeVisualOrder (order);
         return order;
-    }
-
-    static std::pair<SBLevel, std::vector<SBRun>> createRunsFromLevels (Span<const int> levels)
-    {
-        std::vector<SBRun> runs;
-
-        for (size_t i = 0; i < levels.size();)
-        {
-            const auto level = levels[i];
-
-            for (size_t j = i + 1; j < levels.size(); ++j)
-            {
-                const auto lastElement = j == levels.size() - 1;
-                const auto endIndex = lastElement ? j + 1 : j;
-
-                if (levels[j] != level || lastElement)
-                {
-                    runs.push_back ({ (SBUInteger) i, (SBUInteger) (endIndex - i), (SBLevel) level });
-                    i = endIndex;
-                    break;
-                }
-            }
-        }
-
-        const auto baseLevel = std::size (levels) == 0 ? 0 : *std::min_element (std::begin (levels), std::end (levels));
-
-        if (baseLevel % 2 != 0)
-            std::reverse (runs.begin(), runs.end());
-
-        return { (SBLevel) baseLevel, runs };
     }
 };
 
