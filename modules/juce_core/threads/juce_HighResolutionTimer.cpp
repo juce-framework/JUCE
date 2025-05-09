@@ -366,6 +366,7 @@ public:
 
         beginBehaviourTest ("A timer can be restarted externally, after being stopped internally");
         {
+            WaitableEvent stopTimer;
             WaitableEvent timerStopped;
             WaitableEvent timerFiredAfterRestart;
 
@@ -374,6 +375,7 @@ public:
                 switch (++callbackCount)
                 {
                     case 1:
+                        stopTimer.wait (maximumTimeoutMs);
                         timer.stopTimer();
                         timerStopped.signal();
                         return;
@@ -391,6 +393,7 @@ public:
             timer.startTimer (1);
             expect (timer.isTimerRunning());
 
+            stopTimer.signal();
             expect (timerStopped.wait (maximumTimeoutMs));
             expect (! timer.isTimerRunning());
 
