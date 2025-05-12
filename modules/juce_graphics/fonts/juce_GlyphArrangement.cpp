@@ -336,7 +336,10 @@ static auto createFittedText (const Font& f,
     while (numLines < maximumLines)
     {
         ++numLines;
-        auto newFontHeight = height / (float) numLines;
+
+        const auto a = baseOptions.getAdditiveLineSpacing();
+        auto newFontHeight = ((height + a) / (float) numLines - a)
+                             / baseOptions.getLeading();
 
         if (newFontHeight < font.getHeight())
             font.setHeight (jmax (8.0f, newFontHeight));

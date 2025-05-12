@@ -125,6 +125,8 @@ private:
 class JUCE_API  GlyphArrangement  final
 {
 public:
+    using Options = GlyphArrangementOptions;
+
     //==============================================================================
     /** Creates an empty arrangement. */
     GlyphArrangement();
