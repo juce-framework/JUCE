@@ -802,8 +802,8 @@ float Font::getHeightInPoints() const
     return 0.0f;
 }
 
-float Font::getAscentInPoints() const       { return getAscent()  * getHeightToPointsFactor(); }
-float Font::getDescentInPoints() const      { return getDescent() * getHeightToPointsFactor(); }
+float Font::getAscentInPoints() const       { return font->getAscentDescent (*this).ascent  * getHeightInPoints(); }
+float Font::getDescentInPoints() const      { return font->getAscentDescent (*this).descent * getHeightInPoints(); }
 
 int Font::getStringWidth (const String& text) const
 {

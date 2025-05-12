@@ -298,6 +298,7 @@ public:
         This is the maximum height, from the top of the ascent to the bottom of the
         descenders.
 
+        This value is not affected by the optional ascent or descent override.
         @see withPointHeight, getHeight
     */
     float getHeightInPoints() const;
@@ -310,7 +311,9 @@ public:
 
     /** Returns the height of the font above its baseline, in points.
         This is the maximum height from the baseline to the top.
-        @see getHeight, getDescent
+
+        This value is affected by the optional ascent override.
+        @see getAscentOverride, getHeightInPoints, getDescentInPoints
     */
     float getAscentInPoints() const;
 
@@ -322,7 +325,9 @@ public:
 
     /** Returns the amount that the font descends below its baseline, in points.
         This is calculated as (getHeight() - getAscent()).
-        @see getAscent, getHeight
+
+        This value is affected by the optional descent override.
+        @see getDescentOverride, getHeightInPoints, getAscentInPoints
     */
     float getDescentInPoints() const;
 
