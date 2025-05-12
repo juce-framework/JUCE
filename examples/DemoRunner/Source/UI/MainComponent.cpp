@@ -308,6 +308,7 @@ MainComponent::MainComponent()
 
     demosPanel.setTitle ("Demos");
     demosPanel.setFocusContainerType (FocusContainerType::focusContainer);
+    demosPanel.setContentRestrictedToSafeArea (true);
 
     showDemosButton.onClick = [this] { demosPanel.showOrHide (true); };
 

@@ -131,6 +131,24 @@ void SidePanel::resized()
 
     calculateAndRemoveShadowBounds (bounds);
 
+    const auto fullScreen = std::invoke ([&]
+    {
+        if (auto* peer = getPeer())
+            return peer->isFullScreen();
+
+        return false;
+    });
+
+    if (fullScreen && isContentRestrictedToSafeArea() && parent != nullptr)
+    {
+        if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (parent->getScreenBounds()))
+        {
+            const auto safeArea = display->safeAreaInsets.subtractedFrom (display->keyboardInsets.subtractedFrom (display->userArea));
+            const auto safeAreaInLocalSpace = getLocalArea (nullptr, safeArea) + getCurrentOffset();
+            bounds = bounds.getIntersection (safeAreaInLocalSpace);
+        }
+    }
+
     auto titleBounds = bounds.removeFromTop (titleBarHeight);
 
     if (titleBarComponent != nullptr)
@@ -268,18 +286,25 @@ void SidePanel::changeListenerCallback (ChangeBroadcaster*)
     }
 }
 
-Rectangle<int> SidePanel::calculateBoundsInParent (Component& parentComp) const
+Rectangle<int> SidePanel::calculateShowingBoundsInParent (Component& parentComp) const
 {
     auto parentBounds = parentComp.getLocalBounds();
 
-    if (isOnLeft)
-    {
-        return isShowing ? parentBounds.removeFromLeft (panelWidth)
-                         : parentBounds.withX (parentBounds.getX() - panelWidth).withWidth (panelWidth);
-    }
+    return isOnLeft ? parentBounds.removeFromLeft  (panelWidth)
+                    : parentBounds.removeFromRight (panelWidth);
+}
 
-    return isShowing ? parentBounds.removeFromRight (panelWidth)
-                     : parentBounds.withX (parentBounds.getRight()).withWidth (panelWidth);
+Point<int> SidePanel::getCurrentOffset() const
+{
+    if (isShowing)
+        return {};
+
+    return { isOnLeft ? -panelWidth : panelWidth, 0 };
+}
+
+Rectangle<int> SidePanel::calculateBoundsInParent (Component& parentComp) const
+{
+     return calculateShowingBoundsInParent (parentComp) + getCurrentOffset();
 }
 
 void SidePanel::calculateAndRemoveShadowBounds (Rectangle<int>& bounds)
