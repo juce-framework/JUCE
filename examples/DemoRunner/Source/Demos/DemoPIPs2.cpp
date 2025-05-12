@@ -50,6 +50,7 @@
 #include "../../../GUI/GridDemo.h"
 #include "../../../GUI/ImagesDemo.h"
 #include "../../../GUI/KeyMappingsDemo.h"
+#include "../../../GUI/LineSpacingDemo.h"
 #include "../../../GUI/LookAndFeelDemo.h"
 #include "../../../GUI/MDIDemo.h"
 #include "../../../GUI/MenusDemo.h"
@@ -91,6 +92,7 @@ void registerDemos_Two() noexcept
     REGISTER_DEMO (GridDemo,                  GUI, false)
     REGISTER_DEMO (ImagesDemo,                GUI, false)
     REGISTER_DEMO (KeyMappingsDemo,           GUI, false)
+    REGISTER_DEMO (LineSpacingDemo,           GUI, false)
     REGISTER_DEMO (LookAndFeelDemo,           GUI, false)
     REGISTER_DEMO (MDIDemo,                   GUI, false)
     REGISTER_DEMO (MenusDemo,                 GUI, false)
