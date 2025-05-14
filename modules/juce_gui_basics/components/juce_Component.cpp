@@ -214,14 +214,20 @@ public:
         auto scale = g.getInternalContext().getPhysicalPixelScaleFactor();
         auto scaledBounds = c.getLocalBounds() * scale;
 
-        if (effectImage.getBounds() != scaledBounds)
+        const auto preferredType = g.getInternalContext().getPreferredImageTypeForTemporaryImages();
+        const auto pixelData = effectImage.getPixelData();
+        const auto shouldCreateImage = pixelData == nullptr
+                                       || pixelData->width != scaledBounds.getWidth()
+                                       || pixelData->height != scaledBounds.getHeight()
+                                       || pixelData->createType()->getTypeID() != preferredType->getTypeID();
+
+        if (shouldCreateImage)
         {
-            auto tempImageType = g.getInternalContext().getPreferredImageTypeForTemporaryImages();
             effectImage = Image { c.isOpaque() ? Image::RGB : Image::ARGB,
                                   scaledBounds.getWidth(),
                                   scaledBounds.getHeight(),
                                   false,
-                                  *tempImageType };
+                                  *preferredType };
             effectImage.setBackupEnabled (false);
         }
 
