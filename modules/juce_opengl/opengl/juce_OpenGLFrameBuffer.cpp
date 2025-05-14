@@ -38,6 +38,24 @@ namespace juce
 class OpenGLFrameBuffer::Pimpl
 {
 public:
+    /*  Stores the currently-bound texture on construction, and re-binds it on destruction. */
+    struct ScopedTextureBinding
+    {
+        ScopedTextureBinding()
+        {
+            glGetIntegerv (GL_TEXTURE_BINDING_2D, &prev);
+            JUCE_CHECK_OPENGL_ERROR
+        }
+
+        ~ScopedTextureBinding()
+        {
+            glBindTexture (GL_TEXTURE_2D, (GLuint) prev);
+            JUCE_CHECK_OPENGL_ERROR
+        }
+
+        GLint prev{};
+    };
+
     Pimpl (OpenGLContext& c, const int w, const int h,
            const bool wantsDepthBuffer, const bool wantsStencilBuffer)
         : context (c), width (w), height (h),
@@ -56,18 +74,22 @@ public:
         context.extensions.glGenFramebuffers (1, &frameBufferID);
         bind();
 
-        glGenTextures (1, &textureID);
-        glBindTexture (GL_TEXTURE_2D, textureID);
-        JUCE_CHECK_OPENGL_ERROR
+        {
+            const ScopedTextureBinding scopedTextureBinding;
 
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        JUCE_CHECK_OPENGL_ERROR
+            glGenTextures (1, &textureID);
+            glBindTexture (GL_TEXTURE_2D, textureID);
+            JUCE_CHECK_OPENGL_ERROR
 
-        glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-        JUCE_CHECK_OPENGL_ERROR
+            glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            JUCE_CHECK_OPENGL_ERROR
+
+            glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+            JUCE_CHECK_OPENGL_ERROR
+        }
 
         context.extensions.glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
 
@@ -124,13 +146,14 @@ public:
 
     void bind()
     {
+        glGetIntegerv (GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
         context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
         JUCE_CHECK_OPENGL_ERROR
     }
 
     void unbind()
     {
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, context.getFrameBufferID());
+        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, (GLuint) prevFramebuffer);
         JUCE_CHECK_OPENGL_ERROR
     }
 
@@ -140,6 +163,8 @@ public:
     bool hasDepthBuffer, hasStencilBuffer;
 
 private:
+    GLint prevFramebuffer{};
+
     bool checkStatus() noexcept
     {
         const GLenum status = context.extensions.glCheckFramebufferStatus (GL_FRAMEBUFFER);
@@ -230,10 +255,11 @@ bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
 
         clearGLError();
        #endif
-        glBindTexture (GL_TEXTURE_2D, p->textureID);
-        pimpl->context.copyTexture (area, area, area.getWidth(), area.getHeight(), false);
-        glBindTexture (GL_TEXTURE_2D, 0);
-        JUCE_CHECK_OPENGL_ERROR
+        {
+            const Pimpl::ScopedTextureBinding scopedTextureBinding;
+            glBindTexture (GL_TEXTURE_2D, p->textureID);
+            pimpl->context.copyTexture (area, area, area.getWidth(), area.getHeight(), false);
+        }
 
         pimpl->unbind();
         return true;
