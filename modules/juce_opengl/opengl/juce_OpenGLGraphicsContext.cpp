@@ -217,7 +217,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImageList)
 };
 
-
 //==============================================================================
 struct Target
 {
@@ -359,7 +358,7 @@ private:
 //==============================================================================
 struct ShaderPrograms final : public ReferenceCountedObject
 {
-    ShaderPrograms (OpenGLContext& context)
+    explicit ShaderPrograms (OpenGLContext& context)
         : solidColourProgram (context),
           solidColourMasked (context),
           radialGradient (context),
@@ -428,6 +427,13 @@ struct ShaderPrograms final : public ReferenceCountedObject
               screenBounds (program, "screenBounds")
         {}
 
+        Rectangle<float> get2DBounds() const
+        {
+            GLfloat params[4]{};
+            glGetUniformfv (program.getProgramID(), screenBounds.uniformID, params);
+            return { params[0], params[1], 2 * params[2], 2 * params[3] };
+        }
+
         void set2DBounds (Rectangle<float> bounds)
         {
             screenBounds.set (bounds.getX(), bounds.getY(), 0.5f * bounds.getWidth(), 0.5f * bounds.getHeight());
@@ -451,6 +457,35 @@ struct ShaderPrograms final : public ReferenceCountedObject
         OpenGLShaderProgram::Uniform screenBounds;
         std::function<void (OpenGLShaderProgram&)> onShaderActivated;
     };
+
+    /*  If the shader currently bound to the active context is owned by ShaderPrograms, this returns
+        the specific shader that is currently bound, or nullptr if none of the shaders match.
+    */
+    ShaderBase* findActiveShader()
+    {
+        GLint program{};
+        glGetIntegerv (GL_CURRENT_PROGRAM, &program);
+
+        ShaderBase* ptrs[] { &solidColourProgram,
+                             &solidColourMasked,
+                             &radialGradient,
+                             &radialGradientMasked,
+                             &linearGradient1,
+                             &linearGradient1Masked,
+                             &linearGradient2,
+                             &linearGradient2Masked,
+                             &image,
+                             &imageMasked,
+                             &tiledImage,
+                             &tiledImageMasked,
+                             &copyTexture,
+                             &maskTexture };
+
+        const auto iter = std::find_if (std::begin (ptrs),
+                                        std::end (ptrs),
+                                        [&] (auto* x) { return (GLint) x->program.getProgramID() == program; });
+        return iter != std::end (ptrs) ? *iter : nullptr;
+    }
 
     struct MaskedShaderParams
     {
@@ -1422,21 +1457,30 @@ struct StateHelpers
     //==============================================================================
     struct CurrentShader
     {
-        CurrentShader (OpenGLContext& c) noexcept  : context (c)
+        explicit CurrentShader (OpenGLContext& c)
+            : context (c)
         {
-            auto programValueID = "GraphicsContextPrograms";
-            programs = static_cast<ShaderPrograms*> (context.getAssociatedObject (programValueID));
-
-            if (programs == nullptr)
-            {
-                programs = new ShaderPrograms (context);
-                context.setAssociatedObject (programValueID, programs.get());
-            }
         }
 
         ~CurrentShader()
         {
             jassert (activeShader == nullptr);
+
+            if (initialShader == nullptr)
+                return;
+
+            initialShader->program.use();
+
+            // If there are multiple VAOs, then normally binding the previous VAO would also restore
+            // the shader attributes that were last used with that VAO. If there's just a single
+            // global VAO, we need to reset the attributes manually.
+            if (! TraitsVAO::shouldUseCustomVAO())
+                initialShader->bindAttributes();
+
+            if (initialShader->onShaderActivated)
+                initialShader->onShaderActivated (initialShader->program);
+
+            initialShader->set2DBounds (initialBounds);
         }
 
         void setShader (Rectangle<int> bounds, ShaderQuadQueue& quadQueue, ShaderPrograms::ShaderBase& shader)
@@ -1480,15 +1524,54 @@ struct StateHelpers
             }
         }
 
+        static constexpr auto programValueID = "GraphicsContextPrograms";
+
         OpenGLContext& context;
-        ShaderPrograms::Ptr programs;
+        ShaderPrograms::Ptr programs = std::invoke ([&]
+        {
+            if (ShaderPrograms::Ptr result { static_cast<ShaderPrograms*> (context.getAssociatedObject (programValueID)) })
+                return result;
+
+            ShaderPrograms::Ptr newPrograms = new ShaderPrograms (context);
+            context.setAssociatedObject (programValueID, newPrograms.get());
+            return newPrograms;
+        });
 
     private:
+        // We store the original shader and bounds so that we can restore the previous
+        // when the CurrentShader is destroyed.
+        // Note that we do *not* set the active shader and bounds to their previous values.
+        // If a CurrentShader has been constructed, there's a good chance that a new VAO has
+        // also been constructed, in which case we'll need to call bindAttributes() the first
+        // time that a shader is used in this new VAO.
+
+        ShaderPrograms::ShaderBase* initialShader = programs->findActiveShader();
         ShaderPrograms::ShaderBase* activeShader = nullptr;
+        Rectangle<float> initialBounds = initialShader != nullptr
+                                       ? initialShader->get2DBounds()
+                                       : Rectangle<float>{};
         Rectangle<int> currentBounds;
 
         CurrentShader& operator= (const CurrentShader&);
     };
+};
+
+//==============================================================================
+class ViewportRestorer
+{
+public:
+    ViewportRestorer()
+    {
+        glGetIntegerv (GL_VIEWPORT, bounds);
+    }
+
+    ~ViewportRestorer()
+    {
+        glViewport (bounds[0], bounds[1], bounds[2], bounds[3]);
+    }
+
+private:
+    GLint bounds[4];
 };
 
 //==============================================================================
@@ -1697,6 +1780,7 @@ struct GLState
 private:
     GLuint previousFrameBufferTarget;
     SavedBinding<TraitsVAO> savedVAOBinding;
+    ViewportRestorer viewportRestorer;
 };
 
 //==============================================================================
@@ -1829,7 +1913,7 @@ private:
 //==============================================================================
 struct ShaderContext final : public RenderingHelpers::StackBasedLowLevelGraphicsContext<SavedState>
 {
-    ShaderContext (const Target& target)  : glState (target)
+    explicit ShaderContext (const Target& target)  : glState (target)
     {
         stack.initialise (new SavedState (&glState));
     }
@@ -1868,6 +1952,8 @@ struct NonShaderContext final : public LowLevelGraphicsSoftwareRenderer
 
         clearGLError();
        #endif
+
+        ViewportRestorer viewportRestorer;
 
         OpenGLTexture texture;
         texture.loadImage (image);
