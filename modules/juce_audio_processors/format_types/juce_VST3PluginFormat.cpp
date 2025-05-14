@@ -35,19 +35,9 @@
 #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
 
 #include "juce_VST3Headers.h"
+#include "juce_VST3Utilities.h"
 #include "juce_VST3Common.h"
 #include "juce_ARACommon.h"
-
-#if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
-#include <ARA_API/ARAVST3.h>
-
-namespace ARA
-{
-DEF_CLASS_IID (IMainFactory)
-DEF_CLASS_IID (IPlugInEntryPoint)
-DEF_CLASS_IID (IPlugInEntryPoint2)
-}
-#endif
 
 namespace juce
 {

@@ -245,6 +245,22 @@ namespace Presonus
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
+//==============================================================================
+#if JucePlugin_Enable_ARA
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wpragma-pack")
+ #include <ARA_API/ARAVST3.h>
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+ #if ARA_SUPPORT_VERSION_1
+  #error "Unsupported ARA version - only ARA version 2 and onward are supported by the current implementation"
+ #endif
+
+ DEF_CLASS_IID (ARA::IPlugInEntryPoint)
+ DEF_CLASS_IID (ARA::IPlugInEntryPoint2)
+ DEF_CLASS_IID (ARA::IMainFactory)
+#endif // JucePlugin_Enable_ARA
+
+//==============================================================================
 #if JUCE_WINDOWS
  #include <windows.h>
 #endif

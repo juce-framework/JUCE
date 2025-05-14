@@ -66,8 +66,13 @@ public:
     template <typename... Args>
     ScriptBuilder& run (const String& command, Args&&... args)
     {
-        const auto joined = StringArray { command, std::forward<Args> (args)... }.joinIntoString (" ");
-        return echo ("Running " + joined).insertLine (joined);
+        const auto runCommand = StringArray { command, std::forward<Args> (args)... }.joinIntoString (" ");
+        const auto echoCommand = runCommand.replace ("|", "\\|")
+                                           .replace ("&", "\\&")
+                                           .replace ("<", "\\<")
+                                           .replace (">", "\\>");
+
+        return echo ("Running " + echoCommand).insertLine (runCommand);
     }
 
     ScriptBuilder& echo (const String& text)
@@ -1439,9 +1444,7 @@ public:
             }
 
             if (type == XcodeTarget::LV2Helper || type == XcodeTarget::VST3Helper)
-            {
                 return;
-            }
 
             if (type != XcodeTarget::SharedCodeTarget) // everything else depends on the sharedCodeTarget
             {
@@ -2366,7 +2369,7 @@ private:
                 if (target->type == XcodeTarget::LV2Helper)
                     addFile (getFileOptions (getLV2HelperProgramSource()));
                 else if (target->type == XcodeTarget::VST3Helper)
-                    addFile (getFileOptions (getVST3HelperProgramSource()).withCompilerFlags ("-fobjc-arc"));
+                    addFile (getFileOptions (getVST3HelperProgramSource()));
             }
 
             auto targetName = String (target->getName());
@@ -2546,17 +2549,18 @@ private:
                 }
             }
 
-            // When building LV2 and VST3 plugins on Arm macs, we need to load and run the plugin
-            // bundle during a post-build step in order to generate the plugin's supporting files.
-            // Arm macs will only load shared libraries if they are signed, but Xcode runs its
-            // signing step after any post-build scripts. As a workaround, we sign the plugin
-            // using an adhoc certificate.
             if (target->type == XcodeTarget::VST3PlugIn || target->type == XcodeTarget::LV2PlugIn)
             {
                 ScriptBuilder script;
 
                 if (target->type == XcodeTarget::LV2PlugIn)
                 {
+                    // When building LV2 plugins on Arm macs, we need to load and run the plugin bundle
+                    // during a post-build step in order to generate the plugin's supporting files.
+                    // Arm macs will only load shared libraries if they are signed, but Xcode runs its
+                    // signing step after any post-build scripts. As a workaround, we sign the plugin
+                    // using an adhoc certificate.
+
                     // Note: LV2 has a non-standard config build dir
                     script.run ("codesign --verbose=4 --force --sign -", doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${EXECUTABLE_NAME}"))
                           .insertLine()
@@ -2565,13 +2569,8 @@ private:
                 }
                 else if (target->type == XcodeTarget::VST3PlugIn)
                 {
-                    script.run ("codesign --verbose=4 --force --sign -", doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}"))
-                          .insertLine()
-                          .run (doubleQuoted ("${CONFIGURATION_BUILD_DIR}/" + Project::getVST3FileWriterName()),
-                                "-create",
-                                "-version", doubleQuoted (project.getVersionString()),
-                                "-path",    doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}"),
-                                "-output",  doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}/Contents/Resources/moduleinfo.json"));
+                    script.run (doubleQuoted ("${CONFIGURATION_BUILD_DIR}/" + Project::getVST3FileWriterName()), ">",
+                                doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}/Contents/Resources/moduleinfo.json"));
                 }
 
                 target->addShellScriptBuildPhase ("Update manifest", script.toStringWithDefaultShellOptions());

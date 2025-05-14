@@ -1814,9 +1814,9 @@ private:
         if (args.ptr == nullptr)
             return 0;
 
-        const auto uid = VST3ClientExtensions::convertVST2PluginId (JucePlugin_VSTUniqueID,
-                                                                    JucePlugin_Name,
-                                                                    VST3ClientExtensions::InterfaceType::component);
+        const auto uid = VST3Interface::vst2PluginId (JucePlugin_VSTUniqueID,
+                                                      JucePlugin_Name,
+                                                      VST3Interface::Type::component);
         std::copy (uid.begin(), uid.end(), reinterpret_cast<std::byte*> (args.ptr));
         return 1;
        #endif

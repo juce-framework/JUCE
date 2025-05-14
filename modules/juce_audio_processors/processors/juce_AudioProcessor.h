@@ -1155,8 +1155,8 @@ public:
         See also the helper function getXmlFromBinary() for loading settings as XML.
 
         In the case that this AudioProcessor is implementing a VST3 that has declared compatible
-        plugins via VST3ClientExtensions::getCompatibleClasses(), the state passed to this
-        function may have been created by one of these compatible plugins.
+        plugins via JUCE_VST3_COMPATIBLE_CLASSES, the state passed to this function may have
+        been created by one of these compatible plugins.
 
         If the parameter IDs of the current plugin differ from the IDs of the plugin whose state
         was passed to this function, you can use information from the plugin state

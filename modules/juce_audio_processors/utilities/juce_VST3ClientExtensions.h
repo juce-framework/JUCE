@@ -41,7 +41,7 @@ namespace Steinberg
     using TUID = char[16];
 } // namespace Steinberg
 
-#endif
+#endif // DOXYGEN
 
 namespace juce
 {
@@ -104,36 +104,6 @@ struct VST3ClientExtensions
     */
     virtual bool getPluginHasMainInput() const  { return true; }
 
-    using InterfaceId = std::array<std::byte, 16>;
-
-    /** This function should return the UIDs of any compatible VST2 or VST3
-        plug-ins.
-
-        This information will be used to implement the IPluginCompatibility
-        interface. Hosts can use this interface to determine whether this VST3
-        is capable of replacing a given VST2.
-
-        Each compatible class is a 16-byte array that corresponds to the VST3
-        interface ID for the class implementing the IComponent interface.
-        For VST2 or JUCE plugins these IDs can be determined in the following
-        ways:
-        - Use convertVST2PluginId() for VST2 plugins or JUCE VST3 plugins with
-          JUCE_VST3_CAN_REPLACE_VST3 enabled
-        - Use convertJucePluginId() for any other JUCE VST3 plugins
-
-        If JUCE_VST3_CAN_REPLACE_VST2 is enabled the VST3 plugin will have the
-        same identifier as the VST2 plugin and therefore there will be no need
-        to implement this function.
-
-        If the parameter IDs between compatible versions differ
-        getCompatibleParameterIds() should also be overridden. However, unlike
-        getCompatibleParameterIds() this function should remain constant and
-        always return the same IDs.
-
-        @see getCompatibleParameterIds()
-    */
-    virtual std::vector<InterfaceId> getCompatibleClasses() const { return {}; }
-
     /** This function should return a map of VST3 parameter IDs and the JUCE
         parameters they map to.
 
@@ -195,74 +165,35 @@ struct VST3ClientExtensions
         @endcode
 
         @param compatibleClass  A plugin identifier, either for the current
-                                plugin or one listed in getCompatibleClasses().
+                                plugin or one listed in JUCE_VST3_COMPATIBLE_CLASSES.
                                 This parameter allows the implementation to
                                 return a different parameter map for each
-                                compatible class. Use convertJucePluginId() and
-                                convertVST2PluginId() to determine the class IDs
-                                used by JUCE plugins.
-                                When JUCE_VST3_CAN_REPLACE_VST2 is set, the
-                                InterfaceId denoting the VST2 version of the
-                                plugin will match the InterfaceId of the
-                                VST3 that replaces it. In this case, you should
-                                only include the VST2 mappings in the returned
-                                map, assuming there are no collisions between
-                                the VST2 parameter indices and the VST3 ParamIDs.
-                                In the unlikely event of a collision between
-                                the VST2 and VST3 parameter IDs, you should
-                                inspect the state that was most recently
-                                passed to setStateInformation() to determine
-                                whether the host is loading a VST2 state that
-                                requires parameter remapping. If you determine
-                                that no remapping is necessary, you can indicate
-                                this by returning an empty map.
+                                compatible class. Use VST3Interface::jucePluginId()
+                                and VST3Interface::vst2PluginId() to determine
+                                the class IDs used by JUCE plugins. When
+                                JUCE_VST3_CAN_REPLACE_VST2 is set, the ID
+                                denoting the VST2 version of the plugin will
+                                match the ID of the VST3 that replaces it. In
+                                this case, assuming there are no collisions
+                                between the VST2 parameter indices and the VST3
+                                ParamIDs you should only include the VST2
+                                mappings in the returned map. In the unlikely
+                                event of a collision you should inspect the
+                                state that was most recently passed to
+                                setStateInformation() to determine whether the
+                                host is loading a VST2 state that requires
+                                parameter remapping. If you determine that no
+                                remapping is necessary, you can indicate this by
+                                returning an empty map.
 
         @returns    A map where each key is a VST3 parameter ID in the compatible
                     plugin, and the value is the unique JUCE parameter ID in the
                     current plugin that it should be mapped to.
 
-        @see getCompatibleClasses, convertJucePluginId, convertVST2PluginId, convertJuceParameterId
+        @see JUCE_VST3_COMPATIBLE_CLASSES, VST3Interface::jucePluginId, VST3Interface::vst2PluginId, VST3Interface::hexStringToId
     */
-    virtual std::map<uint32_t, String> getCompatibleParameterIds (const InterfaceId& compatibleClass) const;
+    virtual std::map<uint32_t, String> getCompatibleParameterIds (const VST3Interface::Id& compatibleClass) const;
 
-    /** An enum indicating the various VST3 interface types.
-
-        In most cases users shouldn't need to concern themselves with any
-        interfaces other than the component, which is used to report the actual
-        audio effect.
-    */
-    enum class InterfaceType
-    {
-        ara,
-        controller,
-        compatibility,
-        component,
-        processor
-    };
-
-    /** Returns a 16-byte array indicating the VST3 interface ID used for a
-        given JUCE VST3 plugin.
-
-        Internally this is what JUCE will use to assign an ID to each VST3
-        interface, unless JUCE_VST3_CAN_REPLACE_VST2 is enabled.
-
-        @see convertVST2PluginId, getCompatibleClasses, getCompatibleParameterIds
-    */
-    static InterfaceId convertJucePluginId (uint32_t manufacturerCode,
-                                            uint32_t pluginCode,
-                                            InterfaceType interfaceType = InterfaceType::component);
-
-    /** Returns a 16-byte array indicating the VST3 interface ID used for a
-        given VST2 plugin.
-
-        Internally JUCE will use this method to assign an ID for the component
-        and controller interfaces when JUCE_VST3_CAN_REPLACE_VST2 is enabled.
-
-        @see convertJucePluginId, getCompatibleClasses, getCompatibleParameterIds
-    */
-    static InterfaceId convertVST2PluginId (uint32_t pluginCode,
-                                            const String& pluginName,
-                                            InterfaceType interfaceType = InterfaceType::component);
 
     /** Returns the VST3 compatible parameter ID reported for a given JUCE
         parameter.
@@ -276,8 +207,67 @@ struct VST3ClientExtensions
     static uint32_t convertJuceParameterId (const String& parameterId,
                                             bool studioOneCompatible = true);
 
-    /** Converts a 32-character hex notation string to a VST3 interface ID. */
-    static InterfaceId toInterfaceId (const String& interfaceIdString);
+private:
+    /** Instead of overriding this function you should define the preprocessor
+        definition JUCE_VST3_COMPATIBLE_CLASSES as described in the docs.
+
+        @see JUCE_VST3_COMPATIBLE_CLASSES
+    */
+    virtual std::vector<VST3Interface::Id> getCompatibleClasses() const final
+    {
+        return {};
+    }
 };
+
+#if DOXYGEN
+ /** An optional user defined preprocessor definition for declaring a comma
+     separated list of VST2 and VST3 plugin identifiers that this VST3 plugin
+     can replace in a DAW session.
+
+     The definition of this preprocessor must be defined at the project
+     level, normally in your CMake or Projucer project files.
+
+     This information will be used to implement the IPluginCompatibility
+     interface.
+
+     If JUCE_VST3_CAN_REPLACE_VST2 is enabled, the VST3 plugin will have the
+     same identifier as the VST2 plugin and therefore you don't need to
+     implement this preprocessor definition.
+
+     This preprocessor definition can contain code that depends on any class
+     or function defined as part of the VST3Interface struct but should avoid
+     any other dependencies!
+
+     Each compatible class is a 16-byte array that corresponds to the VST3
+     interface identifier as reported by a plugins IComponent interface.
+     For VST2 or JUCE plugins these identifiers can be determined in the
+     following ways:
+     - Use VST3Interface::vst2PluginId() for any VST2 plugins or JUCE VST3
+         plugin with JUCE_VST3_CAN_REPLACE_VST3 enabled
+     - Use VST3Interface::jucePluginId() for any other JUCE VST3 plugins
+
+     Examples
+
+     @code
+     // Defines a VST2 plugin this VST3 can replace
+     JUCE_VST3_COMPATIBLE_CLASSES=VST3Interface::vst2PluginId ('Plug', "Plugin Name")
+
+     // Defines a VST3 plugin this VST3 can replace
+     JUCE_VST3_COMPATIBLE_CLASSES=VST3Interface::jucePluginId ('Manu', 'Plug')
+
+     // Defines both a VST2 and a VST3 plugin this VST3 can replace
+     JUCE_VST3_COMPATIBLE_CLASSES=VST3Interface::vst2PluginId ('Plug', "Plugin Name"), VST3Interface::jucePluginId ('Manu', 'Plug')
+
+     // Defines a non-JUCE VST3 plugin this VST3 can replace
+     JUCE_VST3_COMPATIBLE_CLASSES=VST3Interface::hexStringToId ("0F1E2D3C4B5A69788796A5B4C3D2E1F0")
+     @endcode
+
+     If the parameter IDs between compatible versions differ
+     VST3ClientExtensions::getCompatibleParameterIds() should also be overridden.
+
+     @see VST3Interface VST3ClientExtensions::getCompatibleParameterIds()
+ */
+ #define JUCE_VST3_COMPATIBLE_CLASSES
+#endif // DOXYGEN
 
 } // namespace juce

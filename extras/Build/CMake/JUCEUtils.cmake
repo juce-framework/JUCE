@@ -1020,7 +1020,7 @@ endfunction()
 
 # ==================================================================================================
 
-function(_juce_add_vst3_manifest_helper_target)
+function(_juce_add_vst3_manifest_helper_target shared_code_target)
     if(TARGET juce_vst3_helper
        OR (CMAKE_SYSTEM_NAME STREQUAL "iOS")
        OR (CMAKE_SYSTEM_NAME STREQUAL "Android")
@@ -1039,28 +1039,28 @@ function(_juce_add_vst3_manifest_helper_target)
 
     set(source "${module_path}/juce_audio_plugin_client/VST3/juce_VST3ManifestHelper.${extension}")
 
-    add_executable(juce_vst3_helper "${source}")
-    add_executable(juce::juce_vst3_helper ALIAS juce_vst3_helper)
+    set(vst3_helper_target ${shared_code_target}_vst3_helper)
+    add_executable(${vst3_helper_target} "${source}")
+    add_executable(juce::${vst3_helper_target} ALIAS ${vst3_helper_target})
 
-    target_include_directories(juce_vst3_helper PRIVATE "${vst3_dir}" "${module_path}")
+    target_include_directories(${vst3_helper_target} PRIVATE "${vst3_dir}" "${module_path}")
 
-    add_library(juce_interface_definitions INTERFACE)
-    _juce_add_standard_defs(juce_interface_definitions)
-    target_link_libraries(juce_vst3_helper PRIVATE juce_interface_definitions)
-    target_compile_features(juce_vst3_helper PRIVATE cxx_std_17)
+    target_compile_definitions(${vst3_helper_target} PRIVATE
+        $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},COMPILE_DEFINITIONS>>)
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        _juce_link_frameworks(juce_vst3_helper PRIVATE Cocoa)
-        target_compile_options(juce_vst3_helper PRIVATE -fobjc-arc)
-    endif()
+    target_include_directories(${vst3_helper_target} PRIVATE
+        $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>>)
 
-    set_target_properties(juce_vst3_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package(Threads REQUIRED)
-    target_link_libraries(juce_vst3_helper PRIVATE Threads::Threads ${CMAKE_DL_LIBS} juce_recommended_config_flags)
+    target_compile_features(${vst3_helper_target} PRIVATE cxx_std_17)
+
+    target_link_libraries(${vst3_helper_target} PRIVATE juce_recommended_config_flags)
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
-        target_link_libraries(juce_vst3_helper PRIVATE stdc++fs)
+        target_link_libraries(${vst3_helper_target} PRIVATE stdc++fs)
+    endif()
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        _juce_link_frameworks(${vst3_helper_target} PRIVATE Foundation)
     endif()
 endfunction()
 
@@ -1097,7 +1097,7 @@ function(juce_enable_vst3_manifest_step shared_code_target)
     endif()
 
     # Add a target for the helper tool
-    _juce_add_vst3_manifest_helper_target()
+    _juce_add_vst3_manifest_helper_target(${shared_code_target})
 
     get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
 
@@ -1105,14 +1105,9 @@ function(juce_enable_vst3_manifest_step shared_code_target)
 
     # Use the helper tool to write out the moduleinfo.json
     add_custom_command(TARGET ${target_name} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "creating ${ouput_path}"
+        COMMAND ${CMAKE_COMMAND} -E echo "creating ${output_path}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${product}/Contents/Resources"
-        COMMAND juce_vst3_helper
-            -create
-            -version "${target_version_string}"
-            -path "${product}"
-            -output "${ouput_path}"
-        VERBATIM)
+        COMMAND ${shared_code_target}_vst3_helper > "${ouput_path}")
 
     set_target_properties(${shared_code_target} PROPERTIES _JUCE_VST3_MANIFEST_STEP_ADDED TRUE)
 endfunction()

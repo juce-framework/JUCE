@@ -36,8 +36,8 @@
 
 #include <juce_core/system/juce_PlatformDefs.h>
 
-#ifndef JUCE_API
- #define JUCE_API
+#if ! (defined (JUCE_API) || defined (DOXYGEN))
+  #define JUCE_API
 #endif
 
 #if (JucePlugin_Enable_ARA || (JUCE_PLUGINHOST_ARA && (JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_AU))) && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)

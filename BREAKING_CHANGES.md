@@ -1,5 +1,27 @@
 # JUCE breaking changes
 
+## Change
+
+Some functions and types have been moved from the VST3ClientExtentions class
+into a new VST3Interface struct and JUCE_VST3_COMPATIBLE_CLASSES preprocessor
+definition.
+
+**Possible Issues**
+
+Your project may not compile.
+
+**Workaround**
+
+Replace relevant types and function calls with the equivalent in the
+VST3Interface struct, and/or define the JUCE_VST3_COMPATIBLE_CLASSES
+preprocessor definition in your Projucer or CMake project.
+
+**Rationale**
+
+This change allows the VST3 helper executable to be built without needing to
+depend on, and load, the plugin as part of the post build steps.
+
+
 # Version 8.0.7
 
 ## Change

@@ -33,6 +33,7 @@
 */
 
 #include "juce_VST3Headers.h"
+#include "juce_VST3Utilities.h"
 #include "juce_VST3Common.h"
 
 namespace juce

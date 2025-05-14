@@ -1834,8 +1834,7 @@ public:
                                                     + writerTarget->getBinaryNameWithSuffix (config);
 
                     {
-                        // moduleinfotool doesn't handle Windows-style path separators properly when computing the bundle name
-                        const auto normalisedBundlePath = getOwner().getOutDirFile (config, segments[0]).replace ("\\", "/");
+                        const auto normalisedBundlePath = getOwner().getOutDirFile (config, segments[0]);
                         const auto contentsDir = normalisedBundlePath + "\\Contents";
                         const auto resourceDir = contentsDir + "\\Resources";
                         const auto manifestPath = (resourceDir + "\\moduleinfo.json");
@@ -1845,10 +1844,8 @@ public:
                         const auto manifestInvocationString = StringArray
                         {
                             helperExecutablePath.quoted(),
-                            "-create",
-                            "-version", getOwner().project.getVersionString().quoted(),
-                            "-path",    normalisedBundlePath.quoted(),
-                            "-output",  manifestPath.quoted()
+                            ">",
+                            manifestPath.quoted()
                         }.joinIntoString (" ");
 
                         const auto crossCompilationPairs =
