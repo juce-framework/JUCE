@@ -85,11 +85,15 @@ public:
 
         auto releaser = std::make_unique<DataReleaser> (this, Rectangle { x, y, bitmapData.width, bitmapData.height }, mode);
 
-        bitmapData.data = (uint8*) releaser->data.get();
-        bitmapData.size = (size_t) bitmapData.width
-                        * (size_t) bitmapData.height
-                        * sizeof (PixelARGB);
-        bitmapData.lineStride = (bitmapData.width * bitmapData.pixelStride + 3) & ~3;
+        const auto unsignedLineStride = (((size_t) bitmapData.width * (size_t) bitmapData.pixelStride + 3) & ~((size_t) 3));
+        bitmapData.lineStride = -((int) unsignedLineStride);
+        bitmapData.size = (size_t) bitmapData.height * unsignedLineStride;
+
+        // OpenGL mapped textures are stored in lines from bottom-to-top, but JUCE expects lines to
+        // be ordered top-to-bottom.
+        // The data pointer points to the beginning of the *last* line, and lineStride steps backwards
+        // through the lines.
+        bitmapData.data = (uint8*) releaser->data.get() + (ptrdiff_t) bitmapData.size + (ptrdiff_t) bitmapData.lineStride;
 
         bitmapData.dataReleaser = std::move (releaser);
 
