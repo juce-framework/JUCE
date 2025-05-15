@@ -74,6 +74,7 @@ namespace zlibNamespace
   #undef DO1
   #undef DO8
   #include "zlib/crc32.c"
+  #undef N
   #include "zlib/deflate.c"
   #include "zlib/inffast.c"
   #undef PULLBYTE
