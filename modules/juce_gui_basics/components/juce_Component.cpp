@@ -247,6 +247,11 @@ public:
         effect->applyEffect (effectImage, g, scale, ignoreAlphaLevel ? 1.0f : c.getAlpha());
     }
 
+    void releaseResources()
+    {
+        effectImage = {};
+    }
+
 private:
     Image effectImage;
     ImageEffectFilter* effect;
@@ -611,6 +616,15 @@ void Component::setBufferedToImage (bool shouldBeBuffered)
     {
         cachedImage.reset();
     }
+}
+
+void Component::invalidateCachedImageResources()
+{
+    if (cachedImage != nullptr)
+        cachedImage->releaseResources();
+
+    if (effectState != nullptr)
+        effectState->releaseResources();
 }
 
 //==============================================================================
