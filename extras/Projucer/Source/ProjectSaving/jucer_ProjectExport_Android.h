@@ -132,7 +132,7 @@ public:
           androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "24"),
-          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "34"),
+          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "35"),
           androidTheme                         (settings, Ids::androidTheme,                         getUndoManager()),
           androidExtraAssetsFolder             (settings, Ids::androidExtraAssetsFolder,             getUndoManager()),
           androidOboeRepositoryPath            (settings, Ids::androidOboeRepositoryPath,            getUndoManager()),
@@ -157,10 +157,10 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "8.6"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "8.11.1"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
           gradleClangTidy                      (settings, Ids::gradleClangTidy,                      getUndoManager(), false),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "8.4.1"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "8.10.0"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getDisplayName();
@@ -171,7 +171,7 @@ public:
     void createToolchainExporterProperties (PropertyListBuilder& props)
     {
         props.add (new TextPropertyComponent (gradleVersion, "Gradle Version", 32, false),
-                   "The version of gradle that is used to build this app (4.10 is fine for JUCE)");
+                   "The version of gradle that is used to build this app");
 
         props.add (new TextPropertyComponent (androidPluginVersion, "Android Plug-in Version", 32, false),
                    "The version of the android build plugin for gradle that is used to build this app");
@@ -697,7 +697,7 @@ private:
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
         // NDK 26 is required for ANDROID_WEAK_API_DEFS, which is in turn required for weak-linking AFontMatcher
-        mo << "def ndkVersionString = \"26.2.11394342\"" << newLine << newLine;
+        mo << "def ndkVersionString = \"28.1.13356709\"" << newLine << newLine;
 
         mo << "android {"                                                                    << newLine;
         mo << "    compileSdk " << static_cast<int> (androidTargetSDK.get())                 << newLine;
