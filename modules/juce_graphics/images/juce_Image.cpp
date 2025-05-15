@@ -768,7 +768,7 @@ Image Image::convertedToFormat (PixelFormat newFormat) const
     auto type = image->createType();
     Image newImage (type->create (newFormat, w, h, false));
 
-    if (newFormat == SingleChannel)
+    if (newImage.getFormat() == SingleChannel)
     {
         if (! hasAlphaChannel())
         {
@@ -781,26 +781,28 @@ Image Image::convertedToFormat (PixelFormat newFormat) const
 
             for (int y = 0; y < h; ++y)
             {
-                auto src = reinterpret_cast<const PixelARGB*> (srcData.getLinePointer (y));
-                auto dst = destData.getLinePointer (y);
-
                 for (int x = 0; x < w; ++x)
-                    dst[x] = src[x].getAlpha();
+                {
+                    auto* dstPtr = reinterpret_cast<PixelAlpha*> (destData.getPixelPointer (x, y));
+                    auto* srcPtr = reinterpret_cast<const PixelARGB*> (srcData.getPixelPointer (x, y));
+                    dstPtr->set (*srcPtr);
+                }
             }
         }
     }
-    else if (image->pixelFormat == SingleChannel && newFormat == Image::ARGB)
+    else if (image->pixelFormat == SingleChannel && newImage.getFormat() == ARGB)
     {
         const BitmapData destData (newImage, { w, h }, BitmapData::writeOnly);
         const BitmapData srcData (*this, { w, h }, BitmapData::readOnly);
 
         for (int y = 0; y < h; ++y)
         {
-            auto src = reinterpret_cast<const PixelAlpha*> (srcData.getLinePointer (y));
-            auto dst = reinterpret_cast<PixelARGB*> (destData.getLinePointer (y));
-
             for (int x = 0; x < w; ++x)
-                dst[x].set (src[x]);
+            {
+                auto* dstPtr = reinterpret_cast<PixelARGB*> (destData.getPixelPointer (x, y));
+                auto* srcPtr = reinterpret_cast<const PixelAlpha*> (srcData.getPixelPointer (x, y));
+                dstPtr->set (*srcPtr);
+            }
         }
     }
     else
