@@ -286,11 +286,13 @@ MainComponent::MainComponent()
 
         if (isHeavyweight)
         {
-           #if JUCE_MAC && USE_COREGRAPHICS_RENDERING
-            setRenderingEngine (1);
-           #elif ! JUCE_WINDOWS
-            setRenderingEngine (0);
+           #if (JUCE_MAC && USE_COREGRAPHICS_RENDERING) || JUCE_WINDOWS
+            constexpr auto fallbackEngine = 1;
+           #else
+            constexpr auto fallbackEngine = 0;
            #endif
+
+            setRenderingEngine (fallbackEngine);
         }
 
         isShowingHeavyweightDemo = isHeavyweight;
