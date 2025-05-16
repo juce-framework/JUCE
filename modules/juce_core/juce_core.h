@@ -373,6 +373,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "misc/juce_OptionsHelpers.h"
 
 #include "detail/juce_CallbackListenerList.h"
+#include "detail/juce_LruCache.h"
 
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
  #include "native/juce_CFHelpers_mac.h"
