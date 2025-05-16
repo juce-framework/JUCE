@@ -292,6 +292,14 @@ public:
     }
 
 private:
+
+    // The definition of __BIONIC_AVAILABILITY was changed in NDK 28.1 and it now has variadic
+    // parameters.
+    //
+    // But __INTRODUCED_IN only has one parameter so there isn't even a way to pass on anything to
+    // to __BIONIC_AVAILABILITY.
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments")
+
     static __INTRODUCED_IN (29) Typeface::Ptr fromMatchedFont (AFont* matched)
     {
         if (matched == nullptr)
@@ -355,6 +363,8 @@ private:
 
         return fromMatchedFont (matched.get());
     }
+
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     static Typeface::Ptr loadCompatibleFont (const TypefaceFileAndIndex& info)
     {
