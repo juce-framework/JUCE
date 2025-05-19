@@ -38,6 +38,32 @@
 //==============================================================================
 #if JucePlugin_Build_VST3
 
+JUCE_BEGIN_NO_SANITIZE ("vptr")
+
+#if JUCE_PLUGINHOST_VST3
+ #if JUCE_MAC
+  #include <CoreFoundation/CoreFoundation.h>
+ #endif
+ #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+ #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
+#endif
+
+#include <juce_audio_processors/format_types/juce_VST3Headers.h>
+
+#undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+#define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
+
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
+#include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
+#include <juce_audio_plugin_client/detail/juce_LinuxMessageThread.h>
+#include <juce_audio_plugin_client/detail/juce_VSTWindowUtilities.h>
+#include <juce_gui_basics/native/juce_WindowsHooks_windows.h>
+
+#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors/utilities/juce_FlagCache.h>
+#include <juce_audio_processors/format_types/juce_VST3Common.h>
+
 #if JUCE_VST3_CAN_REPLACE_VST2 && ! JUCE_FORCE_USE_LEGACY_PARAM_IDS && ! JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING
 
  // If you encounter this error there may be an issue migrating parameter
@@ -69,32 +95,6 @@
 
  #error You may have a conflict with parameter automation between VST2 and VST3 versions of your plugin. See the comment above for more details.
 #endif
-
-JUCE_BEGIN_NO_SANITIZE ("vptr")
-
-#if JUCE_PLUGINHOST_VST3
- #if JUCE_MAC
-  #include <CoreFoundation/CoreFoundation.h>
- #endif
- #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
- #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
-#endif
-
-#include <juce_audio_processors/format_types/juce_VST3Headers.h>
-
-#undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
-#define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
-
-#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
-#include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
-#include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
-#include <juce_audio_plugin_client/detail/juce_LinuxMessageThread.h>
-#include <juce_audio_plugin_client/detail/juce_VSTWindowUtilities.h>
-#include <juce_gui_basics/native/juce_WindowsHooks_windows.h>
-
-#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
-#include <juce_audio_processors/utilities/juce_FlagCache.h>
-#include <juce_audio_processors/format_types/juce_VST3Common.h>
 
 #ifndef JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
  #if JucePlugin_WantsMidiInput
