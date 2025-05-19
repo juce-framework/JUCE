@@ -137,7 +137,7 @@ struct VST3ClientExtensions
     /** This function should return a map of VST3 parameter IDs and the JUCE
         parameters they map to.
 
-        This information is used to implement the IRemapParameter interface.
+        This information is used to implement the IRemapParamID interface.
         Hosts can use this to preserve automation data when a session was saved
         using a compatible plugin that has different parameter IDs.
 
@@ -148,19 +148,28 @@ struct VST3ClientExtensions
         already been released without enabling this flag, this method offers an
         alternative approach that won't cause any further compatibility issues.
 
-        The key in the map is a VST3 parameter identifier or Vst::ParamID. For
-        VST2 or JUCE plugins these IDs can be determined in the following ways
-        - Use the parameter index for
-          - VST2 plugins
-          - JUCE VST3 plugins with JUCE_FORCE_LEGACY_PARAM_IDS enabled
-          - Any parameter that doesn't inherit from HostedAudioProcessorParameter
-        - Use convertJuceParameterId() for JUCE VST3 plugins where
-          JUCE_FORCE_LEGACY_PARAM_IDS is disabled
+        The key in the map is an integer which may represent a VST3 parameter
+        identifier (Vst::ParamID) or VST2 parameter index.
+        You should include a map entry for every parameter ID in the compatible
+        plugin.
+        For VST2 or JUCE plugins these IDs can be determined in the following ways.
+        - Use the parameter index if any of the following apply:
+          - the InterfaceId argument refers to a compatible VST2 plugin, or
+          - the InterfaceId argument refers to a JUCE VST3 plugin with
+            JUCE_FORCE_LEGACY_PARAM_IDS enabled, or
+          - the InterfaceId argument refers to a JUCE plugin, but the parameter
+            in the compatible plugin doesn't inherit from
+            HostedAudioProcessorParameter (this case is unlikely).
+        - Otherwise, use convertJuceParameterId() for JUCE VST3 plugins where
+          JUCE_FORCE_LEGACY_PARAM_IDS is disabled, and where the compatible
+          parameter derives from HostedAudioProcessorParameter.
+        - For non-JUCE VST3s, use the Vst::ParamIDs exported by the compatible
+          VST3.
 
         The value in the map is the JUCE parameter ID for the parameter to map
         to, or an empty string to indicate that there is no parameter to map to.
         If a parameter doesn't inherit from HostedAudioProcessorParameter its ID
-        will be the parameter index as a string, for example "1". Otherwise
+        will be the parameter index as a string, for example "1". Otherwise,
         always use the actual parameter ID (even if JUCE_FORCE_LEGACY_PARAM_IDS
         is enabled).
 
@@ -176,7 +185,7 @@ struct VST3ClientExtensions
         JUCE_FORCE_LEGACY_PARAM_IDS is disabled.
 
         @code
-        std::map<uint32_t, String> getCompatibleParameterIds (const String&) const override
+        std::map<uint32_t, String> getCompatibleParameterIds (const InterfaceId&) const override
         {
             return { { 0, "Frequency" },
                      { 1, "CutOff" },
@@ -192,6 +201,21 @@ struct VST3ClientExtensions
                                 compatible class. Use convertJucePluginId() and
                                 convertVST2PluginId() to determine the class IDs
                                 used by JUCE plugins.
+                                When JUCE_VST3_CAN_REPLACE_VST2 is set, the
+                                InterfaceId denoting the VST2 version of the
+                                plugin will match the InterfaceId of the
+                                VST3 that replaces it. In this case, you should
+                                only include the VST2 mappings in the returned
+                                map, assuming there are no collisions between
+                                the VST2 parameter indices and the VST3 ParamIDs.
+                                In the unlikely event of a collision between
+                                the VST2 and VST3 parameter IDs, you should
+                                inspect the state that was most recently
+                                passed to setStateInformation() to determine
+                                whether the host is loading a VST2 state that
+                                requires parameter remapping. If you determine
+                                that no remapping is necessary, you can indicate
+                                this by returning an empty map.
 
         @returns    A map where each key is a VST3 parameter ID in the compatible
                     plugin, and the value is the unique JUCE parameter ID in the

@@ -1131,7 +1131,7 @@ public:
 
         @see getCurrentProgramStateInformation
     */
-    virtual void getStateInformation (juce::MemoryBlock& destData) = 0;
+    virtual void getStateInformation (MemoryBlock& destData) = 0;
 
     /** The host will call this method if it wants to save the state of just the processor's
         current program.
@@ -1144,7 +1144,7 @@ public:
 
         @see getStateInformation, setCurrentProgramStateInformation
     */
-    virtual void getCurrentProgramStateInformation (juce::MemoryBlock& destData);
+    virtual void getCurrentProgramStateInformation (MemoryBlock& destData);
 
     /** This must restore the processor's state from a block of data previously created
         using getStateInformation().
@@ -1154,9 +1154,16 @@ public:
 
         See also the helper function getXmlFromBinary() for loading settings as XML.
 
-        VST3ClientExtensions::getCompatibleParameterIds() will always be called after
-        setStateInformation() therefore you can use information from the plugin state
+        In the case that this AudioProcessor is implementing a VST3 that has declared compatible
+        plugins via VST3ClientExtensions::getCompatibleClasses(), the state passed to this
+        function may have been created by one of these compatible plugins.
+
+        If the parameter IDs of the current plugin differ from the IDs of the plugin whose state
+        was passed to this function, you can use information from the plugin state
         to determine which parameter mapping to use if necessary.
+        VST3ClientExtensions::getCompatibleParameterIds() will always be called after
+        setStateInformation(), and that function should return the parameter mapping from the most
+        recently-loaded state.
 
         @see setCurrentProgramStateInformation, VST3ClientExtensions::getCompatibleParameterIds
     */
@@ -1352,7 +1359,7 @@ public:
         from a binary blob.
     */
     static void copyXmlToBinary (const XmlElement& xml,
-                                 juce::MemoryBlock& destData);
+                                 MemoryBlock& destData);
 
     /** Retrieves an XML element that was stored as binary with the copyXmlToBinary() method.
         This might return nullptr if the data's unsuitable or corrupted.
