@@ -1071,10 +1071,6 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
     OSStatus process (AudioUnitRenderActionFlags* flags, const AudioTimeStamp* time,
                       const UInt32 numFrames, AudioBufferList* data)
     {
-        // If you hit this assertion please contact the JUCE team and let us
-        // know the iOS version/device and audio device that you're using
-        jassert (bufferSize == (int) numFrames);
-
         OSStatus err = noErr;
 
         recordXruns (time, numFrames);
