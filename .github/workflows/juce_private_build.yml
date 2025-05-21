@@ -38,7 +38,7 @@ jobs:
           context: CI
           targetUrl: ${{ env.target_url }}
   build:
-    if: ${{ always() && (needs.setup.result == 'success' || needs.setup.result == 'skipped') }}
+    if: ${{ !cancelled() && (success() || needs.setup.result == 'skipped') }}
     needs: [setup]
     name: .
     # Not having the ability to do a dynamic 'uses' call is a real pain. To
