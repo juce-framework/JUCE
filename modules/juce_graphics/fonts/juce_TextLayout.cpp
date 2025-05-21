@@ -419,7 +419,7 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                                 .withAdditiveLineSpacing (text.getLineSpacing());
 
     if (text.getWordWrap() != AttributedString::none)
-        shapedTextOptions = shapedTextOptions.withMaxWidth (width);
+        shapedTextOptions = shapedTextOptions.withWordWrapWidth (width);
 
     ShapedText st { text.getText(), shapedTextOptions };
 

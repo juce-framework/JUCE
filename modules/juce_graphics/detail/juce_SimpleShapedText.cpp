@@ -1279,7 +1279,7 @@ void SimpleShapedText::shape (const String& data,
     for (const auto& lineRange : getLineRanges (data))
     {
         Shaper shaper { data, lineRange, options };
-        auto lineDataAndStorage = FillLinesOptions{}.withWidth (options.getMaxWidth().value_or ((float) 1e6))
+        auto lineDataAndStorage = FillLinesOptions{}.withWidth (options.getWordWrapWidth().value_or ((float) 1e6))
                                                     .withFirstLinePadding (options.getFirstLineIndent())
                                                     .withTrailingWhitespaceCanExtendBeyondMargin (! options.getTrailingWhitespacesShouldFit())
                                                     .withForceConsumeFirstWord (! options.getAllowBreakingInsideWord())
@@ -1552,7 +1552,7 @@ struct SimpleShapedTextTests : public UnitTest
         String testString { text };
 
         SimpleShapedText st { &testString, ShapedTextOptions{}.withFont (FontOptions { defaultTypeface })
-                                                              .withMaxWidth (maxWidth) };
+                                                              .withWordWrapWidth (maxWidth) };
 
         auto success = true;
 

@@ -205,7 +205,7 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font, const String& t
     using namespace detail;
 
     auto options = ShapedText::Options{}.withMaxNumLines (1)
-                                        .withMaxWidth (maxWidthPixels)
+                                        .withWordWrapWidth (maxWidthPixels)
                                         .withFont (font)
                                         .withBaselineAtZero()
                                         .withTrailingWhitespacesShouldFit (false);
@@ -225,7 +225,7 @@ void GlyphArrangement::addJustifiedText (const Font& font, const String& text,
 {
     using namespace detail;
 
-    ShapedText st { text, ShapedText::Options{}.withMaxWidth (maxLineWidth)
+    ShapedText st { text, ShapedText::Options{}.withWordWrapWidth (maxLineWidth)
                                                .withJustification (horizontalLayout)
                                                .withFont (font)
                                                .withAdditiveLineSpacing (leading)
@@ -259,7 +259,7 @@ static auto createFittedText (const Font& f,
     {
         ShapedText st { text,
                         baseOptions
-                            .withMaxWidth (width)
+                            .withWordWrapWidth (width)
                             .withHeight (height)
                             .withJustification (layout)
                             .withFont (f)
@@ -275,7 +275,7 @@ static auto createFittedText (const Font& f,
     // First attempt: try to squash the entire text on a single line
     {
         ShapedText st { trimmed, baseOptions.withFont (f)
-                                            .withMaxWidth (width)
+                                            .withWordWrapWidth (width)
                                             .withHeight (height)
                                             .withMaxNumLines (1)
                                             .withJustification (layout)
@@ -294,7 +294,7 @@ static auto createFittedText (const Font& f,
             ShapedText squashed { trimmed,
                                   baseOptions
                                       .withFont (f.withHorizontalScale (f.getHorizontalScale() * requiredRelativeScale))
-                                      .withMaxWidth (width)
+                                      .withWordWrapWidth (width)
                                       .withHeight (height)
                                       .withJustification (layout)
                                       .withTrailingWhitespacesShouldFit (false)};
@@ -310,7 +310,7 @@ static auto createFittedText (const Font& f,
         ShapedText squashed { trimmed,
                               baseOptions
                                   .withFont (f.withHorizontalScale (minimumHorizontalScale))
-                                  .withMaxWidth (width)
+                                  .withWordWrapWidth (width)
                                   .withHeight (height)
                                   .withJustification (layout)
                                   .withMaxNumLines (1)
@@ -347,7 +347,7 @@ static auto createFittedText (const Font& f,
         ShapedText squashed { trimmed,
                               baseOptions
                                   .withFont (font)
-                                  .withMaxWidth (width)
+                                  .withWordWrapWidth (width)
                                   .withHeight (height)
                                   .withMaxNumLines (numLines)
                                   .withJustification (layout)
@@ -376,7 +376,7 @@ static auto createFittedText (const Font& f,
         return ShapedText { trimmed,
                             baseOptions
                                 .withFont (font.withHorizontalScale (horizontalScale))
-                                .withMaxWidth (width)
+                                .withWordWrapWidth (width)
                                 .withHeight (height)
                                 .withMaxNumLines (numLines)
                                 .withJustification (layout)

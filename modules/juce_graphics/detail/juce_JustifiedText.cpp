@@ -259,7 +259,7 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
             return getMainAxisLineAlignment (options.getJustification(),
                                              glyphs,
                                              lineLength,
-                                             options.getMaxWidth(),
+                                             options.getWordWrapWidth(),
                                              options.getAlignmentWidth(),
                                              options.getTrailingWhitespacesShouldFit());
         }();
@@ -344,8 +344,8 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
     const auto effectiveLength = options.getTrailingWhitespacesShouldFit() ? lastLineLengths.total
                                                                            : lastLineLengths.withoutTrailingWhitespaces;
 
-    if (! options.getMaxWidth().has_value()
-        || effectiveLength <= *options.getMaxWidth() + maxWidthTolerance)
+    if (! options.getWordWrapWidth().has_value()
+        || effectiveLength <= *options.getWordWrapWidth() + maxWidthTolerance)
         return;
 
     const auto cutoffAtFront = lastLineMetrics.value.anchor.getX() < 0.0f - maxWidthTolerance;
@@ -362,8 +362,8 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
                 {
                     length -= it->advance.getX();
 
-                    if (! options.getMaxWidth().has_value()
-                        || *options.getMaxWidth() >= ellipsisLength + length)
+                    if (! options.getWordWrapWidth().has_value()
+                        || *options.getWordWrapWidth() >= ellipsisLength + length)
                     {
                         return { (int64) std::distance (lastLineGlyphs.begin(), it) + 1,
                                  (int64) lastLineGlyphs.size() };
@@ -378,8 +378,8 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
                 {
                     length -= it->advance.getX();
 
-                    if (! options.getMaxWidth().has_value()
-                        || *options.getMaxWidth() >= ellipsisLength + length)
+                    if (! options.getWordWrapWidth().has_value()
+                        || *options.getWordWrapWidth() >= ellipsisLength + length)
                     {
                         return { 0, (int64) std::distance (lastLineGlyphs.begin(), it) };
                     }
@@ -464,7 +464,7 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
         return getMainAxisLineAlignment (options.getJustification(),
                                          lineWithEllipsisGlyphs,
                                          getMainAxisLineLength (lineWithEllipsisGlyphs),
-                                         options.getMaxWidth(),
+                                         options.getWordWrapWidth(),
                                          options.getAlignmentWidth(),
                                          options.getTrailingWhitespacesShouldFit());
     }();
