@@ -78,12 +78,12 @@ bool AudioDeviceManager::AudioDeviceSetup::operator!= (const AudioDeviceManager:
 
     On some platforms (such as iOS 10), the expected buffer size reported in
     audioDeviceAboutToStart may be smaller than the blocks passed to
-    audioDeviceIOCallbackWithContext. This can lead to out-of-bounds reads if the render
-    callback depends on additional buffers which were initialised using the
-    smaller size.
+    audioDeviceIOCallbackWithContext. This can lead to out-of-bounds reads if
+    the render callback depends on additional buffers which were initialised
+    using the smaller size.
 
-    As a workaround, this class will ensure that the render callback will
-    only ever be called with a block with a length less than or equal to the
+    As a workaround, this class will ensure that the render callback will only
+    ever be called with a block with a length less than or equal to the
     expected block size.
 */
 class CallbackMaxSizeEnforcer  : public AudioIODeviceCallback
@@ -117,8 +117,9 @@ public:
         {
             const auto blockLength = jmin (maximumSize, numSamples - position);
 
-            initChannelPointers (inputChannelData,  storedInputChannels,  position);
-            initChannelPointers (outputChannelData, storedOutputChannels, position);
+            const auto addOffset = [position] (auto ptr) { return ptr + position; };
+            std::transform (inputChannelData,  inputChannelData  + numInputChannels,  storedInputChannels .begin(), addOffset);
+            std::transform (outputChannelData, outputChannelData + numOutputChannels, storedOutputChannels.begin(), addOffset);
 
             inner.audioDeviceIOCallbackWithContext (storedInputChannels.data(),
                                                     (int) storedInputChannels.size(),
@@ -137,24 +138,10 @@ public:
     }
 
 private:
-    struct GetChannelWithOffset
-    {
-        int offset;
-
-        template <typename Ptr>
-        auto operator() (Ptr ptr) const noexcept -> Ptr { return ptr + offset; }
-    };
-
-    template <typename Ptr, typename Vector>
-    void initChannelPointers (Ptr&& source, Vector&& target, int offset)
-    {
-        std::transform (source, source + target.size(), target.begin(), GetChannelWithOffset { offset });
-    }
-
-    AudioIODeviceCallback& inner;
-    int maximumSize = 0;
     std::vector<const float*> storedInputChannels;
     std::vector<float*> storedOutputChannels;
+    AudioIODeviceCallback& inner;
+    int maximumSize = 0;
 };
 
 //==============================================================================
