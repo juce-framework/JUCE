@@ -327,6 +327,9 @@ JustifiedText::JustifiedText (const SimpleShapedText* t, const ShapedTextOptions
 
     rangesToDraw.set ({ 0, (int64) shapedText.getGlyphs().size() }, DrawType::normal, ops);
 
+    if (options.getDrawLinesInFull())
+        return;
+
     //==============================================================================
     // Everything above this line should work well given none of the lines were too
     // long. When Options::getMaxNumLines() == 0 this is guaranteed by SimpleShapedText.

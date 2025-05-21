@@ -179,6 +179,17 @@ public:
         return withMember (*this, &ShapedTextOptions::ellipsis, std::move (x));
     }
 
+    /*  Draw each line in its entirety even if it goes beyond wordWrapWidth. This means that even
+        if configured, an ellipsis will never be inserted.
+
+        This is used by the TextEditor where the Viewport guarantees that all text will be viewable
+        even beyond the word wrap width.
+    */
+    [[nodiscard]] ShapedTextOptions withDrawLinesInFull (bool x = true) const
+    {
+        return withMember (*this, &ShapedTextOptions::drawLinesInFull, std::move (x));
+    }
+
     [[nodiscard]] ShapedTextOptions withReadingDirection (std::optional<TextDirection> x) const
     {
         return withMember (*this, &ShapedTextOptions::readingDir, x);
@@ -203,6 +214,7 @@ public:
     const auto& getTrailingWhitespacesShouldFit() const { return trailingWhitespacesShouldFit; }
     const auto& getMaxNumLines() const                  { return maxNumLines; }
     const auto& getEllipsis() const                     { return ellipsis; }
+    const auto& getDrawLinesInFull() const              { return drawLinesInFull; }
     const auto& getAllowBreakingInsideWord() const      { return allowBreakingInsideWord; }
 
 private:
@@ -227,6 +239,7 @@ private:
     bool baselineAtZero = false;
     bool allowBreakingInsideWord = false;
     bool trailingWhitespacesShouldFit = true;
+    bool drawLinesInFull = false;
     int64 maxNumLines = std::numeric_limits<int64>::max();
     String ellipsis;
 };

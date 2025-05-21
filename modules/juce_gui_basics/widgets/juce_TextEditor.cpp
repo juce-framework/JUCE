@@ -947,6 +947,7 @@ void TextEditor::updateBaseShapedTextOptions()
 {
     auto options = detail::ShapedText::Options{}.withTrailingWhitespacesShouldFit (true)
                                                 .withJustification (getJustificationType().getOnlyHorizontalFlags())
+                                                .withDrawLinesInFull()
                                                 .withLeading (lineSpacing);
 
     if (wordWrap)
