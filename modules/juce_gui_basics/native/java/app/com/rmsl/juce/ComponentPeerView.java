@@ -189,10 +189,51 @@ public final class ComponentPeerView extends ViewGroup
     private final Paint paint = new Paint();
 
     //==============================================================================
-    private native void handleMouseDown (long host, int index, float x, float y, long time);
-    private native void handleMouseDrag (long host, int index, float x, float y, long time);
-    private native void handleMouseUp (long host, int index, float x, float y, long time);
-    private native void handleAccessibilityHover (long host, int action, float x, float y, long time);
+    private static native void handleMouseDown (long host, int index, float x, float y, long time);
+    private static native void handleMouseDrag (long host, int index, float x, float y, long time);
+    private static native void handleMouseUp (long host, int index, float x, float y, long time);
+    private static native void handleAccessibilityHover (long host, int action, float x, float y, long time);
+
+    @FunctionalInterface
+    private interface MouseHandler
+    {
+        void handle (long host, int index, float x, float y, long time);
+    }
+
+    void handleMultiPointerEvent (MotionEvent event, MouseHandler callback)
+    {
+        long time = event.getEventTime();
+        callback.handle (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
+
+        int n = event.getPointerCount();
+
+        if (n > 1)
+        {
+            int point[] = new int[2];
+            getLocationOnScreen (point);
+
+            for (int i = 1; i < n; ++i)
+                callback.handle (host, event.getPointerId (i), event.getX (i) + point[0], event.getY (i) + point[1], time);
+        }
+    }
+
+    void handleSecondaryPointerEvent (MotionEvent event, MouseHandler callback)
+    {
+        long time = event.getEventTime();
+        int i = event.getActionIndex();
+
+        if (i == 0)
+        {
+            callback.handle (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
+        }
+        else
+        {
+            int point[] = new int[2];
+            getLocationOnScreen (point);
+
+            callback.handle (host, event.getPointerId (i), event.getX (i) + point[0], event.getY (i) + point[1], time);
+        }
+    }
 
     @Override
     public boolean onTouchEvent (MotionEvent event)
@@ -214,76 +255,20 @@ public final class ComponentPeerView extends ViewGroup
                 return true;
 
             case MotionEvent.ACTION_CANCEL:
-            {
-                handleMouseUp (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
-
-                int n = event.getPointerCount();
-
-                if (n > 1)
-                {
-                    int point[] = new int[2];
-                    getLocationOnScreen (point);
-
-                    for (int i = 1; i < n; ++i)
-                        handleMouseUp (host, event.getPointerId (i), event.getX (i) + point[0], event.getY (i) + point[1], time);
-                }
-
+                handleMultiPointerEvent (event, ComponentPeerView::handleMouseUp);
                 return true;
-            }
 
             case MotionEvent.ACTION_MOVE:
-            {
-                handleMouseDrag (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
-
-                int n = event.getPointerCount();
-
-                if (n > 1)
-                {
-                    int point[] = new int[2];
-                    getLocationOnScreen (point);
-
-                    for (int i = 1; i < n; ++i)
-                        handleMouseDrag (host, event.getPointerId (i), event.getX (i) + point[0], event.getY (i) + point[1], time);
-                }
-
+                handleMultiPointerEvent (event, ComponentPeerView::handleMouseDrag);
                 return true;
-            }
 
             case MotionEvent.ACTION_POINTER_UP:
-            {
-                int i = (action & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-
-                if (i == 0)
-                {
-                    handleMouseUp (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
-                }
-                else
-                {
-                    int point[] = new int[2];
-                    getLocationOnScreen (point);
-
-                    handleMouseUp (host, event.getPointerId (i), event.getX (i) + point[0], event.getY (i) + point[1], time);
-                }
+                handleSecondaryPointerEvent (event, ComponentPeerView::handleMouseUp);
                 return true;
-            }
 
             case MotionEvent.ACTION_POINTER_DOWN:
-            {
-                int i = (action & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-
-                if (i == 0)
-                {
-                    handleMouseDown (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
-                }
-                else
-                {
-                    int point[] = new int[2];
-                    getLocationOnScreen (point);
-
-                    handleMouseDown (host, event.getPointerId (i), event.getX (i) + point[0], event.getY (i) + point[1], time);
-                }
+                handleSecondaryPointerEvent (event, ComponentPeerView::handleMouseDown);
                 return true;
-            }
 
             default:
                 break;
