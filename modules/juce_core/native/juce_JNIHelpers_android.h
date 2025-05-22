@@ -350,7 +350,9 @@ DECLARE_JNI_CLASS (AndroidContext, "android/content/Context")
  METHOD (startActivityForResult,               "startActivityForResult",          "(Landroid/content/Intent;I)V") \
  METHOD (getFragmentManager,                   "getFragmentManager",              "()Landroid/app/FragmentManager;") \
  METHOD (setContentView,                       "setContentView",                  "(Landroid/view/View;)V") \
- METHOD (getWindow,                            "getWindow",                       "()Landroid/view/Window;")
+ METHOD (getActionBar,                         "getActionBar",                    "()Landroid/app/ActionBar;") \
+ METHOD (getWindow,                            "getWindow",                       "()Landroid/view/Window;") \
+ METHOD (isInMultiWindowMode,                  "isInMultiWindowMode",             "()Z") \
 
 DECLARE_JNI_CLASS (AndroidActivity, "android/app/Activity")
 #undef JNI_CLASS_MEMBERS
@@ -638,13 +640,16 @@ DECLARE_JNI_CLASS (AndroidUri, "android/net/Uri")
  METHOD (invalidate,                "invalidate",                "(IIII)V") \
  METHOD (setVisibility,             "setVisibility",             "(I)V") \
  METHOD (setLayoutParams,           "setLayoutParams",           "(Landroid/view/ViewGroup$LayoutParams;)V") \
+ METHOD (getLayoutParams,           "getLayoutParams",           "()Landroid/view/ViewGroup$LayoutParams;") \
  METHOD (setSystemUiVisibility,     "setSystemUiVisibility",     "(I)V") \
  METHOD (findViewById,              "findViewById",              "(I)Landroid/view/View;") \
+ METHOD (getWindowToken,            "getWindowToken",            "()Landroid/os/IBinder;") \
  METHOD (getRootView,               "getRootView",               "()Landroid/view/View;") \
  METHOD (addOnLayoutChangeListener, "addOnLayoutChangeListener", "(Landroid/view/View$OnLayoutChangeListener;)V") \
  METHOD (announceForAccessibility,  "announceForAccessibility",  "(Ljava/lang/CharSequence;)V")  \
  METHOD (setOnApplyWindowInsetsListener, "setOnApplyWindowInsetsListener", "(Landroid/view/View$OnApplyWindowInsetsListener;)V") \
- METHOD (getRootWindowInsets, "getRootWindowInsets", "()Landroid/view/WindowInsets;")
+ METHOD (getRootWindowInsets, "getRootWindowInsets", "()Landroid/view/WindowInsets;") \
+ METHOD (getWindowSystemUiVisibility, "getWindowSystemUiVisibility", "()I") \
 
 DECLARE_JNI_CLASS (AndroidView, "android/view/View")
 #undef JNI_CLASS_MEMBERS
@@ -658,9 +663,10 @@ DECLARE_JNI_CLASS (AndroidViewGroup, "android/view/ViewGroup")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (getDecorView, "getDecorView",       "()Landroid/view/View;") \
- METHOD (setFlags,     "setFlags",           "(II)V") \
- METHOD (clearFlags,   "clearFlags",         "(I)V")
+ METHOD (getDecorView,  "getDecorView",       "()Landroid/view/View;") \
+ METHOD (getAttributes, "getAttributes",      "()Landroid/view/WindowManager$LayoutParams;") \
+ METHOD (setFlags,      "setFlags",           "(II)V") \
+ METHOD (clearFlags,    "clearFlags",         "(I)V")
 
 DECLARE_JNI_CLASS (AndroidWindow, "android/view/Window")
 #undef JNI_CLASS_MEMBERS
@@ -669,6 +675,12 @@ DECLARE_JNI_CLASS (AndroidWindow, "android/view/Window")
  METHOD (getDefaultDisplay, "getDefaultDisplay", "()Landroid/view/Display;")
 
 DECLARE_JNI_CLASS (AndroidWindowManager, "android/view/WindowManager")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getCurrentWindowMetrics, "getCurrentWindowMetrics", "()Landroid/view/WindowMetrics;")
+
+DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidWindowManager30, "android/view/WindowManager", 30)
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

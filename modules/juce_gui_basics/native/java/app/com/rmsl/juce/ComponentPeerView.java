@@ -34,6 +34,10 @@
 
 package com.rmsl.juce;
 
+import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
@@ -44,31 +48,33 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
-import android.text.Selection;
-import android.text.SpanWatcher;
-import android.text.Spannable;
-import android.text.Spanned;
-import android.text.TextWatcher;
-import android.util.Pair;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.Selection;
+import android.text.SpanWatcher;
+import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.accessibility.AccessibilityNodeProvider;
-import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -80,7 +86,7 @@ public final class ComponentPeerView extends ViewGroup
     {
         super (context);
 
-        if (Application.class.isInstance (context))
+        if (context instanceof Application)
         {
             ((Application) context).registerActivityLifecycleCallbacks (this);
         }
@@ -796,35 +802,53 @@ public final class ComponentPeerView extends ViewGroup
     {
     }
 
-    public void setSystemUiVisibilityCompat (int visibility)
+    public void setSystemUiVisibilityCompat (Window window, boolean visible)
     {
-        Method systemUIVisibilityMethod = null;
-        try
+        if (30 <= Build.VERSION.SDK_INT)
         {
-            systemUIVisibilityMethod = this.getClass().getMethod ("setSystemUiVisibility", int.class);
-        }
-        catch (SecurityException e)
-        {
-            return;
-        }
-        catch (NoSuchMethodException e)
-        {
-            return;
-        }
-        if (systemUIVisibilityMethod == null) return;
+            WindowInsetsController controller = getWindowInsetsController();
 
-        try
-        {
-            systemUIVisibilityMethod.invoke (this, visibility);
+            if (controller != null)
+            {
+                if (visible)
+                {
+                    controller.show (WindowInsets.Type.systemBars());
+                    controller.setSystemBarsBehavior (31 <= Build.VERSION.SDK_INT ? BEHAVIOR_DEFAULT
+                                                                                  : BEHAVIOR_SHOW_BARS_BY_SWIPE);
+                }
+                else
+                {
+                    controller.hide (WindowInsets.Type.systemBars());
+                    controller.setSystemBarsBehavior (BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                }
+
+                return;
+            }
         }
-        catch (java.lang.IllegalArgumentException e)
+
+        if (window == null)
+            return;
+
+        // Displays::findDisplays queries the DecorView to determine the
+        // most recently-requested visibility state of the system UI.
+        // As we're creating new top-level views via WindowManager,
+        // updating only the DecorView isn't sufficient to hide the global
+        // system UI; we also need to update the view that was added to
+        // the WindowManager.
+        ArrayList<View> views = new ArrayList<>();
+        views.add (window.getDecorView());
+        views.add (this);
+
+        for (View view : views)
         {
-        }
-        catch (java.lang.IllegalAccessException e)
-        {
-        }
-        catch (java.lang.reflect.InvocationTargetException e)
-        {
+            final int prevFlags = view.getSystemUiVisibility();
+            final int fullScreenFlags = SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                      | SYSTEM_UI_FLAG_FULLSCREEN
+                                      | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            final int newFlags = visible ? (prevFlags & ~fullScreenFlags)
+                                         : (prevFlags |  fullScreenFlags);
+
+            view.setSystemUiVisibility (newFlags);
         }
     }
 
