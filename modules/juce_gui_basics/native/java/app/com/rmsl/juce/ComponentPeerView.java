@@ -209,10 +209,27 @@ public final class ComponentPeerView extends ViewGroup
                 handleMouseDown (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
                 return true;
 
-            case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 handleMouseUp (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
                 return true;
+
+            case MotionEvent.ACTION_CANCEL:
+            {
+                handleMouseUp (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
+
+                int n = event.getPointerCount();
+
+                if (n > 1)
+                {
+                    int point[] = new int[2];
+                    getLocationOnScreen (point);
+
+                    for (int i = 1; i < n; ++i)
+                        handleMouseUp (host, event.getPointerId (i), event.getX (i) + point[0], event.getY (i) + point[1], time);
+                }
+
+                return true;
+            }
 
             case MotionEvent.ACTION_MOVE:
             {
