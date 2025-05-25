@@ -133,6 +133,9 @@ public:
 
     /** Provides access to the parameter's range. */
     NormalisableRange<float> range;
+    
+    //this should be public
+    float getDefaultValue() const override;
 
 protected:
     /** Override this method if you are interested in receiving callbacks
@@ -144,7 +147,7 @@ private:
     //==============================================================================
     float getValue() const override;
     void setValue (float newValue) override;
-    float getDefaultValue() const override;
+
     int getNumSteps() const override;
     String getText (float, int) const override;
     float getValueForText (const String&) const override;

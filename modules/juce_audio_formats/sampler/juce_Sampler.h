@@ -89,6 +89,9 @@ public:
     //==============================================================================
     bool appliesToNote (int midiNoteNumber) override;
     bool appliesToChannel (int midiChannel) override;
+    
+    double getSourceSampleRate() const { return sourceSampleRate; }
+    int getMidiRootNote() const { return midiRootNote; }
 
 private:
     //==============================================================================
