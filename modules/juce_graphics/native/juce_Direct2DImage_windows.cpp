@@ -764,8 +764,11 @@ void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap,
 
     // If we're about to read from the image, and the main-memory copy of the image is outdated,
     // then we must force a backup so that we can return up-to-date data
-    if (mode != Image::BitmapData::writeOnly && state == State::outdated)
+    if (mode != Image::BitmapData::writeOnly
+        || Rectangle { x, y, bitmap.width, bitmap.height } != Rectangle { width, height })
+    {
         createPersistentBackup (nullptr);
+    }
 
     backingData->initialiseBitmapData (bitmap, x, y, mode);
 
