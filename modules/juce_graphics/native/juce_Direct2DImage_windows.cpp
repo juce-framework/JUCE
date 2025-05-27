@@ -580,6 +580,8 @@ void Direct2DPixelData::moveValidatedImageSection (Point<int> destTopLeft, Recta
         return;
     }
 
+    sendDataChangeMessage();
+
     Ptr staging = new Direct2DPixelData { pixelFormat,
                                           sourceRect.getWidth(),
                                           sourceRect.getHeight(),
@@ -776,6 +778,8 @@ void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap,
     // mark them as outdated.
     if (mode == Image::BitmapData::readOnly)
         return;
+
+    sendDataChangeMessage();
 
     struct Releaser : public Image::BitmapData::BitmapDataReleaser
     {
