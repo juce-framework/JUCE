@@ -99,7 +99,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
 // having the wrong value when the /Zc:__cplusplus is not enabled. This work
 // around prevents needing to provide that flag
 
-#include <juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/fplatform.h>
+#include <pluginterfaces/base/fplatform.h>
 
 #ifdef SMTG_CPP20
  #undef SMTG_CPP20
