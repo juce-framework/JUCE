@@ -353,14 +353,15 @@ public:
 
     void allocateTempBuffers()
     {
-        auto tempBufSize = bufferSize + 4;
+        auto tempBufSize = (size_t) bufferSize + 4;
 
         auto streams = getStreams();
-        const auto total = std::accumulate (streams.begin(), streams.end(), 0,
-                                            [] (int n, const auto& s) { return n + (s != nullptr ? s->channels : 0); });
-        audioBuffer.calloc (total * tempBufSize);
+        const auto total = std::accumulate (streams.begin(), streams.end(), (size_t) 0,
+                                            [] (auto n, const auto& s) { return n + (s != nullptr ? s->channels : 0); });
+        audioBuffer.clear();
+        audioBuffer.resize (total * tempBufSize);
 
-        auto channels = 0;
+        size_t channels = 0;
         for (auto* stream : streams)
             channels += stream != nullptr ? stream->allocateTempBuffers (tempBufSize, channels, audioBuffer) : 0;
     }
@@ -776,15 +777,15 @@ public:
             return;
         }
 
-        const auto numInputChans  = getChannels (inStream);
-        const auto numOutputChans = getChannels (outStream);
+        const auto numInputChans  = (int) getChannels (inStream);
+        const auto numOutputChans = (int) getChannels (outStream);
 
         if (callback != nullptr)
         {
             for (int i = numInputChans; --i >= 0;)
             {
                 auto& info = inStream->channelInfo.getReference (i);
-                auto dest = inStream->tempBuffers[i];
+                auto dest = inStream->tempBuffers[(size_t) i];
                 auto src = ((const float*) inInputData->mBuffers[info.streamNum].mData) + info.dataOffsetSamples;
                 auto stride = info.dataStrideSamples;
 
@@ -818,7 +819,7 @@ public:
             for (int i = numOutputChans; --i >= 0;)
             {
                 auto& info = outStream->channelInfo.getReference (i);
-                auto src = outStream->tempBuffers[i];
+                auto src = outStream->tempBuffers[(size_t) i];
                 auto dest = ((float*) outOutputData->mBuffers[info.streamNum].mData) + info.dataOffsetSamples;
                 auto stride = info.dataStrideSamples;
 
@@ -874,16 +875,20 @@ public:
                                result.setRange (clearFrom, result.getHighestBit() + 1 - clearFrom, false);
                                return result;
                            }()),
-              channelInfo (getChannelInfos (isInput, parent, activeChans)),
-              channels (static_cast<int> (channelInfo.size()))
+              channelInfo (getChannelInfos (isInput, parent, activeChans))
         {}
 
-        int allocateTempBuffers (int tempBufSize, int channelCount, HeapBlock<float>& buffer)
+        size_t allocateTempBuffers (size_t tempBufSize, size_t channelCount, Span<float> buffer)
         {
-            tempBuffers.calloc (channels + 2);
+            tempBuffers.clear();
+            tempBuffers.resize (channels + 2);
 
-            for (int i = 0; i < channels;  ++i)
-                tempBuffers[i] = buffer + channelCount++ * tempBufSize;
+            for (size_t i = 0; i < channels; ++i)
+            {
+                const auto offset = channelCount++ * tempBufSize;
+                jassert (offset + tempBufSize <= buffer.size());
+                tempBuffers[i] = buffer.data() + offset;
+            }
 
             return channels;
         }
@@ -1018,10 +1023,10 @@ public:
         const StringArray chanNames;
         const BigInteger activeChans;
         const Array<CallbackDetailsForChannel> channelInfo;
-        const int channels = 0;
+        const size_t channels = (size_t) channelInfo.size();
         Float64 previousSampleTime;
 
-        HeapBlock<float*> tempBuffers;
+        std::vector<float*> tempBuffers;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Stream)
     };
@@ -1040,11 +1045,11 @@ public:
 
     static int          getLatency          (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::latency); }
     static int          getBitDepth         (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::bitDepth); }
-    static int          getChannels         (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::channels); }
+    static size_t       getChannels         (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::channels); }
     static int          getNumChannelNames  (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::chanNames).size(); }
     static String       getChannelNames     (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::chanNames).joinIntoString (" "); }
     static BigInteger   getActiveChannels   (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::activeChans); }
-    static float**      getTempBuffers      (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, [] (auto& s) { return s.tempBuffers.get(); }); }
+    static float**      getTempBuffers      (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, [] (auto& s) { return s.tempBuffers.data(); }); }
 
     //==============================================================================
     static constexpr Float64 invalidSampleTime = std::numeric_limits<Float64>::max();
@@ -1111,7 +1116,7 @@ private:
     std::atomic<bool> playing { false };
     double sampleRate = 0;
     int bufferSize = 0;
-    HeapBlock<float> audioBuffer;
+    std::vector<float> audioBuffer;
     Atomic<int> callbacksAllowed { 1 };
 
     //==============================================================================
