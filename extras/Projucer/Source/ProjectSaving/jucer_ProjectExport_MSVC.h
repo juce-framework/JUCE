@@ -1087,7 +1087,7 @@ public:
 
                         const auto debugInfoFormat = isDebug || config.shouldGenerateDebugSymbols()
                                                    ? config.getDebugInformationFormatString()
-                                                   : "OldStyle";
+                                                   : "None";
 
                         cl->createNewChildElement ("DebugInformationFormat")->addTextElement (debugInfoFormat);
 
