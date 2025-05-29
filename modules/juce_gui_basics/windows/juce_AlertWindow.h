@@ -587,7 +587,7 @@ private:
     OwnedArray<Component> textBlocks;
     Array<Component*> allComps;
     StringArray textboxNames, comboBoxNames;
-    Component* const associatedComponent;
+    SafePointer<Component> associatedComponent;
     bool escapeKeyCancels = true;
     float desktopScale = 1.0f;
 
