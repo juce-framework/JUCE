@@ -318,7 +318,7 @@ public:
     //==============================================================================
     /** Draws the currently selected texture into this context at its original size.
 
-        @param targetClipArea  the target area to draw into (in top-left origin coords)
+        @param targetClipArea   the target area to draw into (in top-left origin coords)
         @param anchorPosAndTextureSize  the position of this rectangle is the texture's top-left
                                         anchor position in the target space, and the size must be
                                         the total size of the texture.
@@ -328,6 +328,10 @@ public:
                                 used for vertical flipping of the y coordinates.
         @param textureOriginIsBottomLeft    if true, the texture's origin is treated as being at
                                 (0, 0). If false, it is assumed to be (0, 1)
+        @param blend            if true, the texture's alpha is used to blend the texture with
+                                transparency on top the context's existing content. If false, the
+                                texture is drawn with no alpha, overwriting the content of the
+                                context.
     */
     void copyTexture (const Rectangle<int>& targetClipArea,
                       const Rectangle<int>& anchorPosAndTextureSize,
