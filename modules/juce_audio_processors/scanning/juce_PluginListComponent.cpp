@@ -159,8 +159,8 @@ public:
           formatToScan (format),
           filesOrIdentifiersToScan (filesOrIdentifiers),
           propertiesToUse (properties),
-          pathChooserWindow (TRANS ("Select folders to scan..."), String(), MessageBoxIconType::NoIcon),
-          progressWindow (title, text, MessageBoxIconType::NoIcon),
+          pathChooserWindow (TRANS ("Select folders to scan..."), String(), MessageBoxIconType::NoIcon, &plc),
+          progressWindow (title, text, MessageBoxIconType::NoIcon, &plc),
           numThreads (threads),
           allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
     {
