@@ -829,7 +829,7 @@ private:
         setContentOwned (content, resizeAutomatically);
     }
 
-    void buttonClicked (Button*) override
+    void buttonClicked (Button* button) override
     {
         PopupMenu m;
         m.addItem (1, TRANS ("Audio/MIDI Settings..."));
@@ -839,7 +839,7 @@ private:
         m.addSeparator();
         m.addItem (4, TRANS ("Reset to default state"));
 
-        m.showMenuAsync (PopupMenu::Options(),
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (button),
                          ModalCallbackFunction::forComponent (menuCallback, this));
     }
 
