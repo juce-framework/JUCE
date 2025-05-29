@@ -38,6 +38,8 @@ namespace juce
 /** Options that can be used to affect the layout produced by GlyphArrangement::addFittedText.
 
     @see GlyphArrangement::addFittedText
+
+    @tags{Graphics}
 */
 class JUCE_API GlyphArrangementOptions final
 {
