@@ -3,6 +3,15 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.8
+
+  - Improved the TextEditor layout behaviour
+  - Added new options to control text line spacing
+  - Added more Direct2D bug fixes and performance improvements
+  - Fixed a iOS simulator buffer size issue
+  - Moved the MIDI CapabilityInquiry Demo into the DemoRunner
+  - Updated the default Android toolchain version
+
 ## Version 8.0.7
 
   - Improved unicode handling and performance in TextEditor

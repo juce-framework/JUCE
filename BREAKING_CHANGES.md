@@ -353,7 +353,7 @@ encoded string literal, for example for file comparison, Base64 encoding, or any
 encryption, may result in false negatives for JSON data containing the same data
 between versions of JUCE.
 
-Note: JSON files that only ever encoded ASCII text will NOT be effected.
+Note: JSON files that only ever encoded ASCII text will NOT be affected.
 
 **Workaround**
 
