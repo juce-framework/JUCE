@@ -174,6 +174,7 @@ namespace FlacNamespace
  #include "flac/libFLAC/lpc_intrin_neon.c"
  #include "flac/libFLAC/md5.c"
  #include "flac/libFLAC/memory.c"
+ #include "flac/libFLAC/metadata_object.c"
  #include "flac/libFLAC/stream_decoder.c"
  #include "flac/libFLAC/stream_encoder.c"
  #include "flac/libFLAC/stream_encoder_framing.c"
@@ -209,7 +210,7 @@ public:
     {
         lengthInSamples = 0;
         decoder = FlacNamespace::FLAC__stream_decoder_new();
-
+        FLAC__stream_decoder_set_metadata_respond (decoder, FlacNamespace::FLAC__METADATA_TYPE_VORBIS_COMMENT);
         ok = FLAC__stream_decoder_init_stream (decoder,
                                                readCallback_, seekCallback_, tellCallback_, lengthCallback_,
                                                eofCallback_, writeCallback_, metadataCallback_, errorCallback_,
@@ -248,6 +249,21 @@ public:
         numChannels = info.channels;
 
         reservoir.setSize ((int) numChannels, 2 * (int) info.max_blocksize, false, false, true);
+    }
+    
+    void useComments (const FlacNamespace::FLAC__StreamMetadata_VorbisComment& comments)
+    {
+        for (unsigned int i = 0; i < comments.num_comments; ++i)
+        {
+            const auto& comment = comments.comments[i];
+            char* name { nullptr };
+            char* value { nullptr };
+
+            if(FlacNamespace::FLAC__metadata_object_vorbiscomment_entry_to_name_value_pair(comment, &name, &value) && name && value)
+            {
+                metadataValues.set (String (name), String (value));
+            }
+        }
     }
 
     bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
@@ -387,7 +403,10 @@ public:
                                    const FlacNamespace::FLAC__StreamMetadata* metadata,
                                    void* client_data)
     {
-        static_cast<FlacReader*> (client_data)->useMetadata (metadata->data.stream_info);
+        if(metadata->type == FlacNamespace::FLAC__METADATA_TYPE_STREAMINFO)
+            static_cast<FlacReader*> (client_data)->useMetadata (metadata->data.stream_info);
+        else if (metadata->type == FlacNamespace::FLAC__METADATA_TYPE_VORBIS_COMMENT)
+            static_cast<FlacReader*> (client_data)->useComments (metadata->data.vorbis_comment);
     }
 
     static void errorCallback_ (const FlacNamespace::FLAC__StreamDecoder*, FlacNamespace::FLAC__StreamDecoderErrorStatus, void*)
@@ -408,12 +427,14 @@ private:
 class FlacWriter final : public AudioFormatWriter
 {
 public:
-    FlacWriter (OutputStream* out, double rate, uint32 numChans, uint32 bits, int qualityOptionIndex)
+    FlacWriter (OutputStream* out, double rate, uint32 numChans, uint32 bits, const StringPairArray& metadataValues, int qualityOptionIndex)
         : AudioFormatWriter (out, flacFormatName, rate, numChans, bits),
           streamStartPos (output != nullptr ? jmax (output->getPosition(), 0ll) : 0ll)
     {
         encoder = FlacNamespace::FLAC__stream_encoder_new();
 
+        
+        
         if (qualityOptionIndex > 0)
             FLAC__stream_encoder_set_compression_level (encoder, (uint32) jmin (8, qualityOptionIndex));
 
@@ -424,7 +445,23 @@ public:
         FLAC__stream_encoder_set_sample_rate (encoder, (unsigned int) sampleRate);
         FLAC__stream_encoder_set_blocksize (encoder, 0);
         FLAC__stream_encoder_set_do_escape_coding (encoder, true);
+        if(metadataValues.size() > 0)
+        {
+            metadata[0] = FLAC__metadata_object_new(FlacNamespace::FLAC__METADATA_TYPE_VORBIS_COMMENT);
+            metadata[1] = FLAC__metadata_object_new(FlacNamespace::FLAC__METADATA_TYPE_PADDING);
+            metadata[1]->length = 1024;
+            for(auto key : metadataValues.getAllKeys())
+            {
+                auto value = metadataValues[key];
 
+                FlacNamespace::FLAC__StreamMetadata_VorbisComment_Entry entry;
+                if(FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, key.toRawUTF8(), value.toRawUTF8()))
+                    FLAC__metadata_object_vorbiscomment_append_comment (metadata[0], entry, false);
+            }
+            ok = FLAC__stream_encoder_set_metadata (encoder, metadata.data(), 2);
+        }
+
+        
         ok = FLAC__stream_encoder_init_stream (encoder,
                                                encodeWriteCallback, encodeSeekCallback,
                                                encodeTellCallback, encodeMetadataCallback,
@@ -442,6 +479,11 @@ public:
         {
             output = nullptr; // to stop the base class deleting this, as it needs to be returned
                               // to the caller of createWriter()
+        }
+        for(auto& object : metadata)
+        {
+            if(object)
+                FlacNamespace::FLAC__metadata_object_delete(object);
         }
 
         FlacNamespace::FLAC__stream_encoder_delete (encoder);
@@ -525,7 +567,7 @@ public:
         output->writeIntBigEndian (FLAC__STREAM_METADATA_STREAMINFO_LENGTH);
         output->write (buffer, FLAC__STREAM_METADATA_STREAMINFO_LENGTH);
     }
-
+    
     //==============================================================================
     static FlacNamespace::FLAC__StreamEncoderWriteStatus encodeWriteCallback (const FlacNamespace::FLAC__StreamEncoder*,
                                                                               const FlacNamespace::FLAC__byte buffer[],
@@ -563,7 +605,7 @@ public:
 private:
     FlacNamespace::FLAC__StreamEncoder* encoder;
     int64 streamStartPos;
-
+    std::array<FlacNamespace::FLAC__StreamMetadata*,2> metadata { { nullptr, nullptr } };
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacWriter)
 };
 
@@ -610,6 +652,7 @@ std::unique_ptr<AudioFormatWriter> FlacAudioFormat::createWriterFor (std::unique
                                                 options.getSampleRate(),
                                                 (uint32) options.getNumChannels(),
                                                 (uint32) options.getBitsPerSample(),
+                                                options.getMetadataValues(),
                                                 options.getQualityOptionIndex());
 
     if (! writer->ok)
