@@ -1402,8 +1402,8 @@ public:
         if (inputDevice != nullptr)   ResetEvent (inputDevice->clientEvent);
         if (outputDevice != nullptr)  ResetEvent (outputDevice->clientEvent);
 
-        shouldShutdown = false;
-        deviceSampleRateChanged = false;
+        // No lock here; background thread is not running
+        flags &= ~(flagShutdown | flagSampleRateChanged);
 
         startThread (Priority::high);
         Thread::sleep (5);
@@ -1432,7 +1432,8 @@ public:
             }
         }
 
-        isOpen_ = true;
+        flags |= flagOpen;
+
         return lastError;
     }
 
@@ -1449,42 +1450,55 @@ public:
         if (inputDevice != nullptr)   inputDevice->close();
         if (outputDevice != nullptr)  outputDevice->close();
 
-        isOpen_ = false;
+        // Background thread has stopped at this point
+        flags &= ~flagOpen;
     }
 
-    bool isOpen() override       { return isOpen_ && isThreadRunning(); }
-    bool isPlaying() override    { return isStarted && isOpen_ && isThreadRunning(); }
+    bool isOpen() override
+    {
+        return ((flags & flagOpen) != 0) && isThreadRunning();
+    }
+
+    bool isPlaying() override
+    {
+        return ((flags & (flagOpen | flagStarted)) == (flagOpen | flagStarted)) && isThreadRunning();
+    }
 
     void start (AudioIODeviceCallback* call) override
     {
-        if (! isOpen_ || call == nullptr || isStarted)
-            return;
-
-        if (! isThreadRunning())
         {
-            // something's gone wrong and the thread's stopped..
-            isOpen_ = false;
-            return;
+            const ScopedLock sl (startStopLock);
+
+            if ((flags & (flagOpen | flagStarted)) != flagOpen || call == nullptr)
+                return;
+
+            if (! isThreadRunning())
+            {
+                // something's gone wrong and the thread's stopped..
+                flags &= ~flagOpen;
+                return;
+            }
         }
 
         call->audioDeviceAboutToStart (this);
 
-        const ScopedLock sl (startStopLock);
-        callback = call;
-        isStarted = true;
+        {
+            const ScopedLock sl (startStopLock);
+
+            callback = call;
+            flags |= flagStarted;
+        }
     }
 
     void stop() override
     {
-        if (! isStarted)
-            return;
-
-        auto* callbackLocal = callback;
-
+        auto* callbackLocal = std::invoke ([&]()
         {
             const ScopedLock sl (startStopLock);
-            isStarted = false;
-        }
+
+            const auto wasStarted = (flags.fetch_and (~flagStarted) & flagStarted) != 0;
+            return wasStarted ? callback : nullptr;
+        });
 
         if (callbackLocal != nullptr)
             callbackLocal->audioDeviceStopped();
@@ -1525,7 +1539,7 @@ public:
             if ((outputDevice != nullptr && outputDevice->shouldShutdown)
                 || (inputDevice != nullptr && inputDevice->shouldShutdown))
             {
-                shouldShutdown = true;
+                flags |= flagShutdown;
                 triggerAsyncUpdate();
 
                 break;
@@ -1559,7 +1573,7 @@ public:
 
                 if (inputDevice->sampleRateHasChanged)
                 {
-                    deviceSampleRateChanged = true;
+                    flags |= flagSampleRateChanged;
                     triggerAsyncUpdate();
 
                     break;
@@ -1569,15 +1583,19 @@ public:
             {
                 const ScopedTryLock sl (startStopLock);
 
-                if (sl.isLocked() && isStarted)
+                if (sl.isLocked() && (flags & flagStarted) != 0)
+                {
                     callback->audioDeviceIOCallbackWithContext (inputBuffers,
                                                                 numInputBuffers,
                                                                 outputBuffers,
                                                                 numOutputBuffers,
                                                                 bufferSize,
                                                                 {});
+                }
                 else
+                {
                     outs.clear();
+                }
             }
 
             if (outputDeviceActive)
@@ -1588,7 +1606,7 @@ public:
 
                 if (outputDevice->sampleRateHasChanged)
                 {
-                    deviceSampleRateChanged = true;
+                    flags |= flagSampleRateChanged;
                     triggerAsyncUpdate();
 
                     break;
@@ -1614,14 +1632,20 @@ private:
     Array<int> bufferSizes;
 
     // Active state...
-    bool isOpen_ = false, isStarted = false;
+    std::atomic<int> flags { 0 };
+
+    enum Flags
+    {
+        flagOpen                = 1 << 0,
+        flagStarted             = 1 << 1,
+        flagShutdown            = 1 << 2,
+        flagSampleRateChanged   = 1 << 3,
+    };
+
     int currentBufferSizeSamples = 0;
     double currentSampleRate = 0;
-
     AudioIODeviceCallback* callback = {};
     CriticalSection startStopLock;
-
-    std::atomic<bool> shouldShutdown { false }, deviceSampleRateChanged { false };
 
     BigInteger lastKnownInputChannels, lastKnownOutputChannels;
 
@@ -1678,33 +1702,39 @@ private:
             inputDevice = nullptr;
         };
 
-        if (shouldShutdown)
+        const auto prevFlags = flags.fetch_and (~(flagShutdown | flagSampleRateChanged));
+
+        if ((prevFlags & flagShutdown) != 0)
         {
             closeDevices();
+            return;
         }
-        else if (deviceSampleRateChanged)
+
+        if ((prevFlags & flagSampleRateChanged) == 0)
+            return;
+
+        auto sampleRateChangedByInput = (inputDevice != nullptr && inputDevice->sampleRateHasChanged);
+
+        closeDevices();
+        initialise();
+
+        auto changedSampleRate = std::invoke ([this, sampleRateChangedByInput]
         {
-            auto sampleRateChangedByInput = (inputDevice != nullptr && inputDevice->sampleRateHasChanged);
+            if (inputDevice != nullptr && sampleRateChangedByInput)
+                return inputDevice->defaultSampleRate;
 
-            closeDevices();
-            initialise();
+            if (outputDevice != nullptr && ! sampleRateChangedByInput)
+                return outputDevice->defaultSampleRate;
 
-            auto changedSampleRate = [this, sampleRateChangedByInput]()
-            {
-                if (inputDevice != nullptr && sampleRateChangedByInput)
-                    return inputDevice->defaultSampleRate;
+            return 0.0;
+        });
 
-                if (outputDevice != nullptr && ! sampleRateChangedByInput)
-                    return outputDevice->defaultSampleRate;
+        open (lastKnownInputChannels,
+              lastKnownOutputChannels,
+              changedSampleRate,
+              currentBufferSizeSamples);
 
-                return 0.0;
-            }();
-
-            open (lastKnownInputChannels, lastKnownOutputChannels,
-                  changedSampleRate, currentBufferSizeSamples);
-
-            start (callback);
-        }
+        start (callback);
     }
 
     //==============================================================================
