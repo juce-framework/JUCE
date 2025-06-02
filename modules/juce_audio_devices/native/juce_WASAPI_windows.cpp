@@ -465,29 +465,26 @@ public:
 
         client = createClient();
 
-        if (client != nullptr
-             && tryInitialisingWithBufferSize (bufferSizeSamples))
-        {
-            sampleRateHasChanged = false;
-            shouldShutdown = false;
+        if (client == nullptr || ! tryInitialisingWithBufferSize (bufferSizeSamples))
+            return false;
 
-            channelMaps.clear();
+        sampleRateHasChanged = false;
+        shouldShutdown = false;
 
-            for (int i = 0; i <= channels.getHighestBit(); ++i)
-                if (channels[i])
-                    channelMaps.add (i);
+        channelMaps.clear();
 
-            REFERENCE_TIME latency;
+        for (int i = 0; i <= channels.getHighestBit(); ++i)
+            if (channels[i])
+                channelMaps.add (i);
 
-            if (check (client->GetStreamLatency (&latency)))
-                latencySamples = refTimeToSamples (latency, sampleRate);
+        REFERENCE_TIME latency;
 
-            (void) check (client->GetBufferSize (&actualBufferSize));
-            createSessionEventCallback();
-            return check (client->SetEventHandle (clientEvent));
-        }
+        if (check (client->GetStreamLatency (&latency)))
+            latencySamples = refTimeToSamples (latency, sampleRate);
 
-        return false;
+        (void) check (client->GetBufferSize (&actualBufferSize));
+        createSessionEventCallback();
+        return check (client->SetEventHandle (clientEvent));
     }
 
     void closeClient()
@@ -606,11 +603,11 @@ private:
         client->GetService (__uuidof (IAudioSessionControl),
                             (void**) audioSessionControl.resetAndGetPointerAddress());
 
-        if (audioSessionControl != nullptr)
-        {
-            sessionEventCallback = becomeComSmartPtrOwner (new SessionEventCallback (*this));
-            audioSessionControl->RegisterAudioSessionNotification (sessionEventCallback);
-        }
+        if (audioSessionControl == nullptr)
+            return;
+
+        sessionEventCallback = becomeComSmartPtrOwner (new SessionEventCallback (*this));
+        audioSessionControl->RegisterAudioSessionNotification (sessionEventCallback);
     }
 
     void deleteSessionEventCallback()
@@ -670,17 +667,17 @@ private:
                     lowLatencyBufferSizeMultiple = (int) fundamentalPeriod;
                 }
             }
-        }
-        else
-        {
-            REFERENCE_TIME defaultPeriod, minPeriod;
 
-            if (! check (audioClient->GetDevicePeriod (&defaultPeriod, &minPeriod)))
-                return;
-
-            minBufferSize = refTimeToSamples (minPeriod, defaultSampleRate);
-            defaultBufferSize = refTimeToSamples (defaultPeriod, defaultSampleRate);
+            return;
         }
+
+        REFERENCE_TIME defaultPeriod, minPeriod;
+
+        if (! check (audioClient->GetDevicePeriod (&defaultPeriod, &minPeriod)))
+            return;
+
+        minBufferSize = refTimeToSamples (minPeriod, defaultSampleRate);
+        defaultBufferSize = refTimeToSamples (defaultPeriod, defaultSampleRate);
     }
 
     void querySupportedSampleRates (WAVEFORMATEXTENSIBLE format, ComSmartPtr<IAudioClient>& audioClient)
@@ -894,25 +891,25 @@ private:
 
     bool tryInitialisingWithBufferSize (int bufferSizeSamples)
     {
-        if (auto format = findSupportedFormat (client, numChannels, sampleRate))
-        {
-            auto isInitialised = isLowLatencyMode (deviceMode) ? initialiseLowLatencyClient (bufferSizeSamples, *format)
-                                                               : initialiseStandardClient   (bufferSizeSamples, *format);
+        auto format = findSupportedFormat (client, numChannels, sampleRate);
 
-            if (isInitialised)
-            {
-                actualNumChannels  = format->Format.nChannels;
-                const bool isFloat = format->Format.wFormatTag == WAVE_FORMAT_EXTENSIBLE && format->SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
-                bytesPerSample     = format->Format.wBitsPerSample / 8;
-                bytesPerFrame      = format->Format.nBlockAlign;
+        if (! format.has_value())
+            return false;
 
-                updateFormat (isFloat);
+        auto isInitialised = isLowLatencyMode (deviceMode) ? initialiseLowLatencyClient (bufferSizeSamples, *format)
+                                                           : initialiseStandardClient   (bufferSizeSamples, *format);
 
-                return true;
-            }
-        }
+        if (! isInitialised)
+            return false;
 
-        return false;
+        actualNumChannels  = format->Format.nChannels;
+        const bool isFloat = format->Format.wFormatTag == WAVE_FORMAT_EXTENSIBLE && format->SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+        bytesPerSample     = format->Format.wBitsPerSample / 8;
+        bytesPerFrame      = format->Format.nBlockAlign;
+
+        updateFormat (isFloat);
+
+        return true;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIDeviceBase)
@@ -1310,22 +1307,26 @@ public:
 
     StringArray getOutputChannelNames() override
     {
+        if (outputDevice == nullptr)
+            return {};
+
         StringArray outChannels;
 
-        if (outputDevice != nullptr)
-            for (int i = 1; i <= outputDevice->maxNumChannels; ++i)
-                outChannels.add ("Output channel " + String (i));
+        for (int i = 1; i <= outputDevice->maxNumChannels; ++i)
+            outChannels.add ("Output channel " + String (i));
 
         return outChannels;
     }
 
     StringArray getInputChannelNames() override
     {
+        if (inputDevice == nullptr)
+            return {};
+
         StringArray inChannels;
 
-        if (inputDevice != nullptr)
-            for (int i = 1; i <= inputDevice->maxNumChannels; ++i)
-                inChannels.add ("Input channel " + String (i));
+        for (int i = 1; i <= inputDevice->maxNumChannels; ++i)
+            inChannels.add ("Input channel " + String (i));
 
         return inChannels;
     }
@@ -1456,37 +1457,37 @@ public:
 
     void start (AudioIODeviceCallback* call) override
     {
-        if (isOpen_ && call != nullptr && ! isStarted)
+        if (! isOpen_ || call == nullptr || isStarted)
+            return;
+
+        if (! isThreadRunning())
         {
-            if (! isThreadRunning())
-            {
-                // something's gone wrong and the thread's stopped..
-                isOpen_ = false;
-                return;
-            }
-
-            call->audioDeviceAboutToStart (this);
-
-            const ScopedLock sl (startStopLock);
-            callback = call;
-            isStarted = true;
+            // something's gone wrong and the thread's stopped..
+            isOpen_ = false;
+            return;
         }
+
+        call->audioDeviceAboutToStart (this);
+
+        const ScopedLock sl (startStopLock);
+        callback = call;
+        isStarted = true;
     }
 
     void stop() override
     {
-        if (isStarted)
+        if (! isStarted)
+            return;
+
+        auto* callbackLocal = callback;
+
         {
-            auto* callbackLocal = callback;
-
-            {
-                const ScopedLock sl (startStopLock);
-                isStarted = false;
-            }
-
-            if (callbackLocal != nullptr)
-                callbackLocal->audioDeviceStopped();
+            const ScopedLock sl (startStopLock);
+            isStarted = false;
         }
+
+        if (callbackLocal != nullptr)
+            callbackLocal->audioDeviceStopped();
     }
 
     void setMMThreadPriority()
@@ -1495,13 +1496,13 @@ public:
         JUCE_LOAD_WINAPI_FUNCTION (dll, AvSetMmThreadCharacteristicsW, avSetMmThreadCharacteristics, HANDLE, (LPCWSTR, LPDWORD))
         JUCE_LOAD_WINAPI_FUNCTION (dll, AvSetMmThreadPriority, avSetMmThreadPriority, HANDLE, (HANDLE, AVRT_PRIORITY))
 
-        if (avSetMmThreadCharacteristics != nullptr && avSetMmThreadPriority != nullptr)
-        {
-            DWORD dummy = 0;
+        if (avSetMmThreadCharacteristics == nullptr || avSetMmThreadPriority == nullptr)
+            return;
 
-            if (auto h = avSetMmThreadCharacteristics (L"Pro Audio", &dummy))
-                avSetMmThreadPriority (h, AVRT_PRIORITY_NORMAL);
-        }
+        DWORD dummy = 0;
+
+        if (auto h = avSetMmThreadCharacteristics (L"Pro Audio", &dummy))
+            avSetMmThreadPriority (h, AVRT_PRIORITY_NORMAL);
     }
 
     void run() override
