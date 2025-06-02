@@ -1529,8 +1529,6 @@ public:
 
         AudioBuffer<float> ins  (jmax (1, numInputBuffers),  bufferSize + 32);
         AudioBuffer<float> outs (jmax (1, numOutputBuffers), bufferSize + 32);
-        auto inputBuffers  = ins.getArrayOfWritePointers();
-        auto outputBuffers = outs.getArrayOfWritePointers();
         ins.clear();
         outs.clear();
 
@@ -1569,7 +1567,7 @@ public:
                         inputDevice->handleDeviceBuffer();
                 }
 
-                inputDevice->copyBuffersFromReservoir (inputBuffers, numInputBuffers, bufferSize);
+                inputDevice->copyBuffersFromReservoir (ins.getArrayOfWritePointers(), numInputBuffers, bufferSize);
 
                 if (inputDevice->sampleRateHasChanged)
                 {
@@ -1585,9 +1583,9 @@ public:
 
                 if (sl.isLocked() && (flags & flagStarted) != 0)
                 {
-                    callback->audioDeviceIOCallbackWithContext (inputBuffers,
+                    callback->audioDeviceIOCallbackWithContext (ins.getArrayOfReadPointers(),
                                                                 numInputBuffers,
-                                                                outputBuffers,
+                                                                outs.getArrayOfWritePointers(),
                                                                 numOutputBuffers,
                                                                 bufferSize,
                                                                 {});
@@ -1602,7 +1600,7 @@ public:
             {
                 // Note that this function is handed the input device so it can check for the event and make sure
                 // the input reservoir is filled up correctly even when bufferSize > device actualBufferSize
-                outputDevice->copyBuffers (outputBuffers, numOutputBuffers, bufferSize, inputDevice.get(), *this);
+                outputDevice->copyBuffers (outs.getArrayOfReadPointers(), numOutputBuffers, bufferSize, inputDevice.get(), *this);
 
                 if (outputDevice->sampleRateHasChanged)
                 {
