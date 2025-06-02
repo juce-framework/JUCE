@@ -35,12 +35,26 @@
 namespace juce
 {
 
-static constexpr bool isNonBreakingSpace (const juce_wchar c)
+static String portableTrim (String toTrim)
 {
-    return c == 0x00a0
-        || c == 0x2007
-        || c == 0x202f
-        || c == 0x2060;
+    if (toTrim.isEmpty())
+        return toTrim;
+
+    const auto b = toTrim.begin();
+    const auto e = toTrim.end();
+
+    const auto shouldTrim = [] (auto ptr)
+    {
+        return SBCodepointGetBidiType ((SBCodepoint) *ptr) == SBBidiTypeWS;
+    };
+
+    const auto trimmedBegin = CharacterFunctions::trimBegin (b, e, shouldTrim);
+    const auto trimmedEnd = CharacterFunctions::trimEnd (trimmedBegin, e, shouldTrim);
+
+    if (trimmedBegin == b && trimmedEnd == e)
+        return toTrim;
+
+    return String (trimmedBegin, trimmedEnd);
 }
 
 static bool areAllRequiredWidthsSmallerThanMax (const detail::ShapedText& shapedText, float width)
@@ -268,7 +282,7 @@ static auto createFittedText (const Font& f,
         return st;
     }
 
-    const auto trimmed = text.trim();
+    const auto trimmed = portableTrim (text);
 
     constexpr auto widthFittingTolerance = 0.01f;
 

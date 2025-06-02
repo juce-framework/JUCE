@@ -761,6 +761,36 @@ public:
         return -1;
     }
 
+    /** Given a CharacterPointer range and a predicate, returns a pointer to the first
+        character in the range that does not satisfy the predicate.
+    */
+    template <typename Type, typename Predicate>
+    static Type trimBegin (Type begin, const Type end, Predicate&& shouldTrim)
+    {
+        while (begin != end && shouldTrim (begin))
+            ++begin;
+
+        return begin;
+    }
+
+    /** Given a CharacterPointer range and a predicate, returns a pointer one-past the
+        last character in the range that does not satisfy the predicate.
+    */
+    template <typename Type, typename Predicate>
+    static Type trimEnd (const Type begin, Type end, Predicate&& shouldTrim)
+    {
+        while (end > begin)
+        {
+            if (! shouldTrim (--end))
+            {
+                ++end;
+                break;
+            }
+        }
+
+        return end;
+    }
+
     /** Increments a pointer until it points to the first non-whitespace character
         in a string.
 

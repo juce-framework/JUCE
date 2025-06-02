@@ -1668,64 +1668,53 @@ String String::quoted (juce_wchar quoteCharacter) const
 }
 
 //==============================================================================
-static String::CharPointerType findTrimmedEnd (const String::CharPointerType start,
-                                               String::CharPointerType end)
-{
-    while (end > start)
-    {
-        if (! (--end).isWhitespace())
-        {
-            ++end;
-            break;
-        }
-    }
-
-    return end;
-}
-
 String String::trim() const
 {
-    if (isNotEmpty())
-    {
-        auto start = text.findEndOfWhitespace();
-        auto end = start.findTerminatingNull();
-        auto trimmedEnd = findTrimmedEnd (start, end);
+    if (isEmpty())
+        return *this;
 
-        if (trimmedEnd <= start)
-            return {};
+    const auto b = begin();
+    const auto e = end();
 
-        if (text < start || trimmedEnd < end)
-            return String (start, trimmedEnd);
-    }
+    const auto shouldTrim = [] (auto ptr) { return ptr.isWhitespace(); };
+    const auto trimmedBegin = CharacterFunctions::trimBegin (b, e, shouldTrim);
+    const auto trimmedEnd = CharacterFunctions::trimEnd (trimmedBegin, e, shouldTrim);
 
-    return *this;
+    if (trimmedBegin == b && trimmedEnd == e)
+        return *this;
+
+    return String (trimmedBegin, trimmedEnd);
 }
 
 String String::trimStart() const
 {
-    if (isNotEmpty())
-    {
-        auto t = text.findEndOfWhitespace();
+    if (isEmpty())
+        return *this;
 
-        if (t != text)
-            return String (t);
-    }
+    const auto shouldTrim = [] (auto ptr) { return ptr.isWhitespace(); };
+    const auto b = begin();
+    const auto t = CharacterFunctions::trimBegin (b, end(), shouldTrim);
 
-    return *this;
+    if (t == b)
+        return *this;
+
+    return String (t);
 }
 
 String String::trimEnd() const
 {
-    if (isNotEmpty())
-    {
-        auto end = text.findTerminatingNull();
-        auto trimmedEnd = findTrimmedEnd (text, end);
+    if (isEmpty())
+        return *this;
 
-        if (trimmedEnd < end)
-            return String (text, trimmedEnd);
-    }
+    const auto shouldTrim = [] (auto ptr) { return ptr.isWhitespace(); };
+    const auto b = begin();
+    const auto e = end();
+    const auto t = CharacterFunctions::trimEnd (b, e, shouldTrim);
 
-    return *this;
+    if (t == e)
+        return *this;
+
+    return String (b, t);
 }
 
 String String::trimCharactersAtStart (StringRef charactersToTrim) const
