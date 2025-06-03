@@ -667,7 +667,7 @@ public:
         On construction, this calls Graphics::saveState(), and on destruction it calls
         Graphics::restoreState() on the Graphics object that you supply.
     */
-    class ScopedSaveState
+    class JUCE_API ScopedSaveState
     {
     public:
         ScopedSaveState (Graphics&);
