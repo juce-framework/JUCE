@@ -218,6 +218,12 @@ public:
     }
 
 private:
+    enum Flags
+    {
+        stopRequested   = 1 << 0,   // Set to indicate to the background scanner that it should stop asap
+        finished        = 1 << 1,   // Set by the scanner to indicate that it's done
+    };
+
     PluginListComponent& owner;
     AudioPluginFormat& formatToScan;
     StringArray filesOrIdentifiersToScan;
@@ -229,7 +235,7 @@ private:
     double progress = 0;
     const int numThreads;
     bool allowAsync, timerReentrancyCheck = false;
-    std::atomic<bool> finished { false };
+    std::atomic<int> flags { 0 };
     std::unique_ptr<ThreadPool> pool;
     std::set<String> initiallyBlacklistedFiles;
     ScopedMessageBox messageBox;
@@ -315,7 +321,10 @@ private:
 
         progressWindow.addButton (TRANS ("Cancel"), 0, KeyPress (KeyPress::escapeKey));
         progressWindow.addProgressBarComponent (progress);
-        progressWindow.enterModalState();
+        progressWindow.enterModalState (true, ModalCallbackFunction::create ([this] (auto)
+        {
+            flags |= stopRequested;
+        }));
 
         if (numThreads > 0)
         {
@@ -357,10 +366,7 @@ private:
                 startTimer (20);
         }
 
-        if (! progressWindow.isCurrentlyModal())
-            finished = true;
-
-        if (finished)
+        if ((flags & finished) != 0)
             finishedScan();
         else
             progressWindow.setMessage (TRANS ("Testing") + ":\n\n" + pluginBeingScanned);
@@ -368,16 +374,16 @@ private:
 
     bool doNextScan()
     {
-        if (scanner->scanNextFile (true, pluginBeingScanned))
+        if ((flags & stopRequested) == 0 && scanner->scanNextFile (true, pluginBeingScanned))
             return true;
 
-        finished = true;
+        flags |= finished;
         return false;
     }
 
     struct ScanJob final : public ThreadPoolJob
     {
-        ScanJob (Scanner& s)  : ThreadPoolJob ("pluginscan"), scanner (s) {}
+        explicit ScanJob (Scanner& s)  : ThreadPoolJob ("pluginscan"), scanner (s) {}
 
         JobStatus runJob() override
         {
