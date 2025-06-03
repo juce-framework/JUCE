@@ -194,9 +194,13 @@ public:
             pathChooserWindow.addButton (TRANS ("Cancel"), 0, KeyPress (KeyPress::escapeKey));
 
             pathChooserWindow.enterModalState (true,
-                                               ModalCallbackFunction::forComponent (startScanCallback,
-                                                                                    &pathChooserWindow, this),
-                                               false);
+                                               ModalCallbackFunction::create ([this] (auto result)
+                                               {
+                                                   if (result != 0)
+                                                       warnUserAboutStupidPaths();
+                                                   else
+                                                       finishedScan();
+                                               }));
         }
         else
         {
@@ -229,17 +233,6 @@ private:
     std::unique_ptr<ThreadPool> pool;
     std::set<String> initiallyBlacklistedFiles;
     ScopedMessageBox messageBox;
-
-    static void startScanCallback (int result, AlertWindow* alert, Scanner* scanner)
-    {
-        if (alert != nullptr && scanner != nullptr)
-        {
-            if (result != 0)
-                scanner->warnUserAboutStupidPaths();
-            else
-                scanner->finishedScan();
-        }
-    }
 
     // Try to dissuade people from to scanning their entire C: drive, or other system folders.
     void warnUserAboutStupidPaths()
