@@ -354,6 +354,8 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content CAMERA_PERMISSION_TEXT               ${target} JUCE_CAMERA_PERMISSION_TEXT)
     _juce_append_target_property(file_content BLUETOOTH_PERMISSION_ENABLED         ${target} JUCE_BLUETOOTH_PERMISSION_ENABLED)
     _juce_append_target_property(file_content BLUETOOTH_PERMISSION_TEXT            ${target} JUCE_BLUETOOTH_PERMISSION_TEXT)
+    _juce_append_target_property(file_content LOCAL_NETWORK_PERMISSION_ENABLED     ${target} JUCE_LOCAL_NETWORK_PERMISSION_ENABLED)
+    _juce_append_target_property(file_content LOCAL_NETWORK_PERMISSION_TEXT        ${target} JUCE_LOCAL_NETWORK_PERMISSION_TEXT)
     _juce_append_target_property(file_content SEND_APPLE_EVENTS_PERMISSION_ENABLED ${target} JUCE_SEND_APPLE_EVENTS_PERMISSION_ENABLED)
     _juce_append_target_property(file_content SEND_APPLE_EVENTS_PERMISSION_TEXT    ${target} JUCE_SEND_APPLE_EVENTS_PERMISSION_TEXT)
     _juce_append_target_property(file_content SHOULD_ADD_STORYBOARD                ${target} JUCE_SHOULD_ADD_STORYBOARD)
@@ -1969,6 +1971,8 @@ function(_juce_initialise_target target)
         SEND_APPLE_EVENTS_PERMISSION_TEXT
         BLUETOOTH_PERMISSION_ENABLED
         BLUETOOTH_PERMISSION_TEXT
+        LOCAL_NETWORK_PERMISSION_ENABLED
+        LOCAL_NETWORK_PERMISSION_TEXT
         FILE_SHARING_ENABLED            # iOS only
         DOCUMENT_BROWSER_ENABLED        # iOS only
         LAUNCH_STORYBOARD_FILE          # iOS only

@@ -285,22 +285,28 @@ attributes directly to these creation functions, rather than adding them later.
   the target's `COMPANY_NAME` and the name of the CMake target.
 
 `MICROPHONE_PERMISSION_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
+- May be either TRUE or FALSE. Adds NSMicrophoneUsageDescription to an app's Info.plist.
 
 `MICROPHONE_PERMISSION_TEXT`
 - The text your app will display when it requests microphone permissions.
 
 `CAMERA_PERMISSION_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
+- May be either TRUE or FALSE. Adds NSCameraUsageDescription to an app's Info.plist.
 
 `CAMERA_PERMISSION_TEXT`
 - The text your app will display when it requests camera permissions.
 
 `BLUETOOTH_PERMISSION_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
+- May be either TRUE or FALSE. Adds NSBluetoothAlwaysUsageDescription to an app's Info.plist.
 
 `BLUETOOTH_PERMISSION_TEXT`
 - The text your app will display when it requests bluetooth permissions.
+
+`LOCAL_NETWORK_PERMISSION_ENABLED`
+- May be either TRUE or FALSE. Adds NSLocalNetworkUsageDescription to an app's Info.plist.
+
+`LOCAL_NETWORK_PERMISSION_TEXT`
+- The text your app will display when it requests local network access permissions.
 
 `SEND_APPLE_EVENTS_PERMISSION_ENABLED`
 - May be either TRUE or FALSE. Enable this to allow your app to send Apple events.
