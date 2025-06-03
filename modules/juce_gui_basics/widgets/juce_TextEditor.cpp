@@ -951,7 +951,8 @@ void TextEditor::updateBaseShapedTextOptions()
                                                 .withLeading (lineSpacing);
 
     if (wordWrap)
-        options = options.withWordWrapWidth ((float) getMaximumTextWidth());
+        options = options.withWordWrapWidth ((float) getMaximumTextWidth())
+                         .withAllowBreakingInsideWord();
     else
         options = options.withAlignmentWidth ((float) getMaximumTextWidth());
 
