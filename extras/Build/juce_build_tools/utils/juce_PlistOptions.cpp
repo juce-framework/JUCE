@@ -152,6 +152,9 @@ namespace juce::build_tools
         if (bluetoothPermissionEnabled)
             addPlistDictionaryKey (*dict, "NSBluetoothAlwaysUsageDescription", bluetoothPermissionText);
 
+        if (localNetworkPermissionEnabled)
+            addPlistDictionaryKey (*dict, "NSLocalNetworkUsageDescription", localNetworkPermissionText);
+
         if (iOS)
         {
             if (bluetoothPermissionEnabled)

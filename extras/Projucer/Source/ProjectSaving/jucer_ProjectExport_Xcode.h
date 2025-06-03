@@ -228,6 +228,9 @@ public:
           sendAppleEventsPermissionNeededValue         (settings, Ids::sendAppleEventsPermissionNeeded, getUndoManager()),
           sendAppleEventsPermissionTextValue           (settings, Ids::sendAppleEventsPermissionText, getUndoManager(),
                                                         "This app requires the ability to send Apple events to function correctly."),
+          localNetworkPermissionNeededValue            (settings, Ids::localNetworkPermissionNeeded, getUndoManager()),
+          localNetworkPermissionTextValue              (settings, Ids::localNetworkPermissionText, getUndoManager(),
+                                                        "This app requires access to the local network to function correctly."),
           uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    getUndoManager()),
           uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               getUndoManager()),
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
@@ -364,6 +367,9 @@ public:
 
     bool isSendAppleEventsPermissionEnabled() const         { return sendAppleEventsPermissionNeededValue.get(); }
     String getSendAppleEventsPermissionTextString() const   { return sendAppleEventsPermissionTextValue.get(); }
+
+    bool isLocalNetworkPermissionEnabled() const            { return localNetworkPermissionNeededValue.get(); }
+    String getLocalNetworkPermissionTextString() const      { return localNetworkPermissionTextValue.get(); }
 
     bool isInAppPurchasesEnabled() const                    { return iosInAppPurchasesValue.get(); }
     bool isContentSharingEnabled() const                    { return iosContentSharingValue.get(); }
@@ -726,6 +732,14 @@ public:
         props.add (new TextPropertyComponentWithEnablement (cameraPermissionTextValue, cameraPermissionNeededValue,
                                                             "Camera Access Text", 1024, false),
                    "A short description of why your app requires camera access.");
+
+        props.add (new ChoicePropertyComponent (localNetworkPermissionNeededValue, "Local Network Access"),
+                   "Enable this to allow your app to use the local network. "
+                   "The user of your app will be prompted to grant local network access permissions.");
+
+        props.add (new TextPropertyComponentWithEnablement (localNetworkPermissionTextValue, localNetworkPermissionNeededValue,
+                                                            "Local Network Access Text", 1024, false),
+                   "A short description of why your app requires local network access.");
 
         props.add (new ChoicePropertyComponent (bluetoothPermissionNeededValue, "Bluetooth Access"),
                    "Enable this to allow your app to use Bluetooth on iOS 13.0 and above, and macOS 11.0 and above. "
@@ -2049,6 +2063,8 @@ public:
             options.bluetoothPermissionText          = owner.getBluetoothPermissionTextString();
             options.sendAppleEventsPermissionEnabled = owner.isSendAppleEventsPermissionEnabled();
             options.sendAppleEventsPermissionText    = owner.getSendAppleEventsPermissionTextString();
+            options.localNetworkPermissionEnabled    = owner.isLocalNetworkPermissionEnabled();
+            options.localNetworkPermissionText       = owner.getLocalNetworkPermissionTextString();
             options.shouldAddStoryboardToProject     = owner.shouldAddStoryboardToProject();
             options.iconFile                         = owner.iconFile;
             options.projectName                      = owner.projectName;
@@ -3953,6 +3969,7 @@ private:
                                  cameraPermissionNeededValue, cameraPermissionTextValue,
                                  bluetoothPermissionNeededValue, bluetoothPermissionTextValue,
                                  sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
+                                 localNetworkPermissionNeededValue, localNetworkPermissionTextValue,
                                  uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, uiRequiresFullScreenValue, documentExtensionsValue, iosInAppPurchasesValue,
                                  iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                                  networkingMulticastValue, iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
