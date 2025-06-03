@@ -490,9 +490,18 @@ private:
         // If we have a list of strings to represent the different states a
         // parameter can be in then we should present a dropdown allowing a
         // user to pick one of them.
-        if (! parameter.getAllValueStrings().isEmpty()
-             && std::abs (parameter.getNumSteps() - parameter.getAllValueStrings().size()) <= 1)
-            return std::make_unique<ChoiceParameterComponent> (processor, parameter);
+        // We limit the number of items in the dropdown to avoid having to
+        // build and display an overly-large menu.
+        constexpr auto arbitraryDiscreteChoiceThreshold = 1000;
+
+        if (const auto numSteps = parameter.getNumSteps();
+            numSteps < arbitraryDiscreteChoiceThreshold)
+        {
+            const auto valueStrings = parameter.getAllValueStrings();
+
+            if (! valueStrings.isEmpty() && std::abs (numSteps - valueStrings.size()) <= 1)
+                return std::make_unique<ChoiceParameterComponent> (processor, parameter);
+        }
 
         // Everything else can be represented as a slider.
         return std::make_unique<SliderParameterComponent> (processor, parameter);
