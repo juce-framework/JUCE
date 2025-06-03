@@ -135,9 +135,17 @@
     Enable this if you want your standalone plugin window to use kiosk mode.
     By default, kiosk mode is enabled on iOS and Android.
 */
-
 #ifndef JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
  #define JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE (JUCE_IOS || JUCE_ANDROID)
+#endif
+
+/** Config: JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING
+
+    Enable this to ignore a warning caused by enabling JUCE_VST3_CAN_REPLACE_VST2
+    and not enabling JUCE_FORCE_USE_LEGACY_PARAM_IDS.
+ */
+#ifndef JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING
+ #define JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING 0
 #endif
 
 #include "detail/juce_CreatePluginFilter.h"
