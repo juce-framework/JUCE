@@ -44,7 +44,7 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
 
         void runAsync (std::function<void (int)> recipient) override
         {
-            if (iOSGlobals::currentlyFocusedPeer == nullptr)
+            if (peerToUse == nullptr)
             {
                 // Since iOS8, alert windows need to be associated with a window, so you need to
                 // have at least one window on screen when you use this
@@ -76,9 +76,9 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                     [alert.get() setPreferredAction: action];
             }
 
-            [iOSGlobals::currentlyFocusedPeer->controller presentViewController: alert.get()
-                                                                       animated: YES
-                                                                     completion: nil];
+            [peerToUse->controller presentViewController: alert.get()
+                                                animated: YES
+                                              completion: nil];
         }
 
         int runSync() override
@@ -109,6 +109,15 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
 
     private:
         const MessageBoxOptions options;
+        UIViewComponentPeer* peerToUse = std::invoke ([&]() -> UIViewComponentPeer*
+        {
+            if (auto* comp = options.getAssociatedComponent())
+                if (auto* peer = comp->getPeer())
+                    return static_cast<UIViewComponentPeer*> (peer);
+
+            return iOSGlobals::currentlyFocusedPeer;
+        });
+        
         NSUniquePtr<UIAlertController> alert;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageBox)
     };
