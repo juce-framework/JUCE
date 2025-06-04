@@ -109,6 +109,8 @@ namespace juce::dsp::FIR
 
                 for (size_t i = 0; i < size; ++i)
                     fifo[i] = SampleType {0};
+
+		pos = 0;
             }
         }
 
