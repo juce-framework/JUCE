@@ -117,7 +117,7 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
 
             return iOSGlobals::currentlyFocusedPeer;
         });
-        
+
         NSUniquePtr<UIAlertController> alert;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageBox)
     };

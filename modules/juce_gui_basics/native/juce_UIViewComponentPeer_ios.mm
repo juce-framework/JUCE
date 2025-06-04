@@ -40,6 +40,43 @@
 namespace juce
 {
 
+struct WindowSceneTrackerListener
+{
+    virtual ~WindowSceneTrackerListener() = default;
+    virtual void windowSceneChanged() = 0;
+};
+
+struct WindowSceneTracker
+{
+public:
+    WindowSceneTracker() = default;
+
+    void setWindowScene (UIWindowScene* x) API_AVAILABLE (ios (13.0))
+    {
+        windowScene = x;
+        listeners.call ([] (auto& l) { l.windowSceneChanged(); });
+    }
+
+    UIWindowScene* getWindowScene() const API_AVAILABLE (ios (13.0))
+    {
+        return static_cast<UIWindowScene*> (windowScene);
+    }
+
+    void addListener (WindowSceneTrackerListener& l)
+    {
+        listeners.add (&l);
+    }
+
+    void removeListener (WindowSceneTrackerListener& l)
+    {
+        listeners.remove (&l);
+    }
+
+private:
+    ListenerList<WindowSceneTrackerListener> listeners;
+    id windowScene = nil;
+};
+
 //==============================================================================
 static NSArray* getContainerAccessibilityElements (AccessibilityHandler& handler)
 {
@@ -355,10 +392,11 @@ struct UIViewPeerControllerReceiver
 
 //==============================================================================
 class UIViewComponentPeer final : public ComponentPeer,
-                                  public UIViewPeerControllerReceiver
+                                  public UIViewPeerControllerReceiver,
+                                  private WindowSceneTrackerListener
 {
 public:
-    UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);
+    UIViewComponentPeer (Component&, int windowStyleFlags, id viewToAttachTo);
     ~UIViewComponentPeer() override;
 
     //==============================================================================
@@ -460,6 +498,7 @@ public:
     bool fullScreen = false, insideDrawRect = false;
     NSUniquePtr<JuceTextView> hiddenTextInput { [[JuceTextView alloc] initWithOwner: this] };
     NSUniquePtr<JuceTextInputTokenizer> tokenizer { [[JuceTextInputTokenizer alloc] initWithPeer: this] };
+    SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 
     static int64 getMouseTime (NSTimeInterval timestamp) noexcept
     {
@@ -506,6 +545,19 @@ private:
     void appStyleChanged() override
     {
         [controller setNeedsStatusBarAppearanceUpdate];
+    }
+
+    void windowSceneChanged() override
+    {
+        if (isSharedWindow)
+            return;
+
+        if (@available (ios 13, *))
+        {
+            window.windowScene = windowSceneTracker->getWindowScene();
+        }
+
+        updateScreenBounds();
     }
 
     //==============================================================================
@@ -1699,7 +1751,9 @@ struct ChangeRegistrationTrait
 };
 
 //==============================================================================
-UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags, UIView* viewToAttachTo)
+UIViewComponentPeer::UIViewComponentPeer (Component& comp,
+                                          int windowStyleFlags,
+                                          id viewToAttachTo)
     : ComponentPeer (comp, windowStyleFlags),
       isSharedWindow (viewToAttachTo != nil),
       isAppex (SystemStats::isRunningInAppExtensionSandbox())
@@ -1728,8 +1782,9 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
 
     if (isSharedWindow)
     {
-        window = [viewToAttachTo window];
-        [viewToAttachTo addSubview: view];
+        auto* uiViewToAttachTo = static_cast<UIView*> (viewToAttachTo);
+        window = [uiViewToAttachTo window];
+        [uiViewToAttachTo addSubview: view];
     }
     else
     {
@@ -1737,6 +1792,12 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
         r.origin.y = [UIScreen mainScreen].bounds.size.height - (r.origin.y + r.size.height);
 
         window = [[JuceUIWindow alloc] initWithFrame: r];
+
+        if (@available (ios 13, *))
+        {
+            window.windowScene = windowSceneTracker->getWindowScene();
+        }
+
         [((JuceUIWindow*) window) setOwner: this];
 
         controller = [[JuceUIViewController alloc] init];
@@ -1755,10 +1816,14 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
 
     setTitle (component.getName());
     setVisible (component.isVisible());
+
+    windowSceneTracker->addListener (*this);
 }
 
 UIViewComponentPeer::~UIViewComponentPeer()
 {
+    windowSceneTracker->removeListener (*this);
+
     if (iOSGlobals::currentlyFocusedPeer == this)
         iOSGlobals::currentlyFocusedPeer = nullptr;
 
@@ -1864,6 +1929,12 @@ void UIViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
 
         if ((! shouldBeFullScreen) && r.isEmpty())
             r = getBounds();
+
+        // If we're using the UIScene lifecycle we create our first window before we get assigned
+        // a UIWindowScene, in which case we won't be able to determine the available screen area
+        // and the available bounds may be empty. In this case, we still want to fill the screen
+        // as soon as we find out the available screen area, so set this flag unconditionally.
+        fullScreen = shouldBeFullScreen;
 
         // (can't call the component's setBounds method because that'll reset our fullscreen flag)
         if (! r.isEmpty())
@@ -2300,7 +2371,7 @@ void UIViewComponentPeer::performAnyPendingRepaintsNow()
 
 ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 {
-    return new UIViewComponentPeer (*this, styleFlags, (UIView*) windowToAttachTo);
+    return new UIViewComponentPeer (*this, styleFlags, (id) windowToAttachTo);
 }
 
 //==============================================================================
