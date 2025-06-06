@@ -197,7 +197,7 @@ public:
                                                ModalCallbackFunction::create ([this] (auto result)
                                                {
                                                    if (result != 0)
-                                                       warnUserAboutStupidPaths();
+                                                       warnUserAboutUnsuitablePaths();
                                                    else
                                                        finishedScan();
                                                }));
@@ -241,13 +241,13 @@ private:
     ScopedMessageBox messageBox;
 
     // Try to dissuade people from to scanning their entire C: drive, or other system folders.
-    void warnUserAboutStupidPaths()
+    void warnUserAboutUnsuitablePaths()
     {
         for (int i = 0; i < pathList.getPath().getNumPaths(); ++i)
         {
             auto f = pathList.getPath().getRawString (i);
 
-            if (File::isAbsolutePath (f) && isStupidPath (File (f)))
+            if (File::isAbsolutePath (f) && isUnsuitablePath (File (f)))
             {
                 auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
                                                                        TRANS ("Plugin Scanning"),
@@ -273,7 +273,7 @@ private:
         startScan();
     }
 
-    static bool isStupidPath (const File& f)
+    static bool isUnsuitablePath (const File& f)
     {
         Array<File> roots;
         File::findFileSystemRoots (roots);
@@ -281,7 +281,7 @@ private:
         if (roots.contains (f))
             return true;
 
-        File::SpecialLocationType pathsThatWouldBeStupidToScan[]
+        File::SpecialLocationType pathsThatWouldBeUnsuitableToScan[]
             = { File::globalApplicationsDirectory,
                 File::userHomeDirectory,
                 File::userDocumentsDirectory,
@@ -291,7 +291,7 @@ private:
                 File::userMoviesDirectory,
                 File::userPicturesDirectory };
 
-        for (auto location : pathsThatWouldBeStupidToScan)
+        for (auto location : pathsThatWouldBeUnsuitableToScan)
         {
             auto sillyFolder = File::getSpecialLocation (location);
 
