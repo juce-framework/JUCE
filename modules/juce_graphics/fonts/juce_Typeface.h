@@ -255,13 +255,10 @@ public:
         Support for SVG and COLRv1 may be added in the future, depending on demand. However, this
         would require significant additions to JUCE's rendering code, so it has been omitted for
         now.
-
-        The height is specified in JUCE font-height units.
     */
     std::vector<GlyphLayer> getLayersForGlyph (TypefaceMetricsKind,
                                                int glyphNumber,
-                                               const AffineTransform&,
-                                               float normalisedHeight) const;
+                                               const AffineTransform&) const;
 
     /** Kinds of colour glyph format that may be implemented by a particular typeface.
         Most typefaces are monochromatic, and do not support any colour formats.

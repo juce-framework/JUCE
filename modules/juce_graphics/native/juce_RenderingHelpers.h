@@ -210,8 +210,7 @@ public:
             return typeface->getLayersForGlyph (key.font.getMetricsKind(),
                                                 key.glyph,
                                                 AffineTransform::scale (fontHeight * key.font.getHorizontalScale(),
-                                                                        fontHeight),
-                                                fontHeight);
+                                                                        fontHeight));
         });
     }
 
@@ -2668,7 +2667,7 @@ protected:
             const auto fontTransform = AffineTransform::scale (fontHeight * stack->font.getHorizontalScale(),
                                                                fontHeight).followedBy (t);
             const auto fullTransform = stack->transform.getTransformWith (fontTransform);
-            return std::tuple (stack->font.getTypefacePtr()->getLayersForGlyph (stack->font.getMetricsKind(), i, fullTransform, fontHeight), Point<float>{});
+            return std::tuple (stack->font.getTypefacePtr()->getLayersForGlyph (stack->font.getMetricsKind(), i, fullTransform), Point<float>{});
         }();
 
         const auto initialFill = stack->fillType;

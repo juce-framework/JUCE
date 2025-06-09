@@ -175,11 +175,21 @@ using HbFace   = std::unique_ptr<hb_face_t, FunctionPointerDestructor<hb_face_de
 using HbBuffer = std::unique_ptr<hb_buffer_t, FunctionPointerDestructor<hb_buffer_destroy>>;
 using HbBlob   = std::unique_ptr<hb_blob_t, FunctionPointerDestructor<hb_blob_destroy>>;
 
+struct TypefaceFallbackColourGlyphSupport
+{
+    virtual ~TypefaceFallbackColourGlyphSupport() = default;
+    virtual std::vector<GlyphLayer> getFallbackColourGlyphLayers (int, const AffineTransform&) const = 0;
+};
+
 class Typeface::Native
 {
 public:
-    Native (hb_font_t* fontRef, TypefaceAscentDescent nonPortableMetricsIn)
-        : font (fontRef), nonPortable (nonPortableMetricsIn)
+    Native (hb_font_t* fontRef,
+            TypefaceAscentDescent nonPortableMetricsIn,
+            const TypefaceFallbackColourGlyphSupport* colourGlyphSupportIn = {})
+        : font (fontRef),
+          nonPortable (nonPortableMetricsIn),
+          colourGlyphSupport (colourGlyphSupportIn)
     {
     }
 
@@ -213,6 +223,15 @@ public:
         return subFont;
     }
 
+    std::vector<GlyphLayer> getFallbackColourGlyphLayers (int glyph,
+                                                          const AffineTransform& transform) const
+    {
+        if (colourGlyphSupport != nullptr)
+            return colourGlyphSupport->getFallbackColourGlyphLayers (glyph, transform);
+
+        return {};
+    }
+
 private:
     static TypefaceAscentDescent findPortableMetrics (hb_font_t* f, TypefaceAscentDescent fallback)
     {
@@ -235,6 +254,7 @@ private:
 
     TypefaceAscentDescent nonPortable;
     TypefaceAscentDescent portable = findPortableMetrics (font, nonPortable);
+    const TypefaceFallbackColourGlyphSupport* colourGlyphSupport = nullptr;
 };
 
 struct FontStyleHelpers
@@ -524,10 +544,13 @@ static std::vector<GlyphLayer> getBitmapLayer (const Typeface& typeface, int gly
     return { GlyphLayer { ImageLayer { juceImage, transform } } };
 }
 
-std::vector<GlyphLayer> Typeface::getLayersForGlyph (TypefaceMetricsKind kind, int glyphNumber, const AffineTransform& transform, float) const
+std::vector<GlyphLayer> Typeface::getLayersForGlyph (TypefaceMetricsKind kind,
+                                                     int glyphNumber,
+                                                     const AffineTransform& transform) const
 {
-    auto* font = getNativeDetails().getFont();
-    const auto metrics = getNativeDetails().getAscentDescent (kind);
+    auto native = getNativeDetails();
+    auto* font = native.getFont();
+    const auto metrics = native.getAscentDescent (kind);
     const auto factor = metrics.getHeightToPointsFactor();
     jassert (! std::isinf (factor));
     const auto scale = factor / (float) hb_face_get_upem (hb_font_get_face (font));
@@ -542,7 +565,14 @@ std::vector<GlyphLayer> Typeface::getLayersForGlyph (TypefaceMetricsKind kind, i
     if (auto layers = getCOLRv0Layers (*this, glyphNumber, combinedTransform); ! layers.empty())
         return layers;
 
-    // No bitmap or COLRv0 for this glyph, so just get a simple monochromatic outline
+    // Some fonts (e.g. Noto Color Emoji on Android) might only contain COLRv1 data, which we can't
+    // easily display. In such cases, we can use system facilities to render the glyph into a
+    // bitmap. If the face has colour info that wasn't already handled, try rendering to a bitmap.
+    if (getColourGlyphFormats() != 0)
+        if (auto layer = native.getFallbackColourGlyphLayers (glyphNumber, combinedTransform); ! layer.empty())
+            return layer;
+
+    // No colour info available for this glyph, so just get a simple monochromatic outline
     auto path = getGlyphPathInGlyphUnits ((hb_codepoint_t) glyphNumber, font);
 
     if (path.isEmpty())

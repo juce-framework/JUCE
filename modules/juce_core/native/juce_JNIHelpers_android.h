@@ -540,6 +540,7 @@ DECLARE_JNI_CLASS (AndroidPackageManager, "android/content/pm/PackageManager")
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD (constructor,   "<init>",           "(I)V") \
+ METHOD (defaultConstructor, "<init>",      "()V") \
  METHOD (setColor,      "setColor",         "(I)V") \
  METHOD (setAlpha,      "setAlpha",         "(I)V") \
  METHOD (setTypeface,   "setTypeface",      "(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;") \
@@ -563,6 +564,12 @@ DECLARE_JNI_CLASS (AndroidPaint, "android/graphics/Paint")
  METHOD (getClipBounds,   "getClipBounds",    "()Landroid/graphics/Rect;")
 
  DECLARE_JNI_CLASS (AndroidCanvas, "android/graphics/Canvas")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (drawGlyphs, "drawGlyphs", "([II[FIILandroid/graphics/fonts/Font;Landroid/graphics/Paint;)V")
+
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidCanvas31, "android/graphics/Canvas", 31)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -706,8 +713,10 @@ DECLARE_JNI_CLASS (JavaBoolean, "java/lang/Boolean")
   METHOD (remaining,  "remaining", "()I") \
   METHOD (hasArray,   "hasArray",  "()Z") \
   METHOD (array,      "array",     "()[B") \
+  METHOD (put,        "put",       "([B)Ljava/nio/ByteBuffer;") \
   METHOD (setOrder,   "order",     "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;") \
-  STATICMETHOD (wrap, "wrap",      "([B)Ljava/nio/ByteBuffer;")
+  STATICMETHOD (wrap, "wrap",      "([B)Ljava/nio/ByteBuffer;") \
+  STATICMETHOD (allocateDirect, "allocateDirect", "(I)Ljava/nio/ByteBuffer;") \
 
 DECLARE_JNI_CLASS (JavaByteBuffer, "java/nio/ByteBuffer")
 #undef JNI_CLASS_MEMBERS
