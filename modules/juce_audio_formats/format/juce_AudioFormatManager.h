@@ -121,7 +121,7 @@ public:
     /** Returns a set of wildcards for file-matching that contains the extensions for
         all known formats.
 
-        E.g. if might return "*.wav;*.aiff" if it just knows about wavs and aiffs.
+        E.g. it might return "*.wav;*.aiff" if it just knows about wavs and aiffs.
     */
     String getWildcardForAllFormats() const;
 
