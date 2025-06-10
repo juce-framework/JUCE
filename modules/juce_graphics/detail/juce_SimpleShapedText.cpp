@@ -128,44 +128,45 @@ enum class ControlCharacter
 };
 
 template <typename CharPtr>
-static std::map<size_t, ControlCharacter> findControlCharacters (CharPtr b, CharPtr e)
+static std::optional<ControlCharacter> findControlCharacter (CharPtr it, CharPtr end)
 {
     constexpr juce_wchar lf = 0x0a;
     constexpr juce_wchar cr = 0x0d;
     constexpr juce_wchar tab = 0x09;
 
-    std::map<size_t, ControlCharacter> result;
-
-    size_t index = 0;
-
-    for (auto it = b; it != e; ++it, ++index)
+    switch (*it)
     {
-        switch (*it)
+        case lf:
+            return ControlCharacter::lf;
+
+        case tab:
+            return ControlCharacter::tab;
+
+        case cr:
         {
-            case lf:
-                result[index] = ControlCharacter::lf;
-                break;
-
-            case tab:
-                result[index] = ControlCharacter::tab;
-                break;
-
-            case cr:
-            {
-                const auto next = it + 1;
-                result[index] = next != e && *next == lf ? ControlCharacter::crFollowedByLf
-                                                         : ControlCharacter::cr;
-                break;
-            }
-
+            const auto next = it + 1;
+            return next != end && *next == lf ? ControlCharacter::crFollowedByLf
+                                              : ControlCharacter::cr;
         }
     }
+
+    return {};
+}
+
+static auto findControlCharacters (Span<const juce_wchar> string)
+{
+    std::map<size_t, ControlCharacter> result;
+    size_t index = 0;
+
+    for (auto it = string.begin(); it != string.end(); ++it, ++index)
+        if (const auto cc = findControlCharacter (it, string.end()))
+            result[index] = *cc;
 
     return result;
 }
 
 /*  Returns glyphs in logical order as that favours wrapping. */
-static std::vector<ShapedGlyph> lowLevelShape (const String& string,
+static std::vector<ShapedGlyph> lowLevelShape (Span<const juce_wchar> string,
                                                Range<int64> range,
                                                const Font& font,
                                                TextScript script,
@@ -182,46 +183,23 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     hb_buffer_set_direction (buffer.get(),
                              (embeddingLevel % 2) == 0 ? HB_DIRECTION_LTR : HB_DIRECTION_RTL);
 
-    const auto stringBegin  = string.toUTF8();
-    const auto shapingBegin = stringBegin  + (int) range.getStart();
-    const auto shapingEnd   = shapingBegin + (int) range.getLength();
-    const auto stringEnd    = shapingEnd.findTerminatingNull();
+    hb_buffer_add_utf32 (buffer.get(),
+                         unalignedPointerCast<const uint32_t*> (string.data()),
+                         (int) range.getStart(),
+                         0,
+                         0);
 
-    hb_buffer_add_utf8 (buffer.get(),
-                        stringBegin.getAddress(),
-                        shapingBegin.getAddress() - stringBegin.getAddress(),
-                        0,
-                        0);
+    const Span shapedSpan { string.data() + range.getStart(), (size_t) range.getLength() };
+    const auto controlChars = findControlCharacters (shapedSpan);
 
-    const auto controlChars = findControlCharacters (shapingBegin, shapingEnd);
+    for (const auto pair : enumerate (shapedSpan, size_t{}))
+        hb_buffer_add (buffer.get(), static_cast<hb_codepoint_t> (pair.value), (unsigned int) pair.index);
 
-    auto nextControlChar = controlChars.begin();
-    for (const auto pair : enumerate (makeRange (shapingBegin, shapingEnd), size_t{}))
-    {
-        const auto charToAdd = std::invoke ([&]
-        {
-            if (nextControlChar == controlChars.end() || pair.index != nextControlChar->first)
-                return pair.value;
-
-            constexpr juce_wchar wordJoiner       = 0x2060;
-            constexpr juce_wchar nonBreakingSpace = 0x00a0;
-
-            const auto replacement = nextControlChar->second == ControlCharacter::crFollowedByLf
-                                   ? wordJoiner
-                                   : nonBreakingSpace;
-            ++nextControlChar;
-
-            return replacement;
-        });
-
-        hb_buffer_add (buffer.get(), static_cast<hb_codepoint_t> (charToAdd), (unsigned int) pair.index);
-    }
-
-    hb_buffer_add_utf8 (buffer.get(),
-                        shapingEnd.getAddress(),
-                        stringEnd.getAddress() - shapingEnd.getAddress(),
-                        0,
-                        0);
+    hb_buffer_add_utf32 (buffer.get(),
+                         unalignedPointerCast<const uint32_t*> (shapedSpan.data() + shapedSpan.size()),
+                         (int) string.size() - (int) range.getEnd(),
+                         0,
+                         0);
 
     std::vector<hb_feature_t> features;
 
@@ -508,12 +486,12 @@ static auto makeSpan (T& array)
 }
 
 static detail::RangedValues<Font> findSuitableFontsForText (const Font& font,
-                                                            const String& text,
+                                                            Span<const juce_wchar> string,
                                                             const String& language = {})
 {
     detail::RangedValues<std::optional<Font>> fonts;
     detail::Ranges::Operations ops;
-    fonts.set ({ 0, (int64) text.length() }, font, ops);
+    fonts.set ({ 0, (int64) string.size() }, font, ops);
     ops.clear();
 
     const auto getResult = [&]
@@ -534,17 +512,14 @@ static detail::RangedValues<Font> findSuitableFontsForText (const Font& font,
 
     const auto markMissingGlyphs = [&]
     {
-        auto it = text.begin();
         std::vector<int64> fontNotFound;
 
         for (const auto [r, f] : fonts)
         {
             for (auto i = r.getStart(); i < r.getEnd(); ++i)
             {
-                if (f.has_value() && ! isFontSuitableForCodepoint (*f, *it))
+                if (f.has_value() && ! isFontSuitableForCodepoint (*f, string[(size_t) i]))
                     fontNotFound.push_back (i);
-
-                ++it;
             }
         }
 
@@ -565,12 +540,12 @@ static detail::RangedValues<Font> findSuitableFontsForText (const Font& font,
 
         for (const auto [r, f] : fonts)
         {
-            if (! f.has_value())
-            {
-                changes.emplace_back (r, font.findSuitableFontForText (text.substring ((int) r.getStart(),
-                                                                                       (int) r.getEnd()),
-                                                                       language));
-            }
+            if (f.has_value())
+                continue;
+
+            const CharPointer_UTF32 bPtr { string.data() + (int) r.getStart() };
+            const CharPointer_UTF32 ePtr { string.data() + (int) r.getEnd() };
+            changes.emplace_back (r, font.findSuitableFontForText (String (bPtr, ePtr), language));
         }
 
         for (const auto& c : changes)
@@ -590,15 +565,18 @@ static detail::RangedValues<Font> findSuitableFontsForText (const Font& font,
     return getResult();
 }
 
-static RangedValues<Font> resolveFontsWithFallback (const String& string, const RangedValues<Font>& fonts)
+static RangedValues<Font> resolveFontsWithFallback (Span<const juce_wchar> string,
+                                                    const RangedValues<Font>& fonts)
 {
     RangedValues<Font> resolved;
     detail::Ranges::Operations ops;
 
     for (const auto [r, f] : fonts)
     {
-        auto rf = findSuitableFontsForText (f, string.substring ((int) r.getStart(),
-                                                                 (int) std::min (r.getEnd(), (int64) string.length())));
+        const auto constrained = r.constrainRange ({ 0, (int64) string.size() });
+        auto rf = findSuitableFontsForText (f,
+                                            { string.data() + constrained.getStart(),
+                                              (size_t) constrained.getLength() });
 
         for (const auto [subRange, font] : rf)
         {
@@ -825,23 +803,57 @@ static auto rangedValuesWithOffset (detail::RangedValues<T> rv, int64 offset = 0
     return rv;
 }
 
+/*  Increment b by the requested number of steps, or to e, whichever is reached first. */
+template <typename CharPtr>
+static auto incrementCharPtr (CharPtr b, CharPtr e, int64 steps)
+{
+    while (b != e && steps > 0)
+    {
+        ++b;
+        --steps;
+    }
+
+    return b;
+}
+
+static std::vector<juce_wchar> sanitiseString (const String& stringIn, Range<int64> lineRange)
+{
+    std::vector<juce_wchar> result;
+
+    const auto end = stringIn.end();
+    const auto beginOfRange = incrementCharPtr (stringIn.begin(), end, lineRange.getStart());
+    const auto endOfRange = incrementCharPtr (beginOfRange, end, lineRange.getLength());
+
+    result.reserve (beginOfRange.lengthUpTo (endOfRange));
+
+    for (auto it = beginOfRange; it != endOfRange; ++it)
+    {
+        result.push_back (std::invoke ([&]
+        {
+            const auto cc = findControlCharacter (it, end);
+
+            if (! cc.has_value())
+                return *it;
+
+            constexpr juce_wchar wordJoiner       = 0x2060;
+            constexpr juce_wchar nonBreakingSpace = 0x00a0;
+
+            return cc == ControlCharacter::crFollowedByLf ? wordJoiner : nonBreakingSpace;
+        }));
+    }
+
+    return result;
+}
+
 struct Shaper
 {
     Shaper (const String& stringIn, Range<int64> lineRange, const ShapedTextOptions& options)
-        : string { stringIn.substring ((int) lineRange.getStart(), (int) lineRange.getEnd()) }
+        : string (sanitiseString (stringIn, lineRange))
     {
-        const auto analysis = Unicode::performAnalysis (string);
+        const auto analysis = Unicode::performAnalysis (stringIn.substring ((int) lineRange.getStart(),
+                                                                            (int) lineRange.getEnd()));
 
-        const auto string32 = std::invoke ([this]
-                                           {
-                                               std::vector<juce_wchar> s32 ((size_t) string.length() + 1);
-                                               string.copyToUTF32 (s32.data(), s32.size() * sizeof (juce_wchar));
-                                               jassert (! s32.empty());
-                                               s32.pop_back();  // dropping the null terminator
-                                               return s32;
-                                           });
-
-        const BidiAlgorithm bidiAlgorithm { string32 };
+        const BidiAlgorithm bidiAlgorithm { string };
         const auto bidiParagraph = bidiAlgorithm.createParagraph (options.getReadingDirection());
         const auto bidiLine = bidiParagraph.createLine (bidiParagraph.getLength());
         bidiLine.computeVisualOrder (visualOrder);
@@ -997,7 +1009,7 @@ struct Shaper
         return result;
     }
 
-    String string;
+    std::vector<juce_wchar> string;
     std::vector<size_t> visualOrder;
     RangedValues<ShapingParams> shaperRuns;
     std::vector<int64> softBreakBeforePoints;
