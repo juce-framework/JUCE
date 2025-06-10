@@ -139,6 +139,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <public.sdk/source/vst/vstpresetfile.h>
 
  #include "pslextensions/ipslviewembedding.h"
+ #include "pslextensions/ipslcontextinfo.h"
 #else
  // needed for VST_VERSION
  #include <pluginterfaces/vst/vsttypes.h>
@@ -211,6 +212,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #endif
 
  #include "pslextensions/ipslviewembedding.h"
+ #include "pslextensions/ipslcontextinfo.h"
 
 //==============================================================================
 namespace Steinberg
@@ -238,6 +240,8 @@ namespace Steinberg
 namespace Presonus
 {
     DEF_CLASS_IID (IPlugInViewEmbedding)
+    DEF_CLASS_IID (IContextInfoHandler)
+    DEF_CLASS_IID (IContextInfoProvider)
 }
 
 #endif // JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
