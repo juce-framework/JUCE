@@ -1932,6 +1932,9 @@ private:
             case NSEventTypeRightMouseUp:
             case NSEventTypeOtherMouseUp:
             case NSEventTypeOtherMouseDragged:
+           #if JUCE_MAC_API_VERSION_CAN_BE_BUILT (26, 0)
+            case NSEventTypeMouseCancelled:
+           #endif
                 if (Desktop::getInstance().getDraggingMouseSource (0) != nullptr)
                     return false;
                 break;
