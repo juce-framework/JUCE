@@ -371,10 +371,16 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
         if (category == AVAudioSessionCategoryPlayAndRecord)
         {
+           #if JUCE_IOS_API_VERSION_CAN_BE_BUILT (26, 0)
+            constexpr auto bluetoothOption = AVAudioSessionCategoryOptionAllowBluetoothHFP;
+           #else
+            constexpr auto bluetoothOption = AVAudioSessionCategoryOptionAllowBluetooth;
+           #endif
+
             options |= AVAudioSessionCategoryOptionDefaultToSpeaker
-                     | AVAudioSessionCategoryOptionAllowBluetooth
                      | AVAudioSessionCategoryOptionAllowAirPlay
-                     | AVAudioSessionCategoryOptionAllowBluetoothA2DP;
+                     | AVAudioSessionCategoryOptionAllowBluetoothA2DP
+                     | bluetoothOption;
         }
 
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setCategory: category
