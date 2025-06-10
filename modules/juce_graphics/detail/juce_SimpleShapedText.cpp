@@ -119,48 +119,6 @@ SimpleShapedText::SimpleShapedText (const String* data,
     shape (string, options);
 }
 
-struct Utf8Lookup
-{
-    Utf8Lookup (const String& s)
-    {
-        const auto base = s.toUTF8();
-
-        for (auto cursor = base; ! cursor.isEmpty(); ++cursor)
-            indices.push_back ((size_t) std::distance (base.getAddress(), cursor.getAddress()));
-
-        beyondEnd = s.getNumBytesAsUTF8();
-    }
-
-    auto getByteIndex (int64 codepointIndex) const
-    {
-        jassert (codepointIndex <= (int64) indices.size());
-
-        if (codepointIndex == (int64) indices.size())
-            return beyondEnd;
-
-        return indices[(size_t) codepointIndex];
-    }
-
-    auto getCodepointIndex (size_t byteIndex) const
-    {
-        auto it = std::lower_bound (indices.cbegin(), indices.cend(), byteIndex);
-
-        jassert (it != indices.end());
-
-        return (int64) std::distance (indices.begin(), it);
-    }
-
-    auto getByteRange (Range<int64> range)
-    {
-        return Range<size_t> { getByteIndex (range.getStart()),
-                               getByteIndex (range.getEnd()) };
-    }
-
-private:
-    std::vector<size_t> indices;
-    size_t beyondEnd{};
-};
-
 enum class ControlCharacter
 {
     crFollowedByLf,
@@ -169,7 +127,8 @@ enum class ControlCharacter
     tab
 };
 
-static auto findControlCharacters (Span<juce_wchar> text)
+template <typename CharPtr>
+static std::map<size_t, ControlCharacter> findControlCharacters (CharPtr b, CharPtr e)
 {
     constexpr juce_wchar lf = 0x0a;
     constexpr juce_wchar cr = 0x0d;
@@ -177,28 +136,29 @@ static auto findControlCharacters (Span<juce_wchar> text)
 
     std::map<size_t, ControlCharacter> result;
 
-    const auto iMax = text.size();
+    size_t index = 0;
 
-    for (const auto [i, c] : enumerate (text, size_t{}))
+    for (auto it = b; it != e; ++it, ++index)
     {
-        if (c == lf)
+        switch (*it)
         {
-            result[i] = ControlCharacter::lf;
-            continue;
+            case lf:
+                result[index] = ControlCharacter::lf;
+                break;
+
+            case tab:
+                result[index] = ControlCharacter::tab;
+                break;
+
+            case cr:
+            {
+                const auto next = it + 1;
+                result[index] = next != e && *next == lf ? ControlCharacter::crFollowedByLf
+                                                         : ControlCharacter::cr;
+                break;
+            }
+
         }
-
-        if (c == cr)
-        {
-            if (iMax - i > 1 && text[i + 1] == lf)
-                result[i] = ControlCharacter::crFollowedByLf;
-            else
-                result[i] = ControlCharacter::cr;
-
-            continue;
-        }
-
-        if (c == tab)
-            result[i] = ControlCharacter::tab;
     }
 
     return result;
@@ -222,25 +182,23 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     hb_buffer_set_direction (buffer.get(),
                              (embeddingLevel % 2) == 0 ? HB_DIRECTION_LTR : HB_DIRECTION_RTL);
 
-    Utf8Lookup utf8Lookup { string };
-
-    const auto preContextByteRange = utf8Lookup.getByteRange (Range<int64> { 0, range.getStart() });
+    const auto stringBegin  = string.toUTF8();
+    const auto shapingBegin = stringBegin  + (int) range.getStart();
+    const auto shapingEnd   = shapingBegin + (int) range.getLength();
+    const auto stringEnd    = shapingEnd.findTerminatingNull();
 
     hb_buffer_add_utf8 (buffer.get(),
-                        string.toRawUTF8() + preContextByteRange.getStart(),
-                        (int) preContextByteRange.getLength(),
+                        stringBegin.getAddress(),
+                        shapingBegin.getAddress() - stringBegin.getAddress(),
                         0,
                         0);
 
-    const Span utf32Span { string.toUTF32().getAddress() + (size_t) range.getStart(),
-                           (size_t) range.getLength() };
+    const auto controlChars = findControlCharacters (shapingBegin, shapingEnd);
 
-    const auto controlChars = findControlCharacters (utf32Span);
     auto nextControlChar = controlChars.begin();
-
-    for (const auto pair : enumerate (utf32Span, size_t{}))
+    for (const auto pair : enumerate (makeRange (shapingBegin, shapingEnd), size_t{}))
     {
-        const auto charToAdd = [&]
+        const auto charToAdd = std::invoke ([&]
         {
             if (nextControlChar == controlChars.end() || pair.index != nextControlChar->first)
                 return pair.value;
@@ -251,20 +209,17 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
             const auto replacement = nextControlChar->second == ControlCharacter::crFollowedByLf
                                    ? wordJoiner
                                    : nonBreakingSpace;
-
             ++nextControlChar;
 
             return replacement;
-        }();
+        });
 
         hb_buffer_add (buffer.get(), static_cast<hb_codepoint_t> (charToAdd), (unsigned int) pair.index);
     }
 
-    const auto postContextByteRange = utf8Lookup.getByteRange (Range<int64> { range.getEnd(), (int64) string.length() });
-
     hb_buffer_add_utf8 (buffer.get(),
-                        string.toRawUTF8() + postContextByteRange.getStart(),
-                        (int) postContextByteRange.getLength(),
+                        shapingEnd.getAddress(),
+                        stringEnd.getAddress() - shapingEnd.getAddress(),
                         0,
                         0);
 
