@@ -443,14 +443,21 @@ private:
     void swapSamples()
     {
         MemoryBlock mb;
-        auto* stream = new MemoryOutputStream (mb, true);
 
         {
-            std::unique_ptr<AudioFormatWriter> writer (formatManager.findFormatForFileExtension ("wav")->createWriterFor (stream, lastSampleRate, 1, 16,
-                                                                                                                          StringPairArray(), 0));
-            writer->writeFromAudioSampleBuffer (currentRecording, 0, currentRecording.getNumSamples());
-            writer->flush();
-            stream->flush();
+            std::unique_ptr<OutputStream> stream = std::make_unique<MemoryOutputStream> (mb, true);
+            auto* ptr = stream.get();
+
+            const auto writerOptions = AudioFormatWriterOptions{}.withSampleRate (lastSampleRate)
+                                                                 .withNumChannels (1)
+                                                                 .withBitsPerSample (16);
+
+            if (auto writer = formatManager.findFormatForFileExtension ("wav")->createWriterFor (stream, writerOptions))
+            {
+                writer->writeFromAudioSampleBuffer (currentRecording, 0, currentRecording.getNumSamples());
+                writer->flush();
+                ptr->flush();
+            }
         }
 
         loadNewSampleBinary (mb.getData(), static_cast<int> (mb.getSize()), "wav");
