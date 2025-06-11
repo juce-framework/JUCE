@@ -69,13 +69,6 @@ public:
     AudioFormatReader* createReaderFor (InputStream* sourceStream,
                                         bool deleteStreamIfOpeningFails) override;
 
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex) override;
-
     using AudioFormat::createWriterFor;
 
 private:

@@ -175,12 +175,13 @@ public:
                                     ignored
         @see AudioFormatWriter
     */
-    virtual AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                                double sampleRateToUse,
-                                                unsigned int numberOfChannels,
-                                                int bitsPerSample,
-                                                const StringPairArray& metadataValues,
-                                                int qualityOptionIndex) = 0;
+    [[deprecated ("Use the function taking an AudioFormatWriterOptions instead.")]]
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
 
     /** Tries to create an object that can write to a stream with this audio format.
 
@@ -213,12 +214,13 @@ public:
                                     ignored
         @see AudioFormatWriter
     */
-    virtual AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                                double sampleRateToUse,
-                                                const AudioChannelSet& channelLayout,
-                                                int bitsPerSample,
-                                                const StringPairArray& metadataValues,
-                                                int qualityOptionIndex);
+    [[deprecated ("Use the function taking an AudioFormatWriterOptions instead.")]]
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        const AudioChannelSet& channelLayout,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
 
 protected:
     /** Creates an AudioFormat object.

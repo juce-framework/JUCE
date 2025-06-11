@@ -485,23 +485,6 @@ std::unique_ptr<AudioFormatWriter> OggVorbisAudioFormat::createWriterFor (std::u
     return w;
 }
 
-AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
-                                                          double sampleRate,
-                                                          unsigned int numChannels,
-                                                          int bitsPerSample,
-                                                          const StringPairArray& metadataValues,
-                                                          int qualityOptionIndex)
-{
-    if (out == nullptr)
-        return nullptr;
-
-    std::unique_ptr<OggWriter> w (new OggWriter (out, sampleRate, numChannels,
-                                                 (unsigned int) bitsPerSample,
-                                                 qualityOptionIndex, metadataValues));
-
-    return w->ok ? w.release() : nullptr;
-}
-
 StringArray OggVorbisAudioFormat::getQualityOptions()
 {
     return { "64 kbps", "80 kbps", "96 kbps", "112 kbps", "128 kbps", "160 kbps",

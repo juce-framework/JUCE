@@ -3180,14 +3180,6 @@ std::unique_ptr<AudioFormatWriter> MP3AudioFormat::createWriterFor (std::unique_
     return nullptr;
 }
 
-AudioFormatWriter* MP3AudioFormat::createWriterFor (OutputStream*, double /*sampleRateToUse*/,
-                                                    unsigned int /*numberOfChannels*/, int /*bitsPerSample*/,
-                                                    const StringPairArray& /*metadataValues*/, int /*qualityOptionIndex*/)
-{
-    jassertfalse; // not yet implemented!
-    return nullptr;
-}
-
 #endif
 
 } // namespace juce

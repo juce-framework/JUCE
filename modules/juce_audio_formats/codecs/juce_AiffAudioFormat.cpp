@@ -1017,20 +1017,6 @@ MemoryMappedAudioFormatReader* AiffAudioFormat::createMemoryMappedReader (FileIn
     return nullptr;
 }
 
-AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
-                                                     double sampleRate,
-                                                     unsigned int numberOfChannels,
-                                                     int bitsPerSample,
-                                                     const StringPairArray& metadataValues,
-                                                     int /*qualityOptionIndex*/)
-{
-    if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample))
-        return new AiffAudioFormatWriter (out, sampleRate, numberOfChannels,
-                                          (unsigned int) bitsPerSample, metadataValues);
-
-    return nullptr;
-}
-
 std::unique_ptr<AudioFormatWriter> AiffAudioFormat::createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
                                                                      const AudioFormatWriterOptions& options)
 {

@@ -234,30 +234,6 @@ std::unique_ptr<AudioFormatWriter> LAMEEncoderAudioFormat::createWriterFor (std:
                                      options.getMetadataValues());
 }
 
-AudioFormatWriter* LAMEEncoderAudioFormat::createWriterFor (OutputStream* streamToWriteTo,
-                                                            double sampleRateToUse,
-                                                            unsigned int numberOfChannels,
-                                                            int bitsPerSample,
-                                                            const StringPairArray& metadataValues,
-                                                            int qualityOptionIndex)
-{
-    if (streamToWriteTo == nullptr)
-        return nullptr;
-
-    int vbr = 4;
-    int cbr = 0;
-
-    const String qual (getQualityOptions() [qualityOptionIndex]);
-
-    if (qual.contains ("VBR"))
-        vbr = qual.retainCharacters ("0123456789").getIntValue();
-    else
-        cbr = qual.getIntValue();
-
-    return new Writer (streamToWriteTo, getFormatName(), lameApp, vbr, cbr,
-                       sampleRateToUse, numberOfChannels, bitsPerSample, metadataValues);
-}
-
 #endif
 
 } // namespace juce

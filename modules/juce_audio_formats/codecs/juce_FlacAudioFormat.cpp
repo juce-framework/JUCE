@@ -600,24 +600,6 @@ AudioFormatReader* FlacAudioFormat::createReaderFor (InputStream* in, const bool
     return nullptr;
 }
 
-AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
-                                                     double sampleRate,
-                                                     unsigned int numberOfChannels,
-                                                     int bitsPerSample,
-                                                     const StringPairArray& /*metadataValues*/,
-                                                     int qualityOptionIndex)
-{
-    if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample))
-    {
-        std::unique_ptr<FlacWriter> w (new FlacWriter (out, sampleRate, numberOfChannels,
-                                                       (uint32) bitsPerSample, qualityOptionIndex));
-        if (w->ok)
-            return w.release();
-    }
-
-    return nullptr;
-}
-
 std::unique_ptr<AudioFormatWriter> FlacAudioFormat::createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
                                                                      const AudioFormatWriterOptions& options)
 {

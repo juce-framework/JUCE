@@ -1,5 +1,38 @@
 # JUCE breaking changes
 
+# develop
+
+## Change
+
+The AudioFormat class now only has one virtual createWriterFor member function:
+`createWriterFor (std::unique_ptr<OutputStream>&, const AudioFormatWriterOptions&)`.
+
+The older createWriterFor overloads are now non-virtual and deprecated.
+
+**Possible Issues**
+
+Classes overriding the old AudioFormat::createWriterFor functions will fail to
+compile.
+
+Additionally, code calling the old functions will emit a deprecation warning.
+
+**Workaround**
+
+Classes inheriting from AudioFormat should override the new createWriterFor
+function that takes an AudioFormatWriterOptions parameter.
+
+**Rationale**
+
+Adding support for writing wav files in 32-bit PCM format required the addition
+of another parameter to the AudioFormat::createWriterFor interface. This
+function already had many parameters, some of them already superfluous for some
+of the formats that share this interface. The introduction of a new options type
+makes it easier to extend this interface now and in the future. The old
+functions are marked deprecated, as allowing to override them would have made
+the implementation more complicated. The new signature better communicates
+resource ownership, helping to avoid bugs due to misuse.
+
+
 ## Change
 
 Some functions and types have been moved from the VST3ClientExtentions class

@@ -2042,29 +2042,6 @@ std::unique_ptr<AudioFormatWriter> WavAudioFormat::createWriterFor (std::unique_
                                                    options.getSampleFormat());
 }
 
-AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out, double sampleRate,
-                                                    unsigned int numChannels, int bitsPerSample,
-                                                    const StringPairArray& metadataValues, int qualityOptionIndex)
-{
-    return createWriterFor (out, sampleRate, WavFileHelpers::canonicalWavChannelSet (static_cast<int> (numChannels)),
-                            bitsPerSample, metadataValues, qualityOptionIndex);
-}
-
-AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out,
-                                                    double sampleRate,
-                                                    const AudioChannelSet& channelLayout,
-                                                    int bitsPerSample,
-                                                    const StringPairArray& metadataValues,
-                                                    int /*qualityOptionIndex*/)
-{
-    if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample) && isChannelLayoutSupported (channelLayout))
-        return new WavAudioFormatWriter (out, sampleRate, channelLayout,
-                                         (unsigned int) bitsPerSample, toMap (metadataValues),
-                                         AudioFormatWriterOptions::SampleFormat::automatic);
-
-    return nullptr;
-}
-
 namespace WavFileHelpers
 {
     static bool slowCopyWavFileWithNewMetadata (const File& file, const StringMap& metadata)
