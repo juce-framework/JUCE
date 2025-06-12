@@ -166,7 +166,7 @@ struct jpeg_d_main_controller {
 
 /* Coefficient buffer control */
 struct jpeg_d_coef_controller {
-  JMETHOD(void, start_input_pass, (j_decompress_ptr cinfo));
+  JMETHOD(void, start_input_pass_f, (j_decompress_ptr cinfo));
   JMETHOD(int, consume_data, (j_decompress_ptr cinfo));
   JMETHOD(void, start_output_pass, (j_decompress_ptr cinfo));
   JMETHOD(int, decompress_data, (j_decompress_ptr cinfo,
@@ -209,9 +209,9 @@ struct jpeg_marker_reader {
 
 /* Entropy decoding */
 struct jpeg_entropy_decoder {
-  JMETHOD(void, start_pass, (j_decompress_ptr cinfo));
-  JMETHOD(boolean, decode_mcu, (j_decompress_ptr cinfo, JBLOCKARRAY MCU_data));
-  JMETHOD(void, finish_pass, (j_decompress_ptr cinfo));
+  JMETHOD(void, start_pass_f, (j_decompress_ptr cinfo));
+  JMETHOD(boolean, decode_mcu_f, (j_decompress_ptr cinfo, JBLOCKARRAY MCU_data));
+  JMETHOD(void, finish_pass_f, (j_decompress_ptr cinfo));
 };
 
 /* Inverse DCT (also performs dequantization) */

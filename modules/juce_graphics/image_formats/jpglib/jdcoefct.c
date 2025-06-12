@@ -170,7 +170,7 @@ decompress_onepass (j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
       /* Try to fetch an MCU.  Entropy decoder expects buffer to be zeroed. */
       if (cinfo->lim_Se)	/* can bypass in DC only case */
 	MEMZERO(blkp, cinfo->blocks_in_MCU * SIZEOF(JBLOCK));
-      if (! (*cinfo->entropy->decode_mcu) (cinfo, coef->MCU_buffer)) {
+      if (! (*cinfo->entropy->decode_mcu_f) (cinfo, coef->MCU_buffer)) {
 	/* Suspension forced; update state counters and exit */
 	coef->MCU_vert_offset = yoffset;
 	coef->MCU_ctr = MCU_col_num;
@@ -287,7 +287,7 @@ consume_data (j_decompress_ptr cinfo)
 	}
       }
       /* Try to fetch the MCU. */
-      if (! (*cinfo->entropy->decode_mcu) (cinfo, coef->MCU_buffer)) {
+      if (! (*cinfo->entropy->decode_mcu_f) (cinfo, coef->MCU_buffer)) {
 	/* Suspension forced; update state counters and exit */
 	coef->MCU_vert_offset = yoffset;
 	coef->MCU_ctr = MCU_col_num;
@@ -735,7 +735,7 @@ jinit_d_coef_controller (j_decompress_ptr cinfo, boolean need_full_buffer)
     coef->pub.coef_arrays = NULL; /* flag for no virtual arrays */
   }
 
-  coef->pub.start_input_pass = start_input_pass;
+  coef->pub.start_input_pass_f = start_input_pass;
   coef->pub.start_output_pass = start_output_pass;
 #ifdef BLOCK_SMOOTHING_SUPPORTED
   coef->coef_bits_latch = NULL;

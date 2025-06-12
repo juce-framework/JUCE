@@ -518,8 +518,8 @@ start_input_pass (j_decompress_ptr cinfo)
 {
   per_scan_setup(cinfo);
   latch_quant_tables(cinfo);
-  (*cinfo->entropy->start_pass) (cinfo);
-  (*cinfo->coef->start_input_pass) (cinfo);
+  (*cinfo->entropy->start_pass_f) (cinfo);
+  (*cinfo->coef->start_input_pass_f) (cinfo);
   cinfo->inputctl->consume_input = cinfo->coef->consume_data;
 }
 
@@ -533,7 +533,7 @@ start_input_pass (j_decompress_ptr cinfo)
 METHODDEF(void)
 finish_input_pass (j_decompress_ptr cinfo)
 {
-  (*cinfo->entropy->finish_pass) (cinfo);
+  (*cinfo->entropy->finish_pass_f) (cinfo);
   cinfo->inputctl->consume_input = consume_markers;
 }
 
