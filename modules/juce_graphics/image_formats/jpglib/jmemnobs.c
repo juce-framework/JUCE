@@ -2,6 +2,7 @@
  * jmemnobs.c
  *
  * Copyright (C) 1992-1996, Thomas G. Lane.
+ * Modified 2019 by Guido Vollbeding.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -12,7 +13,7 @@
  * This is very portable in the sense that it'll compile on almost anything,
  * but you'd better have lots of main memory (or virtual memory) if you want
  * to process big images.
- * Note that the max_memory_to_use option is ignored by this implementation.
+ * Note that the max_memory_to_use option is respected by this implementation.
  */
 
 #define JPEG_INTERNALS
@@ -32,13 +33,13 @@ extern void free JPP((void *ptr));
  */
 
 GLOBAL(void *)
-jpeg_get_small (j_common_ptr , size_t sizeofobject)
+jpeg_get_small (j_common_ptr cinfo, size_t sizeofobject)
 {
   return (void *) malloc(sizeofobject);
 }
 
 GLOBAL(void)
-jpeg_free_small (j_common_ptr , void * object, size_t)
+jpeg_free_small (j_common_ptr cinfo, void * object, size_t sizeofobject)
 {
   free(object);
 }
@@ -52,13 +53,13 @@ jpeg_free_small (j_common_ptr , void * object, size_t)
  */
 
 GLOBAL(void FAR *)
-jpeg_get_large (j_common_ptr, size_t sizeofobject)
+jpeg_get_large (j_common_ptr cinfo, size_t sizeofobject)
 {
   return (void FAR *) malloc(sizeofobject);
 }
 
 GLOBAL(void)
-jpeg_free_large (j_common_ptr, void FAR * object, size_t)
+jpeg_free_large (j_common_ptr cinfo, void FAR * object, size_t sizeofobject)
 {
   free(object);
 }
@@ -66,13 +67,16 @@ jpeg_free_large (j_common_ptr, void FAR * object, size_t)
 
 /*
  * This routine computes the total memory space available for allocation.
- * Here we always say, "we got all you want bud!"
  */
 
 GLOBAL(long)
-jpeg_mem_available (j_common_ptr, long,
-		    long max_bytes_needed, long)
+jpeg_mem_available (j_common_ptr cinfo, long min_bytes_needed,
+		    long max_bytes_needed, long already_allocated)
 {
+  if (cinfo->mem->max_memory_to_use)
+    return cinfo->mem->max_memory_to_use - already_allocated;
+
+  /* Here we say, "we got all you want bud!" */
   return max_bytes_needed;
 }
 
@@ -84,8 +88,8 @@ jpeg_mem_available (j_common_ptr, long,
  */
 
 GLOBAL(void)
-jpeg_open_backing_store (j_common_ptr cinfo, struct backing_store_struct *,
-			 long )
+jpeg_open_backing_store (j_common_ptr cinfo, backing_store_ptr info,
+			 long total_bytes_needed)
 {
   ERREXIT(cinfo, JERR_NO_BACKING_STORE);
 }
@@ -97,13 +101,13 @@ jpeg_open_backing_store (j_common_ptr cinfo, struct backing_store_struct *,
  */
 
 GLOBAL(long)
-jpeg_mem_init (j_common_ptr)
+jpeg_mem_init (j_common_ptr cinfo)
 {
   return 0;			/* just set max_memory_to_use to 0 */
 }
 
 GLOBAL(void)
-jpeg_mem_term (j_common_ptr)
+jpeg_mem_term (j_common_ptr cinfo)
 {
   /* no work */
 }
