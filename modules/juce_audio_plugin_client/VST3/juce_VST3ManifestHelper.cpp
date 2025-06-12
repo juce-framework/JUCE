@@ -135,7 +135,7 @@ private:
     bool load (const std::string&, std::string&) final { return {}; }
 };
 
-std::optional<Steinberg::ModuleInfo::CompatibilityList> loadCompatibilityFromModule (const VST3::Hosting::Module& pluginModule)
+static std::optional<Steinberg::ModuleInfo::CompatibilityList> loadCompatibilityFromModule (const VST3::Hosting::Module& pluginModule)
 {
     const auto& factory = pluginModule.getFactory();
     const auto& infos = factory.classInfos();
@@ -158,7 +158,7 @@ std::optional<Steinberg::ModuleInfo::CompatibilityList> loadCompatibilityFromMod
     if (compatibility->getCompatibilityJSON (&stream) != Steinberg::kResultOk)
         return {};
 
-    const std::string_view streamView (stream.getData(), stream.getSize());
+    const std::string_view streamView (stream.getData(), (size_t) stream.getSize());
 
     return Steinberg::ModuleInfoLib::parseCompatibilityJson (streamView, nullptr);
 }
