@@ -173,6 +173,9 @@ int main()
     if (auto compatibility = loadCompatibilityFromModule (pluginModule))
         moduleInfo.compatibility = *compatibility;
 
+    moduleInfo.name = JucePlugin_Name;
+    moduleInfo.version = JucePlugin_VersionString;
+
     std::stringstream output;
     Steinberg::ModuleInfoLib::outputJson (moduleInfo, output);
     std::cout << output.str() << std::endl;
