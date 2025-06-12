@@ -103,12 +103,11 @@ public:
             {
                 str << "\""
                     << std::hex
-                    << std::setw (2)
                     << std::setfill ('0')
                     << std::uppercase;
 
                 for (auto byte : oldIds[i])
-                    str << (int) byte;
+                    str << std::setw (2) << (int) byte;
 
                 str.clear();
                 str << "\"";
