@@ -58,7 +58,7 @@ public:
 
     ModifierKeys getCurrentModifiers() const noexcept
     {
-        return ModifierKeys::currentModifiers
+        return ModifierKeys::getCurrentModifiers()
                 .withoutMouseButtons()
                 .withFlags (buttonState.getRawFlags());
     }

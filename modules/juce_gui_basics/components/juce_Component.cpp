@@ -2952,7 +2952,7 @@ bool Component::isMouseOverOrDragging (bool includeChildren) const
 
 bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() noexcept
 {
-    return ModifierKeys::currentModifiers.isAnyMouseButtonDown();
+    return ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown();
 }
 
 Point<int> Component::getMouseXYRelative() const

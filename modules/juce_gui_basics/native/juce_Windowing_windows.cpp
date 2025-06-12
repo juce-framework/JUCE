@@ -1968,7 +1968,7 @@ public:
             keyMods = (keyMods & ~ModifierKeys::ctrlModifier) | ModifierKeys::altModifier;
         }
 
-        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
+        ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withOnlyMouseButtons().withFlags (keyMods);
     }
 
     static void updateModifiersFromWParam (const WPARAM wParam)
@@ -1978,7 +1978,7 @@ public:
         if (wParam & MK_RBUTTON)   mouseMods |= ModifierKeys::rightButtonModifier;
         if (wParam & MK_MBUTTON)   mouseMods |= ModifierKeys::middleButtonModifier;
 
-        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
+        ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (mouseMods);
         updateKeyModifiers();
     }
 
@@ -2712,7 +2712,7 @@ private:
             return result;
         }
 
-        ModifierKeys modsToSend (ModifierKeys::currentModifiers);
+        auto modsToSend = ModifierKeys::getCurrentModifiers();
 
         // this will be handled by WM_TOUCH
         if (isTouchEvent() || areOtherTouchSourcesActive())
@@ -2784,7 +2784,7 @@ private:
 
     void releaseCaptureIfNecessary() const
     {
-        if (! ModifierKeys::currentModifiers.isAnyMouseButtonDown() && hwnd == GetCapture())
+        if (! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown() && hwnd == GetCapture())
             ReleaseCapture();
     }
 
@@ -2974,12 +2974,12 @@ private:
         const auto pos = globalToLocal (convertPhysicalScreenPointToLogical (D2DUtilities::toPoint ({ roundToInt (touch.x / 100.0f),
                                                                                                       roundToInt (touch.y / 100.0f) }), hwnd).toFloat());
         const auto pressure = touchPressure;
-        auto modsToSend = ModifierKeys::currentModifiers;
+        auto modsToSend = ModifierKeys::getCurrentModifiers();
 
         if (isDown)
         {
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
-            modsToSend = ModifierKeys::currentModifiers;
+            ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+            modsToSend = ModifierKeys::getCurrentModifiers();
 
             // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
             handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(),
@@ -2999,7 +2999,7 @@ private:
         }
         else
         {
-            modsToSend = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+            modsToSend = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
         }
 
         handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend,
@@ -3010,7 +3010,7 @@ private:
 
         if (isUp)
         {
-            handleMouseEvent (MouseInputSource::InputSourceType::touch, MouseInputSource::offscreenMousePos, ModifierKeys::currentModifiers.withoutMouseButtons(),
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, MouseInputSource::offscreenMousePos, ModifierKeys::getCurrentModifiers().withoutMouseButtons(),
                               pressure, orientation, time, {}, touchIndex);
 
             if (! isValidPeer (this))
@@ -3019,7 +3019,7 @@ private:
             if (isCancel)
             {
                 currentTouches.clear();
-                ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
+                ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons();
             }
         }
 
@@ -3094,9 +3094,9 @@ private:
         auto pInfoFlags = penInfo.pointerInfo.pointerFlags;
 
         if ((pInfoFlags & POINTER_FLAG_FIRSTBUTTON) != 0)
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+            ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
         else if ((pInfoFlags & POINTER_FLAG_SECONDBUTTON) != 0)
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::rightButtonModifier);
+            ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::rightButtonModifier);
 
         if (isDown)
         {
@@ -3112,7 +3112,7 @@ private:
         else if (isUp || ! (pInfoFlags & POINTER_FLAG_INCONTACT))
         {
             modsToSend = modsToSend.withoutMouseButtons();
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
+            ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons();
         }
 
         handleMouseEvent (MouseInputSource::InputSourceType::pen, pos, modsToSend, pressure,
@@ -3123,7 +3123,7 @@ private:
 
         if (isUp)
         {
-            handleMouseEvent (MouseInputSource::InputSourceType::pen, MouseInputSource::offscreenMousePos, ModifierKeys::currentModifiers,
+            handleMouseEvent (MouseInputSource::InputSourceType::pen, MouseInputSource::offscreenMousePos, ModifierKeys::getCurrentModifiers(),
                               pressure, MouseInputSource::defaultOrientation, time, penDetails);
 
             if (! isValidPeer (this))
@@ -3302,7 +3302,7 @@ private:
                 key = (int) keyChar;
 
             // avoid sending junk text characters for some control-key combinations
-            if (textChar < ' ' && ModifierKeys::currentModifiers.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::altModifier))
+            if (textChar < ' ' && ModifierKeys::getCurrentModifiers().testFlags (ModifierKeys::ctrlModifier | ModifierKeys::altModifier))
                 textChar = 0;
         }
 
@@ -3748,9 +3748,9 @@ private:
         if (isKeyDown (VK_RBUTTON))  mouseMods |= ModifierKeys::rightButtonModifier;
         if (isKeyDown (VK_MBUTTON))  mouseMods |= ModifierKeys::middleButtonModifier;
 
-        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
+        ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (mouseMods);
 
-        return ModifierKeys::currentModifiers;
+        return ModifierKeys::getCurrentModifiers();
     }
 
     std::optional<LRESULT> onNcLButtonDown (WPARAM wParam, LPARAM lParam)

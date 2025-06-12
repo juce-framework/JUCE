@@ -1381,7 +1381,7 @@ private:
     }
 
     bool mouseWasOver = false;
-    bool mouseUpCanTrigger = ! ModifierKeys::currentModifiers.isAnyMouseButtonDown();
+    bool mouseUpCanTrigger = ! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuWindow)
 };
@@ -1469,7 +1469,7 @@ private:
                            const bool wasDown, const bool overScrollArea, const bool isOverAny)
     {
         isDown = window.mouseHasBeenOver()
-                    && (ModifierKeys::currentModifiers.isAnyMouseButtonDown()
+                    && (ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown()
                          || ComponentPeer::getCurrentModifiersRealtime().isAnyMouseButtonDown());
 
         const auto reallyContained = window.reallyContains (localMousePos, true);

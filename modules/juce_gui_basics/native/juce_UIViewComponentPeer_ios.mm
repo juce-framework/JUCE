@@ -951,7 +951,7 @@ static void updateModifiers (const UIKeyModifierFlags flags)
                          | convert (UIKeyModifierCommand,    ModifierKeys::commandModifier)
                          | convert (UIKeyModifierNumericPad, 0); // numpad modifier currently not implemented
 
-    ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withOnlyMouseButtons().withFlags (juceFlags);
+    ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withOnlyMouseButtons().withFlags (juceFlags);
 }
 
 API_AVAILABLE (ios(13.4))
@@ -2071,7 +2071,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEv
         auto time = getMouseTime (event);
         auto touchIndex = currentTouches.getIndexOfTouch (this, touch);
 
-        auto modsToSend = ModifierKeys::currentModifiers;
+        auto modsToSend = ModifierKeys::getCurrentModifiers();
 
         auto isUp = [] (MouseEventFlags m)
         {
@@ -2083,8 +2083,8 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEv
             if ([touch phase] != UITouchPhaseBegan)
                 continue;
 
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
-            modsToSend = ModifierKeys::currentModifiers;
+            ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+            modsToSend = ModifierKeys::getCurrentModifiers();
 
             // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
             handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(),
@@ -2108,7 +2108,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEv
         if (mouseEventFlags == MouseEventFlags::upAndCancel)
         {
             currentTouches.clearTouch (touchIndex);
-            modsToSend = ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
+            modsToSend = ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons();
         }
 
         // NB: some devices return 0 or 1.0 if pressure is unknown, so we'll clip our value to a believable range:
@@ -2139,7 +2139,7 @@ void UIViewComponentPeer::onHover (UIHoverGestureRecognizer* gesture)
 
     handleMouseEvent (MouseInputSource::InputSourceType::touch,
                       pos,
-                      ModifierKeys::currentModifiers,
+                      ModifierKeys::getCurrentModifiers(),
                       MouseInputSource::defaultPressure, MouseInputSource::defaultOrientation,
                       UIViewComponentPeer::getMouseTime ([[NSProcessInfo processInfo] systemUptime]),
                       {});
