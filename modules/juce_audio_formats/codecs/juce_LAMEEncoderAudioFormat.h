@@ -69,7 +69,7 @@ public:
     bool isCompressed() override;
     StringArray getQualityOptions() override;
 
-    std::unique_ptr<AudioFormatWriter> createWriterFor (std::unique_ptr<OutputStream> streamToWriteTo,
+    std::unique_ptr<AudioFormatWriter> createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
                                                         const AudioFormatWriterOptions& options) override;
 
     AudioFormatReader* createReaderFor (InputStream*, bool deleteStreamIfOpeningFails) override;

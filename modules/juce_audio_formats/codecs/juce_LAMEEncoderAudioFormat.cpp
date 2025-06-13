@@ -43,14 +43,15 @@ public:
     Writer (OutputStream* destStream, const String& formatName,
             const File& appFile, int vbr, int cbr,
             double sampleRateIn, unsigned int numberOfChannels,
-            int bitsPerSampleIn, const StringPairArray& metadata)
+            int bitsPerSampleIn, const StringMap& metadata)
         : AudioFormatWriter (destStream, formatName, sampleRateIn,
                              numberOfChannels, (unsigned int) bitsPerSampleIn),
           vbrLevel (vbr), cbrBitrate (cbr)
     {
         WavAudioFormat wavFormat;
 
-        writer = wavFormat.createWriterFor (tempWav.getFile().createOutputStream(),
+        std::unique_ptr<OutputStream> stream = tempWav.getFile().createOutputStream();
+        writer = wavFormat.createWriterFor (stream,
                                             AudioFormatWriter::Options{}.withSampleRate (sampleRateIn)
                                                                         .withNumChannels ((int) numberOfChannels)
                                                                         .withBitsPerSample (bitsPerSampleIn)
@@ -85,14 +86,12 @@ public:
         addMetadataArg (metadata, "id3trackNumber", "--tn");
     }
 
-    void addMetadataArg (const StringPairArray& metadata, const char* key, const char* lameFlag)
+    void addMetadataArg (const StringMap& metadata, const char* key, const char* lameFlag)
     {
-        auto value = metadata.getValue (key, {});
-
-        if (value.isNotEmpty())
+        if (auto it = metadata.find (key); it != metadata.end())
         {
             args.add (lameFlag);
-            args.add (value);
+            args.add (it->second);
         }
     }
 
@@ -207,7 +206,7 @@ AudioFormatReader* LAMEEncoderAudioFormat::createReaderFor (InputStream*, const 
     return nullptr;
 }
 
-std::unique_ptr<AudioFormatWriter> LAMEEncoderAudioFormat::createWriterFor (std::unique_ptr<OutputStream> streamToWriteTo,
+std::unique_ptr<AudioFormatWriter> LAMEEncoderAudioFormat::createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
                                                                             const AudioFormatWriterOptions& options)
 {
     if (streamToWriteTo == nullptr)
