@@ -36,6 +36,7 @@
 
 #include "juce_TargetPlatform.h"
 
+// @cond
 /** Return the Nth argument. By passing a variadic pack followed by N other
     parameters, we can select one of those N parameter based on the length of
     the parameter pack.
@@ -160,6 +161,7 @@
 /** Quote the argument, turning it into a string. */
 #define JUCE_TO_STRING(x) #x
 
+// @endcond
 #if JUCE_CLANG || JUCE_GCC
     #define JUCE_IGNORE_GCC_IMPL_(compiler, warning)
     #define JUCE_IGNORE_GCC_IMPL_0(compiler, warning)
