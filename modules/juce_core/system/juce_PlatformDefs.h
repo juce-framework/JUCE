@@ -160,6 +160,7 @@ namespace juce
   /** This will always cause an assertion failure.
       It is only compiled in a debug build, (unless JUCE_LOG_ASSERTIONS is enabled for your build).
       @see jassert
+      @hiderefby
   */
   #define jassertfalse                  JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION; if (juce::juce_isRunningUnderDebugger()) JUCE_BREAK_IN_DEBUGGER; JUCE_ANALYZER_NORETURN)
 
@@ -170,6 +171,7 @@ namespace juce
       careful that the expression you pass to it doesn't perform any actions that are vital for the
       correct behaviour of your program!
       @see jassertfalse
+      @hiderefby
   */
   #define jassert(expression)           JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
 
