@@ -427,7 +427,7 @@ private:
 class FlacWriter final : public AudioFormatWriter
 {
 public:
-    FlacWriter (OutputStream* out, double rate, uint32 numChans, uint32 bits, const StringPairArray& metadataValues, int qualityOptionIndex)
+    FlacWriter (OutputStream* out, double rate, uint32 numChans, uint32 bits, const std::unordered_map<juce::String, juce::String>& metadataValues, int qualityOptionIndex)
         : AudioFormatWriter (out, flacFormatName, rate, numChans, bits),
           streamStartPos (output != nullptr ? jmax (output->getPosition(), 0ll) : 0ll)
     {
@@ -450,10 +450,8 @@ public:
             metadata[0] = FLAC__metadata_object_new(FlacNamespace::FLAC__METADATA_TYPE_VORBIS_COMMENT);
             metadata[1] = FLAC__metadata_object_new(FlacNamespace::FLAC__METADATA_TYPE_PADDING);
             metadata[1]->length = 1024;
-            for(auto key : metadataValues.getAllKeys())
+            for(const auto& [key, value] : metadataValues)
             {
-                auto value = metadataValues[key];
-
                 FlacNamespace::FLAC__StreamMetadata_VorbisComment_Entry entry;
                 if(FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, key.toRawUTF8(), value.toRawUTF8()))
                     FLAC__metadata_object_vorbiscomment_append_comment (metadata[0], entry, false);
