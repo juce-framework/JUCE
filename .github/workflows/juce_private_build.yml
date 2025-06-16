@@ -27,18 +27,40 @@ run-name: "[${{ inputs.triggerer && inputs.triggerer || github.event.sender.logi
 jobs:
   setup:
     if: ${{ inputs.nightly-targets == '[]' }}
-    name: Set pending commit status
+    name: Check and set CI commit status
     runs-on: ubuntu-latest
+    env:
+      GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      build: ${{ steps.status_check.outputs.build }}
     steps:
-      - uses: myrotvorets/set-commit-status-action@master
+      - uses: actions/checkout@v4.2.2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          sha: ${{ github.sha }}
-          status: pending
-          context: CI
-          targetUrl: ${{ env.target_url }}
+          fetch-depth: 0
+          sparse-checkout: |
+            .github/workflows
+      - id: status_check
+        shell: python
+        run: |
+          import sys
+          import os
+          sys.path.append(os.path.abspath('.github/workflows'))
+          from github_api_request import json_github_api_request
+          sha = os.environ["GITHUB_SHA"]
+          statuses_response = json_github_api_request(f'commits/{sha}/statuses')
+          status = next(filter(lambda x: x['context'] == 'CI', statuses_response), None)
+          if (status is None) or (status['state'] != 'success'):
+            with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'build=1\n')
+            data = {
+              'state': 'pending',
+              'context': 'CI',
+              'target_url': os.environ['target_url'],
+            }
+            post_response = json_github_api_request(f'statuses/{sha}', 'POST', data)
+            print(post_response)
   build:
-    if: ${{ !cancelled() && (success() || needs.setup.result == 'skipped') }}
+    if: ${{ !cancelled() && (success() || needs.setup.result == 'skipped') && (needs.setup.outputs.build == '1' || contains(fromJSON('["master"]'), github.ref_name)) }}
     needs: [setup]
     name: .
     # Not having the ability to do a dynamic 'uses' call is a real pain. To
@@ -66,6 +88,7 @@ jobs:
   set-commit-status:
     if: ${{ always() && inputs.nightly-targets == '[]' }}
     needs: [setup, build, deploy, docs]
+    name: Set CI commit status
     runs-on: ubuntu-latest
     env:
       result: ${{ contains(needs.*.result, 'cancelled') && 'cancelled' || (contains(needs.*.result, 'failure') && 'failure' || 'success') }}
@@ -84,6 +107,7 @@ jobs:
     name: Notify
     uses: juce-framework/JUCE-utils/.github/workflows/notify.yml@master
     with:
+      juce-utils-branch: master
       triggerer: ${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}
       context: ${{ toJson(needs) }}
     secrets: inherit
