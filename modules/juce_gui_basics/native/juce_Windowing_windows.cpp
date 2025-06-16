@@ -2686,40 +2686,13 @@ private:
         client,
     };
 
-    std::optional<LRESULT> doMouseMove (const LPARAM lParam, bool isMouseDownEvent, WindowArea area)
+    std::optional<LRESULT> doMouseMoveAtPoint (bool isMouseDownEvent, WindowArea area, Point<float> position)
     {
-        // Check if the mouse has moved since being pressed in the caption area.
-        // If it has, then we defer to DefWindowProc to handle the mouse movement.
-        // Allowing DefWindowProc to handle WM_NCLBUTTONDOWN directly will pause message
-        // processing (and therefore painting) when the mouse is clicked in the caption area,
-        // which is why we wait until the mouse is *moved* before asking the system to take over.
-        // Letting the system handle the move is important for things like Aero Snap to work.
-        if (area == WindowArea::nonclient && captionMouseDown.has_value() && *captionMouseDown != lParam)
-        {
-            captionMouseDown.reset();
-
-            // When clicking and dragging on the caption area, a new modal loop is started
-            // inside DefWindowProc. This modal loop appears to consume some mouse events,
-            // without forwarding them back to our own window proc. In particular, we never
-            // get to see the WM_NCLBUTTONUP event with the HTCAPTION argument, or any other
-            // kind of mouse-up event to signal that the loop exited, so
-            // ModifierKeys::currentModifiers gets left in the wrong state. As a workaround, we
-            // manually update the modifier keys after DefWindowProc exits, and update the
-            // capture state if necessary.
-            const auto result = DefWindowProc (hwnd, WM_NCLBUTTONDOWN, HTCAPTION, lParam);
-            getMouseModifiers();
-            releaseCaptureIfNecessary();
-            return result;
-        }
-
         auto modsToSend = ModifierKeys::getCurrentModifiers();
 
         // this will be handled by WM_TOUCH
         if (isTouchEvent() || areOtherTouchSourcesActive())
             return {};
-
-        const auto position = area == WindowArea::client ? getPointFromLocalLParam (lParam)
-                                                         : getLocalPointFromScreenLParam (lParam);
 
         if (! isMouseOver)
         {
@@ -2746,10 +2719,9 @@ private:
             if (area == WindowArea::client)
                 Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
         }
-        else if (! isDragging)
+        else if (! isDragging && ! contains (position.roundToInt(), false))
         {
-            if (! contains (position.roundToInt(), false))
-                return {};
+            return {};
         }
 
         static uint32 lastMouseTime = 0;
@@ -2766,6 +2738,38 @@ private:
         }
 
         return {};
+    }
+
+    std::optional<LRESULT> doMouseMove (const LPARAM lParam, bool isMouseDownEvent, WindowArea area)
+    {
+        // Check if the mouse has moved since being pressed in the caption area.
+        // If it has, then we defer to DefWindowProc to handle the mouse movement.
+        // Allowing DefWindowProc to handle WM_NCLBUTTONDOWN directly will pause message
+        // processing (and therefore painting) when the mouse is clicked in the caption area,
+        // which is why we wait until the mouse is *moved* before asking the system to take over.
+        // Letting the system handle the move is important for things like Aero Snap to work.
+        if (area == WindowArea::nonclient && captionMouseDown.has_value() && *captionMouseDown != lParam)
+        {
+            captionMouseDown.reset();
+
+            // When clicking and dragging on the caption area, a new modal loop is started
+            // inside DefWindowProc. This modal loop appears to consume some mouse events,
+            // without forwarding them back to our own window proc. In particular, we never
+            // get to see the WM_NCLBUTTONUP event with the HTCAPTION argument, or any other
+            // kind of mouse-up event to signal that the loop exited, so
+            // ModifierKeys::currentModifiers gets left in the wrong state. As a workaround, we
+            // manually update the modifier keys after DefWindowProc exits, and update the
+            // capture state if necessary.
+            const auto result = DefWindowProc (hwnd, WM_NCLBUTTONDOWN, HTCAPTION, lParam);
+            getMouseModifiers();
+            releaseCaptureIfNecessary();
+            return result;
+        }
+
+        const auto position = area == WindowArea::client ? getPointFromLocalLParam (lParam)
+                                                         : getLocalPointFromScreenLParam (lParam);
+
+        return doMouseMoveAtPoint (isMouseDownEvent, area, position);
     }
 
     void updateModifiersFromModProvider() const
@@ -2843,17 +2847,50 @@ private:
             doMouseUp (getCurrentMousePos(), (WPARAM) 0, false);
     }
 
-    void doMouseExit()
+    /*  The parameter specifies the area the cursor just left. */
+    void doMouseExit (WindowArea area)
     {
         isMouseOver = false;
 
-        if (! areOtherTouchSourcesActive())
+        const auto messagePos = GetMessagePos();
+
+        // If the system tells us that the mouse left an area, but the cursor is still over that
+        // area, respect the system's decision and treat this as a mouse-leave event.
+        // Starting a native drag-n-drop or dragging the window caption may cause the system to send
+        // a mouse-leave event while the mouse is still within the window's bounds.
+        const auto shouldRestartTracking = std::invoke ([&]
+        {
+            auto* peer = getOwnerOfWindow (WindowFromPoint (getPOINTFromLParam (messagePos)));
+
+            if (peer != this)
+                return false;
+
+            const auto newAreaNative = peerWindowProc (hwnd, WM_NCHITTEST, 0, messagePos);
+
+            if (newAreaNative == HTNOWHERE || newAreaNative == HTTRANSPARENT)
+                return false;
+
+            if (newAreaNative == HTCLIENT)
+                return area == WindowArea::nonclient;
+
+            return area == WindowArea::client;
+        });
+
+        if (shouldRestartTracking)
+        {
+            doMouseMoveAtPoint (false,
+                                area == WindowArea::client ? WindowArea::nonclient : WindowArea::client,
+                                getLocalPointFromScreenLParam (messagePos));
+        }
+        else if (! areOtherTouchSourcesActive())
+        {
             doMouseEvent (getCurrentMousePos(), MouseInputSource::defaultPressure);
+        }
     }
 
     std::tuple<ComponentPeer*, Point<float>> findPeerUnderMouse()
     {
-        auto currentMousePos = getPOINTFromLParam ((LPARAM) GetMessagePos());
+        auto currentMousePos = getPOINTFromLParam (GetMessagePos());
 
         auto* peer = getOwnerOfWindow (WindowFromPoint (currentMousePos));
 
@@ -3967,7 +4004,7 @@ private:
             case WM_POINTERLEAVE:
             case WM_NCMOUSELEAVE:
             case WM_MOUSELEAVE:
-                doMouseExit();
+                doMouseExit (message == WM_NCMOUSELEAVE ? WindowArea::nonclient : WindowArea::client);
                 return 0;
 
             case WM_LBUTTONDOWN:
