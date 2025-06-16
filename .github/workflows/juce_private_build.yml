@@ -74,7 +74,7 @@ jobs:
       cpp-std: ${{ inputs.cpp-std }}
     secrets: inherit
   deploy:
-    if: ${{ contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
+    if: ${{ !cancelled() && (success() || needs.build.result == 'skipped') && contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
     needs: [build]
     name: Deploy
     uses: juce-framework/JUCE-utils/.github/workflows/deploy.yml@master
