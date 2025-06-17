@@ -1984,7 +1984,7 @@ public:
 
     //==============================================================================
     bool dontRepaint;
-    static ModifierKeys modifiersAtLastCallback;
+    static inline ModifierKeys modifiersAtLastCallback;
 
     //==============================================================================
     struct FileDropTarget final : public ComBaseClassHelper<IDropTarget>
@@ -2250,7 +2250,7 @@ private:
     bool isAccessibilityActive = false;
 
     //==============================================================================
-    static MultiTouchMapper<DWORD> currentTouches;
+    static inline MultiTouchMapper<DWORD> currentTouches;
 
     //==============================================================================
     class WindowClassHolder final : private DeletedAtShutdown
@@ -4737,9 +4737,6 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentPeer)
 };
-
-MultiTouchMapper<DWORD> HWNDComponentPeer::currentTouches;
-ModifierKeys HWNDComponentPeer::modifiersAtLastCallback;
 
 ComponentPeer* Component::createNewPeer (int styleFlags, void* parentHWND)
 {
