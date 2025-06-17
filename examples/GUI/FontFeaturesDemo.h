@@ -338,7 +338,9 @@ public:
         const FontStringPair example[] =
         {
             FontStringPair { baseLineFont.withPointHeight (16),
-                             feature.exampleText + " " + String::fromUTF8 ("\xe2\x86\x92") },
+                             feature.exampleText },
+            FontStringPair { baseLineFont.withPointHeight (16),
+                             " " + String::fromUTF8 ("\xe2\x86\x92") },
             FontStringPair { exampleFont.withPointHeight (16),
                              feature.exampleText }
         };
