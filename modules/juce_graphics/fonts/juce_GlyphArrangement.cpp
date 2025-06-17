@@ -188,28 +188,40 @@ void GlyphArrangement::addLineOfText (const Font& font, const String& text, floa
 static void addGlyphsFromShapedText (GlyphArrangement& ga, const detail::ShapedText& st, float x, float y)
 {
     st.accessTogetherWith ([&] (auto shapedGlyphs, auto positions, auto font, auto glyphRange, auto)
-                           {
-                               for (size_t i = 0; i < shapedGlyphs.size(); ++i)
-                               {
-                                   const auto glyphIndex = (int64) i + glyphRange.getStart();
+    {
+        for (auto it = shapedGlyphs.begin(); it != shapedGlyphs.end();)
+        {
+            const auto& glyph = *it;
+            const auto isNotPlaceholder = [] (auto& shapedGlyph)
+            {
+                return ! shapedGlyph.isPlaceholderForLigature();
+            };
 
-                                   auto& glyph = shapedGlyphs[i];
-                                   auto& position = positions[i];
+            const auto next = std::find_if (std::next (it),
+                                            shapedGlyphs.end(),
+                                            isNotPlaceholder);
 
-                                   if (glyph.isPlaceholderForLigature())
-                                       continue;
+            const auto addWidth = [] (auto acc, auto& shapedGlyph)
+            {
+                return acc + shapedGlyph.advance.x;
+            };
 
-                                   PositionedGlyph pg { font,
-                                                        st.getText()[(int) st.getTextRange (glyphIndex).getStart()],
-                                                        (int) glyph.glyphId,
-                                                        position.getX() + x,
-                                                        position.getY() + y,
-                                                        glyph.advance.getX(),
-                                                        glyph.isWhitespace() };
+            const auto width = std::accumulate (it, next, 0.0f, addWidth);
+            const auto index = (size_t) std::distance (shapedGlyphs.begin(), it);
+            const auto position = positions[index];
+            const auto glyphIndex = (int64) index + glyphRange.getStart();
 
-                                   ga.addGlyph (std::move (pg));
-                               }
-                           });
+            ga.addGlyph ({ font,
+                           st.getText()[(int) st.getTextRange (glyphIndex).getStart()],
+                           (int) glyph.glyphId,
+                           position.getX() + x,
+                           position.getY() + y,
+                           width,
+                           glyph.isWhitespace() });
+
+            it = next;
+        }
+    });
 }
 
 void GlyphArrangement::addCurtailedLineOfText (const Font& font, const String& text,
