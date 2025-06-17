@@ -1855,14 +1855,10 @@ public:
 
     void grabFocus() override
     {
-        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
-
-        const bool oldDeactivate = shouldDeactivateTitleBar;
-        shouldDeactivateTitleBar = ((styleFlags & windowIsTemporary) == 0);
+        const ScopedValueSetter ignoreDismissScope (shouldIgnoreModalDismiss, true);
+        const ScopedValueSetter titlebarScope (shouldDeactivateTitleBar, (styleFlags & windowIsTemporary) == 0);
 
         callFunctionIfNotLocked (&setFocusCallback, hwnd);
-
-        shouldDeactivateTitleBar = oldDeactivate;
     }
 
     void textInputRequired (Point<int>, TextInputTarget&) override
