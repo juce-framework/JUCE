@@ -2,7 +2,7 @@ from configure_logger import configure_logger
 
 from logging import getLogger
 from urllib.request import Request, urlopen
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from json import dumps, loads
 from os import environ
 from shutil import copyfileobj
@@ -33,13 +33,13 @@ def github_api_request(path, method='GET', data=None):
         try:
             response = urlopen(req)
             return response
-        except HTTPError as e:
+        except (HTTPError, URLError) as e:
             num_attempts += 1
             if num_attempts == 3:
-                logger.warning(f'GitHub API access failed\n{e.headers}\n{e.fp.read()}')
+                logger.warning(f'GitHub API access failed\n{e.reason}\n{e.headers}\n{e.fp.read()}')
                 raise e
             logger.debug(f'Request attempt {num_attempts} failed, retrying')
-            sleep(5)
+            sleep(10)
 
 def json_github_api_request(path, method='GET', data=None):
     with github_api_request(path, method, data) as response:
