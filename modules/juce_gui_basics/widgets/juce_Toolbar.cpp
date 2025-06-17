@@ -668,14 +668,14 @@ void Toolbar::mouseDown (const MouseEvent&) {}
 class Toolbar::CustomisationDialog final : public DialogWindow
 {
 public:
-    CustomisationDialog (ToolbarItemFactory& factory, Toolbar& bar, int optionFlags)
+    CustomisationDialog (ToolbarItemFactory& factory, SafePointer<Toolbar> bar, int optionFlags)
         : DialogWindow (TRANS ("Add/remove items from toolbar"),
-                        bar.findColour (Toolbar::customisationDialogBackgroundColourId),
+                        bar->findColour (Toolbar::customisationDialogBackgroundColourId),
                         true,
                         true),
           toolbar (bar)
     {
-        setContentOwned (new CustomiserPanel (factory, toolbar, optionFlags), true);
+        setContentOwned (new CustomiserPanel (factory, *toolbar, optionFlags), true);
         setResizable (true, true);
         setResizeLimits (400, 300, 1500, 1000);
         positionNearBar();
@@ -683,7 +683,8 @@ public:
 
     ~CustomisationDialog() override
     {
-        toolbar.setEditingActive (false);
+        if (toolbar != nullptr)
+            toolbar->setEditingActive (false);
     }
 
     void closeButtonPressed() override
@@ -693,38 +694,41 @@ public:
 
     bool canModalEventBeSentToComponent (const Component* comp) override
     {
-        return toolbar.isParentOf (comp)
+        return (toolbar != nullptr && toolbar->isParentOf (comp))
                  || dynamic_cast<const detail::ToolbarItemDragAndDropOverlayComponent*> (comp) != nullptr;
     }
 
     void positionNearBar()
     {
-        auto screenSize = toolbar.getParentMonitorArea();
-        auto pos = toolbar.getScreenPosition();
+        if (toolbar == nullptr)
+            return;
+
+        auto screenSize = toolbar->getParentMonitorArea();
+        auto pos = toolbar->getScreenPosition();
         const int gap = 8;
 
-        if (toolbar.isVertical())
+        if (toolbar->isVertical())
         {
             if (pos.x > screenSize.getCentreX())
                 pos.x -= getWidth() - gap;
             else
-                pos.x += toolbar.getWidth() + gap;
+                pos.x += toolbar->getWidth() + gap;
         }
         else
         {
-            pos.x += (toolbar.getWidth() - getWidth()) / 2;
+            pos.x += (toolbar->getWidth() - getWidth()) / 2;
 
             if (pos.y > screenSize.getCentreY())
                 pos.y -= getHeight() - gap;
             else
-                pos.y += toolbar.getHeight() + gap;
+                pos.y += toolbar->getHeight() + gap;
         }
 
         setTopLeftPosition (pos);
     }
 
 private:
-    Toolbar& toolbar;
+    SafePointer<Toolbar> toolbar;
 
     class CustomiserPanel  : public Component
     {
@@ -825,7 +829,7 @@ void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int op
 {
     setEditingActive (true);
 
-    (new CustomisationDialog (factory, *this, optionFlags))
+    (new CustomisationDialog (factory, this, optionFlags))
         ->enterModalState (true, nullptr, true);
 }
 
