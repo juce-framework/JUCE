@@ -80,7 +80,7 @@ jobs:
     uses: juce-framework/JUCE-utils/.github/workflows/deploy.yml@master
     secrets: inherit
   docs:
-    if: ${{ contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
+    if: ${{ !cancelled() && (success() || needs.deploy.result == 'success') && contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
     needs: [deploy]
     name: Docs
     uses: juce-framework/JUCE-utils/.github/workflows/docs.yml@master
