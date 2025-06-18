@@ -2551,10 +2551,16 @@ private:
 
     bool windowUsesNativeShadow() const
     {
-        return hasTitleBar()
-            || (   (0 != (styleFlags & windowHasDropShadow))
-                && (0 == (styleFlags & windowIsSemiTransparent))
-                && (0 == (styleFlags & windowIsTemporary)));
+        if (hasTitleBar())
+            return true;
+
+        // On Windows 11, the native drop shadow also gives us a 1px transparent border and rounded
+        // corners, which doesn't look great in kiosk mode. Disable the native shadow for
+        // fullscreen windows.
+        return Desktop::getInstance().getKioskModeComponent() != &component
+               && (0 != (styleFlags & windowHasDropShadow))
+               && (0 == (styleFlags & windowIsSemiTransparent))
+               && (0 == (styleFlags & windowIsTemporary));
     }
 
     void updateShadower()
