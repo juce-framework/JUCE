@@ -476,7 +476,7 @@ public:
               characterSetValue              (config, Ids::characterSet,               getUndoManager()),
               architectureTypeValue          (config, Ids::winArchitecture,            getUndoManager(), Array<var> { getArchitectureValueString (Architecture::win64) }, ","),
               fastMathValue                  (config, Ids::fastMath,                   getUndoManager()),
-              debugInformationFormatValue    (config, Ids::debugInformationFormat,     getUndoManager(), "OldStyle"),
+              debugInformationFormatValue    (config, Ids::debugInformationFormat,     getUndoManager(), "ProgramDatabase"),
               pluginBinaryCopyStepValue      (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false),
               vstBinaryLocation              (config, Ids::vstBinaryLocation,          getUndoManager()),
               vst3BinaryLocation             (config, Ids::vst3BinaryLocation,         getUndoManager()),

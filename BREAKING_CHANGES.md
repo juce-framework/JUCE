@@ -4,6 +4,31 @@
 
 ## Change
 
+The default Visual Studio project settings for "Debug Information Format" have
+changed in the Projucer. By default debug symbols are generated using the /Zi
+flag.
+
+**Possible Issues**
+
+PDB file generation may change depending on the combination of "Debug
+Information Format" settings.
+
+**Workaround**
+
+Change the "Debug Information Format" setting for each Visual Studio
+configuration as required.
+
+**Rationale**
+
+The previous change to "/Z7" for the "Debug Information Format" flag caused
+build artefacts to drastically increase in size in some configurations, which
+could lead to build failures. In particular, when link-time code-generation is
+enabled, .obj files generated with the debug info mode set to "Z7" or "None"
+may be much larger than when using "Zi" instead.
+
+
+## Change
+
 The "Debug Information Format" flag has been changed to "/Zi" from "/Z7" when
 building JUCE on Windows using CMake.
 
