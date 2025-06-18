@@ -3877,7 +3877,8 @@ private:
                     // and if Microsoft's own VS Code doesn't have perfect mouse handling I don't
                     // think we can be expected to either!
 
-                    if ((styleFlags & windowIsResizable) != 0)
+                    if ((styleFlags & windowIsResizable) != 0
+                        && Desktop::getInstance().getKioskModeComponent() != &component)
                     {
                         const ScopedThreadDPIAwarenessSetter scope { hwnd };
 
