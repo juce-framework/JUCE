@@ -60,8 +60,14 @@ public:
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_new_with_settings, juce_webkit_web_view_new_with_settings,
                                          (WebKitSettings*), GtkWidget*)
 
-    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_load_uri, juce_webkit_web_view_load_uri,
-                                         (WebKitWebView*, const gchar*), void)
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_load_request, juce_webkit_web_view_load_request,
+                                         (WebKitWebView*, const WebKitURIRequest*), void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_uri_request_new, juce_webkit_uri_request_new,
+                                         (const gchar*), WebKitURIRequest*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_uri_request_get_http_headers, juce_webkit_uri_request_get_http_headers,
+                                         (WebKitURIRequest*), SoupMessageHeaders*)
 
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_policy_decision_use, juce_webkit_policy_decision_use,
                                          (WebKitPolicyDecision*), void)
@@ -311,7 +317,9 @@ private:
                             makeSymbolBinding (juce_webkit_web_view_reload,                                      "webkit_web_view_reload"),
                             makeSymbolBinding (juce_webkit_web_view_stop_loading,                                "webkit_web_view_stop_loading"),
                             makeSymbolBinding (juce_webkit_uri_request_get_uri,                                  "webkit_uri_request_get_uri"),
-                            makeSymbolBinding (juce_webkit_web_view_load_uri,                                    "webkit_web_view_load_uri"),
+                            makeSymbolBinding (juce_webkit_web_view_load_request,                                "webkit_web_view_load_request"),
+                            makeSymbolBinding (juce_webkit_uri_request_new,                                      "webkit_uri_request_new"),
+                            makeSymbolBinding (juce_webkit_uri_request_get_http_headers,                         "webkit_uri_request_get_http_headers"),
                             makeSymbolBinding (juce_webkit_navigation_action_get_request,                        "webkit_navigation_action_get_request"),
                             makeSymbolBinding (juce_webkit_navigation_policy_decision_get_frame_name,            "webkit_navigation_policy_decision_get_frame_name"),
                             makeSymbolBinding (juce_webkit_navigation_policy_decision_get_navigation_action,     "webkit_navigation_policy_decision_get_navigation_action"),
@@ -758,7 +766,7 @@ public:
         WebKitSymbols::getInstance()->juce_gtk_container_add ((GtkContainer*) container, webviewWidget);
         WebKitSymbols::getInstance()->juce_gtk_container_add ((GtkContainer*) plug,      container);
 
-        WebKitSymbols::getInstance()->juce_webkit_web_view_load_uri (webview, "about:blank");
+        goToURLWithHeaders ("about:blank", {});
 
         juce_g_signal_connect (webview, "decide-policy",
                                (GCallback) decidePolicyCallback, this);
@@ -800,12 +808,52 @@ public:
         wk.juce_g_free (s);
     }
 
+    void goToURLWithHeaders (StringRef url, Span<const var> headers)
+    {
+        auto& wk = *WebKitSymbols::getInstance();
+
+        auto* request = wk.juce_webkit_uri_request_new (url.text.getAddress());
+        const ScopeGuard requestScope { [&] { wk.juce_g_object_unref (request); } };
+
+        if (! headers.empty())
+        {
+            if (auto* soupHeaders = wk.juce_webkit_uri_request_get_http_headers (request))
+            {
+                for (const String item : headers)
+                {
+                    const auto key   = item.upToFirstOccurrenceOf (":", false, false);
+                    const auto value = item.fromFirstOccurrenceOf (":", false, false);
+
+                    if (key.isNotEmpty() && value.isNotEmpty())
+                        wk.juce_soup_message_headers_append (soupHeaders, key.toRawUTF8(), value.toRawUTF8());
+                    else
+                        jassertfalse; // malformed headers?
+                }
+            }
+        }
+
+        wk.juce_webkit_web_view_load_request (webview, request);
+    }
+
     void goToURL (const var& params)
     {
-        static Identifier urlIdentifier ("url");
-        auto url = params.getProperty (urlIdentifier, var()).toString();
+        static const Identifier urlIdentifier ("url");
+        const String url = params[urlIdentifier];
 
-        WebKitSymbols::getInstance()->juce_webkit_web_view_load_uri (webview, url.toRawUTF8());
+        if (url.isEmpty())
+            return;
+
+        static const Identifier headersIdentifier ("headers");
+        const auto* headers = params[headersIdentifier].getArray();
+
+        static const Identifier postDataIdentifier ("postData");
+        [[maybe_unused]] const auto* postData = params[postDataIdentifier].getBinaryData();
+        // post data is not currently sent
+        jassert (postData == nullptr);
+
+        goToURLWithHeaders (url,
+                            headers != nullptr ? Span { headers->getRawDataPointer(), (size_t) headers->size() }
+                                               : Span<const var>{});
     }
 
     void handleDecisionResponse (const var& params)
@@ -842,7 +890,7 @@ public:
                                                                            this);
     }
 
-    void handleResourceRequesteResponse (const var& params)
+    void handleResourceRequestedResponse (const var& params)
     {
         auto& wk = *WebKitSymbols::getInstance();
 
@@ -909,7 +957,7 @@ public:
         else if (cmd == "decision")                   handleDecisionResponse (params);
         else if (cmd == "init")                       initialisationData = FromVar::convert<InitialisationData> (params);
         else if (cmd == "evaluateJavascript")         evaluateJavascript (params);
-        else if (cmd == ResourceRequestResponse::key) handleResourceRequesteResponse (params);
+        else if (cmd == ResourceRequestResponse::key) handleResourceRequestedResponse (params);
     }
 
     void receiverHadError() override
