@@ -2221,6 +2221,41 @@ public:
         jassertfalse;
     }
 
+    DWORD computeNativeStyleFlags() const
+    {
+        const auto titled = ! isKioskMode() && (styleFlags & windowHasTitleBar) != 0;
+        const auto usesDropShadow = windowUsesNativeShadow();
+        const auto hasClose = (styleFlags & windowHasCloseButton) != 0;
+        const auto hasMin = (styleFlags & windowHasMinimiseButton) != 0;
+        const auto hasMax = (styleFlags & windowHasMaximiseButton) != 0;
+        const auto resizable = (styleFlags & windowIsResizable) != 0;
+
+        DWORD result = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+
+        if (parentToAddTo != nullptr)
+        {
+            result |= WS_CHILD;
+        }
+        else if (titled || usesDropShadow)
+        {
+            result |= usesDropShadow ? WS_CAPTION : 0;
+            result |= titled ? (WS_OVERLAPPED | WS_CAPTION) : WS_POPUP;
+            result |= hasClose ? (WS_SYSMENU | WS_CAPTION) : 0;
+            result |= hasMin ? (WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
+            result |= hasMax ? (WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
+            result |= resizable ? WS_THICKFRAME : 0;
+        }
+        else
+        {
+            // Transparent windows need WS_POPUP and not WS_OVERLAPPED | WS_CAPTION, otherwise
+            // the top corners of the window will get rounded unconditionally.
+            // Unfortunately, this disables nice mouse handling for the caption area.
+            result |= WS_POPUP;
+        }
+
+        return result;
+    }
+
     bool hasTitleBar() const                 { return (styleFlags & windowHasTitleBar) != 0; }
     double getScaleFactor() const            { return scaleFactor; }
 
@@ -2385,46 +2420,23 @@ private:
 
     void createWindowOnMessageThread()
     {
-        DWORD exstyle = 0;
-        DWORD type = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+        const auto type = computeNativeStyleFlags();
 
-        const auto titled = (styleFlags & windowHasTitleBar) != 0;
-        const auto hasClose = (styleFlags & windowHasCloseButton) != 0;
-        const auto hasMin = (styleFlags & windowHasMinimiseButton) != 0;
-        const auto hasMax = (styleFlags & windowHasMaximiseButton) != 0;
-        const auto appearsOnTaskbar = (styleFlags & windowAppearsOnTaskbar) != 0;
-        const auto resizable = (styleFlags & windowIsResizable) != 0;
-        const auto usesDropShadow = windowUsesNativeShadow();
-
-        if (parentToAddTo != nullptr)
+        const auto exstyle = std::invoke ([&]() -> DWORD
         {
-            type |= WS_CHILD;
-        }
-        else
-        {
-            if (titled || usesDropShadow)
-            {
-                type |= usesDropShadow ? WS_CAPTION : 0;
-                type |= titled ? (WS_OVERLAPPED | WS_CAPTION) : WS_POPUP;
-                type |= hasClose ? (WS_SYSMENU | WS_CAPTION) : 0;
-                type |= hasMin ? (WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
-                type |= hasMax ? (WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
-                type |= resizable ? WS_THICKFRAME : 0;
-            }
-            else
-            {
-                // Transparent windows need WS_POPUP and not WS_OVERLAPPED | WS_CAPTION, otherwise
-                // the top corners of the window will get rounded unconditionally.
-                // Unfortunately, this disables nice mouse handling for the caption area.
-                type |= WS_POPUP;
-            }
+            if (parentToAddTo != nullptr)
+                return 0;
 
-            exstyle |= appearsOnTaskbar ? WS_EX_APPWINDOW : WS_EX_TOOLWINDOW;
-        }
+            const auto appearsOnTaskbar = (styleFlags & windowAppearsOnTaskbar) != 0;
+            return appearsOnTaskbar ? WS_EX_APPWINDOW : WS_EX_TOOLWINDOW;
+        });
 
         hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->getWindowClassName(),
                                L"", type, 0, 0, 0, 0, parentToAddTo, nullptr,
                                (HINSTANCE) Process::getCurrentModuleInstanceHandle(), nullptr);
+
+        const auto titled = (styleFlags & windowHasTitleBar) != 0;
+        const auto usesDropShadow = windowUsesNativeShadow();
 
         if (! titled && usesDropShadow)
         {
@@ -2551,16 +2563,11 @@ private:
 
     bool windowUsesNativeShadow() const
     {
-        if (hasTitleBar())
-            return true;
-
-        // On Windows 11, the native drop shadow also gives us a 1px transparent border and rounded
-        // corners, which doesn't look great in kiosk mode. Disable the native shadow for
-        // fullscreen windows.
         return ! isKioskMode()
-               && (0 != (styleFlags & windowHasDropShadow))
-               && (0 == (styleFlags & windowIsSemiTransparent))
-               && (0 == (styleFlags & windowIsTemporary));
+               && (hasTitleBar()
+                   || (   (0 != (styleFlags & windowHasDropShadow))
+                       && (0 == (styleFlags & windowIsSemiTransparent))
+                       && (0 == (styleFlags & windowIsTemporary))));
     }
 
     void updateShadower()
@@ -5865,8 +5872,22 @@ String SystemClipboard::getTextFromClipboard()
 //==============================================================================
 void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
-    if (auto* tlw = dynamic_cast<TopLevelWindow*> (kioskModeComp))
-        tlw->setUsingNativeTitleBar (! enableOrDisable);
+    if (auto* peer = dynamic_cast<HWNDComponentPeer*> (kioskModeComp->getPeer()))
+    {
+        const auto prevFlags = (DWORD) GetWindowLong (peer->getHWND(), GWL_STYLE);
+        const auto nextFlags = peer->computeNativeStyleFlags();
+
+        if (nextFlags != prevFlags)
+        {
+            const auto styleFlags = peer->getStyleFlags();
+            kioskModeComp->removeFromDesktop();
+            kioskModeComp->addToDesktop (styleFlags);
+        }
+    }
+    else
+    {
+        jassertfalse;
+    }
 
     if (kioskModeComp != nullptr && enableOrDisable)
         kioskModeComp->setBounds (getDisplays().getDisplayForRect (kioskModeComp->getScreenBounds())->totalArea);
