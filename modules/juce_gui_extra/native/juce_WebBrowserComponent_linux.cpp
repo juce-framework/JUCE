@@ -433,7 +433,7 @@ class CommandReceiver
 public:
     struct Responder
     {
-        virtual ~Responder() {}
+        virtual ~Responder() = default;
 
         virtual void handleCommand (const String& cmd, const var& param) = 0;
         virtual void receiverHadError() = 0;
@@ -464,37 +464,24 @@ public:
     {
         for (;;)
         {
-            auto len = (receivingLength ? sizeof (size_t) : bufferLength.len);
+            char lengthBytes[sizeof (size_t)]{};
+            const auto numLengthBytes = readIntoBuffer (lengthBytes);
 
-            if (! receivingLength)
-                buffer.realloc (len);
-
-            auto* dst = (receivingLength ? bufferLength.data : buffer.getData());
-
-            auto actual = read (inChannel, &dst[pos], static_cast<size_t> (len - pos));
-
-            if (actual < 0)
-            {
-                if (errno == EINTR)
-                    continue;
-
+            if (numLengthBytes != std::size (lengthBytes))
                 break;
-            }
 
-            pos += static_cast<size_t> (actual);
+            const auto numBytesExpected = readUnaligned<size_t> (lengthBytes);
+            buffer.reserve (numBytesExpected + 1);
+            buffer.resize (numBytesExpected);
 
-            if (pos == len)
-            {
-                pos = 0;
+            if (readIntoBuffer (buffer) != numBytesExpected)
+                break;
 
-                if (! std::exchange (receivingLength, ! receivingLength))
-                {
-                    parseJSON (String (buffer.getData(), bufferLength.len));
+            buffer.push_back (0);
+            parseJSON (StringRef (buffer.data()));
 
-                    if (ret == ReturnAfterMessageReceived::yes)
-                        return;
-                }
-            }
+            if (ret == ReturnAfterMessageReceived::yes)
+                return;
         }
 
         if (errno != EAGAIN && errno != EWOULDBLOCK && responder != nullptr)
@@ -535,7 +522,7 @@ public:
     }
 
 private:
-    void parseJSON (const String& json)
+    void parseJSON (StringRef json)
     {
         auto object = JSON::fromString (json);
 
@@ -549,15 +536,37 @@ private:
         }
     }
 
+    /*  Try to fill the target buffer by reading from the input channel.
+        Returns the number of bytes that were successfully read.
+    */
+    size_t readIntoBuffer (Span<char> target) const
+    {
+        size_t pos = 0;
+
+        while (pos != target.size())
+        {
+            const auto bytesThisTime = read (inChannel, target.data() + pos, target.size() - pos);
+
+            if (bytesThisTime < 0)
+            {
+                if (errno == EINTR)
+                    continue;
+
+                break;
+            }
+
+            pos += static_cast<size_t> (bytesThisTime);
+        }
+
+        return pos;
+    }
+
     static Identifier getCmdIdentifier()    { static Identifier Id ("cmd");    return Id; }
     static Identifier getParamIdentifier()  { static Identifier Id ("params"); return Id; }
 
+    std::vector<char> buffer;
     Responder* responder = nullptr;
     int inChannel = 0;
-    size_t pos = 0;
-    bool receivingLength = true;
-    union { char data [sizeof (size_t)]; size_t len; } bufferLength;
-    HeapBlock<char> buffer;
 };
 
 #define juce_g_signal_connect(instance, detailed_signal, c_handler, data) \
