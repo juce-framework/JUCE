@@ -2557,7 +2557,7 @@ private:
         // On Windows 11, the native drop shadow also gives us a 1px transparent border and rounded
         // corners, which doesn't look great in kiosk mode. Disable the native shadow for
         // fullscreen windows.
-        return Desktop::getInstance().getKioskModeComponent() != &component
+        return ! isKioskMode()
                && (0 != (styleFlags & windowHasDropShadow))
                && (0 == (styleFlags & windowIsSemiTransparent))
                && (0 == (styleFlags & windowIsTemporary));
@@ -3903,8 +3903,7 @@ private:
                     // and if Microsoft's own VS Code doesn't have perfect mouse handling I don't
                     // think we can be expected to either!
 
-                    if ((styleFlags & windowIsResizable) != 0
-                        && Desktop::getInstance().getKioskModeComponent() != &component)
+                    if ((styleFlags & windowIsResizable) != 0 && ! isKioskMode())
                     {
                         const ScopedThreadDPIAwarenessSetter scope { hwnd };
 
