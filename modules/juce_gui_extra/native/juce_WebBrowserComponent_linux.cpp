@@ -547,9 +547,9 @@ private:
         {
             const auto bytesThisTime = read (inChannel, target.data() + pos, target.size() - pos);
 
-            if (bytesThisTime < 0)
+            if (bytesThisTime <= 0)
             {
-                if (errno == EINTR)
+                if (bytesThisTime != 0 && errno == EINTR)
                     continue;
 
                 break;
