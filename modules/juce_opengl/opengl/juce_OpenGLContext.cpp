@@ -193,6 +193,10 @@ public:
     //==============================================================================
     void pause()
     {
+       #if JUCE_ANDROID
+        context.executeOnGLThread ([this] (auto&) { nativeContext->notifyWillPause(); }, true);
+       #endif
+
         renderThread->remove (this);
 
         if ((state.fetch_and (~StateFlags::initialised) & StateFlags::initialised) == 0)
@@ -669,6 +673,10 @@ public:
 
         if (context.renderer != nullptr)
             context.renderer->newOpenGLContextCreated();
+
+       #if JUCE_ANDROID
+        nativeContext->notifyDidResume();
+       #endif
 
         return InitResult::success;
     }
@@ -1667,6 +1675,16 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
     }
 
     JUCE_CHECK_OPENGL_ERROR
+}
+
+void OpenGLContext::NativeContextListener::addListener (OpenGLContext& ctx, NativeContextListener& l)
+{
+    ctx.nativeContext->addListener (l);
+}
+
+void OpenGLContext::NativeContextListener::removeListener (OpenGLContext& ctx, NativeContextListener& l)
+{
+    ctx.nativeContext->removeListener (l);
 }
 
 #if JUCE_ANDROID

@@ -35,7 +35,23 @@
 namespace juce
 {
 
-class OpenGLFrameBuffer::Pimpl
+/*
+    Used on Android to detect when the GL context and associated resources (textures, framebuffers,
+    etc.) need to be destroyed/created due to the Surface changing state.
+*/
+class OpenGLContext::NativeContextListener
+{
+public:
+    virtual ~NativeContextListener() = default;
+
+    virtual void contextWillPause() = 0;
+    virtual void contextDidResume() = 0;
+
+    static void addListener (OpenGLContext& ctx, NativeContextListener& l);
+    static void removeListener (OpenGLContext& ctx, NativeContextListener& l);
+};
+
+class OpenGLFrameBuffer::Pimpl : private OpenGLContext::NativeContextListener
 {
 public:
     struct SavedState
@@ -43,6 +59,11 @@ public:
         int width = 0, height = 0;
         std::vector<PixelARGB> data;
     };
+
+    ~Pimpl() override
+    {
+        release();
+    }
 
     bool isValid() const noexcept
     {
@@ -63,6 +84,8 @@ public:
             return false;
 
         associatedContext = &context;
+        NativeContextListener::addListener (*associatedContext, *this);
+
         return true;
     }
 
@@ -115,7 +138,9 @@ public:
 
     void release()
     {
-        associatedContext = nullptr;
+        if (auto* prev = std::exchange (associatedContext, nullptr))
+            NativeContextListener::removeListener (*prev, *this);
+
         state.emplace<std::monostate>();
     }
 
@@ -353,7 +378,7 @@ private:
             if (OpenGLHelpers::isContextActive())
             {
                 if (textureID != 0)
-                    glDeleteTextures (1, &textureID);
+                    gl::glDeleteTextures (1, &textureID);
 
                 if (depthOrStencilBuffer != 0)
                     gl::glDeleteRenderbuffers (1, &depthOrStencilBuffer);
@@ -426,6 +451,17 @@ private:
         jassertfalse;
 
         return nullptr;
+    }
+
+    void contextWillPause() override
+    {
+        saveAndRelease();
+    }
+
+    void contextDidResume() override
+    {
+        if (associatedContext != nullptr)
+            reloadSavedCopy (*associatedContext);
     }
 
     OpenGLContext* associatedContext = nullptr;

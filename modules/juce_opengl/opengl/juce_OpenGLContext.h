@@ -348,6 +348,7 @@ public:
     //==============================================================================
    #ifndef DOXYGEN
     class NativeContext;
+    class NativeContextListener;
    #endif
 
 private:
