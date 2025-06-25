@@ -124,6 +124,12 @@ void JPEGImageFormat::setQuality (const float newQuality)
 {
     quality = newQuality;
 }
+    
+void JPEGImageFormat::setDensity (const juce::uint16 x, const juce::uint16 y)
+{
+    xDensity = x;
+    yDensity = y;
+}
 
 String JPEGImageFormat::getFormatName()                   { return "JPEG"; }
 bool JPEGImageFormat::usesFileExtension (const File& f)   { return f.hasFileExtension ("jpeg;jpg"); }
@@ -292,10 +298,14 @@ bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     jpegCompStruct.in_color_space = JCS_RGB;
     jpegCompStruct.write_JFIF_header = 1;
 
-    jpegCompStruct.X_density = 72;
-    jpegCompStruct.Y_density = 72;
-
     jpeg_set_defaults (&jpegCompStruct);
+    
+    if (xDensity > 0 && yDensity > 0)
+    {
+        jpegCompStruct.density_unit = 1; // 1 = dots per inch
+        jpegCompStruct.X_density = xDensity;
+        jpegCompStruct.Y_density = yDensity;
+    }
 
     jpegCompStruct.dct_method = JDCT_FLOAT;
     jpegCompStruct.optimize_coding = 1;

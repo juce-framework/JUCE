@@ -220,6 +220,12 @@ namespace PNGHelpers
 //==============================================================================
 PNGImageFormat::PNGImageFormat()    {}
 PNGImageFormat::~PNGImageFormat()   {}
+    
+void PNGImageFormat::setDensity (const juce::uint32 x, const juce::uint32 y)
+{
+    xDensity = x;
+    yDensity = y;
+}
 
 String PNGImageFormat::getFormatName()                   { return "PNG"; }
 bool PNGImageFormat::usesFileExtension (const File& f)   { return f.hasFileExtension ("png"); }
@@ -298,6 +304,16 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     sig_bit.gray  = 0;
     sig_bit.alpha = 8;
     png_set_sBIT (pngWriteStruct, pngInfoStruct, &sig_bit);
+    
+    if (xDensity > 0 && yDensity > 0)
+    {
+        // Set the physical pixel dimensions
+        // (PNG uses pixels per meter, so convert from pixels per inch)
+        png_set_pHYs (pngWriteStruct, pngInfoStruct,
+                      (png_uint_32) ((double)xDensity * 39.3700787402),
+                      (png_uint_32) ((double)yDensity * 39.3700787402),
+                      PNG_RESOLUTION_METER);
+    }
 
     png_write_info (pngWriteStruct, pngInfoStruct);
 

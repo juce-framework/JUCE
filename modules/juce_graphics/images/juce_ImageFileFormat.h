@@ -162,6 +162,14 @@ public:
     //==============================================================================
     PNGImageFormat();
     ~PNGImageFormat() override;
+    
+    //==============================================================================
+    /** Specifies the dentity to be used when writing a JPEG file.
+     
+     @param x  the horizontal density in pixels per inch
+     @param y  the vertical density in pixels per inch
+     */
+    void setDensity (const juce::uint32 x, const juce::uint32 y);
 
     //==============================================================================
     String getFormatName() override;
@@ -169,6 +177,10 @@ public:
     bool canUnderstand (InputStream&) override;
     Image decodeImage (InputStream&) override;
     bool writeImageToStream (const Image&, OutputStream&) override;
+    
+private:
+    juce::uint32 xDensity = 72;
+    juce::uint32 yDensity = 72;
 };
 
 
@@ -194,6 +206,13 @@ public:
                            any negative value is "default" quality
     */
     void setQuality (float newQuality);
+    
+    /** Specifies the dentity to be used when writing a JPEG file.
+     
+     @param x  the horizontal density in pixels per inch
+     @param y  the vertical density in pixels per inch
+     */
+    void setDensity (const juce::uint16 x, const juce::uint16 y);
 
     //==============================================================================
     String getFormatName() override;
@@ -204,6 +223,8 @@ public:
 
 private:
     float quality;
+    juce::uint16 xDensity = 72;
+    juce::uint16 yDensity = 72;
 };
 
 //==============================================================================
