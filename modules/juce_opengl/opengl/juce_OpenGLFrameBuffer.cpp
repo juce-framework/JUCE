@@ -54,12 +54,16 @@ public:
         jassert (context.isActive()); // The context must be active when creating a framebuffer!
 
         release();
-        auto& transientState = state.emplace<TransientState> (context, width, height, false, false);
+        auto& transientState = state.emplace<TransientState> (width, height, false, false);
 
         if (! transientState.createdOk())
             release();
 
-        return isValid();
+        if (! isValid())
+            return false;
+
+        associatedContext = &context;
+        return true;
     }
 
     bool initialise (OpenGLContext& context, const Image& image)
@@ -77,7 +81,7 @@ public:
     {
         auto* p = std::get_if<TransientState> (&other.pimpl->state);
 
-        if (p == nullptr)
+        if (p == nullptr || other.pimpl->associatedContext == nullptr)
         {
             release();
             return true;
@@ -85,14 +89,16 @@ public:
 
         const Rectangle<int> area (p->width, p->height);
 
-        if (! initialise (p->context, area.getWidth(), area.getHeight()))
+        if (! initialise (*other.pimpl->associatedContext, area.getWidth(), area.getHeight()))
             return false;
+
+        jassert (associatedContext != nullptr);
 
         auto* transientState = std::get_if<TransientState> (&state);
         transientState->bind();
 
        #if ! JUCE_ANDROID
-        if (! transientState->context.isCoreProfile())
+        if (! associatedContext->isCoreProfile())
             glEnable (GL_TEXTURE_2D);
 
         clearGLError();
@@ -100,7 +106,7 @@ public:
         {
             const ScopedTextureBinding scopedTextureBinding;
             glBindTexture (GL_TEXTURE_2D, p->textureID);
-            transientState->context.copyTexture (area, area, area.getWidth(), area.getHeight(), false);
+            associatedContext->copyTexture (area, area, area.getWidth(), area.getHeight(), false);
         }
 
         transientState->unbind();
@@ -109,6 +115,7 @@ public:
 
     void release()
     {
+        associatedContext = nullptr;
         state.emplace<std::monostate>();
     }
 
@@ -218,12 +225,14 @@ public:
 
     bool writePixels (const PixelARGB* data, const Rectangle<int>& area)
     {
+        if (associatedContext == nullptr)
+            return false;
+
+        const OpenGLTargetSaver ts;
         auto* transientState = makeAndGetCurrentRenderingTarget();
 
         if (transientState == nullptr)
             return false;
-
-        OpenGLTargetSaver ts (transientState->context);
 
         glDisable (GL_DEPTH_TEST);
         glDisable (GL_BLEND);
@@ -233,15 +242,15 @@ public:
         tex.loadARGB (data, area.getWidth(), area.getHeight());
 
         glViewport (0, 0, transientState->width, transientState->height);
-        transientState->context.copyTexture (area,
-                                             Rectangle<int> (area.getX(),
-                                                             area.getY(),
-                                                             tex.getWidth(),
-                                                             tex.getHeight()),
-                                             transientState->width,
-                                             transientState->height,
-                                             true,
-                                             false);
+        associatedContext->copyTexture (area,
+                                        Rectangle<int> (area.getX(),
+                                                        area.getY(),
+                                                        tex.getWidth(),
+                                                        tex.getHeight()),
+                                        transientState->width,
+                                        transientState->height,
+                                        true,
+                                        false);
 
         JUCE_CHECK_OPENGL_ERROR
         return true;
@@ -269,13 +278,11 @@ private:
     class TransientState
     {
     public:
-        TransientState (OpenGLContext& c,
-                        const int w,
+        TransientState (const int w,
                         const int h,
                         const bool wantsDepthBuffer,
                         const bool wantsStencilBuffer)
-            : context (c),
-              width (w),
+            : width (w),
               height (h),
               textureID (0),
               frameBufferID (0),
@@ -286,11 +293,11 @@ private:
             jassert (OpenGLHelpers::isContextActive());
 
            #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
-            if (context.extensions.glGenFramebuffers == nullptr)
-            return;
+            if (gl::glGenFramebuffers == nullptr)
+                return;
            #endif
 
-            context.extensions.glGenFramebuffers (1, &frameBufferID);
+            gl::glGenFramebuffers (1, &frameBufferID);
             bind();
 
             {
@@ -310,13 +317,13 @@ private:
                 JUCE_CHECK_OPENGL_ERROR
             }
 
-            context.extensions.glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
+            gl::glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
 
             if (wantsDepthBuffer || wantsStencilBuffer)
             {
-                context.extensions.glGenRenderbuffers (1, &depthOrStencilBuffer);
-                context.extensions.glBindRenderbuffer (GL_RENDERBUFFER, depthOrStencilBuffer);
-                jassert (context.extensions.glIsRenderbuffer (depthOrStencilBuffer));
+                gl::glGenRenderbuffers (1, &depthOrStencilBuffer);
+                gl::glBindRenderbuffer (GL_RENDERBUFFER, depthOrStencilBuffer);
+                jassert (gl::glIsRenderbuffer (depthOrStencilBuffer));
 
                #if JUCE_OPENGL_ES
                 constexpr auto depthComponentConstant = (GLenum) GL_DEPTH_COMPONENT16;
@@ -324,17 +331,18 @@ private:
                 constexpr auto depthComponentConstant = (GLenum) GL_DEPTH_COMPONENT;
                #endif
 
-                context.extensions.glRenderbufferStorage (GL_RENDERBUFFER,
-                                                          (wantsDepthBuffer && wantsStencilBuffer) ? (GLenum) GL_DEPTH24_STENCIL8
-                                                                                                   : depthComponentConstant,
-                                                          width, height);
+                gl::glRenderbufferStorage (GL_RENDERBUFFER,
+                                           (wantsDepthBuffer && wantsStencilBuffer) ? (GLenum) GL_DEPTH24_STENCIL8
+                                                                                    : depthComponentConstant,
+                                           width,
+                                           height);
 
                 GLint params = 0;
-                context.extensions.glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_DEPTH_SIZE, &params);
-                context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
+                gl::glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_DEPTH_SIZE, &params);
+                gl::glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
 
                 if (wantsStencilBuffer)
-                    context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
+                    gl::glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
             }
 
             unbind();
@@ -348,10 +356,10 @@ private:
                     glDeleteTextures (1, &textureID);
 
                 if (depthOrStencilBuffer != 0)
-                    context.extensions.glDeleteRenderbuffers (1, &depthOrStencilBuffer);
+                    gl::glDeleteRenderbuffers (1, &depthOrStencilBuffer);
 
                 if (frameBufferID != 0)
-                    context.extensions.glDeleteFramebuffers (1, &frameBufferID);
+                    gl::glDeleteFramebuffers (1, &frameBufferID);
 
                 JUCE_CHECK_OPENGL_ERROR
             }
@@ -365,17 +373,16 @@ private:
         void bind()
         {
             glGetIntegerv (GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
-            context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
+            gl::glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
             JUCE_CHECK_OPENGL_ERROR
         }
 
         void unbind()
         {
-            context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, (GLuint) prevFramebuffer);
+            gl::glBindFramebuffer (GL_FRAMEBUFFER, (GLuint) prevFramebuffer);
             JUCE_CHECK_OPENGL_ERROR
         }
 
-        OpenGLContext& context;
         const int width, height;
         GLuint textureID, frameBufferID, depthOrStencilBuffer;
 
@@ -421,6 +428,7 @@ private:
         return nullptr;
     }
 
+    OpenGLContext* associatedContext = nullptr;
     std::variant<std::monostate, TransientState, SavedState> state;
 };
 
