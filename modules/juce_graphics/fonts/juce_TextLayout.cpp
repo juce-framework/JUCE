@@ -421,6 +421,9 @@ void TextLayout::createStandardLayout (const AttributedString& text)
     if (text.getWordWrap() != AttributedString::none)
         shapedTextOptions = shapedTextOptions.withWordWrapWidth (width);
 
+    if (text.getWordWrap() == AttributedString::WordWrap::byChar)
+        shapedTextOptions = shapedTextOptions.withAllowBreakingInsideWord (true);
+
     ShapedText st { text.getText(), shapedTextOptions };
 
     std::optional<int64> lastLineNumber;
