@@ -46,20 +46,20 @@ public:
 
     bool isValid() const noexcept
     {
-        return transientState != nullptr;
+        return std::holds_alternative<TransientState> (state);
     }
 
     bool initialise (OpenGLContext& context, int width, int height)
     {
         jassert (context.isActive()); // The context must be active when creating a framebuffer!
 
-        transientState.reset();
-        transientState.reset (new TransientState (context, width, height, false, false));
+        release();
+        auto& transientState = state.emplace<TransientState> (context, width, height, false, false);
 
-        if (! transientState->createdOk())
-            transientState.reset();
+        if (! transientState.createdOk())
+            release();
 
-        return transientState != nullptr;
+        return isValid();
     }
 
     bool initialise (OpenGLContext& context, const Image& image)
@@ -75,123 +75,137 @@ public:
 
     bool initialise (OpenGLFrameBuffer& other)
     {
-        auto* p = other.pimpl->transientState.get();
+        auto* p = std::get_if<TransientState> (&other.pimpl->state);
 
         if (p == nullptr)
         {
-            transientState.reset();
+            release();
             return true;
         }
 
-        const Rectangle<int> area (transientState->width, transientState->height);
+        const Rectangle<int> area (p->width, p->height);
 
-        if (initialise (p->context, area.getWidth(), area.getHeight()))
+        if (! initialise (p->context, area.getWidth(), area.getHeight()))
+            return false;
+
+        auto* transientState = std::get_if<TransientState> (&state);
+        transientState->bind();
+
+       #if ! JUCE_ANDROID
+        if (! transientState->context.isCoreProfile())
+            glEnable (GL_TEXTURE_2D);
+
+        clearGLError();
+       #endif
         {
-            transientState->bind();
-
-           #if ! JUCE_ANDROID
-            if (! transientState->context.isCoreProfile())
-                glEnable (GL_TEXTURE_2D);
-
-            clearGLError();
-           #endif
-            {
-                const ScopedTextureBinding scopedTextureBinding;
-                glBindTexture (GL_TEXTURE_2D, p->textureID);
-                transientState->context.copyTexture (area, area, area.getWidth(), area.getHeight(), false);
-            }
-
-            transientState->unbind();
-            return true;
+            const ScopedTextureBinding scopedTextureBinding;
+            glBindTexture (GL_TEXTURE_2D, p->textureID);
+            transientState->context.copyTexture (area, area, area.getWidth(), area.getHeight(), false);
         }
 
-        return false;
+        transientState->unbind();
+        return true;
     }
 
     void release()
     {
-        transientState.reset();
-        savedState.reset();
+        state.emplace<std::monostate>();
     }
 
     void saveAndRelease()
     {
-        if (transientState != nullptr)
+        if (auto* transientState = std::get_if<TransientState> (&state))
         {
-            savedState.reset();
-
             if (auto toSave = readPixels ({ transientState->width, transientState->height }))
-                savedState = std::make_unique<SavedState> (std::move (*toSave));
-
-            transientState.reset();
+                state.emplace<SavedState> (std::move (*toSave));
         }
     }
 
     bool reloadSavedCopy (OpenGLContext& context)
     {
-        if (savedState != nullptr)
+        if (auto* savedState = std::get_if<SavedState> (&state))
         {
-            std::unique_ptr<SavedState> state;
-            std::swap (state, savedState);
+            auto local = std::move (*savedState);
 
-            if (restore (context, *state))
+            if (restore (context, local))
                 return true;
 
-            std::swap (state, savedState);
+            state.emplace<SavedState> (std::move (local));
         }
 
         return false;
     }
 
-    int getWidth() const noexcept            { return transientState != nullptr ? transientState->width : 0; }
-    int getHeight() const noexcept           { return transientState != nullptr ? transientState->height : 0; }
-    GLuint getTextureID() const noexcept     { return transientState != nullptr ? transientState->textureID : 0; }
-
-    bool makeCurrentRenderingTarget() const
+    int getWidth() const noexcept
     {
-        // trying to use a framebuffer after saving it with saveAndRelease()! Be sure to call
-        // reloadSavedCopy() to put it back into GPU memory before using it..
-        jassert (savedState == nullptr);
+        if (auto* transientState = std::get_if<TransientState> (&state))
+            return transientState->width;
 
-        if (transientState == nullptr)
-            return false;
+        return 0;
+    }
 
-        transientState->bind();
-        return true;
+    int getHeight() const noexcept
+    {
+        if (auto* transientState = std::get_if<TransientState> (&state))
+            return transientState->height;
+
+        return 0;
+    }
+
+    GLuint getTextureID() const noexcept
+    {
+        if (auto* transientState = std::get_if<TransientState> (&state))
+            return transientState->textureID;
+
+        return 0;
     }
 
     GLuint getFrameBufferID() const noexcept
     {
-        return transientState != nullptr ? transientState->frameBufferID : 0;
+        if (auto* transientState = std::get_if<TransientState> (&state))
+            return transientState->frameBufferID;
+
+        return 0;
+    }
+
+    bool makeCurrentRenderingTarget()
+    {
+        return makeAndGetCurrentRenderingTarget() != nullptr;
     }
 
     void releaseAsRenderingTarget()
     {
-        if (transientState != nullptr)
+        if (auto* transientState = std::get_if<TransientState> (&state))
             transientState->unbind();
     }
 
     void clear (Colour colour)
     {
-        if (makeCurrentRenderingTarget())
-        {
-            OpenGLHelpers::clear (colour);
-            releaseAsRenderingTarget();
-        }
+        auto* transientState = makeAndGetCurrentRenderingTarget();
+
+        if (transientState == nullptr)
+            return;
+
+        OpenGLHelpers::clear (colour);
+        transientState->unbind();
     }
 
     void makeCurrentAndClear()
     {
-        if (makeCurrentRenderingTarget())
-        {
-            glClearColor (0, 0, 0, 0);
-            glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        }
+        auto* transientState = makeAndGetCurrentRenderingTarget();
+
+        if (transientState == nullptr)
+            return;
+
+        glClearColor (0, 0, 0, 0);
+        glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
-    bool readPixels (PixelARGB* target, const Rectangle<int>& area) const
+    bool readPixels (PixelARGB* target, const Rectangle<int>& area)
     {
-        if (! makeCurrentRenderingTarget())
+        auto* transientState = makeAndGetCurrentRenderingTarget();
+
+        if (transientState == nullptr)
             return false;
 
         glPixelStorei (GL_PACK_ALIGNMENT, 4);
@@ -204,10 +218,12 @@ public:
 
     bool writePixels (const PixelARGB* data, const Rectangle<int>& area)
     {
-        OpenGLTargetSaver ts (transientState->context);
+        auto* transientState = makeAndGetCurrentRenderingTarget();
 
-        if (! makeCurrentRenderingTarget())
+        if (transientState == nullptr)
             return false;
+
+        OpenGLTargetSaver ts (transientState->context);
 
         glDisable (GL_DEPTH_TEST);
         glDisable (GL_BLEND);
@@ -378,7 +394,7 @@ private:
         return true;
     }
 
-    std::optional<SavedState> readPixels (const Rectangle<int>& area) const
+    std::optional<SavedState> readPixels (const Rectangle<int>& area)
     {
         SavedState result { area.getWidth(),
                             area.getHeight(),
@@ -390,8 +406,22 @@ private:
         return result;
     }
 
-    std::unique_ptr<TransientState> transientState;
-    std::unique_ptr<SavedState> savedState;
+    TransientState* makeAndGetCurrentRenderingTarget()
+    {
+        if (auto* transientState = std::get_if<TransientState> (&state))
+        {
+            transientState->bind();
+            return transientState;
+        }
+
+        // trying to use a framebuffer after saving it with saveAndRelease()! Be sure to call
+        // reloadSavedCopy() to put it back into GPU memory before using it..
+        jassertfalse;
+
+        return nullptr;
+    }
+
+    std::variant<std::monostate, TransientState, SavedState> state;
 };
 
 //==============================================================================
