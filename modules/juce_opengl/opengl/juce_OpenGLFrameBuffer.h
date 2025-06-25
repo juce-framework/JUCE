@@ -86,7 +86,7 @@ public:
 
     //==============================================================================
     /** Returns true if a valid buffer has been allocated. */
-    bool isValid() const noexcept                       { return pimpl != nullptr; }
+    bool isValid() const noexcept;
 
     /** Returns the width of the buffer. */
     int getWidth() const noexcept;
@@ -131,9 +131,6 @@ public:
 private:
     class Pimpl;
     std::unique_ptr<Pimpl> pimpl;
-
-    class SavedState;
-    std::unique_ptr<SavedState> savedState;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLFrameBuffer)
 };

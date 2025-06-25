@@ -38,6 +38,190 @@ namespace juce
 class OpenGLFrameBuffer::Pimpl
 {
 public:
+    bool isValid() const noexcept
+    {
+        return transientState != nullptr;
+    }
+
+    bool initialise (OpenGLContext& context, int width, int height)
+    {
+        jassert (context.isActive()); // The context must be active when creating a framebuffer!
+
+        transientState.reset();
+        transientState.reset (new TransientState (context, width, height, false, false));
+
+        if (! transientState->createdOk())
+            transientState.reset();
+
+        return transientState != nullptr;
+    }
+
+    bool initialise (OpenGLContext& context, const Image& image)
+    {
+        if (! image.isARGB())
+            return initialise (context, image.convertedToFormat (Image::ARGB));
+
+        Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
+
+        return initialise (context, bitmap.width, bitmap.height)
+               && writePixels ((const PixelARGB*) bitmap.data, image.getBounds());
+    }
+
+    bool initialise (OpenGLFrameBuffer& other)
+    {
+        auto* p = other.pimpl->transientState.get();
+
+        if (p == nullptr)
+        {
+            transientState.reset();
+            return true;
+        }
+
+        const Rectangle<int> area (transientState->width, transientState->height);
+
+        if (initialise (p->context, area.getWidth(), area.getHeight()))
+        {
+            transientState->bind();
+
+           #if ! JUCE_ANDROID
+            if (! transientState->context.isCoreProfile())
+                glEnable (GL_TEXTURE_2D);
+
+            clearGLError();
+           #endif
+            {
+                const ScopedTextureBinding scopedTextureBinding;
+                glBindTexture (GL_TEXTURE_2D, p->textureID);
+                transientState->context.copyTexture (area, area, area.getWidth(), area.getHeight(), false);
+            }
+
+            transientState->unbind();
+            return true;
+        }
+
+        return false;
+    }
+
+    void release()
+    {
+        transientState.reset();
+        savedState.reset();
+    }
+
+    void saveAndRelease()
+    {
+        if (transientState != nullptr)
+        {
+            savedState.reset (new SavedState (*this, transientState->width, transientState->height));
+            transientState.reset();
+        }
+    }
+
+    bool reloadSavedCopy (OpenGLContext& context)
+    {
+        if (savedState != nullptr)
+        {
+            std::unique_ptr<SavedState> state;
+            std::swap (state, savedState);
+
+            if (state->restore (context, *this))
+                return true;
+
+            std::swap (state, savedState);
+        }
+
+        return false;
+    }
+
+    int getWidth() const noexcept            { return transientState != nullptr ? transientState->width : 0; }
+    int getHeight() const noexcept           { return transientState != nullptr ? transientState->height : 0; }
+    GLuint getTextureID() const noexcept     { return transientState != nullptr ? transientState->textureID : 0; }
+
+    bool makeCurrentRenderingTarget()
+    {
+        // trying to use a framebuffer after saving it with saveAndRelease()! Be sure to call
+        // reloadSavedCopy() to put it back into GPU memory before using it..
+        jassert (savedState == nullptr);
+
+        if (transientState == nullptr)
+            return false;
+
+        transientState->bind();
+        return true;
+    }
+
+    GLuint getFrameBufferID() const noexcept
+    {
+        return transientState != nullptr ? transientState->frameBufferID : 0;
+    }
+
+    void releaseAsRenderingTarget()
+    {
+        if (transientState != nullptr)
+            transientState->unbind();
+    }
+
+    void clear (Colour colour)
+    {
+        if (makeCurrentRenderingTarget())
+        {
+            OpenGLHelpers::clear (colour);
+            releaseAsRenderingTarget();
+        }
+    }
+
+    void makeCurrentAndClear()
+    {
+        if (makeCurrentRenderingTarget())
+        {
+            glClearColor (0, 0, 0, 0);
+            glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        }
+    }
+
+    bool readPixels (PixelARGB* target, const Rectangle<int>& area)
+    {
+        if (! makeCurrentRenderingTarget())
+            return false;
+
+        glPixelStorei (GL_PACK_ALIGNMENT, 4);
+        glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(),
+                      JUCE_RGBA_FORMAT, GL_UNSIGNED_BYTE, target);
+
+        transientState->unbind();
+        return true;
+    }
+
+    bool writePixels (const PixelARGB* data, const Rectangle<int>& area)
+    {
+        OpenGLTargetSaver ts (transientState->context);
+
+        if (! makeCurrentRenderingTarget())
+            return false;
+
+        glDisable (GL_DEPTH_TEST);
+        glDisable (GL_BLEND);
+        JUCE_CHECK_OPENGL_ERROR
+
+        OpenGLTexture tex;
+        tex.loadARGB (data, area.getWidth(), area.getHeight());
+
+        glViewport (0, 0, transientState->width, transientState->height);
+        transientState->context.copyTexture (area,
+                                             Rectangle<int> (area.getX(),
+                                                             area.getY(),
+                                                             tex.getWidth(),
+                                                             tex.getHeight()),
+                                             transientState->width,
+                                             transientState->height,
+                                             true,
+                                             false);
+
+        JUCE_CHECK_OPENGL_ERROR
+        return true;
+    }
+
+private:
     /*  Stores the currently-bound texture on construction, and re-binds it on destruction. */
     struct ScopedTextureBinding
     {
@@ -56,256 +240,249 @@ public:
         GLint prev{};
     };
 
-    Pimpl (OpenGLContext& c, const int w, const int h,
-           const bool wantsDepthBuffer, const bool wantsStencilBuffer)
-        : context (c), width (w), height (h),
-          textureID (0), frameBufferID (0), depthOrStencilBuffer (0)
+    class TransientState
     {
-        // Framebuffer objects can only be created when the current thread has an active OpenGL
-        // context. You'll need to create this object in one of the OpenGLContext's callbacks.
-        jassert (OpenGLHelpers::isContextActive());
+    public:
+        TransientState (OpenGLContext& c,
+                        const int w,
+                        const int h,
+                        const bool wantsDepthBuffer,
+                        const bool wantsStencilBuffer)
+            : context (c),
+              width (w),
+              height (h),
+              textureID (0),
+              frameBufferID (0),
+              depthOrStencilBuffer (0)
+        {
+            // Framebuffer objects can only be created when the current thread has an active OpenGL
+            // context. You'll need to create this object in one of the OpenGLContext's callbacks.
+            jassert (OpenGLHelpers::isContextActive());
 
-       #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
-        if (context.extensions.glGenFramebuffers == nullptr)
+           #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
+            if (context.extensions.glGenFramebuffers == nullptr)
             return;
-       #endif
+           #endif
 
-        context.extensions.glGenFramebuffers (1, &frameBufferID);
-        bind();
+            context.extensions.glGenFramebuffers (1, &frameBufferID);
+            bind();
 
+            {
+                const ScopedTextureBinding scopedTextureBinding;
+
+                glGenTextures (1, &textureID);
+                glBindTexture (GL_TEXTURE_2D, textureID);
+                JUCE_CHECK_OPENGL_ERROR
+
+                glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                JUCE_CHECK_OPENGL_ERROR
+
+                glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+                JUCE_CHECK_OPENGL_ERROR
+            }
+
+            context.extensions.glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
+
+            if (wantsDepthBuffer || wantsStencilBuffer)
+            {
+                context.extensions.glGenRenderbuffers (1, &depthOrStencilBuffer);
+                context.extensions.glBindRenderbuffer (GL_RENDERBUFFER, depthOrStencilBuffer);
+                jassert (context.extensions.glIsRenderbuffer (depthOrStencilBuffer));
+
+               #if JUCE_OPENGL_ES
+                constexpr auto depthComponentConstant = (GLenum) GL_DEPTH_COMPONENT16;
+               #else
+                constexpr auto depthComponentConstant = (GLenum) GL_DEPTH_COMPONENT;
+               #endif
+
+                context.extensions.glRenderbufferStorage (GL_RENDERBUFFER,
+                                                          (wantsDepthBuffer && wantsStencilBuffer) ? (GLenum) GL_DEPTH24_STENCIL8
+                                                                                                   : depthComponentConstant,
+                                                          width, height);
+
+                GLint params = 0;
+                context.extensions.glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_DEPTH_SIZE, &params);
+                context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
+
+                if (wantsStencilBuffer)
+                    context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
+            }
+
+            unbind();
+        }
+
+        ~TransientState()
         {
-            const ScopedTextureBinding scopedTextureBinding;
+            if (OpenGLHelpers::isContextActive())
+            {
+                if (textureID != 0)
+                    glDeleteTextures (1, &textureID);
 
-            glGenTextures (1, &textureID);
-            glBindTexture (GL_TEXTURE_2D, textureID);
-            JUCE_CHECK_OPENGL_ERROR
+                if (depthOrStencilBuffer != 0)
+                    context.extensions.glDeleteRenderbuffers (1, &depthOrStencilBuffer);
 
-            glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            JUCE_CHECK_OPENGL_ERROR
+                if (frameBufferID != 0)
+                    context.extensions.glDeleteFramebuffers (1, &frameBufferID);
 
-            glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+                JUCE_CHECK_OPENGL_ERROR
+            }
+        }
+
+        bool createdOk() const
+        {
+            return frameBufferID != 0 && textureID != 0;
+        }
+
+        void bind()
+        {
+            glGetIntegerv (GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
+            context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
             JUCE_CHECK_OPENGL_ERROR
         }
 
-        context.extensions.glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
-
-        if (wantsDepthBuffer || wantsStencilBuffer)
+        void unbind()
         {
-            context.extensions.glGenRenderbuffers (1, &depthOrStencilBuffer);
-            context.extensions.glBindRenderbuffer (GL_RENDERBUFFER, depthOrStencilBuffer);
-            jassert (context.extensions.glIsRenderbuffer (depthOrStencilBuffer));
-
-            context.extensions.glRenderbufferStorage (GL_RENDERBUFFER,
-                                      (wantsDepthBuffer && wantsStencilBuffer) ? (GLenum) GL_DEPTH24_STENCIL8
-                                                                              #if JUCE_OPENGL_ES
-                                                                               : (GLenum) GL_DEPTH_COMPONENT16,
-                                                                              #else
-                                                                               : (GLenum) GL_DEPTH_COMPONENT,
-                                                                              #endif
-                                      width, height);
-
-            GLint params = 0;
-            context.extensions.glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_DEPTH_SIZE, &params);
-            context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
-
-            if (wantsStencilBuffer)
-                context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
-        }
-
-        unbind();
-    }
-
-    ~Pimpl()
-    {
-        if (OpenGLHelpers::isContextActive())
-        {
-            if (textureID != 0)
-                glDeleteTextures (1, &textureID);
-
-            if (depthOrStencilBuffer != 0)
-                context.extensions.glDeleteRenderbuffers (1, &depthOrStencilBuffer);
-
-            if (frameBufferID != 0)
-                context.extensions.glDeleteFramebuffers (1, &frameBufferID);
-
+            context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, (GLuint) prevFramebuffer);
             JUCE_CHECK_OPENGL_ERROR
         }
-    }
 
-    bool createdOk() const
+        OpenGLContext& context;
+        const int width, height;
+        GLuint textureID, frameBufferID, depthOrStencilBuffer;
+
+    private:
+        GLint prevFramebuffer{};
+
+        JUCE_DECLARE_NON_COPYABLE (TransientState)
+    };
+
+    class SavedState
     {
-        return frameBufferID != 0 && textureID != 0;
-    }
+    public:
+        SavedState (Pimpl& buffer, const int w, const int h)
+            : width (w),
+              height (h),
+              data ((size_t) (w * h))
+        {
+            buffer.readPixels (data, Rectangle<int> (w, h));
+        }
 
-    void bind()
-    {
-        glGetIntegerv (GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
-        JUCE_CHECK_OPENGL_ERROR
-    }
+        bool restore (OpenGLContext& context, Pimpl& buffer)
+        {
+            if (buffer.initialise (context, width, height))
+            {
+                buffer.writePixels (data, Rectangle<int> (width, height));
+                return true;
+            }
 
-    void unbind()
-    {
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, (GLuint) prevFramebuffer);
-        JUCE_CHECK_OPENGL_ERROR
-    }
+            return false;
+        }
 
-    OpenGLContext& context;
-    const int width, height;
-    GLuint textureID, frameBufferID, depthOrStencilBuffer;
+    private:
+        const int width, height;
+        HeapBlock<PixelARGB> data;
 
-private:
-    GLint prevFramebuffer{};
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState)
+    };
 
-    JUCE_DECLARE_NON_COPYABLE (Pimpl)
+    std::unique_ptr<TransientState> transientState;
+    std::unique_ptr<SavedState> savedState;
 };
 
 //==============================================================================
-class OpenGLFrameBuffer::SavedState
+OpenGLFrameBuffer::OpenGLFrameBuffer()
+    : pimpl (std::make_unique<Pimpl>())
 {
-public:
-    SavedState (OpenGLFrameBuffer& buffer, const int w, const int h)
-        : width (w), height (h),
-          data ((size_t) (w * h))
-    {
-        buffer.readPixels (data, Rectangle<int> (w, h));
-    }
+}
 
-    bool restore (OpenGLContext& context, OpenGLFrameBuffer& buffer)
-    {
-        if (buffer.initialise (context, width, height))
-        {
-            buffer.writePixels (data, Rectangle<int> (width, height));
-            return true;
-        }
-
-        return false;
-    }
-
-private:
-    const int width, height;
-    HeapBlock<PixelARGB> data;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState)
-};
-
-//==============================================================================
-OpenGLFrameBuffer::OpenGLFrameBuffer() {}
-OpenGLFrameBuffer::~OpenGLFrameBuffer() {}
+OpenGLFrameBuffer::~OpenGLFrameBuffer() = default;
 
 bool OpenGLFrameBuffer::initialise (OpenGLContext& context, int width, int height)
 {
-    jassert (context.isActive()); // The context must be active when creating a framebuffer!
-
-    pimpl.reset();
-    pimpl.reset (new Pimpl (context, width, height, false, false));
-
-    if (! pimpl->createdOk())
-        pimpl.reset();
-
-    return pimpl != nullptr;
+return pimpl->initialise (context, width, height);
 }
 
-bool OpenGLFrameBuffer::initialise (OpenGLContext& context, const Image& image)
+bool OpenGLFrameBuffer::initialise (OpenGLContext& context, const Image& content)
 {
-    if (! image.isARGB())
-        return initialise (context, image.convertedToFormat (Image::ARGB));
-
-    Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
-
-    return initialise (context, bitmap.width, bitmap.height)
-            && writePixels ((const PixelARGB*) bitmap.data, image.getBounds());
+    return pimpl->initialise (context, content);
 }
 
 bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
 {
-    auto* p = other.pimpl.get();
-
-    if (p == nullptr)
-    {
-        pimpl.reset();
-        return true;
-    }
-
-    const Rectangle<int> area (pimpl->width, pimpl->height);
-
-    if (initialise (p->context, area.getWidth(), area.getHeight()))
-    {
-        pimpl->bind();
-
-       #if ! JUCE_ANDROID
-        if (! pimpl->context.isCoreProfile())
-            glEnable (GL_TEXTURE_2D);
-
-        clearGLError();
-       #endif
-        {
-            const Pimpl::ScopedTextureBinding scopedTextureBinding;
-            glBindTexture (GL_TEXTURE_2D, p->textureID);
-            pimpl->context.copyTexture (area, area, area.getWidth(), area.getHeight(), false);
-        }
-
-        pimpl->unbind();
-        return true;
-    }
-
-    return false;
+    return pimpl->initialise (other);
 }
 
 void OpenGLFrameBuffer::release()
 {
-    pimpl.reset();
-    savedState.reset();
+    pimpl->release();
 }
 
 void OpenGLFrameBuffer::saveAndRelease()
 {
-    if (pimpl != nullptr)
-    {
-        savedState.reset (new SavedState (*this, pimpl->width, pimpl->height));
-        pimpl.reset();
-    }
+    pimpl->saveAndRelease();
 }
 
 bool OpenGLFrameBuffer::reloadSavedCopy (OpenGLContext& context)
 {
-    if (savedState != nullptr)
-    {
-        std::unique_ptr<SavedState> state;
-        std::swap (state, savedState);
-
-        if (state->restore (context, *this))
-            return true;
-
-        std::swap (state, savedState);
-    }
-
-    return false;
+    return pimpl->reloadSavedCopy (context);
 }
 
-int OpenGLFrameBuffer::getWidth() const noexcept            { return pimpl != nullptr ? pimpl->width : 0; }
-int OpenGLFrameBuffer::getHeight() const noexcept           { return pimpl != nullptr ? pimpl->height : 0; }
-GLuint OpenGLFrameBuffer::getTextureID() const noexcept     { return pimpl != nullptr ? pimpl->textureID : 0; }
+bool OpenGLFrameBuffer::isValid() const noexcept
+{
+    return pimpl->isValid();
+}
+
+int OpenGLFrameBuffer::getWidth() const noexcept
+{
+    return pimpl->getWidth();
+}
+
+int OpenGLFrameBuffer::getHeight() const noexcept
+{
+    return pimpl->getHeight();
+}
+
+GLuint OpenGLFrameBuffer::getTextureID() const noexcept
+{
+    return pimpl->getTextureID();
+}
 
 bool OpenGLFrameBuffer::makeCurrentRenderingTarget()
 {
-    // trying to use a framebuffer after saving it with saveAndRelease()! Be sure to call
-    // reloadSavedCopy() to put it back into GPU memory before using it..
-    jassert (savedState == nullptr);
+    return pimpl->makeCurrentRenderingTarget();
+}
 
-    if (pimpl == nullptr)
-        return false;
-
-    pimpl->bind();
-    return true;
+void OpenGLFrameBuffer::releaseAsRenderingTarget()
+{
+    pimpl->releaseAsRenderingTarget();
 }
 
 GLuint OpenGLFrameBuffer::getFrameBufferID() const noexcept
 {
-    return pimpl != nullptr ? pimpl->frameBufferID : 0;
+    return pimpl->getFrameBufferID();
+}
+
+void OpenGLFrameBuffer::clear (Colour colour)
+{
+    pimpl->clear (colour);
+}
+
+void OpenGLFrameBuffer::makeCurrentAndClear()
+{
+    pimpl->makeCurrentAndClear();
+}
+
+bool OpenGLFrameBuffer::readPixels (PixelARGB* targetData, const Rectangle<int>& sourceArea)
+{
+    return pimpl->readPixels (targetData, sourceArea);
+}
+
+bool OpenGLFrameBuffer::writePixels (const PixelARGB* srcData, const Rectangle<int>& targetArea)
+{
+    return pimpl->writePixels (srcData, targetArea);
 }
 
 GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget() noexcept
@@ -313,66 +490,6 @@ GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget() noexcept
     GLint fb = {};
     glGetIntegerv (GL_FRAMEBUFFER_BINDING, &fb);
     return (GLuint) fb;
-}
-
-void OpenGLFrameBuffer::releaseAsRenderingTarget()
-{
-    if (pimpl != nullptr)
-        pimpl->unbind();
-}
-
-void OpenGLFrameBuffer::clear (Colour colour)
-{
-    if (makeCurrentRenderingTarget())
-    {
-        OpenGLHelpers::clear (colour);
-        releaseAsRenderingTarget();
-    }
-}
-
-void OpenGLFrameBuffer::makeCurrentAndClear()
-{
-    if (makeCurrentRenderingTarget())
-    {
-        glClearColor (0, 0, 0, 0);
-        glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    }
-}
-
-bool OpenGLFrameBuffer::readPixels (PixelARGB* target, const Rectangle<int>& area)
-{
-    if (! makeCurrentRenderingTarget())
-        return false;
-
-    glPixelStorei (GL_PACK_ALIGNMENT, 4);
-    glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(),
-                  JUCE_RGBA_FORMAT, GL_UNSIGNED_BYTE, target);
-
-    pimpl->unbind();
-    return true;
-}
-
-bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>& area)
-{
-    OpenGLTargetSaver ts (pimpl->context);
-
-    if (! makeCurrentRenderingTarget())
-        return false;
-
-    glDisable (GL_DEPTH_TEST);
-    glDisable (GL_BLEND);
-    JUCE_CHECK_OPENGL_ERROR
-
-    OpenGLTexture tex;
-    tex.loadARGB (data, area.getWidth(), area.getHeight());
-
-    glViewport (0, 0, pimpl->width, pimpl->height);
-    pimpl->context.copyTexture (area, Rectangle<int> (area.getX(), area.getY(),
-                                                      tex.getWidth(), tex.getHeight()),
-                                pimpl->width, pimpl->height, true, false);
-
-    JUCE_CHECK_OPENGL_ERROR
-    return true;
 }
 
 } // namespace juce
