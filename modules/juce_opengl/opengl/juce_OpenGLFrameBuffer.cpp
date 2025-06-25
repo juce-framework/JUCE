@@ -38,6 +38,12 @@ namespace juce
 class OpenGLFrameBuffer::Pimpl
 {
 public:
+    struct SavedState
+    {
+        int width = 0, height = 0;
+        std::vector<PixelARGB> data;
+    };
+
     bool isValid() const noexcept
     {
         return transientState != nullptr;
@@ -112,7 +118,11 @@ public:
     {
         if (transientState != nullptr)
         {
-            savedState.reset (new SavedState (*this, transientState->width, transientState->height));
+            savedState.reset();
+
+            if (auto toSave = readPixels ({ transientState->width, transientState->height }))
+                savedState = std::make_unique<SavedState> (std::move (*toSave));
+
             transientState.reset();
         }
     }
@@ -124,7 +134,7 @@ public:
             std::unique_ptr<SavedState> state;
             std::swap (state, savedState);
 
-            if (state->restore (context, *this))
+            if (restore (context, *state))
                 return true;
 
             std::swap (state, savedState);
@@ -137,7 +147,7 @@ public:
     int getHeight() const noexcept           { return transientState != nullptr ? transientState->height : 0; }
     GLuint getTextureID() const noexcept     { return transientState != nullptr ? transientState->textureID : 0; }
 
-    bool makeCurrentRenderingTarget()
+    bool makeCurrentRenderingTarget() const
     {
         // trying to use a framebuffer after saving it with saveAndRelease()! Be sure to call
         // reloadSavedCopy() to put it back into GPU memory before using it..
@@ -179,7 +189,7 @@ public:
         }
     }
 
-    bool readPixels (PixelARGB* target, const Rectangle<int>& area)
+    bool readPixels (PixelARGB* target, const Rectangle<int>& area) const
     {
         if (! makeCurrentRenderingTarget())
             return false;
@@ -359,34 +369,26 @@ private:
         JUCE_DECLARE_NON_COPYABLE (TransientState)
     };
 
-    class SavedState
+    bool restore (OpenGLContext& context, const SavedState& savedState)
     {
-    public:
-        SavedState (Pimpl& buffer, const int w, const int h)
-            : width (w),
-              height (h),
-              data ((size_t) (w * h))
-        {
-            buffer.readPixels (data, Rectangle<int> (w, h));
-        }
-
-        bool restore (OpenGLContext& context, Pimpl& buffer)
-        {
-            if (buffer.initialise (context, width, height))
-            {
-                buffer.writePixels (data, Rectangle<int> (width, height));
-                return true;
-            }
-
+        if (! initialise (context, savedState.width, savedState.height))
             return false;
-        }
 
-    private:
-        const int width, height;
-        HeapBlock<PixelARGB> data;
+        writePixels (savedState.data.data(), Rectangle (savedState.width, savedState.height));
+        return true;
+    }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState)
-    };
+    std::optional<SavedState> readPixels (const Rectangle<int>& area) const
+    {
+        SavedState result { area.getWidth(),
+                            area.getHeight(),
+                            std::vector<PixelARGB> ((size_t) area.getWidth() * (size_t) area.getHeight()) };
+
+        if (! readPixels (result.data.data(), area))
+            return {};
+
+        return result;
+    }
 
     std::unique_ptr<TransientState> transientState;
     std::unique_ptr<SavedState> savedState;
