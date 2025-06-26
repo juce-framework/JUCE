@@ -1375,7 +1375,8 @@ public:
             LocalRef viewLayoutParams { env->NewObject (AndroidLayoutParams, AndroidLayoutParams.create, -2, -2) };
             env->CallVoidMethod (view.get(), AndroidView.setLayoutParams, viewLayoutParams.get());
 
-            auto physicalBounds = (comp.getBoundsInParent().toFloat() * scale).toNearestInt();
+            const auto rawPeerBounds = detail::ComponentHelpers::localPositionToRawPeerPos (comp, comp.getBoundsInParent().toFloat());
+            const auto physicalBounds = Desktop::getInstance().getDisplays().logicalToPhysical (rawPeerBounds).toNearestInt();
 
             view.callVoidMethod (AndroidView.layout,
                                  physicalBounds.getX(), physicalBounds.getY(), physicalBounds.getRight(), physicalBounds.getBottom());
@@ -1480,7 +1481,7 @@ public:
 
     void setBounds (const Rectangle<int>& userRect, bool isNowFullScreen) override
     {
-        auto bounds = (userRect.toFloat() * scale).toNearestInt();
+        auto bounds = Desktop::getInstance().getDisplays().logicalToPhysical (userRect);
 
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
@@ -1531,7 +1532,7 @@ public:
                                view.callIntMethod (AndroidView.getWidth),
                                view.callIntMethod (AndroidView.getHeight));
 
-        return (bounds.toFloat() / scale).toNearestInt();
+        return Desktop::getInstance().getDisplays().physicalToLogical (bounds);
     }
 
     void handleScreenSizeChange() override
@@ -1544,19 +1545,20 @@ public:
 
     Point<int> getScreenPosition() const
     {
-        return getViewLocationOnScreen (getEnv(), view.get());
+        const auto physical = getViewLocationOnScreen (getEnv(), view.get());
+        return Desktop::getInstance().getDisplays().physicalToLogical (physical);
     }
 
     Point<float> localToGlobal (Point<float> relativePosition) override
     {
-        return relativePosition + (getScreenPosition().toFloat() / scale);
+        return relativePosition + (getScreenPosition().toFloat());
     }
 
     using ComponentPeer::localToGlobal;
 
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
-        return screenPosition - (getScreenPosition().toFloat() / scale);
+        return screenPosition - (getScreenPosition().toFloat());
     }
 
     using ComponentPeer::globalToLocal;
@@ -1608,13 +1610,10 @@ public:
         // n/a
     }
 
-    bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
+    bool contains (Point<int> localPos, bool) const override
     {
-        return isPositiveAndBelow (localPos.x, component.getWidth())
-            && isPositiveAndBelow (localPos.y, component.getHeight())
-            && ((! trueIfInAChildWindow) || view.callBooleanMethod (ComponentPeerView.containsPoint,
-                                                                    (float) localPos.x * scale,
-                                                                    (float) localPos.y * scale));
+        const auto scaled = detail::ComponentHelpers::rawPeerPositionToLocal (component, localPos);
+        return component.getLocalBounds().contains (scaled);
     }
 
     OptionalBorderSize getFrameSizeIfPresent() const override
@@ -1658,7 +1657,7 @@ public:
     //==============================================================================
     void handleMouseDownCallback (int index, Point<float> sysPos, int64 time)
     {
-        lastMousePos = sysPos / scale;
+        lastMousePos = Desktop::getInstance().getDisplays().physicalToLogical (sysPos);
         auto pos = globalToLocal (lastMousePos);
 
         // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
@@ -1677,7 +1676,7 @@ public:
 
     void handleMouseDragCallback (int index, Point<float> sysPos, int64 time)
     {
-        lastMousePos = sysPos / scale;
+        lastMousePos = Desktop::getInstance().getDisplays().physicalToLogical (sysPos);
         auto pos = globalToLocal (lastMousePos);
 
         jassert (index < 64);
@@ -1697,7 +1696,7 @@ public:
 
     void handleMouseUpCallback (int index, Point<float> sysPos, int64 time)
     {
-        lastMousePos = sysPos / scale;
+        lastMousePos = Desktop::getInstance().getDisplays().physicalToLogical (sysPos);
         auto pos = globalToLocal (lastMousePos);
 
         jassert (index < 64);
@@ -1739,7 +1738,10 @@ public:
 
         if (auto* topHandler = component.getAccessibilityHandler())
         {
-            if (auto* virtualHandler = topHandler->getChildAt ((sysPos / scale).roundToInt()))
+            const auto rawPeerPos = Desktop::getInstance().getDisplays().physicalToLogical (sysPos);
+            const auto localPos = detail::ComponentHelpers::rawPeerPositionToLocal (component, rawPeerPos);
+
+            if (auto* virtualHandler = topHandler->getChildAt (localPos.roundToInt()))
             {
                 switch (command)
                 {
@@ -1952,12 +1954,11 @@ public:
 
     static void handlePaintCallback (JNIEnv* env, AndroidComponentPeer& t, jobject canvas, jobject paint)
     {
-        jobject rect = env->CallObjectMethod (canvas, AndroidCanvas.getClipBounds);
+        LocalRef<jobject> rect { env->CallObjectMethod (canvas, AndroidCanvas.getClipBounds) };
         auto left   = env->GetIntField (rect, AndroidRect.left);
         auto top    = env->GetIntField (rect, AndroidRect.top);
         auto right  = env->GetIntField (rect, AndroidRect.right);
         auto bottom = env->GetIntField (rect, AndroidRect.bottom);
-        env->DeleteLocalRef (rect);
 
         auto clip = Rectangle<int>::leftTopRightBottom (left, top, right, bottom);
 
@@ -1982,7 +1983,9 @@ public:
                 {
                     LowLevelGraphicsSoftwareRenderer g (temp);
                     g.setOrigin (-clip.getPosition());
-                    g.addTransform (AffineTransform::scale (t.scale));
+                    const auto scale = Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale
+                                     / Desktop::getInstance().getGlobalScaleFactor();
+                    g.addTransform (AffineTransform::scale ((float) scale));
                     t.handlePaint (g);
                 }
             }
@@ -1997,7 +2000,7 @@ public:
 
     void repaint (const Rectangle<int>& userArea) override
     {
-        auto area = (userArea.toFloat() * scale).toNearestInt();
+        const auto area = Desktop::getInstance().getDisplays().logicalToPhysical (userArea.toFloat()).toNearestInt();
 
         GlobalRef localView (view);
 
@@ -2188,7 +2191,6 @@ private:
     METHOD   (setViewName,                      "setViewName",                   "(Ljava/lang/String;)V") \
     METHOD   (setVisible,                       "setVisible",                    "(Z)V") \
     METHOD   (isVisible,                        "isVisible",                     "()Z") \
-    METHOD   (containsPoint,                    "containsPoint",                 "(II)Z") \
     METHOD   (showKeyboard,                     "showKeyboard",                  "(III)V") \
     METHOD   (hideKeyboard,                     "hideKeyboard",                  "()V") \
     METHOD   (closeInputMethodContext,          "closeInputMethodContext",       "()V") \
@@ -2467,7 +2469,6 @@ private:
     GlobalRef view, viewGroup, buffer, activityWindow;
     bool viewGroupIsWindow = false, fullScreen = false, navBarsHidden = false;
     int sizeAllocated = 0;
-    float scale = (float) Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidComponentPeer)

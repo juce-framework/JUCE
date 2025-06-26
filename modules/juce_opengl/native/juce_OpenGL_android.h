@@ -147,10 +147,7 @@ public:
                              AndroidViewGroup.addView, surfaceView.get());
 
         // initialise the geometry of the view
-        auto bounds = component.getTopLevelComponent()->getLocalArea (&component, component.getLocalBounds());
-        bounds *= component.getDesktopScaleFactor();
-
-        updateWindowPosition (bounds);
+        updateWindowPosition (component.localAreaToGlobal (component.getLocalBounds()));
         hasInitialised = true;
     }
 
@@ -221,16 +218,17 @@ public:
     //==============================================================================
     void updateWindowPosition (Rectangle<int> bounds)
     {
-        if (lastBounds != bounds)
-        {
-            auto env = getEnv();
+        const auto physical = Desktop::getInstance().getDisplays().logicalToPhysical (bounds.toFloat()).toNearestInt();
 
-            lastBounds = bounds;
-            auto r = bounds * Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
+        if (std::exchange (physicalBounds, physical) == physical)
+            return;
 
-            env->CallVoidMethod (surfaceView.get(), JuceOpenGLViewSurface.layout,
-                                 (jint) r.getX(), (jint) r.getY(), (jint) r.getRight(), (jint) r.getBottom());
-        }
+        getEnv()->CallVoidMethod (surfaceView.get(),
+                                  JuceOpenGLViewSurface.layout,
+                                  (jint) physical.getX(),
+                                  (jint) physical.getY(),
+                                  (jint) physical.getRight(),
+                                  (jint) physical.getBottom());
     }
 
     //==============================================================================
@@ -401,7 +399,7 @@ private:
     bool hasInitialised = false;
 
     GlobalRef surfaceView;
-    Rectangle<int> lastBounds;
+    Rectangle<int> physicalBounds;
 
     struct SurfaceDestructor
     {
@@ -421,14 +419,11 @@ private:
 
     GlobalRef surfaceHolderCallback;
 
-    static EGLDisplay display;
-    static EGLConfig config;
+    inline static EGLDisplay display = EGL_NO_DISPLAY;
+    inline static EGLConfig config;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)
 };
-
-EGLDisplay OpenGLContext::NativeContext::display = EGL_NO_DISPLAY;
-EGLDisplay OpenGLContext::NativeContext::config;
 
 //==============================================================================
 bool OpenGLHelpers::isContextActive()
