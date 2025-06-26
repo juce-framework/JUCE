@@ -447,10 +447,14 @@ public:
 
         if (auto* peer = component.getPeer())
         {
+            auto& desktop = Desktop::getInstance();
+            const auto localBounds = component.getLocalBounds();
+            const auto globalArea = component.getScreenBounds() * desktop.getGlobalScaleFactor();
+
            #if JUCE_MAC
             updateScreen();
 
-            const auto displayScale = Desktop::getInstance().getGlobalScaleFactor() * [this]
+            const auto displayScale = std::invoke ([this]
             {
                 if (auto* view = getCurrentView())
                 {
@@ -462,16 +466,14 @@ public:
                 }
 
                 return areaAndScale.get().scale;
-            }();
-           #else
-            const auto displayScale = Desktop::getInstance().getDisplays()
-                                                            .getDisplayForRect (component.getTopLevelComponent()
-                                                                                        ->getScreenBounds())
-                                                           ->scale;
-           #endif
+            });
 
-            const auto localBounds = component.getLocalBounds();
-            const auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * displayScale;
+            const auto newArea = globalArea.withZeroOrigin() * displayScale;
+           #else
+            const auto newArea = desktop.getDisplays()
+                                        .logicalToPhysical (globalArea)
+                                                       .withZeroOrigin();
+           #endif
 
             // On Windows some hosts (Pro Tools 2022.7) do not take the current DPI into account
             // when sizing plugin editor windows.
