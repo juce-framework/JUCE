@@ -60,15 +60,27 @@ class ConsoleUnitTestRunner final : public UnitTestRunner
 //==============================================================================
 int main (int argc, char **argv)
 {
+    constexpr auto helpOption = "--help|-h";
+    constexpr auto listOption = "--list-categories|-l";
+    constexpr auto categoryOption = "--category|-c";
+    constexpr auto seedOption = "--seed|-s";
+    constexpr auto nameOption = "--name|-n";
+
     ArgumentList args (argc, argv);
 
-    if (args.containsOption ("--help|-h"))
+    if (args.containsOption (helpOption))
     {
-        std::cout << argv[0] << " [--help|-h] [--list-categories] [--category=category] [--seed=seed]" << std::endl;
+        std::cout << argv[0]
+                  << " [" << helpOption << "]"
+                  << " [" << listOption << "]"
+                  << " [" << categoryOption << "=category]"
+                  << " [" << seedOption << "=seed]"
+                  << " [" << nameOption << "=name]"
+                  << std::endl;
         return 0;
     }
 
-    if (args.containsOption ("--list-categories"))
+    if (args.containsOption (listOption))
     {
         for (auto& category : UnitTest::getAllCategories())
             std::cout << category << std::endl;
@@ -83,9 +95,9 @@ int main (int argc, char **argv)
 
     auto seed = [&args]
     {
-        if (args.containsOption ("--seed"))
+        if (args.containsOption (seedOption))
         {
-            auto seedValueString = args.getValueForOption ("--seed");
+            auto seedValueString = args.getValueForOption (seedOption);
 
             if (seedValueString.startsWith ("0x"))
                 return seedValueString.getHexValue64();
@@ -96,8 +108,10 @@ int main (int argc, char **argv)
         return Random::getSystemRandom().nextInt64();
     }();
 
-    if (args.containsOption ("--category"))
-        runner.runTestsInCategory (args.getValueForOption ("--category"), seed);
+    if (args.containsOption (categoryOption))
+        runner.runTestsInCategory (args.getValueForOption (categoryOption), seed);
+    else if (args.containsOption (nameOption))
+        runner.runTestsWithName (args.getValueForOption (nameOption), seed);
     else
         runner.runAllTests (seed);
 
