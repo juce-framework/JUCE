@@ -200,6 +200,7 @@
 //==============================================================================
 #include "midi_io/juce_ScheduledEventThread.h"
 #include "midi_io/ump/juce_UMPEndpointId.h"
+#include "midi_io/ump/juce_UMPStaticDeviceInfo.h"
 #include "midi_io/ump/juce_UMPBlock.h"
 #include "midi_io/ump/juce_UMPEndpoint.h"
 #include "midi_io/ump/juce_UMPDisconnectionListener.h"

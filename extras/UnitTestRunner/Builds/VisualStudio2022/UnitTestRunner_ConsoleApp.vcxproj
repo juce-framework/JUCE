@@ -3230,6 +3230,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPLegacyVirtualOutput.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPOutput.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPSession.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPStaticDeviceInfo.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPVirtualEndpoint.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiDevices.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiMessageCollector.h"/>
