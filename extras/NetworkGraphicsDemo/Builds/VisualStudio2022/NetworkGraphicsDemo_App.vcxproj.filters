@@ -3918,6 +3918,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPSession.h">
       <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPStaticDeviceInfo.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPVirtualEndpoint.h">
       <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
     </ClInclude>
