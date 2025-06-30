@@ -53,7 +53,10 @@ namespace juce::universal_midi_packets
 class VirtualEndpoint
 {
 public:
-    /** Creates an invalid virtual endpoint that doesn't correspond to any virtual device. */
+    /** Creates an invalid virtual endpoint that doesn't correspond to any virtual device.
+
+        isAlive() will return false for a default-constructed VirtualEndpoint.
+    */
     VirtualEndpoint();
     ~VirtualEndpoint();
 
@@ -65,7 +68,10 @@ public:
 
     /** Retrieves the unique id of this endpoint.
 
-        Note that this is *not* guaranteed to be stable - creating the 'same' virtual device
+        Pass this ID to Session::connectInput() and/or Session::connectOutput in order to send and
+        receive messages through the virtual endpoint.
+
+        Note that this ID is *not* guaranteed to be stable - creating the 'same' virtual device
         across several program invocations may produce a different ID each time.
 
         To fetch the current details of this device, you can pass this ID to Endpoints::getEndpoint().

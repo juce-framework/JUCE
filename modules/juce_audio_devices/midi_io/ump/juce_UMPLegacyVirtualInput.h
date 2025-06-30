@@ -55,9 +55,10 @@ public:
 
     /** Retrieves the unique id of this input.
 
-        You can pass this ID to Session::createInput in order to receive messages sent to this input.
+        You can pass this ID to Session::connectInput() in order to receive messages sent to this
+        input.
 
-        Note that this is *not* guaranteed to be stable - creating the 'same' virtual device
+        Note that this ID is *not* guaranteed to be stable - creating the 'same' virtual device
         across several program invocations may produce a different ID each time.
 
         To fetch the current details of this device, you can pass this ID to Endpoints::getEndpoint().
