@@ -680,9 +680,12 @@ void Direct2DPixelData::copyPages (ComSmartPtr<ID2D1Device1> deviceToUse,
                                    Point<int> dstPoint,
                                    Rectangle<int> srcRect)
 {
+    auto& srcPages = srcData.getPagesStructForDevice (deviceToUse);
+    srcPages.getPages();
+
     copyAcrossMultiplePages (dstData.getPagesStructForDevice (deviceToUse),
                              dstPoint,
-                             srcData.getPagesStructForDevice (deviceToUse),
+                             srcPages,
                              srcRect,
                              copyDstFromSrc);
 
