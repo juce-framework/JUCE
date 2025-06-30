@@ -984,7 +984,7 @@ struct AndroidMidiHelpers
         return nanos / (jlong) 1e6;
     }
 
-    /*  When dealing in UMP, the system always sends/receives ump packets in network order, i.e.
+    /*  When dealing in UMP, the system always sends/receives UMP packets in network order, i.e.
         big-endian.
 
         This function will ensure the correct byte ordering for a range of bytes that are about

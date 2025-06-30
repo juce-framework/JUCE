@@ -58,7 +58,7 @@ struct EndpointsListener
     */
     virtual void endpointsChanged() = 0;
 
-    /** Called on Android to indicate that the session managing the virtual MIDI ports
+    /** Called on Android to indicate that the service managing the virtual MIDI ports
         was started or stopped.
         Creating a virtual endpoint will fail if the service is not running, so you may wish to
         listen for this event, and to create the virtual ports after this function has been called.
@@ -122,7 +122,7 @@ public:
     /** Adds a listener that will receive notifications when endpoints are added, removed,
         or otherwise changed.
     */
-    void addListener (EndpointsListener& l);
+    void addListener (EndpointsListener&);
 
     /** Removes a listener that was previously added with addListener().
     */
@@ -157,7 +157,7 @@ public:
     */
     bool isVirtualMidiBytestreamServiceActive() const;
 
-    /** Creating a virtual ump endpoint will only succeed if this function returns true.
+    /** Creating a virtual UMP endpoint will only succeed if this function returns true.
         On recent platforms that support virtual MIDI connections (recent macOS and iOS, recent ALSA,
         Windows MIDI Services), this will normally return true.
         On platforms that don't support virtual MIDI (older Windows MIDI APIs), this will always
@@ -171,7 +171,8 @@ public:
 
     /** By default, Android MIDI services are initially disabled, but can be enabled by calling
         this function, passing true.
-        This function is *not synchronous*.
+        This function is *not synchronous*, so the service will start or stop at some point after
+        this function has returned.
         To find out when the service state changes, listen for virtualMidiServiceActiveChanged()
         and check the result of isVirtualMidiBytestreamServiceActive().
 
@@ -181,7 +182,8 @@ public:
 
     /** By default, Android MIDI services are initially disabled, but can be enabled by calling
         this function, passing true.
-        This function is *not synchronous*.
+        This function is *not synchronous*, so the service will start or stop at some point after
+        this function has returned.
         To find out when the service state changes, listen for virtualMidiServiceActiveChanged()
         and check the result of isVirtualMidiUmpServiceActive().
         On Android versions that don't support virtual UMP (API level < 35), this call does nothing.

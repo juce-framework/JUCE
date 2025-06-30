@@ -69,10 +69,16 @@ struct Consumer
     although this won't result in undefined behaviour, none of the functions will produce useful
     results in this state.
 
-    A particular pitfall to watch out for is calling addConsumer() and removeConsumer() on a
-    default-constructed Input. This has no effect. Instead, if you want to attach listeners to
-    an Input, you should use Session::connectedInput() to create an Input, and ensure that isAlive()
-    returns true on that input before attaching a Consumer.
+    In the case that the device connected to the Input becomes unavailable (e.g. it is unplugged or
+    the bluetooth connection is dropped), the Input will null itself, and calls to isAlive() will
+    return false. You can register a callback to handle this event by calling
+    addDisconnectionListener().
+
+    A particular pitfall to watch out for is calling addConsumer(), removeConsumer(),
+    addDisconnectionListener(), and removeDisconnectionListener() on a default-constructed Input
+    or other Input for which isAlive() returns false. This will have no effect. Instead, if you want
+    to attach listeners to an Input, you should use Session::connectInput() to create an Input,
+    and ensure that isAlive() returns true on that Input before attaching listeners.
 
     @tags{Audio}
 */

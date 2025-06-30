@@ -117,8 +117,8 @@ public:
     {
         switch (streamConfig & maskProtocol)
         {
-            case 1: return ump::PacketProtocol::MIDI_1_0;
-            case 2: return ump::PacketProtocol::MIDI_2_0;
+            case 1: return PacketProtocol::MIDI_1_0;
+            case 2: return PacketProtocol::MIDI_2_0;
         }
 
         return {};
@@ -169,8 +169,8 @@ private:
 
         switch (*p)
         {
-            case ump::PacketProtocol::MIDI_1_0: return StreamConfigFlags { 1 };
-            case ump::PacketProtocol::MIDI_2_0: return StreamConfigFlags { 2 };
+            case PacketProtocol::MIDI_1_0: return StreamConfigFlags { 1 };
+            case PacketProtocol::MIDI_2_0: return StreamConfigFlags { 2 };
         }
 
         return {};

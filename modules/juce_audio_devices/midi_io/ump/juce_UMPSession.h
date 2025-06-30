@@ -43,11 +43,12 @@ enum class BlocksAreStatic : uint8_t
 };
 
 /**
-    Allows creating new connections to endpoints.
+    Allows creating new connections to endpoints, and also creating new virtual endpoints.
 
     The session is internally reference counted, meaning that the system resources represented
-    by the session won't be released until the Session object, along with all Inputs, Outputs,
-    and VirtualEndpoints that it created, have been destroyed.
+    by the session won't be released until the Session object, along with every Input, Output,
+    VirtualEndpoint, LegacyVirtualInput, and LegacyVirtualOutput that it created has been
+    destroyed.
 
     Internally, sessions cache open connections, so that multiple Inputs
     or Outputs to the same endpoint will share resources associated with that connection.
@@ -88,12 +89,9 @@ public:
     /** Returns a new VirtualEndpoint if virtual endpoints are supported and the configuration is
         valid. If creating the endpoint fails, this will return an invalid VirtualEndpoint.
 
-        To close the endpoint and remove it from the global MIDI configuration, call
-        destroyVirtualEndpoint().
-
-        To actually send and receive messages through this endpoint, use connectInput
-        and connectOutput to create endpoint connections, in the same way you would treat
-        any other device.
+        To actually send and receive messages through this endpoint, use connectInput()
+        and connectOutput(), passing the result of VirtualEndpoint::getId(). This will create
+        an Input or Output that can be used in the same way as for any other kind of device.
 
         If the function blocks are static, all blocks must be marked as active.
         If the function blocks are not static, then blocks may be initially inactive.
@@ -131,6 +129,9 @@ public:
     /** Creates a MIDI 1.0-compatible input port.
 
         Where supported by platform APIs, this will explicitly create a single-group MIDI 1.0 port.
+
+        To use the input, pass the result of LegacyVirtualInput::getId() to connectInput().
+
         There are some special cases to keep in mind:
 
         - Windows MIDI Services only allows creation of UMP endpoints, not MIDI 1.0 ports, so on
@@ -148,6 +149,9 @@ public:
     /** Creates a MIDI 1.0-compatible output port.
 
         Where supported by platform APIs, this will explicitly create a single-group MIDI 1.0 port.
+
+        To use the output, pass the result of LegacyVirtualOutput::getId() to connectOutput().
+
         There are some special cases to keep in mind:
 
         - Windows MIDI Services only allows creation of UMP endpoints, not MIDI 1.0 ports, so on

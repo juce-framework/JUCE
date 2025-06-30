@@ -41,7 +41,7 @@ namespace juce::universal_midi_packets
 
     This information differs from the detailed information in the Endpoint struct, in that
     the StaticDeviceInformation is communicated out-of-band, whereas Endpoint information is
-    communicated 'in-band', i.e. it is sent as MIDI messages after establishing a connection to the
+    communicated in-band, i.e. it is sent as MIDI messages after establishing a connection to the
     device.
 
     @tags{Audio}

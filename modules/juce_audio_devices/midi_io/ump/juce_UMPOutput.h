@@ -46,6 +46,17 @@ namespace juce::universal_midi_packets
     although this won't result in undefined behaviour, none of the functions will produce useful
     results in this state.
 
+    In the case that the device connected to the Output becomes unavailable (e.g. it is unplugged or
+    the bluetooth connection is dropped), the Output will null itself, and calls to isAlive() will
+    return false. You can register a callback to handle this event by calling
+    addDisconnectionListener().
+
+    A particular pitfall to watch out for is calling addDisconnectionListener() and
+    removeDisconnectionListener() on a default-constructed Output or other Output for which
+    isAlive() returns false. This will have no effect. Instead, if you want
+    to attach listeners to an Output, you should use Session::connectOutput() to create an Output,
+    and ensure that isAlive() returns true on that Output before attaching listeners.
+
     @tags{Audio}
 */
 class Output
@@ -72,7 +83,7 @@ public:
 
         Returns true on success, false on failure.
 
-        You may send messages using any protocol and they will be converted automatically
+        You may send messages using any protocol, and they will be converted automatically
         to the protocol expected by the receiver.
     */
     bool send (Iterator beginIterator, Iterator endIterator);
