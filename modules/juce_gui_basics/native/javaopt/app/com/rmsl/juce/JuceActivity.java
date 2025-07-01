@@ -60,13 +60,21 @@ public class JuceActivity   extends Activity
                     ? (  SYSTEM_UI_FLAG_LAYOUT_STABLE
                        | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                        | SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
-                    : SYSTEM_UI_FLAG_LAYOUT_STABLE;
+                    : 0;
 
             decorView.setSystemUiVisibility (decorView.getSystemUiVisibility() | flags);
         }
 
         if (30 <= Build.VERSION.SDK_INT)
             getWindow().setDecorFitsSystemWindows (false);
+
+        if (29 <= Build.VERSION.SDK_INT)
+        {
+            if (Build.VERSION.SDK_INT < 35)
+                getWindow().setStatusBarContrastEnforced (false);
+
+            getWindow().setNavigationBarContrastEnforced (false);
+        }
     }
 
     @Override
