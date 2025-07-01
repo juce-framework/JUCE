@@ -1513,40 +1513,42 @@ private:
         if (window.disableMouseMoves || (window.activeSubMenu != nullptr && window.activeSubMenu->isOverChildren()))
             return;
 
-        const bool isMovingTowardsMenu = isMouseOver && globalMousePos != lastMousePos
-                                            && isMovingTowardsSubmenu (globalMousePos);
+        const auto isMovingTowardsMenu = isMouseOver
+                                      && globalMousePos != lastMousePos
+                                      && isMovingTowardsSubmenu (globalMousePos);
 
         lastMousePos = globalMousePos;
 
-        if (! isMovingTowardsMenu)
+        if (isMovingTowardsMenu)
+            return;
+
+        auto* componentUnderMouse = window.getComponentAt (localMousePos);
+        auto* childComponentUnderMouse = componentUnderMouse != &window ? componentUnderMouse : nullptr;
+
+        auto* itemUnderMouse = std::invoke ([&]() -> ItemComponent*
         {
-            auto* c = window.getComponentAt (localMousePos);
+            if (auto* candidate = dynamic_cast<ItemComponent*> (childComponentUnderMouse))
+                return candidate;
 
-            if (c == &window)
-                c = nullptr;
+            if (childComponentUnderMouse != nullptr)
+                return childComponentUnderMouse->findParentComponentOfClass<ItemComponent>();
 
-            auto* itemUnderMouse = dynamic_cast<ItemComponent*> (c);
+            return nullptr;
+        });
 
-            if (itemUnderMouse == nullptr && c != nullptr)
-                itemUnderMouse = c->findParentComponentOfClass<ItemComponent>();
+        if (itemUnderMouse == window.currentChild)
+            return;
 
-            if (itemUnderMouse != window.currentChild
-                  && (isMouseOver || (window.activeSubMenu == nullptr) || ! window.activeSubMenu->isVisible()))
-            {
-                if (isMouseOver && (c != nullptr) && (window.activeSubMenu != nullptr))
-                    window.activeSubMenu->hide (nullptr, true);
+        if (! isMouseOver && window.activeSubMenu != nullptr && window.activeSubMenu->isVisible())
+            return;
 
-                if (! isMouseOver)
-                {
-                    if (! window.mouseHasBeenOver())
-                        return;
+        if (isMouseOver && childComponentUnderMouse != nullptr && window.activeSubMenu != nullptr)
+            window.activeSubMenu->hide (nullptr, true);
 
-                    itemUnderMouse = nullptr;
-                }
+        if (! isMouseOver && ! window.mouseHasBeenOver())
+            return;
 
-                window.setCurrentlyHighlightedChild (itemUnderMouse);
-            }
-        }
+        window.setCurrentlyHighlightedChild (isMouseOver ? itemUnderMouse : nullptr);
     }
 
     bool isMovingTowardsSubmenu (Point<int> newGlobalPos) const
