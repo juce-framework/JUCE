@@ -1423,7 +1423,7 @@ public:
 private:
     Point<int> lastMousePos;
     double scrollAcceleration = 0;
-    uint32 lastScrollTime;
+    uint32 lastScrollTime = 0, lastMoveTime = 0;
     bool isDown = false;
 
     // Although most mouse movements can be handled inside mouse event callbacks, scrolling of menus
@@ -1454,7 +1454,7 @@ private:
             window.showSubMenuFor (window.currentChild);
         }
 
-        highlightItemUnderMouse (globalMousePos, localMousePos);
+        highlightItemUnderMouse (globalMousePos, localMousePos, timeNow);
 
         const bool overScrollArea = scrollIfNecessary (localMousePos, timeNow);
         const bool isOverAny = window.isOverAnyMenu();
@@ -1498,19 +1498,25 @@ private:
         }
     }
 
-    void highlightItemUnderMouse (Point<int> globalMousePos, Point<int> localMousePos)
+    void highlightItemUnderMouse (Point<int> globalMousePos, Point<int> localMousePos, uint32 timeNow)
     {
+        const auto mouseTimedOut = lastMoveTime != 0 && 350 < (timeNow - lastMoveTime);
         const auto mouseHasMoved = 2 < lastMousePos.getDistanceFrom (globalMousePos);
-
-        if (! mouseHasMoved)
-            return;
-
         const auto isMouseOver = window.reallyContains (localMousePos, true);
 
-        if (isMouseOver)
+        if (mouseHasMoved && isMouseOver)
+        {
             window.disableMouseMoves = false;
+            lastMoveTime = timeNow;
+        }
 
-        if (window.disableMouseMoves || (window.activeSubMenu != nullptr && window.activeSubMenu->isOverChildren()))
+        if (! mouseHasMoved && ! mouseTimedOut)
+            return;
+
+        if (window.disableMouseMoves)
+            return;
+
+        if (window.activeSubMenu != nullptr && window.activeSubMenu->isOverChildren())
             return;
 
         const auto isMovingTowardsMenu = isMouseOver
