@@ -117,36 +117,7 @@ public final class ComponentPeerView extends ViewGroup
         colorMatrix.set (colorTransform);
         paint.setColorFilter (new ColorMatrixColorFilter (colorMatrix));
 
-        java.lang.reflect.Method method = null;
-
-        try
-        {
-            method = getClass().getMethod ("setLayerType", int.class, Paint.class);
-        }
-        catch (SecurityException e)
-        {
-        }
-        catch (NoSuchMethodException e)
-        {
-        }
-
-        if (method != null)
-        {
-            try
-            {
-                int layerTypeNone = 0;
-                method.invoke (this, layerTypeNone, null);
-            }
-            catch (java.lang.IllegalArgumentException e)
-            {
-            }
-            catch (java.lang.IllegalAccessException e)
-            {
-            }
-            catch (java.lang.reflect.InvocationTargetException e)
-            {
-            }
-        }
+        setLayerType (LAYER_TYPE_NONE, null);
 
         Choreographer.getInstance().postFrameCallback (this);
     }
