@@ -91,9 +91,15 @@ int main (int argc, char **argv)
     ConsoleLogger logger;
     Logger::setCurrentLogger (&logger);
 
+    const ScopeGuard onExit { [&]
+    {
+        Logger::setCurrentLogger (nullptr);
+        DeletedAtShutdown::deleteAll();
+    }};
+
     ConsoleUnitTestRunner runner;
 
-    auto seed = [&args]
+    const auto seed = std::invoke ([&]
     {
         if (args.containsOption (seedOption))
         {
@@ -106,7 +112,7 @@ int main (int argc, char **argv)
         }
 
         return Random::getSystemRandom().nextInt64();
-    }();
+    });
 
     if (args.containsOption (categoryOption))
         runner.runTestsInCategory (args.getValueForOption (categoryOption), seed);
@@ -122,24 +128,28 @@ int main (int argc, char **argv)
         auto* result = runner.getResult (i);
 
         if (result->failures > 0)
-            failures.push_back (result->unitTestName + " / " + result->subcategoryName + ": " + String (result->failures) + " test failure" + (result->failures > 1 ? "s" : ""));
+        {
+            const auto testName = result->unitTestName + " / " + result->subcategoryName;
+            const auto testSummary = String (result->failures) + " test failure" + (result->failures > 1 ? "s" : "");
+            const auto newLineAndTab = newLine + "\t";
+
+            failures.push_back (testName + ": " + testSummary + newLineAndTab
+                                + result->messages.joinIntoString (newLineAndTab));
+        }
     }
+
+    logger.writeToLog (newLine + String::repeatedString ("-", 65));
 
     if (! failures.empty())
     {
-        logger.writeToLog (newLine + "Test failure summary:" + newLine);
+        logger.writeToLog ("Test failure summary:");
 
         for (const auto& failure : failures)
-            logger.writeToLog (failure);
+            logger.writeToLog (newLine + failure);
 
-        Logger::setCurrentLogger (nullptr);
         return 1;
     }
 
-    logger.writeToLog (newLine + "All tests completed successfully");
-    Logger::setCurrentLogger (nullptr);
-
-    DeletedAtShutdown::deleteAll();
-
+    logger.writeToLog ("All tests completed successfully");
     return 0;
 }
