@@ -1691,7 +1691,7 @@ void OpenGLContext::NativeContextListener::removeListener (OpenGLContext& ctx, N
 
 #if JUCE_ANDROID
 
-void OpenGLContext::NativeContext::surfaceCreated (LocalRef<jobject>)
+void OpenGLContext::NativeContext::surfaceCreated (LocalRef<jobject> holder)
 {
     {
         const std::lock_guard lock { nativeHandleMutex };
@@ -1701,7 +1701,7 @@ void OpenGLContext::NativeContext::surfaceCreated (LocalRef<jobject>)
         // has the context already attached?
         jassert (surface.get() == EGL_NO_SURFACE && context.get() == EGL_NO_CONTEXT);
 
-        const auto window = getNativeWindow();
+        const auto window = getNativeWindowFromSurfaceHolder (holder);
 
         if (window == nullptr)
         {
@@ -1710,7 +1710,11 @@ void OpenGLContext::NativeContext::surfaceCreated (LocalRef<jobject>)
             return;
         }
 
-        // create the surface
+        // Reset the surface (only one window surface may be alive at a time)
+        context.reset();
+        surface.reset();
+
+        // Create the surface
         surface.reset (eglCreateWindowSurface (display, config, window.get(), nullptr));
         jassert (surface.get() != EGL_NO_SURFACE);
 
