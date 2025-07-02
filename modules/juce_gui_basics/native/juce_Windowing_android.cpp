@@ -1319,10 +1319,10 @@ public:
                                                              getAppContext().get(), (jboolean) component.isOpaque(),
                                                              (jlong) this)));
 
-        if (nativeViewHandle != nullptr)
-        {
-            viewGroupIsWindow = false;
+        userDidSupplyParent = nativeViewHandle != nullptr;
 
+        if (userDidSupplyParent)
+        {
             // we don't know if the user is holding on to a local ref to this, so
             // explicitly create a new one
             auto nativeView = LocalRef<jobject> (env->NewLocalRef (static_cast<jobject> (nativeViewHandle)));
@@ -1349,8 +1349,6 @@ public:
         }
         else
         {
-            viewGroupIsWindow = true;
-
             LocalRef viewLayoutParams { env->NewObject (AndroidLayoutParams, AndroidLayoutParams.create, -2, -2) };
             env->CallVoidMethod (view.get(), AndroidView.setLayoutParams, viewLayoutParams.get());
 
@@ -1426,16 +1424,57 @@ public:
         env->CallVoidMethod (view, ComponentPeerView.clear);
         frontWindow = nullptr;
 
-        GlobalRef localView (view);
-        GlobalRef localViewGroup (viewGroup);
+        removeView();
+    }
 
-        callOnMessageThread ([env, localView, localViewGroup]
+    static void removeViewFromActivity (jobject localView)
+    {
+        if (localView == nullptr)
+            return;
+
+        auto* env = getEnv();
+
+        if (LocalRef<jobject> parent { env->CallObjectMethod (localView, AndroidView.getParent) })
+            env->CallVoidMethod (parent, AndroidViewGroup.removeView, localView);
+    }
+
+    void removeView()
+    {
+        auto* env = getEnv();
+
+        if (userDidSupplyParent)
         {
-            if (env->IsInstanceOf (localViewGroup.get(), AndroidActivity))
-                env->CallVoidMethod (localViewGroup.get(), AndroidActivity.setContentView, nullptr);
-            else
-                env->CallVoidMethod (localViewGroup.get(), AndroidViewManager.removeView, localView.get());
-        });
+            if (env->IsInstanceOf (viewGroup, AndroidActivity))
+            {
+                removeViewFromActivity (view);
+                return;
+            }
+
+            if (env->IsInstanceOf (viewGroup, AndroidViewGroup))
+            {
+                env->CallVoidMethod (viewGroup, AndroidViewGroup.removeView, view.get());
+                return;
+            }
+
+            // The parent was not an activity or view group?
+            jassertfalse;
+            return;
+        }
+
+        if (fullScreen)
+        {
+            removeViewFromActivity (view);
+            return;
+        }
+
+        if (env->IsInstanceOf (viewGroup, AndroidWindowManager))
+        {
+            env->CallVoidMethod (viewGroup, AndroidWindowManager.removeViewImmediate, view.get());
+            return;
+        }
+
+        // The view's owner didn't have the expected type!
+        jassertfalse;
     }
 
     void* getNativeHandle() const override
@@ -1464,33 +1503,67 @@ public:
 
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            fullScreen = isNowFullScreen;
+            auto* env = getEnv();
 
-            if (viewGroup != nullptr && viewGroupIsWindow)
+            if (fullScreen != isNowFullScreen && ! userDidSupplyParent)
             {
-                auto* env = getEnv();
+                removeView();
+
+                fullScreen = isNowFullScreen;
 
                 LocalRef windowLayoutParams { env->NewObject (AndroidWindowManagerLayoutParams,
                                                               AndroidWindowManagerLayoutParams.createDefault) };
 
                 setUpLayoutParams (env, windowLayoutParams.get(), bounds);
 
-                env->CallVoidMethod (viewGroup.get(),
-                                     AndroidViewManager.updateViewLayout,
-                                     view.get(),
-                                     windowLayoutParams.get());
+                if (isNowFullScreen)
+                {
+                    if (auto activity = getCurrentOrMainActivity())
+                        env->CallVoidMethod (activity, AndroidActivity.addContentView, view.get(), windowLayoutParams.get());
+                }
+                else if (env->IsInstanceOf (viewGroup, AndroidViewManager))
+                {
+                    env->CallVoidMethod (viewGroup.get(),
+                                         AndroidViewManager.addView,
+                                         view.get(),
+                                         windowLayoutParams.get());
+                }
+                else
+                {
+                    // Not fullscreen but the viewgroup isn't a viewmanager/windowmanager instance
+                    jassertfalse;
+                }
 
                 setNavBarsHidden (navBarsHidden);
             }
-            else
+            else if (! fullScreen)
             {
-                view.callVoidMethod (AndroidView.layout,
-                                     bounds.getX(),
-                                     bounds.getY(),
-                                     bounds.getRight(),
-                                     bounds.getBottom());
+                if (viewGroup != nullptr && ! userDidSupplyParent)
+                {
+                    LocalRef windowLayoutParams { env->NewObject (AndroidWindowManagerLayoutParams,
+                                                                  AndroidWindowManagerLayoutParams.createDefault) };
 
+                    setUpLayoutParams (env, windowLayoutParams.get(), bounds);
+
+                    env->CallVoidMethod (viewGroup.get(),
+                                         AndroidViewManager.updateViewLayout,
+                                         view.get(),
+                                         windowLayoutParams.get());
+
+                    setNavBarsHidden (navBarsHidden);
+                }
+                else
+                {
+                    view.callVoidMethod (AndroidView.layout,
+                                         bounds.getX(),
+                                         bounds.getY(),
+                                         bounds.getRight(),
+                                         bounds.getBottom());
+
+                }
             }
+
+            fullScreen = isNowFullScreen;
         }
         else
         {
@@ -2109,7 +2182,7 @@ private:
         if (! env->IsInstanceOf (layoutParams, AndroidWindowManagerLayoutParams))
             return;
 
-        // When viewGroupIsWindow is true, we're laying out the window within the bounds
+        // When userDidSupplyParent is false, we're laying out the window within the bounds
         // provided to the activity, and the userRect is in global screen space.
         // For fullscreen windows, it's easiest to ask Android to size the view
         // appropriately by matching the parent view.
@@ -2446,7 +2519,7 @@ private:
     static constexpr jint LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES = 0x1;
 
     GlobalRef view, viewGroup, buffer, activityWindow;
-    bool viewGroupIsWindow = false, fullScreen = false, navBarsHidden = false;
+    bool userDidSupplyParent = false, fullScreen = false, navBarsHidden = false;
     int sizeAllocated = 0;
 
     //==============================================================================
