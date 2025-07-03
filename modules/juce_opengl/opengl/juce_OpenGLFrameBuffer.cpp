@@ -119,6 +119,7 @@ public:
 
         auto* transientState = std::get_if<TransientState> (&state);
         transientState->bind();
+        const ScopeGuard unbinder { [transientState] { transientState->unbind(); }};
 
        #if ! JUCE_ANDROID
         if (! associatedContext->isCoreProfile())
@@ -132,7 +133,6 @@ public:
             associatedContext->copyTexture (area, area, area.getWidth(), area.getHeight(), false);
         }
 
-        transientState->unbind();
         return true;
     }
 
@@ -218,8 +218,8 @@ public:
         if (transientState == nullptr)
             return;
 
+        const ScopeGuard unbinder { [transientState] { transientState->unbind(); }};
         OpenGLHelpers::clear (colour);
-        transientState->unbind();
     }
 
     void makeCurrentAndClear()
@@ -240,11 +240,12 @@ public:
         if (transientState == nullptr)
             return false;
 
+        const ScopeGuard unbinder { [transientState] { transientState->unbind(); }};
+
         glPixelStorei (GL_PACK_ALIGNMENT, 4);
         glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(),
                       JUCE_RGBA_FORMAT, GL_UNSIGNED_BYTE, target);
 
-        transientState->unbind();
         return true;
     }
 
@@ -324,6 +325,7 @@ private:
 
             gl::glGenFramebuffers (1, &frameBufferID);
             bind();
+            const ScopeGuard unbinder { [this] { unbind(); }};
 
             {
                 const ScopedTextureBinding scopedTextureBinding;
@@ -369,8 +371,6 @@ private:
                 if (wantsStencilBuffer)
                     gl::glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
             }
-
-            unbind();
         }
 
         ~TransientState()
