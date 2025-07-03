@@ -375,19 +375,19 @@ private:
 
         ~TransientState()
         {
-            if (OpenGLHelpers::isContextActive())
-            {
-                if (textureID != 0)
-                    gl::glDeleteTextures (1, &textureID);
+            if (! OpenGLHelpers::isContextActive())
+                return;
 
-                if (depthOrStencilBuffer != 0)
-                    gl::glDeleteRenderbuffers (1, &depthOrStencilBuffer);
+            if (textureID != 0)
+                gl::glDeleteTextures (1, &textureID);
 
-                if (frameBufferID != 0)
-                    gl::glDeleteFramebuffers (1, &frameBufferID);
+            if (depthOrStencilBuffer != 0)
+                gl::glDeleteRenderbuffers (1, &depthOrStencilBuffer);
 
-                JUCE_CHECK_OPENGL_ERROR
-            }
+            if (frameBufferID != 0)
+                gl::glDeleteFramebuffers (1, &frameBufferID);
+
+            JUCE_CHECK_OPENGL_ERROR
         }
 
         bool createdOk() const
