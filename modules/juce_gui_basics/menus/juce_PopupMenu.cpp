@@ -126,7 +126,10 @@ struct ItemComponent final : public Component
         : item (i), parentWindow (parent), options (o), customComp (i.customComponent)
     {
         if (item.isSectionHeader)
+        {
             customComp = *new HeaderItemComponent (item.text, options);
+            setEnabled (false);
+        }
 
         if (customComp != nullptr)
         {
