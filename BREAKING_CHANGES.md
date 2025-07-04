@@ -4,6 +4,42 @@
 
 ## Change
 
+The behaviour of the default constructed FocusTraverser objects has changed, and
+they will now navigate onto disabled components. This only affects navigation by
+screen readers and not general keyboard navigation, as the latter depends on the
+KeyboardFocusTraverser class.
+
+**Possible Issues**
+
+Disabled child components of focus containers that used the JUCE default
+FocusTraverser will now be discoverable by screen readers. They will accept
+accessibility focus, their title will be reported as well as their disabled
+state.
+
+Children of components that returned a custom ComponentTraverser object are not
+affected.
+
+**Workaround**
+
+If you wish to hide disabled components from screen readers, you can restore the
+old behaviour by overriding `Component::createFocusTraverser()` for your focus
+containers, and returning a FocusTraverser object created using the
+`FocusTraverser::SkipDisabledComponents::yes` argument.
+
+**Rationale**
+
+Disabled components are typically rendered in a dimmed or inactive state, but 
+are still prominently visible for sighted users. The old behaviour made these
+components entirely missing from the accessibility tree, making them 
+non-discoverable with screen readers. 
+
+This was in contrast to the behaviour of native OS components, that are still
+accessible using screen readers, but their disabled/dimmed state is also
+reported.
+
+
+## Change
+
 The default Visual Studio project settings for "Debug Information Format" have
 changed in the Projucer. By default debug symbols are generated using the /Zi
 flag.
