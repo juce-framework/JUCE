@@ -333,7 +333,7 @@ public:
 
         env->CallVoidMethod (info,
                              AndroidAccessibilityNodeInfo.setEnabled,
-                             ! state.isIgnored());
+                             ! state.isIgnored() && accessibilityHandler.getComponent().isEnabled());
         env->CallVoidMethod (info,
                              AndroidAccessibilityNodeInfo.setVisibleToUser,
                              true);
