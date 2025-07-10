@@ -193,10 +193,6 @@ public:
     //==============================================================================
     void pause()
     {
-       #if JUCE_ANDROID
-        context.executeOnGLThread ([this] (auto&) { nativeContext->notifyWillPause(); }, true);
-       #endif
-
         renderThread->remove (this);
 
         if ((state.fetch_and (~StateFlags::initialised) & StateFlags::initialised) == 0)
@@ -204,6 +200,10 @@ public:
 
         ScopedContextActivator activator;
         activator.activate (context);
+
+       #if JUCE_ANDROID
+        nativeContext->notifyWillPause();
+       #endif
 
         if (context.renderer != nullptr)
             context.renderer->openGLContextClosing();
