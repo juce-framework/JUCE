@@ -58,6 +58,8 @@ public:
     {
         int width = 0, height = 0;
         std::vector<PixelARGB> data;
+
+        static constexpr auto order = RowOrder::fromBottomUp;
     };
 
     ~Pimpl() override
@@ -97,7 +99,7 @@ public:
         Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
 
         return initialise (context, bitmap.width, bitmap.height)
-               && writePixels ((const PixelARGB*) bitmap.data, image.getBounds());
+               && writePixels ((const PixelARGB*) bitmap.data, image.getBounds(), RowOrder::fromTopDown);
     }
 
     bool initialise (OpenGLFrameBuffer& other)
@@ -233,7 +235,7 @@ public:
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
-    bool readPixels (PixelARGB* target, const Rectangle<int>& area)
+    bool readPixels (PixelARGB* target, const Rectangle<int>& area, RowOrder order)
     {
         auto* transientState = makeAndGetCurrentRenderingTarget();
 
@@ -246,10 +248,25 @@ public:
         glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(),
                       JUCE_RGBA_FORMAT, GL_UNSIGNED_BYTE, target);
 
+        if (order == RowOrder::fromTopDown)
+        {
+            auto* end = target + area.getWidth() * area.getHeight();
+
+            for (auto y = 0; y < area.getHeight() / 2; ++y)
+            {
+                const auto offset = area.getWidth() * y;
+                auto* rowA = target + offset;
+                auto* rowB = end - offset - area.getWidth();
+
+                for (auto x = 0; x < area.getWidth(); ++x)
+                    std::swap (rowA[x], rowB[x]);
+            }
+        }
+
         return true;
     }
 
-    bool writePixels (const PixelARGB* data, const Rectangle<int>& area)
+    bool writePixels (const PixelARGB* data, const Rectangle<int>& area, RowOrder order)
     {
         if (associatedContext == nullptr)
             return false;
@@ -275,7 +292,7 @@ public:
                                                         tex.getHeight()),
                                         transientState->width,
                                         transientState->height,
-                                        true,
+                                        order == RowOrder::fromTopDown,
                                         false);
 
         JUCE_CHECK_OPENGL_ERROR
@@ -422,7 +439,9 @@ private:
         if (! initialise (context, savedState.width, savedState.height))
             return false;
 
-        writePixels (savedState.data.data(), Rectangle (savedState.width, savedState.height));
+        writePixels (savedState.data.data(),
+                     Rectangle (savedState.width, savedState.height),
+                     SavedState::order);
         return true;
     }
 
@@ -432,7 +451,7 @@ private:
                             area.getHeight(),
                             std::vector<PixelARGB> ((size_t) area.getWidth() * (size_t) area.getHeight()) };
 
-        if (! readPixels (result.data.data(), area))
+        if (! readPixels (result.data.data(), area, SavedState::order))
             return {};
 
         return result;
@@ -551,14 +570,14 @@ void OpenGLFrameBuffer::makeCurrentAndClear()
     pimpl->makeCurrentAndClear();
 }
 
-bool OpenGLFrameBuffer::readPixels (PixelARGB* targetData, const Rectangle<int>& sourceArea)
+bool OpenGLFrameBuffer::readPixels (PixelARGB* targetData, const Rectangle<int>& sourceArea, RowOrder order)
 {
-    return pimpl->readPixels (targetData, sourceArea);
+    return pimpl->readPixels (targetData, sourceArea, order);
 }
 
-bool OpenGLFrameBuffer::writePixels (const PixelARGB* srcData, const Rectangle<int>& targetArea)
+bool OpenGLFrameBuffer::writePixels (const PixelARGB* srcData, const Rectangle<int>& targetArea, RowOrder order)
 {
-    return pimpl->writePixels (srcData, targetArea);
+    return pimpl->writePixels (srcData, targetArea, order);
 }
 
 GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget() noexcept

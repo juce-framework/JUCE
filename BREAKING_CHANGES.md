@@ -4,6 +4,34 @@
 
 ## Change
 
+The signatures of OpenGLFrameBuffer::readPixels() and
+OpenGLFrameBuffer::writePixels() have changed, adding a new RowOrder parameter.
+
+**Possible Issues**
+
+Code that does not specify this parameter will not compile.
+
+**Workaround**
+
+Pass the extra parameter to specify whether the pixel data should be ordered
+with the top-most or bottom-most row first.
+
+**Rationale**
+
+The previous function calls did not allow the pixel order to be configured.
+readPixels() would return pixel data with the bottom-most row first (this is
+convention for the OpenGL API), but writePixels() would expect the top-most row
+first. This meant that reading and then immediately writing the same data would
+have the unexpected effect of flipping the image. Changing readPixels() to
+order pixels from top to bottom would be slightly dangerous, as it would
+introduce a change of behaviour with no accompanying compiler warning.
+Additionally, flipping the pixel storage introduces additional work that can be
+safely skipped when the pixel data is going to be written back to the
+framebuffer later.
+
+
+## Change
+
 The behaviour of the default constructed FocusTraverser objects has changed, and
 they will now navigate onto disabled components. This only affects navigation by
 screen readers and not general keyboard navigation, as the latter depends on the

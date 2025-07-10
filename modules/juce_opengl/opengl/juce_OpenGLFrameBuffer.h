@@ -116,17 +116,24 @@ public:
     /** Selects the framebuffer as the current target, and clears it to transparent. */
     void makeCurrentAndClear();
 
+    enum class RowOrder
+    {
+        fromBottomUp,   //< Standard order for OpenGL, the bottom-most row of pixels is first.
+                        //< Using this pixel ordering may be faster, but may be incompatible
+                        //< with other JUCE functions that operate on image pixel data, as these
+                        //< generally expect the rows to be ordered top-down.
+        fromTopDown,    //< Standard order for JUCE images, the top-most row of pixels is first.
+    };
+
     /** Reads an area of pixels from the framebuffer into a 32-bit ARGB pixel array.
-        The lineStride is measured as a number of pixels, not bytes - pass a stride
-        of 0 to indicate a packed array.
+        The RowOrder parameter specifies the order of rows in the resulting array.
     */
-    bool readPixels (PixelARGB* targetData, const Rectangle<int>& sourceArea);
+    bool readPixels (PixelARGB* targetData, const Rectangle<int>& sourceArea, RowOrder);
 
     /** Writes an area of pixels into the framebuffer from a specified pixel array.
-        The lineStride is measured as a number of pixels, not bytes - pass a stride
-        of 0 to indicate a packed array.
+        The RowOrder parameter specifies the order of rows in srcData.
     */
-    bool writePixels (const PixelARGB* srcData, const Rectangle<int>& targetArea);
+    bool writePixels (const PixelARGB* srcData, const Rectangle<int>& targetArea, RowOrder);
 
 private:
     class Pimpl;
