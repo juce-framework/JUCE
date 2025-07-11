@@ -3064,10 +3064,10 @@ AccessibilityHandler* Component::getAccessibilityHandler()
         // By assigning the accessibility handler before notifying the system that an element was
         // created, the if() predicate above should evaluate to false on recursive calls,
         // terminating the recursion.
-        if (accessibilityHandler != nullptr)
-            detail::AccessibilityHelpers::notifyAccessibilityEvent (*accessibilityHandler, detail::AccessibilityHelpers::Event::elementCreated);
-        else
-            jassertfalse; // createAccessibilityHandler must return non-null
+  //      if (accessibilityHandler != nullptr)
+  //          notifyAccessibilityEventInternal (*accessibilityHandler, InternalAccessibilityEvent::elementCreated);
+  //      else
+        //         jassertfalse; // createAccessibilityHandler must return non-null
     }
 
     return accessibilityHandler.get();

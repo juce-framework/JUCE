@@ -578,6 +578,35 @@ public:
         */
         [[nodiscard]] Options forSubmenu() const;
 
+        /** Provide an X value from the left edge of any PopupMenu item such
+          that clicks to the left of the X value will NOT select the Popup
+          menu item, but clicks to the right will select the Popup men item.
+
+          This is useful for blocking off area for extra UI in a
+          PopupMenu::CustomComponent that you do not want to be used for
+          selecting a menu item.
+
+          @note Added by Tim for FAW SampleComboBox.h so that we could prevent
+                the sample audio preview buttons in the SamplePopMenuItem
+                from selecting the item.
+       */
+        [[nodiscard]] Options withSelectableAreaLeftInset (int xInsetAmount) const;
+
+
+        /** Provide an X value from the right edge of any PopupMenu item such
+        that clicks to the right of the X value will NOT select the Popup
+        menu item, but clicks to the left will select the Popup men item.
+
+        This is useful for blocking off area for extra UI in a
+        PopupMenu::CustomComponent that you do not want to be used for
+        selecting a menu item.
+
+        @note Added by Tim for FAW SampleComboBox.h so that we could prevent
+              the favorite buttons in the SamplePopMenuItem from selecting
+              the item.
+    */
+        [[nodiscard]] Options withSelectableAreaRightInset (int xInsetAmount) const;
+
         //==============================================================================
         /** Gets the parent component. This may be nullptr if the Component has been deleted.
 
@@ -660,6 +689,8 @@ public:
         int visibleItemID = 0, minWidth = 0, minColumns = 1, maxColumns = 0, standardHeight = 0, initiallySelectedItemId = 0;
         bool isWatchingForDeletion = false;
         PopupDirection preferredPopupDirection = PopupDirection::downwards;
+        int selectableAreaLeftInset = 0;
+        int selectableAreaRightInset = 0;
     };
 
     //==============================================================================
