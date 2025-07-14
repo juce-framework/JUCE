@@ -220,7 +220,7 @@ public:
         const ScopedLock lock (mutex);
 
         if (auto ptr = getTypefacePtr (f))
-            return ptr->getNativeDetails().getFontAtPointSizeAndScale (f.getHeightInPoints(), f.getHorizontalScale());
+            return ptr->getNativeDetails()->getFontAtPointSizeAndScale (f.getHeightInPoints(), f.getHorizontalScale());
 
         return {};
     }
@@ -231,7 +231,7 @@ public:
 
         if (auto ptr = getTypefacePtr (f))
         {
-            const auto ascentDescent = ptr->getNativeDetails().getAscentDescent (f.getMetricsKind());
+            const auto ascentDescent = ptr->getNativeDetails()->getAscentDescent (f.getMetricsKind());
 
             auto adjusted = ascentDescent;
             adjusted.ascent = getAscentOverride().value_or (adjusted.ascent);
@@ -886,7 +886,7 @@ static bool characterNotRendered (uint32_t c)
 
 static bool isFontSuitableForCodepoint (const Font& font, juce_wchar c)
 {
-    const auto& hbFont = font.getNativeDetails().font;
+    const auto hbFont = font.getNativeDetails().font;
 
     if (hbFont == nullptr)
         return false;
@@ -994,7 +994,7 @@ Font::Native Font::getNativeDetails() const
 
 Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 {
-    const auto resolvedTypeface = [&]() -> Typeface::Ptr
+    const auto resolvedTypeface = std::invoke ([&]() -> Typeface::Ptr
     {
         if (font.getTypefaceName() != getSystemUIFontName())
             return {};
@@ -1010,7 +1010,7 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
         auto copy = font;
         copy.setTypefaceName (systemTypeface->getName());
         return getDefaultTypefaceForFont (copy);
-    }();
+    });
 
     if (resolvedTypeface != nullptr)
         return resolvedTypeface;

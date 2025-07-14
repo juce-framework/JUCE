@@ -93,9 +93,9 @@ std::unique_ptr<InputStream> makeAndroidInputStreamWrapper (LocalRef<jobject> st
 
 struct AndroidCachedTypeface
 {
-    std::shared_ptr<hb_font_t> font;
+    HbFont font;
     GlobalRef javaFont;
-    TypefaceAscentDescent nonPortableMetrics;
+    TypefaceAscentDescent metrics;
 };
 
 //==============================================================================
@@ -235,7 +235,7 @@ public:
             {
                 return new AndroidTypeface (DoCache::no,
                                             result->font,
-                                            result->nonPortableMetrics,
+                                            result->metrics,
                                             font.getTypefaceName(),
                                             font.getTypefaceStyle(),
                                             result->javaFont);
@@ -251,7 +251,7 @@ public:
             return {};
         }
 
-        HbFont hbFont { hb_font_create (face.get()) };
+        HbFont hbFont { hb_font_create (face.get()), IncrementRef::no };
         FontStyleHelpers::initSynthetics (hbFont.get(), font);
 
         const auto androidFont = shouldStoreAndroidFont (face.get())
@@ -271,11 +271,6 @@ public:
         return fromMemory (DoCache::yes, blob, index);
     }
 
-    Native getNativeDetails() const override
-    {
-        return Native { hbFont.get(), nonPortableMetrics, this };
-    }
-
     Typeface::Ptr createSystemFallback (const String& text, const String& language) const override
     {
         if (__builtin_available (android 29, *))
@@ -291,6 +286,11 @@ public:
         if (doCache == DoCache::yes)
             if (auto* c = MemoryFontCache::getInstance())
                 c->remove ({ getName(), getStyle() });
+    }
+
+    const Native* getNativeDetails() const override
+    {
+        return native.get();
     }
 
     static Typeface::Ptr findSystemTypeface()
@@ -358,8 +358,8 @@ private:
 
         const AFontMatcherPtr matcher { AFontMatcher_create() };
 
-        const auto weight = hb_style_get_value (hbFont.get(), HB_STYLE_TAG_WEIGHT);
-        const auto italic = hb_style_get_value (hbFont.get(), HB_STYLE_TAG_ITALIC) != 0.0f;
+        const auto weight = hb_style_get_value (native->getFont(), HB_STYLE_TAG_WEIGHT);
+        const auto italic = hb_style_get_value (native->getFont(), HB_STYLE_TAG_ITALIC) != 0.0f;
         AFontMatcher_setStyle (matcher.get(), (uint16_t) weight, italic);
 
         AFontMatcher_setLocales (matcher.get(), language.toRawUTF8());
@@ -367,7 +367,7 @@ private:
         const auto utf16 = text.toUTF16();
 
         const AFontPtr matched { AFontMatcher_match (matcher.get(),
-                                                     readFontName (hb_font_get_face (hbFont.get()),
+                                                     readFontName (hb_font_get_face (native->getFont()),
                                                                    HB_OT_NAME_ID_FONT_FAMILY,
                                                                    nullptr).toRawUTF8(),
                                                      unalignedPointerCast<const uint16_t*> (utf16.getAddress()),
@@ -442,7 +442,7 @@ private:
         const auto metrics = findNonPortableMetricsForData (blob);
 
         return new AndroidTypeface (cache,
-                                    HbFont { hb_font_create (face.get()) },
+                                    HbFont (hb_font_create (face.get()), IncrementRef::no),
                                     metrics,
                                     readFontName (face.get(), HB_OT_NAME_ID_FONT_FAMILY, nullptr),
                                     readFontName (face.get(), HB_OT_NAME_ID_FONT_SUBFAMILY, nullptr),
@@ -461,20 +461,19 @@ private:
     }
 
     AndroidTypeface (DoCache cache,
-                     std::shared_ptr<hb_font_t> fontIn,
+                     HbFont fontIn,
                      TypefaceAscentDescent nonPortableMetricsIn,
                      const String& name,
                      const String& style,
                      GlobalRef javaFontIn)
         : Typeface (name, style),
-          hbFont (std::move (fontIn)),
           doCache (cache),
-          nonPortableMetrics (nonPortableMetricsIn),
-          javaFont (std::move (javaFontIn))
+          javaFont (std::move (javaFontIn)),
+          native (std::make_unique<Native> (TypefaceNativeOptions { std::move (fontIn), nonPortableMetricsIn, this }))
     {
         if (doCache == DoCache::yes)
             if (auto* c = MemoryFontCache::getInstance())
-                c->add ({ name, style }, { hbFont, javaFont, nonPortableMetrics });
+                c->add ({ name, style }, { fontIn, javaFont, nonPortableMetricsIn });
     }
 
     static std::tuple<MemoryBlock, TypefaceAscentDescent> getBlobForFont (const Font& font)
@@ -664,22 +663,22 @@ private:
 
         auto* env = getEnv();
 
-        hb_glyph_extents_t extents{};
+        const auto extents = native->getGlyphExtents ((hb_codepoint_t) glyph);
 
-        if (! hb_font_get_glyph_extents (hbFont.get(), (hb_codepoint_t) glyph, &extents))
+        if (! extents.has_value())
         {
             // Trying to retrieve an image for a glyph that's not present in the font?
             jassertfalse;
             return {};
         }
 
-        const auto upem = (jint) hb_face_get_upem (hb_font_get_face (hbFont.get()));
+        const auto upem = (jint) hb_face_get_upem (hb_font_get_face (native->getFont()));
         constexpr jint referenceSize = 128;
 
-        const jint pixelW = (referenceSize * abs (extents.width))  / upem;
-        const jint pixelH = (referenceSize * abs (extents.height)) / upem;
-        const jint pixelBearingX = (referenceSize * extents.x_bearing) / upem;
-        const jint pixelBearingY = (referenceSize * extents.y_bearing) / upem;
+        const jint pixelW = (referenceSize * abs (extents->width))  / upem;
+        const jint pixelH = (referenceSize * abs (extents->height)) / upem;
+        const jint pixelBearingX = (referenceSize * extents->x_bearing) / upem;
+        const jint pixelBearingY = (referenceSize * extents->y_bearing) / upem;
 
         const jint pixelPadding = 2;
 
@@ -760,10 +759,9 @@ private:
                                                .followedBy (transform) } } };
     }
 
-    std::shared_ptr<hb_font_t> hbFont;
     DoCache doCache;
-    TypefaceAscentDescent nonPortableMetrics;
     GlobalRef javaFont;
+    std::unique_ptr<Native> native;
 };
 
 //==============================================================================
