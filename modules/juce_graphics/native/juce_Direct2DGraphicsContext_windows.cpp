@@ -924,7 +924,7 @@ void Direct2DGraphicsContext::drawImage (const Image& imageIn, const AffineTrans
                     continue;
 
                 const auto src = intersection - pageBounds.getPosition().toFloat();
-                const auto dst = getRect (intersection - pagesAndArea.area.getPosition().toFloat()).toNearestInt().toFloat();
+                const auto dst = getRect (intersection - pagesAndArea.area.getPosition().toFloat());
                 const auto [srcConverted, dstConverted] = std::tuple (D2DUtilities::toRECT_F (src),
                                                                       D2DUtilities::toRECT_F (dst));
 
