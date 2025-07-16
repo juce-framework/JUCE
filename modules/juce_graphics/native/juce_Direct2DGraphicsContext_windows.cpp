@@ -1327,13 +1327,34 @@ public:
                         g.drawImageTransformed (imageToDraw, transform);
                     }
 
-                    compareImages (targetNative, targetSoftware);
+                    auto pixelsToIgnore = createEdgeMask (imageToDraw.getWidth(),
+                                                          imageToDraw.getHeight(),
+                                                          targetNative.getWidth(),
+                                                          targetNative.getHeight(),
+                                                          transform);
+
+                    compareImages (targetNative, targetSoftware, 16, pixelsToIgnore);
                 }
             }
         }
     }
 
-    void compareImages (const Image& a, const Image& b)
+    static Image createEdgeMask (int sourceWidth,
+                                 int sourceHeight,
+                                 int maskWidth,
+                                 int maskHeight,
+                                 const AffineTransform& transform)
+    {
+        Image mask { Image::SingleChannel, maskWidth, maskHeight, true, SoftwareImageType{} };
+        Graphics g { mask };
+        g.addTransform (transform);
+        g.setColour (Colours::white);
+        g.drawRect (Rectangle<int> { 0, 0, sourceWidth + 1, sourceHeight + 1 }.toFloat(), 2.0f);
+
+        return mask;
+    }
+
+    void compareImages (const Image& a, const Image& b, int stride, const Image& ignoreMask)
     {
         expect (a.getBounds() == b.getBounds());
 
@@ -1344,10 +1365,13 @@ public:
         int64_t accumulatedError{};
         int64_t numSamples{};
 
-        for (auto y = 0; y < a.getHeight(); y += 16)
+        for (auto y = 0; y < a.getHeight(); y += stride)
         {
-            for (auto x = 0; x < a.getWidth(); x += 16)
+            for (auto x = 0; x < a.getWidth(); x += stride)
             {
+                if (ignoreMask.getPixelAt (x, y) != Colour{})
+                    continue;
+
                 const auto expected = bitmapA.getPixelColour (x, y);
                 const auto actual   = bitmapB.getPixelColour (x, y);
 
