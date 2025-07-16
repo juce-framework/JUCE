@@ -1340,6 +1340,7 @@ public:
         const Image::BitmapData bitmapA { a, Image::BitmapData::readOnly };
         const Image::BitmapData bitmapB { b, Image::BitmapData::readOnly };
 
+        int64_t maxAbsError{};
         int64_t accumulatedError{};
         int64_t numSamples{};
 
@@ -1352,14 +1353,18 @@ public:
 
                 for (auto& fn : { &Colour::getRed, &Colour::getGreen, &Colour::getBlue, &Colour::getAlpha })
                 {
-                    accumulatedError += ((int64_t) (actual.*fn)() - (int64_t) (expected.*fn)());
+                    const auto signedError = ((int64_t) (actual.*fn)() - (int64_t) (expected.*fn)());
+                    const auto absError = std::abs (signedError);
+                    maxAbsError = std::max (maxAbsError, absError);
+
+                    accumulatedError += absError;
                     ++numSamples;
                 }
             }
         }
 
         const auto averageError = (double) accumulatedError / (double) numSamples;
-        expect (std::abs (averageError) < 1.0);
+        expect (std::abs (averageError) < 1.0 && maxAbsError < 10);
     }
 };
 
