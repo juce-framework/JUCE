@@ -2402,7 +2402,8 @@ private:
 
         if (parentToAddTo != nullptr)
         {
-            type |= WS_CHILD;
+            if (!hasClose)
+                type |= WS_CHILD;
         }
         else
         {

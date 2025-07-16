@@ -602,6 +602,9 @@ public:
                                                                                         : NSFloatingWindowLevel)
                                           : NSNormalWindowLevel];
 
+            // Acon Digital modification to prevent topmost windows from overlapping other applications
+            [window setHidesOnDeactivate:YES];
+
             isAlwaysOnTop = alwaysOnTop;
         }
 
