@@ -945,12 +945,19 @@ void Direct2DGraphicsContext::drawImage (const Image& imageIn, const AffineTrans
                 }
                 else
                 {
+                    const auto lastMode = deviceContext->GetAntialiasMode();
+
+                    if (pagesAndArea.pages.size() > 1)
+                        deviceContext->SetAntialiasMode (D2D1_ANTIALIAS_MODE_ALIASED);
+
                     deviceContext->DrawBitmap (page.bitmap,
                                                dstConverted,
                                                currentState->fillType.getOpacity(),
                                                currentState->interpolationMode,
                                                srcConverted,
                                                {});
+
+                    deviceContext->SetAntialiasMode (lastMode);
                 }
             }
         };
@@ -1336,6 +1343,42 @@ public:
                     compareImages (targetNative, targetSoftware, 16, pixelsToIgnore);
                 }
             }
+        }
+
+        beginTest ("Check that there is no seam between D2D image tiles");
+        {
+            const auto width = 229;
+            const auto height = 80 * width;
+
+            Image filmStripSoftware { Image::RGB, width, height, true, SoftwareImageType{} };
+
+            {
+                Graphics g { filmStripSoftware };
+                g.setGradientFill ({ Colours::red, 0, 0, Colours::cyan, (float) filmStripSoftware.getWidth(), 0, false });
+                g.fillAll();
+            }
+
+            const auto filmStrip = NativeImageType{}.convert (filmStripSoftware);
+            Image targetNative { Image::RGB, targetDim, targetDim, true, NativeImageType{} };
+            Image targetSoftware { Image::RGB, targetDim, targetDim, true, SoftwareImageType{} };
+            const auto transform = AffineTransform::scale (1.1f);
+
+            for (auto* target : { &targetNative, &targetSoftware })
+            {
+                Graphics g { *target };
+                g.setColour (Colours::orange);
+                g.fillAll();
+                g.addTransform (transform);
+                g.drawImage (filmStrip, 0, 0, width, width, 0, (16384 / width) * width, width, width);
+            }
+
+            auto pixelsToIgnore = createEdgeMask (width,
+                                                  width,
+                                                  targetNative.getWidth(),
+                                                  targetNative.getHeight(),
+                                                  transform);
+
+            compareImages (targetNative, targetSoftware, 1, pixelsToIgnore);
         }
     }
 
