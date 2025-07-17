@@ -215,9 +215,10 @@ static std::vector<ShapedGlyph> lowLevelShape (Span<const juce_wchar> string,
                                                Range<int64> range,
                                                const Font& font,
                                                TextScript script,
-                                               const String& language,
                                                uint8_t embeddingLevel)
 {
+    static const auto language = SystemStats::getDisplayLanguage();
+
     HbBuffer buffer { hb_buffer_create() };
     hb_buffer_clear_contents (buffer.get());
 
@@ -515,7 +516,6 @@ private:
 struct ShapingParams
 {
     TextScript script;
-    String language;
     uint8_t embeddingLevel;
     Font resolvedFont;
 };
@@ -934,7 +934,6 @@ struct Shaper
                 {
                     shaperRuns.set (range,
                                     { scriptRun->front().script,
-                                      options.getLanguage(),
                                       *it,
                                       font },
                                     ops,
@@ -988,7 +987,6 @@ struct Shaper
                                         shapingRange,
                                         it->value.resolvedFont,
                                         it->value.script,
-                                        it->value.language,
                                         it->value.embeddingLevel);
 
                 shapedGlyphs.set (shapingRange,

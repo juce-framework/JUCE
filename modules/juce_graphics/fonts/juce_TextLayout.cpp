@@ -445,7 +445,6 @@ void TextLayout::createStandardLayout (const AttributedString& text)
     }
 
     auto shapedTextOptions = ShapedTextOptions{}.withFonts (fonts)
-                                                .withLanguage (SystemStats::getUserLanguage())
                                                 .withTrailingWhitespacesShouldFit (false)
                                                 .withJustification (justification)
                                                 .withReadingDirection (getTextDirection (text))
