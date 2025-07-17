@@ -552,7 +552,7 @@ private:
         if (isSharedWindow)
             return;
 
-        if (@available (ios 13, *))
+        if (@available (iOS 13, *))
         {
             window.windowScene = windowSceneTracker->getWindowScene();
         }
@@ -1085,7 +1085,7 @@ static void postTraitChangeNotification (UITraitCollection* previousTraitCollect
 {
     [super traitCollectionDidChange: previousTraitCollection];
 
-    if (@available (ios 17, *))
+    if (@available (iOS 17, *))
         {} // do nothing
     else
         postTraitChangeNotification (previousTraitCollection);
@@ -1793,7 +1793,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp,
 
         window = [[JuceUIWindow alloc] initWithFrame: r];
 
-        if (@available (ios 13, *))
+        if (@available (iOS 13, *))
         {
             window.windowScene = windowSceneTracker->getWindowScene();
         }

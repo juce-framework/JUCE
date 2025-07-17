@@ -610,7 +610,7 @@ struct TemporaryWindow
 {
     UIWindow* window = std::invoke ([&]
     {
-        if (@available (ios 13, *))
+        if (@available (iOS 13, *))
         {
             SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 

@@ -546,7 +546,7 @@ struct CoreMidiHelpers
         std::optional<EndpointInfo> getCachedInfo (const ump::EndpointId& x) const
         {
            #if JUCE_COREMIDI_UMP_ENDPOINT_CAN_BE_BUILT
-            if (@available (macos 15, ios 18, *))
+            if (@available (macOS 15, iOS 18, *))
                 if (const auto iter = virtualEndpoints.find (x); iter != virtualEndpoints.end())
                     return getInfoForEndpoint (iter->second);
            #endif
@@ -627,7 +627,7 @@ struct CoreMidiHelpers
         SharedEndpointsImplNative (MIDIClientRef c, ump::EndpointsListener& l)
             : client (c), listener (l)
         {
-            if (@available (macos 15.0, ios 18.0, *))
+            if (@available (macOS 15.0, iOS 18.0, *))
                 observers.emplace (*this);
         }
 
@@ -846,7 +846,7 @@ struct CoreMidiHelpers
         static std::map<ump::EndpointId, EndpointInfo> findNativeUMPEndpoints()
         {
            #if JUCE_COREMIDI_UMP_ENDPOINT_CAN_BE_BUILT
-            if (@available (macos 15, ios 18, *))
+            if (@available (macOS 15, iOS 18, *))
             {
                 std::map<ump::EndpointId, EndpointInfo> result;
 
@@ -867,7 +867,7 @@ struct CoreMidiHelpers
         static std::optional<SInt32> getUMPActiveGroupBitmap ([[maybe_unused]] MIDIEndpointRef r)
         {
            #if JUCE_MAC_API_VERSION_CAN_BE_BUILT (14, 0) || JUCE_IOS_API_VERSION_CAN_BE_BUILT (17, 0)
-            if (@available (macos 14, ios 17, *))
+            if (@available (macOS 14, iOS 17, *))
             {
                 SInt32 bitmap{};
 
@@ -884,7 +884,7 @@ struct CoreMidiHelpers
         static bool canTransmitGroupless ([[maybe_unused]] MIDIEndpointRef endpoint)
         {
            #if JUCE_MAC_API_VERSION_CAN_BE_BUILT (14, 0) || JUCE_IOS_API_VERSION_CAN_BE_BUILT (17, 0)
-            if (@available (macos 14, ios 17, *))
+            if (@available (macOS 14, iOS 17, *))
             {
                 SInt32 result;
                 if (MIDIObjectGetIntegerProperty (endpoint, kMIDIPropertyUMPCanTransmitGroupless, &result) == noErr)
@@ -2385,7 +2385,7 @@ struct CoreMidiHelpers
                                                                                          [[maybe_unused]] ump::BlocksAreStatic areStatic) override
         {
            #if JUCE_COREMIDI_UMP_ENDPOINT_CAN_BE_BUILT
-            if (@available (macos 15, ios 18, *))
+            if (@available (macOS 15, iOS 18, *))
             {
                 auto connection = VirtualEndpointImplNative::make (cachedEndpoints,
                                                                    deviceName,
@@ -2497,7 +2497,7 @@ struct CoreMidiHelpers
 
         bool isVirtualMidiUmpServiceActive() const override
         {
-            if (@available (macos 15, ios 18, *))
+            if (@available (macOS 15, iOS 18, *))
                 return true;
 
             return false;

@@ -68,13 +68,13 @@ public:
 private:
     static void detach (os_workgroup_t wg, os_workgroup_join_token_s token)
     {
-        if (@available (macos 11.0, ios 14.0, *))
+        if (@available (macOS 11.0, iOS 14.0, *))
             os_workgroup_leave (wg, &token);
     }
 
     static bool attach (os_workgroup_t wg, os_workgroup_join_token_s& tokenOut)
     {
-        if (@available (macos 11.0, ios 14.0, *))
+        if (@available (macOS 11.0, iOS 14.0, *))
         {
             if (wg != nullptr && os_workgroup_join (wg, &tokenOut) == 0)
                 return true;
@@ -220,7 +220,7 @@ size_t AudioWorkgroup::getMaxParallelThreadCount() const
 {
    #if JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
 
-    if (@available (macos 11.0, ios 14.0, *))
+    if (@available (macOS 11.0, iOS 14.0, *))
     {
         if (auto wg = WorkgroupProvider::getWorkgroup (*this))
             return (size_t) os_workgroup_max_parallel_threads (wg, nullptr);

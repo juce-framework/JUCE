@@ -746,7 +746,7 @@ public:
                         if (inDataSize != sizeof (AUMIDIEventListBlock))
                             return kAudioUnitErr_InvalidPropertyValue;
 
-                        if (@available (macos 12, *))
+                        if (@available (macOS 12, *))
                             eventListOutput.setBlock (*static_cast<const AUMIDIEventListBlock*> (inData));
 
                         return noErr;

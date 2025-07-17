@@ -664,7 +664,7 @@ private:
             return Trait::newFn (std::forward<Args> (args)...);             \
         else if constexpr (__IPHONE_OS_VERSION_MAX_ALLOWED < fullVersion)   \
             return Trait::oldFn (std::forward<Args> (args)...);             \
-        else if (@available (ios major ## . ## minor, *))                   \
+        else if (@available (iOS major ## . ## minor, *))                   \
             return Trait::newFn (std::forward<Args> (args)...);             \
         else                                                                \
             return Trait::oldFn (std::forward<Args> (args)...);             \
