@@ -129,12 +129,14 @@ namespace juce
 #endif
 
 //==============================================================================
-#if JUCE_MSVC && ! defined (DOXYGEN)
+#if JUCE_MSVC
+ /** @cond */
  #define JUCE_BLOCK_WITH_FORCED_SEMICOLON(x) \
    __pragma(warning(push)) \
    __pragma(warning(disable:4127)) \
    do { x } while (false) \
    __pragma(warning(pop))
+ /** @endcond */
 #else
  /** This is the good old C++ trick for creating a macro that forces the user to put
     a semicolon after it when they use it.
@@ -204,10 +206,10 @@ namespace juce
 #define JUCE_ASSERTIONS_ENABLED_OR_LOGGED   JUCE_ASSERTIONS_ENABLED || JUCE_LOG_ASSERTIONS
 
 //==============================================================================
-#ifndef DOXYGEN
- #define JUCE_JOIN_MACRO_HELPER(a, b) a ## b
- #define JUCE_STRINGIFY_MACRO_HELPER(a) #a
-#endif
+/** @cond */
+#define JUCE_JOIN_MACRO_HELPER(a, b) a ## b
+#define JUCE_STRINGIFY_MACRO_HELPER(a) #a
+/** @endcond */
 
 /** A good old-fashioned C macro concatenation helper.
     This combines two items (which may themselves be macros) into a single string,
@@ -271,8 +273,10 @@ namespace juce
     static void operator delete (void*) = delete;
 
 //==============================================================================
-#if JUCE_MSVC && ! defined (DOXYGEN)
+#if JUCE_MSVC
+ /** @cond */
  #define JUCE_COMPILER_WARNING(msg) __pragma (message (__FILE__ "(" JUCE_STRINGIFY (__LINE__) ") : Warning: " msg))
+ /** @endcond */
 #else
 
  /** This macro allows you to emit a custom compiler warning message.
@@ -314,8 +318,10 @@ namespace juce
 #endif
 
 //==============================================================================
-#if JUCE_ANDROID && ! defined (DOXYGEN)
+#if JUCE_ANDROID
+ /** @cond */
  #define JUCE_MODAL_LOOPS_PERMITTED 0
+ /** @endcond */
 #elif ! defined (JUCE_MODAL_LOOPS_PERMITTED)
  /** Some operating environments don't provide a modal loop mechanism, so this flag can be
      used to disable any functions that try to run a modal loop. */
@@ -323,11 +329,13 @@ namespace juce
 #endif
 
 //==============================================================================
+/** @cond */
 #if JUCE_GCC || JUCE_CLANG
  #define JUCE_PACKED __attribute__ ((packed))
-#elif ! defined (DOXYGEN)
+#else
  #define JUCE_PACKED
 #endif
+/** @endcond */
 
 //==============================================================================
 #if JUCE_GCC || DOXYGEN

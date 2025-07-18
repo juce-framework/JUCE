@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce::universal_midi_packets
 {
 
@@ -363,5 +362,4 @@ struct Conversion
 };
 
 } // namespace juce::universal_midi_packets
-
-#endif
+/** @endcond */

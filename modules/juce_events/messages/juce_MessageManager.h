@@ -389,11 +389,11 @@ public:
     };
 
     //==============================================================================
-   #ifndef DOXYGEN
     // Internal methods - do not use!
+    /** @cond */
     void deliverBroadcastMessage (const String&);
     ~MessageManager() noexcept;
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

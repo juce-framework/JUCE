@@ -118,16 +118,18 @@ namespace juce
 struct OpenGLExtensionFunctions
 {
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("A more complete set of GL commands can be found in the juce::gl namespace. "
                   "You should use juce::gl::loadFunctions() to load GL functions.")]]
     static void initialise();
-   #endif
+    /** @endcond */
 
-   #if JUCE_WINDOWS && ! defined (DOXYGEN)
+   #if JUCE_WINDOWS
+    /** @cond */
     typedef char GLchar;
     typedef pointer_sized_int GLsizeiptr;
     typedef pointer_sized_int GLintptr;
+    /** @endcond */
    #endif
 
    #define X(name) static decltype (::juce::gl::name)& name;

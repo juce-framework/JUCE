@@ -35,7 +35,7 @@
 namespace juce
 {
 
-#ifndef DOXYGEN
+/** @cond */
 namespace detail
 {
 class BoundsChangeListener final : private ComponentListener
@@ -60,7 +60,7 @@ private:
     ErasedScopeGuard componentListenerGuard;
 };
 } // namespace detail
-#endif
+/** @endcond */
 
 //==============================================================================
 /**

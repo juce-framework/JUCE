@@ -440,10 +440,10 @@ public:
     operator ReferencedType*() const noexcept               { return referencedObject; }
    #endif
 
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("Use the get method instead.")]]
     ReferencedType* getObject() const { return get(); }
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

@@ -35,7 +35,7 @@
 namespace juce::dsp
 {
 
-#ifndef DOXYGEN
+/** @cond */
 namespace SampleTypeHelpers // Internal classes needed for handling sample type classes
 {
     template <typename T, bool = std::is_floating_point_v<T>>
@@ -56,7 +56,7 @@ namespace SampleTypeHelpers // Internal classes needed for handling sample type 
         using Type = typename T::value_type;
     };
 }
-#endif
+/** @endcond */
 
 //==============================================================================
 /**

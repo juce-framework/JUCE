@@ -97,7 +97,7 @@ FUNCTION_TEMPLATE = """/*
 
 #pragma once
 
-#ifndef DOXYGEN
+/** @cond */
 
 #include <vector>
 
@@ -130,7 +130,7 @@ std::vector<juce::lv2::Bundle> juce::lv2::Bundle::getAllBundles()
 }};
 }}
 
-#endif"""
+/** @endcond */"""
 
 
 def chunks(lst, n):

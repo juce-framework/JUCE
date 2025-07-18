@@ -211,7 +211,7 @@ public:
     /** An Array containing the Display objects for all of the connected displays. */
     Array<Display> displays;
 
-   #ifndef DOXYGEN
+    /** @cond */
     /** @internal */
     void refresh();
 
@@ -224,7 +224,7 @@ public:
     [[deprecated]] const Display& findDisplayForRect (Rectangle<int>, bool isPhysical = false) const noexcept;
     [[deprecated]] const Display& findDisplayForPoint (Point<int>, bool isPhysical = false) const noexcept;
     [[deprecated]] const Display& getMainDisplay() const noexcept;
-   #endif
+    /** @endcond */
 
 private:
     friend class Desktop;

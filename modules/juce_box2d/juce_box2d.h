@@ -80,6 +80,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-#ifndef DOXYGEN // for some reason, Doxygen sees this as a re-definition of Box2DRenderer
- #include "utils/juce_Box2DRenderer.h"
-#endif // DOXYGEN
+// For some reason, Doxygen sees this as a re-definition of Box2DRenderer
+/** @cond */
+#include "utils/juce_Box2DRenderer.h"
+/** @endcond */

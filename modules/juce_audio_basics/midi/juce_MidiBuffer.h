@@ -285,7 +285,7 @@ public:
     MidiBufferIterator findNextSamplePosition (int samplePosition) const noexcept;
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     /** This class is now deprecated in favour of MidiBufferIterator.
 
         Used to iterate through the events in a MidiBuffer.
@@ -342,7 +342,7 @@ public:
         const MidiBuffer& buffer;
         MidiBufferIterator iterator;
     };
-   #endif
+    /** @endcond */
 
     /** The raw data holding this buffer.
         Obviously access to this data is provided at your own risk. Its internal format could

@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 // This macro can be set if you need to override this internal name for some reason..
 #ifndef JUCE_STATE_DICTIONARY_KEY
  #define JUCE_STATE_DICTIONARY_KEY   "jucePluginState"
@@ -717,5 +716,4 @@ struct AudioUnitHelpers
 };
 
 } // namespace juce
-
-#endif
+/** @endcond */

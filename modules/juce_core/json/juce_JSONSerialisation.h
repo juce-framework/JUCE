@@ -499,16 +499,14 @@ struct VariantConverter
     }
 };
 
-#ifndef DOXYGEN
-
+/** @cond */
 template <>
 struct VariantConverter<String>
 {
     static String fromVar (const var& v)           { return v.toString(); }
     static var toVar (const String& s)             { return s; }
 };
-
-#endif
+/** @endcond */
 
 /**
     A helper type that can be used to implement specialisations of VariantConverter that use

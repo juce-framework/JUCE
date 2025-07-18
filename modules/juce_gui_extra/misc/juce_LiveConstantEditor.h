@@ -32,8 +32,9 @@
   ==============================================================================
 */
 
-#if JUCE_ENABLE_LIVE_CONSTANT_EDITOR && ! defined (DOXYGEN)
+#if JUCE_ENABLE_LIVE_CONSTANT_EDITOR
 
+/** @cond */
 //==============================================================================
 /** You can safely ignore all the stuff in this namespace - it's a bunch of boilerplate
     code used to implement the JUCE_LIVE_CONSTANT functionality.
@@ -251,6 +252,7 @@ namespace juce::LiveConstantEditor
     }
 
 } // namespace juce::LiveConstantEditor
+/** @endcond */
 
 #endif
 

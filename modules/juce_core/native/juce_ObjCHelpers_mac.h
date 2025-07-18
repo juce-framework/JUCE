@@ -382,7 +382,7 @@ private:
 };
 
 //==============================================================================
-#ifndef DOXYGEN
+/** @cond */
 template <class JuceClass>
 struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
 {
@@ -424,7 +424,7 @@ struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
 
 template <typename Class>
 ObjCLifetimeManagedClass<Class> ObjCLifetimeManagedClass<Class>::objCLifetimeManagedClass;
-#endif
+/** @endcond */
 
 // this will return an NSObject which takes ownership of the JUCE instance passed-in
 // This is useful to tie the life-time of a juce instance to the life-time of an NSObject

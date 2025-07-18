@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce::universal_midi_packets
 {
 
@@ -51,5 +50,4 @@ struct Receiver
 };
 
 } // namespace juce::universal_midi_packets
-
-#endif
+/** @endcond */

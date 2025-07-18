@@ -113,14 +113,14 @@
 #endif
 
 //==============================================================================
-#ifndef DOXYGEN
- // These are old flags that are now supported on all compatible build targets
- #define JUCE_CXX14_IS_AVAILABLE 1
- #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
- #define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1
- #define JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS 1
- #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
- #define JUCE_DELETED_FUNCTION = delete
- #define JUCE_CONSTEXPR constexpr
- #define JUCE_NODISCARD [[nodiscard]]
-#endif
+// These are old flags that are now supported on all compatible build targets
+/** @cond */
+#define JUCE_CXX14_IS_AVAILABLE 1
+#define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
+#define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1
+#define JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS 1
+#define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
+#define JUCE_DELETED_FUNCTION = delete
+#define JUCE_CONSTEXPR constexpr
+#define JUCE_NODISCARD [[nodiscard]]
+/** @endcond */

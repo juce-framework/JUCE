@@ -294,10 +294,10 @@ public:
    #endif
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("This method was spelt wrong! Please change your code to use getCpuSpeedInMegahertz instead.")]]
     static int getCpuSpeedInMegaherz() { return getCpuSpeedInMegahertz(); }
-   #endif
+    /** @endcond */
 
 private:
     SystemStats() = delete; // uses only static methods

@@ -58,10 +58,10 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("This constructor has been changed to take a reference instead of a pointer.")]]
     GenericAudioProcessorEditor (AudioProcessor* p)  : GenericAudioProcessorEditor (*p) {}
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

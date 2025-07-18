@@ -486,7 +486,7 @@ public:
     int getXRunCount() const noexcept;
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("Use setMidiInputDeviceEnabled instead.")]]
     void setMidiInputEnabled (const String&, bool);
     [[deprecated ("Use isMidiInputDeviceEnabled instead.")]]
@@ -499,7 +499,7 @@ public:
     void setDefaultMidiOutput (const String&);
     [[deprecated ("Use getDefaultMidiOutputIdentifier instead.")]]
     const String& getDefaultMidiOutputName() const noexcept  { return defaultMidiOutputDeviceInfo.name; }
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

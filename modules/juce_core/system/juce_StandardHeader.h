@@ -53,10 +53,10 @@
 */
 #define JUCE_VERSION   ((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
-#if ! DOXYGEN
+/** @cond */
 #define JUCE_VERSION_ID \
     [[maybe_unused]] volatile auto juceVersionId = "juce_version_" JUCE_STRINGIFY(JUCE_MAJOR_VERSION) "_" JUCE_STRINGIFY(JUCE_MINOR_VERSION) "_" JUCE_STRINGIFY(JUCE_BUILDNUMBER);
-#endif
+/** @endcond */
 
 //==============================================================================
 #include <algorithm>
@@ -173,6 +173,6 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 /** This macro is added to all JUCE public function declarations. */
 #define JUCE_PUBLIC_FUNCTION        JUCE_API JUCE_CALLTYPE
 
-#ifndef DOXYGEN
- #define JUCE_NAMESPACE juce  // This old macro is deprecated: you should just use the juce namespace directly.
-#endif
+/** @cond */
+#define JUCE_NAMESPACE juce  // This old macro is deprecated: you should just use the juce namespace directly.
+/** @endcond */

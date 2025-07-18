@@ -76,8 +76,9 @@ public:
     class NonConst; /**< Used as a template parameter for AudioData::Pointer. Indicates that the pointer can be used for non-const data. */
     class Const;    /**< Used as a template parameter for AudioData::Pointer. Indicates that the samples can only be used for const data.. */
 
-  #ifndef DOXYGEN
+
     //==============================================================================
+    /** @cond */
     class BigEndian
     {
     public:
@@ -332,7 +333,7 @@ public:
         static void* toVoidPtr (VoidType* v) noexcept { return const_cast<void*> (v); }
         enum { isConst = 1 };
     };
-  #endif
+    /** @endcond */
 
     //==============================================================================
     /**
@@ -799,7 +800,7 @@ public:
 };
 
 //==============================================================================
-#ifndef DOXYGEN
+/** @cond */
 /**
     A set of routines to convert buffers of 32-bit floating point data to and from
     various integer formats.
@@ -867,6 +868,6 @@ public:
 private:
     AudioDataConverters();
 };
-#endif
+/** @endcond */
 
 } // namespace juce

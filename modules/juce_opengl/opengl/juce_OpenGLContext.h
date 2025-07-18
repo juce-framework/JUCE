@@ -346,10 +346,10 @@ public:
     size_t getImageCacheSize() const noexcept;
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     class NativeContext;
     class NativeContextListener;
-   #endif
+    /** @endcond */
 
 private:
     enum class InitResult
@@ -401,9 +401,9 @@ private:
 };
 
 //==============================================================================
-#ifndef DOXYGEN
+/** @cond */
 template <typename FunctionType>
 void OpenGLContext::executeOnGLThread (FunctionType&& f, bool shouldBlock) { execute (new AsyncWorkerFunctor<FunctionType> (f), shouldBlock); }
-#endif
+/** @endcond */
 
 } // namespace juce

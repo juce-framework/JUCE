@@ -1024,7 +1024,7 @@ public:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     // These methods' bool parameters have changed: see the new method signature.
     [[deprecated]] void setValue (double, bool);
     [[deprecated]] void setValue (double, bool, bool);
@@ -1036,7 +1036,7 @@ public:
     [[deprecated]] void setMaxValue (double, bool);
     [[deprecated]] void setMinAndMaxValues (double, double, bool, bool);
     [[deprecated]] void setMinAndMaxValues (double, double, bool);
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

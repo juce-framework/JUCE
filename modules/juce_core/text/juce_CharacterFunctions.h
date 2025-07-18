@@ -36,10 +36,12 @@ namespace juce
 {
 
 //==============================================================================
-#if JUCE_WINDOWS && ! defined (DOXYGEN)
+#if JUCE_WINDOWS
+ /** @cond */
  #define JUCE_NATIVE_WCHAR_IS_UTF8      0
  #define JUCE_NATIVE_WCHAR_IS_UTF16     1
  #define JUCE_NATIVE_WCHAR_IS_UTF32     0
+ /** @endcond */
 #else
  /** This macro will be set to 1 if the compiler's native wchar_t is an 8-bit type. */
  #define JUCE_NATIVE_WCHAR_IS_UTF8      0
@@ -56,10 +58,10 @@ namespace juce
  using juce_wchar = uint32;
 #endif
 
-#ifndef DOXYGEN
- /** This macro is deprecated, but preserved for compatibility with old code. */
- #define JUCE_T(stringLiteral)   (L##stringLiteral)
-#endif
+// This macro is deprecated, but preserved for compatibility with old code.
+/** @cond */
+#define JUCE_T(stringLiteral)   (L##stringLiteral)
+/** @endcond */
 
 #if JUCE_DEFINE_T_MACRO
  /** The 'T' macro is an alternative for using the "L" prefix in front of a string literal.
@@ -72,8 +74,7 @@ namespace juce
  #define T(stringLiteral)   JUCE_T(stringLiteral)
 #endif
 
-#ifndef DOXYGEN
-
+/** @cond */
 //==============================================================================
 // GNU libstdc++ does not have std::make_unsigned
 namespace internal
@@ -86,8 +87,7 @@ namespace internal
     template <> struct make_unsigned<long>                      { using type = unsigned long; };
     template <> struct make_unsigned<long long>                 { using type = unsigned long long; };
 }
-
-#endif
+/** @endcond */
 
 //==============================================================================
 /**
