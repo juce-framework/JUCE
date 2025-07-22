@@ -2084,6 +2084,7 @@ public:
 
     void appStyleChanged() override
     {
+        JUCE_ASSERT_MESSAGE_THREAD
         refreshSystemBarsAndSetHidden (navBarsHidden);
     }
 
