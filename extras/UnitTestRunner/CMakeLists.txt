@@ -50,6 +50,7 @@ target_compile_definitions(UnitTestRunner PRIVATE
 target_link_libraries(UnitTestRunner PRIVATE
     juce::juce_analytics
     juce::juce_audio_utils
+    juce::juce_build_tools
     juce::juce_dsp
     juce::juce_midi_ci
     juce::juce_opengl

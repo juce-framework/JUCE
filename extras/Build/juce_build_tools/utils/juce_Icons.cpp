@@ -510,4 +510,86 @@ namespace juce::build_tools
         return { assets, targetFolder, RelativePath::buildTargetFolder };
     }
 
+    //==============================================================================
+    //==============================================================================
+   #if JUCE_UNIT_TESTS
+
+    class IconsUnitTests : public UnitTest
+    {
+    public:
+        IconsUnitTests() : UnitTest ("Generate icon files", UnitTestCategories::graphics) {}
+
+        void runTest() override
+        {
+            const ScopedJuceInitialiser_GUI scope;
+
+            beginTest ("Load icons from vector file");
+            {
+                TemporaryFile tempFile ("vector");
+
+                {
+                    auto stream = tempFile.getFile().createOutputStream();
+                    expect (stream != nullptr);
+                    stream->write (svg, std::size (svg));
+                }
+
+                const auto icons = Icons::fromFilesSmallAndBig (tempFile.getFile(), {});
+
+                expect (icons.getSmall() != nullptr);
+                expect (icons.getBig() == nullptr);
+
+                expect (dynamic_cast<const DrawableImage*> (icons.getSmall()) == nullptr,
+                        "Vector data should not be rasterised on load");
+            }
+
+            beginTest ("Load icons from raster file");
+            {
+                TemporaryFile tempFile ("raster");
+
+                {
+                    auto stream = tempFile.getFile().createOutputStream();
+                    expect (stream != nullptr);
+                    stream->write (png, std::size (png));
+                }
+
+                const auto icons = Icons::fromFilesSmallAndBig ({}, tempFile.getFile());
+
+                expect (icons.getSmall() == nullptr);
+                expect (icons.getBig() != nullptr);
+
+                expect (dynamic_cast<const DrawableImage*> (icons.getBig()) != nullptr,
+                        "Raster data is loaded as a DrawableImage");
+            }
+        }
+
+    private:
+        static constexpr uint8_t svg[] = R"svg(
+        <svg xmlns="http://www.w3.org/2000/svg" width="284.4" height="284.4" viewBox="0 0 284.4 284.4">
+            <g>
+                <ellipse cx="142.2" cy="142.2" rx="132.82" ry="132.74" fill="#fff"/>
+            </g>
+        </svg>)svg";
+
+        static constexpr uint8_t png[]
+        {
+            0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+            0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00, 0x07,
+            0x08, 0x06, 0x00, 0x00, 0x00, 0xc4, 0x52, 0x57, 0xd3, 0x00, 0x00, 0x00,
+            0x5e, 0x49, 0x44, 0x41, 0x54, 0x78, 0xda, 0x55, 0x8d, 0x49, 0x0e, 0x00,
+            0x21, 0x08, 0x04, 0xfd, 0x89, 0xe2, 0x12, 0x13, 0xf5, 0xea, 0xff, 0x7f,
+            0x46, 0x4b, 0x9b, 0xe8, 0x38, 0x87, 0x0a, 0x84, 0x5e, 0x70, 0x21, 0x04,
+            0x25, 0xde, 0x7b, 0xcd, 0x39, 0x6b, 0x4a, 0x69, 0xef, 0xc4, 0x89, 0x08,
+            0x48, 0xef, 0x1d, 0x63, 0x0c, 0xcc, 0x39, 0xd1, 0x5a, 0xe3, 0xed, 0x13,
+            0x2d, 0x71, 0xa1, 0xd1, 0x0c, 0xea, 0xac, 0x12, 0x31, 0x46, 0x58, 0xe5,
+            0x86, 0x22, 0x67, 0xad, 0xf5, 0x9f, 0x3c, 0x86, 0x52, 0x0a, 0xee, 0x4f,
+            0xa6, 0xdf, 0x6a, 0xee, 0x5b, 0x64, 0xe5, 0x49, 0xbf, 0x50, 0x5c, 0x2f,
+            0xb3, 0x44, 0xdf, 0x94, 0x9e, 0x62, 0xe2, 0x00, 0x00, 0x00, 0x00, 0x49,
+            0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
+        };
+    };
+
+    static IconsUnitTests iconsUnitTests;
+
+   #endif
+
 } // namespace juce::build_tools

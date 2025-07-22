@@ -73,6 +73,7 @@ target_link_libraries(DemoRunner PRIVATE
     juce::juce_animation
     juce::juce_audio_utils
     juce::juce_box2d
+    juce::juce_build_tools
     juce::juce_dsp
     juce::juce_javascript
     juce::juce_midi_ci
