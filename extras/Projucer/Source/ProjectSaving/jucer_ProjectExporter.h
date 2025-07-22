@@ -238,9 +238,7 @@ public:
 
     void addProjectPathToBuildPathList (StringArray&, const build_tools::RelativePath&, int index = -1) const;
 
-    std::unique_ptr<Drawable> getBigIcon() const;
-    std::unique_ptr<Drawable> getSmallIcon() const;
-    build_tools::Icons getIcons() const { return { getSmallIcon(), getBigIcon() }; }
+    build_tools::Icons getIcons() const;
 
     String getExporterIdentifierMacro() const
     {

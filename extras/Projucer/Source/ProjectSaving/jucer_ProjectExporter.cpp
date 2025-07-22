@@ -867,14 +867,14 @@ void ProjectExporter::createDefaultConfigs()
     }
 }
 
-std::unique_ptr<Drawable> ProjectExporter::getBigIcon() const
+build_tools::Icons ProjectExporter::getIcons() const
 {
-    return project.getMainGroup().findItemWithID (settings [Ids::bigIcon]).loadAsImageFile();
-}
+    const auto loadIcon = [this] (auto id)
+    {
+        return project.getMainGroup().findItemWithID (settings[id]).loadAsImageFile();
+    };
 
-std::unique_ptr<Drawable> ProjectExporter::getSmallIcon() const
-{
-    return project.getMainGroup().findItemWithID (settings [Ids::smallIcon]).loadAsImageFile();
+    return { loadIcon (Ids::smallIcon), loadIcon (Ids::bigIcon) };
 }
 
 //==============================================================================

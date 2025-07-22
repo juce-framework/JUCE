@@ -1827,9 +1827,9 @@ private:
 
         if (! app->hasAttribute ("android:icon"))
         {
-            std::unique_ptr<Drawable> bigIcon (getBigIcon()), smallIcon (getSmallIcon());
+            const auto icons = getIcons();
 
-            if (bigIcon != nullptr || smallIcon != nullptr)
+            if (icons.big != nullptr || icons.small != nullptr)
                 app->setAttribute ("android:icon", "@drawable/icon");
         }
 
