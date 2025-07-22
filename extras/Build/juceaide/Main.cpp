@@ -124,19 +124,18 @@ IconParseResults parseIconArguments (juce::ArgumentList&& args)
     args.checkMinNumArguments (2);
     const auto output = args.arguments.removeAndReturn (0);
 
-    const auto popDrawable = [&args]() -> std::unique_ptr<juce::Drawable>
+    const auto popFile = [&args]() -> juce::File
     {
         if (args.size() == 0)
             return {};
 
-        const auto firstArgText = args.arguments.removeAndReturn (0).text;
-        return juce::Drawable::createFromImageFile (firstArgText);
+        return args.arguments.removeAndReturn (0).text;
     };
 
-    auto smallIcon = popDrawable();
-    auto bigIcon   = popDrawable();
+    const auto smallIcon = popFile();
+    const auto bigIcon   = popFile();
 
-    return { { std::move (smallIcon), std::move (bigIcon) }, output.text };
+    return { juce::build_tools::Icons::fromFilesSmallAndBig (smallIcon, bigIcon), output.text };
 }
 
 int writeMacIcon (juce::ArgumentList&& argumentList)

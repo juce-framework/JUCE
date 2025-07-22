@@ -869,12 +869,18 @@ void ProjectExporter::createDefaultConfigs()
 
 build_tools::Icons ProjectExporter::getIcons() const
 {
-    const auto loadIcon = [this] (auto id)
+    const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
+
+    if (! mml.lockWasGained())
+        return {};
+
+    const auto getFile = [this] (auto id)
     {
-        return project.getMainGroup().findItemWithID (settings[id]).loadAsImageFile();
+        return project.getMainGroup().findItemWithID (settings[id]).getFile();
     };
 
-    return { loadIcon (Ids::smallIcon), loadIcon (Ids::bigIcon) };
+    return build_tools::Icons::fromFilesSmallAndBig (getFile (Ids::smallIcon),
+                                                     getFile (Ids::bigIcon));
 }
 
 //==============================================================================

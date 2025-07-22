@@ -35,22 +35,28 @@
 namespace juce::build_tools
 {
 
-    Array<Drawable*> asArray (const Icons& icons)
+    Icons Icons::fromFilesSmallAndBig (const File& small, const File& big)
     {
-        Array<Drawable*> result;
+        Icons result;
+        result.small = Drawable::createFromImageFile (small);
+        result.big   = Drawable::createFromImageFile (big);
+        return result;
+    }
 
-        if (icons.small != nullptr)
-            result.add (icons.small.get());
+    Array<const Drawable*> asArray (const Icons& icons)
+    {
+        Array<const Drawable*> result;
 
-        if (icons.big != nullptr)
-            result.add (icons.big.get());
+        for (auto getter : { &Icons::getSmall, &Icons::getBig })
+            if (auto* got = (icons.*getter)())
+                result.add (got);
 
         return result;
     }
 
     namespace mac
     {
-        static Image fixIconImageSize (Drawable& image)
+        static Image fixIconImageSize (const Drawable& image)
         {
             const int validSizes[] = { 16, 32, 64, 128, 256, 512, 1024 };
 
@@ -90,7 +96,7 @@ namespace juce::build_tools
     {
         MemoryOutputStream data;
         auto smallest = std::numeric_limits<int>::max();
-        Drawable* smallestImage = nullptr;
+        const Drawable* smallestImage = nullptr;
 
         const auto images = asArray (icons);
 
@@ -134,25 +140,25 @@ namespace juce::build_tools
                               int size,
                               bool returnNullIfNothingBigEnough)
     {
-        auto* const im = [&]() -> Drawable*
+        auto* const im = std::invoke ([&]() -> const Drawable*
         {
-            if ((icons.small != nullptr) != (icons.big != nullptr))
-                return icons.small != nullptr ? icons.small.get() : icons.big.get();
+            if ((icons.getSmall() != nullptr) != (icons.getBig() != nullptr))
+                return icons.getSmall() != nullptr ? icons.getSmall() : icons.getBig();
 
-            if (icons.small != nullptr && icons.big != nullptr)
+            if (icons.getSmall() != nullptr && icons.getBig() != nullptr)
             {
-                if (icons.small->getWidth() >= size && icons.big->getWidth() >= size)
-                    return icons.small->getWidth() < icons.big->getWidth() ? icons.small.get() : icons.big.get();
+                if (icons.getSmall()->getWidth() >= size && icons.getBig()->getWidth() >= size)
+                    return icons.getSmall()->getWidth() < icons.getBig()->getWidth() ? icons.getSmall() : icons.getBig();
 
-                if (icons.small->getWidth() >= size)
-                    return icons.small.get();
+                if (icons.getSmall()->getWidth() >= size)
+                    return icons.getSmall();
 
-                if (icons.big->getWidth() >= size)
-                    return icons.big.get();
+                if (icons.getBig()->getWidth() >= size)
+                    return icons.getBig();
             }
 
             return nullptr;
-        }();
+        });
 
         if (im == nullptr)
             return {};
@@ -304,9 +310,9 @@ namespace juce::build_tools
         writeStreamToFile (file, [&] (MemoryOutputStream& mo) { writeWinIcon (icons, mo); });
     }
 
-    Image rescaleImageForIcon (Drawable& d, const int size)
+    Image rescaleImageForIcon (const Drawable& d, const int size)
     {
-        if (auto* drawableImage = dynamic_cast<DrawableImage*> (&d))
+        if (auto* drawableImage = dynamic_cast<const DrawableImage*> (&d))
         {
             auto im = SoftwareImageType().convert (drawableImage->getImage());
 
@@ -365,8 +371,8 @@ namespace juce::build_tools
 
     static void createiOSIconFiles (const Icons& icons, File appIconSet)
     {
-        auto* imageToUse = icons.big != nullptr ? icons.big.get()
-                                                : icons.small.get();
+        auto* imageToUse = icons.getBig() != nullptr ? icons.getBig()
+                                                     : icons.getSmall();
 
         if (imageToUse != nullptr)
         {

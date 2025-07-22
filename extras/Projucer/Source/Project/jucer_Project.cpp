@@ -1632,19 +1632,6 @@ Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.
 String Project::Item::getID() const               { return state [Ids::ID]; }
 void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
-std::unique_ptr<Drawable> Project::Item::loadAsImageFile() const
-{
-    const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
-
-    if (! mml.lockWasGained())
-        return nullptr;
-
-    if (isValid())
-        return Drawable::createFromImageFile (getFile());
-
-    return {};
-}
-
 Project::Item Project::Item::createGroup (Project& project, const String& name, const String& uid, bool isModuleCode)
 {
     Item group (project, ValueTree (Ids::GROUP), isModuleCode);
