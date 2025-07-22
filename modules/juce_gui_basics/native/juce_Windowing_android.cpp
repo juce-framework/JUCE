@@ -1365,7 +1365,7 @@ public:
                                                           AndroidWindowManagerLayoutParams.createDefault) };
 
             if (Desktop::getInstance().getKioskModeComponent() != nullptr)
-                setNavBarsHidden (true);
+                refreshSystemBarsAndSetHidden (true);
 
             setUpLayoutParams (env, windowLayoutParams, physicalBounds);
 
@@ -1428,6 +1428,7 @@ public:
         frontWindow = nullptr;
 
         removeView();
+        setSystemBarsTransparent();
     }
 
     static void removeViewFromActivity (jobject localView)
@@ -1537,7 +1538,7 @@ public:
                     jassertfalse;
                 }
 
-                setNavBarsHidden (navBarsHidden);
+                refreshSystemBarsAndSetHidden (navBarsHidden);
             }
             else if (! fullScreen)
             {
@@ -1553,7 +1554,7 @@ public:
                                          view.get(),
                                          windowLayoutParams.get());
 
-                    setNavBarsHidden (navBarsHidden);
+                    refreshSystemBarsAndSetHidden (navBarsHidden);
                 }
                 else
                 {
@@ -1635,7 +1636,7 @@ public:
 
     void setFullScreen (bool shouldBeFullScreen) override
     {
-        setNavBarsHidden (shouldNavBarsBeHidden (shouldBeFullScreen));
+        refreshSystemBarsAndSetHidden (shouldNavBarsBeHidden (shouldBeFullScreen));
 
         auto newBounds = std::invoke ([&]
         {
@@ -1832,7 +1833,7 @@ public:
             handled = app->backButtonPressed();
 
         if (t.isKioskModeComponent())
-            t.setNavBarsHidden (t.navBarsHidden);
+            t.refreshSystemBarsAndSetHidden (t.navBarsHidden);
 
         if (! handled)
         {
@@ -1856,7 +1857,7 @@ public:
     static void handleAppResumedCallback (JNIEnv*, AndroidComponentPeer& t)
     {
         if (t.isKioskModeComponent())
-            t.setNavBarsHidden (t.navBarsHidden);
+            t.refreshSystemBarsAndSetHidden (t.navBarsHidden);
     }
 
     static jlong handleGetFocusedTextInputTargetCallback (JNIEnv*, AndroidComponentPeer& t)
@@ -2083,7 +2084,7 @@ public:
 
     void appStyleChanged() override
     {
-        setNavBarsHidden (navBarsHidden);
+        refreshSystemBarsAndSetHidden (navBarsHidden);
     }
 
     //==============================================================================
@@ -2484,7 +2485,7 @@ private:
         return (shouldBeFullScreen && isKioskModeComponent());
     }
 
-    void setNavBarsHidden (bool hidden)
+    void refreshSystemBarsAndSetHidden (bool hidden)
     {
         // The system may show the bars again, e.g when navigating away from the app and
         // back again. Therefore, we should call setSystemUiVisibilityCompat each time to
@@ -2495,6 +2496,25 @@ private:
                                   activityWindow.get(),
                                   (jboolean) ! navBarsHidden,
                                   (jboolean) (getAppStyle() == Style::light));
+
+        setSystemBarsTransparent();
+    }
+
+    void setSystemBarsTransparent()
+    {
+        if (activityWindow == nullptr)
+            return;
+
+        auto* env = getEnv();
+
+        constexpr jint fullyTransparent = 0;
+        env->CallVoidMethod (activityWindow, AndroidWindow.setStatusBarColor, fullyTransparent);
+        env->CallVoidMethod (activityWindow, AndroidWindow.setNavigationBarColor, fullyTransparent);
+
+        env->CallVoidMethod (activityWindow, AndroidWindow.setFlags, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+        if (getAndroidSDKVersion() >= 29)
+            env->CallVoidMethod (activityWindow, AndroidWindow29.setNavigationBarContrastEnforced, (jboolean) false);
     }
 
     template <typename Callback>
