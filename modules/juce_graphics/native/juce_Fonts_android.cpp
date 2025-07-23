@@ -104,7 +104,7 @@ class MemoryFontCache : public DeletedAtShutdown
 public:
     using Value = AndroidCachedTypeface;
 
-    ~MemoryFontCache()
+    ~MemoryFontCache() override
     {
         clearSingletonInstance();
     }
@@ -112,7 +112,7 @@ public:
     struct Key
     {
         String name, style;
-        auto tie() const { return std::tuple (name, style); }
+        [[nodiscard]] auto tie() const { return std::tuple (name, style); }
         bool operator< (const Key& other) const { return tie() < other.tie(); }
         bool operator== (const Key& other) const { return tie() == other.tie(); }
     };
@@ -481,7 +481,7 @@ private:
         auto memory = loadFontAsset (font.getTypefaceName());
 
         if (! memory.isEmpty())
-            return std::tuple (memory, findNonPortableMetricsForAsset (font.getTypefaceName()));
+            return { memory, findNonPortableMetricsForAsset (font.getTypefaceName()) };
 
         const auto file = findFontFile (font);
 
@@ -497,7 +497,7 @@ private:
         MemoryBlock result;
         stream.readIntoMemoryBlock (result);
 
-        return std::tuple (stream.isExhausted() ? result : MemoryBlock{}, findNonPortableMetricsForFile (file));
+        return { stream.isExhausted() ? result : MemoryBlock{}, findNonPortableMetricsForFile (file) };
     }
 
     static File findFontFile (const Font& font)
@@ -604,7 +604,7 @@ private:
         return mapEntry;
     }
 
-    static TypefaceAscentDescent findNonPortableMetricsForFile (File file)
+    static TypefaceAscentDescent findNonPortableMetricsForFile (const File& file)
     {
         auto* env = getEnv();
         const LocalRef typeface { env->CallStaticObjectMethod (TypefaceClass,
