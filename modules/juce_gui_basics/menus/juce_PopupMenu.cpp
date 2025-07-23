@@ -250,7 +250,7 @@ private:
         }
 
     private:
-        static AccessibilityActions getAccessibilityActions (ItemAccessibilityHandler& handler,
+        static AccessibilityActions getAccessibilityActions (ItemAccessibilityHandler&,
                                                              ItemComponent& item)
         {
             auto onFocus = [&item]
@@ -260,16 +260,7 @@ private:
                 item.parentWindow.setCurrentlyHighlightedChild (&item);
             };
 
-            auto onToggle = [&handler, &item, onFocus]
-            {
-                if (handler.getCurrentState().isSelected())
-                    item.parentWindow.setCurrentlyHighlightedChild (nullptr);
-                else
-                    onFocus();
-            };
-
-            auto actions = AccessibilityActions().addAction (AccessibilityActionType::focus,  std::move (onFocus))
-                                                 .addAction (AccessibilityActionType::toggle, std::move (onToggle));
+            auto actions = AccessibilityActions().addAction (AccessibilityActionType::focus, std::move (onFocus));
 
             if (canBeTriggered (item.item))
             {
