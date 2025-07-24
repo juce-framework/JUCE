@@ -615,10 +615,10 @@ static RangedValues<Font> resolveFontsWithFallback (Span<const juce_wchar> strin
 
     for (const auto [r, f] : fonts)
     {
-        const auto constrained = r.constrainRange ({ 0, (int64) string.size() });
+        const auto intersected = r.getIntersectionWith ({ 0, (int64) string.size() });
         auto rf = findSuitableFontsForText (f,
-                                            { string.data() + constrained.getStart(),
-                                              (size_t) constrained.getLength() });
+                                            { string.data() + intersected.getStart(),
+                                              (size_t) intersected.getLength() });
 
         for (const auto [subRange, font] : rf)
         {

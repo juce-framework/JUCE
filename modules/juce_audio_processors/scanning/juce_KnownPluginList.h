@@ -218,7 +218,7 @@ public:
     void setCustomScanner (std::unique_ptr<CustomScanner> newScanner);
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     // These methods have been deprecated! When getting the list of plugin types you should instead use
     // the getTypes() method which returns a copy of the internal PluginDescription array and can be accessed
     // in a thread-safe way.
@@ -234,7 +234,7 @@ public:
     [[deprecated]] void addToMenu (PopupMenu& menu, SortMethod sortMethod, const String& currentlyTickedPluginID = {}) const;
     [[deprecated]] int getIndexChosenByMenu (int menuResultCode) const;
     [[deprecated]] std::unique_ptr<PluginTree> createTree (SortMethod sortMethod) const;
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

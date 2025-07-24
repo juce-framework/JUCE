@@ -478,6 +478,7 @@ public:
               fastMathValue                  (config, Ids::fastMath,                   getUndoManager()),
               debugInformationFormatValue    (config, Ids::debugInformationFormat,     getUndoManager(), "ProgramDatabase"),
               pluginBinaryCopyStepValue      (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false),
+              intrinsicFunctionsEnabledValue (config, Ids::intrinsicFunctions,         getUndoManager(), false),
               vstBinaryLocation              (config, Ids::vstBinaryLocation,          getUndoManager()),
               vst3BinaryLocation             (config, Ids::vst3BinaryLocation,         getUndoManager()),
               aaxBinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
@@ -577,6 +578,7 @@ public:
         bool shouldUseMultiProcessorCompilation() const   { return multiProcessorCompilationValue.get(); }
         bool isFastMathEnabled() const                    { return fastMathValue.get(); }
         bool isPluginBinaryCopyStepEnabled() const        { return pluginBinaryCopyStepValue.get(); }
+        bool isIntrinsicFunctionsEnabled() const          { return intrinsicFunctionsEnabledValue.get(); }
 
         static bool shouldBuildTarget (build_tools::ProjectType::Target::Type targetType, Architecture arch)
         {
@@ -648,6 +650,9 @@ public:
                                                     { "Disabled (/Od)", "Minimise size (/O1)", "Maximise speed (/O2)", "Full optimisation (/Ox)" },
                                                     { optimisationOff,  optimiseMinSize,       optimiseMaxSpeed,       optimiseFull }),
                        "The optimisation level for this configuration");
+
+            props.add (new ChoicePropertyComponent (intrinsicFunctionsEnabledValue, "Intrinsic Functions"),
+                       "Replaces some function calls with intrinsic or otherwise special forms of the function that help your application run faster.");
 
             props.add (new TextPropertyComponent (intermediatesPathValue, "Intermediates Path", 2048, false),
                        "An optional path to a folder to use for the intermediate build files. Note that Visual Studio allows "
@@ -749,7 +754,7 @@ public:
         ValueTreePropertyWithDefault warningLevelValue, warningsAreErrorsValue, prebuildCommandValue, postbuildCommandValue, generateDebugSymbolsValue,
                                      enableIncrementalLinkingValue, useRuntimeLibDLLValue, multiProcessorCompilationValue,
                                      intermediatesPathValue, characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue,
-                                     pluginBinaryCopyStepValue;
+                                     pluginBinaryCopyStepValue, intrinsicFunctionsEnabledValue;
 
         struct LocationProperties
         {
@@ -1126,6 +1131,9 @@ public:
 
                         auto cppStandard = owner.project.getCppStandardString();
                         cl->createNewChildElement ("LanguageStandard")->addTextElement ("stdcpp" + cppStandard);
+
+                        if (config.isIntrinsicFunctionsEnabled())
+                            cl->createNewChildElement ("IntrinsicFunctions")->addTextElement ("true");
                     }
 
                     {

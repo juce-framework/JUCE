@@ -343,9 +343,9 @@ private:
         Components components;
     };
 }
-#ifndef DOXYGEN
- JUCE_PACKED
-#endif
+/** @cond */
+JUCE_PACKED
+/** @endcond */
 ;
 
 
@@ -585,9 +585,9 @@ private:
    #endif
 
 }
-#ifndef DOXYGEN
- JUCE_PACKED
-#endif
+/** @cond */
+JUCE_PACKED
+/** @endcond */
 ;
 
 forcedinline void PixelARGB::blend (PixelRGB src) noexcept
@@ -737,9 +737,9 @@ private:
     //==============================================================================
     uint8 a;
 }
-#ifndef DOXYGEN
+/** @cond */
  JUCE_PACKED
-#endif
+/** @endcond */
 ;
 
 #if JUCE_MSVC

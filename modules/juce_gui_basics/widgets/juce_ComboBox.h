@@ -432,13 +432,13 @@ public:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     // These methods' bool parameters have changed: see their new method signatures.
     [[deprecated]] void clear (bool);
     [[deprecated]] void setSelectedId (int, bool);
     [[deprecated]] void setSelectedItemIndex (int, bool);
     [[deprecated]] void setText (const String&, bool);
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

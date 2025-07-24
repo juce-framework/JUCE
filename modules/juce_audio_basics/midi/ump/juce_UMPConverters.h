@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce::universal_midi_packets
 {
     /**
@@ -212,5 +211,4 @@ namespace juce::universal_midi_packets
         SingleGroupMidi1ToBytestreamTranslator translator;
     };
 } // namespace juce::universal_midi_packets
-
-#endif
+/** @endcond */

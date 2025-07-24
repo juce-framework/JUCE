@@ -68,14 +68,14 @@ using uint32    = unsigned int;
   using uint64 = unsigned long long;
 #endif
 
-#ifndef DOXYGEN
- /** A macro for creating 64-bit literals.
-     Historically, this was needed to support portability with MSVC6, and is kept here
-     so that old code will still compile, but nowadays every compiler will support the
-     LL and ULL suffixes, so you should use those in preference to this macro.
- */
- #define literal64bit(longLiteral)     (longLiteral##LL)
-#endif
+/** @cond */
+/** A macro for creating 64-bit literals.
+    Historically, this was needed to support portability with MSVC6, and is kept here
+    so that old code will still compile, but nowadays every compiler will support the
+    LL and ULL suffixes, so you should use those in preference to this macro.
+*/
+#define literal64bit(longLiteral)     (longLiteral##LL)
+/** @endcond */
 
 #if JUCE_64BIT
   /** A signed integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
@@ -129,7 +129,7 @@ Type juce_hypot (Type a, Type b) noexcept
    #endif
 }
 
-#ifndef DOXYGEN
+/** @cond */
 template <>
 inline float juce_hypot (float a, float b) noexcept
 {
@@ -139,7 +139,7 @@ inline float juce_hypot (float a, float b) noexcept
     return hypotf (a, b);
    #endif
 }
-#endif
+/** @endcond */
 
 //==============================================================================
 /** Commonly used mathematical constants
@@ -165,7 +165,7 @@ struct MathConstants
     static constexpr FloatType sqrt2 = static_cast<FloatType> (1.4142135623730950488L);
 };
 
-#ifndef DOXYGEN
+/** @cond */
 /** A double-precision constant for pi. */
 [[deprecated ("This is deprecated in favour of MathConstants<double>::pi.")]]
 const constexpr double  double_Pi  = MathConstants<double>::pi;
@@ -173,7 +173,7 @@ const constexpr double  double_Pi  = MathConstants<double>::pi;
 /** A single-precision constant for pi. */
 [[deprecated ("This is deprecated in favour of MathConstants<float>::pi.")]]
 const constexpr float   float_Pi   = MathConstants<float>::pi;
-#endif
+/** @endcond */
 
 /** Converts an angle in degrees to radians. */
 template <typename FloatType>
@@ -763,7 +763,7 @@ namespace TypeHelpers
     */
     template <typename Type> struct ParameterType                   { using type = const Type&; };
 
-   #ifndef DOXYGEN
+    /** @cond */
     template <typename Type> struct ParameterType <Type&>           { using type = Type&; };
     template <typename Type> struct ParameterType <Type*>           { using type = Type*; };
     template <>              struct ParameterType <char>            { using type = char; };
@@ -779,7 +779,7 @@ namespace TypeHelpers
     template <>              struct ParameterType <bool>            { using type = bool; };
     template <>              struct ParameterType <float>           { using type = float; };
     template <>              struct ParameterType <double>          { using type = double; };
-   #endif
+    /** @endcond */
 
     /** These templates are designed to take a type, and if it's a double, they return a double
         type; for anything else, they return a float type.
@@ -796,20 +796,20 @@ namespace TypeHelpers
     */
     template <int bytes>     struct UnsignedTypeWithSize            {};
 
-   #ifndef DOXYGEN
+    /** @cond */
     template <>              struct UnsignedTypeWithSize<1>         { using type = uint8; };
     template <>              struct UnsignedTypeWithSize<2>         { using type = uint16; };
     template <>              struct UnsignedTypeWithSize<4>         { using type = uint32; };
     template <>              struct UnsignedTypeWithSize<8>         { using type = uint64; };
-   #endif
+    /** @endcond */
 }
 
 //==============================================================================
-#ifndef DOXYGEN
- [[deprecated ("Use roundToInt instead.")]] inline int roundDoubleToInt (double value) noexcept  { return roundToInt (value); }
- [[deprecated ("Use roundToInt instead.")]] inline int roundFloatToInt  (float  value) noexcept  { return roundToInt (value); }
- [[deprecated ("Use std::abs() instead.")]] inline int64 abs64 (int64 n) noexcept                { return std::abs (n); }
-#endif
+/** @cond */
+[[deprecated ("Use roundToInt instead.")]] inline int roundDoubleToInt (double value) noexcept  { return roundToInt (value); }
+[[deprecated ("Use roundToInt instead.")]] inline int roundFloatToInt  (float  value) noexcept  { return roundToInt (value); }
+[[deprecated ("Use std::abs() instead.")]] inline int64 abs64 (int64 n) noexcept                { return std::abs (n); }
+/** @endcond */
 
 /** Converts an enum to its underlying integral type.
     Similar to std::to_underlying, which is only available in C++23 and above.

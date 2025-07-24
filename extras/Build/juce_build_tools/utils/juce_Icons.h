@@ -35,20 +35,29 @@
 namespace juce::build_tools
 {
 
-    struct Icons
+    class Icons
     {
+    public:
+        Icons() = default;
+
+        static Icons fromFilesSmallAndBig (const File& small, const File& big);
+
+        const Drawable* getSmall() const { return small.get(); }
+        const Drawable* getBig()   const { return big.get(); }
+
+    private:
         std::unique_ptr<Drawable> small;
         std::unique_ptr<Drawable> big;
     };
 
-    Array<Drawable*> asArray (const Icons&);
+    Array<const Drawable*> asArray (const Icons&);
     void writeMacIcon (const Icons&, const File&);
     void writeWinIcon (const Icons&, const File&);
 
     Image getBestIconForSize (const Icons& icons,
                               int size,
                               bool returnNullIfNothingBigEnough);
-    Image rescaleImageForIcon (Drawable& d, int size);
+    Image rescaleImageForIcon (const Drawable& d, int size);
 
     RelativePath createXcassetsFolderFromIcons (const Icons& icons,
                                                 const File& targetFolder,

@@ -47,7 +47,8 @@ namespace KeyboardFocusTraverserHelpers
                                 detail::FocusHelpers::NavigationDirection direction)
     {
         if (auto* comp = detail::FocusHelpers::navigateFocus (current, container, direction,
-                                                              &Component::isKeyboardFocusContainer))
+                                                              &Component::isKeyboardFocusContainer,
+                                                              FocusTraverser::SkipDisabledComponents::yes))
         {
             if (isKeyboardFocusable (comp, container))
                 return comp;
@@ -85,7 +86,8 @@ std::vector<Component*> KeyboardFocusTraverser::getAllComponents (Component* par
     std::vector<Component*> components;
     detail::FocusHelpers::findAllComponents (parentComponent,
                                              components,
-                                             &Component::isKeyboardFocusContainer);
+                                             &Component::isKeyboardFocusContainer,
+                                             FocusTraverser::SkipDisabledComponents::yes);
 
     auto removePredicate = [parentComponent] (const Component* comp)
     {

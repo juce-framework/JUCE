@@ -4,6 +4,70 @@
 
 ## Change
 
+The signatures of OpenGLFrameBuffer::readPixels() and
+OpenGLFrameBuffer::writePixels() have changed, adding a new RowOrder parameter.
+
+**Possible Issues**
+
+Code that does not specify this parameter will not compile.
+
+**Workaround**
+
+Pass the extra parameter to specify whether the pixel data should be ordered
+with the top-most or bottom-most row first.
+
+**Rationale**
+
+The previous function calls did not allow the pixel order to be configured.
+readPixels() would return pixel data with the bottom-most row first (this is
+convention for the OpenGL API), but writePixels() would expect the top-most row
+first. This meant that reading and then immediately writing the same data would
+have the unexpected effect of flipping the image. Changing readPixels() to
+order pixels from top to bottom would be slightly dangerous, as it would
+introduce a change of behaviour with no accompanying compiler warning.
+Additionally, flipping the pixel storage introduces additional work that can be
+safely skipped when the pixel data is going to be written back to the
+framebuffer later.
+
+
+## Change
+
+The behaviour of the default constructed FocusTraverser objects has changed, and
+they will now navigate onto disabled components. This only affects navigation by
+screen readers and not general keyboard navigation, as the latter depends on the
+KeyboardFocusTraverser class.
+
+**Possible Issues**
+
+Disabled child components of focus containers that used the JUCE default
+FocusTraverser will now be discoverable by screen readers. They will accept
+accessibility focus, their title will be reported as well as their disabled
+state.
+
+Children of components that returned a custom ComponentTraverser object are not
+affected.
+
+**Workaround**
+
+If you wish to hide disabled components from screen readers, you can restore the
+old behaviour by overriding `Component::createFocusTraverser()` for your focus
+containers, and returning a FocusTraverser object created using the
+`FocusTraverser::SkipDisabledComponents::yes` argument.
+
+**Rationale**
+
+Disabled components are typically rendered in a dimmed or inactive state, but 
+are still prominently visible for sighted users. The old behaviour made these
+components entirely missing from the accessibility tree, making them 
+non-discoverable with screen readers. 
+
+This was in contrast to the behaviour of native OS components, that are still
+accessible using screen readers, but their disabled/dimmed state is also
+reported.
+
+
+## Change
+
 The default Visual Studio project settings for "Debug Information Format" have
 changed in the Projucer. By default debug symbols are generated using the /Zi
 flag.

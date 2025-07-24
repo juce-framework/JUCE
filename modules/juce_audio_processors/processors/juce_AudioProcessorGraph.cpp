@@ -1193,18 +1193,25 @@ private:
                 jassert (bufIndex >= 0);
             }
 
-            if (inputChan < numOuts && isBufferNeededLater (reversed, ourRenderingIndex, inputChan, src))
+            const auto nodeDelay = getNodeDelay (src.nodeID);
+            const auto needsDelay = nodeDelay < maxLatency;
+
+            if ((inputChan < numOuts || needsDelay)
+                && isBufferNeededLater (reversed, ourRenderingIndex, inputChan, src))
             {
-                // can't mess up this channel because it's needed later by another node,
-                // so we need to use a copy of it..
+                // We can't modify this channel because it's needed later by another node,
+                // so we need to use a copy of it.
+                // If the input channel index matches any output channel index, this implies that
+                // the output would overwrite the content of the input buffer.
+                // If the input needs to be delayed by some amount, this will modify the buffer
+                // in-place which will produce the wrong delay if a subsequent input needs a
+                // different delay value.
                 auto newFreeBuffer = getFreeBuffer (audioBuffers);
                 sequence.addCopyChannelOp (bufIndex, newFreeBuffer);
                 bufIndex = newFreeBuffer;
             }
 
-            auto nodeDelay = getNodeDelay (src.nodeID);
-
-            if (nodeDelay < maxLatency)
+            if (needsDelay)
                 sequence.addDelayChannelOp (bufIndex, maxLatency - nodeDelay);
 
             return bufIndex;
@@ -2144,6 +2151,8 @@ public:
 
     void runTest() override
     {
+        const ScopedJuceInitialiser_GUI scope;
+
         const auto midiChannel = AudioProcessorGraph::midiChannelIndex;
 
         beginTest ("isConnected returns true when two nodes are connected");
@@ -2330,6 +2339,66 @@ public:
             // not a supported usage pattern.
         }
 
+        beginTest ("When a delayed channel is used as an input to multiple nodes, the delay is applied appropriately for each node");
+        {
+            AudioProcessorGraph graph;
+            graph.setBusesLayout ({ { AudioChannelSet::stereo() }, { AudioChannelSet::mono() } });
+
+            const auto nodeA = graph.addNode (BasicProcessor::make (BasicProcessor::getStereoInMonoOut(), MidiIn::no, MidiOut::no));
+            const auto nodeB = graph.addNode (BasicProcessor::make (BasicProcessor::getStereoInMonoOut(), MidiIn::no, MidiOut::no));
+            const auto nodeC = graph.addNode (BasicProcessor::make (BasicProcessor::getStereoInMonoOut(), MidiIn::no, MidiOut::no));
+            const auto input = graph.addNode (std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::IODeviceType::audioInputNode));
+            const auto output = graph.addNode (std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::IODeviceType::audioOutputNode));
+
+            constexpr auto latencySamples = 2;
+            nodeA->getProcessor()->setLatencySamples (latencySamples);
+
+            // [input 0    1]   0 and 1 denote input/output channels
+            //        |    |
+            //        |    |
+            // [nodeA 0 1] |    nodeA has latency applied
+            //        |   /|
+            //        |  / |
+            // [nodeB 0 1] |    each node sums all input channels onto the first output channel
+            //        |   /
+            //        |  /
+            // [nodeC 0 1]
+            //        |
+            //        |
+            //   [out 0]
+
+            expect (graph.addConnection ({ { input->nodeID, 0}, { nodeA->nodeID, 0} }));
+            expect (graph.addConnection ({ { input->nodeID, 1}, { nodeB->nodeID, 1} }));
+            expect (graph.addConnection ({ { input->nodeID, 1}, { nodeC->nodeID, 1} }));
+
+            expect (graph.addConnection ({ { nodeA->nodeID, 0}, { nodeB->nodeID, 0} }));
+            expect (graph.addConnection ({ { nodeB->nodeID, 0}, { nodeC->nodeID, 0} }));
+
+            expect (graph.addConnection ({ { nodeC->nodeID, 0}, { output->nodeID, 0} }));
+
+            graph.rebuild();
+
+            constexpr auto blockSize = 128;
+            graph.prepareToPlay (44100.0, blockSize);
+            expect (graph.getLatencySamples() == latencySamples);
+
+            AudioBuffer<float> audio (2, blockSize);
+            audio.clear();
+            audio.setSample (1, 0, 1.0f);
+
+            MidiBuffer midi;
+            graph.processBlock (audio, midi);
+
+            // The impulse should arrive at nodes B and C simultaneously, so the end result should
+            // be a double-amplitude impulse with the latency of node A applied
+
+            for (auto i = 0; i < blockSize; ++i)
+            {
+                const auto expected = i == latencySamples ? 2.0f : 0.0f;
+                expect (exactlyEqual (audio.getSample (0, i), expected));
+            }
+        }
+
         beginTest ("large render sequence can be built");
         {
             AudioProcessorGraph graph;
@@ -2368,7 +2437,7 @@ private:
     class BasicProcessor final : public AudioProcessor
     {
     public:
-        explicit BasicProcessor (const AudioProcessor::BusesProperties& layout, MidiIn mIn, MidiOut mOut)
+        explicit BasicProcessor (const BusesProperties& layout, MidiIn mIn, MidiOut mOut)
             : AudioProcessor (layout), midiIn (mIn), midiOut (mOut) {}
 
         const String getName() const override                         { return "Basic Processor"; }
@@ -2382,7 +2451,7 @@ private:
         void setCurrentProgram (int) override                         {}
         const String getProgramName (int) override                    { return {}; }
         void changeProgramName (int, const String&) override          {}
-        void getStateInformation (juce::MemoryBlock&) override        {}
+        void getStateInformation (MemoryBlock&) override              {}
         void setStateInformation (const void*, int) override          {}
         void prepareToPlay (double, int) override                     {}
         void releaseResources() override                              {}
@@ -2391,14 +2460,20 @@ private:
         void reset() override                                         {}
         void setNonRealtime (bool) noexcept override                  {}
 
-        void processBlock (AudioBuffer<float>&, MidiBuffer&) override
+        void processBlock (AudioBuffer<float>& audio, MidiBuffer&) override
         {
             blockPrecision = singlePrecision;
+
+            for (auto i = 1; i < audio.getNumChannels(); ++i)
+                audio.addFrom (0, 0, audio.getReadPointer (i), audio.getNumSamples());
         }
 
-        void processBlock (AudioBuffer<double>&, MidiBuffer&) override
+        void processBlock (AudioBuffer<double>& audio, MidiBuffer&) override
         {
             blockPrecision = doublePrecision;
+
+            for (auto i = 1; i < audio.getNumChannels(); ++i)
+                audio.addFrom (0, 0, audio.getReadPointer (i), audio.getNumSamples());
         }
 
         static std::unique_ptr<BasicProcessor> make (const BusesProperties& layout,
@@ -2417,6 +2492,12 @@ private:
         {
             return BusesProperties().withInput  ("in",  AudioChannelSet::stereo())
                                     .withOutput ("out", AudioChannelSet::stereo());
+        }
+
+        static BusesProperties getStereoInMonoOut()
+        {
+            return BusesProperties().withInput  ("in",  AudioChannelSet::stereo())
+                                    .withOutput ("out", AudioChannelSet::mono());
         }
 
         static BusesProperties getMultichannelProperties (int numChannels)

@@ -38,7 +38,7 @@
 
 #pragma once
 
-#ifndef DOXYGEN
+/** @cond */
 
 #include <vector>
 
@@ -10238,4 +10238,4 @@ to an instance of LV2_Extension_Data_Feature.
 };
 }
 
-#endif
+/** @endcond */

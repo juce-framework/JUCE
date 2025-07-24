@@ -118,7 +118,7 @@ public:
     */
     HostedParameter* getHostedParameter (int index) const;
 
-   #ifndef DOXYGEN
+    /** @cond */
     /** Use the new typesafe visitor-based interface rather than this function.
 
         Returns a pointer to some kind of platform-specific data about the plugin.
@@ -150,7 +150,7 @@ public:
     [[deprecated]] bool isParameterOrientationInverted (int parameterIndex) const override;
     [[deprecated]] bool isMetaParameter (int parameterIndex) const override;
     [[deprecated]] AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const override;
-   #endif
+    /** @endcond */
 
 protected:
     //==============================================================================

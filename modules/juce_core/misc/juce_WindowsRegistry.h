@@ -135,12 +135,12 @@ public:
                                                        bool registerForCurrentUserOnly,
                                                        WoW64Mode mode = WoW64_Default);
 
-   #ifndef DOXYGEN
+    /** @cond */
     // DEPRECATED: use the other methods with a WoW64Mode parameter of WoW64_64bit instead.
     [[deprecated]] static String getValueWow64 (const String&, const String& defaultValue = String());
     [[deprecated]] static bool valueExistsWow64 (const String&);
     [[deprecated]] static bool keyExistsWow64 (const String&);
-   #endif
+    /** @endcond */
 
 private:
     WindowsRegistry() = delete;

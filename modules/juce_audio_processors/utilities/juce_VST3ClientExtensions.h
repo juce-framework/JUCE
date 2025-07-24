@@ -32,7 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
+/** @cond */
 
 // Forward declaration to avoid leaking implementation details.
 namespace Steinberg
@@ -41,7 +41,7 @@ namespace Steinberg
     using TUID = char[16];
 } // namespace Steinberg
 
-#endif // DOXYGEN
+/** @endcond */
 
 namespace juce
 {

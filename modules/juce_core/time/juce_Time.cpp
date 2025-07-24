@@ -59,36 +59,6 @@ namespace TimeHelpers
        #endif
     }
 
-    static std::tm millisToUTC (int64 millis) noexcept
-    {
-       #if JUCE_WINDOWS
-        std::tm result;
-        millis /= 1000;
-
-        if (_gmtime64_s (&result, &millis) != 0)
-            zerostruct (result);
-
-        return result;
-
-       #else
-        std::tm result;
-        auto now = (time_t) (millis / 1000);
-
-        if (gmtime_r (&now, &result) == nullptr)
-            zerostruct (result);
-
-        return result;
-       #endif
-    }
-
-    static int getUTCOffsetSeconds (const int64 millis) noexcept
-    {
-        auto utc = millisToUTC (millis);
-        utc.tm_isdst = -1;  // Treat this UTC time as local to find the offset
-
-        return (int) ((millis / 1000) - (int64) mktime (&utc));
-    }
-
     static int extendedModulo (const int64 value, const int modulo) noexcept
     {
         return (int) (value >= 0 ? (value % modulo)
@@ -181,6 +151,32 @@ namespace TimeHelpers
                 + t.tm_sec;
     }
 
+    static int64 mktime_local (const std::tm& t) noexcept
+    {
+        auto t1 = t;
+        const auto result = mktime (&t1);
+
+        // If any field changed in the struct passed to mktime, it indicates the
+        // original time was invalid or ambiguous in the local timezone.
+        //
+        // Common scenarios where this validation catches errors:
+        //   Daylight Saving Time transitions:
+        //      Times like 1:30 AM may not exist, mktime() may adjust them to
+        //      2:30 AM for example
+        //   Invalid dates or out-of-range values:
+        //      Feb 30, Apr 31, etc. may get normalised to valid dates
+        //      hour=25, minute=70, etc. may get normalised to valid times
+
+        jassert (   t.tm_year == t1.tm_year
+                 && t.tm_mon  == t1.tm_mon
+                 && t.tm_mday == t1.tm_mday
+                 && t.tm_hour == t1.tm_hour
+                 && t.tm_min  == t1.tm_min
+                 && t.tm_sec  == t1.tm_sec);
+
+        return (int64) result;
+    }
+
     static Atomic<uint32> lastMSCounterValue { (uint32) 0 };
 
     static String getUTCOffsetString (int utcOffsetSeconds, bool includeSemiColon)
@@ -213,9 +209,9 @@ Time::Time (int year, int month, int day,
     t.tm_hour   = hours;
     t.tm_min    = minutes;
     t.tm_sec    = seconds;
-    t.tm_isdst  = -1;
+    t.tm_isdst  = useLocalTime ? -1 : 0;
 
-    millisSinceEpoch = 1000 * (useLocalTime ? (int64) mktime (&t)
+    millisSinceEpoch = 1000 * (useLocalTime ? TimeHelpers::mktime_local (t)
                                             : TimeHelpers::mktime_utc (t))
                          + milliseconds;
 }
@@ -383,7 +379,7 @@ String Time::getTimeZone() const
 {
     String zone[2];
 
-  #if JUCE_WINDOWS && (JUCE_MSVC || JUCE_CLANG)
+   #if JUCE_WINDOWS && (JUCE_MSVC || JUCE_CLANG)
     _tzset();
 
     for (int i = 0; i < 2; ++i)
@@ -393,13 +389,13 @@ String Time::getTimeZone() const
         _get_tzname (&length, name, sizeof (name) - 1, i);
         zone[i] = name;
     }
-  #else
+   #else
     tzset();
 
     auto zonePtr = (const char**) tzname;
     zone[0] = zonePtr[0];
     zone[1] = zonePtr[1];
-  #endif
+   #endif
 
     if (isDaylightSavingTime())
     {
@@ -416,7 +412,9 @@ String Time::getTimeZone() const
 
 int Time::getUTCOffsetSeconds() const noexcept
 {
-    return TimeHelpers::getUTCOffsetSeconds (millisSinceEpoch);
+    // Treat local time as UTC to measure the difference
+    const auto local = TimeHelpers::millisToLocal (millisSinceEpoch);
+    return (int) (TimeHelpers::mktime_utc (local) - (millisSinceEpoch / 1000));
 }
 
 String Time::getUTCOffsetString (bool includeSemiColon) const
@@ -640,6 +638,13 @@ public:
         expect (t.getUTCOffsetString (true)  == "Z" || t.getUTCOffsetString (true).length() == 6);
         expect (t.getUTCOffsetString (false) == "Z" || t.getUTCOffsetString (false).length() == 5);
 
+        if (Time{}.getTimeZone() == "GMT")
+        {
+            // Tests the point of transition to BST
+            expect (Time (2025, 2, 30, 0, 59, 59, 999, false).toISO8601 (true) == "2025-03-30T00:59:59.999Z");
+            expect (Time (2025, 2, 30, 1, 00, 00, 000, false).toISO8601 (true) == "2025-03-30T02:00:00.000+01:00");
+        }
+
         expect (TimeHelpers::getUTCOffsetString (-(3 * 60 + 15) * 60, true) == "-03:15");
         expect (TimeHelpers::getUTCOffsetString (-(3 * 60 + 30) * 60, true) == "-03:30");
         expect (TimeHelpers::getUTCOffsetString (-(3 * 60 + 45) * 60, true) == "-03:45");
@@ -648,6 +653,7 @@ public:
 
         expect (Time::fromISO8601 (t.toISO8601 (true)) == t);
         expect (Time::fromISO8601 (t.toISO8601 (false)) == t);
+        expect (Time::fromISO8601 (Time (0).toISO8601 (true)) == Time (0));
 
         expect (Time::fromISO8601 ("2016-02-16") == Time (2016, 1, 16, 0, 0, 0, 0, false));
         expect (Time::fromISO8601 ("20160216Z")  == Time (2016, 1, 16, 0, 0, 0, 0, false));

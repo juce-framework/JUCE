@@ -34,8 +34,7 @@
 
 #pragma once
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce
 {
 
@@ -1663,5 +1662,4 @@ private:
 JUCE_END_NO_SANITIZE
 
 } // namespace juce
-
-#endif
+/** @endcond */

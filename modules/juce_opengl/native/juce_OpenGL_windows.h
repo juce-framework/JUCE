@@ -196,6 +196,9 @@ public:
         return nullptr;
     }
 
+    void addListener (NativeContextListener&) {}
+    void removeListener (NativeContextListener&) {}
+
 private:
     //==============================================================================
     void handleAsyncUpdate() override

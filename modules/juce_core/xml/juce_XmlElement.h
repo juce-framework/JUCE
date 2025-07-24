@@ -874,7 +874,7 @@ public:
         return AttributeIterator { attributes.get() };
     }
 
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated]] void macroBasedForLoop() const noexcept {}
 
     [[deprecated ("This has been deprecated in favour of the toString method.")]]
@@ -897,7 +897,7 @@ public:
                       StringRef dtdToUse,
                       StringRef encodingType = "UTF-8",
                       int lineWrapLength = 60) const;
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================
@@ -926,7 +926,7 @@ private:
 };
 
 //==============================================================================
-#ifndef DOXYGEN
+/** @cond */
 
 /** DEPRECATED: A handy macro to make it easy to iterate all the child elements in an XmlElement.
 
@@ -979,6 +979,6 @@ private:
 #define forEachXmlChildElementWithTagName(parentXmlElement, childElementVariableName, requiredTagName) \
     for (auto* (childElementVariableName) : ((parentXmlElement).macroBasedForLoop(), (parentXmlElement).getChildWithTagNameIterator ((requiredTagName))))
 
-#endif
+/** @endcond */
 
 } // namespace juce

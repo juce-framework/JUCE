@@ -350,7 +350,8 @@ public:
         return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
     }
 
-   #if JUCE_MSVC && ! defined (DOXYGEN)
+   #if JUCE_MSVC
+    /** @cond */
     int compareIgnoreCase (CharPointer_UTF16 other) const noexcept
     {
         return _wcsicmp (data, other.data);
@@ -366,6 +367,7 @@ public:
         const CharType* const t = wcsstr (data, stringToFind.getAddress());
         return t == nullptr ? -1 : (int) (t - data);
     }
+    /** @endcond */
    #endif
 
     /** Returns the character index of a substring, or -1 if it isn't found. */

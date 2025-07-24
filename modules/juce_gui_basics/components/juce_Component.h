@@ -2627,7 +2627,7 @@ public:
     virtual std::unique_ptr<AccessibilityHandler> createAccessibilityHandler();
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("Use the setFocusContainerType that takes a more descriptive enum.")]]
     void setFocusContainer (bool shouldBeFocusContainer) noexcept
     {
@@ -2637,7 +2637,7 @@ public:
 
     [[deprecated ("Use the contains that takes a Point<int>.")]]
     void contains (int, int) = delete;
-   #endif
+    /** @endcond */
 
 private:
 
@@ -2645,7 +2645,7 @@ private:
     friend class ComponentPeer;
     friend class detail::MouseInputSourceImpl;
 
-   #ifndef DOXYGEN
+    /** @cond */
     static Component* currentlyFocusedComponent;
 
     //==============================================================================
@@ -2758,7 +2758,7 @@ protected:
     virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
     /** @internal */
     static std::unique_ptr<AccessibilityHandler> createIgnoredAccessibilityHandler (Component&);
-   #endif
+    /** @endcond */
 };
 
 } // namespace juce

@@ -35,11 +35,11 @@
 namespace juce::dsp
 {
 
-#ifndef DOXYGEN
- // This class is needed internally.
- template <typename Scalar>
- struct CmplxSIMDOps;
-#endif
+/** @cond */
+// This class is needed internally.
+template <typename Scalar>
+struct CmplxSIMDOps;
+/** @endcond */
 
 //==============================================================================
 /**

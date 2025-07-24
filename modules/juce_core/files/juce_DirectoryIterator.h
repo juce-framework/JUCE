@@ -35,8 +35,7 @@
 namespace juce
 {
 
-#ifndef DOXYGEN
-
+/** @cond */
 //==============================================================================
 /**
     This class is now deprecated in favour of RangedDirectoryIterator.
@@ -203,7 +202,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryIterator)
 };
-
-#endif
+/** @endcond */
 
 } // namespace juce

@@ -217,19 +217,19 @@ namespace util
     /** Use this function to prevent denormals on intel CPUs.
         This function will work with both primitives and simple containers.
     */
-  #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
+   #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
     inline void snapToZero (float&       x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
-   #ifndef DOXYGEN
+    /** @cond */
     inline void snapToZero (double&      x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
     inline void snapToZero (long double& x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
-   #endif
-  #else
+    /** @endcond */
+   #else
     inline void snapToZero ([[maybe_unused]] float&       x) noexcept            {}
-   #ifndef DOXYGEN
+    /** @cond */
     inline void snapToZero ([[maybe_unused]] double&      x) noexcept            {}
     inline void snapToZero ([[maybe_unused]] long double& x) noexcept            {}
+    /** @endcond */
    #endif
-  #endif
 }
 
 }

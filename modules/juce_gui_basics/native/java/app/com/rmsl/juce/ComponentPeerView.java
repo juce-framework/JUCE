@@ -34,6 +34,9 @@
 
 package com.rmsl.juce;
 
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_CAPTION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
@@ -42,6 +45,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
@@ -114,36 +118,7 @@ public final class ComponentPeerView extends ViewGroup
         colorMatrix.set (colorTransform);
         paint.setColorFilter (new ColorMatrixColorFilter (colorMatrix));
 
-        java.lang.reflect.Method method = null;
-
-        try
-        {
-            method = getClass().getMethod ("setLayerType", int.class, Paint.class);
-        }
-        catch (SecurityException e)
-        {
-        }
-        catch (NoSuchMethodException e)
-        {
-        }
-
-        if (method != null)
-        {
-            try
-            {
-                int layerTypeNone = 0;
-                method.invoke (this, layerTypeNone, null);
-            }
-            catch (java.lang.IllegalArgumentException e)
-            {
-            }
-            catch (java.lang.IllegalAccessException e)
-            {
-            }
-            catch (java.lang.reflect.InvocationTargetException e)
-            {
-            }
-        }
+        setLayerType (LAYER_TYPE_NONE, null);
 
         Choreographer.getInstance().postFrameCallback (this);
     }
@@ -804,14 +779,26 @@ public final class ComponentPeerView extends ViewGroup
     {
     }
 
-    public void setSystemUiVisibilityCompat (Window window, boolean visible)
+    public void setSystemUiVisibilityCompat (Window window, boolean visible, boolean isLight)
     {
+        if (window != null)
+        {
+            // Although this is deprecated in Android 35+, it still seems to be necessary
+            // to adjust the colour of the nav bar icons when in button-mode.
+            window.setNavigationBarColor (isLight ? Color.BLACK : Color.WHITE);
+        }
+
         if (30 <= Build.VERSION.SDK_INT)
         {
             WindowInsetsController controller = getWindowInsetsController();
 
             if (controller != null)
             {
+                final int mask = (35 <= Build.VERSION.SDK_INT ? APPEARANCE_LIGHT_CAPTION_BARS : 0)
+                               | APPEARANCE_LIGHT_NAVIGATION_BARS
+                               | APPEARANCE_LIGHT_STATUS_BARS;
+                controller.setSystemBarsAppearance (isLight ? mask : 0, mask);
+
                 if (visible)
                 {
                     controller.show (WindowInsets.Type.systemBars());
@@ -843,14 +830,18 @@ public final class ComponentPeerView extends ViewGroup
 
         for (View view : views)
         {
+            final int lightStyle = (26 <= Build.VERSION.SDK_INT ? SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR : 0)
+                                 | SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
             final int prevFlags = view.getSystemUiVisibility();
             final int fullScreenFlags = SYSTEM_UI_FLAG_HIDE_NAVIGATION
                                       | SYSTEM_UI_FLAG_FULLSCREEN
                                       | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-            final int newFlags = visible ? (prevFlags & ~fullScreenFlags)
-                                         : (prevFlags |  fullScreenFlags);
+            final int withVisibility = visible ? (prevFlags & ~fullScreenFlags)
+                                               : (prevFlags |  fullScreenFlags);
+            final int withColour = isLight ? (withVisibility |  lightStyle)
+                                           : (withVisibility & ~lightStyle);
 
-            view.setSystemUiVisibility (newFlags);
+            view.setSystemUiVisibility (withColour);
         }
     }
 

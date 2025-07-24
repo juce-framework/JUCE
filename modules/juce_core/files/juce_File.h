@@ -35,9 +35,11 @@
 namespace juce
 {
 
-#if ! DOXYGEN && (JUCE_MAC || JUCE_IOS)
+/** @cond */
+#if JUCE_MAC || JUCE_IOS
  using OSType = unsigned int;
 #endif
+/** @endcond */
 
 //==============================================================================
 /**
@@ -1153,7 +1155,8 @@ public:
         bool foldersFirst;
     };
 
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES && ! defined (DOXYGEN)
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** @cond */
     /* These static objects are deprecated because it's too easy to accidentally use them indirectly
        during a static constructor, which leads to very obscure order-of-initialisation bugs.
        Use File::getSeparatorChar() and File::getSeparatorString(), and instead of File::nonexistent,
@@ -1162,6 +1165,7 @@ public:
     [[deprecated]] static const juce_wchar separator;
     [[deprecated]] static const StringRef separatorString;
     [[deprecated]] static const File nonexistent;
+    /** @endcond */
    #endif
 
 private:

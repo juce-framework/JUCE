@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce::universal_midi_packets
 {
 
@@ -209,5 +208,4 @@ using PacketX3 = Packet<3>;
 using PacketX4 = Packet<4>;
 
 } // namespace juce::universal_midi_packets
-
-#endif
+/** @endcond */

@@ -448,10 +448,12 @@ public:
     explicit Image (ReferenceCountedObjectPtr<ImagePixelData>) noexcept;
 
     //==============================================================================
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES && ! defined (DOXYGEN)
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** @cond */
     /* A null Image object that can be used when you need to return an invalid image. */
     [[deprecated ("If you need a default-constructed var, just use Image() or {}.")]]
     static const Image null;
+    /** @endcond */
    #endif
 
 private:

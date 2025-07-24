@@ -42,9 +42,9 @@ constexpr auto nullopt = std::nullopt;
 // link time code generation.
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
 
-#ifndef DOXYGEN
+/** @cond */
 #define JUCE_OPTIONAL_OPERATORS X(==) X(!=) X(<) X(<=) X(>) X(>=)
-#endif
+/** @endcond */
 
 /**
     A simple optional type.
@@ -175,7 +175,7 @@ Optional<std::decay_t<Value>> makeOptional (Value&& v)
     return std::forward<Value> (v);
 }
 
-#ifndef DOXYGEN
+/** @cond */
 #define X(op) \
     template <typename T, typename U> bool operator op (const Optional<T>& lhs, const Optional<U>& rhs) { return lhs.opt op rhs.opt; } \
     template <typename T> bool operator op (const Optional<T>& lhs, Nullopt rhs) { return lhs.opt op rhs; } \
@@ -187,6 +187,6 @@ JUCE_OPTIONAL_OPERATORS
 
 #undef X
 #undef JUCE_OPTIONAL_OPERATORS
-#endif
+/** @endcond */
 
 } // namespace juce

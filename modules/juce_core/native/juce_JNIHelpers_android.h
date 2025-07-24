@@ -367,6 +367,7 @@ DECLARE_JNI_CLASS (AndroidContext, "android/content/Context")
  METHOD (startActivityForResult,               "startActivityForResult",          "(Landroid/content/Intent;I)V") \
  METHOD (getFragmentManager,                   "getFragmentManager",              "()Landroid/app/FragmentManager;") \
  METHOD (setContentView,                       "setContentView",                  "(Landroid/view/View;)V") \
+ METHOD (addContentView,                       "addContentView",                  "(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V") \
  METHOD (getActionBar,                         "getActionBar",                    "()Landroid/app/ActionBar;") \
  METHOD (getWindow,                            "getWindow",                       "()Landroid/view/Window;") \
  METHOD (isInMultiWindowMode,                  "isInMultiWindowMode",             "()Z") \
@@ -690,13 +691,22 @@ DECLARE_JNI_CLASS (AndroidViewGroup, "android/view/ViewGroup")
  METHOD (getDecorView,  "getDecorView",       "()Landroid/view/View;") \
  METHOD (getAttributes, "getAttributes",      "()Landroid/view/WindowManager$LayoutParams;") \
  METHOD (setFlags,      "setFlags",           "(II)V") \
- METHOD (clearFlags,    "clearFlags",         "(I)V")
+ METHOD (clearFlags,    "clearFlags",         "(I)V") \
+ METHOD (setStatusBarColor, "setStatusBarColor", "(I)V") \
+ METHOD (setNavigationBarColor, "setNavigationBarColor", "(I)V") \
 
 DECLARE_JNI_CLASS (AndroidWindow, "android/view/Window")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (getDefaultDisplay, "getDefaultDisplay", "()Landroid/view/Display;")
+ METHOD (setNavigationBarContrastEnforced, "setNavigationBarContrastEnforced", "(Z)V") \
+
+DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidWindow29, "android/view/Window", 29)
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getDefaultDisplay, "getDefaultDisplay", "()Landroid/view/Display;") \
+ METHOD (removeViewImmediate, "removeViewImmediate", "(Landroid/view/View;)V") \
 
 DECLARE_JNI_CLASS (AndroidWindowManager, "android/view/WindowManager")
 #undef JNI_CLASS_MEMBERS

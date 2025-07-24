@@ -394,7 +394,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
  #include "unit_tests/juce_UnitTestCategories.h"
 #endif
 
-#ifndef DOXYGEN
+/** @cond */
 namespace juce
 {
  /*
@@ -415,7 +415,7 @@ namespace juce
   static this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode compileUnitMismatchSentinel;
  #endif
 }
-#endif
+/** @endcond */
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 

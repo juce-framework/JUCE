@@ -34,8 +34,7 @@
 
 #pragma once
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce
 {
 
@@ -239,5 +238,4 @@ auto becomeVSTComSmartPtrOwner (ObjectType* t)
 JUCE_END_NO_SANITIZE
 
 } // namespace juce
-
-#endif // DOXYGEN
+/** @endcond */

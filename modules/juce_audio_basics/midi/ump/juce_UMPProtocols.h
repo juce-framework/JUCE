@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce::universal_midi_packets
 {
 
@@ -63,5 +62,4 @@ enum class MidiProtocol : uint8_t
 };
 
 } // namespace juce::universal_midi_packets
-
-#endif
+/** @endcond */

@@ -125,6 +125,7 @@ namespace Ids
     DECLARE_ID (cppLibType);
     DECLARE_ID (codeSigningIdentity);
     DECLARE_ID (fastMath);
+    DECLARE_ID (intrinsicFunctions);
     DECLARE_ID (linkTimeOptimisation);
     DECLARE_ID (vstBinaryLocation);
     DECLARE_ID (vst3BinaryLocation);

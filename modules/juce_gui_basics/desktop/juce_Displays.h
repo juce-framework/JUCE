@@ -91,6 +91,9 @@ public:
             occupying the top portion of the screen is likely to have insets for the status bar but
             not the navigation bar, whereas an activity on the bottom may have navigation insets
             but not status insets.
+
+            The insets may also change as a result of rotating the screen, as this will rotate any
+            physical screen cutouts, and could also cause system UI elements to be repositioned.
         */
         BorderSize<int> safeAreaInsets;
 
@@ -211,7 +214,7 @@ public:
     /** An Array containing the Display objects for all of the connected displays. */
     Array<Display> displays;
 
-   #ifndef DOXYGEN
+    /** @cond */
     /** @internal */
     void refresh();
 
@@ -224,7 +227,7 @@ public:
     [[deprecated]] const Display& findDisplayForRect (Rectangle<int>, bool isPhysical = false) const noexcept;
     [[deprecated]] const Display& findDisplayForPoint (Point<int>, bool isPhysical = false) const noexcept;
     [[deprecated]] const Display& getMainDisplay() const noexcept;
-   #endif
+    /** @endcond */
 
 private:
     friend class Desktop;
