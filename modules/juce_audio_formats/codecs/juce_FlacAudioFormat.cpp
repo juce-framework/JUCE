@@ -261,7 +261,7 @@ public:
 
             if(FlacNamespace::FLAC__metadata_object_vorbiscomment_entry_to_name_value_pair(comment, &name, &value) && name && value)
             {
-                metadataValues.set (String (name), String (value));
+                metadataValues.set (CharPointer_UTF8 (name), CharPointer_UTF8 (value));
             }
         }
     }
