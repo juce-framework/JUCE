@@ -2233,11 +2233,19 @@ struct CoreMidiHelpers
                     [mutableBlocks.get() addObject: mutableBlock.get()];
 
             NSError* error = nullptr;
-            // On macOS 15, passing a non-null NSError* will cause the function to fail.
-            // Hopefully we can get more detailed error information in future versions.
+            auto** errorParam = std::invoke ([&error]() -> NSError**
+            {
+                // On macOS 15, passing a non-null NSError* will cause the function to fail.
+                // This issue is fixed in macOS 26 beta 4.
+                if (@available (macOS 26, iOS 26, *))
+                    return &error;
+
+                return nullptr;
+            });
+
             const auto successAssigningBlocks = [endpoint registerFunctionBlocks: mutableBlocks.get()
                                                                     markAsStatic: (areStatic == ump::BlocksAreStatic::yes)
-                                                                           error: nil];
+                                                                           error: errorParam];
 
             if (! successAssigningBlocks)
             {
