@@ -2089,8 +2089,8 @@ public:
     }
 
     //==============================================================================
-    static Point<float> lastMousePos;
-    static int64 touchesDown;
+    inline static Point<float> lastMousePos{};
+    inline static int64 touchesDown = 0;
 
     //==============================================================================
     struct StartupActivityCallbackListener final : public ActivityLifecycleCallbacks
@@ -2529,8 +2529,8 @@ private:
 
     //==============================================================================
     friend class Displays;
-    static AndroidComponentPeer* frontWindow;
-    static GlobalRef activityCallbackListener;
+    inline static AndroidComponentPeer* frontWindow = nullptr;
+    inline static GlobalRef activityCallbackListener;
 
     static constexpr jint GRAVITY_LEFT = 0x3, GRAVITY_TOP = 0x30;
     static constexpr jint TYPE_APPLICATION = 0x2;
@@ -2549,11 +2549,6 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidComponentPeer)
 };
-
-Point<float> AndroidComponentPeer::lastMousePos;
-int64 AndroidComponentPeer::touchesDown = 0;
-AndroidComponentPeer* AndroidComponentPeer::frontWindow = nullptr;
-GlobalRef AndroidComponentPeer::activityCallbackListener;
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindow)
