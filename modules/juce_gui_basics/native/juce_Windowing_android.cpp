@@ -1308,7 +1308,8 @@ static constexpr int translateAndroidKeyboardFlags (int javaFlags) noexcept
 }
 
 //==============================================================================
-class AndroidComponentPeer final : public ComponentPeer
+class AndroidComponentPeer final : public ComponentPeer,
+                                   private ActivityLifecycleCallbacks
 {
 public:
     AndroidComponentPeer (Component& comp, int windowStyleFlags, void* nativeViewHandle)
@@ -2097,20 +2098,12 @@ public:
     {
         void onActivityStarted (jobject /*activity*/) override
         {
-            auto* env = getEnv();
-            LocalRef<jobject> appContext (getAppContext());
+            forceDisplayUpdate();
 
-            if (appContext.get() != nullptr)
-            {
-                env->CallVoidMethod (appContext.get(),
-                                     AndroidApplication.unregisterActivityLifecycleCallbacks,
-                                     activityCallbackListener.get());
-                clear();
-                activityCallbackListener.clear();
-
-                forceDisplayUpdate();
-            }
+            AndroidComponentPeer::startupActivityCallbackListener.reset();
         }
+
+        ActivityLifecycleCallbackForwarder forwarder { GlobalRef { getAppContext() }, this };
     };
 
     class MainActivityWindowLayoutListener : public AndroidInterfaceImplementer
@@ -2530,7 +2523,7 @@ private:
     //==============================================================================
     friend class Displays;
     inline static AndroidComponentPeer* frontWindow = nullptr;
-    inline static GlobalRef activityCallbackListener;
+    inline static std::optional<StartupActivityCallbackListener> startupActivityCallbackListener;
 
     static constexpr jint GRAVITY_LEFT = 0x3, GRAVITY_TOP = 0x30;
     static constexpr jint TYPE_APPLICATION = 0x2;
@@ -2562,37 +2555,10 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
-class Desktop::NativeDarkModeChangeDetectorImpl  : public ActivityLifecycleCallbacks
+class Desktop::NativeDarkModeChangeDetectorImpl  : private ActivityLifecycleCallbacks
 {
 public:
-    NativeDarkModeChangeDetectorImpl()
-    {
-        LocalRef<jobject> appContext (getAppContext());
-
-        if (appContext != nullptr)
-        {
-            auto* env = getEnv();
-
-            myself = GlobalRef (CreateJavaInterface (this, "android/app/Application$ActivityLifecycleCallbacks"));
-            env->CallVoidMethod (appContext.get(), AndroidApplication.registerActivityLifecycleCallbacks, myself.get());
-        }
-    }
-
-    ~NativeDarkModeChangeDetectorImpl() override
-    {
-        LocalRef<jobject> appContext (getAppContext());
-
-        if (appContext != nullptr && myself != nullptr)
-        {
-            auto* env = getEnv();
-
-            env->CallVoidMethod (appContext.get(),
-                                 AndroidApplication.unregisterActivityLifecycleCallbacks,
-                                 myself.get());
-            clear();
-            myself.clear();
-        }
-    }
+    NativeDarkModeChangeDetectorImpl() = default;
 
     bool isDarkModeEnabled() const noexcept  { return darkModeEnabled; }
 
@@ -2625,8 +2591,8 @@ private:
                          UI_MODE_NIGHT_UNDEFINED = 0x00000000,
                          UI_MODE_NIGHT_YES       = 0x00000020;
 
-    GlobalRef myself;
     bool darkModeEnabled = getDarkModeSetting();
+    ActivityLifecycleCallbackForwarder forwarder { GlobalRef { getAppContext() }, this };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
@@ -2972,20 +2938,9 @@ void Displays::findDisplays (float masterScale)
             }
         }
     }
-    else if (AndroidComponentPeer::activityCallbackListener == nullptr)
+    else if (! AndroidComponentPeer::startupActivityCallbackListener.has_value())
     {
-        LocalRef<jobject> appContext (getAppContext());
-
-        if (appContext.get() != nullptr)
-        {
-            AndroidComponentPeer::activityCallbackListener = GlobalRef (CreateJavaInterface (
-                    new AndroidComponentPeer::StartupActivityCallbackListener,
-                    "android/app/Application$ActivityLifecycleCallbacks"));
-
-            env->CallVoidMethod (appContext,
-                                 AndroidApplication.registerActivityLifecycleCallbacks,
-                                 AndroidComponentPeer::activityCallbackListener.get());
-        }
+        AndroidComponentPeer::startupActivityCallbackListener.emplace();
     }
 
     displays.add (d);

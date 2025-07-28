@@ -1016,9 +1016,11 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
                                        const String& interfaceName);
 
 //==============================================================================
-class ActivityLifecycleCallbacks     : public AndroidInterfaceImplementer
+class ActivityLifecycleCallbacks
 {
 public:
+    virtual ~ActivityLifecycleCallbacks() = default;
+
     virtual void onActivityPreCreated            (jobject /*activity*/, jobject /*bundle*/)  {}
     virtual void onActivityPreDestroyed          (jobject /*activity*/)                      {}
     virtual void onActivityPrePaused             (jobject /*activity*/)                      {}
@@ -1044,15 +1046,27 @@ public:
     virtual void onActivityPostStopped           (jobject /*activity*/)                      {}
 
     virtual void onActivityConfigurationChanged  (jobject /*activity*/)                      {}
+};
+
+class ActivityLifecycleCallbackForwarder : private AndroidInterfaceImplementer
+{
+public:
+    ActivityLifecycleCallbackForwarder (GlobalRef appContext, ActivityLifecycleCallbacks* callbacks);
+
+    ~ActivityLifecycleCallbackForwarder() override;
 
 private:
     jobject invoke (jobject, jobject, jobjectArray) override;
+
+    GlobalRef appContext;
+    GlobalRef myself;
+    ActivityLifecycleCallbacks* callbacks = nullptr;
 };
 
 //==============================================================================
-struct SurfaceHolderCallback    : AndroidInterfaceImplementer
+struct SurfaceHolderCallback    : public AndroidInterfaceImplementer
 {
-    virtual ~SurfaceHolderCallback() override = default;
+    ~SurfaceHolderCallback() override = default;
 
     virtual void surfaceChanged (LocalRef<jobject> holder, int format, int width, int height) = 0;
     virtual void surfaceCreated (LocalRef<jobject> holder) = 0;

@@ -429,7 +429,22 @@ void juce_dispatchDelete (JNIEnv*, jobject /*object*/, jlong host)
 }
 
 //==============================================================================
-jobject ActivityLifecycleCallbacks::invoke (jobject proxy, jobject method, jobjectArray args)
+ActivityLifecycleCallbackForwarder::ActivityLifecycleCallbackForwarder (GlobalRef ctx, ActivityLifecycleCallbacks* cb)
+    : appContext (ctx),
+      myself (CreateJavaInterface (this, "android/app/Application$ActivityLifecycleCallbacks")),
+      callbacks (cb)
+{
+    if (appContext != nullptr && myself != nullptr)
+        getEnv()->CallVoidMethod (appContext, AndroidApplication.registerActivityLifecycleCallbacks, myself.get());
+}
+
+ActivityLifecycleCallbackForwarder::~ActivityLifecycleCallbackForwarder()
+{
+    if (appContext != nullptr && myself != nullptr)
+        getEnv()->CallVoidMethod (appContext, AndroidApplication.unregisterActivityLifecycleCallbacks, myself.get());
+}
+
+jobject ActivityLifecycleCallbackForwarder::invoke (jobject proxy, jobject method, jobjectArray args)
 {
     auto* env = getEnv();
 
@@ -475,7 +490,7 @@ jobject ActivityLifecycleCallbacks::invoke (jobject proxy, jobject method, jobje
 
     const auto activity = env->GetArrayLength (args) > 0 ? env->GetObjectArrayElement (args, 0) : (jobject) nullptr;
     const auto bundle   = env->GetArrayLength (args) > 1 ? env->GetObjectArrayElement (args, 1) : (jobject) nullptr;
-    (iter->second) (*this, activity, bundle);
+    (iter->second) (*callbacks, activity, bundle);
 
     return nullptr;
 }
