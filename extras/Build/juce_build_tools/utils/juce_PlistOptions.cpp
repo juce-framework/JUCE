@@ -165,6 +165,15 @@ namespace juce::build_tools
 
             if (shouldAddStoryboardToProject)
                 addPlistDictionaryKey (*dict, "UILaunchStoryboardName", storyboardName);
+
+            XmlElement sceneManifestKey ("key");
+            sceneManifestKey.addTextElement ("UIApplicationSceneManifest");
+            dict->addChildElement (new XmlElement (sceneManifestKey));
+
+            auto* sceneManifestDict = dict->createNewChildElement ("dict");
+            addPlistDictionaryKey (*sceneManifestDict, "UIApplicationSupportsMultipleScenes", false);
+            addKeyIfNotFound (*sceneManifestDict, "UISceneConfigurations");
+            sceneManifestDict->createNewChildElement ("dict");
         }
         else
         {
