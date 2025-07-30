@@ -196,13 +196,11 @@ public:
     //==============================================================================
     void reset()
     {
-        const ScopedLock sl { lock };
-        cache = {};
+        cache.clear();
     }
 
     const auto& get (const Font& font, const int glyphNumber)
     {
-        const ScopedLock sl { lock };
         return cache.get (Key { font, glyphNumber }, [] (const auto& key)
         {
             auto fontHeight = key.font.getHeight();
@@ -233,7 +231,6 @@ private:
     };
 
     LruCache<Key, std::vector<GlyphLayer>> cache;
-    CriticalSection lock;
 
     static GlyphCache*& getSingletonPointer() noexcept
     {

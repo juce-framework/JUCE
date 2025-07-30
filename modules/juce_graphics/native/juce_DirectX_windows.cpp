@@ -479,7 +479,7 @@ RectangleListSpriteBatch::~RectangleListSpriteBatch()
 void RectangleListSpriteBatch::release()
 {
     whiteRectangle = nullptr;
-    spriteBatches = {};
+    spriteBatches.clear();
     destinations.free();
     destinationsCapacity = 0;
 }
