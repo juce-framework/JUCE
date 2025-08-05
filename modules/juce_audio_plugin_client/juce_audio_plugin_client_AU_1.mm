@@ -172,7 +172,12 @@ public:
             channelInfo.add (info);
         }
        #else
-        channelInfo = AudioUnitHelpers::getAUChannelInfo (*juceFilter);
+        auto channelInfoSet = AudioUnitHelpers::getAUChannelInfo (*juceFilter);
+        channelInfo.resize ((int) channelInfoSet.size());
+        std::transform (channelInfoSet.begin(),
+                        channelInfoSet.end(),
+                        channelInfo.begin(),
+                        [] (auto x) { return x.makeChannelInfo(); });
        #endif
 
         AddPropertyListener (kAudioUnitProperty_ContextName, auPropertyListenerDispatcher, this);
