@@ -440,31 +440,29 @@ struct AudioUnitHelpers
             }
         }
 
-        auto hasUnsupportedInput = ! hasMainInputBus, hasUnsupportedOutput = ! hasMainOutputBus;
-
-        for (auto inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
+        const auto computeHasUnsupportedLayout = [&] (bool isInput)
         {
-            Channels channelConfiguration { static_cast<SInt16> (inChanNum),
-                                            static_cast<SInt16> (hasInOutMismatch ? defaultOutputs : inChanNum) };
+            const auto hasMainBus = isInput ? hasMainInputBus : hasMainOutputBus;
+            const auto begin = hasMainBus ? 1 : 0;
+            const auto end = hasMainBus ? maxNumChanToCheckFor : 0;
 
-            if (! supportedChannels.contains (channelConfiguration))
+            for (auto chan = begin; chan <= end; ++chan)
             {
-                hasUnsupportedInput = true;
-                break;
-            }
-        }
+                const Channels channelConfig
+                {
+                    static_cast<SInt16> (! isInput && hasInOutMismatch ? defaultInputs  : chan),
+                    static_cast<SInt16> (  isInput && hasInOutMismatch ? defaultOutputs : chan)
+                };
 
-        for (auto outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
-        {
-            Channels channelConfiguration { static_cast<SInt16> (hasInOutMismatch ? defaultInputs : outChanNum),
-                                            static_cast<SInt16> (outChanNum) };
-
-            if (! supportedChannels.contains (channelConfiguration))
-            {
-                hasUnsupportedOutput = true;
-                break;
+                if (! supportedChannels.contains (channelConfig))
+                    return true;
             }
-        }
+
+            return ! hasMainBus;
+        };
+
+        const auto hasUnsupportedInput  = computeHasUnsupportedLayout (true);
+        const auto hasUnsupportedOutput = computeHasUnsupportedLayout (false);
 
         for (const auto& supported : supportedChannels)
         {
