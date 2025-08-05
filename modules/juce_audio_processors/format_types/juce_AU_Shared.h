@@ -429,16 +429,9 @@ struct AudioUnitHelpers
             }
         }
 
-        auto hasInOutMismatch = false;
-
-        for (const auto& supported : supportedChannels)
-        {
-            if (supported.ins != supported.outs)
-            {
-                hasInOutMismatch = true;
-                break;
-            }
-        }
+        const auto hasInOutMismatch = std::any_of (supportedChannels.begin(),
+                                                   supportedChannels.end(),
+                                                   [] (const Channels& x) { return x.ins != x.outs; });
 
         const auto computeHasUnsupportedLayout = [&] (bool isInput)
         {
