@@ -2420,9 +2420,9 @@ public:
 
     SoftwareRendererSavedState (const SoftwareRendererSavedState& other) = default;
 
-    SoftwareRendererSavedState* beginTransparencyLayer (float opacity)
+    std::unique_ptr<SoftwareRendererSavedState> beginTransparencyLayer (float opacity)
     {
-        auto* s = new SoftwareRendererSavedState (*this);
+        auto s = std::make_unique<SoftwareRendererSavedState> (*this);
 
         if (clip != nullptr)
         {
@@ -2565,12 +2565,12 @@ public:
     void beginTransparencyLayer (float opacity)
     {
         save();
-        currentState.reset (currentState->beginTransparencyLayer (opacity));
+        currentState = currentState->beginTransparencyLayer (opacity);
     }
 
     void endTransparencyLayer()
     {
-        std::unique_ptr<StateObjectType> finishedTransparencyLayer (currentState.release());
+        auto finishedTransparencyLayer = std::move (currentState);
         restore();
         currentState->endTransparencyLayer (*finishedTransparencyLayer);
     }
