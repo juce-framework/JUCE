@@ -1588,6 +1588,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorGraph.cpp">
       <Filter>JUCE Modules\juce_audio_processors\processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorParameter.cpp">
+      <Filter>JUCE Modules\juce_audio_processors\processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorParameterGroup.cpp">
       <Filter>JUCE Modules\juce_audio_processors\processors</Filter>
     </ClCompile>
