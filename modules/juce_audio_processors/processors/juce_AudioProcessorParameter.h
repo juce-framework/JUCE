@@ -35,8 +35,6 @@
 namespace juce
 {
 
-class AudioProcessor;
-
 //==============================================================================
 /** An abstract base class for parameter objects that can be added to an
     AudioProcessor.
@@ -264,9 +262,9 @@ public:
 
     /** @internal
         This should only be called by the owner of the parameter after it has been added to
-        a processor. Do not call this function; changing parameter indices *will* break things!
+        a processor. Do not call this function; changing the parameter index *will* break things!
     */
-    void setParameterIndex (int index) noexcept;
+    void setParameterIndex (int) noexcept;
 
     //==============================================================================
     /** Returns the current value of the parameter as a String.
@@ -338,6 +336,12 @@ public:
         virtual void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) = 0;
     };
 
+    /** @internal
+        This should only be called by the owner of the parameter after it has been added to
+        a processor. Do not call this function; changing the owner *will* break things!
+    */
+    void setOwner (Listener* listener) noexcept;
+
     /** Registers a listener to receive events when the parameter's state changes.
         If the listener is already registered, this will not register it again.
 
@@ -355,9 +359,6 @@ public:
     /** @internal */
     void sendValueChangedMessageToListeners (float newValue);
 
-    /** @internal */
-    AudioProcessor* processor = nullptr;
-
     /** Returns the default number of steps for a parameter.
 
         NOTE! This method is deprecated! It's recommended that you use
@@ -373,6 +374,7 @@ private:
     int version = 0;
     CriticalSection listenerLock;
     Array<Listener*> listeners;
+    Listener* finalListener = nullptr;
     mutable StringArray valueStrings;
 
    #if JUCE_DEBUG

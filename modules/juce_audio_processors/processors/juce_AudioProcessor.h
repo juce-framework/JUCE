@@ -1516,6 +1516,31 @@ public:
     [[deprecated]] virtual bool isOutputChannelStereoPair (int index) const;
     /** @endcond */
 
+    /** @internal
+        Used to convert new-style per-parameter callbacks into old-style processor-change
+        callbacks.
+        This type will be removed in the future!
+    */
+    class ParameterChangeForwarder : public AudioProcessorParameter::Listener
+    {
+    public:
+        explicit ParameterChangeForwarder (AudioProcessor* o) : owner (o) {}
+
+        ParameterChangeForwarder (const ParameterChangeForwarder& other) : owner (other.owner) {}
+
+        ParameterChangeForwarder& operator= (const ParameterChangeForwarder& other)
+        {
+            owner = other.owner;
+            return *this;
+        }
+
+        void parameterValueChanged (int, float) override;
+        void parameterGestureChanged (int, bool) override;
+
+    private:
+        AudioProcessor* owner = nullptr;
+    };
+
 private:
     //==============================================================================
     struct InOutChannelPair
@@ -1587,6 +1612,8 @@ private:
 
     AudioProcessorParameterGroup parameterTree;
     Array<AudioProcessorParameter*> flatParameterList;
+
+    ParameterChangeForwarder parameterListener { this };
 
     AudioProcessorParameter* getParamChecked (int) const;
 

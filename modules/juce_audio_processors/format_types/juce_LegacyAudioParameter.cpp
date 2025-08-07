@@ -40,10 +40,12 @@ JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 class LegacyAudioParameter final : public HostedAudioProcessorParameter
 {
 public:
-    LegacyAudioParameter (AudioProcessor& audioProcessorToUse, int audioParameterIndex)
+    LegacyAudioParameter (AudioProcessorParameter::Listener& listener,
+                          AudioProcessor& audioProcessorToUse,
+                          int audioParameterIndex)
+        : processor (&audioProcessorToUse)
     {
-        processor = &audioProcessorToUse;
-
+        setOwner (&listener);
         setParameterIndex (audioParameterIndex);
         jassert (getParameterIndex() < processor->getNumParameters());
     }
@@ -118,6 +120,9 @@ public:
 
         return {};
     }
+
+private:
+    AudioProcessor* processor = nullptr;
 };
 
 //==============================================================================
@@ -135,6 +140,7 @@ public:
     {
         clear();
 
+        forwarder = AudioProcessor::ParameterChangeForwarder { &audioProcessor };
         legacyParamIDs = forceLegacyParamIDs;
 
         auto numParameters = audioProcessor.getNumParameters();
@@ -147,7 +153,7 @@ public:
                 if (usingManagedParameters)
                     return audioProcessor.getParameters()[i];
 
-                auto newParam = std::make_unique<LegacyAudioParameter> (audioProcessor, i);
+                auto newParam = std::make_unique<LegacyAudioParameter> (forwarder, audioProcessor, i);
                 auto* result = newParam.get();
                 ownedGroup.addChild (std::move (newParam));
 
@@ -163,6 +169,7 @@ public:
 
     void clear()
     {
+        forwarder = AudioProcessor::ParameterChangeForwarder { nullptr };
         ownedGroup = AudioProcessorParameterGroup();
         params.clear();
     }
@@ -211,6 +218,7 @@ private:
     const AudioProcessorParameterGroup* processorGroup = nullptr;
     AudioProcessorParameterGroup ownedGroup;
     Array<AudioProcessorParameter*> params;
+    AudioProcessor::ParameterChangeForwarder forwarder { nullptr };
     bool legacyParamIDs = false, usingManagedParameters = false;
 };
 

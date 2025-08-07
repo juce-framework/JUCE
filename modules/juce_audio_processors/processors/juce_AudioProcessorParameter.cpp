@@ -50,6 +50,12 @@ void AudioProcessorParameter::setParameterIndex (int index) noexcept
     parameterIndex = index;
 }
 
+void AudioProcessorParameter::setOwner (Listener* listenerIn) noexcept
+{
+    jassert (finalListener == nullptr);
+    finalListener = listenerIn;
+}
+
 void AudioProcessorParameter::setValueNotifyingHost (float newValue)
 {
     setValue (newValue);
@@ -59,7 +65,7 @@ void AudioProcessorParameter::setValueNotifyingHost (float newValue)
 void AudioProcessorParameter::beginChangeGesture()
 {
     // This method can't be used until the parameter has been attached to a processor!
-    jassert (processor != nullptr && parameterIndex >= 0);
+    jassert (parameterIndex >= 0);
 
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     // This means you've called beginChangeGesture twice in succession without
@@ -75,20 +81,14 @@ void AudioProcessorParameter::beginChangeGesture()
         if (auto* l = listeners[i])
             l->parameterGestureChanged (getParameterIndex(), true);
 
-    if (processor != nullptr && parameterIndex >= 0)
-    {
-        // audioProcessorParameterChangeGestureBegin callbacks will shortly be deprecated and
-        // this code will be removed.
-        for (int i = processor->listeners.size(); --i >= 0;)
-            if (auto* l = processor->listeners[i])
-                l->audioProcessorParameterChangeGestureBegin (processor, getParameterIndex());
-    }
+    if (finalListener != nullptr)
+        finalListener->parameterGestureChanged (getParameterIndex(), true);
 }
 
 void AudioProcessorParameter::endChangeGesture()
 {
     // This method can't be used until the parameter has been attached to a processor!
-    jassert (processor != nullptr && parameterIndex >= 0);
+    jassert (parameterIndex >= 0);
 
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     // This means you've called endChangeGesture without having previously
@@ -104,14 +104,8 @@ void AudioProcessorParameter::endChangeGesture()
         if (auto* l = listeners[i])
             l->parameterGestureChanged (getParameterIndex(), false);
 
-    if (processor != nullptr && parameterIndex >= 0)
-    {
-        // audioProcessorParameterChangeGestureEnd callbacks will shortly be deprecated and
-        // this code will be removed.
-        for (int i = processor->listeners.size(); --i >= 0;)
-            if (auto* l = processor->listeners[i])
-                l->audioProcessorParameterChangeGestureEnd (processor, getParameterIndex());
-    }
+    if (finalListener != nullptr)
+        finalListener->parameterGestureChanged (getParameterIndex(), false);
 }
 
 void AudioProcessorParameter::sendValueChangedMessageToListeners (float newValue)
@@ -122,14 +116,8 @@ void AudioProcessorParameter::sendValueChangedMessageToListeners (float newValue
         if (auto* l = listeners [i])
             l->parameterValueChanged (getParameterIndex(), newValue);
 
-    if (processor != nullptr && parameterIndex >= 0)
-    {
-        // audioProcessorParameterChanged callbacks will shortly be deprecated and
-        // this code will be removed.
-        for (int i = processor->listeners.size(); --i >= 0;)
-            if (auto* l = processor->listeners[i])
-                l->audioProcessorParameterChanged (processor, getParameterIndex(), newValue);
-    }
+    if (finalListener != nullptr)
+        finalListener->parameterValueChanged (getParameterIndex(), newValue);
 }
 
 bool AudioProcessorParameter::isOrientationInverted() const                      { return false; }

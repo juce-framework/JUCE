@@ -521,7 +521,7 @@ void AudioProcessor::addParameter (AudioProcessorParameter* param)
     jassert (param != nullptr);
     parameterTree.addChild (std::unique_ptr<AudioProcessorParameter> (param));
 
-    param->processor = this;
+    param->setOwner (&parameterListener);
     param->setParameterIndex (flatParameterList.size());
     flatParameterList.add (param);
 
@@ -539,7 +539,7 @@ void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterG
     for (int i = oldSize; i < flatParameterList.size(); ++i)
     {
         auto p = flatParameterList.getUnchecked (i);
-        p->processor = this;
+        p->setOwner (&parameterListener);
         p->setParameterIndex (i);
 
         validateParameter (p);
@@ -566,7 +566,7 @@ void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
     for (int i = 0; i < flatParameterList.size(); ++i)
     {
         auto p = flatParameterList.getUnchecked (i);
-        p->processor = this;
+        p->setOwner (&parameterListener);
         p->setParameterIndex (i);
 
         validateParameter (p);
@@ -1422,6 +1422,31 @@ AudioProcessorParameter* AudioProcessor::getParamChecked (int index) const
 
 bool AudioProcessor::canAddBus ([[maybe_unused]] bool isInput) const                     { return false; }
 bool AudioProcessor::canRemoveBus ([[maybe_unused]] bool isInput) const                  { return false; }
+
+//==============================================================================
+void AudioProcessor::ParameterChangeForwarder::parameterValueChanged (int index, float value)
+{
+    if (owner == nullptr)
+        return;
+
+    for (int i = owner->listeners.size(); --i >= 0;)
+        if (auto* l = owner->listeners[i])
+            l->audioProcessorParameterChanged (owner, index, value);
+}
+
+void AudioProcessor::ParameterChangeForwarder::parameterGestureChanged (int index, bool begin)
+{
+    if (owner == nullptr)
+        return;
+
+    const auto callback = begin
+                        ? &AudioProcessorListener::audioProcessorParameterChangeGestureBegin
+                        : &AudioProcessorListener::audioProcessorParameterChangeGestureEnd;
+
+    for (int i = owner->listeners.size(); --i >= 0;)
+        if (auto* l = owner->listeners[i])
+            (l->*callback) (owner, index);
+}
 
 JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
