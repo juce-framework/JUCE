@@ -1642,7 +1642,6 @@ private:
     template <typename floatType>
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);
 
-    friend class AudioProcessorParameter;
     friend class LADSPAPluginInstance;
 
     [[deprecated ("This method is no longer used - you can delete it from your AudioProcessor classes.")]]
