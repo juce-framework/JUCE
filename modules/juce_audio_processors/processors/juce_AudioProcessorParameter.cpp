@@ -44,6 +44,12 @@ AudioProcessorParameter::~AudioProcessorParameter()
    #endif
 }
 
+void AudioProcessorParameter::setParameterIndex (int index) noexcept
+{
+    jassert (parameterIndex < 0 && 0 <= index);
+    parameterIndex = index;
+}
+
 void AudioProcessorParameter::setValueNotifyingHost (float newValue)
 {
     setValue (newValue);

@@ -522,7 +522,7 @@ void AudioProcessor::addParameter (AudioProcessorParameter* param)
     parameterTree.addChild (std::unique_ptr<AudioProcessorParameter> (param));
 
     param->processor = this;
-    param->parameterIndex = flatParameterList.size();
+    param->setParameterIndex (flatParameterList.size());
     flatParameterList.add (param);
 
     validateParameter (param);
@@ -540,7 +540,7 @@ void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterG
     {
         auto p = flatParameterList.getUnchecked (i);
         p->processor = this;
-        p->parameterIndex = i;
+        p->setParameterIndex (i);
 
         validateParameter (p);
     }
@@ -567,7 +567,7 @@ void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
     {
         auto p = flatParameterList.getUnchecked (i);
         p->processor = this;
-        p->parameterIndex = i;
+        p->setParameterIndex (i);
 
         validateParameter (p);
     }

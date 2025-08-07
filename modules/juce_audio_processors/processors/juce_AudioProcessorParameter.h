@@ -262,6 +262,12 @@ public:
     /** Returns the index of this parameter in its parent processor's parameter list. */
     int getParameterIndex() const noexcept              { return parameterIndex; }
 
+    /** @internal
+        This should only be called by the owner of the parameter after it has been added to
+        a processor. Do not call this function; changing parameter indices *will* break things!
+    */
+    void setParameterIndex (int index) noexcept;
+
     //==============================================================================
     /** Returns the current value of the parameter as a String.
 
@@ -349,11 +355,11 @@ public:
     /** @internal */
     void sendValueChangedMessageToListeners (float newValue);
 
+    /** @internal */
+    AudioProcessor* processor = nullptr;
+
 private:
     //==============================================================================
-    friend class AudioProcessor;
-    friend class LegacyAudioParameter;
-    AudioProcessor* processor = nullptr;
     int parameterIndex = -1;
     int version = 0;
     CriticalSection listenerLock;
