@@ -577,7 +577,7 @@ void AudioProcessor::refreshParameterList() {}
 
 int AudioProcessor::getDefaultNumParameterSteps() noexcept
 {
-    return 0x7fffffff;
+    return AudioProcessorParameter::getDefaultNumParameterSteps();
 }
 
 void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
@@ -1358,7 +1358,7 @@ int AudioProcessor::getParameterNumSteps (int index)
     if (auto* p = getParameters()[index])
         return p->getNumSteps();
 
-    return AudioProcessor::getDefaultNumParameterSteps();
+    return getDefaultNumParameterSteps();
 }
 
 bool AudioProcessor::isParameterDiscrete (int index) const

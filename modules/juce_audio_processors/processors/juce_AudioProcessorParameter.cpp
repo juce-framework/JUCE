@@ -136,7 +136,7 @@ bool AudioProcessorParameter::isOrientationInverted() const                     
 bool AudioProcessorParameter::isAutomatable() const                              { return true; }
 bool AudioProcessorParameter::isMetaParameter() const                            { return false; }
 AudioProcessorParameter::Category AudioProcessorParameter::getCategory() const   { return genericParameter; }
-int AudioProcessorParameter::getNumSteps() const                                 { return AudioProcessor::getDefaultNumParameterSteps(); }
+int AudioProcessorParameter::getNumSteps() const                                 { return getDefaultNumParameterSteps(); }
 bool AudioProcessorParameter::isDiscrete() const                                 { return false; }
 bool AudioProcessorParameter::isBoolean() const                                  { return false; }
 
@@ -173,6 +173,11 @@ void AudioProcessorParameter::removeListener (AudioProcessorParameter::Listener*
 {
     const ScopedLock sl (listenerLock);
     listeners.removeFirstMatchingValue (listenerToRemove);
+}
+
+int AudioProcessorParameter::getDefaultNumParameterSteps() noexcept
+{
+    return 0x7fffffff;
 }
 
 } // namespace juce

@@ -173,7 +173,7 @@ public:
     /** Returns the number of steps that this parameter's range should be quantised into.
 
         If you want a continuous range of values, don't override this method, and allow
-        the default implementation to return AudioProcessor::getDefaultNumParameterSteps().
+        the default implementation to return getDefaultNumParameterSteps().
 
         If your parameter is boolean, then you may want to make this return 2.
 
@@ -357,6 +357,15 @@ public:
 
     /** @internal */
     AudioProcessor* processor = nullptr;
+
+    /** Returns the default number of steps for a parameter.
+
+        NOTE! This method is deprecated! It's recommended that you use
+        AudioProcessorParameter::getNumSteps() instead.
+
+        @see getParameterNumSteps
+    */
+    static int getDefaultNumParameterSteps() noexcept;
 
 private:
     //==============================================================================
