@@ -1030,7 +1030,9 @@ endfunction()
 # ==================================================================================================
 
 function(_juce_add_vst3_manifest_helper_target shared_code_target)
-    if(TARGET juce_vst3_helper
+    set(vst3_helper_target ${shared_code_target}_vst3_helper)
+
+    if(TARGET ${vst3_helper_target}
        OR (CMAKE_SYSTEM_NAME STREQUAL "iOS")
        OR (CMAKE_SYSTEM_NAME STREQUAL "Android")
        OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
@@ -1048,7 +1050,6 @@ function(_juce_add_vst3_manifest_helper_target shared_code_target)
 
     set(source "${module_path}/juce_audio_plugin_client/VST3/juce_VST3ManifestHelper.${extension}")
 
-    set(vst3_helper_target ${shared_code_target}_vst3_helper)
     add_executable(${vst3_helper_target} "${source}")
     add_executable(juce::${vst3_helper_target} ALIAS ${vst3_helper_target})
 
