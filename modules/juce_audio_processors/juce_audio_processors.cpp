@@ -186,6 +186,7 @@ private:
 #include "format_types/juce_LegacyAudioParameter.cpp"
 #include "processors/juce_AudioProcessorParameter.cpp"
 #include "processors/juce_AudioProcessor.cpp"
+#include "processors/juce_AudioProcessorListener.cpp"
 #include "processors/juce_AudioPluginInstance.cpp"
 #include "processors/juce_AudioProcessorEditor.cpp"
 #include "processors/juce_AudioProcessorGraph.cpp"

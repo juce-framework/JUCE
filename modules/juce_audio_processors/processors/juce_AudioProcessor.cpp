@@ -1425,8 +1425,4 @@ bool AudioProcessor::canRemoveBus ([[maybe_unused]] bool isInput) const         
 
 JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
-//==============================================================================
-void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int) {}
-void AudioProcessorListener::audioProcessorParameterChangeGestureEnd   (AudioProcessor*, int) {}
-
 } // namespace juce

@@ -987,6 +987,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorGraph.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorListener.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorParameter.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
