@@ -2878,6 +2878,20 @@ public:
             expectEquals (String::toDecimalStringWithSignificantFigures (2.8647,     6), String ("2.86470"));
 
             expectEquals (String::toDecimalStringWithSignificantFigures (-0.0000000000019, 1), String ("-0.000000000002"));
+
+            // Powers of 10
+
+            expectEquals (String::toDecimalStringWithSignificantFigures (       0.001, 7), String (       "0.001000000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (       0.01,  7), String (       "0.01000000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (       0.1,   7), String (       "0.1000000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (       1,     7), String (       "1.000000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (      10,     7), String (      "10.00000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (     100,     7), String (     "100.0000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (    1000,     7), String (    "1000.000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (   10000,     7), String (   "10000.00"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (  100000,     7), String (  "100000.0"));
+            expectEquals (String::toDecimalStringWithSignificantFigures ( 1000000,     7), String ( "1000000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (10000000,     7), String ("10000000"));
         }
 
         beginTest ("Float trimming");

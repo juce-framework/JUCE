@@ -1159,11 +1159,10 @@ public:
             return "0";
         }
 
-        auto numDigitsBeforePoint = (int) std::ceil (std::log10 (number < 0 ? -number : number));
-
-        auto shift = numberOfSignificantFigures - numDigitsBeforePoint;
-        auto factor = std::pow (10.0, shift);
-        auto rounded = std::round (number * factor) / factor;
+        const auto numDigitsBeforePoint = (int) std::floor (std::log10 (std::abs (number)) + DecimalType (1));
+        const auto shift = numberOfSignificantFigures - numDigitsBeforePoint;
+        const auto factor = std::pow (10.0, shift);
+        const auto rounded = std::round (number * factor) / factor;
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision (std::max (shift, 0)) << rounded;
