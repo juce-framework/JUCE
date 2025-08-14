@@ -47,16 +47,6 @@ namespace PropertyFileConstants
 }
 
 //==============================================================================
-PropertiesFile::Options::Options()
-    : commonToAllUsers (false),
-      ignoreCaseOfKeyNames (false),
-      doNotSave (false),
-      millisecondsBeforeSaving (3000),
-      storageFormat (PropertiesFile::storeAsXML),
-      processLock (nullptr)
-{
-}
-
 File PropertiesFile::Options::getDefaultFile() const
 {
     // mustn't have illegal characters in this name..
