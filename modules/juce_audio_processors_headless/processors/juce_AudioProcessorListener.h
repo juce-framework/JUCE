@@ -35,6 +35,8 @@
 namespace juce
 {
 
+class AudioProcessor;
+
 //==============================================================================
 /**
     Base class for listeners that want to know about changes to an AudioProcessor.

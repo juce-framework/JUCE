@@ -73,12 +73,12 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
 #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
 #include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
-#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors_headless/format_types/juce_LegacyAudioParameter.h>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
 #include <juce_gui_basics/detail/juce_ComponentPeerHelpers.h>
 
 #if JucePlugin_Enable_ARA
- #include <juce_audio_processors/utilities/ARA/juce_AudioProcessor_ARAExtensions.h>
+ #include <juce_audio_processors_headless/utilities/ARA/juce_AudioProcessor_ARAExtensions.h>
  #include <ARA_API/ARAAudioUnit.h>
  #if ARA_SUPPORT_VERSION_1
   #error "Unsupported ARA version - only ARA version 2 and onward are supported by the current JUCE ARA implementation"

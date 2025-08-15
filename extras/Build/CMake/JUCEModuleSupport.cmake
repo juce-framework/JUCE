@@ -529,6 +529,19 @@ function(juce_add_module module_path)
         endif()
     endif()
 
+    if(${module_name} STREQUAL "juce_audio_processors_headless")
+        add_library(juce_ara_headers INTERFACE)
+
+        target_include_directories(juce_ara_headers INTERFACE
+            "$<$<TARGET_EXISTS:juce_ara_sdk>:$<TARGET_PROPERTY:juce_ara_sdk,INTERFACE_INCLUDE_DIRECTORIES>>")
+
+        target_link_libraries(juce_audio_processors_headless INTERFACE juce_ara_headers)
+
+        if(JUCE_ARG_ALIAS_NAMESPACE)
+            add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_ara_headers ALIAS juce_ara_headers)
+        endif()
+    endif()
+
     if(${module_name} STREQUAL "juce_audio_processors")
         add_library(juce_vst3_headers INTERFACE)
 
@@ -553,17 +566,9 @@ function(juce_add_module module_path)
             "${lv2_base_path}/lilv/src")
         target_link_libraries(juce_audio_processors INTERFACE juce_lilv_headers)
 
-        add_library(juce_ara_headers INTERFACE)
-
-        target_include_directories(juce_ara_headers INTERFACE
-            "$<$<TARGET_EXISTS:juce_ara_sdk>:$<TARGET_PROPERTY:juce_ara_sdk,INTERFACE_INCLUDE_DIRECTORIES>>")
-
-        target_link_libraries(juce_audio_processors INTERFACE juce_ara_headers)
-
         if(JUCE_ARG_ALIAS_NAMESPACE)
             add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_vst3_headers ALIAS juce_vst3_headers)
             add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_lilv_headers ALIAS juce_lilv_headers)
-            add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_ara_headers ALIAS juce_ara_headers)
         endif()
     endif()
 

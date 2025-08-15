@@ -61,8 +61,8 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 #include <juce_gui_basics/native/juce_WindowsHooks_windows.h>
 
 //==============================================================================
-#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
-#include <juce_audio_processors/utilities/juce_FlagCache.h>
+#include <juce_audio_processors_headless/format_types/juce_LegacyAudioParameter.h>
+#include <juce_audio_processors_headless/utilities/juce_FlagCache.h>
 #include <juce_audio_processors/format_types/juce_VST3Utilities.h>
 #include <juce_audio_processors/format_types/juce_VST3Common.h>
 #include <juce_audio_plugin_client/VST3/juce_VST3ModuleInfo.h>

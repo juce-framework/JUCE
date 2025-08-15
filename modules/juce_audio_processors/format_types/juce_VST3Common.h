@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <juce_audio_processors_headless/utilities/juce_FlagCache.h>
+
 /** @cond */
 namespace juce
 {

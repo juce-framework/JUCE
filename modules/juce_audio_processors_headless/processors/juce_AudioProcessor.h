@@ -35,6 +35,8 @@
 namespace juce
 {
 
+class AudioProcessorEditor;
+
 //==============================================================================
 /**
     Base class for audio processing classes or plugins.
@@ -1030,6 +1032,10 @@ public:
 
         Note that you should only call this method from the message thread as the active
         editor may be deleted by the message thread, causing a dangling pointer.
+
+        The returned pointer is *non-owning*! If you're planning to store this pointer,
+        it's a good idea to immediately wrap this in a Component::SafePointer or similar
+        so that you don't try to use the editor after the owner destroys it.
     */
     AudioProcessorEditor* getActiveEditor() const noexcept;
 
@@ -1596,7 +1602,7 @@ private:
 
     //==============================================================================
     Array<AudioProcessorListener*> listeners;
-    Component::SafePointer<AudioProcessorEditor> activeEditor;
+    AudioProcessorEditor* activeEditor = nullptr;
     double currentSampleRate = 0;
     int blockSize = 0, latencySamples = 0;
     bool suspended = false;

@@ -65,3 +65,27 @@
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_graphics/juce_graphics.h>
+
+#include <juce_audio_processors_headless/processors/juce_AudioProcessorListener.h>
+#include <juce_audio_processors_headless/utilities/juce_AAXClientExtensions.h>
+#include <juce_audio_processors_headless/utilities/juce_VST2ClientExtensions.h>
+#include <juce_audio_processors_headless/utilities/juce_VST3Interface.h>
+#include <juce_audio_processors_headless/utilities/juce_VST3ClientExtensions.h>
+#include <juce_audio_processors_headless/format_types/juce_ARACommon.h>
+#include <juce_audio_processors_headless/utilities/juce_ExtensionsVisitor.h>
+#include <juce_audio_processors_headless/processors/juce_AudioProcessorParameter.h>
+#include <juce_audio_processors_headless/processors/juce_HostedAudioProcessorParameter.h>
+#include <juce_audio_processors_headless/processors/juce_AudioProcessorParameterGroup.h>
+#include <juce_audio_processors_headless/processors/juce_AudioProcessor.h>
+#include <juce_audio_processors_headless/processors/juce_PluginDescription.h>
+#include <juce_audio_processors_headless/processors/juce_AudioPluginInstance.h>
+#include <juce_audio_processors_headless/processors/juce_AudioProcessorGraph.h>
+#include <juce_audio_processors_headless/format/juce_AudioPluginFormat.h>
+#include <juce_audio_processors_headless/utilities/juce_AudioProcessorParameterWithID.h>
+#include <juce_audio_processors_headless/utilities/juce_RangedAudioParameter.h>
+#include <juce_audio_processors_headless/utilities/juce_AudioParameterFloat.h>
+#include <juce_audio_processors_headless/utilities/juce_AudioParameterInt.h>
+#include <juce_audio_processors_headless/utilities/juce_AudioParameterBool.h>
+#include <juce_audio_processors_headless/utilities/juce_AudioParameterChoice.h>
+#include <juce_audio_processors_headless/utilities/ARA/juce_ARADebug.h>
+#include <juce_audio_processors_headless/utilities/ARA/juce_ARA_utils.h>

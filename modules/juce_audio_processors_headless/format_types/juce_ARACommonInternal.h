@@ -32,15 +32,19 @@
   ==============================================================================
 */
 
+#pragma once
+
 #if (JUCE_PLUGINHOST_ARA && (JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_AU) && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX))
+
+#include <ARA_API/ARAInterface.h>
 
 namespace juce
 {
 
-static void dummyARAInterfaceAssert (ARA::ARAAssertCategory, const void*, const char*)
+static inline void dummyARAInterfaceAssert (ARA::ARAAssertCategory, const void*, const char*)
 {}
 
-static ARA::ARAInterfaceConfiguration createInterfaceConfig (const ARA::ARAFactory* araFactory)
+static inline ARA::ARAInterfaceConfiguration createInterfaceConfig (const ARA::ARAFactory* araFactory)
 {
     static auto* assertFunction = &dummyARAInterfaceAssert;
 
@@ -68,8 +72,8 @@ static ARA::ARAInterfaceConfiguration createInterfaceConfig (const ARA::ARAFacto
     On both platforms the onDelete function is used to release resources that ensure that the module
     providing the ARAFactory* remains loaded.
 */
-static std::shared_ptr<const ARA::ARAFactory> getOrCreateARAFactory (const ARA::ARAFactory* ptr,
-                                                                     std::function<void()> onDelete)
+static inline std::shared_ptr<const ARA::ARAFactory> getOrCreateARAFactory (const ARA::ARAFactory* ptr,
+                                                                            std::function<void()> onDelete)
 {
     JUCE_ASSERT_MESSAGE_THREAD
 

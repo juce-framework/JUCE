@@ -51,8 +51,8 @@
 #include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
 #include <juce_audio_plugin_client/detail/juce_LinuxMessageThread.h>
 
-#include <juce_audio_processors/utilities/juce_FlagCache.h>
-#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors_headless/utilities/juce_FlagCache.h>
+#include <juce_audio_processors_headless/format_types/juce_LegacyAudioParameter.h>
 
 #include "JuceLV2Defines.h"
 #include <juce_audio_processors/format_types/juce_LV2Common.h>

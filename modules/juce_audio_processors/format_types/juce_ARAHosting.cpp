@@ -34,8 +34,6 @@
 
 #if (JUCE_PLUGINHOST_ARA && (JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_AU) && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX))
 
-#include "juce_ARAHosting.h"
-
 #include <ARA_Library/Dispatch/ARAHostDispatch.cpp>
 
 namespace juce

@@ -32,6 +32,8 @@
   ==============================================================================
 */
 
+#include <juce_audio_processors_headless/format_types/juce_LegacyAudioParameter.h>
+
 namespace juce
 {
 

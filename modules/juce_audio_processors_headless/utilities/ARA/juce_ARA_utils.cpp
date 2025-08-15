@@ -55,7 +55,7 @@ JUCE_API void JUCE_CALLTYPE handleARAAssertion (const char* file, const int line
 #endif
 
 #if JucePlugin_Enable_ARA
-#include "juce_ARADocumentControllerCommon.cpp"
+#include "juce_ARADocumentControllerCommon.h"
 #include "juce_ARADocumentController.cpp"
 #include "juce_ARAModelObjects.cpp"
 #include "juce_ARAPlugInInstanceRoles.cpp"

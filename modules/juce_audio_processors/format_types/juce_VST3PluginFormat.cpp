@@ -37,7 +37,7 @@
 #include "juce_VST3Headers.h"
 #include "juce_VST3Utilities.h"
 #include "juce_VST3Common.h"
-#include "juce_ARACommon.h"
+#include <juce_audio_processors_headless/format_types/juce_ARACommon.h>
 
 namespace juce
 {

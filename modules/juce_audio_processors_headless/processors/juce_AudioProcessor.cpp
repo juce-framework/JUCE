@@ -883,6 +883,9 @@ void AudioProcessor::audioIOChanged (bool busNumberChanged, bool channelNumChang
 //==============================================================================
 void AudioProcessor::editorBeingDeleted (AudioProcessorEditor* const editor) noexcept
 {
+    // Don't free UI objects from non-UI threads!
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
     const ScopedLock sl (activeEditorLock);
 
     if (activeEditor == editor)
@@ -891,25 +894,32 @@ void AudioProcessor::editorBeingDeleted (AudioProcessorEditor* const editor) noe
 
 AudioProcessorEditor* AudioProcessor::getActiveEditor() const noexcept
 {
+    // Don't query UI objects from non-UI threads!
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
     const ScopedLock sl (activeEditorLock);
     return activeEditor;
 }
 
 AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
 {
+    // Don't create UI objects from non-UI threads!
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
     const ScopedLock sl (activeEditorLock);
 
     if (activeEditor != nullptr)
-        return activeEditor;
+    {
+        // There's already an active editor! Before calling createEditorIfNeeded(),
+        // you should check whether there's already an editor using getActiveEditor().
+        jassertfalse;
+        return nullptr;
+    }
 
     auto* ed = createEditor();
 
     if (ed != nullptr)
-    {
-        // you must give your editor comp a size before returning it..
-        jassert (ed->getWidth() > 0 && ed->getHeight() > 0);
         activeEditor = ed;
-    }
 
     // You must make your hasEditor() method return a consistent result!
     jassert (hasEditor() == (ed != nullptr));
