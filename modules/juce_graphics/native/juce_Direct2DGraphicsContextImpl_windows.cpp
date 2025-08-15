@@ -449,8 +449,7 @@ public:
     {
         noTransforms = 0,
         applyWorldTransform = 1,
-        applyInverseWorldTransform = 2,
-        applyFillTypeTransform = 4,
+        applyFillTypeTransform = 2,
         applyWorldAndFillTypeTransforms = applyFillTypeTransform | applyWorldTransform
     };
 
@@ -462,37 +461,29 @@ public:
         if (! fillType.isGradient() && ! fillType.isTiledImage())
             return currentBrush;
 
-        Point<float> translation{};
         AffineTransform transform{};
+
+        if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
+            transform = currentTransform.getTransform();
+
+        if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
+            transform = fillType.transform.followedBy (transform);
 
         if (fillType.isGradient())
         {
-            if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
-            {
-                if (currentTransform.isOnlyTranslated && fillType.transform.isOnlyTranslation())
-                    translation = currentTransform.offset.toFloat();
-                else
-                    transform = currentTransform.getTransform();
-            }
+            auto p1 = fillType.gradient->point1;
+            auto p2 = fillType.gradient->point2;
 
-            if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
+            if (transform.isOnlyTranslation())
             {
-                if (fillType.transform.isOnlyTranslation())
-                    translation += Point (fillType.transform.getTranslationX(), fillType.transform.getTranslationY());
-                else
-                    transform = fillType.transform.followedBy (transform);
+                Point<float> translation { transform.getTranslationX(), transform.getTranslationY() };
+                p1 += translation;
+                p2 += translation;
             }
-
-            if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
+            else
             {
-                if (currentTransform.isOnlyTranslated)
-                    translation -= currentTransform.offset.toFloat();
-                else
-                    transform = transform.followedBy (currentTransform.getTransform().inverted());
+                currentBrush->SetTransform (D2DUtilities::transformToMatrix (transform));
             }
-
-            const auto p1 = fillType.gradient->point1 + translation;
-            const auto p2 = fillType.gradient->point2 + translation;
 
             if (fillType.gradient->isRadial)
             {
@@ -507,19 +498,11 @@ public:
                 linearGradient->SetEndPoint ({ p2.x, p2.y });
             }
         }
-        else if (fillType.isTiledImage())
+        else
         {
-            if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
-                transform = currentTransform.getTransform();
-
-            if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
-                transform = fillType.transform.followedBy (transform);
-
-            if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
-                transform = transform.followedBy (currentTransform.getTransform().inverted());
+            currentBrush->SetTransform (D2DUtilities::transformToMatrix (transform));
         }
 
-        currentBrush->SetTransform (D2DUtilities::transformToMatrix (transform));
         currentBrush->SetOpacity (fillType.getOpacity());
 
         return currentBrush;
