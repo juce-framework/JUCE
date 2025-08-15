@@ -51,9 +51,7 @@
   license:            AGPLv3/Commercial
   minimumCppStandard: 17
 
-  dependencies:       juce_gui_extra, juce_audio_basics
-  OSXFrameworks:      CoreAudio CoreMIDI AudioToolbox
-  iOSFrameworks:      AudioToolbox
+  dependencies:       juce_gui_extra, juce_audio_processors_headless
 
  END_JUCE_MODULE_DECLARATION
 
@@ -63,9 +61,8 @@
 #pragma once
 #define JUCE_AUDIO_PROCESSORS_H_INCLUDED
 
-#include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_audio_processors_headless/juce_audio_processors_headless.h>
 #include <juce_gui_extra/juce_gui_extra.h>
-#include <juce_audio_basics/juce_audio_basics.h>
 
 //==============================================================================
 /** Config: JUCE_PLUGINHOST_VST

@@ -40,6 +40,7 @@ juce_add_modules(
     juce_audio_formats
     juce_audio_plugin_client
     juce_audio_processors
+    juce_audio_processors_headless
     juce_audio_utils
     juce_box2d
     juce_core
