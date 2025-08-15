@@ -480,7 +480,7 @@ public:
                 if (fillType.transform.isOnlyTranslation())
                     translation += Point (fillType.transform.getTranslationX(), fillType.transform.getTranslationY());
                 else
-                    transform = transform.followedBy (fillType.transform);
+                    transform = fillType.transform.followedBy (transform);
             }
 
             if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
@@ -513,7 +513,7 @@ public:
                 transform = currentTransform.getTransform();
 
             if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
-                transform = transform.followedBy (fillType.transform);
+                transform = fillType.transform.followedBy (transform);
 
             if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
                 transform = transform.followedBy (currentTransform.getTransform().inverted());
