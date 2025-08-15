@@ -84,7 +84,7 @@ public:
             return opt;
         }());
 
-        pluginFormatManager.addDefaultFormats();
+        addDefaultFormatsToManager (pluginFormatManager);
 
         if (auto savedPluginList = appProperties.getUserSettings()->getXmlValue ("pluginList"))
             pluginList.recreateFromXml (*savedPluginList);

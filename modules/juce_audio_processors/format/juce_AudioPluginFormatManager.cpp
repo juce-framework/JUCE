@@ -37,56 +37,27 @@
 namespace juce
 {
 
-AudioPluginFormatManager::AudioPluginFormatManager() {}
-AudioPluginFormatManager::~AudioPluginFormatManager() {}
-
 //==============================================================================
-void AudioPluginFormatManager::addDefaultFormats()
+void addDefaultFormatsToManager (AudioPluginFormatManager& manager)
 {
-   #if JUCE_DEBUG
-    // you should only call this method once!
-    for (auto* format [[maybe_unused]] : formats)
-    {
-       #if JUCE_INTERNAL_HAS_VST
-        jassert (dynamic_cast<VSTPluginFormat*> (format) == nullptr);
-       #endif
-
-       #if JUCE_INTERNAL_HAS_VST3
-        jassert (dynamic_cast<VST3PluginFormat*> (format) == nullptr);
-       #endif
-
-       #if JUCE_INTERNAL_HAS_AU
-        jassert (dynamic_cast<AudioUnitPluginFormat*> (format) == nullptr);
-       #endif
-
-       #if JUCE_INTERNAL_HAS_LADSPA
-        jassert (dynamic_cast<LADSPAPluginFormat*> (format) == nullptr);
-       #endif
-
-       #if JUCE_INTERNAL_HAS_LV2
-        jassert (dynamic_cast<LV2PluginFormat*> (format) == nullptr);
-       #endif
-    }
-   #endif
-
    #if JUCE_INTERNAL_HAS_AU
-    formats.add (new AudioUnitPluginFormat());
+    manager.addFormat (std::make_unique<AudioUnitPluginFormat>());
    #endif
 
    #if JUCE_INTERNAL_HAS_VST
-    formats.add (new VSTPluginFormat());
+    manager.addFormat (std::make_unique<VSTPluginFormat>());
    #endif
 
    #if JUCE_INTERNAL_HAS_VST3
-    formats.add (new VST3PluginFormat());
+    manager.addFormat (std::make_unique<VST3PluginFormat>());
    #endif
 
    #if JUCE_INTERNAL_HAS_LADSPA
-    formats.add (new LADSPAPluginFormat());
+    manager.addFormat (std::make_unique<LADSPAPluginFormat>());
    #endif
 
    #if JUCE_INTERNAL_HAS_LV2
-    formats.add (new LV2PluginFormat());
+    manager.addFormat (std::make_unique<LV2PluginFormat>());
    #endif
 }
 
@@ -100,9 +71,19 @@ Array<AudioPluginFormat*> AudioPluginFormatManager::getFormats() const
     return a;
 }
 
-void AudioPluginFormatManager::addFormat (AudioPluginFormat* format)
+void AudioPluginFormatManager::addFormat (std::unique_ptr<AudioPluginFormat> format)
 {
-    formats.add (format);
+    for (auto* existing : formats)
+    {
+        if (existing->getName() == format->getName())
+        {
+            // This format manager already contains a format with this name!
+            jassertfalse;
+            return;
+        }
+    }
+
+    formats.add (std::move (format));
 }
 
 std::unique_ptr<AudioPluginInstance> AudioPluginFormatManager::createPluginInstance (const PluginDescription& description,

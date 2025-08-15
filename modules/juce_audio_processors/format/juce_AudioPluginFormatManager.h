@@ -47,14 +47,14 @@ class JUCE_API  AudioPluginFormatManager
 {
 public:
     //==============================================================================
-    AudioPluginFormatManager();
-
-    /** Destructor. */
-    ~AudioPluginFormatManager();
+    AudioPluginFormatManager() = default;
 
     //==============================================================================
-    /** Adds the set of available standard formats, e.g. VST. */
-    void addDefaultFormats();
+    /** This function has been removed. To add default formats to the manager,
+        use one of the new functions addDefaultFormatsToManager() or
+        addHeadlessDefaultFormatsToManager();
+    */
+    void addDefaultFormats() = delete;
 
     //==============================================================================
     /** Returns the number of types of format that are available.
@@ -74,7 +74,13 @@ public:
     /** Adds a format to the list.
         The object passed in will be owned and deleted by the manager.
     */
-    void addFormat (AudioPluginFormat*);
+    [[deprecated ("Prefer the signature that accepts a unique_ptr")]]
+    void addFormat (AudioPluginFormat* f) { addFormat (rawToUniquePtr (f)); }
+
+    /** Adds a format to the list.
+        The object passed in will be owned and deleted by the manager.
+    */
+    void addFormat (std::unique_ptr<AudioPluginFormat>);
 
     //==============================================================================
     /** Tries to load the type for this description, by trying all the formats
@@ -147,5 +153,11 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormatManager)
 };
+
+/** Add all standard plugin formats to the AudioPluginFormatManager, *with* UI support.
+
+    This function replaces AudioPluginFormatManager::addDefaultFormats().
+*/
+void addDefaultFormatsToManager (AudioPluginFormatManager&);
 
 } // namespace juce

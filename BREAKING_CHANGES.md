@@ -4,6 +4,25 @@
 
 ## Change
 
+The function AudioPluginFormatManager::addDefaultFormats() has been removed.
+
+**Possible Issues**
+
+Code that calls this function will fail to compile.
+
+**Workaround**
+
+Use the new non-member function "addDefaultFormatsToManager()" instead.
+
+**Rationale**
+
+This change removes the dependency between the AudioPluginFormatManager and the
+concrete plugin format types, allowing the AudioPluginFormatManager to be built
+in isolation.
+
+
+## Change
+
 The signatures of OpenGLFrameBuffer::readPixels() and
 OpenGLFrameBuffer::writePixels() have changed, adding a new RowOrder parameter.
 
