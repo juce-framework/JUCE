@@ -1229,6 +1229,8 @@ void Component::addChildComponent (Component& child, int zOrder)
 
         child.internalHierarchyChanged();
         internalChildrenChanged();
+      
+        child.lookAndFeelChanged();
     }
 }
 
