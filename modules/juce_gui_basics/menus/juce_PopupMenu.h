@@ -544,6 +544,9 @@ public:
 
             This is useful to ensure that a particular item is shown when the menu
             contains too many items to display on a single screen.
+
+            The specified item will be positioned at the target screen area of the
+            menu if possible.
         */
         [[nodiscard]] Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
 
