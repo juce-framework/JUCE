@@ -1093,36 +1093,34 @@ struct MenuWindow final : public Component
 
     void ensureItemComponentIsVisible (const ItemComponent& itemComp, int wantedY)
     {
-        if (windowPos.getHeight() > PopupMenuSettings::scrollZone * 4)
+        if (windowPos.getHeight() <= PopupMenuSettings::scrollZone * 4
+            || (wantedY <= 0 && 0 <= itemComp.getY() && itemComp.getBottom() <= windowPos.getHeight()))
         {
-            auto currentY = itemComp.getY();
-
-            if (wantedY > 0 || currentY < 0 || itemComp.getBottom() > windowPos.getHeight())
-            {
-                if (wantedY < 0)
-                    wantedY = jlimit (PopupMenuSettings::scrollZone,
-                                      jmax (PopupMenuSettings::scrollZone,
-                                            windowPos.getHeight() - (PopupMenuSettings::scrollZone + itemComp.getHeight())),
-                                      currentY);
-
-                auto parentArea = getParentArea (windowPos.getPosition(), options.getParentComponent()) / scaleFactor;
-                auto deltaY = wantedY - currentY;
-
-                windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
-                                   jmin (windowPos.getHeight(), parentArea.getHeight()));
-
-                auto newY = jlimit (parentArea.getY(),
-                                    parentArea.getBottom() - windowPos.getHeight(),
-                                    windowPos.getY() + deltaY);
-
-                deltaY -= newY - windowPos.getY();
-
-                childYOffset -= deltaY;
-                windowPos.setPosition (windowPos.getX(), newY);
-
-                updateYPositions();
-            }
+            return;
         }
+
+        if (wantedY < 0)
+            wantedY = jlimit (PopupMenuSettings::scrollZone,
+                              jmax (PopupMenuSettings::scrollZone,
+                                    windowPos.getHeight() - (PopupMenuSettings::scrollZone + itemComp.getHeight())),
+                              itemComp.getY());
+
+        auto parentArea = getParentArea (windowPos.getPosition(), options.getParentComponent()) / scaleFactor;
+        auto deltaY = wantedY - itemComp.getY();
+
+        windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
+                           jmin (windowPos.getHeight(), parentArea.getHeight()));
+
+        auto newY = jlimit (parentArea.getY(),
+                            parentArea.getBottom() - windowPos.getHeight(),
+                            windowPos.getY() + deltaY);
+
+        deltaY -= newY - windowPos.getY();
+
+        childYOffset -= deltaY;
+        windowPos.setPosition (windowPos.getX(), newY);
+
+        updateYPositions();
     }
 
     void resizeToBestWindowPos()
