@@ -424,23 +424,23 @@ struct MenuWindow final : public Component
 
         if (auto visibleID = options.getItemThatMustBeVisible())
         {
-            for (auto* item : items)
+            const auto iter = std::find_if (items.begin(), items.end(), [&] (auto* item)
             {
-                if (item->item.itemID == visibleID)
+                return item->item.itemID == visibleID;
+            });
+
+            if (iter != items.end())
+            {
+                const auto targetPosition = [&]
                 {
-                    const auto targetPosition = [&]
-                    {
-                        if (auto* pc = options.getParentComponent())
-                            return pc->getLocalPoint (nullptr, targetArea.getTopLeft());
+                    if (auto* pc = options.getParentComponent())
+                        return pc->getLocalPoint (nullptr, targetArea.getTopLeft());
 
-                        return targetArea.getTopLeft();
-                    }();
+                    return targetArea.getTopLeft();
+                }();
 
-                    auto y = targetPosition.getY() - windowPos.getY();
-                    ensureItemComponentIsVisible (*item, isPositiveAndBelow (y, windowPos.getHeight()) ? y : -1);
-
-                    break;
-                }
+                auto y = targetPosition.getY() - windowPos.getY();
+                ensureItemComponentIsVisible (**iter, isPositiveAndBelow (y, windowPos.getHeight()) ? y : -1);
             }
         }
 
