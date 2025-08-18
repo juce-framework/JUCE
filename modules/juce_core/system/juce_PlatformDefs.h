@@ -85,14 +85,14 @@ namespace juce
   #define JUCE_BREAK_IN_DEBUGGER        { __debugbreak(); }
 #elif JUCE_INTEL && (JUCE_GCC || JUCE_CLANG || JUCE_MAC)
   #if JUCE_NO_INLINE_ASM
-   #define JUCE_BREAK_IN_DEBUGGER       { }
+    #define JUCE_BREAK_IN_DEBUGGER      { }
   #else
-   #define JUCE_BREAK_IN_DEBUGGER       { asm ("int $3"); }
+    #define JUCE_BREAK_IN_DEBUGGER      { asm ("int $3"); }
   #endif
-#elif JUCE_ARM && JUCE_MAC
-  #define JUCE_BREAK_IN_DEBUGGER        { __builtin_debugtrap(); }
 #elif JUCE_ANDROID
   #define JUCE_BREAK_IN_DEBUGGER        { __builtin_trap(); }
+#elif JUCE_ARM && JUCE_CLANG
+  #define JUCE_BREAK_IN_DEBUGGER        { __builtin_debugtrap(); }
 #else
   #define JUCE_BREAK_IN_DEBUGGER        { __asm int 3 }
 #endif
