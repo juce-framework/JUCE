@@ -1105,19 +1105,17 @@ struct MenuWindow final : public Component
                                     windowPos.getHeight() - (PopupMenuSettings::scrollZone + itemComp.getHeight())),
                               itemComp.getY());
 
-        auto parentArea = getParentArea (windowPos.getPosition(), options.getParentComponent()) / scaleFactor;
-        auto deltaY = wantedY - itemComp.getY();
+        const auto parentArea = getParentArea (windowPos.getPosition(), options.getParentComponent()) / scaleFactor;
+        const auto deltaY = windowPos.getY() + wantedY - itemComp.getY();
 
         windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
                            jmin (windowPos.getHeight(), parentArea.getHeight()));
 
-        auto newY = jlimit (parentArea.getY(),
-                            parentArea.getBottom() - windowPos.getHeight(),
-                            windowPos.getY() + deltaY);
+        const auto newY = jlimit (parentArea.getY(),
+                                  parentArea.getBottom() - windowPos.getHeight(),
+                                  deltaY);
 
-        deltaY -= newY - windowPos.getY();
-
-        childYOffset -= deltaY;
+        childYOffset -= (deltaY - newY);
         windowPos.setPosition (windowPos.getX(), newY);
 
         updateYPositions();
