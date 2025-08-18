@@ -431,15 +431,15 @@ struct MenuWindow final : public Component
 
             if (iter != items.end())
             {
-                const auto targetPosition = [&]
+                const auto targetPosition = std::invoke ([&]
                 {
                     if (auto* pc = options.getParentComponent())
                         return pc->getLocalPoint (nullptr, targetArea.getTopLeft());
 
                     return targetArea.getTopLeft();
-                }();
+                });
 
-                auto y = targetPosition.getY() - windowPos.getY();
+                const auto y = targetPosition.getY() - windowPos.getY();
                 ensureItemComponentIsVisible (**iter, isPositiveAndBelow (y, windowPos.getHeight()) ? y : -1);
             }
         }
@@ -1093,20 +1093,40 @@ struct MenuWindow final : public Component
 
     void ensureItemComponentIsVisible (const ItemComponent& itemComp, int wantedY)
     {
-        if (windowPos.getHeight() <= PopupMenuSettings::scrollZone * 4
-            || (wantedY <= 0 && 0 <= itemComp.getY() && itemComp.getBottom() <= windowPos.getHeight()))
+        const auto parentArea = getParentArea (windowPos.getPosition(), options.getParentComponent()) / scaleFactor;
+
+        if (const auto posAndOffset = computeInitialPosAndOffset (windowPos, parentArea, itemComp.getBounds(), childYOffset, wantedY))
         {
-            return;
+            std::tie (windowPos, childYOffset) = std::tie (posAndOffset->windowPos, posAndOffset->childYOffset);
+            updateYPositions();
+        }
+    }
+
+    struct PosAndOffset
+    {
+        Rectangle<int> windowPos;
+        int childYOffset = 0;
+    };
+
+    static std::optional<PosAndOffset> computeInitialPosAndOffset (Rectangle<int> windowPos,
+                                                                   const Rectangle<int>& parentArea,
+                                                                   const Rectangle<int>& itemCompBounds,
+                                                                   int childYOffset,
+                                                                   int wantedY)
+    {
+        if (windowPos.getHeight() <= PopupMenuSettings::scrollZone * 4
+            || (wantedY <= 0 && 0 <= itemCompBounds.getY() && itemCompBounds.getBottom() <= windowPos.getHeight()))
+        {
+            return {};
         }
 
         if (wantedY < 0)
             wantedY = jlimit (PopupMenuSettings::scrollZone,
                               jmax (PopupMenuSettings::scrollZone,
-                                    windowPos.getHeight() - (PopupMenuSettings::scrollZone + itemComp.getHeight())),
-                              itemComp.getY());
+                                    windowPos.getHeight() - (PopupMenuSettings::scrollZone + itemCompBounds.getHeight())),
+                              itemCompBounds.getY());
 
-        const auto parentArea = getParentArea (windowPos.getPosition(), options.getParentComponent()) / scaleFactor;
-        const auto deltaY = windowPos.getY() + wantedY - itemComp.getY();
+        const auto deltaY = windowPos.getY() + wantedY - itemCompBounds.getY();
 
         windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
                            jmin (windowPos.getHeight(), parentArea.getHeight()));
@@ -1118,7 +1138,7 @@ struct MenuWindow final : public Component
         childYOffset -= (deltaY - newY);
         windowPos.setPosition (windowPos.getX(), newY);
 
-        updateYPositions();
+        return PosAndOffset { windowPos, childYOffset };
     }
 
     void resizeToBestWindowPos()
