@@ -469,7 +469,7 @@ public:
         {
             if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
             {
-                if (currentTransform.isOnlyTranslated)
+                if (currentTransform.isOnlyTranslated && fillType.transform.isOnlyTranslation())
                     translation = currentTransform.offset.toFloat();
                 else
                     transform = currentTransform.getTransform();

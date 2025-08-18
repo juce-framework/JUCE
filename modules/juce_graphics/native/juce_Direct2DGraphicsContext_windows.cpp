@@ -1380,6 +1380,12 @@ public:
 
             compareImages (targetNative, targetSoftware, 1, pixelsToIgnore);
         }
+
+        beginTest ("Gradient fill transform should compose with world transform correctly");
+        {
+            testGradientFillTransform (1.0f);
+            testGradientFillTransform (1.5f);
+        }
     }
 
     static Image createEdgeMask (int sourceWidth,
@@ -1432,6 +1438,79 @@ public:
 
         const auto averageError = (double) accumulatedError / (double) numSamples;
         expect (std::abs (averageError) < 1.0 && maxAbsError < 10);
+    }
+
+    void testGradientFillTransform (float scale)
+    {
+        constexpr int size = 500;
+        constexpr int circleSize = 100;
+        constexpr int brushTranslation = 20;
+
+        Image image { Image::RGB,
+                      roundToInt (size * scale),
+                      roundToInt (size * scale),
+                      true };
+
+        {
+            for (int i = 0; i < size / circleSize; ++i)
+            {
+                Graphics g { image };
+
+                g.addTransform (AffineTransform::scale (scale));
+                g.addTransform (AffineTransform::translation ((float) i * circleSize, (float) i * circleSize));
+
+                const auto fillCol1 { Colours::red };
+                const auto fillCol2 { Colours::green };
+                const auto centreLoc = circleSize / 2.0f;
+
+                FillType innerGlowGrad = ColourGradient { fillCol1,
+                                                          { centreLoc, centreLoc },
+                                                          fillCol2,
+                                                          { centreLoc, 0.0f },
+                                                          true };
+
+                innerGlowGrad.gradient->addColour (0.19, fillCol1);
+
+                innerGlowGrad.transform = AffineTransform::scale (1.1f, 0.9f, centreLoc, centreLoc)
+                                              .followedBy (AffineTransform::translation (brushTranslation,
+                                                                                         brushTranslation));
+
+                g.setFillType (innerGlowGrad);
+                g.fillEllipse (0, 0, (float) circleSize, (float) circleSize);
+            }
+        }
+
+        for (int i = 0; i < size / circleSize; ++i)
+        {
+            const auto getScaled = [scale] (Point<int> p)
+            {
+                return p.toFloat().transformedBy (AffineTransform::scale (scale)).roundToInt();
+            };
+
+            const auto approximatelyEqual = [] (const Colour& a, const Colour& b)
+            {
+                return    std::abs (a.getRed() - b.getRed()) < 2
+                       && std::abs (a.getGreen() - b.getGreen()) < 2
+                       && std::abs (a.getBlue() - b.getBlue()) < 2
+                       && std::abs (a.getAlpha() - b.getAlpha()) < 2;
+            };
+
+            const Point<int> centre { circleSize / 2, circleSize / 2 };
+            const Point<int> brushOffset { brushTranslation, brushTranslation };
+
+            const auto redPosition = getScaled (centre + brushOffset);
+            expect (image.getPixelAt (redPosition.getX(), redPosition.getY()) == Colours::red);
+
+            const auto mostlyRedPosition = getScaled (centre);
+            expect (approximatelyEqual (image.getPixelAt (mostlyRedPosition.getX(), mostlyRedPosition.getY()),
+                                        Colour { 138, 59, 0 }));
+
+            const auto greenPosition = getScaled (centre.withY (2));
+            expect (image.getPixelAt (greenPosition.getX(), greenPosition.getY()) == Colours::green);
+
+            const auto blackPosition = getScaled ({ circleSize - 2, 2 });
+            expect (image.getPixelAt (blackPosition.getX(), blackPosition.getY()) == Colours::black);
+        }
     }
 };
 
