@@ -32,6 +32,8 @@
   ==============================================================================
 */
 
+#include <juce_audio_processors_headless/format/juce_PluginFormatDefs.h>
+
 namespace juce
 {
 
@@ -41,79 +43,49 @@ AudioPluginFormatManager::~AudioPluginFormatManager() {}
 //==============================================================================
 void AudioPluginFormatManager::addDefaultFormats()
 {
-   #if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD || JUCE_IOS)
-    #define HAS_VST 1
-   #else
-    #define HAS_VST 0
-   #endif
-
-   #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
-    #define HAS_VST3 1
-   #else
-    #define HAS_VST3 0
-   #endif
-
-   #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
-    #define HAS_AU 1
-   #else
-    #define HAS_AU 0
-   #endif
-
-   #if JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)
-    #define HAS_LADSPA 1
-   #else
-    #define HAS_LADSPA 0
-   #endif
-
-   #if JUCE_PLUGINHOST_LV2 && (JUCE_MAC || JUCE_LINUX || JUCE_BSD || JUCE_WINDOWS)
-    #define HAS_LV2 1
-   #else
-    #define HAS_LV2 0
-   #endif
-
    #if JUCE_DEBUG
     // you should only call this method once!
     for (auto* format [[maybe_unused]] : formats)
     {
-       #if HAS_VST
+       #if JUCE_INTERNAL_HAS_VST
         jassert (dynamic_cast<VSTPluginFormat*> (format) == nullptr);
        #endif
 
-       #if HAS_VST3
+       #if JUCE_INTERNAL_HAS_VST3
         jassert (dynamic_cast<VST3PluginFormat*> (format) == nullptr);
        #endif
 
-       #if HAS_AU
+       #if JUCE_INTERNAL_HAS_AU
         jassert (dynamic_cast<AudioUnitPluginFormat*> (format) == nullptr);
        #endif
 
-       #if HAS_LADSPA
+       #if JUCE_INTERNAL_HAS_LADSPA
         jassert (dynamic_cast<LADSPAPluginFormat*> (format) == nullptr);
        #endif
 
-       #if HAS_LV2
+       #if JUCE_INTERNAL_HAS_LV2
         jassert (dynamic_cast<LV2PluginFormat*> (format) == nullptr);
        #endif
     }
    #endif
 
-   #if HAS_AU
+   #if JUCE_INTERNAL_HAS_AU
     formats.add (new AudioUnitPluginFormat());
    #endif
 
-   #if HAS_VST
+   #if JUCE_INTERNAL_HAS_VST
     formats.add (new VSTPluginFormat());
    #endif
 
-   #if HAS_VST3
+   #if JUCE_INTERNAL_HAS_VST3
     formats.add (new VST3PluginFormat());
    #endif
 
-   #if HAS_LADSPA
+   #if JUCE_INTERNAL_HAS_LADSPA
     formats.add (new LADSPAPluginFormat());
    #endif
 
-   #if HAS_LV2
+   #if JUCE_INTERNAL_HAS_LV2
     formats.add (new LV2PluginFormat());
    #endif
 }
