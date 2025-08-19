@@ -95,3 +95,4 @@
 #include <juce_audio_processors_headless/format_types/juce_VST3PluginFormatHeadless.h>
 #include <juce_audio_processors_headless/format_types/juce_VSTPluginFormatHeadless.h>
 #include <juce_audio_processors_headless/format_types/juce_ARAHosting.h>
+#include <juce_audio_processors_headless/format/juce_AudioPluginFormatManager.h>

@@ -166,7 +166,6 @@ private:
 
 } // namespace juce
 
-#include "format/juce_AudioPluginFormatManager.cpp"
 #include "format/juce_AudioPluginFormatManagerHelpers.cpp"
 #include "processors/juce_AudioProcessorEditor.cpp"
 #include "processors/juce_GenericAudioProcessorEditor.cpp"
