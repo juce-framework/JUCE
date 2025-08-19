@@ -35,6 +35,7 @@
 #if JUCE_PLUGINHOST_VST
 
 #include <juce_audio_processors_headless/format_types/juce_VSTPluginFormatImpl.h>
+#include <juce_audio_processors/utilities/juce_NSViewComponentWithParent.h>
 
 namespace juce
 {

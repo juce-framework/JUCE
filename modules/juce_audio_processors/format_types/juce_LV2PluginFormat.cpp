@@ -36,6 +36,7 @@
 
 #include <juce_audio_processors_headless/format_types/juce_LV2PluginFormatImpl.h>
 #include <juce_gui_extra/native/juce_NSViewFrameWatcher_mac.h>
+#include <juce_audio_processors/utilities/juce_NSViewComponentWithParent.h>
 
 namespace juce
 {
