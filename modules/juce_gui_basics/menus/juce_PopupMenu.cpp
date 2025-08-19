@@ -1095,7 +1095,7 @@ struct MenuWindow final : public Component
     {
         const auto parentArea = getParentArea (windowPos.getPosition(), options.getParentComponent()) / scaleFactor;
 
-        if (const auto posAndOffset = computeInitialPosAndOffset (windowPos, parentArea, itemComp.getBounds(), childYOffset, wantedY))
+        if (const auto posAndOffset = computeInitialPosAndOffset (windowPos, parentArea, itemComp.getBounds(), wantedY))
         {
             std::tie (windowPos, childYOffset) = std::tie (posAndOffset->windowPos, posAndOffset->childYOffset);
             updateYPositions();
@@ -1111,7 +1111,6 @@ struct MenuWindow final : public Component
     static std::optional<PosAndOffset> computeInitialPosAndOffset (Rectangle<int> windowPos,
                                                                    const Rectangle<int>& parentArea,
                                                                    const Rectangle<int>& itemCompBounds,
-                                                                   int childYOffset,
                                                                    int wantedY)
     {
         if (windowPos.getHeight() <= PopupMenuSettings::scrollZone * 4
@@ -1135,10 +1134,9 @@ struct MenuWindow final : public Component
                                   parentArea.getBottom() - windowPos.getHeight(),
                                   deltaY);
 
-        childYOffset -= (deltaY - newY);
         windowPos.setPosition (windowPos.getX(), newY);
 
-        return PosAndOffset { windowPos, childYOffset };
+        return PosAndOffset { windowPos, newY - deltaY };
     }
 
     void resizeToBestWindowPos()
