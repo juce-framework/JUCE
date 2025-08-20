@@ -55,6 +55,7 @@ namespace jpeglibNamespace
                                           "-Wregister",
                                           "-Wredundant-decls")
 
+    #define DONT_USE_EXTERN_C
     #include "jpglib/jaricom.c"
     #include "jpglib/jcapimin.c"
     #include "jpglib/jcapistd.c"
