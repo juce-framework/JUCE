@@ -41,6 +41,9 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+
 #include "juce_audio_processors_headless.h"
 
 #include <juce_audio_processors_headless/processors/juce_AudioProcessorListener.cpp>
@@ -61,3 +64,4 @@
 #include <juce_audio_processors_headless/utilities/juce_AudioParameterBool.cpp>
 #include <juce_audio_processors_headless/utilities/juce_AudioParameterChoice.cpp>
 #include <juce_audio_processors_headless/utilities/ARA/juce_ARA_utils.cpp>
+#include <juce_audio_processors_headless/format_types/juce_AudioUnitPluginFormatHeadless.mm>

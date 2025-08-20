@@ -89,3 +89,4 @@
 #include <juce_audio_processors_headless/utilities/juce_AudioParameterChoice.h>
 #include <juce_audio_processors_headless/utilities/ARA/juce_ARADebug.h>
 #include <juce_audio_processors_headless/utilities/ARA/juce_ARA_utils.h>
+#include <juce_audio_processors_headless/format_types/juce_AudioUnitPluginFormatHeadless.h>
