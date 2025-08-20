@@ -397,8 +397,9 @@ void ProjectExporter::addExtraIncludePathsIfPluginOrHost()
             addToExtraSearchPaths (getInternalVST3SDKPath(), 0);
     }
 
-    const auto lv2BasePath = getModuleFolderRelativeToProject ("juce_audio_processors").getChildFile ("format_types")
-                                                                                       .getChildFile ("LV2_SDK");
+    const auto lv2BasePath = getModuleFolderRelativeToProject ("juce_audio_processors_headless")
+                                .getChildFile ("format_types")
+                                .getChildFile ("LV2_SDK");
 
     if ((shouldBuildTargetType (Target::LV2PlugIn) && project.shouldBuildLV2()) || project.isLV2PluginHost())
     {

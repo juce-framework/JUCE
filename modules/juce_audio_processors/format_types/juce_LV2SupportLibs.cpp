@@ -108,7 +108,7 @@ extern "C"
 
 #pragma push_macro ("nil")
 #undef nil
-#include "LV2_SDK/sratom/src/sratom.c"
+#include "sratom/src/sratom.c"
 #pragma pop_macro ("nil")
 
 } // extern "C"
