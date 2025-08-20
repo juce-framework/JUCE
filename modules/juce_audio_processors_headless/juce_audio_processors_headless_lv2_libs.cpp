@@ -40,5 +40,5 @@
  #include <juce_core/system/juce_CompilerWarnings.h>
  #include <juce_core/system/juce_TargetPlatform.h>
 
- #include "format_types/juce_LV2SupportLibs.cpp"
+ #include <juce_audio_processors_headless/format_types/juce_LV2SupportLibs.cpp>
 #endif

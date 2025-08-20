@@ -55,7 +55,7 @@
 #include <juce_audio_processors_headless/format_types/juce_LegacyAudioParameter.h>
 
 #include "JuceLV2Defines.h"
-#include <juce_audio_processors/format_types/juce_LV2Common.h>
+#include <juce_audio_processors_headless/format_types/juce_LV2Common.h>
 
 #include <fstream>
 

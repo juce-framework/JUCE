@@ -56,7 +56,7 @@ struct Bundle
     const char* name;
     std::vector<BundleResource> contents;
 
-    static std::vector<Bundle> getAllBundles();
+    static inline std::vector<Bundle> getAllBundles();
 };
 
 } // namespace juce::lv2
