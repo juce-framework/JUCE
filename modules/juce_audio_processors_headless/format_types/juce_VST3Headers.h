@@ -137,6 +137,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <public.sdk/source/vst/utility/vst2persistence.h>
  #include <public.sdk/source/vst/vsteditcontroller.h>
  #include <public.sdk/source/vst/vstpresetfile.h>
+ #include <public.sdk/source/vst/moduleinfo/moduleinfoparser.h>
 
  #include <juce_audio_processors_headless/format_types/pslextensions/ipslviewembedding.h>
 #else

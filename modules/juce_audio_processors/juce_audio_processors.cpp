@@ -46,17 +46,17 @@
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 #define JUCE_GUI_BASICS_INCLUDE_SCOPED_THREAD_DPI_AWARENESS_SETTER 1
 #define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
+#define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
 
 #include "juce_audio_processors.h"
 #include <juce_gui_extra/juce_gui_extra.h>
 
 //==============================================================================
-#if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3) && (JUCE_LINUX || JUCE_BSD)
+#if JUCE_PLUGINHOST_VST && (JUCE_LINUX || JUCE_BSD)
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wvariadic-macros")
  #include <X11/Xlib.h>
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #include <X11/Xutil.h>
- #include <sys/utsname.h>
  #undef KeyPress
 #endif
 

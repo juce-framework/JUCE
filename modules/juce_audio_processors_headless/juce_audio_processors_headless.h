@@ -92,3 +92,4 @@
 #include <juce_audio_processors_headless/format_types/juce_AudioUnitPluginFormatHeadless.h>
 #include <juce_audio_processors_headless/format_types/juce_LADSPAPluginFormatHeadless.h>
 #include <juce_audio_processors_headless/format_types/juce_LV2PluginFormatHeadless.h>
+#include <juce_audio_processors_headless/format_types/juce_VST3PluginFormatHeadless.h>
