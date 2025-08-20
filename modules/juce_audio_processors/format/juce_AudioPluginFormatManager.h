@@ -154,6 +154,18 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormatManager)
 };
 
+/** Add all standard plugin formats to the AudioPluginFormatManager, *without* UI support.
+
+    If you use one of these formats to load a plugin, the resulting plugin will always return
+    false from hasEditor(), and return nullptr from createEditor().
+
+    This function is intended for use in commandline projects that never need to load plugin UIs.
+    In such cases, build times can be improved by omitting UI code from the project.
+
+    This is a cut-down version of the old AudioPluginFormatManager::addDefaultFormats().
+*/
+void addHeadlessDefaultFormatsToManager (AudioPluginFormatManager&);
+
 /** Add all standard plugin formats to the AudioPluginFormatManager, *with* UI support.
 
     This function replaces AudioPluginFormatManager::addDefaultFormats().

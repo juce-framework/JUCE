@@ -38,6 +38,29 @@ namespace juce
 {
 
 //==============================================================================
+void addHeadlessDefaultFormatsToManager ([[maybe_unused]] AudioPluginFormatManager& manager)
+{
+   #if JUCE_INTERNAL_HAS_AU
+    manager.addFormat (std::make_unique<AudioUnitPluginFormatHeadless>());
+   #endif
+
+   #if JUCE_INTERNAL_HAS_VST
+    manager.addFormat (std::make_unique<VSTPluginFormatHeadless>());
+   #endif
+
+   #if JUCE_INTERNAL_HAS_VST3
+    manager.addFormat (std::make_unique<VST3PluginFormatHeadless>());
+   #endif
+
+   #if JUCE_INTERNAL_HAS_LADSPA
+    manager.addFormat (std::make_unique<LADSPAPluginFormatHeadless>());
+   #endif
+
+   #if JUCE_INTERNAL_HAS_LV2
+    manager.addFormat (std::make_unique<LV2PluginFormatHeadless>());
+   #endif
+}
+
 void addDefaultFormatsToManager ([[maybe_unused]] AudioPluginFormatManager& manager)
 {
    #if JUCE_INTERNAL_HAS_AU
