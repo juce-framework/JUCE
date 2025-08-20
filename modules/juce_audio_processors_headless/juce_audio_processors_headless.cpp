@@ -68,3 +68,4 @@
 #include <juce_audio_processors_headless/format_types/juce_LADSPAPluginFormatHeadless.cpp>
 #include <juce_audio_processors_headless/format_types/juce_LV2PluginFormatHeadless.cpp>
 #include <juce_audio_processors_headless/format_types/juce_VST3PluginFormatHeadless.cpp>
+#include <juce_audio_processors_headless/format_types/juce_ARAHosting.cpp>

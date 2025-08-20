@@ -148,7 +148,6 @@
 #include "format_types/juce_VST3PluginFormat.h"
 #include "format_types/juce_VSTMidiEventList.h"
 #include "format_types/juce_VSTPluginFormat.h"
-#include "format_types/juce_ARAHosting.h"
 #include "scanning/juce_PluginDirectoryScanner.h"
 #include "scanning/juce_PluginListComponent.h"
 #include "utilities/juce_ParameterAttachments.h"
