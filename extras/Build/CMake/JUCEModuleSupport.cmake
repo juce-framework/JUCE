@@ -530,6 +530,16 @@ function(juce_add_module module_path)
     endif()
 
     if(${module_name} STREQUAL "juce_audio_processors_headless")
+        add_library(juce_vst3_headers INTERFACE)
+
+        target_compile_definitions(juce_vst3_headers INTERFACE "$<$<TARGET_EXISTS:juce_vst3_sdk>:JUCE_CUSTOM_VST3_SDK=1>")
+
+        target_include_directories(juce_vst3_headers INTERFACE
+            "$<$<TARGET_EXISTS:juce_vst3_sdk>:$<TARGET_PROPERTY:juce_vst3_sdk,INTERFACE_INCLUDE_DIRECTORIES>>"
+            "$<$<NOT:$<TARGET_EXISTS:juce_vst3_sdk>>:${base_path}/juce_audio_processors_headless/format_types/VST3_SDK>")
+
+        target_link_libraries(juce_audio_processors_headless INTERFACE juce_vst3_headers)
+
         add_library(juce_lilv_headers INTERFACE)
         set(lv2_base_path "${base_path}/juce_audio_processors_headless/format_types/LV2_SDK")
         target_include_directories(juce_lilv_headers INTERFACE
@@ -551,24 +561,9 @@ function(juce_add_module module_path)
         target_link_libraries(juce_audio_processors_headless INTERFACE juce_ara_headers)
 
         if(JUCE_ARG_ALIAS_NAMESPACE)
+            add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_vst3_headers ALIAS juce_vst3_headers)
             add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_lilv_headers ALIAS juce_lilv_headers)
             add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_ara_headers ALIAS juce_ara_headers)
-        endif()
-    endif()
-
-    if(${module_name} STREQUAL "juce_audio_processors")
-        add_library(juce_vst3_headers INTERFACE)
-
-        target_compile_definitions(juce_vst3_headers INTERFACE "$<$<TARGET_EXISTS:juce_vst3_sdk>:JUCE_CUSTOM_VST3_SDK=1>")
-
-        target_include_directories(juce_vst3_headers INTERFACE
-            "$<$<TARGET_EXISTS:juce_vst3_sdk>:$<TARGET_PROPERTY:juce_vst3_sdk,INTERFACE_INCLUDE_DIRECTORIES>>"
-            "$<$<NOT:$<TARGET_EXISTS:juce_vst3_sdk>>:${base_path}/juce_audio_processors/format_types/VST3_SDK>")
-
-        target_link_libraries(juce_audio_processors INTERFACE juce_vst3_headers)
-
-        if(JUCE_ARG_ALIAS_NAMESPACE)
-            add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_vst3_headers ALIAS juce_vst3_headers)
         endif()
     endif()
 

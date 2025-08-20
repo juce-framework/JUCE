@@ -451,7 +451,7 @@ void ProjectExporter::addLegacyVSTFolderToPathIfSpecified()
 
 build_tools::RelativePath ProjectExporter::getInternalVST3SDKPath()
 {
-    return getModuleFolderRelativeToProject ("juce_audio_processors")
+    return getModuleFolderRelativeToProject ("juce_audio_processors_headless")
                            .getChildFile ("format_types")
                            .getChildFile ("VST3_SDK");
 }

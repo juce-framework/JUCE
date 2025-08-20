@@ -138,7 +138,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <public.sdk/source/vst/vsteditcontroller.h>
  #include <public.sdk/source/vst/vstpresetfile.h>
 
- #include "pslextensions/ipslviewembedding.h"
+ #include <juce_audio_processors_headless/format_types/pslextensions/ipslviewembedding.h>
 #else
  // needed for VST_VERSION
  #include <pluginterfaces/vst/vsttypes.h>
@@ -210,7 +210,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
   #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>
  #endif
 
- #include "pslextensions/ipslviewembedding.h"
+ #include <juce_audio_processors_headless/format_types/pslextensions/ipslviewembedding.h>
 
 //==============================================================================
 namespace Steinberg

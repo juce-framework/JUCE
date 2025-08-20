@@ -83,16 +83,16 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6387 6031)
  #define NOMINMAX
 #endif
 
-#include <juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/coreiids.cpp>
-#include <juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/funknown.cpp>
-#include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/commonstringconvert.cpp>
-#include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/memorystream.cpp>
-#include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/readfile.cpp>
-#include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/hosting/module.cpp>
-#include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/moduleinfo/moduleinfocreator.cpp>
-#include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/moduleinfo/moduleinfoparser.cpp>
-#include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/utility/stringconvert.cpp>
-#include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/vstinitiids.cpp>
+#include <juce_audio_processors_headless/format_types/VST3_SDK/pluginterfaces/base/coreiids.cpp>
+#include <juce_audio_processors_headless/format_types/VST3_SDK/pluginterfaces/base/funknown.cpp>
+#include <juce_audio_processors_headless/format_types/VST3_SDK/public.sdk/source/common/commonstringconvert.cpp>
+#include <juce_audio_processors_headless/format_types/VST3_SDK/public.sdk/source/common/memorystream.cpp>
+#include <juce_audio_processors_headless/format_types/VST3_SDK/public.sdk/source/common/readfile.cpp>
+#include <juce_audio_processors_headless/format_types/VST3_SDK/public.sdk/source/vst/hosting/module.cpp>
+#include <juce_audio_processors_headless/format_types/VST3_SDK/public.sdk/source/vst/moduleinfo/moduleinfocreator.cpp>
+#include <juce_audio_processors_headless/format_types/VST3_SDK/public.sdk/source/vst/moduleinfo/moduleinfoparser.cpp>
+#include <juce_audio_processors_headless/format_types/VST3_SDK/public.sdk/source/vst/utility/stringconvert.cpp>
+#include <juce_audio_processors_headless/format_types/VST3_SDK/public.sdk/source/vst/vstinitiids.cpp>
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
