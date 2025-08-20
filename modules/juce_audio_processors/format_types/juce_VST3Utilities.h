@@ -166,8 +166,19 @@ class VSTComSmartPtr
 {
 public:
     VSTComSmartPtr() = default;
-    VSTComSmartPtr (const VSTComSmartPtr& other) noexcept : source (other.source)            { if (source != nullptr) source->addRef(); }
-    ~VSTComSmartPtr()                                                                        { if (source != nullptr) source->release(); }
+
+    ~VSTComSmartPtr()
+    {
+        if (source != nullptr)
+            source->release();
+    }
+
+    VSTComSmartPtr (const VSTComSmartPtr& other) noexcept
+        : VSTComSmartPtr (other.get(), true) {}
+
+    template <typename Other, std::enable_if_t<! std::is_same_v<Other, ObjectType>, int> = 0>
+    VSTComSmartPtr (const VSTComSmartPtr<Other>& other) noexcept
+        : VSTComSmartPtr (other.get(), true) {}
 
     explicit operator bool() const noexcept           { return operator!= (nullptr); }
     ObjectType* get() const noexcept                  { return source; }
@@ -179,6 +190,12 @@ public:
         auto p = other;
         std::swap (p.source, source);
         return *this;
+    }
+
+    template <typename Other, std::enable_if_t<! std::is_same_v<Other, ObjectType>, int> = 0>
+    VSTComSmartPtr& operator= (const VSTComSmartPtr<Other>& other)
+    {
+        return operator= (VSTComSmartPtr { other });
     }
 
     VSTComSmartPtr& operator= (std::nullptr_t)
@@ -215,7 +232,13 @@ public:
     }
 
 private:
-    explicit VSTComSmartPtr (ObjectType* object, bool autoAddRef) noexcept  : source (object)  { if (source != nullptr && autoAddRef) source->addRef(); }
+    VSTComSmartPtr (ObjectType* object, bool autoAddRef) noexcept
+        : source (object)
+    {
+        if (source != nullptr && autoAddRef)
+            source->addRef();
+    }
+
     ObjectType* source = nullptr;
 };
 
