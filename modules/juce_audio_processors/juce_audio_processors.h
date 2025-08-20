@@ -146,7 +146,6 @@
 #include "format_types/juce_LADSPAPluginFormat.h"
 #include "format_types/juce_LV2PluginFormat.h"
 #include "format_types/juce_VST3PluginFormat.h"
-#include "format_types/juce_VSTMidiEventList.h"
 #include "format_types/juce_VSTPluginFormat.h"
 #include "scanning/juce_PluginDirectoryScanner.h"
 #include "scanning/juce_PluginListComponent.h"
