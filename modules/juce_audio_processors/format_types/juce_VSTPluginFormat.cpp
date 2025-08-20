@@ -34,6 +34,8 @@
 
 #if JUCE_PLUGINHOST_VST
 
+#include <juce_audio_processors_headless/utilities/juce_CommonProcessorUtilities.h>
+
 //==============================================================================
 #undef PRAGMA_ALIGN_SUPPORTED
 

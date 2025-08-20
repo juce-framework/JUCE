@@ -72,20 +72,6 @@
 namespace juce
 {
 
-#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD))
-
-static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
-                                 const PluginDescription& desc)
-{
-    for (auto* p : list)
-        if (p->isDuplicateOf (desc))
-            return true;
-
-    return false;
-}
-
-#endif
-
 #if JUCE_MAC
 
 //==============================================================================

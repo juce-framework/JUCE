@@ -34,6 +34,8 @@
 
 #if JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)
 
+#include <juce_audio_processors_headless/utilities/juce_CommonProcessorUtilities.h>
+
 #include <ladspa.h>
 
 namespace juce
