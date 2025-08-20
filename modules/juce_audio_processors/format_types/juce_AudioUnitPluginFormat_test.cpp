@@ -32,7 +32,7 @@
   ==============================================================================
 */
 
-#include "juce_AU_Shared.h"
+#include <juce_audio_processors_headless/format_types/juce_AU_Shared.h>
 
 namespace juce
 {

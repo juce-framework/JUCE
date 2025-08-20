@@ -74,7 +74,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
 #include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
 #include <juce_audio_processors_headless/format_types/juce_LegacyAudioParameter.h>
-#include <juce_audio_processors/format_types/juce_AU_Shared.h>
+#include <juce_audio_processors_headless/format_types/juce_AU_Shared.h>
 #include <juce_gui_basics/detail/juce_ComponentPeerHelpers.h>
 
 #if JucePlugin_Enable_ARA

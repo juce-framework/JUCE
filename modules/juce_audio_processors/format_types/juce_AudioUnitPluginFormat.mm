@@ -51,7 +51,7 @@
 
 #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
 #include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
-#include <juce_audio_processors/format_types/juce_AU_Shared.h>
+#include <juce_audio_processors_headless/format_types/juce_AU_Shared.h>
 #include <juce_audio_processors_headless/format_types/juce_ARACommonInternal.h>
 
 namespace juce

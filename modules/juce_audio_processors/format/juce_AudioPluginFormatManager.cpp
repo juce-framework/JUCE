@@ -38,7 +38,7 @@ namespace juce
 {
 
 //==============================================================================
-void addDefaultFormatsToManager (AudioPluginFormatManager& manager)
+void addDefaultFormatsToManager ([[maybe_unused]] AudioPluginFormatManager& manager)
 {
    #if JUCE_INTERNAL_HAS_AU
     manager.addFormat (std::make_unique<AudioUnitPluginFormat>());
