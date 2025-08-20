@@ -57,17 +57,6 @@
 namespace juce
 {
 
-// Change this to disable logging of various activities
-#ifndef AU_LOGGING
- #define AU_LOGGING 1
-#endif
-
-#if AU_LOGGING
- #define JUCE_AU_LOG(a) Logger::writeToLog(a);
-#else
- #define JUCE_AU_LOG(a)
-#endif
-
 namespace AudioUnitFormatHelpers
 {
    #if JUCE_DEBUG
@@ -262,7 +251,6 @@ namespace AudioUnitFormatHelpers
 
     // Audio Unit plugins expect hosts to listen to their view bounds, and to resize
     // the plugin window/view appropriately.
-  #if JUCE_MAC || JUCE_IOS
    #if JUCE_IOS
     #define JUCE_IOS_MAC_VIEW  UIView
     using ViewComponentBaseClass = UIViewComponent;
@@ -277,7 +265,6 @@ namespace AudioUnitFormatHelpers
         void childBoundsChanged (Component*) override  { triggerAsyncUpdate(); }
         void handleAsyncUpdate() override              { resizeToFitView(); }
     };
-  #endif
 
     template <typename PropertyType>
     static std::optional<PropertyType> tryGetProperty (AudioUnit inUnit,
@@ -2983,8 +2970,6 @@ FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()
 {
     return {};
 }
-
-#undef JUCE_AU_LOG
 
 } // namespace juce
 
