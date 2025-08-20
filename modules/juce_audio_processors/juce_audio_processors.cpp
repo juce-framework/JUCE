@@ -169,7 +169,6 @@ private:
 #include "format/juce_AudioPluginFormatManager.cpp"
 #include "processors/juce_AudioProcessorEditor.cpp"
 #include "processors/juce_GenericAudioProcessorEditor.cpp"
-#include "format_types/juce_LADSPAPluginFormat.cpp"
 #include "format_types/juce_VSTPluginFormat.cpp"
 #include "format_types/juce_VST3PluginFormat.cpp"
 #include "format_types/juce_AudioUnitPluginFormat.mm"

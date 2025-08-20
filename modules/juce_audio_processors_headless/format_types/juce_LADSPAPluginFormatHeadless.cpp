@@ -586,10 +586,7 @@ private:
 
 
 //==============================================================================
-LADSPAPluginFormat::LADSPAPluginFormat() {}
-LADSPAPluginFormat::~LADSPAPluginFormat() {}
-
-void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results, const String& fileOrIdentifier)
+void LADSPAPluginFormatHeadless::findAllTypesForFile (OwnedArray<PluginDescription>& results, const String& fileOrIdentifier)
 {
     if (! fileMightContainThisPluginType (fileOrIdentifier))
         return;
@@ -627,9 +624,10 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& res
     }
 }
 
-void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
-                                               double sampleRate, int blockSize,
-                                               PluginCreationCallback callback)
+void LADSPAPluginFormatHeadless::createPluginInstance (const PluginDescription& desc,
+                                                       double sampleRate,
+                                                       int blockSize,
+                                                       PluginCreationCallback callback)
 {
     std::unique_ptr<LADSPAPluginInstance> result;
 
@@ -665,33 +663,33 @@ void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
     callback (std::move (result), errorMsg);
 }
 
-bool LADSPAPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const
+bool LADSPAPluginFormatHeadless::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const
 {
     return false;
 }
 
-bool LADSPAPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
+bool LADSPAPluginFormatHeadless::fileMightContainThisPluginType (const String& fileOrIdentifier)
 {
     auto f = File::createFileWithoutCheckingPath (fileOrIdentifier);
     return f.existsAsFile() && f.hasFileExtension (".so");
 }
 
-String LADSPAPluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)
+String LADSPAPluginFormatHeadless::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)
 {
     return fileOrIdentifier;
 }
 
-bool LADSPAPluginFormat::pluginNeedsRescanning (const PluginDescription& desc)
+bool LADSPAPluginFormatHeadless::pluginNeedsRescanning (const PluginDescription& desc)
 {
     return File (desc.fileOrIdentifier).getLastModificationTime() != desc.lastFileModTime;
 }
 
-bool LADSPAPluginFormat::doesPluginStillExist (const PluginDescription& desc)
+bool LADSPAPluginFormatHeadless::doesPluginStillExist (const PluginDescription& desc)
 {
     return File::createFileWithoutCheckingPath (desc.fileOrIdentifier).exists();
 }
 
-StringArray LADSPAPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive, bool)
+StringArray LADSPAPluginFormatHeadless::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive, bool)
 {
     StringArray results;
 
@@ -701,9 +699,8 @@ StringArray LADSPAPluginFormat::searchPathsForPlugins (const FileSearchPath& dir
     return results;
 }
 
-void LADSPAPluginFormat::recursiveFileSearch (StringArray& results, const File& dir, const bool recursive)
+void LADSPAPluginFormatHeadless::recursiveFileSearch (StringArray& results, const File& dir, const bool recursive)
 {
-
     for (const auto& iter : RangedDirectoryIterator (dir, false, "*", File::findFilesAndDirectories))
     {
         auto f = iter.getFile();
@@ -720,7 +717,7 @@ void LADSPAPluginFormat::recursiveFileSearch (StringArray& results, const File& 
     }
 }
 
-FileSearchPath LADSPAPluginFormat::getDefaultLocationsToSearch()
+FileSearchPath LADSPAPluginFormatHeadless::getDefaultLocationsToSearch()
 {
     return  { SystemStats::getEnvironmentVariable ("LADSPA_PATH", "/usr/lib/ladspa;/usr/local/lib/ladspa;~/.ladspa").replace (":", ";") };
 }
