@@ -141,6 +141,7 @@
 #include "processors/juce_AudioProcessorEditor.h"
 #include "processors/juce_GenericAudioProcessorEditor.h"
 #include "format/juce_AudioPluginFormatManager.h"
+#include "format/juce_AudioPluginFormatManagerHelpers.h"
 #include "scanning/juce_KnownPluginList.h"
 #include "format_types/juce_AudioUnitPluginFormat.h"
 #include "format_types/juce_LADSPAPluginFormat.h"

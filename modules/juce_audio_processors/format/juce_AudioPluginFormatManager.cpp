@@ -61,29 +61,6 @@ void addHeadlessDefaultFormatsToManager ([[maybe_unused]] AudioPluginFormatManag
    #endif
 }
 
-void addDefaultFormatsToManager ([[maybe_unused]] AudioPluginFormatManager& manager)
-{
-   #if JUCE_INTERNAL_HAS_AU
-    manager.addFormat (std::make_unique<AudioUnitPluginFormat>());
-   #endif
-
-   #if JUCE_INTERNAL_HAS_VST
-    manager.addFormat (std::make_unique<VSTPluginFormat>());
-   #endif
-
-   #if JUCE_INTERNAL_HAS_VST3
-    manager.addFormat (std::make_unique<VST3PluginFormat>());
-   #endif
-
-   #if JUCE_INTERNAL_HAS_LADSPA
-    manager.addFormat (std::make_unique<LADSPAPluginFormat>());
-   #endif
-
-   #if JUCE_INTERNAL_HAS_LV2
-    manager.addFormat (std::make_unique<LV2PluginFormat>());
-   #endif
-}
-
 int AudioPluginFormatManager::getNumFormats() const                         { return formats.size(); }
 AudioPluginFormat* AudioPluginFormatManager::getFormat (int index) const    { return formats[index]; }
 

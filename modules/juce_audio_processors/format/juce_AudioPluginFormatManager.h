@@ -166,10 +166,4 @@ private:
 */
 void addHeadlessDefaultFormatsToManager (AudioPluginFormatManager&);
 
-/** Add all standard plugin formats to the AudioPluginFormatManager, *with* UI support.
-
-    This function replaces AudioPluginFormatManager::addDefaultFormats().
-*/
-void addDefaultFormatsToManager (AudioPluginFormatManager&);
-
 } // namespace juce
