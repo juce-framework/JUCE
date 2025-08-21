@@ -344,7 +344,6 @@ static void checkForPointerAPI()
 }
 
 //==============================================================================
-using SetProcessDPIAwarenessContextFunc        = BOOL                  (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using SetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (DPI_Awareness);
 using SetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using GetSystemMetricsForDpiFunc               = int                   (WINAPI*) (int, UINT);
@@ -354,7 +353,6 @@ using GetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*)
 using GetAwarenessFromDpiAwarenessContextFunc  = DPI_Awareness         (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using EnableNonClientDPIScalingFunc            = BOOL                  (WINAPI*) (HWND);
 
-static SetProcessDPIAwarenessContextFunc       setProcessDPIAwarenessContext       = nullptr;
 static SetProcessDPIAwarenessFunc              setProcessDPIAwareness              = nullptr;
 static SetThreadDPIAwarenessContextFunc        setThreadDPIAwarenessContext        = nullptr;
 static GetProcessDPIAwarenessFunc              getProcessDPIAwareness              = nullptr;
@@ -382,7 +380,6 @@ static void loadDPIAwarenessFunctions()
     setThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
     getThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
     getAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
-    setProcessDPIAwarenessContext       = (SetProcessDPIAwarenessContextFunc) getUser32Function ("SetProcessDpiAwarenessContext");
     enableNonClientDPIScaling           = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
    #endif
 }
@@ -399,8 +396,7 @@ static void setDPIAwareness()
 
     loadDPIAwarenessFunctions();
 
-    if (setProcessDPIAwarenessContext != nullptr
-        && setProcessDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
+    if (SetProcessDpiAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
         return;
 
     if (setProcessDPIAwareness != nullptr && enableNonClientDPIScaling != nullptr
