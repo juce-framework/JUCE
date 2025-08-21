@@ -1313,13 +1313,14 @@ public:
     /** Returns a textual description of a WrapperType value */
     static const char* getWrapperTypeDescription (AudioProcessor::WrapperType) noexcept;
 
-
     /** A struct containing information about the DAW track inside which your
-        AudioProcessor is loaded. */
+        AudioProcessor is loaded.
+    */
     struct TrackProperties
     {
-        std::optional<String> name;     // The name of the track - this will be empty if the track name is not known
-        std::optional<Colour> colour;   // The colour of the track - this will be empty if the colour is not known
+        std::optional<String> name;       ///< The name of the track - this will be empty if the track name is not known
+        std::optional<uint32> colourARGB; ///< The colour of the track - The format of this number is: ((alpha << 24) | (red << 16) | (green << 8) | blue).
+                                          ///< You can pass this to the constructor of Colour to create a matching colour instance.
 
         // other properties may be added in the future
     };

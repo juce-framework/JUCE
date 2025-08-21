@@ -2680,7 +2680,7 @@ public:
             if (! std::strcmp (Vst::ChannelContext::kChannelNameLengthKey, id))
                 value = props.name.value_or (String{}).length();
             else if (! std::strcmp (Vst::ChannelContext::kChannelColorKey, id))
-                value = static_cast<Steinberg::int64> (props.colour.value_or (Colours::transparentBlack).getARGB());
+                value = static_cast<Steinberg::int64> (props.colourARGB.value_or (0));
             else
                 return kResultFalse;
 

@@ -70,9 +70,17 @@ inline String convertOptionalARAString (ARA::ARAUtf8String str, const String& fa
 }
 
 /** Converts an ARA::ARAColor* to a JUCE Colour. */
-inline Colour convertARAColour (const ARA::ARAColor* colour)
+inline uint32 convertARAColourARGB (const ARA::ARAColor* colour)
 {
-    return Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
+    static constexpr auto floatToByte = [] (float x)
+    {
+        return (uint32) jlimit (0, 255, roundToInt (x * 255.0f));
+    };
+
+    return 0xff000000
+         | (floatToByte (colour->r) << 0x10)
+         | (floatToByte (colour->g) << 0x08)
+         | (floatToByte (colour->b) << 0x00);
 }
 
 /** Converts a potentially NULL ARA::ARAColor* to a JUCE Colour.
@@ -80,9 +88,9 @@ inline Colour convertARAColour (const ARA::ARAColor* colour)
     Returns the JUCE equivalent of the provided colour if it's not nullptr, and the fallback colour
     otherwise.
 */
-inline Colour convertOptionalARAColour (const ARA::ARAColor* colour, const Colour& fallbackColour = Colour())
+inline uint32 convertOptionalARAColour (const ARA::ARAColor* colour, uint32 fallbackColour = {})
 {
-    return (colour != nullptr) ? convertARAColour (colour) : fallbackColour;
+    return (colour != nullptr) ? convertARAColourARGB (colour) : fallbackColour;
 }
 
 } // namespace juce

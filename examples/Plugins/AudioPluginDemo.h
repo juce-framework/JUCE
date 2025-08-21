@@ -468,10 +468,10 @@ private:
 
         void updateTrackProperties()
         {
-            auto trackColour = getProcessor().getTrackProperties().colour;
+            auto trackColour = getProcessor().getTrackProperties().colourARGB;
             auto& lf = getLookAndFeel();
 
-            backgroundColour = (trackColour.has_value() ? trackColour->withAlpha (1.0f).withBrightness (0.266f)
+            backgroundColour = (trackColour.has_value() ? Colour { *trackColour }.withAlpha (1.0f).withBrightness (0.266f)
                                                         : lf.findColour (ResizableWindow::backgroundColourId));
             repaint();
         }

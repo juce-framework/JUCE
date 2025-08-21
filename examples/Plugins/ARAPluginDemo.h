@@ -1440,7 +1440,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (convertOptionalARAColour (playbackRegion.getEffectiveColor(), Colours::black));
+        g.fillAll (Colour { convertOptionalARAColour (playbackRegion.getEffectiveColor()) });
 
         const auto* audioModification = playbackRegion.getAudioModification<ARADemoPluginAudioModification>();
         g.setColour (audioModification->isDimmed() ? Colours::darkgrey.darker() : Colours::darkgrey.brighter());
@@ -1827,7 +1827,7 @@ public:
 
         if (auto colour = regionSequence.getColor())
         {
-            g.setColour (convertARAColour (colour));
+            g.setColour (Colour { convertARAColourARGB (colour) });
             g.fillRect (getLocalBounds().removeFromTop (16).reduced (6));
             g.fillRect (getLocalBounds().removeFromBottom (16).reduced (6));
         }

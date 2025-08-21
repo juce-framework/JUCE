@@ -4,6 +4,28 @@
 
 ## Change
 
+AudioProcessor::TrackProperties::colour has been removed. It is replaced by a
+new data member, colourARGB.
+
+**Possible Issues**
+
+Code that references this data member will fail to compile.
+
+**Workaround**
+
+Use the new colourARGB field, which holds the raw ARGB values packed in a
+uint32, instead. In order to convert to a Colour instance, pass the value held
+by colourARGB to the constructor of Colour.
+
+**Rationale**
+
+This change removes the dependency between the juce_audio_processors_headless
+and juce_graphics. It is now possible to build programs that work with headless
+AudioProcessors without needing to include juce_graphics.
+
+
+## Change
+
 The function AudioPluginFormatManager::addDefaultFormats() has been removed.
 
 **Possible Issues**

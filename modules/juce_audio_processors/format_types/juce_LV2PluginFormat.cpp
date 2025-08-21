@@ -43,6 +43,125 @@ namespace juce
 namespace lv2_host
 {
 
+class UiFeaturesData
+{
+public:
+    UiFeaturesData (PhysicalResizeListener& rl,
+                    TouchListener& tl,
+                    LV2_Handle instanceIn,
+                    LV2UI_Widget parentIn,
+                    Instance::GetExtensionData getExtensionData,
+                    const Ports& ports,
+                    SymbolMap& symapIn,
+                    const UiFeaturesDataOptions& optIn)
+        : opts (optIn),
+          resizeListener (rl),
+          touchListener (tl),
+          instance (instanceIn),
+          parent (parentIn),
+          symap (symapIn),
+          dataAccess { getExtensionData },
+          portIndices (makePortIndices (ports))
+    {
+    }
+
+    const LV2_Feature* const* getFeatureArray() const noexcept { return features.pointers.data(); }
+
+    Rectangle<int> getLastRequestedBounds() const   { return { lastRequestedWidth, lastRequestedHeight }; }
+
+private:
+    int resizeCallback (int width, int height)
+    {
+        lastRequestedWidth = width;
+        lastRequestedHeight = height;
+        resizeListener.viewRequestedResizeInPhysicalPixels (width, height);
+        return 0;
+    }
+
+    static int resizeCallback (LV2UI_Feature_Handle handle, int width, int height)
+    {
+        return static_cast<UiFeaturesData*> (handle)->resizeCallback (width, height);
+    }
+
+    uint32_t portIndexCallback (const char* symbol) const
+    {
+        const auto it = portIndices.find (symbol);
+        return it != portIndices.cend() ? it->second : LV2UI_INVALID_PORT_INDEX;
+    }
+
+    static uint32_t portIndexCallback (LV2UI_Feature_Handle handle, const char* symbol)
+    {
+        return static_cast<const UiFeaturesData*> (handle)->portIndexCallback (symbol);
+    }
+
+    void touchCallback (uint32_t portIndex, bool grabbed) const
+    {
+        touchListener.controlGrabbed (portIndex, grabbed);
+    }
+
+    static void touchCallback (LV2UI_Feature_Handle handle, uint32_t index, bool b)
+    {
+        return static_cast<const UiFeaturesData*> (handle)->touchCallback (index, b);
+    }
+
+    static std::map<String, uint32_t> makePortIndices (const Ports& ports)
+    {
+        std::map<String, uint32_t> result;
+
+        ports.forEachPort ([&] (const PortHeader& header)
+        {
+            [[maybe_unused]] const auto emplaced = result.emplace (header.symbol, header.index);
+
+            // This will complain if there are duplicate port symbols.
+            jassert (emplaced.second);
+        });
+
+        return result;
+    }
+
+    const UiFeaturesDataOptions opts;
+    PhysicalResizeListener& resizeListener;
+    TouchListener& touchListener;
+    LV2_Handle instance{};
+    LV2UI_Widget parent{};
+    SymbolMap& symap;
+    const UsefulUrids urids { symap };
+    Log log { &urids };
+    int lastRequestedWidth = 0, lastRequestedHeight = 0;
+    std::vector<LV2_Options_Option> options { { LV2_OPTIONS_INSTANCE,
+                                                0,
+                                                symap.map (LV2_UI__scaleFactor),
+                                                sizeof (float),
+                                                symap.map (LV2_ATOM__Float),
+                                                &opts.initialScaleFactor },
+                                              { LV2_OPTIONS_INSTANCE,
+                                                0,
+                                                symap.map (LV2_PARAMETERS__sampleRate),
+                                                sizeof (float),
+                                                symap.map (LV2_ATOM__Float),
+                                                &opts.sampleRate },
+                                              { LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, nullptr } }; // The final entry must be nulled out
+    LV2UI_Resize resize { this, resizeCallback };
+    LV2_URID_Map map        = symap.getMapFeature();
+    LV2_URID_Unmap unmap    = symap.getUnmapFeature();
+    LV2UI_Port_Map portMap { this, portIndexCallback };
+    LV2UI_Touch touch { this, touchCallback };
+    LV2_Extension_Data_Feature dataAccess;
+    std::map<String, uint32_t> portIndices;
+    Features features { UiFeatureUris::makeFeatures (&resize,
+                                                     parent,
+                                                     instance,
+                                                     &dataAccess,
+                                                     &map,
+                                                     &unmap,
+                                                     &portMap,
+                                                     &touch,
+                                                     options.data(),
+                                                     log.getLogFeature()) };
+
+    JUCE_LEAK_DETECTOR (UiFeaturesData)
+};
+
 /*
     Creates and holds a UI instance for a plugin with a specific URI, using the provided descriptor.
 */
