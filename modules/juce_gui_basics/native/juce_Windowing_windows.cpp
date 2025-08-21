@@ -335,10 +335,8 @@ static void checkForPointerAPI()
 
 //==============================================================================
 using GetSystemMetricsForDpiFunc               = int                   (WINAPI*) (int, UINT);
-using GetWindowDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (HWND);
 using EnableNonClientDPIScalingFunc            = BOOL                  (WINAPI*) (HWND);
 
-static GetWindowDPIAwarenessContextFunc        getWindowDPIAwarenessContext        = nullptr;
 static EnableNonClientDPIScalingFunc           enableNonClientDPIScaling           = nullptr;
 
 static bool hasCheckedForDPIAwareness = false;
@@ -353,7 +351,6 @@ static void loadDPIAwarenessFunctions()
         return;
 
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    getWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
     enableNonClientDPIScaling           = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
    #endif
 }
@@ -412,13 +409,8 @@ static bool isPerMonitorDPIAwareWindow ([[maybe_unused]] HWND nativeWindow)
    #else
     setDPIAwareness();
 
-    if (getWindowDPIAwarenessContext != nullptr)
-    {
-        return (GetAwarenessFromDpiAwarenessContext (getWindowDPIAwarenessContext (nativeWindow))
-                  == DPI_AWARENESS_PER_MONITOR_AWARE);
-    }
-
-    return isPerMonitorDPIAwareProcess();
+    return (GetAwarenessFromDpiAwarenessContext (GetWindowDpiAwarenessContext (nativeWindow))
+              == DPI_AWARENESS_PER_MONITOR_AWARE);
    #endif
 }
 
@@ -492,42 +484,19 @@ private:
 class ScopedThreadDPIAwarenessSetter::NativeImpl
 {
 public:
-    static auto& getFunctions()
-    {
-        struct Functions
-        {
-            GetWindowDPIAwarenessContextFunc getWindowAwareness             = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-
-            bool isLoaded() const noexcept
-            {
-                return getWindowAwareness != nullptr;
-            }
-
-            Functions() = default;
-            JUCE_DECLARE_NON_COPYABLE (Functions)
-            JUCE_DECLARE_NON_MOVEABLE (Functions)
-        };
-
-        static const Functions functions;
-        return functions;
-    }
-
     explicit NativeImpl (HWND nativeWindow [[maybe_unused]])
     {
        #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        if (const auto& functions = getFunctions(); functions.isLoaded())
-        {
-            auto dpiAwareWindow = (GetAwarenessFromDpiAwarenessContext (functions.getWindowAwareness (nativeWindow))
-                                   == DPI_AWARENESS_PER_MONITOR_AWARE);
+        auto dpiAwareWindow = (GetAwarenessFromDpiAwarenessContext (GetWindowDpiAwarenessContext (nativeWindow))
+                               == DPI_AWARENESS_PER_MONITOR_AWARE);
 
-            auto dpiAwareThread = (GetAwarenessFromDpiAwarenessContext (GetThreadDpiAwarenessContext())
-                                   == DPI_AWARENESS_PER_MONITOR_AWARE);
+        auto dpiAwareThread = (GetAwarenessFromDpiAwarenessContext (GetThreadDpiAwarenessContext())
+                               == DPI_AWARENESS_PER_MONITOR_AWARE);
 
-            if (dpiAwareWindow && ! dpiAwareThread)
-                oldContext = SetThreadDpiAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
-            else if (! dpiAwareWindow && dpiAwareThread)
-                oldContext = SetThreadDpiAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
-        }
+        if (dpiAwareWindow && ! dpiAwareThread)
+            oldContext = SetThreadDpiAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+        else if (! dpiAwareWindow && dpiAwareThread)
+            oldContext = SetThreadDpiAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
        #endif
     }
 
