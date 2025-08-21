@@ -6063,20 +6063,6 @@ private:
 
     static auto getCursorSizeForPeerFunction() -> int (*) (ComponentPeer&)
     {
-        static const auto getSystemMetricsForDpi = []() -> GetSystemMetricsForDpiFunc
-        {
-            constexpr auto library = "User32.dll";
-            LoadLibraryA (library);
-
-            if (auto* handle = GetModuleHandleA (library))
-                return (GetSystemMetricsForDpiFunc) GetProcAddress (handle, "GetSystemMetricsForDpi");
-
-            return nullptr;
-        }();
-
-        if (getSystemMetricsForDpi == nullptr)
-            return [] (ComponentPeer&) { return unityCursorSize; };
-
         return [] (ComponentPeer& p)
         {
             const ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { p.getNativeHandle() };
@@ -6085,7 +6071,7 @@ private:
 
             if (auto* monitor = MonitorFromWindow ((HWND) p.getNativeHandle(), MONITOR_DEFAULTTONULL))
                 if (SUCCEEDED (GetDpiForMonitor (monitor, MDT_DEFAULT, &dpiX, &dpiY)))
-                    return getSystemMetricsForDpi (SM_CXCURSOR, dpiX);
+                    return GetSystemMetricsForDpi (SM_CXCURSOR, dpiX);
 
             return unityCursorSize;
         };
