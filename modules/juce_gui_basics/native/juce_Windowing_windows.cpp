@@ -336,12 +336,10 @@ static void checkForPointerAPI()
 //==============================================================================
 using GetSystemMetricsForDpiFunc               = int                   (WINAPI*) (int, UINT);
 using GetWindowDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (HWND);
-using GetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) ();
 using GetAwarenessFromDpiAwarenessContextFunc  = DPI_AWARENESS         (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using EnableNonClientDPIScalingFunc            = BOOL                  (WINAPI*) (HWND);
 
 static GetWindowDPIAwarenessContextFunc        getWindowDPIAwarenessContext        = nullptr;
-static GetThreadDPIAwarenessContextFunc        getThreadDPIAwarenessContext        = nullptr;
 static GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromDPIAwarenessContext = nullptr;
 static EnableNonClientDPIScalingFunc           enableNonClientDPIScaling           = nullptr;
 
@@ -358,7 +356,6 @@ static void loadDPIAwarenessFunctions()
 
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
     getWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-    getThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
     getAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
     enableNonClientDPIScaling           = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
    #endif
@@ -429,18 +426,16 @@ static bool isPerMonitorDPIAwareWindow ([[maybe_unused]] HWND nativeWindow)
    #endif
 }
 
-static bool isPerMonitorDPIAwareThread (GetThreadDPIAwarenessContextFunc getThreadDPIAwarenessContextIn = getThreadDPIAwarenessContext,
-                                        GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromDPIAwarenessContextIn = getAwarenessFromDPIAwarenessContext)
+static bool isPerMonitorDPIAwareThread (GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromDPIAwarenessContextIn = getAwarenessFromDPIAwarenessContext)
 {
    #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
     return false;
    #else
     setDPIAwareness();
 
-    if (getThreadDPIAwarenessContextIn != nullptr
-        && getAwarenessFromDPIAwarenessContextIn != nullptr)
+    if (getAwarenessFromDPIAwarenessContextIn != nullptr)
     {
-        return (getAwarenessFromDPIAwarenessContextIn (getThreadDPIAwarenessContextIn())
+        return (getAwarenessFromDPIAwarenessContextIn (GetThreadDpiAwarenessContext())
                   == DPI_AWARENESS_PER_MONITOR_AWARE);
     }
 
@@ -511,13 +506,11 @@ public:
         struct Functions
         {
             GetWindowDPIAwarenessContextFunc getWindowAwareness             = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-            GetThreadDPIAwarenessContextFunc getThreadAwareness             = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
             GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
 
             bool isLoaded() const noexcept
             {
                 return getWindowAwareness != nullptr
-                    && getThreadAwareness != nullptr
                     && getAwarenessFromContext != nullptr;
             }
 
@@ -538,7 +531,7 @@ public:
             auto dpiAwareWindow = (functions.getAwarenessFromContext (functions.getWindowAwareness (nativeWindow))
                                    == DPI_AWARENESS_PER_MONITOR_AWARE);
 
-            auto dpiAwareThread = (functions.getAwarenessFromContext (functions.getThreadAwareness())
+            auto dpiAwareThread = (functions.getAwarenessFromContext (GetThreadDpiAwarenessContext())
                                    == DPI_AWARENESS_PER_MONITOR_AWARE);
 
             if (dpiAwareWindow && ! dpiAwareThread)
@@ -576,7 +569,6 @@ static auto& getScopedDPIAwarenessDisablerFunctions()
 {
     struct Functions
     {
-        GetThreadDPIAwarenessContextFunc localGetThreadDpiAwarenessContext = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
         GetAwarenessFromDpiAwarenessContextFunc localGetAwarenessFromDpiAwarenessContextFunc = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
 
         Functions() = default;
@@ -592,7 +584,7 @@ ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
 {
     const auto& functions = getScopedDPIAwarenessDisablerFunctions();
 
-    if (! isPerMonitorDPIAwareThread (functions.localGetThreadDpiAwarenessContext, functions.localGetAwarenessFromDpiAwarenessContextFunc))
+    if (! isPerMonitorDPIAwareThread (functions.localGetAwarenessFromDpiAwarenessContextFunc))
         return;
 
     previousContext = SetThreadDpiAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
