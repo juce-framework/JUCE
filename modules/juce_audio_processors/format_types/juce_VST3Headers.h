@@ -246,7 +246,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
-#if JucePlugin_Enable_ARA
+#if JucePlugin_Enable_ARA || JUCE_PLUGINHOST_ARA
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wpragma-pack")
  #include <ARA_API/ARAVST3.h>
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
@@ -255,10 +255,12 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
   #error "Unsupported ARA version - only ARA version 2 and onward are supported by the current implementation"
  #endif
 
- DEF_CLASS_IID (ARA::IPlugInEntryPoint)
- DEF_CLASS_IID (ARA::IPlugInEntryPoint2)
- DEF_CLASS_IID (ARA::IMainFactory)
-#endif // JucePlugin_Enable_ARA
+ #if ! JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+  DEF_CLASS_IID (ARA::IPlugInEntryPoint)
+  DEF_CLASS_IID (ARA::IPlugInEntryPoint2)
+  DEF_CLASS_IID (ARA::IMainFactory)
+ #endif
+#endif // JucePlugin_Enable_ARA || JUCE_PLUGINHOST_ARA
 
 //==============================================================================
 #if JUCE_WINDOWS
