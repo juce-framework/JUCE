@@ -335,9 +335,6 @@ static void checkForPointerAPI()
 
 //==============================================================================
 using GetSystemMetricsForDpiFunc               = int                   (WINAPI*) (int, UINT);
-using EnableNonClientDPIScalingFunc            = BOOL                  (WINAPI*) (HWND);
-
-static EnableNonClientDPIScalingFunc           enableNonClientDPIScaling           = nullptr;
 
 static bool hasCheckedForDPIAwareness = false;
 
@@ -349,10 +346,6 @@ static void loadDPIAwarenessFunctions()
 
     if (shcoreModule == nullptr)
         return;
-
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    enableNonClientDPIScaling           = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
-   #endif
 }
 
 static void setDPIAwareness()
@@ -370,8 +363,7 @@ static void setDPIAwareness()
     if (SetProcessDpiAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
         return;
 
-    if (enableNonClientDPIScaling != nullptr
-        && SUCCEEDED (SetProcessDpiAwareness (PROCESS_PER_MONITOR_DPI_AWARE)))
+    if (SUCCEEDED (SetProcessDpiAwareness (PROCESS_PER_MONITOR_DPI_AWARE)))
         return;
 
     if (SUCCEEDED (SetProcessDpiAwareness (PROCESS_SYSTEM_DPI_AWARE)))
@@ -3619,7 +3611,7 @@ private:
         // Ensure that non-client areas are scaled for per-monitor DPI awareness v1 - can't
         // do this in peerWindowProc as we have no window at this point
         if (message == WM_NCCREATE)
-            NullCheckedInvocation::invoke (enableNonClientDPIScaling, h);
+            EnableNonClientDpiScaling (h);
 
         if (auto* peer = getOwnerOfWindow (h))
         {
