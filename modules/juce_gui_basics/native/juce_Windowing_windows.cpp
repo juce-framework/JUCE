@@ -264,16 +264,6 @@ struct ScopedDeviceContext
  #define GET_POINTERID_WPARAM(wParam)    (LOWORD(wParam))
 #endif
 
-#ifndef MONITOR_DPI_TYPE
- enum Monitor_DPI_Type
- {
-     MDT_Effective_DPI = 0,
-     MDT_Angular_DPI   = 1,
-     MDT_Raw_DPI       = 2,
-     MDT_Default       = MDT_Effective_DPI
- };
-#endif
-
 #ifndef DPI_AWARENESS
  enum DPI_Awareness
  {
@@ -357,7 +347,6 @@ static void checkForPointerAPI()
 using SetProcessDPIAwarenessContextFunc        = BOOL                  (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using SetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (DPI_Awareness);
 using SetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (DPI_AWARENESS_CONTEXT);
-using GetDPIForMonitorFunc                     = HRESULT               (WINAPI*) (HMONITOR, Monitor_DPI_Type, UINT*, UINT*);
 using GetSystemMetricsForDpiFunc               = int                   (WINAPI*) (int, UINT);
 using GetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (HANDLE, DPI_Awareness*);
 using GetWindowDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (HWND);
@@ -368,7 +357,6 @@ using EnableNonClientDPIScalingFunc            = BOOL                  (WINAPI*)
 static SetProcessDPIAwarenessContextFunc       setProcessDPIAwarenessContext       = nullptr;
 static SetProcessDPIAwarenessFunc              setProcessDPIAwareness              = nullptr;
 static SetThreadDPIAwarenessContextFunc        setThreadDPIAwarenessContext        = nullptr;
-static GetDPIForMonitorFunc                    getDPIForMonitor                    = nullptr;
 static GetProcessDPIAwarenessFunc              getProcessDPIAwareness              = nullptr;
 static GetWindowDPIAwarenessContextFunc        getWindowDPIAwarenessContext        = nullptr;
 static GetThreadDPIAwarenessContextFunc        getThreadDPIAwarenessContext        = nullptr;
@@ -386,7 +374,6 @@ static void loadDPIAwarenessFunctions()
     if (shcoreModule == nullptr)
         return;
 
-    getDPIForMonitor                    = (GetDPIForMonitorFunc) GetProcAddress (shcoreModule, "GetDpiForMonitor");
     setProcessDPIAwareness              = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
 
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
@@ -420,7 +407,7 @@ static void setDPIAwareness()
         && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_Per_Monitor_Aware)))
         return;
 
-    if (setProcessDPIAwareness != nullptr && getDPIForMonitor != nullptr
+    if (setProcessDPIAwareness != nullptr
         && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_System_Aware)))
         return;
 
@@ -5988,13 +5975,10 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT, LPARAM userInfo
     auto isMain = (info.dwFlags & 1 /* MONITORINFOF_PRIMARY */) != 0;
     auto dpi = 0.0;
 
-    if (getDPIForMonitor != nullptr)
-    {
-        UINT dpiX = 0, dpiY = 0;
+    UINT dpiX = 0, dpiY = 0;
 
-        if (SUCCEEDED (getDPIForMonitor (hm, MDT_Default, &dpiX, &dpiY)))
-            dpi = (dpiX + dpiY) / 2.0;
-    }
+    if (SUCCEEDED (GetDpiForMonitor (hm, MDT_DEFAULT, &dpiX, &dpiY)))
+        dpi = (dpiX + dpiY) / 2.0;
 
     // Call EnumDisplayDevices and EnumDisplaySettings to get the refresh rate of the monitor
     BOOL ok = TRUE;
@@ -6189,17 +6173,6 @@ private:
 
     static auto getCursorSizeForPeerFunction() -> int (*) (ComponentPeer&)
     {
-        static const auto getDpiForMonitor = []() -> GetDPIForMonitorFunc
-        {
-            constexpr auto library = "SHCore.dll";
-            LoadLibraryA (library);
-
-            if (auto* handle = GetModuleHandleA (library))
-                return (GetDPIForMonitorFunc) GetProcAddress (handle, "GetDpiForMonitor");
-
-            return nullptr;
-        }();
-
         static const auto getSystemMetricsForDpi = []() -> GetSystemMetricsForDpiFunc
         {
             constexpr auto library = "User32.dll";
@@ -6211,7 +6184,7 @@ private:
             return nullptr;
         }();
 
-        if (getDpiForMonitor == nullptr || getSystemMetricsForDpi == nullptr)
+        if (getSystemMetricsForDpi == nullptr)
             return [] (ComponentPeer&) { return unityCursorSize; };
 
         return [] (ComponentPeer& p)
@@ -6221,7 +6194,7 @@ private:
             UINT dpiX = 0, dpiY = 0;
 
             if (auto* monitor = MonitorFromWindow ((HWND) p.getNativeHandle(), MONITOR_DEFAULTTONULL))
-                if (SUCCEEDED (getDpiForMonitor (monitor, MDT_Default, &dpiX, &dpiY)))
+                if (SUCCEEDED (GetDpiForMonitor (monitor, MDT_DEFAULT, &dpiX, &dpiY)))
                     return getSystemMetricsForDpi (SM_CXCURSOR, dpiX);
 
             return unityCursorSize;

@@ -93,6 +93,7 @@
  #include <dwmapi.h>
  #include <dwrite_3.h>
  #include <dcomp.h>
+ #include <shellscalingapi.h>
 
  #if JUCE_ETW_TRACELOGGING
   #include <TraceLoggingProvider.h>
@@ -113,6 +114,7 @@
   #pragma comment(lib, "imm32.lib")
   #pragma comment(lib, "comctl32.lib")
   #pragma comment(lib, "dwmapi.lib")
+  #pragma comment(lib, "shcore.lib")
 
   // Link a newer version of the side-by-side comctl32 dll.
   // Required to enable the newer native message box and visual styles on vista and above.
