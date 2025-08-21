@@ -344,7 +344,6 @@ static void checkForPointerAPI()
 }
 
 //==============================================================================
-using SetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (DPI_Awareness);
 using SetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using GetSystemMetricsForDpiFunc               = int                   (WINAPI*) (int, UINT);
 using GetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (HANDLE, DPI_Awareness*);
@@ -353,7 +352,6 @@ using GetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*)
 using GetAwarenessFromDpiAwarenessContextFunc  = DPI_Awareness         (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using EnableNonClientDPIScalingFunc            = BOOL                  (WINAPI*) (HWND);
 
-static SetProcessDPIAwarenessFunc              setProcessDPIAwareness              = nullptr;
 static SetThreadDPIAwarenessContextFunc        setThreadDPIAwarenessContext        = nullptr;
 static GetProcessDPIAwarenessFunc              getProcessDPIAwareness              = nullptr;
 static GetWindowDPIAwarenessContextFunc        getWindowDPIAwarenessContext        = nullptr;
@@ -371,8 +369,6 @@ static void loadDPIAwarenessFunctions()
 
     if (shcoreModule == nullptr)
         return;
-
-    setProcessDPIAwareness              = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
 
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
     getProcessDPIAwareness              = (GetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "GetProcessDpiAwareness");
@@ -399,12 +395,11 @@ static void setDPIAwareness()
     if (SetProcessDpiAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
         return;
 
-    if (setProcessDPIAwareness != nullptr && enableNonClientDPIScaling != nullptr
-        && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_Per_Monitor_Aware)))
+    if (enableNonClientDPIScaling != nullptr
+        && SUCCEEDED (SetProcessDpiAwareness (PROCESS_PER_MONITOR_DPI_AWARE)))
         return;
 
-    if (setProcessDPIAwareness != nullptr
-        && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_System_Aware)))
+    if (SUCCEEDED (SetProcessDpiAwareness (PROCESS_SYSTEM_DPI_AWARE)))
         return;
 
     SetProcessDPIAware();
