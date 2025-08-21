@@ -264,16 +264,6 @@ struct ScopedDeviceContext
  #define GET_POINTERID_WPARAM(wParam)    (LOWORD(wParam))
 #endif
 
-#ifndef DPI_AWARENESS
- enum DPI_Awareness
- {
-     DPI_Awareness_Invalid           = -1,
-     DPI_Awareness_Unaware           = 0,
-     DPI_Awareness_System_Aware      = 1,
-     DPI_Awareness_Per_Monitor_Aware = 2
- };
-#endif
-
 #ifndef USER_DEFAULT_SCREEN_DPI
  #define USER_DEFAULT_SCREEN_DPI 96
 #endif
@@ -346,14 +336,12 @@ static void checkForPointerAPI()
 //==============================================================================
 using SetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using GetSystemMetricsForDpiFunc               = int                   (WINAPI*) (int, UINT);
-using GetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (HANDLE, DPI_Awareness*);
 using GetWindowDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (HWND);
 using GetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) ();
-using GetAwarenessFromDpiAwarenessContextFunc  = DPI_Awareness         (WINAPI*) (DPI_AWARENESS_CONTEXT);
+using GetAwarenessFromDpiAwarenessContextFunc  = DPI_AWARENESS         (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using EnableNonClientDPIScalingFunc            = BOOL                  (WINAPI*) (HWND);
 
 static SetThreadDPIAwarenessContextFunc        setThreadDPIAwarenessContext        = nullptr;
-static GetProcessDPIAwarenessFunc              getProcessDPIAwareness              = nullptr;
 static GetWindowDPIAwarenessContextFunc        getWindowDPIAwarenessContext        = nullptr;
 static GetThreadDPIAwarenessContextFunc        getThreadDPIAwarenessContext        = nullptr;
 static GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromDPIAwarenessContext = nullptr;
@@ -371,7 +359,6 @@ static void loadDPIAwarenessFunctions()
         return;
 
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    getProcessDPIAwareness              = (GetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "GetProcessDpiAwareness");
     getWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
     setThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
     getThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
@@ -417,13 +404,10 @@ static bool isPerMonitorDPIAwareProcess()
         if (! JUCEApplication::isStandaloneApp())
             return false;
 
-        if (getProcessDPIAwareness == nullptr)
-            return false;
+        PROCESS_DPI_AWARENESS context{};
+        GetProcessDpiAwareness (nullptr, &context);
 
-        DPI_Awareness context;
-        getProcessDPIAwareness (nullptr, &context);
-
-        return context == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
+        return context == PROCESS_PER_MONITOR_DPI_AWARE;
     }();
 
     return dpiAware;
@@ -441,7 +425,7 @@ static bool isPerMonitorDPIAwareWindow ([[maybe_unused]] HWND nativeWindow)
         && getAwarenessFromDPIAwarenessContext != nullptr)
     {
         return (getAwarenessFromDPIAwarenessContext (getWindowDPIAwarenessContext (nativeWindow))
-                  == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+                  == DPI_AWARENESS_PER_MONITOR_AWARE);
     }
 
     return isPerMonitorDPIAwareProcess();
@@ -460,7 +444,7 @@ static bool isPerMonitorDPIAwareThread (GetThreadDPIAwarenessContextFunc getThre
         && getAwarenessFromDPIAwarenessContextIn != nullptr)
     {
         return (getAwarenessFromDPIAwarenessContextIn (getThreadDPIAwarenessContextIn())
-                  == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+                  == DPI_AWARENESS_PER_MONITOR_AWARE);
     }
 
     return isPerMonitorDPIAwareProcess();
@@ -557,10 +541,10 @@ public:
         if (const auto& functions = getFunctions(); functions.isLoaded())
         {
             auto dpiAwareWindow = (functions.getAwarenessFromContext (functions.getWindowAwareness (nativeWindow))
-                                   == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+                                   == DPI_AWARENESS_PER_MONITOR_AWARE);
 
             auto dpiAwareThread = (functions.getAwarenessFromContext (functions.getThreadAwareness())
-                                   == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+                                   == DPI_AWARENESS_PER_MONITOR_AWARE);
 
             if (dpiAwareWindow && ! dpiAwareThread)
                 oldContext = functions.setThreadAwareness (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
