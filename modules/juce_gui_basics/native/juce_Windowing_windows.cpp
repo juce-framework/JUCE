@@ -358,7 +358,6 @@ using SetProcessDPIAwareFunc                   = BOOL                  (WINAPI*)
 using SetProcessDPIAwarenessContextFunc        = BOOL                  (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using SetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (DPI_Awareness);
 using SetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (DPI_AWARENESS_CONTEXT);
-using GetDPIForWindowFunc                      = UINT                  (WINAPI*) (HWND);
 using GetDPIForMonitorFunc                     = HRESULT               (WINAPI*) (HMONITOR, Monitor_DPI_Type, UINT*, UINT*);
 using GetSystemMetricsForDpiFunc               = int                   (WINAPI*) (int, UINT);
 using GetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (HANDLE, DPI_Awareness*);
@@ -372,7 +371,6 @@ static SetProcessDPIAwarenessContextFunc       setProcessDPIAwarenessContext    
 static SetProcessDPIAwarenessFunc              setProcessDPIAwareness              = nullptr;
 static SetThreadDPIAwarenessContextFunc        setThreadDPIAwarenessContext        = nullptr;
 static GetDPIForMonitorFunc                    getDPIForMonitor                    = nullptr;
-static GetDPIForWindowFunc                     getDPIForWindow                     = nullptr;
 static GetProcessDPIAwarenessFunc              getProcessDPIAwareness              = nullptr;
 static GetWindowDPIAwarenessContextFunc        getWindowDPIAwarenessContext        = nullptr;
 static GetThreadDPIAwarenessContextFunc        getThreadDPIAwarenessContext        = nullptr;
@@ -396,7 +394,6 @@ static void loadDPIAwarenessFunctions()
     setProcessDPIAwareness              = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
 
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    getDPIForWindow                     = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
     getProcessDPIAwareness              = (GetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "GetProcessDpiAwareness");
     getWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
     setThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
@@ -713,14 +710,7 @@ static Point<int> convertLogicalScreenPointToPhysical (Point<int> p, HWND h) noe
 JUCE_API double getScaleFactorForWindow (HWND h);
 JUCE_API double getScaleFactorForWindow (HWND h)
 {
-    // NB. Using a local function here because we need to call this method from the plug-in wrappers
-    // which don't load the DPI-awareness functions on startup
-    static auto localGetDPIForWindow = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
-
-    if (localGetDPIForWindow != nullptr)
-        return (double) localGetDPIForWindow (h) / USER_DEFAULT_SCREEN_DPI;
-
-    return 1.0;
+    return (double) GetDpiForWindow (h) / USER_DEFAULT_SCREEN_DPI;
 }
 
 static RECT getWindowScreenRect (HWND hwnd)
@@ -2199,8 +2189,7 @@ public:
             if (auto* parentPeer = getOwnerOfWindow (parentHWND))
                 return parentPeer->getPlatformScaleFactor();
 
-            if (getDPIForWindow != nullptr)
-                return getScaleFactorForWindow (parentHWND);
+            return getScaleFactorForWindow (parentHWND);
         }
 
         return scaleFactor;
