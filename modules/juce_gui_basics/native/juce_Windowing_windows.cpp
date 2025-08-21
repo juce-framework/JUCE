@@ -354,7 +354,6 @@ static void checkForPointerAPI()
 }
 
 //==============================================================================
-using SetProcessDPIAwareFunc                   = BOOL                  (WINAPI*) ();
 using SetProcessDPIAwarenessContextFunc        = BOOL                  (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using SetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (DPI_Awareness);
 using SetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (DPI_AWARENESS_CONTEXT);
@@ -366,7 +365,6 @@ using GetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*)
 using GetAwarenessFromDpiAwarenessContextFunc  = DPI_Awareness         (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using EnableNonClientDPIScalingFunc            = BOOL                  (WINAPI*) (HWND);
 
-static SetProcessDPIAwareFunc                  setProcessDPIAware                  = nullptr;
 static SetProcessDPIAwarenessContextFunc       setProcessDPIAwarenessContext       = nullptr;
 static SetProcessDPIAwarenessFunc              setProcessDPIAwareness              = nullptr;
 static SetThreadDPIAwarenessContextFunc        setThreadDPIAwarenessContext        = nullptr;
@@ -381,8 +379,6 @@ static bool hasCheckedForDPIAwareness = false;
 
 static void loadDPIAwarenessFunctions()
 {
-    setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
-
     constexpr auto shcore = "SHCore.dll";
     LoadLibraryA (shcore);
     const auto shcoreModule = GetModuleHandleA (shcore);
@@ -428,7 +424,7 @@ static void setDPIAwareness()
         && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_System_Aware)))
         return;
 
-    NullCheckedInvocation::invoke (setProcessDPIAware);
+    SetProcessDPIAware();
 }
 
 static bool isPerMonitorDPIAwareProcess()
