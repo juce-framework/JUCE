@@ -34,9 +34,9 @@
 
 #if JUCE_PLUGINHOST_LV2 && (! (JUCE_ANDROID || JUCE_IOS))
 
-#include "juce_LV2Common.h"
-#include "juce_LV2Resources.h"
-
+#include <juce_audio_processors/format_types/juce_LV2Common.h>
+#include <juce_audio_processors/format_types/juce_LV2Resources.h>
+#include <juce_audio_processors_headless/utilities/juce_FlagCache.h>
 #include <juce_gui_extra/native/juce_NSViewFrameWatcher_mac.h>
 
 #include <thread>
@@ -2044,7 +2044,6 @@ public:
     FeaturesData features;
     Instance instance;
     Messages<MessageHeader, RealtimeReadTrait> uiToProcessor;
-    SharedResourcePointer<ProcessorToUi> processorToUi;
 
 private:
     LV2_Handle handle = instance == nullptr ? nullptr : instance.getHandle();
@@ -2271,7 +2270,7 @@ struct UiDescriptorLibrary
         : library (std::make_unique<DynamicLibrary> (libraryPath)),
           getDescriptor (lv2_shared::wordCast<GetDescriptor> (library->getFunction ("lv2ui_descriptor"))) {}
 
-    std::unique_ptr<DynamicLibrary> library;
+    std::shared_ptr<DynamicLibrary> library;
     GetDescriptor getDescriptor = nullptr;
 };
 
@@ -2592,169 +2591,10 @@ public:
     auto withPluginUri  (URL v)  const noexcept { return withMember (*this, &UiInstanceArgs::pluginUri,  std::move (v)); }
 };
 
-/*
-    Creates and holds a UI instance for a plugin with a specific URI, using the provided descriptor.
-*/
-class UiInstance
-{
-public:
-    UiInstance (World& world,
-                const UiDescriptor* descriptorIn,
-                const UiInstanceArgs& args,
-                const LV2_Feature* const* features,
-                MessageBufferInterface<MessageHeader>& messagesIn,
-                SymbolMap& map,
-                PhysicalResizeListener& rl)
-        : descriptor (descriptorIn),
-          resizeListener (rl),
-          uiToProcessor (messagesIn),
-          mLV2_UI__floatProtocol   (map.map (LV2_UI__floatProtocol)),
-          mLV2_ATOM__atomTransfer  (map.map (LV2_ATOM__atomTransfer)),
-          mLV2_ATOM__eventTransfer (map.map (LV2_ATOM__eventTransfer)),
-          instance (makeInstance (args, features)),
-          idleCallback (getExtensionData<LV2UI_Idle_Interface> (world, LV2_UI__idleInterface))
-    {
-        jassert (descriptor != nullptr);
-        jassert (widget != nullptr);
-
-        ignoreUnused (resizeListener);
-    }
-
-    LV2UI_Handle getHandle() const noexcept { return instance.get(); }
-
-    void pushMessage (MessageHeader header, uint32_t size, const void* buffer)
-    {
-        descriptor->portEvent (getHandle(), header.portIndex, size, header.protocol, buffer);
-    }
-
-    int idle()
-    {
-        if (idleCallback.valid && idleCallback.extension.idle != nullptr)
-            return idleCallback.extension.idle (getHandle());
-
-        return 0;
-    }
-
-    template <typename Extension>
-    OptionalExtension<Extension> getExtensionData (World& world, const char* uid) const
-    {
-        return descriptor->getExtensionData<Extension> (world, uid);
-    }
-
-    Rectangle<int> getDetectedViewBounds() const
-    {
-       #if JUCE_MAC
-        const auto frame = [(NSView*) widget frame];
-        return { (int) frame.size.width, (int) frame.size.height };
-       #elif JUCE_LINUX || JUCE_BSD
-        Window root = 0;
-        int wx = 0, wy = 0;
-        unsigned int ww = 0, wh = 0, bw = 0, bitDepth = 0;
-
-        XWindowSystemUtilities::ScopedXLock xLock;
-        auto* display = XWindowSystem::getInstance()->getDisplay();
-        X11Symbols::getInstance()->xGetGeometry (display,
-                                                 (::Drawable) widget,
-                                                 &root,
-                                                 &wx,
-                                                 &wy,
-                                                 &ww,
-                                                 &wh,
-                                                 &bw,
-                                                 &bitDepth);
-
-        return { (int) ww, (int) wh };
-       #elif JUCE_WINDOWS
-        RECT rect;
-        GetWindowRect ((HWND) widget, &rect);
-        return { rect.right - rect.left, rect.bottom - rect.top };
-       #else
-        return {};
-       #endif
-    }
-
-    const UiDescriptor* descriptor = nullptr;
-
-private:
-    using Instance = std::unique_ptr<void, void (*) (LV2UI_Handle)>;
-    using Idle = int (*) (LV2UI_Handle);
-
-    Instance makeInstance (const UiInstanceArgs& args, const LV2_Feature* const* features)
-    {
-        if (descriptor->get() == nullptr)
-            return { nullptr, [] (LV2UI_Handle) {} };
-
-        return Instance { descriptor->get()->instantiate (descriptor->get(),
-                                                          args.pluginUri.toString (true).toRawUTF8(),
-                                                          File::addTrailingSeparator (args.bundlePath.getFullPathName()).toRawUTF8(),
-                                                          writeFunction,
-                                                          this,
-                                                          &widget,
-                                                          features),
-                          descriptor->get()->cleanup };
-    }
-
-    void write (uint32_t portIndex, uint32_t bufferSize, uint32_t protocol, const void* buffer)
-    {
-        const LV2_URID protocols[] { 0, mLV2_UI__floatProtocol, mLV2_ATOM__atomTransfer, mLV2_ATOM__eventTransfer };
-        const auto it = std::find (std::begin (protocols), std::end (protocols), protocol);
-
-        if (it != std::end (protocols))
-        {
-            uiToProcessor.pushMessage ({ portIndex, protocol }, bufferSize, buffer);
-        }
-    }
-
-    static void writeFunction (LV2UI_Controller controller,
-                               uint32_t portIndex,
-                               uint32_t bufferSize,
-                               uint32_t portProtocol,
-                               const void* buffer)
-    {
-        jassert (controller != nullptr);
-        static_cast<UiInstance*> (controller)->write (portIndex, bufferSize, portProtocol, buffer);
-    }
-
-    PhysicalResizeListener& resizeListener;
-    MessageBufferInterface<MessageHeader>& uiToProcessor;
-    LV2UI_Widget widget = nullptr;
-    const LV2_URID mLV2_UI__floatProtocol;
-    const LV2_URID mLV2_ATOM__atomTransfer;
-    const LV2_URID mLV2_ATOM__eventTransfer;
-    Instance instance;
-    OptionalExtension<LV2UI_Idle_Interface> idleCallback;
-
-   #if JUCE_MAC
-    NSViewFrameWatcher frameWatcher { (NSView*) widget, [this]
-    {
-        const auto bounds = getDetectedViewBounds();
-        resizeListener.viewRequestedResizeInPhysicalPixels (bounds.getWidth(), bounds.getHeight());
-    } };
-   #elif JUCE_WINDOWS
-    WindowSizeChangeListener frameWatcher { (HWND) widget, resizeListener };
-   #endif
-
-    JUCE_LEAK_DETECTOR (UiInstance)
-};
-
 struct TouchListener
 {
     virtual ~TouchListener() = default;
     virtual void controlGrabbed (uint32_t port, bool grabbed) = 0;
-};
-
-class AsyncFn final : public AsyncUpdater
-{
-public:
-    explicit AsyncFn (std::function<void()> callbackIn)
-        : callback (std::move (callbackIn)) {}
-
-    ~AsyncFn() override { cancelPendingUpdate(); }
-
-    void handleAsyncUpdate() override { callback(); }
-
-private:
-    std::function<void()> callback;
 };
 
 class UiFeaturesDataOptions
@@ -2920,40 +2760,6 @@ private:
     JUCE_LEAK_DETECTOR (UiFeaturesData)
 };
 
-class UiInstanceWithSupports
-{
-public:
-    UiInstanceWithSupports (World& world,
-                            PhysicalResizeListener& resizeListener,
-                            TouchListener& touchListener,
-                            const UiDescriptor* descriptor,
-                            const UiInstanceArgs& args,
-                            LV2UI_Widget parent,
-                            InstanceWithSupports& engineInstance,
-                            const UiFeaturesDataOptions& opts)
-        : features (resizeListener,
-                    touchListener,
-                    engineInstance.instance.getHandle(),
-                    parent,
-                    engineInstance.instance.getExtensionDataCallback(),
-                    engineInstance.ports,
-                    *engineInstance.symap,
-                    opts),
-          instance (world,
-                    descriptor,
-                    args,
-                    features.getFeatureArray(),
-                    engineInstance.uiToProcessor,
-                    *engineInstance.symap,
-                    resizeListener)
-    {}
-
-    UiFeaturesData features;
-    UiInstance instance;
-
-    JUCE_LEAK_DETECTOR (UiInstanceWithSupports)
-};
-
 struct RequiredFeatures
 {
     explicit RequiredFeatures (OwningNodes nodes)
@@ -2978,536 +2784,6 @@ static bool noneOf (Range&& range, Predicate&& pred)
     using std::end;
     return std::none_of (begin (range), end (range), std::forward<Predicate> (pred));
 }
-
-class PeerChangedListener final : private ComponentMovementWatcher
-{
-public:
-    PeerChangedListener (Component& c, std::function<void()> peerChangedIn)
-        : ComponentMovementWatcher (&c), peerChanged (std::move (peerChangedIn))
-    {
-    }
-
-    void componentMovedOrResized (bool, bool) override {}
-    void componentPeerChanged() override { NullCheckedInvocation::invoke (peerChanged); }
-    void componentVisibilityChanged() override {}
-
-    using ComponentMovementWatcher::componentVisibilityChanged;
-    using ComponentMovementWatcher::componentMovedOrResized;
-
-private:
-    std::function<void()> peerChanged;
-};
-
-struct ViewSizeListener final : private ComponentMovementWatcher
-{
-    ViewSizeListener (Component& c, PhysicalResizeListener& l)
-        : ComponentMovementWatcher (&c), listener (l)
-    {
-    }
-
-    void componentMovedOrResized (bool, bool wasResized) override
-    {
-        if (wasResized)
-        {
-            const auto physicalSize = Desktop::getInstance().getDisplays()
-                                                            .logicalToPhysical (getComponent()->localAreaToGlobal (getComponent()->getLocalBounds()));
-            const auto width  = physicalSize.getWidth();
-            const auto height = physicalSize.getHeight();
-
-            if (width > 10 && height > 10)
-                listener.viewRequestedResizeInPhysicalPixels (width, height);
-        }
-    }
-
-    void componentPeerChanged() override {}
-    void componentVisibilityChanged() override {}
-
-    using ComponentMovementWatcher::componentVisibilityChanged;
-    using ComponentMovementWatcher::componentMovedOrResized;
-
-    PhysicalResizeListener& listener;
-};
-
-class ConfiguredEditorComponent final : public Component,
-                                        private PhysicalResizeListener
-{
-public:
-    ConfiguredEditorComponent (World& world,
-                               InstanceWithSupports& instance,
-                               UiDescriptor& uiDescriptor,
-                               LogicalResizeListener& resizeListenerIn,
-                               TouchListener& touchListener,
-                               const String& uiBundleUri,
-                               const UiFeaturesDataOptions& opts)
-        : resizeListener (resizeListenerIn),
-          floatUrid (instance.symap->map (LV2_ATOM__Float)),
-          scaleFactorUrid (instance.symap->map (LV2_UI__scaleFactor)),
-          uiInstance (new UiInstanceWithSupports (world,
-                                                  *this,
-                                                  touchListener,
-                                                  &uiDescriptor,
-                                                  UiInstanceArgs{}.withBundlePath (bundlePathFromUri (uiBundleUri.toRawUTF8()))
-                                                                  .withPluginUri (URL (instance.instance.getUri())),
-                                                  viewComponent.getWidget(),
-                                                  instance,
-                                                  opts)),
-          resizeClient (uiInstance->instance.getExtensionData<LV2UI_Resize> (world, LV2_UI__resize)),
-          optionsInterface (uiInstance->instance.getExtensionData<LV2_Options_Interface> (world, LV2_OPTIONS__interface))
-    {
-        jassert (uiInstance != nullptr);
-
-        setOpaque (true);
-        addAndMakeVisible (viewComponent);
-
-        const auto boundsToUse = [&]
-        {
-            const auto requested = uiInstance->features.getLastRequestedBounds();
-
-            if (requested.getWidth() > 10 && requested.getHeight() > 10)
-                return requested;
-
-            return uiInstance->instance.getDetectedViewBounds();
-        }();
-
-        const auto scaled = lv2ToComponentRect (boundsToUse);
-        lastWidth  = scaled.getWidth();
-        lastHeight = scaled.getHeight();
-        setSize (lastWidth, lastHeight);
-    }
-
-    ~ConfiguredEditorComponent() override
-    {
-        viewComponent.prepareForDestruction();
-    }
-
-    void paint (Graphics& g) override
-    {
-        g.fillAll (Colours::black);
-    }
-
-    void resized() override
-    {
-        viewComponent.setBounds (getLocalBounds());
-    }
-
-    void updateViewBounds()
-    {
-        // If the editor changed size as a result of a request from the client,
-        // we shouldn't send a notification back to the client.
-        if (uiInstance != nullptr)
-        {
-            if (resizeClient.valid && resizeClient.extension.ui_resize != nullptr)
-            {
-                const auto physicalSize = componentToLv2Rect (getLocalBounds());
-
-                resizeClient.extension.ui_resize (uiInstance->instance.getHandle(),
-                                                  physicalSize.getWidth(),
-                                                  physicalSize.getHeight());
-            }
-        }
-    }
-
-    void pushMessage (MessageHeader header, uint32_t size, const void* buffer)
-    {
-        if (uiInstance != nullptr)
-            uiInstance->instance.pushMessage (header, size, buffer);
-    }
-
-    int idle()
-    {
-        if (uiInstance != nullptr)
-            return uiInstance->instance.idle();
-
-        return 0;
-    }
-
-    void childBoundsChanged (Component* c) override
-    {
-        if (c == nullptr)
-            resizeToFitView();
-    }
-
-    void setUserScaleFactor (float userScale) { userScaleFactor = userScale; }
-
-    void sendScaleFactorToPlugin()
-    {
-        const auto factor = getEffectiveScale();
-
-        const LV2_Options_Option options[]
-        {
-            { LV2_OPTIONS_INSTANCE, 0, scaleFactorUrid, sizeof (float), floatUrid, &factor },
-            { {}, {}, {}, {}, {}, {} }
-        };
-
-        if (optionsInterface.valid)
-            optionsInterface.extension.set (uiInstance->instance.getHandle(), options);
-
-        applyLastRequestedPhysicalSize();
-    }
-
-private:
-    void viewRequestedResizeInPhysicalPixels (int width, int height) override
-    {
-        lastWidth = width;
-        lastHeight = height;
-        const auto logical = lv2ToComponentRect ({ width, height });
-        resizeListener.viewRequestedResizeInLogicalPixels (logical.getWidth(), logical.getHeight());
-    }
-
-    void resizeToFitView()
-    {
-        viewComponent.fitToView();
-        resizeListener.viewRequestedResizeInLogicalPixels (viewComponent.getWidth(), viewComponent.getHeight());
-    }
-
-    void applyLastRequestedPhysicalSize()
-    {
-        viewRequestedResizeInPhysicalPixels (lastWidth, lastHeight);
-        viewComponent.forceViewToSize();
-    }
-
-    /*  Convert from the component's coordinate system to the hosted LV2's coordinate system. */
-    Rectangle<int> componentToLv2Rect (Rectangle<int> r) const
-    {
-        return localAreaToGlobal (r) * nativeScaleFactor * getDesktopScaleFactor();
-    }
-
-    /*  Convert from the hosted LV2's coordinate system to the component's coordinate system. */
-    Rectangle<int> lv2ToComponentRect (Rectangle<int> vr) const
-    {
-        return getLocalArea (nullptr, vr / (nativeScaleFactor * getDesktopScaleFactor()));
-    }
-
-    float getEffectiveScale() const     { return nativeScaleFactor * userScaleFactor; }
-
-    // If possible, try to keep platform-specific handing restricted to the implementation of
-    // ViewComponent. Keep the interface of ViewComponent consistent on all platforms.
-   #if JUCE_LINUX || JUCE_BSD
-    struct InnerHolder
-    {
-        struct Inner final : public XEmbedComponent
-        {
-            Inner() : XEmbedComponent (true, true)
-            {
-                setOpaque (true);
-                setVisible (true);
-                addToDesktop (0);
-            }
-        };
-
-        Inner inner;
-    };
-
-    struct ViewComponent final : public InnerHolder,
-                                 public XEmbedComponent
-    {
-        explicit ViewComponent (PhysicalResizeListener& l)
-            : XEmbedComponent ((unsigned long) inner.getPeer()->getNativeHandle(), true, false),
-              listener (inner, l)
-        {
-            setOpaque (true);
-        }
-
-        ~ViewComponent()
-        {
-            removeClient();
-        }
-
-        void prepareForDestruction()
-        {
-            inner.removeClient();
-        }
-
-        LV2UI_Widget getWidget() { return lv2_shared::wordCast<LV2UI_Widget> (inner.getHostWindowID()); }
-        void forceViewToSize() {}
-        void fitToView() {}
-
-        ViewSizeListener listener;
-    };
-   #elif JUCE_MAC
-    struct ViewComponent final : public NSViewComponentWithParent
-    {
-        explicit ViewComponent (PhysicalResizeListener&)
-            : NSViewComponentWithParent (WantsNudge::no) {}
-        LV2UI_Widget getWidget() { return getView(); }
-        void forceViewToSize() {}
-        void fitToView() { resizeToFitView(); }
-        void prepareForDestruction() {}
-    };
-   #elif JUCE_WINDOWS
-    struct ViewComponent final : public HWNDComponent
-    {
-        explicit ViewComponent (PhysicalResizeListener&)
-        {
-            setOpaque (true);
-            inner.addToDesktop (0);
-
-            if (auto* peer = inner.getPeer())
-                setHWND (peer->getNativeHandle());
-        }
-
-        void paint (Graphics& g) override { g.fillAll (Colours::black); }
-
-        LV2UI_Widget getWidget() { return getHWND(); }
-
-        void forceViewToSize() { updateHWNDBounds(); }
-        void fitToView() { resizeToFit(); }
-
-        void prepareForDestruction() {}
-
-    private:
-        struct Inner final : public Component
-        {
-            Inner() { setOpaque (true); }
-            void paint (Graphics& g) override { g.fillAll (Colours::black); }
-        };
-
-        Inner inner;
-    };
-   #else
-    struct ViewComponent final : public Component
-    {
-        explicit ViewComponent (PhysicalResizeListener&) {}
-        void* getWidget() { return nullptr; }
-        void forceViewToSize() {}
-        void fitToView() {}
-        void prepareForDestruction() {}
-    };
-   #endif
-
-    struct ScaleNotifierCallback
-    {
-        ConfiguredEditorComponent& window;
-
-        void operator() (float platformScale) const
-        {
-            MessageManager::callAsync ([ref = Component::SafePointer<ConfiguredEditorComponent> (&window), platformScale]
-            {
-                if (auto* r = ref.getComponent())
-                {
-                    if (approximatelyEqual (std::exchange (r->nativeScaleFactor, platformScale), platformScale))
-                        return;
-
-                    r->nativeScaleFactor = platformScale;
-                    r->sendScaleFactorToPlugin();
-                }
-            });
-        }
-    };
-
-    LogicalResizeListener& resizeListener;
-    int lastWidth = 0, lastHeight = 0;
-    float nativeScaleFactor = 1.0f, userScaleFactor = 1.0f;
-    NativeScaleFactorNotifier scaleNotifier { this, ScaleNotifierCallback { *this } };
-    ViewComponent viewComponent { *this };
-    LV2_URID floatUrid, scaleFactorUrid;
-    std::unique_ptr<UiInstanceWithSupports> uiInstance;
-    OptionalExtension<LV2UI_Resize> resizeClient;
-    OptionalExtension<LV2_Options_Interface> optionsInterface;
-    PeerChangedListener peerListener { *this, [this]
-    {
-        applyLastRequestedPhysicalSize();
-    } };
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfiguredEditorComponent)
-};
-
-//==============================================================================
-/*  Interface to receive notifications when the Editor changes. */
-struct EditorListener
-{
-    virtual ~EditorListener() = default;
-
-    /*  The editor needs to be recreated in a few different scenarios, such as:
-        - When the scale factor of the window changes, because we can only provide the
-          scale factor to the view during construction
-        - When the sample rate changes, because the processor also needs to be destroyed
-          and recreated in this case
-
-        This function will be called whenever the editor has been recreated, in order to
-        allow the processor (or other listeners) to respond, e.g. by sending all of the
-        current port/parameter values to the view.
-    */
-    virtual void viewCreated (UiEventListener* newListener) = 0;
-
-    virtual void notifyEditorBeingDeleted() = 0;
-};
-
-/*  We can't pass the InstanceWithSupports directly to the editor, because
-    it might be destroyed and reconstructed if the sample rate changes.
-*/
-struct InstanceProvider
-{
-    virtual ~InstanceProvider() noexcept = default;
-
-    virtual InstanceWithSupports* getInstanceWithSupports() const = 0;
-};
-
-class Editor final : public AudioProcessorEditor,
-                     public UiEventListener,
-                     private LogicalResizeListener
-{
-public:
-    Editor (World& worldIn,
-            AudioPluginInstance& p,
-            InstanceProvider& instanceProviderIn,
-            UiDescriptor& uiDescriptorIn,
-            TouchListener& touchListenerIn,
-            EditorListener& listenerIn,
-            const String& uiBundleUriIn,
-            RequiredFeatures requiredIn,
-            OptionalFeatures optionalIn)
-        : AudioProcessorEditor (p),
-          world (worldIn),
-          instanceProvider (&instanceProviderIn),
-          uiDescriptor (&uiDescriptorIn),
-          touchListener (&touchListenerIn),
-          listener (&listenerIn),
-          uiBundleUri (uiBundleUriIn),
-          required (std::move (requiredIn)),
-          optional (std::move (optionalIn))
-    {
-        setResizable (isResizable (required, optional), false);
-        setSize (10, 10);
-        setOpaque (true);
-
-        createView();
-
-        instanceProvider->getInstanceWithSupports()->processorToUi->addUi (*this);
-    }
-
-    ~Editor() noexcept override
-    {
-        instanceProvider->getInstanceWithSupports()->processorToUi->removeUi (*this);
-
-        listener->notifyEditorBeingDeleted();
-    }
-
-    void createView()
-    {
-        const auto initialScale = userScaleFactor * (float) [&]
-        {
-            if (auto* p = getPeer())
-                return p->getPlatformScaleFactor();
-
-            return 1.0;
-        }();
-
-        const auto opts = UiFeaturesDataOptions{}.withInitialScaleFactor (initialScale)
-                                                 .withSampleRate ((float) processor.getSampleRate());
-        configuredEditor = nullptr;
-        configuredEditor = rawToUniquePtr (new ConfiguredEditorComponent (world,
-                                                                          *instanceProvider->getInstanceWithSupports(),
-                                                                          *uiDescriptor,
-                                                                          *this,
-                                                                          *touchListener,
-                                                                          uiBundleUri,
-                                                                          opts));
-        parentHierarchyChanged();
-        const auto initialSize = configuredEditor->getBounds();
-        setSize (initialSize.getWidth(), initialSize.getHeight());
-
-        listener->viewCreated (this);
-    }
-
-    void destroyView()
-    {
-        configuredEditor = nullptr;
-    }
-
-    void paint (Graphics& g) override
-    {
-        g.fillAll (Colours::black);
-    }
-
-    void resized() override
-    {
-        const ScopedValueSetter<bool> scope (resizeFromHost, true);
-
-        if (auto* inner = configuredEditor.get())
-        {
-            inner->setBounds (getLocalBounds());
-            inner->updateViewBounds();
-        }
-    }
-
-    void parentHierarchyChanged() override
-    {
-        if (auto* comp = configuredEditor.get())
-        {
-            if (isShowing())
-                addAndMakeVisible (comp);
-            else
-                removeChildComponent (comp);
-        }
-    }
-
-    void pushMessage (MessageHeader header, uint32_t size, const void* buffer) override
-    {
-        if (auto* comp = configuredEditor.get())
-            comp->pushMessage (header, size, buffer);
-    }
-
-    int idle() override
-    {
-        if (auto* comp = configuredEditor.get())
-            return comp->idle();
-
-        return 0;
-    }
-
-    void setScaleFactor (float newScale) override
-    {
-        userScaleFactor = newScale;
-
-        if (configuredEditor != nullptr)
-        {
-            configuredEditor->setUserScaleFactor (userScaleFactor);
-            configuredEditor->sendScaleFactorToPlugin();
-        }
-    }
-
-private:
-    bool isResizable (const RequiredFeatures& requiredFeatures,
-                      const OptionalFeatures& optionalFeatures) const
-    {
-        const auto uriMatches = [] (const LilvNode* node)
-        {
-            const auto* uri = lilv_node_as_uri (node);
-            return std::strcmp (uri, LV2_UI__noUserResize) == 0;
-        };
-
-        return uiDescriptor->hasExtensionData (world, LV2_UI__resize)
-               && ! uiDescriptor->hasExtensionData (world, LV2_UI__noUserResize)
-               && noneOf (requiredFeatures.values, uriMatches)
-               && noneOf (optionalFeatures.values, uriMatches);
-    }
-
-    bool isScalable() const
-    {
-        return uiDescriptor->hasExtensionData (world, LV2_OPTIONS__interface);
-    }
-
-    void viewRequestedResizeInLogicalPixels (int width, int height) override
-    {
-        if (! resizeFromHost)
-            setSize (width, height);
-    }
-
-    World& world;
-    InstanceProvider* instanceProvider;
-    UiDescriptor* uiDescriptor;
-    TouchListener* touchListener;
-    EditorListener* listener;
-    String uiBundleUri;
-    const RequiredFeatures required;
-    const OptionalFeatures optional;
-    std::unique_ptr<ConfiguredEditorComponent> configuredEditor;
-    float userScaleFactor = 1.0f;
-    bool resizeFromHost = false;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Editor)
-};
 
 class Uis
 {
@@ -4258,126 +3534,28 @@ static std::vector<ParameterData> getJuceParameterInfo (World& world,
  constexpr auto editorFunctionalityEnabled = false;
 #endif
 
-template <bool editorEnabled = editorFunctionalityEnabled> class OptionalEditor;
-
-template <>
-class OptionalEditor<true>
-{
-public:
-    OptionalEditor (String uiBundleUriIn, UiDescriptor uiDescriptorIn, std::function<void()> timerCallback)
-        : uiBundleUri (std::move (uiBundleUriIn)),
-          uiDescriptor (std::move (uiDescriptorIn)),
-          changedParameterFlusher (std::move (timerCallback)) {}
-
-    void createView()
-    {
-        if (auto* editor = editorPointer.getComponent())
-            editor->createView();
-    }
-
-    void destroyView()
-    {
-        if (auto* editor = editorPointer.getComponent())
-            editor->destroyView();
-    }
-
-    std::unique_ptr<AudioProcessorEditor> createEditor (World& world,
-                                                        AudioPluginInstance& p,
-                                                        InstanceProvider& instanceProviderIn,
-                                                        TouchListener& touchListenerIn,
-                                                        EditorListener& listenerIn)
-    {
-        if (! hasEditor())
-            return nullptr;
-
-        const auto queryFeatures = [this, &world] (const char* kind)
-        {
-            return world.findNodes (world.newUri (uiDescriptor.get()->URI).get(),
-                                    world.newUri (kind).get(),
-                                    nullptr);
-        };
-
-        auto newEditor = std::make_unique<Editor> (world,
-                                                   p,
-                                                   instanceProviderIn,
-                                                   uiDescriptor,
-                                                   touchListenerIn,
-                                                   listenerIn,
-                                                   uiBundleUri,
-                                                   RequiredFeatures { queryFeatures (LV2_CORE__requiredFeature) },
-                                                   OptionalFeatures { queryFeatures (LV2_CORE__optionalFeature) });
-
-        editorPointer = newEditor.get();
-
-        changedParameterFlusher.startTimerHz (60);
-
-        return newEditor;
-    }
-
-    bool hasEditor() const
-    {
-        return uiDescriptor.get() != nullptr;
-    }
-
-    void prepareToDestroyEditor()
-    {
-        changedParameterFlusher.stopTimer();
-    }
-
-private:
-    Component::SafePointer<Editor> editorPointer = nullptr;
-    String uiBundleUri;
-    UiDescriptor uiDescriptor;
-    TimedCallback changedParameterFlusher;
-};
-
-template <>
-class OptionalEditor<false>
-{
-public:
-    OptionalEditor (String, UiDescriptor, std::function<void()>) {}
-
-    void createView() {}
-    void destroyView() {}
-
-    std::unique_ptr<AudioProcessorEditor> createEditor (World&,
-                                                        AudioPluginInstance&,
-                                                        InstanceProvider&,
-                                                        TouchListener&,
-                                                        EditorListener&)
-    {
-        return nullptr;
-    }
-
-    bool hasEditor() const { return false; }
-    void prepareToDestroyEditor() {}
-};
-
 //==============================================================================
-class LV2AudioPluginInstance final : public AudioPluginInstance,
-                                     private TouchListener,
-                                     private EditorListener,
-                                     private InstanceProvider
+class LV2AudioPluginInstanceHeadless : public AudioPluginInstance
 {
 public:
-    LV2AudioPluginInstance (std::shared_ptr<World> worldIn,
-                            const Plugin& pluginIn,
-                            const UsefulUris& uris,
-                            std::unique_ptr<InstanceWithSupports>&& in,
-                            PluginDescription&& desc,
-                            std::vector<String> knownPresetUris,
-                            PluginState stateToApply,
-                            String uiBundleUriIn,
-                            UiDescriptor uiDescriptorIn)
-        : LV2AudioPluginInstance (worldIn,
-                                  pluginIn,
-                                  std::move (in),
-                                  std::move (desc),
-                                  std::move (knownPresetUris),
-                                  std::move (stateToApply),
-                                  std::move (uiBundleUriIn),
-                                  std::move (uiDescriptorIn),
-                                  getParsedBuses (*worldIn, pluginIn, uris)) {}
+    LV2AudioPluginInstanceHeadless (std::shared_ptr<World> worldIn,
+                                    const Plugin& pluginIn,
+                                    const UsefulUris& uris,
+                                    std::unique_ptr<InstanceWithSupports>&& in,
+                                    PluginDescription&& desc,
+                                    std::vector<String> knownPresetUris,
+                                    PluginState stateToApply,
+                                    String,
+                                    UiDescriptor)
+        : LV2AudioPluginInstanceHeadless (worldIn,
+                                          pluginIn,
+                                          std::move (in),
+                                          std::move (desc),
+                                          std::move (knownPresetUris),
+                                          std::move (stateToApply),
+                                          getParsedBuses (*worldIn, pluginIn, uris))
+    {
+    }
 
     void fillInPluginDescription (PluginDescription& d) const override { d = description; }
 
@@ -4398,7 +3576,6 @@ public:
         // Ideally this should all happen in the same Component.
 
         deactivate();
-        destroyView();
 
         MemoryBlock mb;
         getStateInformation (mb);
@@ -4414,8 +3591,6 @@ public:
         setStateInformationImpl (mb.getData(), (int) mb.getSize(), ConcurrentWithAudioCallback::no);
 
         jassert (numSamples == instance->features.getMaxBlockSize());
-
-        optionalEditor.createView();
         activate();
     }
 
@@ -4471,15 +3646,8 @@ public:
         });
     }
 
-    AudioProcessorEditor* createEditor() override
-    {
-        return optionalEditor.createEditor (*world, *this, *this, *this, *this).release();
-    }
-
-    bool hasEditor() const override
-    {
-        return optionalEditor.hasEditor();
-    }
+    AudioProcessorEditor* createEditor() override { return nullptr; }
+    bool hasEditor() const override { return false; }
 
     int getNumPrograms() override { return (int) presetUris.size(); }
 
@@ -4573,28 +3741,48 @@ public:
 
     AudioProcessorParameter* getBypassParameter() const override { return bypassParam; }
 
+    void postAllParametersToUi (ProcessorToUi& channel, UiEventListener* uiEventListener)
+    {
+        parameterValues.postAllParametersToUi (uiEventListener, getParameterWriterUrids(), channel);
+        controlPortStructure.writeOutputPorts (uiEventListener, channel);
+    }
+
+    void postChangedParametersToUi (ProcessorToUi& channel, UiEventListener* uiEventListener)
+    {
+        parameterValues.postChangedParametersToUi (uiEventListener, getParameterWriterUrids(), channel);
+        controlPortStructure.writeOutputPorts (uiEventListener, channel);
+    }
+
+    /*  The current instance will be *recreated* every time the sample rate changes! */
+    InstanceWithSupports* getCurrentInstance() const
+    {
+        return instance.get();
+    }
+
+    AudioProcessorParameter* getParamByPortIndex (uint32_t portIndex) const
+    {
+        return parameterValues.getParamByPortIndex (portIndex);
+    }
+
 private:
     enum class ConcurrentWithAudioCallback { no, yes };
 
-    LV2AudioPluginInstance (std::shared_ptr<World> worldIn,
-                            const Plugin& pluginIn,
-                            std::unique_ptr<InstanceWithSupports>&& in,
-                            PluginDescription&& desc,
-                            std::vector<String> knownPresetUris,
-                            PluginState stateToApply,
-                            String uiBundleUriIn,
-                            UiDescriptor uiDescriptorIn,
-                            const lv2_shared::ParsedBuses& parsedBuses)
+    virtual void sendOutgoingPortMessageToUi (UiMessageHeader, uint32_t, const void*) {}
+
+    LV2AudioPluginInstanceHeadless (std::shared_ptr<World> worldIn,
+                                    const Plugin& pluginIn,
+                                    std::unique_ptr<InstanceWithSupports>&& in,
+                                    PluginDescription&& desc,
+                                    std::vector<String> knownPresetUris,
+                                    PluginState stateToApply,
+                                    const lv2_shared::ParsedBuses& parsedBuses)
         : AudioPluginInstance (getBusesProperties (parsedBuses, *worldIn)),
           declaredBusLayout (parsedBuses),
           world (std::move (worldIn)),
           plugin (pluginIn),
           description (std::move (desc)),
           presetUris (std::move (knownPresetUris)),
-          instance (std::move (in)),
-          optionalEditor (std::move (uiBundleUriIn),
-                          std::move (uiDescriptorIn),
-                          [this] { postChangedParametersToUi(); })
+          instance (std::move (in))
     {
         applyStateWithAppropriateLocking (std::move (stateToApply), ConcurrentWithAudioCallback::no);
     }
@@ -4612,16 +3800,6 @@ private:
         auto mapFeature = instance->symap->getMapFeature();
         applyStateWithAppropriateLocking (PluginState { lilv_state_new_from_string (world->get(), &mapFeature, copy.data()) },
                                           concurrent);
-    }
-
-    // This does *not* destroy the editor component.
-    // If we destroy the processor, the view must also be destroyed to avoid dangling pointers.
-    // However, JUCE clients expect their editors to remain valid for the duration of the
-    // AudioProcessor's lifetime.
-    // As a compromise, this will create a new LV2 view into an existing editor component.
-    void destroyView()
-    {
-        optionalEditor.destroyView();
     }
 
     void activate()
@@ -4660,53 +3838,12 @@ private:
         return port.supportsEvent (world->newUri (LV2_MIDI__MidiEvent).get());
     }
 
-    void controlGrabbed (uint32_t port, bool grabbed) override
-    {
-        if (auto* param = parameterValues.getParamByPortIndex (port))
-        {
-            if (grabbed)
-                param->beginChangeGesture();
-            else
-                param->endChangeGesture();
-        }
-    }
-
-    void viewCreated (UiEventListener* newListener) override
-    {
-        uiEventListener = newListener;
-        postAllParametersToUi();
-    }
-
     ParameterWriterUrids getParameterWriterUrids() const
     {
         return { instance->urids.mLV2_PATCH__Set,
                  instance->urids.mLV2_PATCH__property,
                  instance->urids.mLV2_PATCH__value,
                  instance->urids.mLV2_ATOM__eventTransfer };
-    }
-
-    void postAllParametersToUi()
-    {
-        parameterValues.postAllParametersToUi (uiEventListener, getParameterWriterUrids(), *instance->processorToUi);
-        controlPortStructure.writeOutputPorts (uiEventListener, *instance->processorToUi);
-    }
-
-    void postChangedParametersToUi()
-    {
-        parameterValues.postChangedParametersToUi (uiEventListener, getParameterWriterUrids(), *instance->processorToUi);
-        controlPortStructure.writeOutputPorts (uiEventListener, *instance->processorToUi);
-    }
-
-    void notifyEditorBeingDeleted() override
-    {
-        optionalEditor.prepareToDestroyEditor();
-        uiEventListener = nullptr;
-        editorBeingDeleted (getActiveEditor());
-    }
-
-    InstanceWithSupports* getInstanceWithSupports() const override
-    {
-        return instance.get();
     }
 
     void applyStateWithAppropriateLocking (PluginState&& state, ConcurrentWithAudioCallback concurrent)
@@ -4726,7 +3863,6 @@ private:
         }
 
         parameterValues.updateFromControlPorts (controlPortStructure);
-        asyncFullUiParameterUpdate.triggerAsyncUpdate();
     }
 
     PluginState loadStateWithUri (const String& str)
@@ -4946,10 +4082,9 @@ private:
 
         for (const auto* event : lv2_shared::SequenceIterator { lv2_shared::SequenceWithSize { sequence } })
         {
-            // At the moment, we forward all outgoing events to the UI.
-            instance->processorToUi->pushMessage ({ uiEventListener, { port.header.index, instance->urids.mLV2_ATOM__eventTransfer } },
-                                                  (uint32_t) (event->body.size + sizeof (LV2_Atom)),
-                                                  &event->body);
+            sendOutgoingPortMessageToUi ({ nullptr, { port.header.index, instance->urids.mLV2_ATOM__eventTransfer } },
+                                         (uint32_t) (event->body.size + sizeof (LV2_Atom)),
+                                         &event->body);
 
             if (event->body.type == instance->urids.mLV2_MIDI__MidiEvent)
                 midi.addEvent (event + 1, static_cast<int> (event->body.size), static_cast<int> (event->time.frames));
@@ -5105,7 +4240,6 @@ private:
     PluginDescription description;
     std::vector<String> presetUris;
     std::unique_ptr<InstanceWithSupports> instance;
-    AsyncFn asyncFullUiParameterUpdate { [this] { postAllParametersToUi(); } };
 
     std::vector<AtomPort*> atomPorts = getPortPointers (instance->ports.getAtomPorts());
 
@@ -5170,13 +4304,11 @@ private:
     LV2Parameter* bypassParam = enabledPort != nullptr ? parameterValues.getParamByPortIndex (enabledPort->header.index)
                                                        : nullptr;
 
-    std::atomic<UiEventListener*> uiEventListener { nullptr };
-    OptionalEditor<> optionalEditor;
     int lastAppliedPreset = 0;
     bool hasThreadSafeRestore = plugin.hasExtensionData (world->newUri (LV2_STATE__threadSafeRestore));
     bool active { false };
 
-    JUCE_LEAK_DETECTOR (LV2AudioPluginInstance)
+    JUCE_LEAK_DETECTOR (LV2AudioPluginInstanceHeadless)
 };
 
 } // namespace lv2_host
@@ -5393,12 +4525,14 @@ public:
         return result;
     }
 
-    void createPluginInstance (const PluginDescription& desc,
-                               double initialSampleRate,
-                               int initialBufferSize,
-                               PluginCreationCallback callback)
+    template <typename TypeToCreate>
+    static void createPluginInstance (LV2PluginFormat& format,
+                                      const PluginDescription& desc,
+                                      double initialSampleRate,
+                                      int initialBufferSize,
+                                      PluginCreationCallback callback)
     {
-        const auto* pluginPtr = findPluginByUri (desc.fileOrIdentifier);
+        const auto* pluginPtr = format.pimpl->findPluginByUri (desc.fileOrIdentifier);
 
         if (pluginPtr == nullptr)
             return callback (nullptr, "Unable to locate plugin with the requested URI");
@@ -5416,6 +4550,9 @@ public:
 
             return callback (nullptr, "plugin requires missing features: " + missingFeaturesString);
         }
+
+        auto world = format.pimpl->world;
+        auto& uris = format.pimpl->uris;
 
         auto stateToApply = [&]
         {
@@ -5449,7 +4586,7 @@ public:
 
         const auto uiToUse = [&]() -> const LilvUI*
         {
-            const auto bestMatch = findEmbeddableUi (&pluginUis);
+            const auto bestMatch = format.pimpl->findEmbeddableUi (&pluginUis);
 
             if (bestMatch == nullptr)
                 return bestMatch;
@@ -5472,15 +4609,15 @@ public:
         auto uiBundleUri = uiToUse != nullptr ? String::fromUTF8 (lilv_node_as_uri (lilv_ui_get_bundle_uri (uiToUse)))
                                               : String();
 
-        auto wrapped = std::make_unique<lv2_host::LV2AudioPluginInstance> (world,
-                                                                           plugin,
-                                                                           uris,
-                                                                           std::move (instance),
-                                                                           getDescription (pluginPtr),
-                                                                           findPresetUrisForPlugin (plugin.get()),
-                                                                           std::move (stateToApply),
-                                                                           std::move (uiBundleUri),
-                                                                           getUiDescriptor (uiToUse));
+        auto wrapped = std::make_unique<TypeToCreate> (world,
+                                                       plugin,
+                                                       uris,
+                                                       std::move (instance),
+                                                       format.pimpl->getDescription (pluginPtr),
+                                                       format.pimpl->findPresetUrisForPlugin (plugin.get()),
+                                                       std::move (stateToApply),
+                                                       std::move (uiBundleUri),
+                                                       getUiDescriptor (uiToUse));
         callback (std::move (wrapped), {});
     }
 
@@ -5590,7 +4727,938 @@ private:
     lv2_host::UsefulUris uris { world->get() };
 };
 
+namespace lv2_host
+{
+
+/*
+    Creates and holds a UI instance for a plugin with a specific URI, using the provided descriptor.
+*/
+class UiInstance
+{
+public:
+    UiInstance (World& world,
+                const UiDescriptor* descriptorIn,
+                const UiInstanceArgs& args,
+                const LV2_Feature* const* features,
+                MessageBufferInterface<MessageHeader>& messagesIn,
+                SymbolMap& map,
+                PhysicalResizeListener& rl)
+        : descriptor (descriptorIn),
+          resizeListener (rl),
+          uiToProcessor (messagesIn),
+          mLV2_UI__floatProtocol   (map.map (LV2_UI__floatProtocol)),
+          mLV2_ATOM__atomTransfer  (map.map (LV2_ATOM__atomTransfer)),
+          mLV2_ATOM__eventTransfer (map.map (LV2_ATOM__eventTransfer)),
+          instance (makeInstance (args, features)),
+          idleCallback (getExtensionData<LV2UI_Idle_Interface> (world, LV2_UI__idleInterface))
+    {
+        jassert (descriptor != nullptr);
+        jassert (widget != nullptr);
+
+        ignoreUnused (resizeListener);
+    }
+
+    LV2UI_Handle getHandle() const noexcept { return instance.get(); }
+
+    void pushMessage (MessageHeader header, uint32_t size, const void* buffer)
+    {
+        descriptor->portEvent (getHandle(), header.portIndex, size, header.protocol, buffer);
+    }
+
+    int idle()
+    {
+        if (idleCallback.valid && idleCallback.extension.idle != nullptr)
+            return idleCallback.extension.idle (getHandle());
+
+        return 0;
+    }
+
+    template <typename Extension>
+    OptionalExtension<Extension> getExtensionData (World& world, const char* uid) const
+    {
+        return descriptor->getExtensionData<Extension> (world, uid);
+    }
+
+    Rectangle<int> getDetectedViewBounds() const
+    {
+       #if JUCE_MAC
+        const auto frame = [(NSView*) widget frame];
+        return { (int) frame.size.width, (int) frame.size.height };
+       #elif JUCE_LINUX || JUCE_BSD
+        Window root = 0;
+        int wx = 0, wy = 0;
+        unsigned int ww = 0, wh = 0, bw = 0, bitDepth = 0;
+
+        XWindowSystemUtilities::ScopedXLock xLock;
+        auto* display = XWindowSystem::getInstance()->getDisplay();
+        X11Symbols::getInstance()->xGetGeometry (display,
+                                                 (::Drawable) widget,
+                                                 &root,
+                                                 &wx,
+                                                 &wy,
+                                                 &ww,
+                                                 &wh,
+                                                 &bw,
+                                                 &bitDepth);
+
+        return { (int) ww, (int) wh };
+       #elif JUCE_WINDOWS
+        RECT rect;
+        GetWindowRect ((HWND) widget, &rect);
+        return { rect.right - rect.left, rect.bottom - rect.top };
+       #else
+        return {};
+       #endif
+    }
+
+    const UiDescriptor* descriptor = nullptr;
+
+private:
+    using Instance = std::unique_ptr<void, void (*) (LV2UI_Handle)>;
+    using Idle = int (*) (LV2UI_Handle);
+
+    Instance makeInstance (const UiInstanceArgs& args, const LV2_Feature* const* features)
+    {
+        if (descriptor->get() == nullptr)
+            return { nullptr, [] (LV2UI_Handle) {} };
+
+        return Instance { descriptor->get()->instantiate (descriptor->get(),
+                                                          args.pluginUri.toString (true).toRawUTF8(),
+                                                          File::addTrailingSeparator (args.bundlePath.getFullPathName()).toRawUTF8(),
+                                                          writeFunction,
+                                                          this,
+                                                          &widget,
+                                                          features),
+                          descriptor->get()->cleanup };
+    }
+
+    void write (uint32_t portIndex, uint32_t bufferSize, uint32_t protocol, const void* buffer)
+    {
+        const LV2_URID protocols[] { 0, mLV2_UI__floatProtocol, mLV2_ATOM__atomTransfer, mLV2_ATOM__eventTransfer };
+        const auto it = std::find (std::begin (protocols), std::end (protocols), protocol);
+
+        if (it != std::end (protocols))
+        {
+            uiToProcessor.pushMessage ({ portIndex, protocol }, bufferSize, buffer);
+        }
+    }
+
+    static void writeFunction (LV2UI_Controller controller,
+                               uint32_t portIndex,
+                               uint32_t bufferSize,
+                               uint32_t portProtocol,
+                               const void* buffer)
+    {
+        jassert (controller != nullptr);
+        static_cast<UiInstance*> (controller)->write (portIndex, bufferSize, portProtocol, buffer);
+    }
+
+    PhysicalResizeListener& resizeListener;
+    MessageBufferInterface<MessageHeader>& uiToProcessor;
+    LV2UI_Widget widget = nullptr;
+    const LV2_URID mLV2_UI__floatProtocol;
+    const LV2_URID mLV2_ATOM__atomTransfer;
+    const LV2_URID mLV2_ATOM__eventTransfer;
+    Instance instance;
+    OptionalExtension<LV2UI_Idle_Interface> idleCallback;
+
+   #if JUCE_MAC
+    NSViewFrameWatcher frameWatcher { (NSView*) widget, [this]
+    {
+        const auto bounds = getDetectedViewBounds();
+        resizeListener.viewRequestedResizeInPhysicalPixels (bounds.getWidth(), bounds.getHeight());
+    } };
+   #elif JUCE_WINDOWS
+    WindowSizeChangeListener frameWatcher { (HWND) widget, resizeListener };
+   #endif
+
+    JUCE_LEAK_DETECTOR (UiInstance)
+};
+
+class AsyncFn final : public AsyncUpdater
+{
+public:
+    explicit AsyncFn (std::function<void()> callbackIn)
+        : callback (std::move (callbackIn)) {}
+
+    ~AsyncFn() override { cancelPendingUpdate(); }
+
+    void handleAsyncUpdate() override { callback(); }
+
+private:
+    std::function<void()> callback;
+};
+
+class UiInstanceWithSupports
+{
+public:
+    UiInstanceWithSupports (World& world,
+                            PhysicalResizeListener& resizeListener,
+                            TouchListener& touchListener,
+                            const UiDescriptor* descriptor,
+                            const UiInstanceArgs& args,
+                            LV2UI_Widget parent,
+                            InstanceWithSupports& engineInstance,
+                            const UiFeaturesDataOptions& opts)
+        : features (resizeListener,
+                    touchListener,
+                    engineInstance.instance.getHandle(),
+                    parent,
+                    engineInstance.instance.getExtensionDataCallback(),
+                    engineInstance.ports,
+                    *engineInstance.symap,
+                    opts),
+          instance (world,
+                    descriptor,
+                    args,
+                    features.getFeatureArray(),
+                    engineInstance.uiToProcessor,
+                    *engineInstance.symap,
+                    resizeListener)
+    {}
+
+    UiFeaturesData features;
+    UiInstance instance;
+
+    JUCE_LEAK_DETECTOR (UiInstanceWithSupports)
+};
+
+class PeerChangedListener final : private ComponentMovementWatcher
+{
+public:
+    PeerChangedListener (Component& c, std::function<void()> peerChangedIn)
+        : ComponentMovementWatcher (&c), peerChanged (std::move (peerChangedIn))
+    {
+    }
+
+    void componentMovedOrResized (bool, bool) override {}
+    void componentPeerChanged() override { NullCheckedInvocation::invoke (peerChanged); }
+    void componentVisibilityChanged() override {}
+
+    using ComponentMovementWatcher::componentVisibilityChanged;
+    using ComponentMovementWatcher::componentMovedOrResized;
+
+private:
+    std::function<void()> peerChanged;
+};
+
+struct ViewSizeListener final : private ComponentMovementWatcher
+{
+    ViewSizeListener (Component& c, PhysicalResizeListener& l)
+        : ComponentMovementWatcher (&c), listener (l)
+    {
+    }
+
+    void componentMovedOrResized (bool, bool wasResized) override
+    {
+        if (wasResized)
+        {
+            const auto physicalSize = Desktop::getInstance().getDisplays()
+                                                            .logicalToPhysical (getComponent()->localAreaToGlobal (getComponent()->getLocalBounds()));
+            const auto width  = physicalSize.getWidth();
+            const auto height = physicalSize.getHeight();
+
+            if (width > 10 && height > 10)
+                listener.viewRequestedResizeInPhysicalPixels (width, height);
+        }
+    }
+
+    void componentPeerChanged() override {}
+    void componentVisibilityChanged() override {}
+
+    using ComponentMovementWatcher::componentVisibilityChanged;
+    using ComponentMovementWatcher::componentMovedOrResized;
+
+    PhysicalResizeListener& listener;
+};
+
+class ConfiguredEditorComponent final : public Component,
+                                        private PhysicalResizeListener
+{
+public:
+    ConfiguredEditorComponent (World& world,
+                               InstanceWithSupports& instance,
+                               UiDescriptor& uiDescriptor,
+                               LogicalResizeListener& resizeListenerIn,
+                               TouchListener& touchListener,
+                               const String& uiBundleUri,
+                               const UiFeaturesDataOptions& opts)
+        : resizeListener (resizeListenerIn),
+          floatUrid (instance.symap->map (LV2_ATOM__Float)),
+          scaleFactorUrid (instance.symap->map (LV2_UI__scaleFactor)),
+          uiInstance (new UiInstanceWithSupports (world,
+                                                  *this,
+                                                  touchListener,
+                                                  &uiDescriptor,
+                                                  UiInstanceArgs{}.withBundlePath (bundlePathFromUri (uiBundleUri.toRawUTF8()))
+                                                                  .withPluginUri (URL (instance.instance.getUri())),
+                                                  viewComponent.getWidget(),
+                                                  instance,
+                                                  opts)),
+          resizeClient (uiInstance->instance.getExtensionData<LV2UI_Resize> (world, LV2_UI__resize)),
+          optionsInterface (uiInstance->instance.getExtensionData<LV2_Options_Interface> (world, LV2_OPTIONS__interface))
+    {
+        jassert (uiInstance != nullptr);
+
+        setOpaque (true);
+        addAndMakeVisible (viewComponent);
+
+        const auto boundsToUse = [&]
+        {
+            const auto requested = uiInstance->features.getLastRequestedBounds();
+
+            if (requested.getWidth() > 10 && requested.getHeight() > 10)
+                return requested;
+
+            return uiInstance->instance.getDetectedViewBounds();
+        }();
+
+        const auto scaled = lv2ToComponentRect (boundsToUse);
+        lastWidth  = scaled.getWidth();
+        lastHeight = scaled.getHeight();
+        setSize (lastWidth, lastHeight);
+    }
+
+    ~ConfiguredEditorComponent() override
+    {
+        viewComponent.prepareForDestruction();
+    }
+
+    void paint (Graphics& g) override
+    {
+        g.fillAll (Colours::black);
+    }
+
+    void resized() override
+    {
+        viewComponent.setBounds (getLocalBounds());
+    }
+
+    void updateViewBounds()
+    {
+        // If the editor changed size as a result of a request from the client,
+        // we shouldn't send a notification back to the client.
+        if (uiInstance != nullptr)
+        {
+            if (resizeClient.valid && resizeClient.extension.ui_resize != nullptr)
+            {
+                const auto physicalSize = componentToLv2Rect (getLocalBounds());
+
+                resizeClient.extension.ui_resize (uiInstance->instance.getHandle(),
+                                                  physicalSize.getWidth(),
+                                                  physicalSize.getHeight());
+            }
+        }
+    }
+
+    void pushMessage (MessageHeader header, uint32_t size, const void* buffer)
+    {
+        if (uiInstance != nullptr)
+            uiInstance->instance.pushMessage (header, size, buffer);
+    }
+
+    int idle()
+    {
+        if (uiInstance != nullptr)
+            return uiInstance->instance.idle();
+
+        return 0;
+    }
+
+    void childBoundsChanged (Component* c) override
+    {
+        if (c == nullptr)
+            resizeToFitView();
+    }
+
+    void setUserScaleFactor (float userScale) { userScaleFactor = userScale; }
+
+    void sendScaleFactorToPlugin()
+    {
+        const auto factor = getEffectiveScale();
+
+        const LV2_Options_Option options[]
+        {
+            { LV2_OPTIONS_INSTANCE, 0, scaleFactorUrid, sizeof (float), floatUrid, &factor },
+            { {}, {}, {}, {}, {}, {} }
+        };
+
+        if (optionsInterface.valid)
+            optionsInterface.extension.set (uiInstance->instance.getHandle(), options);
+
+        applyLastRequestedPhysicalSize();
+    }
+
+private:
+    void viewRequestedResizeInPhysicalPixels (int width, int height) override
+    {
+        lastWidth = width;
+        lastHeight = height;
+        const auto logical = lv2ToComponentRect ({ width, height });
+        resizeListener.viewRequestedResizeInLogicalPixels (logical.getWidth(), logical.getHeight());
+    }
+
+    void resizeToFitView()
+    {
+        viewComponent.fitToView();
+        resizeListener.viewRequestedResizeInLogicalPixels (viewComponent.getWidth(), viewComponent.getHeight());
+    }
+
+    void applyLastRequestedPhysicalSize()
+    {
+        viewRequestedResizeInPhysicalPixels (lastWidth, lastHeight);
+        viewComponent.forceViewToSize();
+    }
+
+    /*  Convert from the component's coordinate system to the hosted LV2's coordinate system. */
+    Rectangle<int> componentToLv2Rect (Rectangle<int> r) const
+    {
+        return localAreaToGlobal (r) * nativeScaleFactor * getDesktopScaleFactor();
+    }
+
+    /*  Convert from the hosted LV2's coordinate system to the component's coordinate system. */
+    Rectangle<int> lv2ToComponentRect (Rectangle<int> vr) const
+    {
+        return getLocalArea (nullptr, vr / (nativeScaleFactor * getDesktopScaleFactor()));
+    }
+
+    float getEffectiveScale() const     { return nativeScaleFactor * userScaleFactor; }
+
+    // If possible, try to keep platform-specific handing restricted to the implementation of
+    // ViewComponent. Keep the interface of ViewComponent consistent on all platforms.
+   #if JUCE_LINUX || JUCE_BSD
+    struct InnerHolder
+    {
+        struct Inner final : public XEmbedComponent
+        {
+            Inner() : XEmbedComponent (true, true)
+            {
+                setOpaque (true);
+                setVisible (true);
+                addToDesktop (0);
+            }
+        };
+
+        Inner inner;
+    };
+
+    struct ViewComponent final : public InnerHolder,
+                                 public XEmbedComponent
+    {
+        explicit ViewComponent (PhysicalResizeListener& l)
+            : XEmbedComponent ((unsigned long) inner.getPeer()->getNativeHandle(), true, false),
+              listener (inner, l)
+        {
+            setOpaque (true);
+        }
+
+        ~ViewComponent()
+        {
+            removeClient();
+        }
+
+        void prepareForDestruction()
+        {
+            inner.removeClient();
+        }
+
+        LV2UI_Widget getWidget() { return lv2_shared::wordCast<LV2UI_Widget> (inner.getHostWindowID()); }
+        void forceViewToSize() {}
+        void fitToView() {}
+
+        ViewSizeListener listener;
+    };
+   #elif JUCE_MAC
+    struct ViewComponent final : public NSViewComponentWithParent
+    {
+        explicit ViewComponent (PhysicalResizeListener&)
+            : NSViewComponentWithParent (WantsNudge::no) {}
+        LV2UI_Widget getWidget() { return getView(); }
+        void forceViewToSize() {}
+        void fitToView() { resizeToFitView(); }
+        void prepareForDestruction() {}
+    };
+   #elif JUCE_WINDOWS
+    struct ViewComponent final : public HWNDComponent
+    {
+        explicit ViewComponent (PhysicalResizeListener&)
+        {
+            setOpaque (true);
+            inner.addToDesktop (0);
+
+            if (auto* peer = inner.getPeer())
+                setHWND (peer->getNativeHandle());
+        }
+
+        void paint (Graphics& g) override { g.fillAll (Colours::black); }
+
+        LV2UI_Widget getWidget() { return getHWND(); }
+
+        void forceViewToSize() { updateHWNDBounds(); }
+        void fitToView() { resizeToFit(); }
+
+        void prepareForDestruction() {}
+
+    private:
+        struct Inner final : public Component
+        {
+            Inner() { setOpaque (true); }
+            void paint (Graphics& g) override { g.fillAll (Colours::black); }
+        };
+
+        Inner inner;
+    };
+   #else
+    struct ViewComponent final : public Component
+    {
+        explicit ViewComponent (PhysicalResizeListener&) {}
+        void* getWidget() { return nullptr; }
+        void forceViewToSize() {}
+        void fitToView() {}
+        void prepareForDestruction() {}
+    };
+   #endif
+
+    struct ScaleNotifierCallback
+    {
+        ConfiguredEditorComponent& window;
+
+        void operator() (float platformScale) const
+        {
+            MessageManager::callAsync ([ref = Component::SafePointer<ConfiguredEditorComponent> (&window), platformScale]
+            {
+                if (auto* r = ref.getComponent())
+                {
+                    if (approximatelyEqual (std::exchange (r->nativeScaleFactor, platformScale), platformScale))
+                        return;
+
+                    r->nativeScaleFactor = platformScale;
+                    r->sendScaleFactorToPlugin();
+                }
+            });
+        }
+    };
+
+    LogicalResizeListener& resizeListener;
+    int lastWidth = 0, lastHeight = 0;
+    float nativeScaleFactor = 1.0f, userScaleFactor = 1.0f;
+    NativeScaleFactorNotifier scaleNotifier { this, ScaleNotifierCallback { *this } };
+    ViewComponent viewComponent { *this };
+    LV2_URID floatUrid, scaleFactorUrid;
+    std::unique_ptr<UiInstanceWithSupports> uiInstance;
+    OptionalExtension<LV2UI_Resize> resizeClient;
+    OptionalExtension<LV2_Options_Interface> optionsInterface;
+    PeerChangedListener peerListener { *this, [this]
+    {
+        applyLastRequestedPhysicalSize();
+    } };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfiguredEditorComponent)
+};
+
 //==============================================================================
+/*  Interface to receive notifications when the Editor changes. */
+struct EditorListener
+{
+    virtual ~EditorListener() = default;
+
+    /*  The editor needs to be recreated in a few different scenarios, such as:
+        - When the scale factor of the window changes, because we can only provide the
+          scale factor to the view during construction
+        - When the sample rate changes, because the processor also needs to be destroyed
+          and recreated in this case
+
+        This function will be called whenever the editor has been recreated, in order to
+        allow the processor (or other listeners) to respond, e.g. by sending all of the
+        current port/parameter values to the view.
+    */
+    virtual void viewCreated (UiEventListener* newListener) = 0;
+
+    virtual void notifyEditorBeingDeleted() = 0;
+};
+
+class Editor final : public AudioProcessorEditor,
+                     public UiEventListener,
+                     private LogicalResizeListener
+{
+public:
+    Editor (World& worldIn,
+            AudioPluginInstance& p,
+            UiDescriptor& uiDescriptorIn,
+            TouchListener& touchListenerIn,
+            EditorListener& listenerIn,
+            ProcessorToUi& channelIn,
+            InstanceWithSupports& instanceIn,
+            const String& uiBundleUriIn,
+            RequiredFeatures requiredIn,
+            OptionalFeatures optionalIn)
+        : AudioProcessorEditor (p),
+          world (worldIn),
+          uiDescriptor (&uiDescriptorIn),
+          touchListener (&touchListenerIn),
+          listener (&listenerIn),
+          uiBundleUri (uiBundleUriIn),
+          channel (channelIn),
+          required (std::move (requiredIn)),
+          optional (std::move (optionalIn))
+    {
+        setResizable (isResizable (required, optional), false);
+        setSize (10, 10);
+        setOpaque (true);
+
+        createView (instanceIn);
+
+        channel.addUi (*this);
+    }
+
+    ~Editor() noexcept override
+    {
+        channel.removeUi (*this);
+
+        listener->notifyEditorBeingDeleted();
+    }
+
+    void createView (InstanceWithSupports& instance)
+    {
+        const auto initialScale = userScaleFactor * (float) [&]
+        {
+            if (auto* p = getPeer())
+                return p->getPlatformScaleFactor();
+
+            return 1.0;
+        }();
+
+        const auto opts = UiFeaturesDataOptions{}.withInitialScaleFactor (initialScale)
+                                                 .withSampleRate ((float) processor.getSampleRate());
+        configuredEditor = nullptr;
+        configuredEditor = rawToUniquePtr (new ConfiguredEditorComponent (world,
+                                                                          instance,
+                                                                          *uiDescriptor,
+                                                                          *this,
+                                                                          *touchListener,
+                                                                          uiBundleUri,
+                                                                          opts));
+        parentHierarchyChanged();
+        const auto initialSize = configuredEditor->getBounds();
+        setSize (initialSize.getWidth(), initialSize.getHeight());
+
+        listener->viewCreated (this);
+    }
+
+    void destroyView()
+    {
+        configuredEditor = nullptr;
+    }
+
+    void paint (Graphics& g) override
+    {
+        g.fillAll (Colours::black);
+    }
+
+    void resized() override
+    {
+        const ScopedValueSetter<bool> scope (resizeFromHost, true);
+
+        if (auto* inner = configuredEditor.get())
+        {
+            inner->setBounds (getLocalBounds());
+            inner->updateViewBounds();
+        }
+    }
+
+    void parentHierarchyChanged() override
+    {
+        if (auto* comp = configuredEditor.get())
+        {
+            if (isShowing())
+                addAndMakeVisible (comp);
+            else
+                removeChildComponent (comp);
+        }
+    }
+
+    void pushMessage (MessageHeader header, uint32_t size, const void* buffer) override
+    {
+        if (auto* comp = configuredEditor.get())
+            comp->pushMessage (header, size, buffer);
+    }
+
+    int idle() override
+    {
+        if (auto* comp = configuredEditor.get())
+            return comp->idle();
+
+        return 0;
+    }
+
+    void setScaleFactor (float newScale) override
+    {
+        userScaleFactor = newScale;
+
+        if (configuredEditor != nullptr)
+        {
+            configuredEditor->setUserScaleFactor (userScaleFactor);
+            configuredEditor->sendScaleFactorToPlugin();
+        }
+    }
+
+private:
+    bool isResizable (const RequiredFeatures& requiredFeatures,
+                      const OptionalFeatures& optionalFeatures) const
+    {
+        const auto uriMatches = [] (const LilvNode* node)
+        {
+            const auto* uri = lilv_node_as_uri (node);
+            return std::strcmp (uri, LV2_UI__noUserResize) == 0;
+        };
+
+        return uiDescriptor->hasExtensionData (world, LV2_UI__resize)
+               && ! uiDescriptor->hasExtensionData (world, LV2_UI__noUserResize)
+               && noneOf (requiredFeatures.values, uriMatches)
+               && noneOf (optionalFeatures.values, uriMatches);
+    }
+
+    bool isScalable() const
+    {
+        return uiDescriptor->hasExtensionData (world, LV2_OPTIONS__interface);
+    }
+
+    void viewRequestedResizeInLogicalPixels (int width, int height) override
+    {
+        if (! resizeFromHost)
+            setSize (width, height);
+    }
+
+    World& world;
+    UiDescriptor* uiDescriptor;
+    TouchListener* touchListener;
+    EditorListener* listener;
+    String uiBundleUri;
+    ProcessorToUi& channel;
+    const RequiredFeatures required;
+    const OptionalFeatures optional;
+    std::unique_ptr<ConfiguredEditorComponent> configuredEditor;
+    float userScaleFactor = 1.0f;
+    bool resizeFromHost = false;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Editor)
+};
+
+template <bool editorEnabled = editorFunctionalityEnabled> class OptionalEditor;
+
+template <>
+class OptionalEditor<true>
+{
+public:
+    OptionalEditor (World& worldIn, String uiBundleUriIn, UiDescriptor uiDescriptorIn, std::function<void()> timerCallback)
+        : world (&worldIn),
+          uiBundleUri (std::move (uiBundleUriIn)),
+          uiDescriptor (std::move (uiDescriptorIn)),
+          changedParameterFlusher (std::move (timerCallback)) {}
+
+    void createView (InstanceWithSupports& instance)
+    {
+        if (auto* editor = editorPointer.getComponent())
+            editor->createView (instance);
+    }
+
+    void destroyView()
+    {
+        if (auto* editor = editorPointer.getComponent())
+            editor->destroyView();
+    }
+
+    std::unique_ptr<AudioProcessorEditor> createEditor (AudioPluginInstance& p,
+                                                        InstanceWithSupports& instanceIn,
+                                                        TouchListener& touchListenerIn,
+                                                        EditorListener& listenerIn,
+                                                        ProcessorToUi& channelIn)
+    {
+        if (! hasEditor())
+            return nullptr;
+
+        const auto queryFeatures = [this] (const char* kind)
+        {
+            return world->findNodes (world->newUri (uiDescriptor.get()->URI).get(),
+                                     world->newUri (kind).get(),
+                                     nullptr);
+        };
+
+        auto newEditor = std::make_unique<Editor> (*world,
+                                                   p,
+                                                   uiDescriptor,
+                                                   touchListenerIn,
+                                                   listenerIn,
+                                                   channelIn,
+                                                   instanceIn,
+                                                   uiBundleUri,
+                                                   RequiredFeatures { queryFeatures (LV2_CORE__requiredFeature) },
+                                                   OptionalFeatures { queryFeatures (LV2_CORE__optionalFeature) });
+
+        editorPointer = newEditor.get();
+
+        changedParameterFlusher.startTimerHz (60);
+
+        return newEditor;
+    }
+
+    bool hasEditor() const
+    {
+        return uiDescriptor.get() != nullptr;
+    }
+
+    void prepareToDestroyEditor()
+    {
+        changedParameterFlusher.stopTimer();
+    }
+
+private:
+    World* world = nullptr;
+    Component::SafePointer<Editor> editorPointer = nullptr;
+    String uiBundleUri;
+    UiDescriptor uiDescriptor;
+    TimedCallback changedParameterFlusher;
+};
+
+template <>
+class OptionalEditor<false>
+{
+public:
+    OptionalEditor (String, UiDescriptor, std::function<void()>) {}
+
+    void createView (InstanceWithSupports&) {}
+    void destroyView() {}
+
+    std::unique_ptr<AudioProcessorEditor> createEditor (AudioPluginInstance&,
+                                                        InstanceWithSupports&,
+                                                        TouchListener&,
+                                                        EditorListener&,
+                                                        ProcessorToUi&)
+    {
+        return nullptr;
+    }
+
+    bool hasEditor() const { return false; }
+    void prepareToDestroyEditor() {}
+};
+
+class LV2AudioPluginInstance final : public LV2AudioPluginInstanceHeadless,
+                                     private EditorListener,
+                                     private TouchListener
+{
+public:
+    using LV2AudioPluginInstanceHeadless::LV2AudioPluginInstanceHeadless;
+
+    LV2AudioPluginInstance (std::shared_ptr<World> worldIn,
+                            const Plugin& pluginIn,
+                            const UsefulUris& uris,
+                            std::unique_ptr<InstanceWithSupports>&& in,
+                            PluginDescription&& desc,
+                            std::vector<String> knownPresetUris,
+                            PluginState stateToApply,
+                            String uiBundleUriIn,
+                            UiDescriptor uiDescriptorIn)
+        : LV2AudioPluginInstanceHeadless (worldIn,
+                                          pluginIn,
+                                          uris,
+                                          std::move (in),
+                                          std::move (desc),
+                                          knownPresetUris,
+                                          std::move (stateToApply),
+                                          uiBundleUriIn,
+                                          uiDescriptorIn),
+          optionalEditor (*worldIn,
+                          std::move (uiBundleUriIn),
+                          std::move (uiDescriptorIn),
+                          [this] { postChangedParametersToUi (*processorToUi, uiEventListener); })
+    {
+        asyncFullUiParameterUpdate.triggerAsyncUpdate();
+    }
+
+    AudioProcessorEditor* createEditor() override
+    {
+        if (auto* i = getCurrentInstance())
+            return optionalEditor.createEditor (*this, *i, *this, *this, *processorToUi).release();
+
+        // No instance?
+        jassertfalse;
+        return nullptr;
+    }
+
+    bool hasEditor() const override
+    {
+        return optionalEditor.hasEditor();
+    }
+
+    void prepareToPlay (double sampleRate, int numSamples) override
+    {
+        // This does *not* destroy the editor component.
+        // If we destroy the processor, the view must also be destroyed to avoid dangling pointers.
+        // However, JUCE clients expect their editors to remain valid for the duration of the
+        // AudioProcessor's lifetime.
+        // As a compromise, this will create a new LV2 view into an existing editor component.
+        optionalEditor.destroyView();
+
+        LV2AudioPluginInstanceHeadless::prepareToPlay (sampleRate, numSamples);
+
+        if (auto* i = getCurrentInstance())
+            optionalEditor.createView (*i);
+        else
+            jassertfalse; // Unable to create instance?
+    }
+
+    void setStateInformation (const void *data, int size) override
+    {
+        LV2AudioPluginInstanceHeadless::setStateInformation (data, size);
+        asyncFullUiParameterUpdate.triggerAsyncUpdate();
+    }
+
+    void setCurrentProgram (int newProgram) override
+    {
+        LV2AudioPluginInstanceHeadless::setCurrentProgram (newProgram);
+        asyncFullUiParameterUpdate.triggerAsyncUpdate();
+    }
+
+private:
+    void sendOutgoingPortMessageToUi (UiMessageHeader header, uint32_t size, const void* buffer) override
+    {
+        header.listener = uiEventListener;
+        processorToUi->pushMessage (header, size, buffer);
+    }
+
+    void viewCreated (UiEventListener* newListener) override
+    {
+        uiEventListener = newListener;
+        postAllParametersToUi (*processorToUi, uiEventListener);
+    }
+
+    void notifyEditorBeingDeleted() override
+    {
+        optionalEditor.prepareToDestroyEditor();
+        uiEventListener = nullptr;
+        editorBeingDeleted (getActiveEditor());
+    }
+
+    void controlGrabbed (uint32_t port, bool grabbed) override
+    {
+        if (auto* param = getParamByPortIndex (port))
+        {
+            if (grabbed)
+                param->beginChangeGesture();
+            else
+                param->endChangeGesture();
+        }
+    }
+
+    SharedResourcePointer<ProcessorToUi> processorToUi;
+
+    std::atomic<UiEventListener*> uiEventListener { nullptr };
+    OptionalEditor<> optionalEditor;
+    AsyncFn asyncFullUiParameterUpdate { [this] { postAllParametersToUi (*processorToUi, uiEventListener); } };
+};
+
+} // namespace lv2_host
+
 LV2PluginFormat::LV2PluginFormat()
     : pimpl (std::make_unique<Pimpl>()) {}
 
@@ -5647,7 +5715,7 @@ void LV2PluginFormat::createPluginInstance (const PluginDescription& desc,
                                             int bufferSize,
                                             PluginCreationCallback callback)
 {
-    pimpl->createPluginInstance (desc, sampleRate, bufferSize, std::move (callback));
+    Pimpl::createPluginInstance<lv2_host::LV2AudioPluginInstance> (*this, desc, sampleRate, bufferSize, std::move (callback));
 }
 
 } // namespace juce
