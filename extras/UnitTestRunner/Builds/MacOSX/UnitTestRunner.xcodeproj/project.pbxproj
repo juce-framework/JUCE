@@ -22,6 +22,7 @@
 		3822F598DA7044E5DB7633A9 /* include_juce_audio_utils.mm */ = {isa = PBXBuildFile; fileRef = 846E187EC2E797B982861CA4; };
 		3866839F4051D104244870B1 /* CoreAudioKit.framework */ = {isa = PBXBuildFile; fileRef = 336A244E3C6460495F0A424C; };
 		44628795CE784DEE1B98F986 /* include_juce_audio_processors_ara.cpp */ = {isa = PBXBuildFile; fileRef = C7F2704A6676859CCE14A4D1; };
+		47AF227257B0C27F028E46FD /* include_juce_audio_processors_headless.mm */ = {isa = PBXBuildFile; fileRef = 8BB820415B16C032419DAB36; };
 		4BC57B0D2215621D90C8881C /* WebKit.framework */ = {isa = PBXBuildFile; fileRef = D2EBC6292AE5AFC46EB10DAC; };
 		5CB3596030B0DD3763CAF85C /* include_juce_data_structures.mm */ = {isa = PBXBuildFile; fileRef = 302A999B2803C0D5C15D237C; };
 		5FE50792EDC7638DE9A824B5 /* RecentFilesMenuTemplate.nib */ = {isa = PBXBuildFile; fileRef = 5C7BDD8DF72F2FC2D44D757A; };
@@ -90,6 +91,8 @@
 		8165CEA1A009721D3D05D98F /* juce_core */ /* juce_core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_core; path = ../../../../modules/juce_core; sourceTree = SOURCE_ROOT; };
 		846E187EC2E797B982861CA4 /* include_juce_audio_utils.mm */ /* include_juce_audio_utils.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_utils.mm; path = ../../JuceLibraryCode/include_juce_audio_utils.mm; sourceTree = SOURCE_ROOT; };
 		88AA2B9840A6792BBAD559EE /* Main.cpp */ /* Main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = SOURCE_ROOT; };
+		8B17B4AD66494FE8CC78629B /* juce_audio_processors_headless */ /* juce_audio_processors_headless */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_processors_headless; path = ../../../../modules/juce_audio_processors_headless; sourceTree = SOURCE_ROOT; };
+		8BB820415B16C032419DAB36 /* include_juce_audio_processors_headless.mm */ /* include_juce_audio_processors_headless.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_processors_headless.mm; path = ../../JuceLibraryCode/include_juce_audio_processors_headless.mm; sourceTree = SOURCE_ROOT; };
 		8C449538B266A891147103D6 /* IOKit.framework */ /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		8EBA9CF0874619A8FA0B4E74 /* juce_osc */ /* juce_osc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_osc; path = ../../../../modules/juce_osc; sourceTree = SOURCE_ROOT; };
 		8EC828FBFEC92A64A135467C /* juce_midi_ci */ /* juce_midi_ci */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_midi_ci; path = ../../../../modules/juce_midi_ci; sourceTree = SOURCE_ROOT; };
@@ -173,6 +176,7 @@
 				A76DD7182C290A9020C96CA7,
 				3A26A3568F2C301EEED25288,
 				C7F2704A6676859CCE14A4D1,
+				8BB820415B16C032419DAB36,
 				45FB94C047D1ECAACA9462B7,
 				846E187EC2E797B982861CA4,
 				AB19DDC8458D2A420E6D8AC3,
@@ -249,6 +253,7 @@
 				39F1D4C0BF563E43EA8A98B2,
 				D6F54293A21405C783852645,
 				A40A2A0B2841A622C53047CD,
+				8B17B4AD66494FE8CC78629B,
 				2A889138F8B9285E95BDEEE6,
 				8165CEA1A009721D3D05D98F,
 				05501801BF6C4A47598C59E2,
@@ -336,6 +341,7 @@
 				FDDF955477BE7FEBC364E19B,
 				74EC8AEC296DB2721EB438BF,
 				44628795CE784DEE1B98F986,
+				47AF227257B0C27F028E46FD,
 				79FE3F2D2EFAC333283E5D90,
 				3822F598DA7044E5DB7633A9,
 				9B48039CDFD679AD944BAC70,
@@ -430,6 +436,7 @@
 					"JUCE_MODULE_AVAILABLE_juce_audio_devices=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_formats=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_processors=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_utils=1",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
@@ -562,6 +569,7 @@
 					"JUCE_MODULE_AVAILABLE_juce_audio_devices=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_formats=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_processors=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_utils=1",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",

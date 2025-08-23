@@ -26,6 +26,7 @@
 		80B9F7ED2009922C693B7DD4 /* DiscRecording.framework */ = {isa = PBXBuildFile; fileRef = CB82A14817C3E2ABBBBC3864; };
 		80EE2C27B466BAFD83881D3F /* Accelerate.framework */ = {isa = PBXBuildFile; fileRef = 2E13A899F4E3C99054A3656F; };
 		88DB5C5128E42AD59AD944D9 /* Security.framework */ = {isa = PBXBuildFile; fileRef = 9D1E94FAB66D1FB2531A3F9F; };
+		8CE87C0D717B6D9BF77437D2 /* include_juce_audio_processors_headless.mm */ = {isa = PBXBuildFile; fileRef = 52CBBACAC86AD67BAF0687F6; };
 		8ECB0767EE340DD83869E37D /* WebKit.framework */ = {isa = PBXBuildFile; fileRef = EC794872987FEA2E129C589A; };
 		95C7D26CC68839FC6BF90AC3 /* include_juce_audio_processors_ara.cpp */ = {isa = PBXBuildFile; fileRef = 52EF9BE720EFF47106DB0351; };
 		987CBD5330E76B404F0D966C /* Main.cpp */ = {isa = PBXBuildFile; fileRef = 77C0AC21C1028911123844FC; };
@@ -60,6 +61,7 @@
 		448838BE6E937D450A3C84CE /* CoreMIDI.framework */ /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		4D1DB6D77B6F3DE7A569780B /* CoreAudioKit.framework */ /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
 		4FF648D72D6F1A78956CDA1B /* Demos.h */ /* Demos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Demos.h; path = ../../Source/Demos.h; sourceTree = SOURCE_ROOT; };
+		52CBBACAC86AD67BAF0687F6 /* include_juce_audio_processors_headless.mm */ /* include_juce_audio_processors_headless.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_processors_headless.mm; path = ../../JuceLibraryCode/include_juce_audio_processors_headless.mm; sourceTree = SOURCE_ROOT; };
 		52EF9BE720EFF47106DB0351 /* include_juce_audio_processors_ara.cpp */ /* include_juce_audio_processors_ara.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_processors_ara.cpp; path = ../../JuceLibraryCode/include_juce_audio_processors_ara.cpp; sourceTree = SOURCE_ROOT; };
 		53EC217F09F0762DFA2910A8 /* include_juce_graphics_Sheenbidi.c */ /* include_juce_graphics_Sheenbidi.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_Sheenbidi.c; path = ../../JuceLibraryCode/include_juce_graphics_Sheenbidi.c; sourceTree = SOURCE_ROOT; };
 		55CB060922ABCBC105FE38D2 /* juce_osc */ /* juce_osc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_osc; path = ../../../../modules/juce_osc; sourceTree = SOURCE_ROOT; };
@@ -85,6 +87,7 @@
 		9D1E94FAB66D1FB2531A3F9F /* Security.framework */ /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		9E8129263CD42C6029FC2CAD /* AudioToolbox.framework */ /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A505E1DABB2ED630EFBA96DB /* juce_audio_processors */ /* juce_audio_processors */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_processors; path = ../../../../modules/juce_audio_processors; sourceTree = SOURCE_ROOT; };
+		A65669B0F325817E28126C52 /* juce_audio_processors_headless */ /* juce_audio_processors_headless */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_processors_headless; path = ../../../../modules/juce_audio_processors_headless; sourceTree = SOURCE_ROOT; };
 		A7FF2B353C8568B5A7A80117 /* include_juce_graphics.mm */ /* include_juce_graphics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_graphics.mm; path = ../../JuceLibraryCode/include_juce_graphics.mm; sourceTree = SOURCE_ROOT; };
 		AB2DE62887E2F58D821F3217 /* include_juce_audio_processors_lv2_libs.cpp */ /* include_juce_audio_processors_lv2_libs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_processors_lv2_libs.cpp; path = ../../JuceLibraryCode/include_juce_audio_processors_lv2_libs.cpp; sourceTree = SOURCE_ROOT; };
 		AC684ED3A008C6E513200C05 /* include_juce_graphics_Harfbuzz.cpp */ /* include_juce_graphics_Harfbuzz.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_graphics_Harfbuzz.cpp; path = ../../JuceLibraryCode/include_juce_graphics_Harfbuzz.cpp; sourceTree = SOURCE_ROOT; };
@@ -209,6 +212,7 @@
 				C6E2284D86D93F1D9D5C7666,
 				AED58461CE961C62A0E0A552,
 				52EF9BE720EFF47106DB0351,
+				52CBBACAC86AD67BAF0687F6,
 				AB2DE62887E2F58D821F3217,
 				FCEBB157FB526741DB6791D1,
 				01E0EEF68A11C1CAF180E173,
@@ -248,6 +252,7 @@
 				89583CD42AD218E9753DF11C,
 				9C67BD1915C7FD5747C2BA8F,
 				A505E1DABB2ED630EFBA96DB,
+				A65669B0F325817E28126C52,
 				E4EA870A22A0C6649E55DD30,
 				8EACAADD3A23DED3E252C92F,
 				B5433B00F012AD87AADBFCD6,
@@ -356,6 +361,7 @@
 				A1F34D09F4E4338775917ED1,
 				2E28F61A64DEF942FE7B94C4,
 				95C7D26CC68839FC6BF90AC3,
+				8CE87C0D717B6D9BF77437D2,
 				0E39AB2B15DCE39E1055A646,
 				EA487FA4116517A8DFEE85B0,
 				0977FEC02DAF29438583198A,
@@ -396,6 +402,7 @@
 					"JUCE_MODULE_AVAILABLE_juce_audio_devices=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_formats=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_processors=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_utils=1",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
@@ -557,6 +564,7 @@
 					"JUCE_MODULE_AVAILABLE_juce_audio_devices=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_formats=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_processors=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_utils=1",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",

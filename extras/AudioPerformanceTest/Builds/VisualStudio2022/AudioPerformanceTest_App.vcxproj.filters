@@ -338,6 +338,9 @@
     <Filter Include="JUCE Modules\juce_audio_processors">
       <UniqueIdentifier>{67BE498C-9E1F-C73A-B99A-387C034CE680}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_audio_processors_headless">
+      <UniqueIdentifier>{948A112F-4A55-FA00-E3DB-35DF596E09C2}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_audio_utils\audio_cd">
       <UniqueIdentifier>{1A9C8538-959B-25E3-473D-B462C9A9D458}</UniqueIdentifier>
     </Filter>
@@ -1632,6 +1635,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors_lv2_libs.cpp">
       <Filter>JUCE Modules\juce_audio_processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\juce_audio_processors_headless.cpp">
+      <Filter>JUCE Modules\juce_audio_processors_headless</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\juce_audio_processors_headless.mm">
+      <Filter>JUCE Modules\juce_audio_processors_headless</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDReader.cpp">
       <Filter>JUCE Modules\juce_audio_utils\audio_cd</Filter>
@@ -3511,6 +3520,9 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors_ara.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors_headless.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors_lv2_libs.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -4949,6 +4961,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h">
       <Filter>JUCE Modules\juce_audio_processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\juce_audio_processors_headless.h">
+      <Filter>JUCE Modules\juce_audio_processors_headless</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDBurner.h">
       <Filter>JUCE Modules\juce_audio_utils\audio_cd</Filter>
