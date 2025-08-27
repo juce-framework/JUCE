@@ -197,6 +197,7 @@ lilv_world_set_option(LilvWorld* world, const char* uri, const LilvNode* value)
     }
   } else if (!strcmp(uri, LILV_OPTION_LV2_PATH)) {
     if (lilv_node_is_string(value)) {
+      free(world->opt.lv2_path);
       world->opt.lv2_path = lilv_strdup(lilv_node_as_string(value));
       return;
     }
