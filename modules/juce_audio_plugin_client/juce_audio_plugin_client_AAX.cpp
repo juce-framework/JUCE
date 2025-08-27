@@ -2414,9 +2414,6 @@ namespace AAXClasses
             aaxInputFormat = aaxOutputFormat;
        #endif
 
-        if (processor.isMidiEffect())
-            aaxInputFormat = aaxOutputFormat = AAX_eStemFormat_Mono;
-
         check (desc.AddAudioIn  (JUCEAlgorithmIDs::inputChannels));
         check (desc.AddAudioOut (JUCEAlgorithmIDs::outputChannels));
 
@@ -2586,10 +2583,16 @@ namespace AAXClasses
             // MIDI effect plug-ins do not support any audio channels
             jassert (numInputBuses == 0 && numOutputBuses == 0);
 
-            if (auto* desc = descriptor.NewComponentDescriptor())
+            for (const auto format : aaxFormats)
             {
-                createDescriptor (*desc, plugin->getBusesLayout(), *plugin, pluginIds, numMeters);
-                check (descriptor.AddComponent (desc));
+                const auto channelSet = channelSetFromStemFormat (format, false);
+                const AudioProcessor::BusesLayout layout { { channelSet }, { channelSet } };
+
+                if (auto* desc = descriptor.NewComponentDescriptor())
+                {
+                    createDescriptor (*desc, layout, *plugin, pluginIds, numMeters);
+                    check (descriptor.AddComponent (desc));
+                }
             }
         }
         else

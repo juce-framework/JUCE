@@ -924,7 +924,7 @@ void Direct2DGraphicsContext::drawImage (const Image& imageIn, const AffineTrans
                     continue;
 
                 const auto src = intersection - pageBounds.getPosition().toFloat();
-                const auto dst = getRect (intersection - pagesAndArea.area.getPosition().toFloat()).toNearestInt().toFloat();
+                const auto dst = getRect (intersection - pagesAndArea.area.getPosition().toFloat());
                 const auto [srcConverted, dstConverted] = std::tuple (D2DUtilities::toRECT_F (src),
                                                                       D2DUtilities::toRECT_F (dst));
 
@@ -945,12 +945,19 @@ void Direct2DGraphicsContext::drawImage (const Image& imageIn, const AffineTrans
                 }
                 else
                 {
+                    const auto lastMode = deviceContext->GetAntialiasMode();
+
+                    if (pagesAndArea.pages.size() > 1)
+                        deviceContext->SetAntialiasMode (D2D1_ANTIALIAS_MODE_ALIASED);
+
                     deviceContext->DrawBitmap (page.bitmap,
                                                dstConverted,
                                                currentState->fillType.getOpacity(),
                                                currentState->interpolationMode,
                                                srcConverted,
                                                {});
+
+                    deviceContext->SetAntialiasMode (lastMode);
                 }
             }
         };
@@ -1327,39 +1334,183 @@ public:
                         g.drawImageTransformed (imageToDraw, transform);
                     }
 
-                    compareImages (targetNative, targetSoftware);
+                    auto pixelsToIgnore = createEdgeMask (imageToDraw.getWidth(),
+                                                          imageToDraw.getHeight(),
+                                                          targetNative.getWidth(),
+                                                          targetNative.getHeight(),
+                                                          transform);
+
+                    compareImages (targetNative, targetSoftware, 16, pixelsToIgnore);
                 }
             }
         }
+
+        beginTest ("Check that there is no seam between D2D image tiles");
+        {
+            const auto width = 229;
+            const auto height = 80 * width;
+
+            Image filmStripSoftware { Image::RGB, width, height, true, SoftwareImageType{} };
+
+            {
+                Graphics g { filmStripSoftware };
+                g.setGradientFill ({ Colours::red, 0, 0, Colours::cyan, (float) filmStripSoftware.getWidth(), 0, false });
+                g.fillAll();
+            }
+
+            const auto filmStrip = NativeImageType{}.convert (filmStripSoftware);
+            Image targetNative { Image::RGB, targetDim, targetDim, true, NativeImageType{} };
+            Image targetSoftware { Image::RGB, targetDim, targetDim, true, SoftwareImageType{} };
+            const auto transform = AffineTransform::scale (1.1f);
+
+            for (auto* target : { &targetNative, &targetSoftware })
+            {
+                Graphics g { *target };
+                g.setColour (Colours::orange);
+                g.fillAll();
+                g.addTransform (transform);
+                g.drawImage (filmStrip, 0, 0, width, width, 0, (16384 / width) * width, width, width);
+            }
+
+            auto pixelsToIgnore = createEdgeMask (width,
+                                                  width,
+                                                  targetNative.getWidth(),
+                                                  targetNative.getHeight(),
+                                                  transform);
+
+            compareImages (targetNative, targetSoftware, 1, pixelsToIgnore);
+        }
+
+        beginTest ("Gradient fill transform should compose with world transform correctly");
+        {
+            testGradientFillTransform (1.0f);
+            testGradientFillTransform (1.5f);
+        }
     }
 
-    void compareImages (const Image& a, const Image& b)
+    static Image createEdgeMask (int sourceWidth,
+                                 int sourceHeight,
+                                 int maskWidth,
+                                 int maskHeight,
+                                 const AffineTransform& transform)
+    {
+        Image mask { Image::SingleChannel, maskWidth, maskHeight, true, SoftwareImageType{} };
+        Graphics g { mask };
+        g.addTransform (transform);
+        g.setColour (Colours::white);
+        g.drawRect (Rectangle<int> { 0, 0, sourceWidth + 1, sourceHeight + 1 }.toFloat(), 2.0f);
+
+        return mask;
+    }
+
+    void compareImages (const Image& a, const Image& b, int stride, const Image& ignoreMask)
     {
         expect (a.getBounds() == b.getBounds());
 
         const Image::BitmapData bitmapA { a, Image::BitmapData::readOnly };
         const Image::BitmapData bitmapB { b, Image::BitmapData::readOnly };
 
+        int64_t maxAbsError{};
         int64_t accumulatedError{};
         int64_t numSamples{};
 
-        for (auto y = 0; y < a.getHeight(); y += 16)
+        for (auto y = 0; y < a.getHeight(); y += stride)
         {
-            for (auto x = 0; x < a.getWidth(); x += 16)
+            for (auto x = 0; x < a.getWidth(); x += stride)
             {
+                if (ignoreMask.getPixelAt (x, y) != Colour{})
+                    continue;
+
                 const auto expected = bitmapA.getPixelColour (x, y);
                 const auto actual   = bitmapB.getPixelColour (x, y);
 
                 for (auto& fn : { &Colour::getRed, &Colour::getGreen, &Colour::getBlue, &Colour::getAlpha })
                 {
-                    accumulatedError += ((int64_t) (actual.*fn)() - (int64_t) (expected.*fn)());
+                    const auto signedError = ((int64_t) (actual.*fn)() - (int64_t) (expected.*fn)());
+                    const auto absError = std::abs (signedError);
+                    maxAbsError = std::max (maxAbsError, absError);
+
+                    accumulatedError += absError;
                     ++numSamples;
                 }
             }
         }
 
         const auto averageError = (double) accumulatedError / (double) numSamples;
-        expect (std::abs (averageError) < 1.0);
+        expect (std::abs (averageError) < 1.0 && maxAbsError < 10);
+    }
+
+    void testGradientFillTransform (float scale)
+    {
+        constexpr int size = 500;
+        constexpr int circleSize = 100;
+        constexpr int brushTranslation = 20;
+
+        Image image { Image::RGB,
+                      roundToInt (size * scale),
+                      roundToInt (size * scale),
+                      true };
+
+        {
+            for (int i = 0; i < size / circleSize; ++i)
+            {
+                Graphics g { image };
+
+                g.addTransform (AffineTransform::scale (scale));
+                g.addTransform (AffineTransform::translation ((float) i * circleSize, (float) i * circleSize));
+
+                const auto fillCol1 { Colours::red };
+                const auto fillCol2 { Colours::green };
+                const auto centreLoc = circleSize / 2.0f;
+
+                FillType innerGlowGrad = ColourGradient { fillCol1,
+                                                          { centreLoc, centreLoc },
+                                                          fillCol2,
+                                                          { centreLoc, 0.0f },
+                                                          true };
+
+                innerGlowGrad.gradient->addColour (0.19, fillCol1);
+
+                innerGlowGrad.transform = AffineTransform::scale (1.1f, 0.9f, centreLoc, centreLoc)
+                                              .followedBy (AffineTransform::translation (brushTranslation,
+                                                                                         brushTranslation));
+
+                g.setFillType (innerGlowGrad);
+                g.fillEllipse (0, 0, (float) circleSize, (float) circleSize);
+            }
+        }
+
+        for (int i = 0; i < size / circleSize; ++i)
+        {
+            const auto getScaled = [scale] (Point<int> p)
+            {
+                return p.toFloat().transformedBy (AffineTransform::scale (scale)).roundToInt();
+            };
+
+            const auto approximatelyEqual = [] (const Colour& a, const Colour& b)
+            {
+                return    std::abs (a.getRed() - b.getRed()) < 2
+                       && std::abs (a.getGreen() - b.getGreen()) < 2
+                       && std::abs (a.getBlue() - b.getBlue()) < 2
+                       && std::abs (a.getAlpha() - b.getAlpha()) < 2;
+            };
+
+            const Point<int> centre { circleSize / 2, circleSize / 2 };
+            const Point<int> brushOffset { brushTranslation, brushTranslation };
+
+            const auto redPosition = getScaled (centre + brushOffset);
+            expect (image.getPixelAt (redPosition.getX(), redPosition.getY()) == Colours::red);
+
+            const auto mostlyRedPosition = getScaled (centre);
+            expect (approximatelyEqual (image.getPixelAt (mostlyRedPosition.getX(), mostlyRedPosition.getY()),
+                                        Colour { 138, 59, 0 }));
+
+            const auto greenPosition = getScaled (centre.withY (2));
+            expect (image.getPixelAt (greenPosition.getX(), greenPosition.getY()) == Colours::green);
+
+            const auto blackPosition = getScaled ({ circleSize - 2, 2 });
+            expect (image.getPixelAt (blackPosition.getX(), blackPosition.getY()) == Colours::black);
+        }
     }
 };
 

@@ -344,8 +344,9 @@ private:
 };
 
 //==============================================================================
-struct VideoComponent::Pimpl
-    : public AndroidViewComponent, private ActivityLifecycleCallbacks, private SurfaceHolderCallback
+struct VideoComponent::Pimpl : public AndroidViewComponent,
+                               private ActivityLifecycleCallbacks,
+                               private SurfaceHolderCallback
 {
     Pimpl (VideoComponent& ownerToUse, bool)
         : owner (ownerToUse),
@@ -359,14 +360,6 @@ struct VideoComponent::Pimpl
         auto* env = getEnv();
 
         LocalRef<jobject> appContext (getAppContext());
-
-        if (appContext != nullptr)
-        {
-            ActivityLifecycleCallbacks* callbacks = dynamic_cast<ActivityLifecycleCallbacks*> (this);
-
-            activityLifeListener = GlobalRef (CreateJavaInterface (callbacks, "android/app/Application$ActivityLifecycleCallbacks"));
-            env->CallVoidMethod (appContext.get(), AndroidApplication.registerActivityLifecycleCallbacks, activityLifeListener.get());
-        }
 
         {
             LocalRef<jobject> surfaceView (env->NewObject (AndroidSurfaceView, AndroidSurfaceView.constructor, getAppContext().get()));
@@ -396,13 +389,6 @@ struct VideoComponent::Pimpl
                 SurfaceHolderCallback::clear();
                 surfaceHolderCallback.clear();
             }
-        }
-
-        if (activityLifeListener != nullptr)
-        {
-            env->CallVoidMethod (getAppContext().get(), AndroidApplication.unregisterActivityLifecycleCallbacks, activityLifeListener.get());
-            ActivityLifecycleCallbacks::clear();
-            activityLifeListener.clear();
         }
     }
 
@@ -1696,7 +1682,7 @@ private:
     VideoComponent& owner;
 
     MediaSession mediaSession;
-    GlobalRef activityLifeListener;
+    ActivityLifecycleCallbackForwarder forwarder { GlobalRef { getAppContext() }, this };
    #if JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
     SystemVolumeListener systemVolumeListener;
    #endif

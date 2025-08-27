@@ -1417,11 +1417,22 @@ public:
                 for (const auto metadata : midiMessages)
                 {
                     if (metadata.numBytes <= 3)
+                    {
+                        const auto getByteOrZero = [&metadata] (int index)
+                        {
+                            return index < metadata.numBytes ? metadata.data[index] : (uint8) 0;
+                        };
+
                         MusicDeviceMIDIEvent (audioUnit,
-                                              metadata.data[0], metadata.data[1], metadata.data[2],
+                                              getByteOrZero (0),
+                                              getByteOrZero (1),
+                                              getByteOrZero (2),
                                               (UInt32) metadata.samplePosition);
+                    }
                     else
+                    {
                         MusicDeviceSysEx (audioUnit, metadata.data, (UInt32) metadata.numBytes);
+                    }
                 }
 
                 midiMessages.clear();

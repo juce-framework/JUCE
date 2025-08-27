@@ -42,7 +42,7 @@ int RangedAudioParameter::getNumSteps() const
     if (range.interval > 0)
         return (static_cast<int> ((range.end - range.start) / range.interval) + 1);
 
-    return AudioProcessor::getDefaultNumParameterSteps();
+    return getDefaultNumParameterSteps();
 }
 
 float RangedAudioParameter::convertTo0to1 (float v) const noexcept

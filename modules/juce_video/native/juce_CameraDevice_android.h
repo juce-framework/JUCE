@@ -490,8 +490,7 @@ private:
 };
 
 //==============================================================================
-struct CameraDevice::Pimpl
-    : private ActivityLifecycleCallbacks
+struct CameraDevice::Pimpl : private ActivityLifecycleCallbacks
 {
     using InternalOpenCameraResultCallback = std::function<void (const String& /*cameraId*/, const String& /*error*/)>;
 
@@ -504,7 +503,6 @@ struct CameraDevice::Pimpl
           maxWidth (maxWidthToUse),
           maxHeight (maxHeightToUse),
           cameraId (cameraIdToUse),
-          activityLifeListener (CreateJavaInterface (this, "android/app/Application$ActivityLifecycleCallbacks")),
           cameraManager (initialiseCameraManager()),
           cameraCharacteristics (initialiseCameraCharacteristics (cameraManager, cameraId)),
           streamConfigurationMap (cameraCharacteristics),
@@ -516,10 +514,7 @@ struct CameraDevice::Pimpl
 
     ~Pimpl() override
     {
-        auto* env = getEnv();
-
-        env->CallVoidMethod (getAppContext().get(), AndroidApplication.unregisterActivityLifecycleCallbacks, activityLifeListener.get());
-        activityLifeListener.clear();
+        callbackForwarder.reset();
     }
 
     JUCE_DECLARE_WEAK_REFERENCEABLE (Pimpl)
@@ -551,7 +546,7 @@ struct CameraDevice::Pimpl
     {
         if (granted)
         {
-            getEnv()->CallVoidMethod (getAppContext().get(), AndroidApplication.registerActivityLifecycleCallbacks, activityLifeListener.get());
+            callbackForwarder.emplace (GlobalRef { getAppContext() }, static_cast<ActivityLifecycleCallbacks*> (this));
             scopedCameraDevice.reset (new ScopedCameraDevice (*this, cameraId, cameraManager, handler, getAutoFocusModeToUse()));
         }
         else
@@ -2809,7 +2804,7 @@ private:
     String cameraId;
     InternalOpenCameraResultCallback cameraOpenCallback;
 
-    GlobalRef activityLifeListener;
+    std::optional<ActivityLifecycleCallbackForwarder> callbackForwarder;
 
     GlobalRef cameraManager;
     GlobalRef cameraCharacteristics;

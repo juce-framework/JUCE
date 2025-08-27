@@ -34,39 +34,30 @@
 
 package com.rmsl.juce;
 
-import java.lang.reflect.*;
+import android.app.Activity;
+import android.app.Application;
+import android.os.Bundle;
 
-public class JuceInvocationHandler implements InvocationHandler
+public class JuceActivityCallbacksBase implements Application.ActivityLifecycleCallbacks
 {
-    public JuceInvocationHandler (long nativeContextRef)
-    {
-        nativeContext = nativeContextRef;
-    }
-
-    public void clear()
-    {
-        nativeContext = 0;
-    }
+    @Override
+    public void onActivityCreated (Activity activity, Bundle savedInstanceState) {}
 
     @Override
-    public void finalize()
-    {
-        if (nativeContext != 0)
-            dispatchFinalize (nativeContext);
-    }
+    public void onActivityStarted (Activity activity) {}
 
     @Override
-    public Object invoke (Object proxy, Method method, Object[] args) throws Throwable
-    {
-        if (nativeContext != 0)
-            return dispatchInvoke (nativeContext, proxy, method, args);
+    public void onActivityResumed (Activity activity) {}
 
-        return null;
-    }
+    @Override
+    public void onActivityPaused (Activity activity) {}
 
-    //==============================================================================
-    private long nativeContext = 0;
+    @Override
+    public void onActivityStopped (Activity activity) {}
 
-    private native void dispatchFinalize (long nativeContextRef);
-    private native Object dispatchInvoke (long nativeContextRef, Object proxy, Method method, Object[] args);
+    @Override
+    public void onActivitySaveInstanceState (Activity activity, Bundle outState) {}
+
+    @Override
+    public void onActivityDestroyed (Activity activity) {}
 }

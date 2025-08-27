@@ -411,7 +411,9 @@ namespace Keys
         MiddleButton = 2,
         RightButton = 3,
         WheelUp = 4,
-        WheelDown = 5
+        WheelDown = 5,
+        BackButton = 6,
+        ForwardButton = 7
     };
 
     static int AltMask = 0;
@@ -2518,6 +2520,7 @@ ModifierKeys XWindowSystem::getNativeRealtimeModifiers() const
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
+    // xQueryPointer doesn't emit masks for back/forward buttons.
     if (X11Symbols::getInstance()->xQueryPointer (display,
                                                   X11Symbols::getInstance()->xRootWindow (display,
                                                                                           X11Symbols::getInstance()->xDefaultScreen (display)),
@@ -3077,26 +3080,24 @@ void XWindowSystem::setWindowType (::Window windowH, int styleFlags) const
 
 void XWindowSystem::initialisePointerMap()
 {
-    auto numButtons = X11Symbols::getInstance()->xGetPointerMapping (display, nullptr, 0);
-    pointerMap[2] = pointerMap[3] = pointerMap[4] = Keys::NoButton;
+    const auto numButtons = X11Symbols::getInstance()->xGetPointerMapping (display, nullptr, 0);
+    std::fill_n (pointerMap, std::size (pointerMap), Keys::NoButton);
 
-    if (numButtons == 2)
-    {
-        pointerMap[0] = Keys::LeftButton;
-        pointerMap[1] = Keys::RightButton;
-    }
-    else if (numButtons >= 3)
-    {
-        pointerMap[0] = Keys::LeftButton;
-        pointerMap[1] = Keys::MiddleButton;
-        pointerMap[2] = Keys::RightButton;
+    constexpr unsigned char twoButtons[] { Keys::LeftButton, Keys::RightButton };
+    constexpr unsigned char moreButtons[] { Keys::LeftButton,
+                                            Keys::MiddleButton,
+                                            Keys::RightButton,
+                                            Keys::WheelUp,
+                                            Keys::WheelDown,
+                                            Keys::NoButton,
+                                            Keys::NoButton,
+                                            Keys::BackButton,
+                                            Keys::ForwardButton };
+    static_assert (std::size (moreButtons) >= std::size (decltype (pointerMap){}));
 
-        if (numButtons >= 5)
-        {
-            pointerMap[3] = Keys::WheelUp;
-            pointerMap[4] = Keys::WheelDown;
-        }
-    }
+    auto* sourceArray = numButtons == 2 ? twoButtons : moreButtons;
+    const auto numToCopy = jmin (numButtons, (int) std::size (pointerMap));
+    std::copy (sourceArray, sourceArray + numToCopy, pointerMap);
 }
 
 void XWindowSystem::deleteIconPixmaps (::Window windowH) const
@@ -3620,6 +3621,9 @@ void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, const XBut
             case Keys::LeftButton:      handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::leftButtonModifier); break;
             case Keys::RightButton:     handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::rightButtonModifier); break;
             case Keys::MiddleButton:    handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::middleButtonModifier); break;
+            case Keys::BackButton:      handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::backButtonModifier); break;
+            case Keys::ForwardButton:   handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::forwardButtonModifier); break;
+
             default: break;
         }
     }
@@ -3638,9 +3642,12 @@ void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer* peer, const XB
     {
         switch (pointerMap[mapIndex])
         {
-            case Keys::LeftButton:      ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::leftButtonModifier);   break;
-            case Keys::RightButton:     ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::rightButtonModifier);  break;
-            case Keys::MiddleButton:    ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::middleButtonModifier); break;
+            case Keys::LeftButton:      ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::leftButtonModifier);    break;
+            case Keys::RightButton:     ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::rightButtonModifier);   break;
+            case Keys::MiddleButton:    ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::middleButtonModifier);  break;
+            case Keys::BackButton:      ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::backButtonModifier);    break;
+            case Keys::ForwardButton:   ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::forwardButtonModifier); break;
+
             default: break;
         }
     }

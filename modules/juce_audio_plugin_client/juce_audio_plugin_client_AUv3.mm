@@ -194,7 +194,13 @@ public:
             channelInfos.add (channelInfo);
         }
        #else
-        Array<AUChannelInfo> channelInfos = AudioUnitHelpers::getAUChannelInfo (processor);
+        auto channelInfoSet = AudioUnitHelpers::getAUChannelInfo (processor);
+        Array<AUChannelInfo> channelInfos;
+        channelInfos.resize ((int) channelInfoSet.size());
+        std::transform (channelInfoSet.begin(),
+                        channelInfoSet.end(),
+                        channelInfos.begin(),
+                        [] (auto x) { return x.makeChannelInfo(); });
        #endif
 
         processor.setPlayHead (this);

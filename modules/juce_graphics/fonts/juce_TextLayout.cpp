@@ -283,39 +283,72 @@ void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& te
     createLayoutWithBalancedLineLengths (text, maxWidth, 1.0e7f);
 }
 
-void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& text, float maxWidth, float maxHeight)
+void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& text,
+                                                      float maxWidth,
+                                                      float maxHeight)
 {
     auto minimumWidth = maxWidth / 2.0f;
     auto bestWidth = maxWidth;
-    float bestLineProportion = 0.0f;
+    auto bestScore = std::numeric_limits<float>::max();
+
+    auto widthProbeText = text;
+
+    if (widthProbeText.getWordWrap() == AttributedString::byChar)
+        widthProbeText.setWordWrap (AttributedString::byWord);
+
+    std::optional<float> advanceWidth;
 
     while (maxWidth > minimumWidth)
     {
-        createLayout (text, maxWidth, maxHeight);
+        createLayout (widthProbeText, maxWidth, maxHeight);
 
-        if (getNumLines() < 2)
+        const auto numLines = getNumLines();
+
+        if (numLines < 2)
             return;
 
-        auto line1 = lines.getUnchecked (lines.size() - 1)->getLineBoundsX().getLength();
-        auto line2 = lines.getUnchecked (lines.size() - 2)->getLineBoundsX().getLength();
-        auto shortest = jmin (line1, line2);
-        auto longest  = jmax (line1, line2);
-        auto prop = shortest > 0 ? longest / shortest : 1.0f;
+        std::vector<float> lineLengths;
+        lineLengths.reserve ((size_t) numLines);
+        std::transform (lines.begin(),
+                        lines.end(),
+                        std::back_inserter (lineLengths),
+                        [] (const auto& line) { return line->getLineBoundsX().getLength(); });
 
-        if (prop > 0.9f && prop < 1.1f)
-            return;
+        const auto longestLineLength = *std::max_element (lineLengths.begin(), lineLengths.end());
 
-        if (prop > bestLineProportion)
+        auto accumulateScore = [longestLineLength] (auto scoreSum, auto lineLength)
         {
-            bestLineProportion = prop;
+            const auto unusedSpace = 1.0f - (lineLength / longestLineLength);
+            return scoreSum + (unusedSpace * unusedSpace);
+        };
+
+        const auto score = std::accumulate (lineLengths.begin(),
+                                            lineLengths.end(),
+                                            0.0f, accumulateScore) / (float) numLines;
+
+        if (score < bestScore)
+        {
+            bestScore = score;
             bestWidth = maxWidth;
+
+            if (score < 0.4f)
+                break;
         }
 
-        maxWidth -= 10.0f;
+        if (! advanceWidth.has_value())
+        {
+            advanceWidth = std::numeric_limits<float>::max();
+
+            for (const auto& line : lines)
+                for (const auto& run : line->runs)
+                    for (const auto& glyph : run->glyphs)
+                        advanceWidth = jmin (*advanceWidth, glyph.width);
+        }
+
+        maxWidth -= *advanceWidth;
     }
 
-    if (! approximatelyEqual (bestWidth, maxWidth))
-        createLayout (text, bestWidth, maxHeight);
+    createLayout (text, bestWidth, maxHeight);
 }
 
 //==============================================================================
@@ -420,6 +453,9 @@ void TextLayout::createStandardLayout (const AttributedString& text)
 
     if (text.getWordWrap() != AttributedString::none)
         shapedTextOptions = shapedTextOptions.withWordWrapWidth (width);
+
+    if (text.getWordWrap() == AttributedString::WordWrap::byChar)
+        shapedTextOptions = shapedTextOptions.withAllowBreakingInsideWord (true);
 
     ShapedText st { text.getText(), shapedTextOptions };
 

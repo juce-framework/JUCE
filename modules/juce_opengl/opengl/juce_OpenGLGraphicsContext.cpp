@@ -1797,9 +1797,9 @@ struct SavedState final : public RenderingHelpers::SavedStateBase<SavedState>
           previousTarget (createCopyIfNotNull (other.previousTarget.get()))
     {}
 
-    SavedState* beginTransparencyLayer (float opacity)
+    std::unique_ptr<SavedState> beginTransparencyLayer (float opacity)
     {
-        auto* s = new SavedState (*this);
+        auto s = std::make_unique<SavedState> (*this);
 
         if (clip != nullptr)
         {
@@ -1834,6 +1834,8 @@ struct SavedState final : public RenderingHelpers::SavedStateBase<SavedState>
             clip->renderImageUntransformed (*this, finishedLayerState.transparencyLayer,
                                             (int) (finishedLayerState.transparencyLayerAlpha * 255.0f),
                                             clipBounds.getX(), clipBounds.getY(), false);
+
+            state->activeTextures.bindTexture (0);
         }
     }
 

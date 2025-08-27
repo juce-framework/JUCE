@@ -161,31 +161,7 @@ class JuceActivityWatcher final : public ActivityLifecycleCallbacks
 public:
     JuceActivityWatcher()
     {
-        auto appContext = getAppContext();
-
-        if (appContext != nullptr)
-        {
-            auto* env = getEnv();
-
-            myself = GlobalRef (CreateJavaInterface (this, "android/app/Application$ActivityLifecycleCallbacks"));
-            env->CallVoidMethod (appContext.get(), AndroidApplication.registerActivityLifecycleCallbacks, myself.get());
-        }
-
         checkActivityIsMain (androidApkContext);
-    }
-
-    ~JuceActivityWatcher() override
-    {
-        auto appContext = getAppContext();
-
-        if (appContext != nullptr && myself != nullptr)
-        {
-            auto* env = getEnv();
-
-            env->CallVoidMethod (appContext.get(), AndroidApplication.unregisterActivityLifecycleCallbacks, myself.get());
-            clear();
-            myself.clear();
-        }
     }
 
     void onActivityStarted (jobject activity) override
@@ -314,9 +290,9 @@ private:
         return mainActivityClassPath;
     }
 
-    GlobalRef myself;
     CriticalSection currentActivityLock;
     WeakGlobalRef currentActivity, mainActivity;
+    ActivityLifecycleCallbackForwarder forwarder { GlobalRef { getAppContext() }, this };
 };
 
 //==============================================================================
