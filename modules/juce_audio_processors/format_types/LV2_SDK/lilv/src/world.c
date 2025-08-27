@@ -1046,7 +1046,8 @@ lilv_world_load_plugin_classes(LilvWorld* world)
     LilvPluginClass* pclass = lilv_plugin_class_new(
       world, parent, class_node, (const char*)sord_node_get_string(label));
     if (pclass) {
-      zix_tree_insert((ZixTree*)world->plugin_classes, pclass, NULL);
+      if (zix_tree_insert((ZixTree*)world->plugin_classes, pclass, NULL) == ZIX_STATUS_EXISTS)
+        lilv_plugin_class_free(pclass);
     }
 
     sord_node_free(world->world, label);

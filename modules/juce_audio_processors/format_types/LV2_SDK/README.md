@@ -7,6 +7,8 @@ directory. The following modifications were made:
 - Removed the include of dlfcn.h in world.c
 - Fixed a leak of world->opt.lv2_path when calling lilv_world_set_option
   multiple times
+- Fixed a leak of plugin classes when calling lilv_world_load_plugin_classes
+  multiple times
 
 Remember to update the versions in the config headers if you ever update the
 library versions!
