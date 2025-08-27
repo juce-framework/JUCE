@@ -137,7 +137,7 @@ private:
     std::unique_ptr<TableListBoxModel> tableModel;
 
     class Scanner;
-    std::unique_ptr<Scanner> currentScanner;
+    std::shared_ptr<Scanner> currentScanner;
 
     ScopedMessageBox messageBox;
 

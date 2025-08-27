@@ -154,7 +154,8 @@ public:
 };
 
 //==============================================================================
-class PluginListComponent::Scanner final : private Timer
+class PluginListComponent::Scanner final : public std::enable_shared_from_this<Scanner>,
+                                           private Timer
 {
 public:
     Scanner (PluginListComponent& plc, AudioPluginFormat& format, const StringArray& filesOrIdentifiers,
@@ -321,9 +322,10 @@ private:
 
         progressWindow.addButton (TRANS ("Cancel"), 0, KeyPress (KeyPress::escapeKey));
         progressWindow.addProgressBarComponent (progress);
-        progressWindow.enterModalState (true, ModalCallbackFunction::create ([this] (auto)
+        progressWindow.enterModalState (true, ModalCallbackFunction::create ([weak = weak_from_this()] (auto)
         {
-            flags |= stopRequested;
+            if (const auto strong = weak.lock())
+                strong->flags |= stopRequested;
         }));
 
         if (numThreads > 0)
@@ -650,9 +652,14 @@ void PluginListComponent::scanFor (AudioPluginFormat& format)
 
 void PluginListComponent::scanFor (AudioPluginFormat& format, const StringArray& filesOrIdentifiersToScan)
 {
-    currentScanner.reset (new Scanner (*this, format, filesOrIdentifiersToScan, propertiesToUse, allowAsync, numThreads,
-                                       dialogTitle.isNotEmpty() ? dialogTitle : TRANS ("Scanning for plug-ins..."),
-                                       dialogText.isNotEmpty()  ? dialogText  : TRANS ("Searching for all possible plug-in files...")));
+    currentScanner = std::make_shared<Scanner> (*this,
+                                                format,
+                                                filesOrIdentifiersToScan,
+                                                propertiesToUse,
+                                                allowAsync,
+                                                numThreads,
+                                                dialogTitle.isNotEmpty() ? dialogTitle : TRANS ("Scanning for plug-ins..."),
+                                                dialogText.isNotEmpty()  ? dialogText  : TRANS ("Searching for all possible plug-in files..."));
 }
 
 bool PluginListComponent::isScanning() const noexcept
