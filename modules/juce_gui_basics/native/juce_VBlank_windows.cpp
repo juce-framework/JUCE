@@ -102,6 +102,9 @@ public:
 
     static HMONITOR getMonitorFromOutput (ComSmartPtr<IDXGIOutput> output)
     {
+        if (output == nullptr)
+            return nullptr;
+
         DXGI_OUTPUT_DESC desc = {};
         return (FAILED (output->GetDesc (&desc)) || ! desc.AttachedToDesktop)
                    ? nullptr
@@ -214,18 +217,22 @@ public:
 
         for (const auto& adapter : directX->adapters.getAdapterArray())
         {
-            UINT i = 0;
-            ComSmartPtr<IDXGIOutput> output;
-
-            while (adapter->dxgiAdapter->EnumOutputs (i, output.resetAndGetPointerAddress()) != DXGI_ERROR_NOT_FOUND)
+            for (UINT i = 0;; ++i)
             {
-                if (VBlankThread::getMonitorFromOutput (output) == monitor)
-                {
-                    threads.emplace_back (std::make_unique<VBlankThread> (output, monitor, listener));
-                    return;
-                }
+                ComSmartPtr<IDXGIOutput> output;
+                const auto result = adapter->dxgiAdapter->EnumOutputs (i, output.resetAndGetPointerAddress());
 
-                ++i;
+                if (result == DXGI_ERROR_NOT_CURRENTLY_AVAILABLE)
+                    break;
+
+                if (result == DXGI_ERROR_NOT_FOUND)
+                    break;
+
+                if (VBlankThread::getMonitorFromOutput (output) != monitor)
+                    continue;
+
+                threads.emplace_back (std::make_unique<VBlankThread> (output, monitor, listener));
+                break;
             }
         }
     }
