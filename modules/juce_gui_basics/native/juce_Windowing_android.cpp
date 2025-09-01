@@ -2565,18 +2565,25 @@ public:
 
     bool isDarkModeEnabled() const noexcept  { return darkModeEnabled; }
 
-    void onActivityStarted (jobject /*activity*/) override
+private:
+    void onActivityStarted (jobject) override
     {
-        const auto isEnabled = getDarkModeSetting();
-
-        if (darkModeEnabled != isEnabled)
-        {
-            darkModeEnabled = isEnabled;
-            Desktop::getInstance().darkModeChanged();
-        }
+        updateMode();
     }
 
-private:
+    void onActivityConfigurationChanged (jobject) override
+    {
+        updateMode();
+    }
+
+    void updateMode()
+    {
+        const auto current = getDarkModeSetting();
+
+        if (std::exchange (darkModeEnabled, current) != current)
+            Desktop::getInstance().darkModeChanged();
+    }
+
     static bool getDarkModeSetting()
     {
         auto* env = getEnv();
