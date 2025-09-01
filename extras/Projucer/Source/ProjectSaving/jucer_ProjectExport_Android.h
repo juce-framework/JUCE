@@ -1846,7 +1846,7 @@ private:
         setAttributeIfNotPresent (*act, "android:name", getActivityClassString());
 
         if (! act->hasAttribute ("android:configChanges"))
-            act->setAttribute ("android:configChanges", "keyboard|keyboardHidden|orientation|screenSize|navigation|smallestScreenSize|screenLayout");
+            act->setAttribute ("android:configChanges", "keyboard|keyboardHidden|orientation|screenSize|navigation|smallestScreenSize|screenLayout|uiMode");
 
         if (androidScreenOrientation.get() != "unspecified")
         {
