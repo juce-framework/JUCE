@@ -1421,6 +1421,22 @@ public:
         return kResultFalse;
     }
 
+    tresult PLUGIN_API setComponentHandler (Vst::IComponentHandler* handler) override
+    {
+        const auto result = EditController::setComponentHandler (handler);
+
+        if (result != kResultTrue)
+            return result;
+
+        if (audioProcessor != nullptr)
+        {
+            if (auto* extensions = audioProcessor->get()->getVST3ClientExtensions())
+                extensions->setIComponentHandler (componentHandler);
+        }
+
+        return kResultTrue;
+    }
+
     //==============================================================================
     IPlugView* PLUGIN_API createView (const char* name) override
     {
