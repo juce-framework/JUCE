@@ -44,7 +44,7 @@
 
   ID:                 juce_javascript
   vendor:             juce
-  version:            8.0.8
+  version:            8.0.9
   name:               JUCE Javascript interpreter
   description:        Javascript interpreter.
   website:            http://www.juce.com/juce
