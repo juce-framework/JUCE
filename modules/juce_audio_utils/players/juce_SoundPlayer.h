@@ -73,9 +73,9 @@ public:
         This gives you slightly more control over the sound playback compared
         to  the other playSound methods. For example, if you would like to
         stop the sound prematurely you can call this method with a
-        TransportAudioSource and then call audioSource->stop. Note that,
+        AudioTransportSource and then call audioSource->stop. Note that,
         you must call audioSource->start to start the playback, if your
-        audioSource is a TransportAudioSource.
+        audioSource is a AudioTransportSource.
 
         The audio device manager will not hold any references to this audio
         source once the audio source has stopped playing for any reason,

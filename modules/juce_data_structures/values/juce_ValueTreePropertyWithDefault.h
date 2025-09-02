@@ -230,6 +230,9 @@ public:
     /** Returns the property ID of the referenced property. */
     Identifier& getPropertyID() noexcept                    { return targetProperty; }
 
+    /** Returns the property ID of the referenced property. */
+    const Identifier& getPropertyID() const noexcept        { return targetProperty; }
+
     /** Returns the UndoManager that is being used. */
     UndoManager* getUndoManager() noexcept                  { return undoManager; }
 
@@ -332,11 +335,11 @@ private:
 };
 
 //==============================================================================
-#ifndef DOXYGEN
+/** @cond */
 using ValueWithDefault  [[deprecated ("This class has been renamed to better describe what is does. "
                                       "This declaration is here for backwards compatibility and new "
                                       "code should use the new class name.")]]
     = ValueTreePropertyWithDefault;
-#endif
+/** @endcond */
 
 } // namespace juce

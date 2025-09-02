@@ -69,6 +69,24 @@
 
 #include <future>
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
+inline constexpr auto pluginIsMidiEffect = JucePlugin_AUMainType == kAudioUnitType_MIDIProcessor;
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+inline constexpr auto pluginProducesMidiOutput =
+#if JucePlugin_ProducesMidiOutput
+        true;
+#else
+        pluginIsMidiEffect;
+#endif
+
+inline constexpr auto pluginWantsMidiInput =
+#if JucePlugin_WantsMidiInput
+        true;
+#else
+        pluginIsMidiEffect;
+#endif
+
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullability-completeness")
 
 using namespace juce;
@@ -176,7 +194,13 @@ public:
             channelInfos.add (channelInfo);
         }
        #else
-        Array<AUChannelInfo> channelInfos = AudioUnitHelpers::getAUChannelInfo (processor);
+        auto channelInfoSet = AudioUnitHelpers::getAUChannelInfo (processor);
+        Array<AUChannelInfo> channelInfos;
+        channelInfos.resize ((int) channelInfoSet.size());
+        std::transform (channelInfoSet.begin(),
+                        channelInfoSet.end(),
+                        channelInfos.begin(),
+                        [] (auto x) { return x.makeChannelInfo(); });
        #endif
 
         processor.setPlayHead (this);
@@ -384,11 +408,7 @@ public:
     //==============================================================================
     int getVirtualMIDICableCount() const
     {
-       #if JucePlugin_WantsMidiInput
-        return 1;
-       #else
-        return 0;
-       #endif
+        return pluginWantsMidiInput;
     }
 
     bool getSupportsMPE() const
@@ -398,11 +418,10 @@ public:
 
     NSArray<NSString*>* getMIDIOutputNames() const
     {
-       #if JucePlugin_ProducesMidiOutput
-        return @[@"MIDI Out"];
-       #else
+        if constexpr (pluginProducesMidiOutput)
+            return @[@"MIDI Out"];
+
         return @[];
-       #endif
     }
 
     //==============================================================================
@@ -447,7 +466,7 @@ public:
         if (str != nullptr)
         {
             AudioProcessor::TrackProperties props;
-            props.name = nsStringToJuce (str);
+            props.name = std::make_optional (nsStringToJuce (str));
 
             getAudioProcessor().updateTrackProperties (props);
         }
@@ -546,6 +565,11 @@ public:
 
         hostMusicalContextCallback = [au musicalContextBlock];
         hostTransportStateCallback = [au transportStateBlock];
+
+       #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+        if (@available (macOS 12, iOS 15, *))
+            eventListOutput.setBlock ([au MIDIOutputEventListBlock]);
+       #endif
 
         if (@available (macOS 10.13, *))
             midiOutputEventBlock = [au MIDIOutputEventBlock];
@@ -1447,6 +1471,7 @@ private:
             switch (event->head.eventType)
             {
                 case AURenderEventMIDI:
+                case AURenderEventMIDISysEx:
                 {
                     const AUMIDIEvent& midiEvent = event->MIDI;
                     midiMessages.addEvent (midiEvent.data, midiEvent.length, static_cast<int> (midiEvent.eventSampleTime - startTime));
@@ -1487,10 +1512,6 @@ private:
                     }
                 }
                 break;
-
-                case AURenderEventMIDISysEx:
-                default:
-                    break;
             }
         }
     }
@@ -1599,19 +1620,7 @@ private:
             // process audio
             processBlock (audioBuffer.getBuffer (frameCount), midiMessages);
 
-            // send MIDI
-           #if JucePlugin_ProducesMidiOutput
-            if (@available (macOS 10.13, *))
-            {
-                if (auto midiOut = midiOutputEventBlock)
-                    for (const auto metadata : midiMessages)
-                        if (isPositiveAndBelow (metadata.samplePosition, frameCount))
-                            midiOut ((int64_t) metadata.samplePosition + (int64_t) (timestamp->mSampleTime + 0.5),
-                                     0,
-                                     metadata.numBytes,
-                                     metadata.data);
-            }
-           #endif
+            sendMidi ((int64_t) (timestamp->mSampleTime + 0.5), frameCount);
         }
 
         // copy back
@@ -1619,6 +1628,37 @@ private:
             audioBuffer.get ((int) outputBusNumber, *outputData, mapper.get (false, (int) outputBusNumber));
 
         return noErr;
+    }
+
+    void sendMidi (int64_t baseTimeStamp, AUAudioFrameCount frameCount)
+    {
+        if constexpr (pluginProducesMidiOutput)
+        {
+            #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+             if (@available (macOS 12, iOS 15, *))
+             {
+                 if (eventListOutput.trySend (midiMessages, baseTimeStamp))
+                     return;
+             }
+            #endif
+
+            if (@available (macOS 10.13, *))
+            {
+                if (auto midiOut = midiOutputEventBlock)
+                {
+                    for (const auto metadata : midiMessages)
+                    {
+                        if (! isPositiveAndBelow (metadata.samplePosition, frameCount))
+                            continue;
+
+                        midiOut ((int64_t) metadata.samplePosition + baseTimeStamp,
+                                 0,
+                                 metadata.numBytes,
+                                 metadata.data);
+                    }
+                }
+            }
+        }
     }
 
     void processBlock (juce::AudioBuffer<float>& buffer, MidiBuffer& midiBuffer) noexcept
@@ -1787,6 +1827,7 @@ private:
     AUMIDIOutputEventBlock midiOutputEventBlock = nullptr;
 
    #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+    AudioUnitHelpers::EventListOutput eventListOutput;
     ump::ToBytestreamDispatcher converter { 2048 };
    #endif
 

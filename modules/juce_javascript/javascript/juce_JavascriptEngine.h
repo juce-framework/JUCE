@@ -36,22 +36,15 @@ namespace juce
 {
 
 /**
-    A simple javascript interpreter!
-
-    It's not fully standards-compliant, and won't be as fast as the fancy JIT-compiled
+    This class is a wrapper around QuickJS, an ES2023 compliant, embeddable javascript
+    engine. It may not be as fast as the fancy JIT-compiled
     engines that you get in browsers, but this is an extremely compact, low-overhead javascript
-    interpreter, which is integrated with the juce var and DynamicObject classes. If you need
-    a few simple bits of scripting in your app, and want to be able to easily let the JS
-    work with native objects defined as DynamicObject subclasses, then this might do the job.
+    interpreter, which is integrated with the juce var and DynamicObject classes. It allows you
+    to easily let the JS work with native objects defined as DynamicObject subclasses.
 
     To use, simply create an instance of this class and call execute() to run your code.
     Variables that the script sets can be retrieved with evaluate(), and if you need to provide
     native objects for the script to use, you can add them with registerNativeObject().
-
-    One caveat: Because the values and objects that the engine works with are DynamicObject
-    and var objects, they use reference-counting rather than garbage-collection, so if your
-    script creates complex connections between objects, you run the risk of creating cyclic
-    dependencies and hence leaking.
 
     @tags{Core}
 */

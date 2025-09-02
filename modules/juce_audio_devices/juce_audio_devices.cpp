@@ -176,19 +176,6 @@
   #include "native/juce_ALSA_linux.cpp"
  #endif
 
- #if JUCE_JACK
-  /* Got an include error here? If so, you've either not got jack-audio-connection-kit
-     installed, or you've not got your paths set up correctly to find its header files.
-
-     The package you need to install to get JACK support is "libjack-dev".
-
-     If you don't have the jack-audio-connection-kit library and don't want to build
-     JUCE with low latency audio support, just set the JUCE_JACK flag to 0.
-  */
-  #include <jack/jack.h>
-  #include "native/juce_JackAudio_linux.cpp"
- #endif
-
  #if (JUCE_LINUX && JUCE_BELA)
   /* Got an include error here? If so, you've either not got the bela headers
      installed, or you've not got your paths set up correctly to find its header
@@ -256,6 +243,25 @@ namespace juce
   }
  #endif
 
+#endif
+
+#if (JUCE_LINUX || JUCE_BSD || JUCE_MAC || JUCE_WINDOWS) && JUCE_JACK
+ /* Got an include error here? If so, you've either not got jack-audio-connection-kit
+    installed, or you've not got your paths set up correctly to find its header files.
+
+    Linux: The package you need to install to get JACK support is libjack-dev.
+
+    macOS: The package you need to install to get JACK support is jack, which you can
+    install using Homebrew.
+
+    Windows: The package you need to install to get JACK support is available from the
+    JACK Audio website. Download and run the installer for Windows.
+
+    If you don't have the jack-audio-connection-kit library and don't want to build
+    JUCE with low latency audio support, just set the JUCE_JACK flag to 0.
+ */
+ #include <jack/jack.h>
+ #include "native/juce_JackAudio.cpp"
 #endif
 
 #include "midi_io/juce_MidiDevices.cpp"

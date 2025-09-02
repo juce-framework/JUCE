@@ -30,6 +30,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_gui_extra/juce_gui_extra.h>
 #include <juce_javascript/juce_javascript.h>
+#include <juce_midi_ci/juce_midi_ci.h>
 #include <juce_opengl/juce_opengl.h>
 #include <juce_osc/juce_osc.h>
 #include <juce_product_unlocking/juce_product_unlocking.h>
@@ -56,7 +57,7 @@ namespace ProjectInfo
 {
     const char* const  projectName    = "DemoRunner";
     const char* const  companyName    = "Raw Material Software Limited";
-    const char* const  versionString  = "8.0.4";
-    const int          versionNumber  = 0x80004;
+    const char* const  versionString  = "8.0.9";
+    const int          versionNumber  = 0x80009;
 }
 #endif

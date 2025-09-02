@@ -120,7 +120,22 @@ add_library(juce::juce_recommended_config_flags ALIAS juce_recommended_config_fl
 if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
     _juce_get_debug_config_genex(debug_config)
     target_compile_options(juce_recommended_config_flags INTERFACE
-        $<IF:${debug_config},/Od /Zi,/Ox> $<$<STREQUAL:"${CMAKE_CXX_COMPILER_ID}","MSVC">:/MP> /EHsc)
+        $<IF:${debug_config},/Od,/Ox> $<$<STREQUAL:"${CMAKE_CXX_COMPILER_ID}","MSVC">:/MP> /EHsc)
+
+    set(needs_debug_flag TRUE)
+
+    if(POLICY CMP0141)
+        set(policy_state)
+        cmake_policy(GET CMP0141 policy_state)
+
+        if("${policy_state}" STREQUAL "NEW")
+            set(needs_debug_flag FALSE)
+        endif()
+    endif()
+
+    if(needs_debug_flag)
+        target_compile_options(juce_recommended_config_flags INTERFACE $<${debug_config}:/Zi>)
+    endif()
 elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
        OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
        OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
@@ -140,9 +155,9 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIA
         $<$<CONFIG:Release>:$<IF:$<STREQUAL:"${CMAKE_CXX_COMPILER_ID}","MSVC">,-GL,-flto>>)
     target_link_libraries(juce_recommended_lto_flags INTERFACE
         $<$<CONFIG:Release>:$<$<STREQUAL:"${CMAKE_CXX_COMPILER_ID}","MSVC">:-LTCG>>)
-elseif((NOT MINGW) AND ((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-                     OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-                     OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")))
+elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+       OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+       OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
     target_compile_options(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:-flto>)
     target_link_libraries(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:-flto>)
     # Xcode 15.0 requires this flag to avoid a compiler bug

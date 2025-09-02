@@ -210,8 +210,7 @@ public:
             return typeface->getLayersForGlyph (key.font.getMetricsKind(),
                                                 key.glyph,
                                                 AffineTransform::scale (fontHeight * key.font.getHorizontalScale(),
-                                                                        fontHeight),
-                                                fontHeight);
+                                                                        fontHeight));
         });
     }
 
@@ -2421,15 +2420,23 @@ public:
 
     SoftwareRendererSavedState (const SoftwareRendererSavedState& other) = default;
 
-    SoftwareRendererSavedState* beginTransparencyLayer (float opacity)
+    std::unique_ptr<SoftwareRendererSavedState> beginTransparencyLayer (float opacity)
     {
-        auto* s = new SoftwareRendererSavedState (*this);
+        auto s = std::make_unique<SoftwareRendererSavedState> (*this);
 
         if (clip != nullptr)
         {
             auto layerBounds = clip->getClipBounds();
 
-            s->image = Image (Image::ARGB, layerBounds.getWidth(), layerBounds.getHeight(), true);
+            const auto imageType = image.getPixelData()->createLowLevelContext()
+                                                       ->getPreferredImageTypeForTemporaryImages();
+
+            s->image = Image (Image::ARGB,
+                              layerBounds.getWidth(),
+                              layerBounds.getHeight(),
+                              true,
+                              *imageType);
+
             s->transparencyLayerAlpha = opacity;
             s->transform.moveOriginInDeviceSpace (-layerBounds.getPosition());
             s->cloneClipIfMultiplyReferenced();
@@ -2558,12 +2565,12 @@ public:
     void beginTransparencyLayer (float opacity)
     {
         save();
-        currentState.reset (currentState->beginTransparencyLayer (opacity));
+        currentState = currentState->beginTransparencyLayer (opacity);
     }
 
     void endTransparencyLayer()
     {
-        std::unique_ptr<StateObjectType> finishedTransparencyLayer (currentState.release());
+        auto finishedTransparencyLayer = std::move (currentState);
         restore();
         currentState->endTransparencyLayer (*finishedTransparencyLayer);
     }
@@ -2660,7 +2667,7 @@ protected:
             const auto fontTransform = AffineTransform::scale (fontHeight * stack->font.getHorizontalScale(),
                                                                fontHeight).followedBy (t);
             const auto fullTransform = stack->transform.getTransformWith (fontTransform);
-            return std::tuple (stack->font.getTypefacePtr()->getLayersForGlyph (stack->font.getMetricsKind(), i, fullTransform, fontHeight), Point<float>{});
+            return std::tuple (stack->font.getTypefacePtr()->getLayersForGlyph (stack->font.getMetricsKind(), i, fullTransform), Point<float>{});
         }();
 
         const auto initialFill = stack->fillType;
@@ -2673,7 +2680,7 @@ protected:
                 if (auto fill = colourLayer->colour)
                     stack->setFillType (*fill);
 
-                stack->fillEdgeTable (colourLayer->clip, drawPosition.x, (int) drawPosition.y);
+                stack->fillEdgeTable (colourLayer->clip, drawPosition.x, roundToInt (drawPosition.y));
             }
             else if (auto* imageLayer = std::get_if<ImageLayer> (&layer.layer))
             {

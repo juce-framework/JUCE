@@ -1,0 +1,50 @@
+name: Upload Artifact
+description: Upload an artifact preserving file permissions
+inputs:
+  key:
+    description: The artifact key
+    required: true
+  paths:
+    description: The artifact paths
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Create tarball
+      shell: python3 {0}
+      run: |
+        import sys
+        import os
+        sys.path.append(os.path.abspath('.github/workflows'))
+
+        from configure_logger import configure_logger
+
+        from logging import getLogger
+        from os import mkdir
+        import tarfile
+
+        logger = getLogger(__name__)
+        configure_logger(logger)
+
+        input_paths = """${{ inputs.paths }}"""
+        logger.debug(f'Input paths: {input_paths}')
+        paths = filter(None, [x.strip() for x in input_paths.split('\n')])
+        logger.info(f'Uploading paths: {paths}')
+        mkdir('tmp_artifact_upload')
+        archive_path = 'tmp_artifact_upload/${{ inputs.key }}.tar'
+        logger.debug(f'Creating archive: {archive_path}')
+        with tarfile.open('tmp_artifact_upload/${{ inputs.key }}.tar', 'w') as tar:
+            for path in paths:
+                logger.debug(f'Adding path to archive archive: {path}')
+                tar.add(path)
+    - uses: actions/upload-artifact@v4.6.0
+      with:
+        name: ${{ inputs.key }}
+        path: tmp_artifact_upload
+        retention-days: 1
+    - name: Clean up
+      shell: python3 {0}
+      run: |
+        from shutil import rmtree
+        rmtree('tmp_artifact_upload')
+

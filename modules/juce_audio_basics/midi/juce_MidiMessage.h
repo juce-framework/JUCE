@@ -880,7 +880,7 @@ public:
     static MidiMessage createSysExMessage (Span<const std::byte> data);
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     /** Reads a midi variable-length integer.
 
         The `data` argument indicates the data to read the number from,
@@ -889,7 +889,7 @@ public:
     */
     [[deprecated ("This signature has been deprecated in favour of the safer readVariableLengthValue.")]]
     static int readVariableLengthVal (const uint8* data, int& numBytesUsed) noexcept;
-   #endif
+    /** @endcond */
 
     /** Holds information about a variable-length value which was parsed
         from a stream of bytes.
@@ -989,17 +989,17 @@ public:
 
 private:
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     union PackedData
     {
         uint8* allocatedData;
         uint8 asBytes[sizeof (uint8*)];
     };
+    /** @endcond */
 
     PackedData packedData;
     double timeStamp = 0;
     int size;
-   #endif
 
     inline bool isHeapAllocated() const noexcept  { return size > (int) sizeof (packedData); }
     inline uint8* getData() const noexcept        { return isHeapAllocated() ? packedData.allocatedData : (uint8*) packedData.asBytes; }

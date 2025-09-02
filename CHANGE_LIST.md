@@ -3,6 +3,54 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.9
+
+  - Added support for configurable font features (ligatures, kerning, ...)
+  - Multiple improvements to Android windowing
+  - Multiple improvements to text shaping
+  - Fixed clearing audio buffers on WASAPI device start/stop
+  - Fixed AU hosting of plug-ins with poorly implemented parameters
+  - Added macOS/iOS 26 support
+  - Added support for iOS UIScene lifecycle on iOS 13+
+  - Added support for 32-bit int WAV files
+  - Multiple Linux WebView improvements
+  - Fixed an issue with MIDI FX AAX plug-ins on any audio channel layouts
+  - Accessibility navigation is now enabled by default for disabled components
+
+## Version 8.0.8
+
+  - Improved the TextEditor layout behaviour
+  - Added new options to control text line spacing
+  - Added more Direct2D bug fixes and performance improvements
+  - Fixed a iOS simulator buffer size issue
+  - Moved the MIDI CapabilityInquiry Demo into the DemoRunner
+  - Updated the default Android toolchain version
+
+## Version 8.0.7
+
+  - Improved unicode handling and performance in TextEditor
+  - Fixed iOS external device sample rate handling in iOS 18
+  - Added many Direct2D bug fixes and performance improvements
+  - Added a new MessageManager::callSync counterpart to callAsync
+  - Fixed a crash in Ableton when closing a plug-in window
+  - Improved sscache compatibility
+  - Fixed some PopupMenu bugs
+  - Updated Zlib
+
+## Version 8.0.6
+
+  - Changed a Visual Studio toolchain error into a warning 
+
+## Version 8.0.5
+
+  - Added Windows Arm support
+  - Added support for local notifications
+  - Added passthrough compiler options to juceaide
+  - Added support for VST3 parameter migrations
+  - Fixed some Windows mouse events and window dragging behaviour
+  - Added Ranges functionality
+  - Added VST2 and VST3 MIDI note names
+
 ## Version 8.0.4
 
   - Simplified singleton creation

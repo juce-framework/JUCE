@@ -99,7 +99,7 @@ public:
 
     /** Callback to indicate that the user has dropped the files onto this component.
 
-        When the user drops the files, this get called, and you can use the files in whatever
+        When the user drops the files, this gets called, and you can use the files in whatever
         way is appropriate.
 
         Note that after this is called, the fileDragExit method may not be called, so you should

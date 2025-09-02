@@ -68,7 +68,7 @@
     <VS2019 targetFolder="Builds/VisualStudio2019" extraCompilerFlags="/w44265 /w45038 /w44062">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="UnitTestRunner" warningsAreErrors="1"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner" debugInformationFormat="None"
+        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner"
                        warningsAreErrors="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
@@ -96,7 +96,7 @@
     <VS2022 targetFolder="Builds/VisualStudio2022" extraCompilerFlags="/w44265 /w45038 /w44062">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="UnitTestRunner" warningsAreErrors="1"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner" debugInformationFormat="None"
+        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner"
                        warningsAreErrors="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

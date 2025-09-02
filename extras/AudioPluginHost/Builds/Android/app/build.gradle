@@ -1,9 +1,9 @@
 apply plugin: 'com.android.application'
 
-def ndkVersionString = "26.2.11394342"
+def ndkVersionString = "28.1.13356709"
 
 android {
-    compileSdk 34
+    compileSdk 35
     ndkVersion ndkVersionString
     namespace "com.juce.audiopluginhost"
     externalNativeBuild {
@@ -24,11 +24,11 @@ android {
 
     defaultConfig {
         applicationId "com.juce.audiopluginhost"
-        minSdkVersion    23
-        targetSdkVersion 34
+        minSdkVersion    24
+        targetSdkVersion 35
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-23", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE", "-DANDROID_WEAK_API_DEFS=ON", "-DCMAKE_CXX_STANDARD=17", "-DCMAKE_CXX_EXTENSIONS=OFF"
+                arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-24", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE", "-DANDROID_WEAK_API_DEFS=ON", "-DCMAKE_CXX_STANDARD=17", "-DCMAKE_CXX_EXTENSIONS=OFF"
             }
         }
     }

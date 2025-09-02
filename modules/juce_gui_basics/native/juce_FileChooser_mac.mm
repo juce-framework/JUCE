@@ -103,9 +103,9 @@ public:
         [panel setTitle: nsTitle];
         [panel setReleasedWhenClosed: YES];
 
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+        JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
         [panel setAllowedFileTypes: createAllowedTypesArray (filters)];
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
         if (! isSave)
         {
@@ -123,7 +123,7 @@ public:
 
         if (preview != nullptr)
         {
-            nsViewPreview = [[NSView alloc] initWithFrame: makeNSRect (preview->getLocalBounds())];
+            nsViewPreview = [[NSView alloc] initWithFrame: makeCGRect (preview->getLocalBounds())];
             [panel setAccessoryView: nsViewPreview];
 
             preview->addToDesktop (0, (void*) nsViewPreview);

@@ -44,7 +44,7 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            8.0.4
+  version:            8.0.9
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
@@ -55,7 +55,7 @@
   OSXFrameworks:      Cocoa QuartzCore
   WeakOSXFrameworks:  Metal MetalKit
   iOSFrameworks:      CoreServices UIKit
-  WeakiOSFrameworks:  Metal MetalKit UniformTypeIdentifiers
+  WeakiOSFrameworks:  Metal MetalKit UniformTypeIdentifiers UserNotifications
 
  END_JUCE_MODULE_DECLARATION
 

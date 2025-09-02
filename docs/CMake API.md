@@ -75,17 +75,17 @@ or Visual Studio project, then you could open the generated project in your IDE.
 
 ### Building for iOS
 
-To build for iOS, you'll need CMake 3.14 or higher. Using the Xcode generator is highly recommended,
-as other generators may not automatically find the correct SDK for the iPhone simulator, and may
-fail to run certain parts of the build, such as compiling icons and processing the app's plist. By
-default, CMake will build for the same system that originally configured the project, so to enable
-cross-compilation for iOS, a few extra flags must be passed to the initial CMake invocation:
+Using the Xcode generator is highly recommended, as other generators may not automatically find
+the correct SDK for the iPhone simulator, and may fail to run certain parts of the build, such as
+compiling icons and processing the app's plist. By default, CMake will build for the same system
+that originally configured the project, so to enable cross-compilation for iOS, a few extra flags
+must be passed to the initial CMake invocation:
 
-    cmake -Bbuild-ios -GXcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=9.3
+    cmake -Bbuild-ios -GXcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
 
 Here we create a build tree in the directory named 'build-ios', using the Xcode generator. The
 `-DCMAKE_SYSTEM_NAME=iOS` option tells CMake to enable cross-compiling for iOS. The
-`-DCMAKE_OSX_DEPLOYMENT_TARGET=9.3` option sets the minimum deployment target (it applies to iOS
+`-DCMAKE_OSX_DEPLOYMENT_TARGET=12.0` option sets the minimum deployment target (it applies to iOS
 despite the 'OSX' in the variable name!).
 
 Once the project has generated, we can open it as normal in Xcode (look for the project file in the
@@ -102,7 +102,7 @@ require special code signing.
 If we wanted to build for a real device, we would need to pass some extra signing details to the
 initial CMake configuration command:
 
-    cmake -Bbuild-ios -GXcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=9.3 \
+    cmake -Bbuild-ios -GXcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
         -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY="iPhone Developer"
         -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=<10 character id>
 
@@ -136,14 +136,14 @@ configuring the CMake project with `"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"`.
 
 ### Building with Clang on Windows
 
-Clang-cl (Clang with MSVC-like command-line) should work by default. If you are generating a Visual
+Clang-cl (Clang with MSVC-like command line) should work by default. If you are generating a Visual
 Studio project, and have installed the LLVM package which is distributed with Visual Studio, then
-you can configure a Clang-cl build by passing "-T ClangCL" on your configuration commandline.
+you can configure a Clang-cl build by passing `-T ClangCL` on your configuration command line.
 
 If you wish to use Clang with GNU-like command-line instead, you can pass
-`-DCMAKE_CXX_COMPILER=clang++` and `-DCMAKE_C_COMPILER=clang` on your configuration commandline.
-clang++ and clang must be on your `PATH` for this to work. Only more recent versions of CMake
-support Clang's GNU-like command-line on Windows.   Note that CMake doesn't seem to automatically
+`-DCMAKE_CXX_COMPILER=clang++` and `-DCMAKE_C_COMPILER=clang` on your configuration command line.
+`clang++` and `clang` must be on your `PATH` for this to work. Only more recent versions of CMake
+support Clang's GNU-like command-line on Windows. Note that CMake doesn't seem to automatically
 link a runtime library when building in this configuration, but this can be remedied by setting
 the `MSVC_RUNTIME_LIBRARY` property. See the [official
 documentation](https://cmake.org/cmake/help/v3.22/prop_tgt/MSVC_RUNTIME_LIBRARY.html) of this
@@ -226,18 +226,18 @@ folders.
 
 Only brings in targets for the built-in JUCE modules, and the `juce_add_module*` CMake functions.
 This is meant for highly custom use-cases where the `juce_add_gui_app` and `juce_add_plugin`
-functions are not required. Most importantly, the 'juceaide' helper tool is not built when this
+functions are not required. Most importantly, the `juceaide` helper tool is not built when this
 option is enabled, which may improve build times for established products that use other methods to
 handle plugin bundle structures, icons, plists, and so on. If this option is enabled, then
 `JUCE_ENABLE_MODULE_SOURCE_GROUPS` will have no effect.
 
 #### `JUCE_WEBVIEW2_PACKAGE_LOCATION`
 
-You can ask JUCE to link the WebView2 library statically to your target on Windows, by specifying 
-the `NEEDS_WEBVIEW2` option when creating your target. In this case JUCE will search for the 
-WebView2 package on your system. The default search location is 
+You can ask JUCE to link the WebView2 library statically to your target on Windows, by specifying
+the `NEEDS_WEBVIEW2` option when creating your target. In this case JUCE will search for the
+WebView2 package on your system. The default search location is
 `%userprofile%\AppData\Local\PackageManagement\NuGet\Packages`. This location can be overriden by
-specifying this option. The provided location should contain the `*Microsoft.Web.WebView2*` 
+specifying this option. The provided location should contain the `*Microsoft.Web.WebView2*`
 directory.
 
 ### Functions
@@ -274,76 +274,86 @@ attributes directly to these creation functions, rather than adding them later.
   the target's plist.
 
 `BUILD_VERSION`
-- A version number string in the format "major.minor.bugfix". If not specified, this will match
+- A version number string in the format `major.minor.bugfix`. If not specified, this will match
   the `VERSION` of the target. On Apple platforms, this is the private version string used to
   distinguish between App Store builds. This option corresponds to the `CFBundleVersion` field in
   the target's plist.
 
 `BUNDLE_ID`
-- An identifier string in the form "com.yourcompany.productname" which should uniquely identify
+- An identifier string in the form `com.yourcompany.productname` which should uniquely identify
   this target. Mainly used for macOS builds. If not specified, a default will be generated using
   the target's `COMPANY_NAME` and the name of the CMake target.
 
 `MICROPHONE_PERMISSION_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
+- May be either `TRUE` or `FALSE`. Adds `NSMicrophoneUsageDescription` to an app's Info.plist.
 
 `MICROPHONE_PERMISSION_TEXT`
 - The text your app will display when it requests microphone permissions.
 
 `CAMERA_PERMISSION_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
+- May be either `TRUE` or `FALSE`. Adds `NSCameraUsageDescription` to an app's Info.plist.
 
 `CAMERA_PERMISSION_TEXT`
 - The text your app will display when it requests camera permissions.
 
 `BLUETOOTH_PERMISSION_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
+- May be either `TRUE` or `FALSE`. Adds `NSBluetoothAlwaysUsageDescription` to an app's Info.plist.
 
 `BLUETOOTH_PERMISSION_TEXT`
 - The text your app will display when it requests bluetooth permissions.
 
+`LOCAL_NETWORK_PERMISSION_ENABLED`
+- May be either `TRUE` or `FALSE`. Adds `NSLocalNetworkUsageDescription` to an app's Info.plist.
+
+`LOCAL_NETWORK_PERMISSION_TEXT`
+- The text your app will display when it requests local network access permissions.
+
 `SEND_APPLE_EVENTS_PERMISSION_ENABLED`
-- May be either TRUE or FALSE. Enable this to allow your app to send Apple events.
+- May be either `TRUE` or `FALSE`. Enable this to allow your app to send Apple events.
 
 `SEND_APPLE_EVENTS_PERMISSION_TEXT`
 - The text your app will display when it requests permission to send Apple events.
 
 `FILE_SHARING_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+- May be either `TRUE` or `FALSE`. Adds the appropriate entries to an iOS app's Info.plist.
 
 `DOCUMENT_BROWSER_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+- May be either `TRUE` or `FALSE`. Adds the appropriate entries to an iOS app's Info.plist.
 
 `STATUS_BAR_HIDDEN`
-- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+- May be either `TRUE` or `FALSE`. Adds the appropriate entries to an iOS app's Info.plist.
 
- `REQUIRES_FULL_SCREEN`
- - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+`REQUIRES_FULL_SCREEN`
+- May be either `TRUE` or `FALSE`. Adds the appropriate entries to an iOS app's Info.plist.
 
 `BACKGROUND_AUDIO_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+- May be either `TRUE` or `FALSE`. Adds the appropriate entries to an iOS app's Info.plist.
 
 `BACKGROUND_BLE_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+- May be either `TRUE` or `FALSE`. Adds the appropriate entries to an iOS app's Info.plist.
 
 `APP_GROUPS_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's entitlements.
+- May be either `TRUE` or `FALSE`. Adds the appropriate entries to an iOS app's entitlements.
 
 `APP_GROUP_IDS`
 - The app groups to which your iOS app belongs. These will be added to your app's entitlements.
 
 `ICLOUD_PERMISSIONS_ENABLED`
-- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's entitlements.
+- May be either `TRUE` or `FALSE`. Adds the appropriate entries to an iOS app's entitlements.
 
 `IPHONE_SCREEN_ORIENTATIONS`
 - May be one or more of `UIInterfaceOrientationUnknown`, `UIInterfaceOrientationPortrait`,
   `UIInterfaceOrientationPortraitUpsideDown`, `UIInterfaceOrientationLandscapeLeft`, or
   `UIInterfaceOrientationLandscapeRight`. Adds appropriate entries to an iOS app's plist.
+  Defaults to `UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft
+  UIInterfaceOrientationLandscapeRight`
 
 `IPAD_SCREEN_ORIENTATIONS`
 - May be one or more of `UIInterfaceOrientationUnknown`, `UIInterfaceOrientationPortrait`,
   `UIInterfaceOrientationPortraitUpsideDown`, `UIInterfaceOrientationLandscapeLeft`, or
   `UIInterfaceOrientationLandscapeRight`. Adds appropriate entries to an iOS app's plist.
+  Defaults to `UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft
+  UIInterfaceOrientationLandscapeRight`
 
 `LAUNCH_STORYBOARD_FILE`
 - A custom launch storyboard file to use on iOS. If not supplied, a default storyboard will be
@@ -352,14 +362,14 @@ attributes directly to these creation functions, rather than adding them later.
 
 `CUSTOM_XCASSETS_FOLDER`
 - A path to an xcassets directory, containing icons and/or launch images for this target. If this
-  is specified, the ICON_BIG and ICON_SMALL arguments will not have an effect on iOS. LaunchImages
-  have been deprecated from iOS 13 onward, but if your xcassets folder contains a LaunchImage and
-  a custom storyboard hasn't been specified, then it will be used.
+  is specified, the `ICON_BIG` and `ICON_SMALL` arguments will not have an effect on iOS.
+  LaunchImages have been deprecated from iOS 13 onward, but if your xcassets folder contains a
+  LaunchImage and a custom storyboard hasn't been specified, then it will be used.
 
 `TARGETED_DEVICE_FAMILY`
 - Specifies the device families on which the product must be capable of running. Allowed values
-  are "1", "2", and "1,2"; these correspond to "iPhone/iPod touch", "iPad", and "iPhone/iPod and
-  iPad" respectively. This will default to "1,2", meaning that the target will target iPhone,
+  are `1`, `2`, and `1,2`; these correspond to "iPhone/iPod touch", "iPad", and "iPhone/iPod and
+  iPad" respectively. This will default to `1,2`, meaning that the target will target iPhone,
   iPod, and iPad.
 
 `ICON_BIG`, `ICON_SMALL`
@@ -425,13 +435,16 @@ attributes directly to these creation functions, rather than adding them later.
   if you get linker or include errors that reference StoreKit, just set this argument to `TRUE`.
 
 `PUSH_NOTIFICATIONS_ENABLED`
-- Sets app entitlements to allow push notifications. False by default.
+- Sets app entitlements to allow push notifications. May be either `TRUE`
+  or `FALSE`. Defaults to `FALSE`.
 
 `NETWORK_MULTICAST_ENABLED`
-- Sets app entitlements to allow IP multicast or broadcast on macOS/iOS. False by default.
+- Sets app entitlements to allow IP multicast or broadcast on macOS/iOS. May be either `TRUE`
+  or `FALSE`. Defaults to `FALSE`.
 
 `HARDENED_RUNTIME_ENABLED`
-- Enables macOS' hardened runtime for this target. Required for notarisation. False by default.
+- Enables macOS' hardened runtime for this target. Required for notarisation. May be either
+  `TRUE` or `FALSE`. Defaults to `FALSE`.
 
 `HARDENED_RUNTIME_OPTIONS`
 - A set of space-separated entitlement keys that will be added to this target's entitlements
@@ -439,11 +452,12 @@ attributes directly to these creation functions, rather than adding them later.
   `com.apple.security.*` where `*` is a specific entitlement.
 
 `APP_SANDBOX_ENABLED`
-- Enables macOS' app sandbox for this target. False by default.
+- Enables macOS' app sandbox for this target. May be either `TRUE` or `FALSE`. Defaults to `FALSE`.
 
 `APP_SANDBOX_INHERIT`
 - Allows child processes to inherit the static entitlements of their parent process. If this
-  is set to `TRUE`, no other app sandbox entitlements will be set on this target.
+  is set to `TRUE`, no other app sandbox entitlements will be set on this target. Defaults to
+  `FALSE`.
 
 `APP_SANDBOX_OPTIONS`
 - A set of space-separated entitlement keys that will be added to this target's entitlements
@@ -467,8 +481,8 @@ attributes directly to these creation functions, rather than adding them later.
   accessing read/write absolute paths if `APP_SANDBOX_ENABLED` is `TRUE`.
 
 `APP_SANDBOX_EXCEPTION_IOKIT`
-- A set of space-separated strings specifying IOUserClient subclasses to open or to set properties 
-  on. These will be added to this target's entitlements plist if `APP_SANDBOX_ENABLED` is `TRUE`. 
+- A set of space-separated strings specifying IOUserClient subclasses to open or to set properties
+  on. These will be added to this target's entitlements plist if `APP_SANDBOX_ENABLED` is `TRUE`.
   For more information see Apple's IOKit User Client Class Temporary Exception documentation.
 
 `PLIST_TO_MERGE`
@@ -476,8 +490,8 @@ attributes directly to these creation functions, rather than adding them later.
 
 `FORMATS`
 - For plugin targets, specifies the plugin targets to build. Should be provided as a
-  space-separated list. Valid values are `Standalone Unity VST3 AU AUv3 AAX VST`. `AU` and `AUv3`
-  plugins will only be enabled when building on macOS. It is an error to pass `AAX` or `VST`
+  space-separated list. Valid values are `Standalone Unity VST3 AU AUv3 AAX VST LV2`. `AU` and
+  `AUv3` plugins will only be enabled when building on macOS. It is an error to pass `AAX` or `VST`
   without first calling `juce_set_aax_sdk_path` or `juce_set_vst2_sdk_path` respectively.
 
 `PLUGIN_NAME`
@@ -489,71 +503,80 @@ attributes directly to these creation functions, rather than adding them later.
 `PLUGIN_MANUFACTURER_CODE`
 - A four-character unique ID for your company. For AU compatibility, this must contain at least
   one upper-case letter. GarageBand 10.3 requires the first letter to be upper-case, and the
-  remaining letters to be lower-case.
+  remaining letters to be lower-case. Defaults to `Manu`.
 
 `PLUGIN_CODE`
 - A four-character unique ID for your plugin. For AU compatibility, this must contain exactly one
   upper-case letter. GarageBand 10.3 requires the first letter to be upper-case, and the remaining
-  letters to be lower-case.
+  letters to be lower-case. Defaults to a random code that changes each time the build is
+  configured.
 
 `DESCRIPTION`
 - A short description of your plugin.
 
 `IS_SYNTH`
 - Whether the plugin is a synth. Will be used to set sensible plugin category values if they
-  are not provided explicitly.
+  are not provided explicitly. May be either `TRUE` or `FALSE`. Defaults to `FALSE`.
 
 `NEEDS_MIDI_INPUT`
-- Whether the plugin should provide a midi input.
+- Whether the plugin should provide a midi input. May be either `TRUE` or `FALSE`. Defaults to
+  `FALSE`.
 
 `NEEDS_MIDI_OUTPUT`
-- Whether the plugin should provide a midi output.
+- Whether the plugin should provide a midi output. May be either `TRUE` or `FALSE`. Defaults to
+  `FALSE`.
 
 `IS_MIDI_EFFECT`
 - Whether the plugin is a MIDI effect (some hosts provide a special channel-strip location for
-  MIDI effect plugins).
+  MIDI effect plugins). May be either `TRUE` or `FALSE`. Defaults to `FALSE`.
 
 `EDITOR_WANTS_KEYBOARD_FOCUS`
 - Whether the plugin requires keyboard focus, or should defer all keyboard handling to the host.
+  May be either `TRUE` or `FALSE`. Defaults to `FALSE`.
 
 `DISABLE_AAX_BYPASS`
-- Whether the AAX bypass function should be disabled.
+- Whether the AAX bypass function should be disabled. May be either `TRUE` or `FALSE`. Defaults to
+  `FALSE`.
 
 `DISABLE_AAX_MULTI_MONO`
-- Whether the AAX multi mono bus layout should be disabled.
+- Whether the AAX multi mono bus layout should be disabled. May be either `TRUE` or `FALSE`.
+  Defaults to `FALSE`.
 
 `AAX_IDENTIFIER`
-- The bundle ID for the AAX plugin target. Matches the `BUNDLE_ID` by default.
+- The bundle ID for the AAX plugin target. Defaults to the `BUNDLE_ID`.
 
 `LV2URI`
-- This is a string that acts as a unique identifier for an LV2 plugin. If you make any incompatible 
+- This is a string that acts as a unique identifier for an LV2 plugin. If you make any incompatible
   changes to your plugin (remove parameters, reorder parameters, change preset format etc.) you MUST
   change this value. LV2 hosts will assume that any plugins with the same URI are interchangeable.
-  By default, the value of this property will be generated based on the COMPANY_WEBSITE and
-  PLUGIN_NAME. However, in some circumstances, such as the following, you'll need to override the
+  By default, the value of this property will be generated based on the `COMPANY_WEBSITE` and
+  `PLUGIN_NAME`. However, in some circumstances, such as the following, you'll need to override the
   default:
   - The plugin name contains characters such as spaces that are invalid in a URI; or
-  - The COMPANY_WEBSITE omits the leading scheme identifier (http://); or
-  - There's no website associated with the plugin, so you want to use a 'urn:' identifier instead.
+  - The `COMPANY_WEBSITE` omits the leading scheme identifier (`http://`); or
+  - There's no website associated with the plugin, so you want to use a `urn:` identifier instead.
 
 `VST_NUM_MIDI_INS`
 - For VST2 and VST3 plugins that accept midi, this allows you to configure the number of inputs.
+  Defaults to `16`.
 
 `VST_NUM_MIDI_OUTS`
 - For VST2 and VST3 plugins that produce midi, this allows you to configure the number of outputs.
+  Defaults to `16`.
 
 `VST2_CATEGORY`
 - Should be one of: `kPlugCategUnknown`, `kPlugCategEffect`, `kPlugCategSynth`,
   `kPlugCategAnalysis`, `kPlugCategMastering`, `kPlugCategSpacializer`, `kPlugCategRoomFx`,
   `kPlugSurroundFx`, `kPlugCategRestoration`, `kPlugCategOfflineProcess`, `kPlugCategShell`,
-  `kPlugCategGenerator`.
+  `kPlugCategGenerator`. Defaults to `kPlugCategSynth` if `IS_SYNTH` is `TRUE`. Otherwise defaults
+  to `kPlugCategEffect`.
 
 `VST3_CATEGORIES`
 - Should be one or more, separated by spaces, of the following: `Fx`, `Instrument`, `Analyzer`,
   `Delay`, `Distortion`, `Drum`, `Dynamics`, `EQ`, `External`, `Filter`, `Generator`, `Mastering`,
   `Modulation`, `Mono`, `Network`, `NoOfflineProcess`, `OnlyOfflineProcess`, `OnlyRT`,
   `Pitch Shift`, `Restoration`, `Reverb`, `Sampler`, `Spatial`, `Stereo`, `Surround`, `Synth`,
-  `Tools`, `Up-Downmix`
+  `Tools`, `Up-Downmix`. Defaults to `Synth` if `IS_SYNTH` is `TRUE`. Otherwise defaults to `Fx`.
 
 `AU_MAIN_TYPE`
 - Should be one of: `kAudioUnitType_Effect`, `kAudioUnitType_FormatConverter`,
@@ -564,42 +587,45 @@ attributes directly to these creation functions, rather than adding them later.
 `AU_EXPORT_PREFIX`
 - A prefix for the names of entry-point functions that your component exposes. Typically this
   will be a version of your plugin's name that can be used as part of a C++ token. Defaults
-  to your plugin's name with the suffix 'AU'.
+  to your plugin's name with the suffix `AU`.
 
 `AU_SANDBOX_SAFE`
-- May be either TRUE or FALSE. Adds the appropriate entries to an AU plugin's Info.plist.
+- Adds the appropriate entries to an AU plugin's Info.plist. May be either `TRUE` or `FALSE`.
+  Defaults to `FALSE`.
 
 `SUPPRESS_AU_PLIST_RESOURCE_USAGE`
-- May be either TRUE or FALSE. Defaults to FALSE. Set this to TRUE to disable the `resourceUsage`
-  key in the target's plist. This is useful for AU plugins that must access resources which cannot
-  be declared in the resourceUsage block, such as UNIX domain sockets. In particular,
-  PACE-protected AU plugins may require this option to be enabled in order for the plugin to load
-  in GarageBand.
+- May be either `TRUE` or `FALSE`. Defaults to `FALSE`. Set this to `TRUE` to disable the
+  `resourceUsage` key in the target's plist. This is useful for AU plugins that must access
+  resources which cannot be declared in the resourceUsage block, such as UNIX domain sockets. In
+  particular, PACE-protected AU plugins may require this option to be enabled in order for the
+  plugin to load in GarageBand.
 
 `AAX_CATEGORY`
 - Should be one or more of: `None`, `EQ`, `Dynamics`, `PitchShift`, `Reverb`, `Delay`, `Modulation`,
   `Harmonic`, `NoiseReduction`, `Dither`, `SoundField`, `HWGenerators`, `SWGenerators`,
   `WrappedPlugin`, `Effect`, and `MIDIEffect`. You may also add the prefix `AAX_ePlugInCategory_`.
+  Defaults to `MIDIEffect` when `IS_MIDI_EFFECT` is `TRUE`, `SWGenerators` when `IS_SYNTH` is
+  `TRUE`, otherwise `None`.
 
 `PLUGINHOST_AU`
-- May be either TRUE or FALSE (defaults to FALSE). If TRUE, will add the preprocessor definition
-  `JUCE_PLUGINHOST_AU=1` to the new target, and will link the macOS frameworks necessary for
-  hosting plugins. Using this parameter should be preferred over using
+- May be either `TRUE` or `FALSE`. Defaults to `FALSE`. If `TRUE`, will add the preprocessor
+  definition `JUCE_PLUGINHOST_AU=1` to the new target, and will link the macOS frameworks necessary
+  for hosting plugins. Using this parameter should be preferred over using
   `target_compile_definitions` to manually set the `JUCE_PLUGINHOST_AU` preprocessor definition.
 
 `USE_LEGACY_COMPATIBILITY_PLUGIN_CODE`
-- May be either TRUE or FALSE (defaults to FALSE). If TRUE, will override the value of the
-  preprocessor definition "JucePlugin_ManufacturerCode" with the hex equivalent of "proj". This
-  option exists to maintain compatibility with a previous, buggy version of JUCE's CMake support
-  which mishandled the manufacturer code property. Most projects should leave this option set to
-  its default value.
+- May be either `TRUE` or `FALSE`. Defaults to `FALSE`. If `TRUE`, the preprocessor definition
+  `JucePlugin_ManufacturerCode` will be set to the hex equivalent of `proj`. This option exists to
+  maintain compatibility with a previous, buggy version of JUCE's CMake support which mishandled the
+  manufacturer code property. Most projects should leave this option set to its default value.
 
 `COPY_PLUGIN_AFTER_BUILD`
-- Whether or not to install the plugin to the current system after building. False by default.
-  If you want all of the plugins in a subdirectory to be installed automatically after building,
-  you can set the property `JUCE_COPY_PLUGIN_AFTER_BUILD` on the directory before adding the
-  plugins, rather than setting this argument on each individual target. Note that on Windows,
-  the default install locations may not be writable by normal user accounts.
+- Whether or not to install the plugin to the current system after building. May be either
+  `TRUE` or `FALSE`. Defaults to `FALSE`. If you want all of the plugins in a subdirectory to be
+  installed automatically after building, you can set the property `JUCE_COPY_PLUGIN_AFTER_BUILD`
+  on the directory before adding the plugins, rather than setting this argument on each individual
+  target. Note that on Windows, the default install locations may not be writable by normal user
+  accounts.
 
 `VST_COPY_DIR`
 - The location to which VST2 (legacy) plugins will be copied after building if
@@ -635,8 +661,8 @@ attributes directly to these creation functions, rather than adding them later.
   to set it if you have enabled `COPY_PLUGIN_AFTER_BUILD` and the `Unity` format.
 
 `IS_ARA_EFFECT`
-- May be either TRUE or FALSE (defaults to FALSE). If TRUE it enables additional codepaths in the
-  VST3 and AU plugin wrappers allowing compatible hosts to load the plugin with additional ARA
+- May be either `TRUE` or `FALSE`. Defaults to `FALSE`. If `TRUE` it enables additional codepaths in
+  the VST3 and AU plugin wrappers allowing compatible hosts to load the plugin with additional ARA
   functionality. It will also add the preprocessor definition `JucePlugin_Enable_ARA=1`, which can
   be used in preprocessor conditions inside the plugin code. You should not add this definition
   using `target_compile_definitions` manually.
@@ -659,22 +685,22 @@ attributes directly to these creation functions, rather than adding them later.
 - Defaults to having no analyzable types. Should be one or more of the following values if the
   document controller has the corresponding analysis capability: `kARAContentTypeNotes`,
   `kARAContentTypeTempoEntries`, `kARAContentTypeBarSignatures`, `kARAContentTypeStaticTuning `,
-  `kARAContentTypeKeySignatures`, `kARAContentTypeSheetChords`
+  `kARAContentTypeKeySignatures`, `kARAContentTypeSheetChords`.
 
 `ARA_TRANSFORMATION_FLAGS`
 - Defaults to `kARAPlaybackTransformationNoChanges`. If the document controller has the ability to
   provide the corresponding change it should be one or more of:
   `kARAPlaybackTransformationTimestretch`, `kARAPlaybackTransformationTimestretchReflectingTempo`,
   `kARAPlaybackTransformationContentBasedFadeAtTail`,
-  `kARAPlaybackTransformationContentBasedFadeAtHead`
+  `kARAPlaybackTransformationContentBasedFadeAtHead`.
 
 `VST3_AUTO_MANIFEST`
-- May be either TRUE or FALSE (defaults to TRUE). When TRUE, a POST_BUILD step will be added to the
-  VST3 target which will generate a moduleinfo.json file into the Resources subdirectory of the
-  plugin bundle. This is normally desirable, but does require that the plugin can be successfully
-  loaded immediately after building the VST3 target. If the plugin needs further processing before
-  it can be loaded (e.g. custom signing), then set this option to FALSE to disable the automatic
-  manifest generation. To generate the manifest at a later point in the build, use the
+- May be either `TRUE` or `FALSE`. Defaults to `TRUE`. When `TRUE`, a `POST_BUILD` step will be
+  added to the VST3 target which will generate a `moduleinfo.json` file into the Resources
+  subdirectory of the plugin bundle. This is normally desirable, but does require that the plugin
+  can be successfully loaded immediately after building the VST3 target. If the plugin needs further
+  processing before it can be loaded (e.g. custom signing), then set this option to FALSE to disable
+  the automatic manifest generation. To generate the manifest at a later point in the build, use the
   `juce_enable_vst3_manifest_step` function. It is strongly recommended to generate a manifest for
   your plugin, as this allows compatible hosts to scan the plugin much more quickly, leading to
   an improved experience for users.
@@ -746,10 +772,10 @@ target!).
 You may call this function to manually enable VST3 manifest generation on a plugin. The argument to
 this function should be a target previously created with `juce_add_plugin`.
 
-VST3_AUTO_MANIFEST TRUE will cause the VST3 manifest to be generated immediately after building.
+`VST3_AUTO_MANIFEST TRUE` will cause the VST3 manifest to be generated immediately after building.
 This is not always appropriate, if extra build steps (such as signing or modifying the plugin
 bundle) must be executed before the plugin can be loaded. In such cases, you should set
-VST3_AUTO_MANIFEST FALSE, use `add_custom_command(TARGET POST_BUILD)` to add your own post-build
+`VST3_AUTO_MANIFEST FALSE`, use `add_custom_command(TARGET POST_BUILD)` to add your own post-build
 steps, and then finally call `juce_enable_vst3_manifest_step`.
 
 #### `juce_set_<kind>_sdk_path`
@@ -816,7 +842,7 @@ CMake-supplied defaults.
 
     juce_link_with_embedded_linux_subprocess(<target>)
 
-This function links the provided target with an interface library that generates a barebones 
+This function links the provided target with an interface library that generates a barebones
 standalone executable file and embeds it as a binary resource. This binary resource is only used
 by the `juce_gui_extra` module and only when its `JUCE_WEB_BROWSER` capability is enabled. This
 executable will then be deployed into a temporary file only when the code is running in a

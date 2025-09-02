@@ -141,16 +141,19 @@ inline var nsDictionaryToVar (const NSDictionary* dictionary)
     return jsonDataToVar (jsonObjectToData (dictionary));
 }
 
-#if JUCE_MAC
+// NSRect is just another name for CGRect, but CGRect is available on iOS *and* macOS.
+// Use makeCGRect below.
 template <typename RectangleType>
-NSRect makeNSRect (const RectangleType& r) noexcept
+CGRect makeNSRect (const RectangleType& r) noexcept = delete;
+
+template <typename RectangleType>
+CGRect makeCGRect (const RectangleType& r) noexcept
 {
-    return NSMakeRect (static_cast<CGFloat> (r.getX()),
+    return CGRectMake (static_cast<CGFloat> (r.getX()),
                        static_cast<CGFloat> (r.getY()),
                        static_cast<CGFloat> (r.getWidth()),
                        static_cast<CGFloat> (r.getHeight()));
 }
-#endif
 
 #if JUCE_INTEL
  template <typename T>
@@ -180,7 +183,11 @@ template <typename SuperType, typename ReturnType, typename... Params>
 inline ReturnType ObjCMsgSendSuper (id self, SEL sel, Params... params)
 {
     using SuperFn = ReturnType (*) (struct objc_super*, SEL, Params...);
+
+    // objc_msgSendSuper_stret is declared to return void, but will actually return non-void
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type-mismatch")
     const auto fn = reinterpret_cast<SuperFn> (MetaSuperFn<ReturnType>::value);
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     objc_super s = { self, [SuperType class] };
     return fn (&s, sel, params...);
@@ -343,7 +350,11 @@ struct ObjCClass
     void addMethod (SEL selector, Result (*callbackFn) (id, SEL, Args...))
     {
         const auto s = detail::makeCompileTimeStr (@encode (Result), @encode (id), @encode (SEL), @encode (Args)...);
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type-mismatch")
         [[maybe_unused]] const auto b = class_addMethod (cls, selector, (IMP) callbackFn, s.data());
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
         jassert (b);
     }
 
@@ -371,7 +382,7 @@ private:
 };
 
 //==============================================================================
-#ifndef DOXYGEN
+/** @cond */
 template <class JuceClass>
 struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
 {
@@ -413,7 +424,7 @@ struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
 
 template <typename Class>
 ObjCLifetimeManagedClass<Class> ObjCLifetimeManagedClass<Class>::objCLifetimeManagedClass;
-#endif
+/** @endcond */
 
 // this will return an NSObject which takes ownership of the JUCE instance passed-in
 // This is useful to tie the life-time of a juce instance to the life-time of an NSObject

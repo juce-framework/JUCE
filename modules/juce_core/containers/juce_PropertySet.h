@@ -182,7 +182,7 @@ public:
     void restoreFromXml (const XmlElement& xml);
 
     //==============================================================================
-    /** Sets up a second PopertySet that will be used to look up any values that aren't
+    /** Sets up a second PropertySet that will be used to look up any values that aren't
         set in this one.
 
         If you set this up to be a pointer to a second property set, then whenever one

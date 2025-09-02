@@ -867,14 +867,20 @@ void ProjectExporter::createDefaultConfigs()
     }
 }
 
-std::unique_ptr<Drawable> ProjectExporter::getBigIcon() const
+build_tools::Icons ProjectExporter::getIcons() const
 {
-    return project.getMainGroup().findItemWithID (settings [Ids::bigIcon]).loadAsImageFile();
-}
+    const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
 
-std::unique_ptr<Drawable> ProjectExporter::getSmallIcon() const
-{
-    return project.getMainGroup().findItemWithID (settings [Ids::smallIcon]).loadAsImageFile();
+    if (! mml.lockWasGained())
+        return {};
+
+    const auto getFile = [this] (auto id)
+    {
+        return project.getMainGroup().findItemWithID (settings[id]).getFile();
+    };
+
+    return build_tools::Icons::fromFilesSmallAndBig (getFile (Ids::smallIcon),
+                                                     getFile (Ids::bigIcon));
 }
 
 //==============================================================================

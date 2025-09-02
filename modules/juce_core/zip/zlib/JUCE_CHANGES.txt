@@ -1,0 +1,9 @@
+# inflate.h and inftrees.h
+
+Include guards were added to these files to support multiple inclusion in a
+unity-style build.
+
+# zlib.h
+
+`extern "C"` was removed to avoid symbol collisions when including multiple
+copies of zlib in the same project.

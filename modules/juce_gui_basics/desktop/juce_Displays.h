@@ -56,19 +56,44 @@ public:
 
         /** The total area of this display in logical pixels including any OS-dependent objects
             like the taskbar, menu bar, etc.
+
+            On mobile (Android, iOS) this is the full area of the display.
         */
         Rectangle<int> totalArea;
 
         /** The total area of this display in logical pixels which isn't covered by OS-dependent
             objects like the taskbar, menu bar, etc.
+
+            On mobile (iOS, Android), the system UI will be made transparent whenever possible, and
+            the JUCE app may draw behind these bars. Therefore, on these platforms, the userArea
+            is *not* restricted by the system UI. Instead, potentially-obscured areas of the
+            display can be found by querying the safeAreaInsets and keyboardInsets.
+
+            Mobile platforms that support multiple windows (e.g. Android in split screen) will
+            return the screen area currently available to the application here. The resulting
+            area may be significantly smaller than the total screen area, but may overlap the
+            system decorations.
         */
         Rectangle<int> userArea;
 
         /** Represents the area of this display in logical pixels that is not functional for
             displaying content.
 
+            These insets are applied relative to the userArea.
+
             On mobile devices this may be the area covered by display cutouts and notches, where
             you still want to draw a background but should not position important content.
+
+            Note that these insets may change depending on the current state of the system.
+            As a simple example, entering/leaving kiosk mode may cause the system UI visibility
+            to change, which may affect the safe areas.
+            A more complex example would be split-screen state on Android, where an activity
+            occupying the top portion of the screen is likely to have insets for the status bar but
+            not the navigation bar, whereas an activity on the bottom may have navigation insets
+            but not status insets.
+
+            The insets may also change as a result of rotating the screen, as this will rotate any
+            physical screen cutouts, and could also cause system UI elements to be repositioned.
         */
         BorderSize<int> safeAreaInsets;
 
@@ -189,7 +214,7 @@ public:
     /** An Array containing the Display objects for all of the connected displays. */
     Array<Display> displays;
 
-   #ifndef DOXYGEN
+    /** @cond */
     /** @internal */
     void refresh();
 
@@ -202,7 +227,7 @@ public:
     [[deprecated]] const Display& findDisplayForRect (Rectangle<int>, bool isPhysical = false) const noexcept;
     [[deprecated]] const Display& findDisplayForPoint (Point<int>, bool isPhysical = false) const noexcept;
     [[deprecated]] const Display& getMainDisplay() const noexcept;
-   #endif
+    /** @endcond */
 
 private:
     friend class Desktop;

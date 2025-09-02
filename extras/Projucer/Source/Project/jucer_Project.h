@@ -59,6 +59,8 @@ namespace ProjectMessages
         DECLARE_ID (pluginCodeInvalid);
         DECLARE_ID (manufacturerCodeInvalid);
         DECLARE_ID (deprecatedExporter);
+        DECLARE_ID (unsupportedArm32Config);
+        DECLARE_ID (arm64Warning);
 
         DECLARE_ID (notification);
         DECLARE_ID (warning);
@@ -73,7 +75,7 @@ namespace ProjectMessages
         static Identifier warnings[] = { Ids::cppStandard, Ids::moduleNotFound, Ids::jucePath,
                                          Ids::jucerFileModified, Ids::missingModuleDependencies,
                                          Ids::oldProjucer, Ids::pluginCodeInvalid, Ids::manufacturerCodeInvalid,
-                                         Ids::deprecatedExporter };
+                                         Ids::deprecatedExporter, Ids::unsupportedArm32Config, Ids::arm64Warning };
 
         if (std::find (std::begin (warnings), std::end (warnings), message) != std::end (warnings))
             return Ids::warning;
@@ -99,6 +101,8 @@ namespace ProjectMessages
         if (message == Ids::pluginCodeInvalid)          return "Invalid Plugin Code";
         if (message == Ids::manufacturerCodeInvalid)    return "Invalid Manufacturer Code";
         if (message == Ids::deprecatedExporter)         return "Deprecated Exporter";
+        if (message == Ids::unsupportedArm32Config)     return "Unsupported Architecture";
+        if (message == Ids::arm64Warning)               return "Prefer arm64ec over arm64";
 
         jassertfalse;
         return {};
@@ -116,6 +120,8 @@ namespace ProjectMessages
         if (message == Ids::pluginCodeInvalid)          return "The plugin code should be exactly four characters in length.";
         if (message == Ids::manufacturerCodeInvalid)    return "The manufacturer code should be exactly four characters in length.";
         if (message == Ids::deprecatedExporter)         return "The project includes a deprecated exporter.";
+        if (message == Ids::unsupportedArm32Config)     return "The project includes a Visual Studio configuration that uses the 32-bit Arm architecture, which is no longer supported. This configuration has been hidden, and will be removed on save.";
+        if (message == Ids::arm64Warning)               return "For software where interoperability is a concern (such as plugins and hosts), arm64ec will provide the best compatibility with existing x64 software";
 
         jassertfalse;
         return {};
@@ -446,9 +452,6 @@ public:
         String getID() const;
         void setID (const String& newID);
         Item findItemWithID (const String& targetId) const; // (recursive search)
-
-        String getImageFileID() const;
-        std::unique_ptr<Drawable> loadAsImageFile() const;
 
         //==============================================================================
         Value getNameValue();

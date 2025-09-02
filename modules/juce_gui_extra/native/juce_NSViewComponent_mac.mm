@@ -75,7 +75,7 @@ public:
             const auto newArea = peer->getAreaCoveredBy (owner);
 
             if (convertToRectInt ([view frame]) != newArea)
-                [view setFrame: makeNSRect (newArea)];
+                [view setFrame: makeCGRect (newArea)];
         }
     }
 

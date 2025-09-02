@@ -42,6 +42,8 @@ namespace juce
 class CoreGraphicsPixelData final : public ImagePixelData
 {
 public:
+    using Ptr = ReferenceCountedObjectPtr<CoreGraphicsPixelData>;
+
     CoreGraphicsPixelData (const Image::PixelFormat format, int w, int h, bool clearImage)
         : ImagePixelData (format, w, h)
     {
@@ -60,8 +62,8 @@ public:
         auto colourSpace = detail::ColorSpacePtr { CGColorSpaceCreateWithName ((format == Image::SingleChannel) ? kCGColorSpaceGenericGrayGamma2_2
                                                                                                                 : kCGColorSpaceSRGB) };
 
-        context = detail::ContextPtr { CGBitmapContextCreate (imageData->data, (size_t) width, (size_t) height, 8, (size_t) lineStride,
-                                                              colourSpace.get(), getCGImageFlags (format)) };
+        context.reset (CGBitmapContextCreate (imageData->data, (size_t) width, (size_t) height, 8, (size_t) lineStride,
+                                              colourSpace.get(), getCGImageFlags (format)));
     }
 
     ~CoreGraphicsPixelData() override
@@ -101,53 +103,53 @@ public:
 
     std::unique_ptr<ImageType> createType() const override    { return std::make_unique<NativeImageType>(); }
 
-    //==============================================================================
-    static CGImageRef getCachedImageRef (const Image& juceImage, CGColorSpaceRef colourSpace)
+    void applyGaussianBlurEffectInArea (Rectangle<int> area, float radius) override
     {
-        auto cgim = dynamic_cast<CoreGraphicsPixelData*> (juceImage.getPixelData());
-
-        if (cgim != nullptr && cgim->cachedImageRef != nullptr)
-            return CGImageRetain (cgim->cachedImageRef.get());
-
-        CGImageRef ref = createImage (juceImage, colourSpace);
-
-        if (cgim != nullptr)
-            cgim->cachedImageRef.reset (CGImageRetain (ref));
-
-        return ref;
+        const auto buildFilter = [radius]
+        {
+            return [CIFilter filterWithName: @"CIGaussianBlur"
+                        withInputParameters: @{ kCIInputRadiusKey: [NSNumber numberWithFloat: radius] }];
+        };
+        applyFilterInArea (area, buildFilter);
     }
 
-    static CGImageRef createImage (const Image& juceImage, CGColorSpaceRef colourSpace)
+    //==============================================================================
+    static CFUniquePtr<CGImageRef> getCachedImageRef (const Image& juceImage, CGColorSpaceRef colourSpace)
     {
+        auto cgim = std::invoke ([&]() -> CFUniquePtr<CGImageRef>
+        {
+            if (auto ptr = juceImage.getPixelData())
+                return ptr->getNativeExtensions().getCGImage (colourSpace);
+
+            return {};
+        });
+
+        if (cgim != nullptr)
+            return cgim;
+
         const Image::BitmapData srcData (juceImage, Image::BitmapData::readOnly);
 
-        const auto provider = [&]
-        {
-            if (auto* cgim = dynamic_cast<CoreGraphicsPixelData*> (juceImage.getPixelData()))
-            {
-                return detail::DataProviderPtr { CGDataProviderCreateWithData (new ImageDataContainer::Ptr (cgim->imageData),
-                                                                               srcData.data,
-                                                                               srcData.size,
-                                                                               [] (void * __nullable info, const void*, size_t) { delete (ImageDataContainer::Ptr*) info; }) };
-            }
+        const auto usableSize = jmin ((size_t) srcData.lineStride * (size_t) srcData.height, srcData.size);
+        CFUniquePtr<CFDataRef> data (CFDataCreate (nullptr, (const UInt8*) srcData.data, (CFIndex) usableSize));
+        detail::DataProviderPtr provider { CGDataProviderCreateWithCFData (data.get()) };
 
-            const auto usableSize = jmin ((size_t) srcData.lineStride * (size_t) srcData.height, srcData.size);
-            CFUniquePtr<CFDataRef> data (CFDataCreate (nullptr, (const UInt8*) srcData.data, (CFIndex) usableSize));
-            return detail::DataProviderPtr { CGDataProviderCreateWithCFData (data.get()) };
-        }();
-
-        return CGImageCreate ((size_t) srcData.width,
-                              (size_t) srcData.height,
-                              8,
-                              (size_t) srcData.pixelStride * 8,
-                              (size_t) srcData.lineStride,
-                              colourSpace, getCGImageFlags (juceImage.getFormat()), provider.get(),
-                              nullptr, true, kCGRenderingIntentDefault);
+        return CFUniquePtr<CGImageRef> { CGImageCreate ((size_t) srcData.width,
+                                                        (size_t) srcData.height,
+                                                        8,
+                                                        (size_t) srcData.pixelStride * 8,
+                                                        (size_t) srcData.lineStride,
+                                                        colourSpace,
+                                                        getCGImageFlags (juceImage.getFormat()),
+                                                        provider.get(),
+                                                        nullptr,
+                                                        true,
+                                                        kCGRenderingIntentDefault) };
     }
 
     //==============================================================================
     detail::ContextPtr context;
     detail::ImagePtr cachedImageRef;
+    NSUniquePtr<CIContext> ciContext;
 
     struct ImageDataContainer final : public ReferenceCountedObject
     {
@@ -157,10 +159,103 @@ public:
         HeapBlock<uint8> data;
     };
 
+    CFUniquePtr<CGImageRef> getCGImage (CGColorSpaceRef colourSpace)
+    {
+        if (cachedImageRef != nullptr)
+            return CFUniquePtr<CGImageRef> { CGImageRetain (cachedImageRef.get()) };
+
+        const Image::BitmapData srcData { Image { this }, Image::BitmapData::readOnly };
+
+        detail::DataProviderPtr provider { CGDataProviderCreateWithData (new ImageDataContainer::Ptr (imageData),
+                                                                         srcData.data,
+                                                                         srcData.size,
+                                                                         [] (void * __nullable info, const void*, size_t) { delete (ImageDataContainer::Ptr*) info; }) };
+
+        cachedImageRef.reset (CGImageCreate ((size_t) srcData.width,
+                                             (size_t) srcData.height,
+                                             8,
+                                             (size_t) srcData.pixelStride * 8,
+                                             (size_t) srcData.lineStride,
+                                             colourSpace, getCGImageFlags (pixelFormat), provider.get(),
+                                             nullptr, true, kCGRenderingIntentDefault));
+
+        return CFUniquePtr<CGImageRef> { CGImageRetain (cachedImageRef.get()) };
+    }
+
     ImageDataContainer::Ptr imageData = new ImageDataContainer();
     int pixelStride, lineStride;
 
+    NativeExtensions getNativeExtensions() override
+    {
+        struct Wrapped
+        {
+            explicit Wrapped (Ptr selfIn) : self (selfIn) {}
+
+            CGContextRef getCGContext() const
+            {
+                return self->context.get();
+            }
+
+            CFUniquePtr<CGImageRef> getCGImage (CGColorSpaceRef x) const
+            {
+                return self->getCGImage (x);
+            }
+
+            Point<int> getTopLeft() const
+            {
+                return {};
+            }
+
+            Ptr self;
+        };
+
+        return NativeExtensions { Wrapped { this } };
+    }
+
 private:
+    template <typename BuildFilter>
+    bool applyFilterInArea (Rectangle<int> area, BuildFilter&& buildFilter)
+    {
+        // This function might be called on the OpenGL rendering thread, or some other background
+        // thread that doesn't necessarily have an autorelease pool in scope.
+        // Note that buildFilter is called within this pool, to ensure that the filter is released
+        // upon leaving the pool's scope.
+        JUCE_AUTORELEASEPOOL
+        {
+            auto* filter = buildFilter();
+
+            if (filter == nullptr || context == nullptr)
+                return false;
+
+            const detail::ImagePtr content { CGBitmapContextCreateImage (context.get()) };
+
+            if (content == nullptr)
+                return false;
+
+            const auto cgArea = makeCGRect (area);
+            auto* ciImage = [[CIImage imageWithCGImage: content.get()] imageByCroppingToRect: cgArea];
+
+            if (ciImage == nullptr)
+                return false;
+
+            if (ciContext == nullptr)
+                ciContext.reset ([[CIContext contextWithCGContext: context.get() options: nullptr] retain]);
+
+            if (ciContext == nullptr)
+                return false;
+
+            [filter setValue: ciImage forKey: kCIInputImageKey];
+            auto* output = [filter outputImage];
+
+            if (output == nullptr)
+                return false;
+
+            CGContextClearRect (context.get(), cgArea);
+            [ciContext.get() drawImage: output inRect: cgArea fromRect: cgArea];
+            return true;
+        }
+    }
+
     void freeCachedImageRef()
     {
         cachedImageRef.reset();
@@ -376,7 +471,7 @@ void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const Affi
         if (sourceImage.getFormat() != Image::SingleChannel)
             singleChannelImage = sourceImage.convertedToFormat (Image::SingleChannel);
 
-        auto image = detail::ImagePtr { CoreGraphicsPixelData::createImage (singleChannelImage, greyColourSpace.get()) };
+        detail::ImagePtr image { CoreGraphicsPixelData::getCachedImageRef (singleChannelImage, greyColourSpace.get()) };
 
         flip();
         auto t = AffineTransform::verticalFlip ((float) sourceImage.getHeight()).followedBy (transform);
@@ -867,6 +962,10 @@ void CoreGraphicsContext::drawGlyphs (Span<const uint16_t> glyphs,
         Path p;
         auto& f = state->font;
         f.getTypefacePtr()->getOutlineForGlyph (f.getMetricsKind(), glyph, p);
+
+        if (p.isEmpty())
+            continue;
+
         const auto scale = f.getHeight();
         fillPath (p, AffineTransform::scale (scale * f.getHorizontalScale(), scale).translated (positions[index]).followedBy (transform));
     }
@@ -1029,11 +1128,25 @@ Image juce_loadWithCoreImage (InputStream& input)
                                                        (int) CGImageGetHeight (loadedImage),
                                                        hasAlphaChan));
 
-                auto cgImage = dynamic_cast<CoreGraphicsPixelData*> (image.getPixelData());
-                jassert (cgImage != nullptr); // if USE_COREGRAPHICS_RENDERING is set, the CoreGraphicsPixelData class should have been used.
+                auto* context = std::invoke ([&]() -> CGContextRef
+                {
+                    auto ptr = image.getPixelData();
 
-                CGContextDrawImage (cgImage->context.get(), convertToCGRect (image.getBounds()), loadedImage);
-                CGContextFlush (cgImage->context.get());
+                    if (ptr == nullptr)
+                        return {};
+
+                    return ptr->getNativeExtensions().getCGContext();
+                });
+
+                if (context == nullptr)
+                {
+                    // if USE_COREGRAPHICS_RENDERING is set, the CoreGraphicsPixelData class should have been used.
+                    jassertfalse;
+                    return {};
+                }
+
+                CGContextDrawImage (context, convertToCGRect (image.getBounds()), loadedImage);
+                CGContextFlush (context);
 
                 // Because it's impossible to create a truly 24-bit CG image, this flag allows a user
                 // to find out whether the file they just loaded the image from had an alpha channel or not.
@@ -1061,13 +1174,13 @@ Image juce_createImageFromCIImage (CIImage* im, int w, int h)
 
 CGImageRef juce_createCoreGraphicsImage (const Image& juceImage, CGColorSpaceRef colourSpace)
 {
-    return CoreGraphicsPixelData::createImage (juceImage, colourSpace);
+    return CoreGraphicsPixelData::getCachedImageRef (juceImage, colourSpace).release();
 }
 
 CGContextRef juce_getImageContext (const Image& image)
 {
-    if (auto cgi = dynamic_cast<CoreGraphicsPixelData*> (image.getPixelData()))
-        return cgi->context.get();
+    if (auto ptr = image.getPixelData())
+        return ptr->getNativeExtensions().getCGContext();
 
     jassertfalse;
     return {};

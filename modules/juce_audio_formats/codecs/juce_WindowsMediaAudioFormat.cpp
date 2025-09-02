@@ -357,9 +357,8 @@ AudioFormatReader* WindowsMediaAudioFormat::createReaderFor (InputStream* source
     return nullptr;
 }
 
-AudioFormatWriter* WindowsMediaAudioFormat::createWriterFor (OutputStream* /*streamToWriteTo*/, double /*sampleRateToUse*/,
-                                                             unsigned int /*numberOfChannels*/, int /*bitsPerSample*/,
-                                                             const StringPairArray& /*metadataValues*/, int /*qualityOptionIndex*/)
+std::unique_ptr<AudioFormatWriter> WindowsMediaAudioFormat::createWriterFor (std::unique_ptr<OutputStream>&,
+                                                                             const AudioFormatWriterOptions&)
 {
     jassertfalse; // not yet implemented!
     return nullptr;

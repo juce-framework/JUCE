@@ -35,8 +35,7 @@
 namespace juce
 {
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace detail
 {
     template <typename Ret, typename... Args>
@@ -91,8 +90,7 @@ namespace detail
 
 template <size_t len, typename T>
 class FixedSizeFunction;
-
-#endif
+/** @endcond */
 
 /**
     A type similar to `std::function` that holds a callable object.

@@ -32,8 +32,9 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
+#pragma once
 
+/** @cond */
 // This macro can be set if you need to override this internal name for some reason..
 #ifndef JUCE_STATE_DICTIONARY_KEY
  #define JUCE_STATE_DICTIONARY_KEY   "jucePluginState"
@@ -364,7 +365,40 @@ struct AudioUnitHelpers
         return false;
     }
 
-    static Array<AUChannelInfo> getAUChannelInfo (const AudioProcessor& processor)
+    struct Channels
+    {
+        SInt16 ins, outs;
+
+        std::pair<SInt16, SInt16> makePair() const noexcept { return std::make_pair (ins, outs); }
+        AUChannelInfo makeChannelInfo() const noexcept { return { ins, outs }; }
+
+        bool operator<  (const Channels& other) const noexcept { return makePair() <  other.makePair(); }
+        bool operator== (const Channels& other) const noexcept { return makePair() == other.makePair(); }
+
+        // The 'standard' layout with the most channels defined is AudioChannelSet::create9point1point6().
+        // This value should be updated if larger standard channel layouts are added in the future.
+        static constexpr auto maxNumChanToCheckFor = 16;
+    };
+
+    /*  Removes non-wildcard layouts that are already included by other wildcard layouts.
+    */
+    static void removeNonWildcardLayouts (std::set<Channels>& layouts)
+    {
+        for (auto it = layouts.begin(); it != layouts.end();)
+        {
+            if ((it->ins != -1 && layouts.find ({ -1, it->outs }) != layouts.end())
+                || (it->outs != -1 && layouts.find ({ it->ins, -1 }) != layouts.end()))
+            {
+                it = layouts.erase (it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+
+    static std::set<Channels> getAUChannelInfo (const AudioProcessor& processor)
     {
        #ifdef JucePlugin_AUMainType
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
@@ -373,140 +407,130 @@ struct AudioUnitHelpers
             // A MIDI effect requires an output bus in order to determine the sample rate.
             // No audio will be written to the output bus, so it can have any number of channels.
             // No input bus is required.
-            return { AUChannelInfo { 0, -1 } };
+            return { Channels { 0, -1 } };
         }
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
        #endif
 
-        Array<AUChannelInfo> channelInfo;
+        const auto defaultInputs  = processor.getChannelCountOfBus (true,  0);
+        const auto defaultOutputs = processor.getChannelCountOfBus (false, 0);
+        const auto hasMainInputBus  = (AudioUnitHelpers::getBusCountForWrapper (processor, true)  > 0);
+        const auto hasMainOutputBus = (AudioUnitHelpers::getBusCountForWrapper (processor, false) > 0);
 
-        auto hasMainInputBus  = (AudioUnitHelpers::getBusCountForWrapper (processor, true)  > 0);
-        auto hasMainOutputBus = (AudioUnitHelpers::getBusCountForWrapper (processor, false) > 0);
-
-        auto layout = processor.getBusesLayout();
-
-        // The 'standard' layout with the most channels defined is AudioChannelSet::create9point1point6().
-        // This value should be updated if larger standard channel layouts are added in the future.
-        constexpr auto maxNumChanToCheckFor = 16;
-
-        auto defaultInputs  = processor.getChannelCountOfBus (true,  0);
-        auto defaultOutputs = processor.getChannelCountOfBus (false, 0);
-
-        struct Channels
-        {
-            SInt16 ins, outs;
-
-            std::pair<SInt16, SInt16> makePair() const noexcept { return std::make_pair (ins, outs); }
-
-            bool operator<  (const Channels& other) const noexcept { return makePair() <  other.makePair(); }
-            bool operator== (const Channels& other) const noexcept { return makePair() == other.makePair(); }
-        };
-
-        SortedSet<Channels> supportedChannels;
+        std::set<Channels> supportedChannels;
 
         // add the current configuration
         if (defaultInputs != 0 || defaultOutputs != 0)
-            supportedChannels.add ({ static_cast<SInt16> (defaultInputs),
-                                     static_cast<SInt16> (defaultOutputs) });
+            supportedChannels.insert ({ static_cast<SInt16> (defaultInputs),
+                                        static_cast<SInt16> (defaultOutputs) });
 
-        for (auto inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
+        static const auto layoutsToTry = std::invoke ([&]
         {
-            auto inLayout = layout;
+            std::vector<AudioChannelSet> sets;
 
-            if (auto* inBus = processor.getBus (true, 0))
-                if (! isNumberOfChannelsSupported (inBus, inChanNum, inLayout))
-                    continue;
-
-            for (auto outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
+            for (auto i = 1; i <= Channels::maxNumChanToCheckFor; ++i)
             {
-                auto outLayout = inLayout;
+                const auto setsWithSizeI = AudioChannelSet::channelSetsWithNumberOfChannels (i);
+                std::copy (setsWithSizeI.begin(), setsWithSizeI.end(), std::back_inserter (sets));
+            }
 
-                if (auto* outBus = processor.getBus (false, 0))
-                    if (! isNumberOfChannelsSupported (outBus, outChanNum, outLayout))
-                        continue;
+            return sets;
+        });
 
-                supportedChannels.add ({ static_cast<SInt16> (hasMainInputBus  ? outLayout.getMainInputChannels()  : 0),
-                                         static_cast<SInt16> (hasMainOutputBus ? outLayout.getMainOutputChannels() : 0) });
+        std::vector<char> inputHasOutputRestrictions (layoutsToTry.size()), outputHasInputRestrictions (layoutsToTry.size());
+
+        for (const auto [inputIndex, inputLayout] : enumerate (layoutsToTry))
+        {
+            for (const auto [outputIndex, outputLayout] : enumerate (layoutsToTry))
+            {
+                auto copy = processor.getBusesLayout();
+
+                if (! copy.inputBuses.isEmpty())
+                    copy.inputBuses.getReference (0) = inputLayout;
+
+                if (! copy.outputBuses.isEmpty())
+                    copy.outputBuses.getReference (0) = outputLayout;
+
+                if (processor.checkBusesLayoutSupported (copy))
+                {
+                    supportedChannels.insert ({ (SInt16) inputLayout.size(), (SInt16) outputLayout.size() });
+                }
+                else
+                {
+                    inputHasOutputRestrictions[(size_t) inputIndex]  = true;
+                    outputHasInputRestrictions[(size_t) outputIndex] = true;
+                }
             }
         }
 
-        auto hasInOutMismatch = false;
+        static constexpr auto identity = [] (auto x) { return x; };
+        const auto noRestrictions = std::none_of (inputHasOutputRestrictions.begin(), inputHasOutputRestrictions.end(), identity)
+                                 && std::none_of (outputHasInputRestrictions.begin(), outputHasInputRestrictions.end(), identity);
 
-        for (const auto& supported : supportedChannels)
+        if (noRestrictions)
         {
-            if (supported.ins != supported.outs)
+            if (hasMainInputBus)
             {
-                hasInOutMismatch = true;
-                break;
+                if (hasMainOutputBus)
+                    return { Channels { -1, -2 } };
+
+                return { Channels { -1, 0 } };
             }
+
+            return { Channels { 0, -1 } };
         }
 
-        auto hasUnsupportedInput = ! hasMainInputBus, hasUnsupportedOutput = ! hasMainOutputBus;
-
-        for (auto inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
+        const auto allMatchedLayoutsExclusivelySupported = std::invoke ([&]
         {
-            Channels channelConfiguration { static_cast<SInt16> (inChanNum),
-                                            static_cast<SInt16> (hasInOutMismatch ? defaultOutputs : inChanNum) };
+            for (SInt16 i = 1; i <= Channels::maxNumChanToCheckFor; ++i)
+                if (supportedChannels.find ({ i, i }) == supportedChannels.end())
+                    return false;
 
-            if (! supportedChannels.contains (channelConfiguration))
+            return std::all_of (supportedChannels.begin(), supportedChannels.end(), [] (auto x) { return x.ins == x.outs; });
+        });
+
+        if (allMatchedLayoutsExclusivelySupported)
+            return { Channels { -1, -1 } };
+
+        std::set<Channels> filteredChannels;
+
+        for (auto& c : supportedChannels)
+        {
+            const auto findDistance = [&] (auto channelCount)
             {
-                hasUnsupportedInput = true;
-                break;
-            }
-        }
+                return std::distance (layoutsToTry.begin(),
+                                      std::lower_bound (layoutsToTry.begin(),
+                                                        layoutsToTry.end(),
+                                                        channelCount,
+                                                        [] (auto a, auto b) { return a.size() < b; }));
+            };
 
-        for (auto outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
-        {
-            Channels channelConfiguration { static_cast<SInt16> (hasInOutMismatch ? defaultInputs : outChanNum),
-                                            static_cast<SInt16> (outChanNum) };
-
-            if (! supportedChannels.contains (channelConfiguration))
+            const auto findChannelCount = [&] (auto& restrictions,
+                                               auto thisChannelCount,
+                                               auto otherChannelCount,
+                                               auto hasMainBus)
             {
-                hasUnsupportedOutput = true;
-                break;
-            }
+                const auto lower = findDistance (otherChannelCount);
+                const auto upper = findDistance (otherChannelCount + 1);
+
+                const auto wildcard = std::all_of (restrictions.begin() + lower,
+                                                   restrictions.begin() + upper,
+                                                   identity)
+                                    ? thisChannelCount
+                                    : (SInt16) -1;
+                return hasMainBus ? wildcard : (SInt16) 0;
+            };
+
+            const auto ins  = findChannelCount (outputHasInputRestrictions, c.ins, c.outs, hasMainInputBus);
+            const auto outs = findChannelCount (inputHasOutputRestrictions, c.outs, c.ins, hasMainOutputBus);
+
+            const Channels layout { ins, outs };
+            filteredChannels.insert (layout == Channels { -1, -1 } ? c : layout);
         }
 
-        for (const auto& supported : supportedChannels)
-        {
-            AUChannelInfo info;
+        removeNonWildcardLayouts (filteredChannels);
 
-            // see here: https://developer.apple.com/library/mac/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/TheAudioUnit/TheAudioUnit.html
-            info.inChannels  = static_cast<SInt16> (hasMainInputBus  ? (hasUnsupportedInput  ? supported.ins  : (hasInOutMismatch && (! hasUnsupportedOutput) ? -2 : -1)) : 0);
-            info.outChannels = static_cast<SInt16> (hasMainOutputBus ? (hasUnsupportedOutput ? supported.outs : (hasInOutMismatch && (! hasUnsupportedInput)  ? -2 : -1)) : 0);
-
-            if (info.inChannels == -2 && info.outChannels == -2)
-                info.inChannels = -1;
-
-            int j;
-            for (j = 0; j < channelInfo.size(); ++j)
-                if (info.inChannels == channelInfo.getReference (j).inChannels
-                      && info.outChannels == channelInfo.getReference (j).outChannels)
-                    break;
-
-            if (j >= channelInfo.size())
-                channelInfo.add (info);
-        }
-
-        return channelInfo;
-    }
-
-    static bool isNumberOfChannelsSupported (const AudioProcessor::Bus* b, int numChannels, AudioProcessor::BusesLayout& inOutCurrentLayout)
-    {
-        auto potentialSets = AudioChannelSet::channelSetsWithNumberOfChannels (static_cast<int> (numChannels));
-
-        for (auto set : potentialSets)
-        {
-            auto copy = inOutCurrentLayout;
-
-            if (b->isLayoutSupported (set, &copy))
-            {
-                inOutCurrentLayout = copy;
-                return true;
-            }
-        }
-
-        return false;
+        return filteredChannels;
     }
 
     //==============================================================================
@@ -590,8 +614,131 @@ struct AudioUnitHelpers
         return juceFilter->getBusesLayout();
        #endif
     }
+
+   #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+    class ScopedMIDIEventListBlock
+    {
+    public:
+        ScopedMIDIEventListBlock() = default;
+
+        ScopedMIDIEventListBlock (ScopedMIDIEventListBlock&& other) noexcept
+            : midiEventListBlock (std::exchange (other.midiEventListBlock, nil)) {}
+
+        ScopedMIDIEventListBlock& operator= (ScopedMIDIEventListBlock&& other) noexcept
+        {
+            ScopedMIDIEventListBlock { std::move (other) }.swap (*this);
+            return *this;
+        }
+
+        ~ScopedMIDIEventListBlock()
+        {
+            if (midiEventListBlock != nil)
+                [midiEventListBlock release];
+        }
+
+        static ScopedMIDIEventListBlock copy (AUMIDIEventListBlock b)
+        {
+            return ScopedMIDIEventListBlock { b };
+        }
+
+        explicit operator bool() const { return midiEventListBlock != nil; }
+
+        void operator() (AUEventSampleTime eventSampleTime, uint8_t cable, const struct MIDIEventList * eventList) const
+        {
+            jassert (midiEventListBlock != nil);
+            midiEventListBlock (eventSampleTime, cable, eventList);
+        }
+
+    private:
+        void swap (ScopedMIDIEventListBlock& other) noexcept
+        {
+            std::swap (other.midiEventListBlock, midiEventListBlock);
+        }
+
+        explicit ScopedMIDIEventListBlock (AUMIDIEventListBlock b) : midiEventListBlock ([b copy]) {}
+
+        AUMIDIEventListBlock midiEventListBlock = nil;
+    };
+
+    class EventListOutput
+    {
+    public:
+        API_AVAILABLE (macos (12.0), ios (15.0))
+        void setBlock (ScopedMIDIEventListBlock x)
+        {
+            block = std::move (x);
+        }
+
+        API_AVAILABLE (macos (12.0), ios (15.0))
+        void setBlock (AUMIDIEventListBlock x)
+        {
+            setBlock (ScopedMIDIEventListBlock::copy (x));
+        }
+
+        bool trySend (const MidiBuffer& buffer, int64_t baseTimeStamp)
+        {
+            if (! block)
+                return false;
+
+            struct MIDIEventList stackList = {};
+            MIDIEventPacket* end = nullptr;
+
+            const auto init = [&]
+            {
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability-new")
+                end = MIDIEventListInit (&stackList, kMIDIProtocol_1_0);
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+            };
+
+            const auto send = [&]
+            {
+                block (baseTimeStamp, 0, &stackList);
+            };
+
+            const auto add = [&] (const ump::View& view, int timeStamp)
+            {
+                static_assert (sizeof (uint32_t) == sizeof (UInt32)
+                               && alignof (uint32_t) == alignof (UInt32),
+                               "If this fails, the cast below will be broken too!");
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability-new")
+                using List = struct MIDIEventList;
+                end = MIDIEventListAdd (&stackList,
+                                        sizeof (List::packet),
+                                        end,
+                                        (MIDITimeStamp) timeStamp,
+                                        view.size(),
+                                        reinterpret_cast<const UInt32*> (view.data()));
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+            };
+
+            init();
+
+            for (const auto metadata : buffer)
+            {
+                toUmp1Converter.convert (ump::BytestreamMidiView (metadata), [&] (const ump::View& view)
+                {
+                    add (view, metadata.samplePosition);
+
+                    if (end != nullptr)
+                        return;
+
+                    send();
+                    init();
+                    add (view, metadata.samplePosition);
+                });
+            }
+
+            send();
+
+            return true;
+        }
+
+    private:
+        ScopedMIDIEventListBlock block;
+        ump::ToUMP1Converter toUmp1Converter;
+    };
+   #endif
 };
 
 } // namespace juce
-
-#endif
+/** @endcond */

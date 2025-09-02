@@ -523,6 +523,9 @@ static void comboBoxPopupMenuFinishedCallback (int result, ComboBox* combo)
 
         if (result != 0)
             combo->setSelectedId (result);
+
+        if (auto* handler = combo->getAccessibilityHandler())
+            handler->grabFocus();
     }
 }
 

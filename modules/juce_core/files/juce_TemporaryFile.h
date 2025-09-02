@@ -88,14 +88,40 @@ public:
 
     //==============================================================================
     /** Creates a randomly-named temporary file in the default temp directory.
+    */
+    TemporaryFile();
+
+    /** Creates a randomly-named temporary file in the default temp directory.
+
+        @param suffix       a file suffix to use for the file
+    */
+    explicit TemporaryFile (const String& suffix);
+
+    /** Creates a randomly-named temporary file in the default temp directory.
 
         @param suffix       a file suffix to use for the file
         @param optionFlags  a combination of the values listed in the OptionFlags enum
         The file will not be created until you write to it. And remember that when
         this object is deleted, the file will also be deleted!
     */
-    TemporaryFile (const String& suffix = String(),
-                   int optionFlags = 0);
+    TemporaryFile (const String& suffix,
+                   int optionFlags);
+
+    /** Creates a temporary file in the same directory as a specified file.
+
+        This is useful if you have a file that you want to overwrite, but don't
+        want to harm the original file if the write operation fails. You can
+        use this to create a temporary file next to the target file, then
+        write to the temporary file, and finally use overwriteTargetFileWithTemporary()
+        to replace the target file with the one you've just written.
+
+        This class won't create any files until you actually write to them. And remember
+        that when this object is deleted, the temporary file will also be deleted!
+
+        @param targetFile   the file that you intend to overwrite - the temporary
+                            file will be created in the same directory as this
+    */
+    explicit TemporaryFile (const File& targetFile);
 
     /** Creates a temporary file in the same directory as a specified file.
 
@@ -113,7 +139,7 @@ public:
         @param optionFlags  a combination of the values listed in the OptionFlags enum
     */
     TemporaryFile (const File& targetFile,
-                   int optionFlags = 0);
+                   int optionFlags);
 
     /** Creates a temporary file using an explicit filename.
         The other constructors are a better choice than this one, unless for some reason

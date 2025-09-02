@@ -464,6 +464,19 @@ public:
     */
     void setTopRightPosition (int x, int y);
 
+    /** Moves the component to a new position.
+
+        Changes the position of the component's top-right corner (keeping it the same size).
+        The position is relative to the top-left of the component's parent.
+
+        If the component actually moves, this method will make a synchronous call to moved().
+
+        Note that if you've used setTransform() to apply a transform, then the component's
+        bounds will no longer be a direct reflection of the position at which it appears within
+        its parent, as the transform will be applied to whatever bounds you set for it.
+    */
+    void setTopRightPosition (Point<int>);
+
     /** Changes the size of the component.
 
         A synchronous call to resized() will occur if the size actually changes.
@@ -1134,7 +1147,7 @@ public:
 
     /** Generates a snapshot of part of this component.
 
-        This will return a new Image, the size of the rectangle specified,
+        This will return a new Image of type imageType, the size of the rectangle specified,
         containing a snapshot of the specified area of the component and all
         its children.
 
@@ -1149,7 +1162,8 @@ public:
     */
     Image createComponentSnapshot (Rectangle<int> areaToGrab,
                                    bool clipImageToComponentBounds = true,
-                                   float scaleFactor = 1.0f);
+                                   float scaleFactor = 1.0f,
+                                   const ImageType& imageType = NativeImageType{});
 
     /** Draws this component and all its subcomponents onto the specified graphics
         context.
@@ -2401,6 +2415,9 @@ public:
         /** If the component is valid, this deletes it and sets this pointer to null. */
         void deleteAndZero()                                  { delete std::exchange (weakRef, nullptr); }
 
+        bool operator== (SafePointer other) const noexcept    { return weakRef == other.weakRef; }
+        bool operator!= (SafePointer other) const noexcept    { return ! operator== (other); }
+
         bool operator== (ComponentType* component) const noexcept   { return weakRef == component; }
         bool operator!= (ComponentType* component) const noexcept   { return weakRef != component; }
 
@@ -2486,6 +2503,9 @@ public:
         @see setCachedComponentImage
     */
     CachedComponentImage* getCachedComponentImage() const noexcept      { return cachedImage.get(); }
+
+    /** Invalidates cached images, both in the CachedComponentImage (if any) and the image effect state. */
+    void invalidateCachedImageResources();
 
     /** Sets a flag to indicate whether mouse drag events on this Component should be ignored when it is inside a
         Viewport with drag-to-scroll functionality enabled. This is useful for Components such as sliders that
@@ -2607,7 +2627,7 @@ public:
     virtual std::unique_ptr<AccessibilityHandler> createAccessibilityHandler();
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("Use the setFocusContainerType that takes a more descriptive enum.")]]
     void setFocusContainer (bool shouldBeFocusContainer) noexcept
     {
@@ -2617,7 +2637,7 @@ public:
 
     [[deprecated ("Use the contains that takes a Point<int>.")]]
     void contains (int, int) = delete;
-   #endif
+    /** @endcond */
 
 private:
 
@@ -2625,7 +2645,7 @@ private:
     friend class ComponentPeer;
     friend class detail::MouseInputSourceImpl;
 
-   #ifndef DOXYGEN
+    /** @cond */
     static Component* currentlyFocusedComponent;
 
     //==============================================================================
@@ -2692,14 +2712,14 @@ private:
     uint8 componentTransparency = 0;
 
     //==============================================================================
-    void internalMouseEnter (MouseInputSource, Point<float>, Time);
-    void internalMouseExit  (MouseInputSource, Point<float>, Time);
-    void internalMouseDown  (MouseInputSource, const detail::PointerState&, Time);
-    void internalMouseUp    (MouseInputSource, const detail::PointerState&, Time, ModifierKeys oldModifiers);
-    void internalMouseDrag  (MouseInputSource, const detail::PointerState&, Time);
-    void internalMouseMove  (MouseInputSource, Point<float>, Time);
-    void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
-    void internalMagnifyGesture (MouseInputSource, Point<float>, Time, float);
+    static void internalMouseEnter (SafePointer<Component>, MouseInputSource, Point<float>, Time);
+    static void internalMouseExit  (SafePointer<Component>, MouseInputSource, Point<float>, Time);
+    static void internalMouseDown  (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time);
+    static void internalMouseUp    (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time, ModifierKeys oldModifiers);
+    static void internalMouseDrag  (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time);
+    static void internalMouseMove  (SafePointer<Component>, MouseInputSource, Point<float>, Time);
+    static void internalMouseWheel (SafePointer<Component>, MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
+    static void internalMagnifyGesture (SafePointer<Component>, MouseInputSource, Point<float>, Time, float);
     void internalBroughtToFront();
     void internalKeyboardFocusGain (FocusChangeType, const WeakReference<Component>&, FocusChangeDirection);
     void internalKeyboardFocusGain (FocusChangeType);
@@ -2738,7 +2758,7 @@ protected:
     virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
     /** @internal */
     static std::unique_ptr<AccessibilityHandler> createIgnoredAccessibilityHandler (Component&);
-   #endif
+    /** @endcond */
 };
 
 } // namespace juce

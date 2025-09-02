@@ -2,6 +2,7 @@
  * jinclude.h
  *
  * Copyright (C) 1991-1994, Thomas G. Lane.
+ * Modified 2017-2022 by Guido Vollbeding.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -10,15 +11,12 @@
  * care of by the standard jconfig symbols, but on really weird systems
  * you may have to edit this file.)
  *
- * NOTE: this file is NOT intended to be included by applications using the
- * JPEG library.  Most applications need only include jpeglib.h.
+ * NOTE: this file is NOT intended to be included by applications using
+ * the JPEG library.  Most applications need only include jpeglib.h.
  */
 
 
 /* Include auto-config file to find out which system include files we need. */
-
-#ifndef __jinclude_h__
-#define __jinclude_h__
 
 #include "jconfig.h"		/* auto configuration options */
 #define JCONFIG_INCLUDED	/* so that jpeglib.h doesn't do it again */
@@ -86,112 +84,74 @@
  * The modules that use fread() and fwrite() always invoke them through
  * these macros.  On some systems you may need to twiddle the argument casts.
  * CAUTION: argument order is different from underlying functions!
+ *
+ * Furthermore, macros are provided for fflush() and ferror() in order
+ * to facilitate adaption by applications using an own FILE class.
+ *
+ * You can define your own custom file I/O functions in jconfig.h and
+ * #define JPEG_HAVE_FILE_IO_CUSTOM there to prevent redefinition here.
+ *
+ * You can #define JPEG_USE_FILE_IO_CUSTOM in jconfig.h to use custom file
+ * I/O functions implemented in Delphi VCL (Visual Component Library)
+ * in Vcl.Imaging.jpeg.pas for the TJPEGImage component utilizing
+ * the Delphi RTL (Run-Time Library) TMemoryStream component:
+ *
+ *   procedure jpeg_stdio_src(var cinfo: jpeg_decompress_struct;
+ *     input_file: TStream); external;
+ *
+ *   procedure jpeg_stdio_dest(var cinfo: jpeg_compress_struct;
+ *     output_file: TStream); external;
+ *
+ *   function jfread(var buf; recsize, reccount: Integer; S: TStream): Integer;
+ *   begin
+ *     Result := S.Read(buf, recsize * reccount);
+ *   end;
+ *
+ *   function jfwrite(const buf; recsize, reccount: Integer; S: TStream): Integer;
+ *   begin
+ *     Result := S.Write(buf, recsize * reccount);
+ *   end;
+ *
+ *   function jfflush(S: TStream): Integer;
+ *   begin
+ *     Result := 0;
+ *   end;
+ *
+ *   function jferror(S: TStream): Integer;
+ *   begin
+ *     Result := 0;
+ *   end;
+ *
+ * TMemoryStream of Delphi RTL has the distinctive feature to provide dynamic
+ * memory buffer management with a file/stream-based interface, particularly for
+ * the write (output) operation, which is easier to apply compared with direct
+ * implementations as given in jdatadst.c for memory destination.  Those direct
+ * implementations of dynamic memory write tend to be more difficult to use,
+ * so providing an option like TMemoryStream may be a useful alternative.
+ *
+ * The CFile/CMemFile classes of the Microsoft Foundation Class (MFC) Library
+ * may be used in a similar fashion.
  */
 
+#ifndef JPEG_HAVE_FILE_IO_CUSTOM
+#ifdef JPEG_USE_FILE_IO_CUSTOM
+extern size_t jfread(void * __ptr, size_t __size, size_t __n, FILE * __stream);
+extern size_t jfwrite(const void * __ptr, size_t __size, size_t __n, FILE * __stream);
+extern int    jfflush(FILE * __stream);
+extern int    jferror(FILE * __fp);
+
+#define JFREAD(file,buf,sizeofbuf)  \
+  ((size_t) jfread((void *) (buf), (size_t) 1, (size_t) (sizeofbuf), (file)))
+#define JFWRITE(file,buf,sizeofbuf)  \
+  ((size_t) jfwrite((const void *) (buf), (size_t) 1, (size_t) (sizeofbuf), (file)))
+#define JFFLUSH(file)	jfflush(file)
+#define JFERROR(file)	jferror(file)
+#else
 #define JFREAD(file,buf,sizeofbuf)  \
   ((size_t) fread((void *) (buf), (size_t) 1, (size_t) (sizeofbuf), (file)))
 #define JFWRITE(file,buf,sizeofbuf)  \
   ((size_t) fwrite((const void *) (buf), (size_t) 1, (size_t) (sizeofbuf), (file)))
-
-
-
-typedef enum {			/* JPEG marker codes */
-  M_SOF0  = 0xc0,
-  M_SOF1  = 0xc1,
-  M_SOF2  = 0xc2,
-  M_SOF3  = 0xc3,
-
-  M_SOF5  = 0xc5,
-  M_SOF6  = 0xc6,
-  M_SOF7  = 0xc7,
-
-  M_JPG   = 0xc8,
-  M_SOF9  = 0xc9,
-  M_SOF10 = 0xca,
-  M_SOF11 = 0xcb,
-
-  M_SOF13 = 0xcd,
-  M_SOF14 = 0xce,
-  M_SOF15 = 0xcf,
-
-  M_DHT   = 0xc4,
-
-  M_DAC   = 0xcc,
-
-  M_RST0  = 0xd0,
-  M_RST1  = 0xd1,
-  M_RST2  = 0xd2,
-  M_RST3  = 0xd3,
-  M_RST4  = 0xd4,
-  M_RST5  = 0xd5,
-  M_RST6  = 0xd6,
-  M_RST7  = 0xd7,
-
-  M_SOI   = 0xd8,
-  M_EOI   = 0xd9,
-  M_SOS   = 0xda,
-  M_DQT   = 0xdb,
-  M_DNL   = 0xdc,
-  M_DRI   = 0xdd,
-  M_DHP   = 0xde,
-  M_EXP   = 0xdf,
-
-  M_APP0  = 0xe0,
-  M_APP1  = 0xe1,
-  M_APP2  = 0xe2,
-  M_APP3  = 0xe3,
-  M_APP4  = 0xe4,
-  M_APP5  = 0xe5,
-  M_APP6  = 0xe6,
-  M_APP7  = 0xe7,
-  M_APP8  = 0xe8,
-  M_APP9  = 0xe9,
-  M_APP10 = 0xea,
-  M_APP11 = 0xeb,
-  M_APP12 = 0xec,
-  M_APP13 = 0xed,
-  M_APP14 = 0xee,
-  M_APP15 = 0xef,
-
-  M_JPG0  = 0xf0,
-  M_JPG13 = 0xfd,
-  M_COM   = 0xfe,
-
-  M_TEM   = 0x01,
-
-  M_ERROR = 0x100
-} JPEG_MARKER;
-
-
-/*
- * Figure F.12: extend sign bit.
- * On some machines, a shift and add will be faster than a table lookup.
- */
-
-#ifdef AVOID_TABLES
-
-#define HUFF_EXTEND(x,s)  ((x) < (1<<((s)-1)) ? (x) + (((-1)<<(s)) + 1) : (x))
-
-#else
-
-#define HUFF_EXTEND(x,s)  ((x) < extend_test[s] ? (x) + extend_offset[s] : (x))
-
-static const int extend_test[16] =   /* entry n is 2**(n-1) */
-  { 0, 0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080,
-    0x0100, 0x0200, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000 };
-
-#define SHIFTED_BITS_PLUS_ONE(n) (int) (((unsigned int) -1) << n) + 1
-
-static const int extend_offset[16] = /* entry n is (-1 << n) + 1 */
-  { 0,
-    SHIFTED_BITS_PLUS_ONE (1), SHIFTED_BITS_PLUS_ONE (2), SHIFTED_BITS_PLUS_ONE (3), SHIFTED_BITS_PLUS_ONE (4),
-    SHIFTED_BITS_PLUS_ONE (5), SHIFTED_BITS_PLUS_ONE (6), SHIFTED_BITS_PLUS_ONE (7), SHIFTED_BITS_PLUS_ONE (8),
-    SHIFTED_BITS_PLUS_ONE (9), SHIFTED_BITS_PLUS_ONE (10), SHIFTED_BITS_PLUS_ONE (11), SHIFTED_BITS_PLUS_ONE (12),
-    SHIFTED_BITS_PLUS_ONE (13), SHIFTED_BITS_PLUS_ONE (14), SHIFTED_BITS_PLUS_ONE (15) };
-
-#undef SHIFTED_BITS_PLUS_ONE
-
-#endif /* AVOID_TABLES */
-
-
+#define JFFLUSH(file)	fflush(file)
+#define JFERROR(file)	ferror(file)
+#endif
 #endif

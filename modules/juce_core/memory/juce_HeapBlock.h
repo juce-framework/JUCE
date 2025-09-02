@@ -35,7 +35,8 @@
 namespace juce
 {
 
-#if ! (DOXYGEN || JUCE_EXCEPTIONS_DISABLED)
+#if ! JUCE_EXCEPTIONS_DISABLED
+/** @cond */
 namespace HeapBlockHelper
 {
     template <bool shouldThrow>
@@ -44,6 +45,7 @@ namespace HeapBlockHelper
     template <>
     struct ThrowOnFail<true>    { static void checkPointer (void* data) { if (data == nullptr) throw std::bad_alloc(); } };
 }
+/** @endcond */
 #endif
 
 //==============================================================================

@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_devices
   vendor:             juce
-  version:            8.0.4
+  version:            8.0.9
   name:               JUCE audio and MIDI I/O device classes
   description:        Classes to play and record from audio and MIDI I/O devices
   website:            http://www.juce.com/juce
@@ -121,7 +121,7 @@
 #endif
 
 /** Config: JUCE_JACK
-    Enables JACK audio devices (Linux only).
+    Enables JACK audio devices.
 */
 #ifndef JUCE_JACK
  #define JUCE_JACK 0

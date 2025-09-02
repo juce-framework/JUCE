@@ -1668,64 +1668,53 @@ String String::quoted (juce_wchar quoteCharacter) const
 }
 
 //==============================================================================
-static String::CharPointerType findTrimmedEnd (const String::CharPointerType start,
-                                               String::CharPointerType end)
-{
-    while (end > start)
-    {
-        if (! (--end).isWhitespace())
-        {
-            ++end;
-            break;
-        }
-    }
-
-    return end;
-}
-
 String String::trim() const
 {
-    if (isNotEmpty())
-    {
-        auto start = text.findEndOfWhitespace();
-        auto end = start.findTerminatingNull();
-        auto trimmedEnd = findTrimmedEnd (start, end);
+    if (isEmpty())
+        return *this;
 
-        if (trimmedEnd <= start)
-            return {};
+    const auto b = begin();
+    const auto e = end();
 
-        if (text < start || trimmedEnd < end)
-            return String (start, trimmedEnd);
-    }
+    const auto shouldTrim = [] (auto ptr) { return ptr.isWhitespace(); };
+    const auto trimmedBegin = CharacterFunctions::trimBegin (b, e, shouldTrim);
+    const auto trimmedEnd = CharacterFunctions::trimEnd (trimmedBegin, e, shouldTrim);
 
-    return *this;
+    if (trimmedBegin == b && trimmedEnd == e)
+        return *this;
+
+    return String (trimmedBegin, trimmedEnd);
 }
 
 String String::trimStart() const
 {
-    if (isNotEmpty())
-    {
-        auto t = text.findEndOfWhitespace();
+    if (isEmpty())
+        return *this;
 
-        if (t != text)
-            return String (t);
-    }
+    const auto shouldTrim = [] (auto ptr) { return ptr.isWhitespace(); };
+    const auto b = begin();
+    const auto t = CharacterFunctions::trimBegin (b, end(), shouldTrim);
 
-    return *this;
+    if (t == b)
+        return *this;
+
+    return String (t);
 }
 
 String String::trimEnd() const
 {
-    if (isNotEmpty())
-    {
-        auto end = text.findTerminatingNull();
-        auto trimmedEnd = findTrimmedEnd (text, end);
+    if (isEmpty())
+        return *this;
 
-        if (trimmedEnd < end)
-            return String (text, trimmedEnd);
-    }
+    const auto shouldTrim = [] (auto ptr) { return ptr.isWhitespace(); };
+    const auto b = begin();
+    const auto e = end();
+    const auto t = CharacterFunctions::trimEnd (b, e, shouldTrim);
 
-    return *this;
+    if (t == e)
+        return *this;
+
+    return String (b, t);
 }
 
 String String::trimCharactersAtStart (StringRef charactersToTrim) const
@@ -1860,7 +1849,7 @@ String String::formattedRaw (const char* pf, ...)
         va_start (args, pf);
 
        #if JUCE_WINDOWS
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+        JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
        #endif
 
       #if JUCE_ANDROID
@@ -1881,7 +1870,7 @@ String String::formattedRaw (const char* pf, ...)
       #endif
 
        #if JUCE_WINDOWS
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        JUCE_END_IGNORE_DEPRECATION_WARNINGS
        #endif
         va_end (args);
 
@@ -2342,13 +2331,11 @@ static String serialiseDouble (double input, int maxDecimalPlaces = 0)
 //==============================================================================
 #if JUCE_ALLOW_STATIC_NULL_VARIABLES
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 const String String::empty;
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 #endif
 
@@ -2371,49 +2358,55 @@ public:
     {
         static void test (UnitTest& test, Random& r)
         {
-            String s (createRandomWideCharString (r));
+            constexpr auto stringLength = 50;
+            const String s (createRandomWideCharString (r, stringLength));
 
             using CharType = typename CharPointerType::CharType;
-            CharType buffer[300];
+            constexpr auto bytesPerCodeUnit = sizeof (CharType);
+            constexpr auto maxCodeUnitsPerCodePoint = 4 / bytesPerCodeUnit;
 
-            memset (buffer, 0xff, sizeof (buffer));
-            CharPointerType (buffer).writeAll (s.toUTF32());
-            test.expectEquals (String (CharPointerType (buffer)), s);
+            std::array<CharType, stringLength * maxCodeUnitsPerCodePoint + 1> codeUnits{};
+            const auto codeUnitsSizeInBytes = codeUnits.size() * bytesPerCodeUnit;
 
-            memset (buffer, 0xff, sizeof (buffer));
-            CharPointerType (buffer).writeAll (s.toUTF16());
-            test.expectEquals (String (CharPointerType (buffer)), s);
+            std::memset (codeUnits.data(), 0xff, codeUnitsSizeInBytes);
+            CharPointerType (codeUnits.data()).writeAll (s.toUTF32());
+            test.expectEquals (String (CharPointerType (codeUnits.data())), s);
 
-            memset (buffer, 0xff, sizeof (buffer));
-            CharPointerType (buffer).writeAll (s.toUTF8());
-            test.expectEquals (String (CharPointerType (buffer)), s);
+            std::memset (codeUnits.data(), 0xff, codeUnitsSizeInBytes);
+            CharPointerType (codeUnits.data()).writeAll (s.toUTF16());
+            test.expectEquals (String (CharPointerType (codeUnits.data())), s);
 
-            const auto nullTerminator = std::find (buffer, buffer + std::size (buffer), (CharType) 0);
-            const auto numValidBytes = (int) std::distance (buffer, nullTerminator) * (int) sizeof (CharType);
+            std::memset (codeUnits.data(), 0xff, codeUnitsSizeInBytes);
+            CharPointerType (codeUnits.data()).writeAll (s.toUTF8());
+            test.expectEquals (String (CharPointerType (codeUnits.data())), s);
 
-            test.expect (CharPointerType::isValidString (buffer, numValidBytes));
+            test.expect (CharPointerType::isValidString (codeUnits.data(), codeUnitsSizeInBytes));
         }
     };
 
-    static String createRandomWideCharString (Random& r)
+    static String createRandomWideCharString (Random& r, size_t length)
     {
-        juce_wchar buffer[50] = { 0 };
+        std::vector<juce_wchar> characters (length, 0);
 
-        for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
+        for (auto& character : characters)
         {
             if (r.nextBool())
             {
                 do
                 {
-                    buffer[i] = (juce_wchar) (1 + r.nextInt (0x10ffff - 1));
+                    character = (juce_wchar) (1 + r.nextInt (0x10ffff - 1));
                 }
-                while (! CharPointer_UTF16::canRepresent (buffer[i]));
+                while (! CharPointer_UTF16::canRepresent (character));
             }
             else
-                buffer[i] = (juce_wchar) (1 + r.nextInt (0xff));
+            {
+                character = (juce_wchar) (1 + r.nextInt (0xff));
+            }
         }
 
-        return CharPointer_UTF32 (buffer);
+        characters.push_back (0);
+
+        return CharPointer_UTF32 (characters.data());
     }
 
     void runTest() override
@@ -2885,6 +2878,20 @@ public:
             expectEquals (String::toDecimalStringWithSignificantFigures (2.8647,     6), String ("2.86470"));
 
             expectEquals (String::toDecimalStringWithSignificantFigures (-0.0000000000019, 1), String ("-0.000000000002"));
+
+            // Powers of 10
+
+            expectEquals (String::toDecimalStringWithSignificantFigures (       0.001, 7), String (       "0.001000000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (       0.01,  7), String (       "0.01000000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (       0.1,   7), String (       "0.1000000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (       1,     7), String (       "1.000000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (      10,     7), String (      "10.00000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (     100,     7), String (     "100.0000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (    1000,     7), String (    "1000.000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (   10000,     7), String (   "10000.00"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (  100000,     7), String (  "100000.0"));
+            expectEquals (String::toDecimalStringWithSignificantFigures ( 1000000,     7), String ( "1000000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (10000000,     7), String ("10000000"));
         }
 
         beginTest ("Float trimming");

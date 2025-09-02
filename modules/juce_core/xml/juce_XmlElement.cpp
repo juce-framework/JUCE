@@ -34,7 +34,6 @@
 
 namespace juce
 {
-
 static bool isValidXmlNameStartCharacter (juce_wchar character) noexcept
 {
     return character == ':'
@@ -67,21 +66,19 @@ static bool isValidXmlNameBodyCharacter (juce_wchar character) noexcept
 }
 
 XmlElement::XmlAttributeNode::XmlAttributeNode (const XmlAttributeNode& other) noexcept
-    : name (other.name),
-      value (other.value)
+    : attribute (other.attribute)
 {
 }
 
 XmlElement::XmlAttributeNode::XmlAttributeNode (const Identifier& n, const String& v) noexcept
-    : name (n), value (v)
+    : attribute { n, v }
 {
-    jassert (isValidXmlName (name));
+    jassert (isValidXmlName (attribute.name));
 }
 
 XmlElement::XmlAttributeNode::XmlAttributeNode (String::CharPointerType nameStart, String::CharPointerType nameEnd)
-    : name (nameStart, nameEnd)
+    : XmlAttributeNode ({ nameStart, nameEnd }, {})
 {
-    jassert (isValidXmlName (name));
 }
 
 //==============================================================================
@@ -281,7 +278,7 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
             auto attIndent = (size_t) (indentationLevel + tagName.length() + 1);
             int lineLen = 0;
 
-            for (auto* att = attributes.get(); att != nullptr; att = att->nextListItem)
+            for (const auto& [name, value] : getAttributeIterator())
             {
                 if (lineLen > lineWrapLength && indentationLevel >= 0)
                 {
@@ -292,9 +289,9 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
 
                 auto startPos = outputStream.getPosition();
                 outputStream.writeByte (' ');
-                outputStream << att->name;
+                outputStream << name;
                 outputStream.write ("=\"", 2);
-                XmlOutputFunctions::escapeIllegalXmlChars (outputStream, att->value, true);
+                XmlOutputFunctions::escapeIllegalXmlChars (outputStream, value, true);
                 outputStream.writeByte ('"');
                 lineLen += (int) (outputStream.getPosition() - startPos);
             }
@@ -536,7 +533,7 @@ static const String& getEmptyStringRef() noexcept
 const String& XmlElement::getAttributeName (const int index) const noexcept
 {
     if (auto* att = attributes[index].get())
-        return att->name.toString();
+        return att->attribute.name.toString();
 
     return getEmptyStringRef();
 }
@@ -544,16 +541,16 @@ const String& XmlElement::getAttributeName (const int index) const noexcept
 const String& XmlElement::getAttributeValue (const int index) const noexcept
 {
     if (auto* att = attributes[index].get())
-        return att->value;
+        return att->attribute.value;
 
     return getEmptyStringRef();
 }
 
-XmlElement::XmlAttributeNode* XmlElement::getAttribute (StringRef attributeName) const noexcept
+const XmlAttribute* XmlElement::getAttribute (StringRef attributeName) const noexcept
 {
-    for (auto* att = attributes.get(); att != nullptr; att = att->nextListItem)
-        if (att->name == attributeName)
-            return att;
+    for (const auto& att : getAttributeIterator())
+        if (att.name == attributeName)
+            return &att;
 
     return nullptr;
 }
@@ -617,10 +614,14 @@ bool XmlElement::compareAttribute (StringRef attributeName,
                                    const bool ignoreCase) const noexcept
 {
     if (auto* att = getAttribute (attributeName))
-        return ignoreCase ? att->value.equalsIgnoreCase (stringToCompareAgainst)
-                          : att->value == stringToCompareAgainst;
+        return att->equals (attributeName, stringToCompareAgainst, ignoreCase);
 
     return false;
+}
+
+bool XmlElement::compareAttribute (const XmlAttribute& other, const bool ignoreCase) const noexcept
+{
+    return compareAttribute (other.name, other.value, ignoreCase);
 }
 
 //==============================================================================
@@ -634,9 +635,9 @@ void XmlElement::setAttribute (const Identifier& attributeName, const String& va
     {
         for (auto* att = attributes.get(); ; att = att->nextListItem)
         {
-            if (att->name == attributeName)
+            if (att->attribute.name == attributeName)
             {
-                att->value = value;
+                att->attribute.value = value;
                 break;
             }
 
@@ -663,7 +664,7 @@ void XmlElement::removeAttribute (const Identifier& attributeName) noexcept
 {
     for (auto* att = &attributes; att->get() != nullptr; att = &(att->get()->nextListItem))
     {
-        if (att->get()->name == attributeName)
+        if (att->get()->attribute.name == attributeName)
         {
             delete att->removeNext();
             break;
@@ -794,7 +795,7 @@ bool XmlElement::isEquivalentTo (const XmlElement* const other,
 
             for (auto* att = attributes.get(); att != nullptr; att = att->nextListItem)
             {
-                if (! other->compareAttribute (att->name, att->value))
+                if (! other->compareAttribute (att->attribute))
                     return false;
 
                 ++totalAtts;
@@ -818,11 +819,8 @@ bool XmlElement::isEquivalentTo (const XmlElement* const other,
                     return false;
                 }
 
-                if (thisAtt->name != otherAtt->name
-                     || thisAtt->value != otherAtt->value)
-                {
+                if (thisAtt->attribute != otherAtt->attribute)
                     return false;
-                }
 
                 thisAtt = thisAtt->nextListItem;
                 otherAtt = otherAtt->nextListItem;

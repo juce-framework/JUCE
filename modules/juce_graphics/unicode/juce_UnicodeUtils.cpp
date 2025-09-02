@@ -82,12 +82,4 @@ enum class TextBreakType
     hard  // The sequence of characters must be broken here.
 };
 
-/** Types of text direction. This may also be applied to characters. */
-enum class TextDirection
-{
-    ltr, // This text reads left to right.
-
-    rtl  // This text reads right to left.
-};
-
 } // namespace juce

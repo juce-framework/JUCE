@@ -48,13 +48,13 @@ public:
         if (comp->isOnDesktop())
         {
            #if JUCE_WINDOWS
-            const auto scope = [&]() -> std::unique_ptr<ScopedThreadDPIAwarenessSetter>
+            const auto scope = [&]() -> std::optional<ScopedThreadDPIAwarenessSetter>
             {
                 if (comp != nullptr)
                     if (auto* handle = comp->getWindowHandle())
-                        return std::make_unique<ScopedThreadDPIAwarenessSetter> (handle);
+                        return ScopedThreadDPIAwarenessSetter (handle);
 
-                return nullptr;
+                return {};
             }();
            #endif
 

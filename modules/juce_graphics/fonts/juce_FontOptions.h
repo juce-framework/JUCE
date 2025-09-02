@@ -161,31 +161,68 @@ public:
     /** Returns a copy of these options with underline enabled or disabled, defaults to disabled. */
     [[nodiscard]] FontOptions withUnderline       (bool x = true)          const { return withMember (*this, &FontOptions::underlined, x); }
 
-    /** Returns a copy of these options the specified metrics kind. */
+    /** Returns a copy of these options with the specified metrics kind. */
     [[nodiscard]] FontOptions withMetricsKind     (TypefaceMetricsKind x)  const { return withMember (*this, &FontOptions::metricsKind, x); }
 
+    /** Returns a copy of these options with the specified font metrics value override.
+        std::nullopt indicates that the font should use the built-in typeface metric; otherwise,
+        the ascent value will be found by multiplying the provided value by the font size in points.
+    */
+    [[nodiscard]] FontOptions withAscentOverride  (std::optional<float> x) const { return withMember (*this, &FontOptions::ascentOverride, x.value_or (-1.0f)); }
+
+    /** Returns a copy of these options with the specified font metrics value override.
+        std::nullopt indicates that the font should use the built-in typeface metric; otherwise,
+        the descent value will be found by multiplying the provided value by the font size in points.
+    */
+    [[nodiscard]] FontOptions withDescentOverride (std::optional<float> x) const { return withMember (*this, &FontOptions::descentOverride, x.value_or (-1.0f)); }
+
+    /** Returns a copy of these options with the specified font feature setting added or updated. */
+    [[nodiscard]] FontOptions withFeatureSetting (FontFeatureSetting featureSetting) const;
+
+    /** Returns a copy of these options with the specified feature removed.
+
+        If the `featureTag` corresponds to a recognised default-enabled font feature (e.g., "calt",
+        "ccmp", "liga", "locl", "mark", "mkmk", "rlig"), it's setting will be reset to its default
+        state.
+    */
+    [[nodiscard]] FontOptions withFeatureRemoved (FontFeatureTag featureTag) const;
+
+    /** Returns a copy of these options with the specified feature enabled. */
+    [[nodiscard]] FontOptions withFeatureEnabled (FontFeatureTag tag)  const { return withFeatureSetting ({ tag, FontFeatureSetting::featureEnabled }); }
+
+    /** Returns a copy of these options with the specified feature disabled. */
+    [[nodiscard]] FontOptions withFeatureDisabled (FontFeatureTag tag) const { return withFeatureSetting ({ tag, FontFeatureSetting::featureDisabled }); }
+
     /** @see withName() */
-    [[nodiscard]] auto getName()            const { return name; }
+    [[nodiscard]] auto getName()             const { return name; }
     /** @see withStyle() */
-    [[nodiscard]] auto getStyle()           const { return style; }
+    [[nodiscard]] auto getStyle()            const { return style; }
     /** @see withTypeface() */
-    [[nodiscard]] auto getTypeface()        const { return typeface; }
+    [[nodiscard]] auto getTypeface()         const { return typeface; }
     /** @see withFallbacks() */
-    [[nodiscard]] auto getFallbacks()       const { return fallbacks; }
+    [[nodiscard]] auto getFallbacks()        const { return fallbacks; }
     /** @see withHeight() */
-    [[nodiscard]] auto getHeight()          const { return height; }
+    [[nodiscard]] auto getHeight()           const { return height; }
     /** @see withPointHeight() */
-    [[nodiscard]] auto getPointHeight()     const { return pointHeight; }
+    [[nodiscard]] auto getPointHeight()      const { return pointHeight; }
     /** @see withKerningFactor() */
-    [[nodiscard]] auto getKerningFactor()   const { return tracking; }
+    [[nodiscard]] auto getKerningFactor()    const { return tracking; }
     /** @see withHorizontalScale() */
-    [[nodiscard]] auto getHorizontalScale() const { return horizontalScale; }
+    [[nodiscard]] auto getHorizontalScale()  const { return horizontalScale; }
     /** @see withFallbackEnabled() */
-    [[nodiscard]] auto getFallbackEnabled() const { return fallbackEnabled; }
+    [[nodiscard]] auto getFallbackEnabled()  const { return fallbackEnabled; }
     /** @see withUnderline() */
-    [[nodiscard]] auto getUnderline()       const { return underlined; }
+    [[nodiscard]] auto getUnderline()        const { return underlined; }
     /** @see withMetricsKind() */
-    [[nodiscard]] auto getMetricsKind()     const { return metricsKind; }
+    [[nodiscard]] auto getMetricsKind()      const { return metricsKind; }
+    /** @see withAscentOverride() */
+    [[nodiscard]] auto getAscentOverride()   const { return ascentOverride >= 0.0f ? std::make_optional (ascentOverride) : std::nullopt; }
+    /** @see withDescentOverride() */
+    [[nodiscard]] auto getDescentOverride()  const { return descentOverride >= 0.0f ? std::make_optional (descentOverride) : std::nullopt; }
+
+    /** @see withFeatureSetting() */
+    [[nodiscard]] Span<const FontFeatureSetting> getFeatureSettings() const&  { return features; }
+    [[nodiscard]] Span<const FontFeatureSetting> getFeatureSettings() const&& = delete;
 
     /** Equality operator. */
     [[nodiscard]] bool operator== (const FontOptions& other) const;
@@ -206,11 +243,14 @@ private:
     String name, style;
     Typeface::Ptr typeface;
     std::vector<String> fallbacks;
+    std::vector<FontFeatureSetting> features;
     TypefaceMetricsKind metricsKind { TypefaceMetricsKind::portable };
     float height = -1.0f;
     float pointHeight = -1.0f;
     float tracking{};
     float horizontalScale = 1.0f;
+    float ascentOverride = -1.0f;
+    float descentOverride = -1.0f;
     bool fallbackEnabled = true;
     bool underlined{};
 };

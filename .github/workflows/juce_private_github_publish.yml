@@ -1,0 +1,16 @@
+name: JUCE Private GitHub Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+        type: string
+        description: The tag to publish ("5.4.5")
+
+jobs:
+  publish-github-release:
+    uses: juce-framework/JUCE-utils/.github/workflows/github_publish.yml@master
+    with:
+      tag: ${{ inputs.tag }}
+    secrets: inherit

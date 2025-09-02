@@ -44,7 +44,7 @@
 
   ID:                 juce_box2d
   vendor:             juce
-  version:            8.0.4
+  version:            8.0.9
   name:               JUCE wrapper for the Box2D physics engine
   description:        The Box2D physics engine and some utility classes.
   website:            http://www.juce.com/juce
@@ -80,6 +80,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-#ifndef DOXYGEN // for some reason, Doxygen sees this as a re-definition of Box2DRenderer
- #include "utils/juce_Box2DRenderer.h"
-#endif // DOXYGEN
+// For some reason, Doxygen sees this as a re-definition of Box2DRenderer
+/** @cond */
+#include "utils/juce_Box2DRenderer.h"
+/** @endcond */

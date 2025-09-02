@@ -101,7 +101,14 @@ public:
     void setStateInformation (const void* d, int s) override                      { inner->setStateInformation (d, s); }
     void getCurrentProgramStateInformation (juce::MemoryBlock& b) override        { inner->getCurrentProgramStateInformation (b); }
     void setCurrentProgramStateInformation (const void* d, int s) override        { inner->setCurrentProgramStateInformation (d, s); }
-    void prepareToPlay (double sr, int bs) override                               { inner->setRateAndBufferSizeDetails (sr, bs); inner->prepareToPlay (sr, bs); }
+
+    void prepareToPlay (double sr, int bs) override
+    {
+        inner->setProcessingPrecision (getProcessingPrecision());
+        inner->setRateAndBufferSizeDetails (sr, bs);
+        inner->prepareToPlay (sr, bs);
+    }
+
     void releaseResources() override                                              { inner->releaseResources(); }
     void memoryWarningReceived() override                                         { inner->memoryWarningReceived(); }
     void processBlock (AudioBuffer<float>& a, MidiBuffer& m) override             { inner->processBlock (a, m); }

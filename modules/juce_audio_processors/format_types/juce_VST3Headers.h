@@ -89,7 +89,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
                                      "-Wunused-function",
                                      "-Wunused-parameter",
                                      "-Wzero-as-null-pointer-constant",
-                                     "-Wdangling-else")
+                                     "-Wdangling-else",
+                                     "-Wnontrivial-memcall")
 
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values
@@ -98,7 +99,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
 // having the wrong value when the /Zc:__cplusplus is not enabled. This work
 // around prevents needing to provide that flag
 
-#include <juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/fplatform.h>
+#include <pluginterfaces/base/fplatform.h>
 
 #ifdef SMTG_CPP20
  #undef SMTG_CPP20
@@ -126,6 +127,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <pluginterfaces/vst/ivstparameterchanges.h>
  #include <pluginterfaces/vst/ivstplugview.h>
  #include <pluginterfaces/vst/ivstprocesscontext.h>
+ #include <pluginterfaces/vst/ivstremapparamid.h>
  #include <pluginterfaces/vst/vsttypes.h>
  #include <pluginterfaces/vst/ivstunits.h>
  #include <pluginterfaces/vst/ivstmidicontrollers.h>
@@ -243,6 +245,24 @@ namespace Presonus
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
+//==============================================================================
+#if JucePlugin_Enable_ARA || JUCE_PLUGINHOST_ARA
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wpragma-pack")
+ #include <ARA_API/ARAVST3.h>
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+ #if ARA_SUPPORT_VERSION_1
+  #error "Unsupported ARA version - only ARA version 2 and onward are supported by the current implementation"
+ #endif
+
+ #if ! JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+  DEF_CLASS_IID (ARA::IPlugInEntryPoint)
+  DEF_CLASS_IID (ARA::IPlugInEntryPoint2)
+  DEF_CLASS_IID (ARA::IMainFactory)
+ #endif
+#endif // JucePlugin_Enable_ARA || JUCE_PLUGINHOST_ARA
+
+//==============================================================================
 #if JUCE_WINDOWS
  #include <windows.h>
 #endif

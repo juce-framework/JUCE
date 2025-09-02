@@ -68,9 +68,7 @@ endfunction()
 
 if((CMAKE_SYSTEM_NAME STREQUAL "Windows")
    OR (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-   OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD")
-   OR MSYS
-   OR MINGW)
+   OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
     # If you really need to override the detected arch for some reason,
     # you can configure the build with -DJUCE_TARGET_ARCHITECTURE=<custom arch>
     if(NOT DEFINED JUCE_TARGET_ARCHITECTURE)
@@ -654,12 +652,6 @@ function(juce_add_module module_path)
             endif()
 
             _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" windowsLibs)
-        elseif(MSYS OR MINGW)
-            if(module_name STREQUAL "juce_gui_basics")
-                target_compile_options(${module_name} INTERFACE "-Wa,-mbig-obj")
-            endif()
-
-            _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" mingwLibs)
         endif()
     endif()
 

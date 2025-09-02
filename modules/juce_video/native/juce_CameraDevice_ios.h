@@ -646,7 +646,7 @@ private:
 
                 printImageOutputDebugInfo (captureOutput);
 
-                if (auto* connection = findVideoConnection (captureOutput))
+                if (findVideoConnection (captureOutput) != nullptr)
                 {
                     auto* photoOutput = (AVCapturePhotoOutput*) captureOutput;
                     auto outputConnection = [photoOutput connectionWithMediaType: AVMediaTypeVideo];
@@ -1176,7 +1176,7 @@ struct CameraDevice::ViewerComponent  : public UIViewComponent
                        {
                            if ([keyPath isEqualToString: @"videoRotationAngleForHorizonLevelPreview"])
                            {
-                               if (auto* previewLayer = getPreviewLayer (self))
+                               if (getPreviewLayer (self) != nullptr)
                                {
                                    auto* viewer = static_cast<ViewerComponent*> (context);
                                    auto& session = viewer->cameraDevice.pimpl->captureSession;

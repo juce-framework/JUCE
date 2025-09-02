@@ -65,7 +65,7 @@ if(subdirs)
     set(WebView2_library "${WebView2_root_dir}/build/native/${WebView2_arch}/WebView2LoaderStatic.lib")
 elseif(NOT WebView2_FIND_QUIETLY)
     message(WARNING
-            "WebView2 wasn't found in the the local NuGet folder."
+            "WebView2 wasn't found in the local NuGet folder."
             "\n"
             "To install NuGet and the WebView2 package containing the statically linked library, "
             "open a PowerShell and issue the following commands"

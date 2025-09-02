@@ -237,8 +237,7 @@ struct ComponentHelpers
 
     static void releaseAllCachedImageResources (Component& c)
     {
-        if (auto* cached = c.getCachedComponentImage())
-            cached->releaseResources();
+        c.invalidateCachedImageResources();
 
         for (auto* child : c.childComponentList)
             releaseAllCachedImageResources (*child);
@@ -259,7 +258,7 @@ struct ComponentHelpers
         for (auto& ms : Desktop::getInstance().getMouseSources())
             if (auto* c = ms.getComponentUnderMouse())
                 if (modalWouldBlockComponent (*c, &modal))
-                    (c->*function) (ms, SH::screenPosToLocalPos (*c, ms.getScreenPosition()), Time::getCurrentTime());
+                    function (c, ms, SH::screenPosToLocalPos (*c, ms.getScreenPosition()), Time::getCurrentTime());
     }
 
     class ModalComponentManagerChangeNotifier

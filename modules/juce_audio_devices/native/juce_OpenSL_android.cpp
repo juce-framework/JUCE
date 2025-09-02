@@ -360,22 +360,17 @@ public:
             if (runner == nullptr)
                 return false;
 
-            const bool supportsJavaProxy = (getAndroidSDKVersion() >= 24);
+            // may return nullptr on some platforms - that's ok
+            config = SlRef<SLAndroidConfigurationItf_>::cast (runner);
 
-            if (supportsJavaProxy)
+            if (config != nullptr)
             {
-                // may return nullptr on some platforms - that's ok
-                config = SlRef<SLAndroidConfigurationItf_>::cast (runner);
+                jobject audioRoutingJni;
+                auto status = (*config)->AcquireJavaProxy (config, /*SL_ANDROID_JAVA_PROXY_ROUTING*/1,
+                                                           &audioRoutingJni);
 
-                if (config != nullptr)
-                {
-                    jobject audioRoutingJni;
-                    auto status = (*config)->AcquireJavaProxy (config, /*SL_ANDROID_JAVA_PROXY_ROUTING*/1,
-                                                               &audioRoutingJni);
-
-                    if (status == SL_RESULT_SUCCESS && audioRoutingJni != nullptr)
-                        javaProxy = GlobalRef (LocalRef<jobject> (getEnv()->NewLocalRef (audioRoutingJni)));
-                }
+                if (status == SL_RESULT_SUCCESS && audioRoutingJni != nullptr)
+                    javaProxy = GlobalRef (LocalRef<jobject> (getEnv()->NewLocalRef (audioRoutingJni)));
             }
 
             queue = SlRef<SLAndroidSimpleBufferQueueItf_>::cast (runner);
@@ -677,8 +672,7 @@ public:
                         return;
                     }
 
-                    const bool supportsUnderrunCount = (getAndroidSDKVersion() >= 24);
-                    getUnderrunCount = supportsUnderrunCount ? getEnv()->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : nullptr;
+                    getUnderrunCount = getEnv()->GetMethodID (AudioTrack, "getUnderrunCount", "()I");
                 }
             }
         }
@@ -1054,18 +1048,14 @@ OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (
                                                                                 int numBuffersToUse)
 {
     std::unique_ptr<OpenSLSession> retval;
-    auto sdkVersion = getAndroidSDKVersion();
 
     // SDK versions 21 and higher should natively support floating point...
-    if (sdkVersion >= 21)
-    {
-        retval.reset (new OpenSLSessionT<float> (numInputChannels, numOutputChannels, samleRateToUse,
-                                                 bufferSizeToUse, numBuffersToUse));
+    retval.reset (new OpenSLSessionT<float> (numInputChannels, numOutputChannels, samleRateToUse,
+                                             bufferSizeToUse, numBuffersToUse));
 
-        // ...however, some devices lie so re-try without floating point
-        if (retval != nullptr && (! retval->openedOK()))
-            retval = nullptr;
-    }
+    // ...however, some devices lie so re-try without floating point
+    if (retval != nullptr && (! retval->openedOK()))
+        retval = nullptr;
 
     if (retval == nullptr)
     {

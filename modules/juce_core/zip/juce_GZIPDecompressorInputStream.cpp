@@ -35,7 +35,7 @@
 namespace juce
 {
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4309 4305 4365 6385 6326 6340)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4244 4309 4305 4365 6385 6326 6340)
 
 namespace zlibNamespace
 {
@@ -49,18 +49,32 @@ namespace zlibNamespace
                                        "-Wredundant-decls",
                                        "-Wimplicit-fallthrough",
                                        "-Wzero-as-null-pointer-constant",
-                                       "-Wcomma")
+                                       "-Wcomma",
+                                       "-Wcast-align",
+                                       "-Wkeyword-macro",
+                                       "-Wmissing-prototypes")
+
+  #pragma push_macro ("register")
+  #define register
+
+  #pragma push_macro ("MIN")
+  #undef MIN
+
+  #pragma push_macro ("read")
+  #pragma push_macro ("write")
+  #pragma push_macro ("open")
+  #pragma push_macro ("close")
 
   #undef OS_CODE
   #undef fdopen
   #define ZLIB_INTERNAL
   #define NO_DUMMY_DECL
-  #include "zlib/zlib.h"
   #include "zlib/adler32.c"
   #include "zlib/compress.c"
   #undef DO1
   #undef DO8
   #include "zlib/crc32.c"
+  #undef N
   #include "zlib/deflate.c"
   #include "zlib/inffast.c"
   #undef PULLBYTE
@@ -70,6 +84,7 @@ namespace zlibNamespace
   #undef NEEDBITS
   #undef DROPBITS
   #undef BYTEBITS
+  #undef GZIP
   #include "zlib/inflate.c"
   #include "zlib/inftrees.c"
   #include "zlib/trees.c"
@@ -82,19 +97,26 @@ namespace zlibNamespace
   #undef Dad
   #undef Len
 
+  #pragma pop_macro ("close")
+  #pragma pop_macro ("open")
+  #pragma pop_macro ("write")
+  #pragma pop_macro ("read")
+  #pragma pop_macro ("MIN")
+  #pragma pop_macro ("register")
+
   JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #else
   #include JUCE_ZLIB_INCLUDE_PATH
-
-  #ifndef z_uInt
-   #ifdef uInt
-    #define z_uInt uInt
-   #else
-    #define z_uInt unsigned int
-   #endif
-  #endif
-
  #endif
+
+#ifndef z_uInt
+ #ifdef uInt
+  #define z_uInt uInt
+ #else
+  #define z_uInt unsigned int
+ #endif
+#endif
+
 }
 
 JUCE_END_IGNORE_WARNINGS_MSVC

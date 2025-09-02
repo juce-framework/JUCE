@@ -50,7 +50,7 @@ void JUCEDemos::registerDemo (std::function<Component*()> constructorCallback, c
 {
    #if JUCE_MAC
     auto f = File::getSpecialLocation (File::currentExecutableFile)
-                  .getParentDirectory().getParentDirectory().getChildFile ("Resources");
+                  .getParentDirectory().getSiblingFile ("Resources");
    #else
     auto f = findExamplesDirectoryFromExecutable (File::getSpecialLocation (File::currentApplicationFile));
    #endif
@@ -69,7 +69,7 @@ void JUCEDemos::registerDemo (std::function<Component*()> constructorCallback, c
 File JUCEDemos::findExamplesDirectoryFromExecutable (File exec)
 {
     int numTries = 15;
-    auto exampleDir = exec.getParentDirectory().getChildFile ("examples");
+    auto exampleDir = exec.getSiblingFile ("examples");
 
     if (exampleDir.exists())
         return exampleDir;

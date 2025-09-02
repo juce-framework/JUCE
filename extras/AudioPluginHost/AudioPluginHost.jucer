@@ -59,7 +59,7 @@
             extraCompilerFlags="/w44265 /w45038 /w44062">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="AudioPluginHost" debugInformationFormat="ProgramDatabase"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="AudioPluginHost"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../modules"/>
@@ -82,7 +82,7 @@
             extraCompilerFlags="/w44265 /w45038 /w44062">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="AudioPluginHost" debugInformationFormat="ProgramDatabase"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="AudioPluginHost"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../modules"/>
@@ -128,7 +128,7 @@
         <MODULEPATH id="juce_dsp" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_IPHONE>
-    <ANDROIDSTUDIO targetFolder="Builds/Android" androidMinimumSDK="23" androidInternetNeeded="1"
+    <ANDROIDSTUDIO targetFolder="Builds/Android" androidMinimumSDK="24" androidInternetNeeded="1"
                    microphonePermissionNeeded="1" smallIcon="c97aUr" bigIcon="c97aUr"
                    androidExtraAssetsFolder="../../examples/Assets" androidBluetoothScanNeeded="1"
                    androidBluetoothAdvertiseNeeded="1" androidBluetoothConnectNeeded="1">

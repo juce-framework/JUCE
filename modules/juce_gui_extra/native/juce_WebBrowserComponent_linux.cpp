@@ -60,8 +60,14 @@ public:
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_new_with_settings, juce_webkit_web_view_new_with_settings,
                                          (WebKitSettings*), GtkWidget*)
 
-    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_load_uri, juce_webkit_web_view_load_uri,
-                                         (WebKitWebView*, const gchar*), void)
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_load_request, juce_webkit_web_view_load_request,
+                                         (WebKitWebView*, const WebKitURIRequest*), void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_uri_request_new, juce_webkit_uri_request_new,
+                                         (const gchar*), WebKitURIRequest*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_uri_request_get_http_headers, juce_webkit_uri_request_get_http_headers,
+                                         (WebKitURIRequest*), SoupMessageHeaders*)
 
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_policy_decision_use, juce_webkit_policy_decision_use,
                                          (WebKitPolicyDecision*), void)
@@ -311,7 +317,9 @@ private:
                             makeSymbolBinding (juce_webkit_web_view_reload,                                      "webkit_web_view_reload"),
                             makeSymbolBinding (juce_webkit_web_view_stop_loading,                                "webkit_web_view_stop_loading"),
                             makeSymbolBinding (juce_webkit_uri_request_get_uri,                                  "webkit_uri_request_get_uri"),
-                            makeSymbolBinding (juce_webkit_web_view_load_uri,                                    "webkit_web_view_load_uri"),
+                            makeSymbolBinding (juce_webkit_web_view_load_request,                                "webkit_web_view_load_request"),
+                            makeSymbolBinding (juce_webkit_uri_request_new,                                      "webkit_uri_request_new"),
+                            makeSymbolBinding (juce_webkit_uri_request_get_http_headers,                         "webkit_uri_request_get_http_headers"),
                             makeSymbolBinding (juce_webkit_navigation_action_get_request,                        "webkit_navigation_action_get_request"),
                             makeSymbolBinding (juce_webkit_navigation_policy_decision_get_frame_name,            "webkit_navigation_policy_decision_get_frame_name"),
                             makeSymbolBinding (juce_webkit_navigation_policy_decision_get_navigation_action,     "webkit_navigation_policy_decision_get_navigation_action"),
@@ -425,7 +433,7 @@ class CommandReceiver
 public:
     struct Responder
     {
-        virtual ~Responder() {}
+        virtual ~Responder() = default;
 
         virtual void handleCommand (const String& cmd, const var& param) = 0;
         virtual void receiverHadError() = 0;
@@ -456,37 +464,24 @@ public:
     {
         for (;;)
         {
-            auto len = (receivingLength ? sizeof (size_t) : bufferLength.len);
+            char lengthBytes[sizeof (size_t)]{};
+            const auto numLengthBytes = readIntoBuffer (lengthBytes);
 
-            if (! receivingLength)
-                buffer.realloc (len);
-
-            auto* dst = (receivingLength ? bufferLength.data : buffer.getData());
-
-            auto actual = read (inChannel, &dst[pos], static_cast<size_t> (len - pos));
-
-            if (actual < 0)
-            {
-                if (errno == EINTR)
-                    continue;
-
+            if (numLengthBytes != std::size (lengthBytes))
                 break;
-            }
 
-            pos += static_cast<size_t> (actual);
+            const auto numBytesExpected = readUnaligned<size_t> (lengthBytes);
+            buffer.reserve (numBytesExpected + 1);
+            buffer.resize (numBytesExpected);
 
-            if (pos == len)
-            {
-                pos = 0;
+            if (readIntoBuffer (buffer) != numBytesExpected)
+                break;
 
-                if (! std::exchange (receivingLength, ! receivingLength))
-                {
-                    parseJSON (String (buffer.getData(), bufferLength.len));
+            buffer.push_back (0);
+            parseJSON (StringRef (buffer.data()));
 
-                    if (ret == ReturnAfterMessageReceived::yes)
-                        return;
-                }
-            }
+            if (ret == ReturnAfterMessageReceived::yes)
+                return;
         }
 
         if (errno != EAGAIN && errno != EWOULDBLOCK && responder != nullptr)
@@ -527,7 +522,7 @@ public:
     }
 
 private:
-    void parseJSON (const String& json)
+    void parseJSON (StringRef json)
     {
         auto object = JSON::fromString (json);
 
@@ -541,15 +536,37 @@ private:
         }
     }
 
+    /*  Try to fill the target buffer by reading from the input channel.
+        Returns the number of bytes that were successfully read.
+    */
+    size_t readIntoBuffer (Span<char> target) const
+    {
+        size_t pos = 0;
+
+        while (pos != target.size())
+        {
+            const auto bytesThisTime = read (inChannel, target.data() + pos, target.size() - pos);
+
+            if (bytesThisTime <= 0)
+            {
+                if (bytesThisTime != 0 && errno == EINTR)
+                    continue;
+
+                break;
+            }
+
+            pos += static_cast<size_t> (bytesThisTime);
+        }
+
+        return pos;
+    }
+
     static Identifier getCmdIdentifier()    { static Identifier Id ("cmd");    return Id; }
     static Identifier getParamIdentifier()  { static Identifier Id ("params"); return Id; }
 
+    std::vector<char> buffer;
     Responder* responder = nullptr;
     int inChannel = 0;
-    size_t pos = 0;
-    bool receivingLength = true;
-    union { char data [sizeof (size_t)]; size_t len; } bufferLength;
-    HeapBlock<char> buffer;
 };
 
 #define juce_g_signal_connect(instance, detailed_signal, c_handler, data) \
@@ -758,7 +775,7 @@ public:
         WebKitSymbols::getInstance()->juce_gtk_container_add ((GtkContainer*) container, webviewWidget);
         WebKitSymbols::getInstance()->juce_gtk_container_add ((GtkContainer*) plug,      container);
 
-        WebKitSymbols::getInstance()->juce_webkit_web_view_load_uri (webview, "about:blank");
+        goToURLWithHeaders ("about:blank", {});
 
         juce_g_signal_connect (webview, "decide-policy",
                                (GCallback) decidePolicyCallback, this);
@@ -800,12 +817,52 @@ public:
         wk.juce_g_free (s);
     }
 
+    void goToURLWithHeaders (StringRef url, Span<const var> headers)
+    {
+        auto& wk = *WebKitSymbols::getInstance();
+
+        auto* request = wk.juce_webkit_uri_request_new (url.text.getAddress());
+        const ScopeGuard requestScope { [&] { wk.juce_g_object_unref (request); } };
+
+        if (! headers.empty())
+        {
+            if (auto* soupHeaders = wk.juce_webkit_uri_request_get_http_headers (request))
+            {
+                for (const String item : headers)
+                {
+                    const auto key   = item.upToFirstOccurrenceOf (":", false, false);
+                    const auto value = item.fromFirstOccurrenceOf (":", false, false);
+
+                    if (key.isNotEmpty() && value.isNotEmpty())
+                        wk.juce_soup_message_headers_append (soupHeaders, key.toRawUTF8(), value.toRawUTF8());
+                    else
+                        jassertfalse; // malformed headers?
+                }
+            }
+        }
+
+        wk.juce_webkit_web_view_load_request (webview, request);
+    }
+
     void goToURL (const var& params)
     {
-        static Identifier urlIdentifier ("url");
-        auto url = params.getProperty (urlIdentifier, var()).toString();
+        static const Identifier urlIdentifier ("url");
+        const String url = params[urlIdentifier];
 
-        WebKitSymbols::getInstance()->juce_webkit_web_view_load_uri (webview, url.toRawUTF8());
+        if (url.isEmpty())
+            return;
+
+        static const Identifier headersIdentifier ("headers");
+        const auto* headers = params[headersIdentifier].getArray();
+
+        static const Identifier postDataIdentifier ("postData");
+        [[maybe_unused]] const auto* postData = params[postDataIdentifier].getBinaryData();
+        // post data is not currently sent
+        jassert (postData == nullptr);
+
+        goToURLWithHeaders (url,
+                            headers != nullptr ? Span { headers->getRawDataPointer(), (size_t) headers->size() }
+                                               : Span<const var>{});
     }
 
     void handleDecisionResponse (const var& params)
@@ -842,7 +899,7 @@ public:
                                                                            this);
     }
 
-    void handleResourceRequesteResponse (const var& params)
+    void handleResourceRequestedResponse (const var& params)
     {
         auto& wk = *WebKitSymbols::getInstance();
 
@@ -909,7 +966,7 @@ public:
         else if (cmd == "decision")                   handleDecisionResponse (params);
         else if (cmd == "init")                       initialisationData = FromVar::convert<InitialisationData> (params);
         else if (cmd == "evaluateJavascript")         evaluateJavascript (params);
-        else if (cmd == ResourceRequestResponse::key) handleResourceRequesteResponse (params);
+        else if (cmd == ResourceRequestResponse::key) handleResourceRequestedResponse (params);
     }
 
     void receiverHadError() override
@@ -1137,11 +1194,11 @@ private:
         // Using the non-deprecated webkit_javascript_result_get_js_value() functions seems easier
         // but returned values fail the JS_IS_VALUE() internal assertion. The example code from the
         // documentation doesn't seem to work either.
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+        JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
         WebKitJavascriptResultUniquePtr jsResult { wk.juce_webkit_web_view_run_javascript_finish (owner->webview,
                                                                                                      result,
                                                                                                      &error) };
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
         if (jsResult == nullptr)
         {

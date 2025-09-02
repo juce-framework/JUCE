@@ -48,10 +48,10 @@ void DropShadow::drawForImage (Graphics& g, const Image& srcImage) const
     if (! srcImage.isValid())
         return;
 
-    Image blurred;
-    ImageEffects::applySingleChannelBoxBlurEffect (radius,
-                                                   srcImage.convertedToFormat (Image::SingleChannel),
-                                                   blurred);
+    auto blurred = srcImage.convertedToFormat (Image::SingleChannel);
+    blurred.setBackupEnabled (false);
+
+    blurred.getPixelData()->applySingleChannelBoxBlurEffect (radius);
 
     g.setColour (colour);
     g.drawImageAt (blurred, offset.x, offset.y, true);
@@ -65,23 +65,24 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
             .expanded (radius + 1)
             .getIntersection (g.getClipBounds().expanded (radius + 1));
 
-    if (area.getWidth() > 2 && area.getHeight() > 2)
+    if (area.getWidth() <= 2 || area.getHeight() <= 2)
+        return;
+
+    const auto tempImageType = g.getInternalContext().getPreferredImageTypeForTemporaryImages();
+    Image pathImage { Image::SingleChannel, area.getWidth(), area.getHeight(), true, *tempImageType };
+    pathImage.setBackupEnabled (false);
+
     {
-        Image pathImage { Image::SingleChannel, area.getWidth(), area.getHeight(), true };
-
-        {
-            Graphics g2 (pathImage);
-            g2.setColour (Colours::white);
-            g2.fillPath (path, AffineTransform::translation ((float) (offset.x - area.getX()),
-                                                             (float) (offset.y - area.getY())));
-        }
-
-        Image blurred;
-        ImageEffects::applySingleChannelBoxBlurEffect (radius, pathImage, blurred);
-
-        g.setColour (colour);
-        g.drawImageAt (blurred, area.getX(), area.getY(), true);
+        Graphics g2 (pathImage);
+        g2.setColour (Colours::white);
+        g2.fillPath (path, AffineTransform::translation ((float) (offset.x - area.getX()),
+                                                         (float) (offset.y - area.getY())));
     }
+
+    pathImage.getPixelData()->applySingleChannelBoxBlurEffect (radius);
+
+    g.setColour (colour);
+    g.drawImageAt (pathImage, area.getX(), area.getY(), true);
 }
 
 static void drawShadowSection (Graphics& g, ColourGradient& cg, Rectangle<float> area,

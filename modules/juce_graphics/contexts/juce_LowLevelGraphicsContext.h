@@ -137,6 +137,16 @@ public:
                              Span<const Point<float>>,
                              const AffineTransform&) = 0;
 
+    /** Returns the optimal ImageType for creating temporary images in this GraphicsContext.
+
+        While this typically matches the GraphicsContext's native ImageType, certain scenarios
+        may benefit from using a different format for temporary operations (e.g., for
+        performance, memory efficiency, or specific rendering requirements).
+
+        @return A unique_ptr to the recommended ImageType instance for temporary images
+    */
+    virtual std::unique_ptr<ImageType> getPreferredImageTypeForTemporaryImages() const = 0;
+
     virtual void drawRoundedRectangle (const Rectangle<float>& r, float cornerSize, float lineThickness)
     {
         Path p;

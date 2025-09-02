@@ -35,14 +35,150 @@
 namespace juce
 {
 
-struct BitmapDataDetail
+namespace BitmapDataDetail
 {
-    BitmapDataDetail() = delete;
+    template <auto T>
+    using FormatConstant = std::integral_constant<decltype (T), T>;
 
-    static void convert (const Image::BitmapData& src, Image::BitmapData& dest)
+    using ARGB = FormatConstant<Image::PixelFormat::ARGB>;
+    using RGB  = FormatConstant<Image::PixelFormat::RGB>;
+    using A    = FormatConstant<Image::PixelFormat::SingleChannel>;
+
+    static Colour getPixelColour (const uint8* pixel, A)
     {
-        jassert (src.width == dest.width);
-        jassert (src.height == dest.height);
+        return Colour (*((const PixelAlpha*) pixel));
+    }
+
+    static Colour getPixelColour (const uint8* pixel, RGB)
+    {
+        return Colour (*((const PixelRGB*) pixel));
+    }
+
+    static Colour getPixelColour (const uint8* pixel, ARGB)
+    {
+        return Colour (((const PixelARGB*) pixel)->getUnpremultiplied());
+    }
+
+    static void setPixelColour (uint8* pixel, PixelARGB col, A)
+    {
+        ((PixelAlpha*) pixel)->set (col);
+    }
+
+    static void setPixelColour (uint8* pixel, PixelARGB col, RGB)
+    {
+        ((PixelRGB*) pixel)->set (col);
+    }
+
+    static void setPixelColour (uint8* pixel, PixelARGB col, ARGB)
+    {
+        ((PixelARGB*) pixel)->set (col);
+    }
+
+    using ConverterFn = void (*) (const Image::BitmapData& src, const Image::BitmapData& dst, int w, int h);
+
+    template <typename From, typename To>
+    static constexpr ConverterFn makeConverterFn (From, To)
+    {
+        struct GetPixel
+        {
+            explicit GetPixel (const Image::BitmapData& bd)
+                : data (bd.data),
+                  lineStride ((size_t) bd.lineStride),
+                  pixelStride ((size_t) bd.pixelStride) {}
+
+            uint8* operator() (int x, int y) const
+            {
+                return data + (size_t) y * (size_t) lineStride + (size_t) x * (size_t) pixelStride;
+            }
+
+            uint8* data;
+            size_t lineStride, pixelStride;
+        };
+
+        return [] (const Image::BitmapData& src, const Image::BitmapData& dst, int w, int h)
+        {
+            const GetPixel getSrc { src }, getDst { dst };
+
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    const auto srcColour = getPixelColour (getSrc (x, y), From{});
+                    setPixelColour (getDst (x, y), srcColour.getPixelARGB(), To{});
+                }
+            }
+        };
+    }
+
+    template <typename From, typename... To>
+    static constexpr auto makeConverterFns (From from, To... to)
+    {
+        return std::array<ConverterFn, sizeof... (To)> { makeConverterFn (from, to)... };
+    }
+
+    /** This structure holds a 2D array of function pointers.
+        The structure is indexed by source format and destination format, where the function
+        at that index will convert an entire BitmapData array between those two formats.
+
+        This approach is designed to avoid branching, especially switch statements, from
+        the inner loop of the conversion. At time of writing, compilers cannot automatically
+        vectorise loops containing switch statements. Therefore, it's often faster to move
+        switches or table lookups outside tight loops.
+
+        This is the old, slow approach:
+
+        @code
+            for (int y = 0; y < dest.height; ++y)
+                for (int x = 0; x < dest.width; ++x)
+                    dest.setPixelColour (x, y, src.getPixelColour (x, y));
+        @endcode
+
+        This is a faster way to write the same thing:
+
+        @code
+            if (const auto* converter = converterFnTable.getConverterFor (src.pixelFormat, dest.pixelFormat))
+                converter (src, dest, dest.width, dest.height);
+        @endcode
+    */
+    template <typename... Formats>
+    class ConverterFnTable
+    {
+    public:
+        constexpr ConverterFn getConverterFor (Image::PixelFormat src, Image::PixelFormat dst) const
+        {
+            const auto srcIndex = toIndex (src, Formats{}...);
+            const auto dstIndex = toIndex (dst, Formats{}...);
+
+            if (srcIndex >= sizeof... (Formats) || dstIndex >= sizeof... (Formats))
+                return nullptr;
+
+            return table[srcIndex][dstIndex];
+        }
+
+    private:
+        static size_t toIndex (Image::PixelFormat)
+        {
+            return 0;
+        }
+
+        template <typename Head, typename... Tail>
+        static size_t toIndex (Image::PixelFormat src, Head head, Tail... tail)
+        {
+            return src == head() ? 0 : 1 + toIndex (src, tail...);
+        }
+
+        std::array<std::array<ConverterFn, sizeof... (Formats)>, sizeof... (Formats)> table
+        {
+            makeConverterFns (Formats{}, Formats{}...)...
+        };
+    };
+
+    static bool convert (const Image::BitmapData& src, Image::BitmapData& dest)
+    {
+        if (std::tuple (src.width, src.height) != std::tuple (dest.width, dest.height))
+            return false;
+
+        static constexpr auto converterFnTable = ConverterFnTable<RGB, ARGB, A>{};
 
         if (src.pixelStride == dest.pixelStride && src.pixelFormat == dest.pixelFormat)
         {
@@ -51,28 +187,87 @@ struct BitmapDataDetail
         }
         else
         {
-            for (int y = 0; y < dest.height; ++y)
-                for (int x = 0; x < dest.width; ++x)
-                    dest.setPixelColour (x, y, src.getPixelColour (x, y));
+            if (auto* converter = converterFnTable.getConverterFor (src.pixelFormat, dest.pixelFormat))
+                converter (src, dest, dest.width, dest.height);
         }
+
+        return true;
     }
 
     static Image convert (const Image::BitmapData& src, const ImageType& type)
     {
         Image result (type.create (src.pixelFormat, src.width, src.height, false));
-
-        {
-            Image::BitmapData dest (result, Image::BitmapData::writeOnly);
-            BitmapDataDetail::convert (src, dest);
-        }
+        Image::BitmapData (result, Image::BitmapData::writeOnly).convertFrom (src);
 
         return result;
     }
-};
 
+    static void blurDataTriplets (uint8* d, int num, const int delta) noexcept
+    {
+        uint32 last = d[0];
+        d[0] = (uint8) ((d[0] + d[delta] + 1) / 3);
+        d += delta;
+
+        num -= 2;
+
+        do
+        {
+            const uint32 newLast = d[0];
+            d[0] = (uint8) ((last + d[0] + d[delta] + 1) / 3);
+            d += delta;
+            last = newLast;
+        }
+        while (--num > 0);
+
+        d[0] = (uint8) ((last + d[0] + 1) / 3);
+    }
+
+    static void blurSingleChannelImage (uint8* const data, const int w, const int h,
+                                        const int lineStride, const int repetitions) noexcept
+    {
+        jassert (w > 2 && h > 2);
+
+        for (int y = 0; y < h; ++y)
+            for (int i = repetitions; --i >= 0;)
+                blurDataTriplets (data + lineStride * y, w, 1);
+
+        for (int x = 0; x < w; ++x)
+            for (int i = repetitions; --i >= 0;)
+                blurDataTriplets (data + x, h, lineStride);
+    }
+
+    template <class PixelType>
+    struct PixelIterator
+    {
+        template <class PixelOperation>
+        static void iterate (const Image::BitmapData& data, const PixelOperation& pixelOp)
+        {
+            for (int y = 0; y < data.height; ++y)
+                for (int x = 0; x < data.width; ++x)
+                    pixelOp (*reinterpret_cast<PixelType*> (data.getPixelPointer (x, y)));
+        }
+    };
+
+    template <class PixelOperation>
+    static void performPixelOp (const Image::BitmapData& data, const PixelOperation& pixelOp)
+    {
+        switch (data.pixelFormat)
+        {
+            case Image::ARGB:           PixelIterator<PixelARGB> ::iterate (data, pixelOp); break;
+            case Image::RGB:            PixelIterator<PixelRGB>  ::iterate (data, pixelOp); break;
+            case Image::SingleChannel:  PixelIterator<PixelAlpha>::iterate (data, pixelOp); break;
+            case Image::UnknownFormat:
+            default:                    jassertfalse; break;
+        }
+    }
+}
+
+//==============================================================================
 class SubsectionPixelData : public ImagePixelData
 {
 public:
+    using Ptr = ReferenceCountedObjectPtr<SubsectionPixelData>;
+
     SubsectionPixelData (ImagePixelData::Ptr source, Rectangle<int> r)
         : ImagePixelData (source->pixelFormat, r.getWidth(), r.getHeight()),
           sourceImage (std::move (source)),
@@ -103,23 +298,87 @@ public:
     {
         jassert (getReferenceCount() > 0); // (This method can't be used on an unowned pointer, as it will end up self-deleting)
         auto type = createType();
-
-        Image newImage (type->create (pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB));
+        auto result = type->create (pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB);
 
         {
-            Graphics g (newImage);
+            Graphics g { Image { result } };
             g.drawImageAt (Image (*this), 0, 0);
         }
 
-        return *newImage.getPixelData();
+        return result;
     }
 
     std::unique_ptr<ImageType> createType() const override { return sourceImage->createType(); }
 
+    void applySingleChannelBoxBlurEffectInArea (Rectangle<int> b, int radius) override
+    {
+        sourceImage->applySingleChannelBoxBlurEffectInArea (getIntersection (b), radius);
+    }
+
+    void applyGaussianBlurEffectInArea (Rectangle<int> b, float radius) override
+    {
+        sourceImage->applyGaussianBlurEffectInArea (getIntersection (b), radius);
+    }
+
+    void multiplyAllAlphasInArea (Rectangle<int> b, float amount) override
+    {
+        sourceImage->multiplyAllAlphasInArea (getIntersection (b), amount);
+    }
+
+    void desaturateInArea (Rectangle<int> b) override
+    {
+        sourceImage->desaturateInArea (getIntersection (b));
+    }
+
     /* as we always hold a reference to image, don't double count */
     int getSharedCount() const noexcept override { return getReferenceCount() + sourceImage->getSharedCount() - 1; }
 
+    NativeExtensions getNativeExtensions() override
+    {
+        struct Wrapped
+        {
+            explicit Wrapped (Ptr selfIn)
+                : self (selfIn) {}
+
+           #if JUCE_WINDOWS
+            Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1> x) const
+            {
+                return self->sourceImage->getNativeExtensions().getPages (x);
+            }
+           #endif
+
+           #if JUCE_MAC || JUCE_IOS
+            CGContextRef getCGContext() const
+            {
+                return self->sourceImage->getNativeExtensions().getCGContext();
+            }
+
+            CFUniquePtr<CGImageRef> getCGImage (CGColorSpaceRef colourSpace) const
+            {
+                const auto& parentNative = self->sourceImage->getNativeExtensions();
+                const auto parentImage = parentNative.getCGImage (colourSpace);
+                return CFUniquePtr<CGImageRef> { CGImageCreateWithImageInRect (parentImage.get(),
+                                                                               makeCGRect (self->area + parentNative.getTopLeft())) };
+            }
+           #endif
+
+            Point<int> getTopLeft() const
+            {
+                return self->sourceImage->getNativeExtensions().getTopLeft() + self->area.getTopLeft();
+            }
+
+            Ptr self;
+        };
+
+        return NativeExtensions { Wrapped { this } };
+    }
+
 private:
+    Rectangle<int> getIntersection (Rectangle<int> b) const
+    {
+        return area.getIntersection (b + area.getTopLeft());
+    }
+
     friend class Image;
     const ImagePixelData::Ptr sourceImage;
     const Rectangle<int> area;
@@ -150,14 +409,150 @@ int ImagePixelData::getSharedCount() const noexcept
     return getReferenceCount();
 }
 
-void ImagePixelData::applyGaussianBlurEffect ([[maybe_unused]] float radius, Image& result)
+void ImagePixelData::applySingleChannelBoxBlurEffectInArea (Rectangle<int> bounds, int radius)
 {
-    result = {};
+    if (pixelFormat == Image::SingleChannel)
+    {
+        const Image::BitmapData bm (Image { this }, bounds, Image::BitmapData::readWrite);
+        BitmapDataDetail::blurSingleChannelImage (bm.data, bm.width, bm.height, bm.lineStride, 2 * radius);
+    }
 }
 
-void ImagePixelData::applySingleChannelBoxBlurEffect ([[maybe_unused]] int radius, juce::Image &result)
+void ImagePixelData::applyGaussianBlurEffectInArea (Rectangle<int> bounds, float radius)
 {
-    result = {};
+    ImageConvolutionKernel blurKernel (roundToInt (radius * 2.0f));
+    blurKernel.createGaussianBlur (radius);
+
+    Image target { this };
+    blurKernel.applyToImage (target, Image { this }.createCopy(), bounds);
+}
+
+void ImagePixelData::multiplyAllAlphasInArea (Rectangle<int> b, float amount)
+{
+    if (pixelFormat == Image::ARGB || pixelFormat == Image::SingleChannel)
+    {
+        const Image::BitmapData destData (Image { this }, b, Image::BitmapData::readWrite);
+        BitmapDataDetail::performPixelOp (destData, [&] (auto& p) { p.multiplyAlpha (amount); });
+    }
+}
+
+void ImagePixelData::desaturateInArea (Rectangle<int> b)
+{
+    if (pixelFormat == Image::ARGB || pixelFormat == Image::RGB)
+    {
+        const Image::BitmapData destData (Image { this }, b, Image::BitmapData::readWrite);
+        BitmapDataDetail::performPixelOp (destData, [] (auto& p) { p.desaturate(); });
+    }
+}
+
+auto ImagePixelData::getNativeExtensions() -> NativeExtensions
+{
+    struct Wrapped
+    {
+        Point<int> getTopLeft() const { return {}; }
+
+       #if JUCE_WINDOWS
+        Span<const Direct2DPixelDataPage> getPages (ComSmartPtr<ID2D1Device1>) const { return {}; }
+       #endif
+
+       #if JUCE_MAC || JUCE_IOS
+        CGContextRef getCGContext() const { return {}; }
+        CFUniquePtr<CGImageRef> getCGImage (CGColorSpaceRef) const { return {}; }
+       #endif
+    };
+
+    return NativeExtensions { Wrapped{} };
+}
+
+struct MoveImageParams
+{
+    Rectangle<int> src{};
+    Point<int> dst{};
+
+    MoveImageParams constrained (int width, int height) const
+    {
+        const auto intersectedSrc = src.getIntersection ({ width, height });
+        const auto srcOffset = intersectedSrc.getPosition() - src.getPosition();
+        const auto intersectedDst = intersectedSrc.withPosition (dst + srcOffset).getIntersection ({ width, height });
+
+        if (intersectedDst.isEmpty())
+            return {};
+
+        const MoveImageParams result { intersectedDst.withPosition (intersectedDst.getPosition() + src.getPosition() - dst),
+                                       intersectedDst.getPosition() };
+
+        // postconditions
+        jassert ((juce::Rectangle { width, height }.contains (result.src)));
+        jassert ((juce::Rectangle { width, height }.contains (result.src.withPosition (result.dst))));
+
+        return result;
+    }
+
+    bool operator== (const MoveImageParams& other) const
+    {
+        const auto tie = [] (auto& x) { return std::tuple (x.src, x.dst); };
+        return tie (*this) == tie (other);
+    }
+
+    bool operator!= (const MoveImageParams& other) const
+    {
+        return ! operator== (other);
+    }
+};
+
+static void moveValidatedImageSectionInSoftware (ImagePixelData& img,
+                                                 Point<int> destTopLeft,
+                                                 Rectangle<int> sourceRect)
+{
+    const auto minX = jmin (destTopLeft.x, sourceRect.getX());
+    const auto minY = jmin (destTopLeft.y, sourceRect.getY());
+
+    Image tempImage { &img };
+    const Image::BitmapData destData (tempImage,
+                                      minX,
+                                      minY,
+                                      sourceRect.getWidth(),
+                                      sourceRect.getHeight(),
+                                      Image::BitmapData::readWrite);
+
+    const auto dstPos = destTopLeft - Point { minX, minY };
+    const auto srcPos = sourceRect.getPosition() - Point { minX, minY };
+
+          auto* dst = destData.getPixelPointer (dstPos.x, dstPos.y);
+    const auto* src = destData.getPixelPointer (srcPos.x, srcPos.y);
+
+    const auto lineSize = (size_t) destData.pixelStride * (size_t) sourceRect.getWidth();
+
+    if (destTopLeft.y > sourceRect.getY())
+    {
+        for (auto h = sourceRect.getHeight(); --h >= 0;)
+        {
+            const auto offset = h * destData.lineStride;
+            memmove (dst + offset, src + offset, lineSize);
+        }
+    }
+    else if (dst != src)
+    {
+        for (auto h = sourceRect.getHeight(); --h >= 0;)
+        {
+            memmove (dst, src, lineSize);
+            dst += destData.lineStride;
+            src += destData.lineStride;
+        }
+    }
+}
+
+void ImagePixelData::moveImageSection (Point<int> destTopLeft, Rectangle<int> sourceRect)
+{
+    const auto constrained = MoveImageParams { sourceRect, destTopLeft }.constrained (width, height);
+
+    if (! constrained.src.isEmpty())
+        moveValidatedImageSection (constrained.dst, constrained.src);
+}
+
+void ImagePixelData::moveValidatedImageSection (Point<int> destTopLeft, Rectangle<int> sourceRect)
+{
+    moveValidatedImageSectionInSoftware (*this, destTopLeft, sourceRect);
 }
 
 //==============================================================================
@@ -208,7 +603,7 @@ public:
             sendDataChangeMessage();
     }
 
-    ImagePixelData::Ptr clone() override
+    Ptr clone() override
     {
         auto s = new SoftwarePixelData (pixelFormat, width, height, false);
         memcpy (s->imageData, imageData, (size_t) lineStride * (size_t) height);
@@ -373,7 +768,7 @@ Image Image::convertedToFormat (PixelFormat newFormat) const
     auto type = image->createType();
     Image newImage (type->create (newFormat, w, h, false));
 
-    if (newFormat == SingleChannel)
+    if (newImage.getFormat() == SingleChannel)
     {
         if (! hasAlphaChannel())
         {
@@ -381,31 +776,33 @@ Image Image::convertedToFormat (PixelFormat newFormat) const
         }
         else
         {
-            const BitmapData destData (newImage, 0, 0, w, h, BitmapData::writeOnly);
-            const BitmapData srcData (*this, 0, 0, w, h);
+            const BitmapData destData (newImage, { w, h }, BitmapData::writeOnly);
+            const BitmapData srcData (*this, { w, h }, BitmapData::readOnly);
 
             for (int y = 0; y < h; ++y)
             {
-                auto src = reinterpret_cast<const PixelARGB*> (srcData.getLinePointer (y));
-                auto dst = destData.getLinePointer (y);
-
                 for (int x = 0; x < w; ++x)
-                    dst[x] = src[x].getAlpha();
+                {
+                    auto* dstPtr = reinterpret_cast<PixelAlpha*> (destData.getPixelPointer (x, y));
+                    auto* srcPtr = reinterpret_cast<const PixelARGB*> (srcData.getPixelPointer (x, y));
+                    dstPtr->set (*srcPtr);
+                }
             }
         }
     }
-    else if (image->pixelFormat == SingleChannel && newFormat == Image::ARGB)
+    else if (image->pixelFormat == SingleChannel && newImage.getFormat() == ARGB)
     {
-        const BitmapData destData (newImage, 0, 0, w, h, BitmapData::writeOnly);
-        const BitmapData srcData (*this, 0, 0, w, h);
+        const BitmapData destData (newImage, { w, h }, BitmapData::writeOnly);
+        const BitmapData srcData (*this, { w, h }, BitmapData::readOnly);
 
         for (int y = 0; y < h; ++y)
         {
-            auto src = reinterpret_cast<const PixelAlpha*> (srcData.getLinePointer (y));
-            auto dst = reinterpret_cast<PixelARGB*> (destData.getLinePointer (y));
-
             for (int x = 0; x < w; ++x)
-                dst[x].set (src[x]);
+            {
+                auto* dstPtr = reinterpret_cast<PixelARGB*> (destData.getPixelPointer (x, y));
+                auto* srcPtr = reinterpret_cast<const PixelAlpha*> (srcData.getPixelPointer (x, y));
+                dstPtr->set (*srcPtr);
+            }
         }
     }
     else
@@ -426,14 +823,24 @@ NamedValueSet* Image::getProperties() const
 }
 
 //==============================================================================
-Image::BitmapData::BitmapData (Image& im, int x, int y, int w, int h, BitmapData::ReadWriteMode mode)
-    : width (w), height (h)
+Image::BitmapData::BitmapData (Image& im, int x, int y, int w, int h, ReadWriteMode mode)
+    : BitmapData (im, { x, y, w, h }, mode)
+{
+}
+
+Image::BitmapData::BitmapData (const Image& im, Rectangle<int> bounds, ReadWriteMode mode)
+    : width (bounds.getWidth()), height (bounds.getHeight())
 {
     // The BitmapData class must be given a valid image, and a valid rectangle within it!
     jassert (im.image != nullptr);
-    jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= im.getWidth() && y + h <= im.getHeight());
+    jassert (bounds.getX() >= 0);
+    jassert (bounds.getY() >= 0);
+    jassert (bounds.getWidth() > 0);
+    jassert (bounds.getHeight() > 0);
+    jassert (bounds.getRight() <= im.getWidth());
+    jassert (bounds.getBottom() <= im.getHeight());
 
-    im.image->initialiseBitmapData (*this, x, y, mode);
+    im.image->initialiseBitmapData (*this, bounds.getX(), bounds.getY(), mode);
     jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
 }
 
@@ -448,7 +855,7 @@ Image::BitmapData::BitmapData (const Image& im, int x, int y, int w, int h)
     jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
 }
 
-Image::BitmapData::BitmapData (const Image& im, BitmapData::ReadWriteMode mode)
+Image::BitmapData::BitmapData (const Image& im, ReadWriteMode mode)
     : width (im.getWidth()),
       height (im.getHeight())
 {
@@ -459,23 +866,17 @@ Image::BitmapData::BitmapData (const Image& im, BitmapData::ReadWriteMode mode)
     jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
 }
 
-Image::BitmapData::~BitmapData()
-{
-}
-
 Colour Image::BitmapData::getPixelColour (int x, int y) const noexcept
 {
-    jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
-
-    auto pixel = getPixelPointer (x, y);
+    auto* pixel = getPixelPointer (x, y);
 
     switch (pixelFormat)
     {
-        case Image::ARGB:           return Colour ( ((const PixelARGB*)  pixel)->getUnpremultiplied());
-        case Image::RGB:            return Colour (*((const PixelRGB*)   pixel));
-        case Image::SingleChannel:  return Colour (*((const PixelAlpha*) pixel));
-        case Image::UnknownFormat:
-        default:                    jassertfalse; break;
+        case ARGB:           return BitmapDataDetail::getPixelColour (pixel, BitmapDataDetail::ARGB{});
+        case RGB:            return BitmapDataDetail::getPixelColour (pixel, BitmapDataDetail::RGB{});
+        case SingleChannel:  return BitmapDataDetail::getPixelColour (pixel, BitmapDataDetail::A{});
+        case UnknownFormat:
+        default:             jassertfalse; break;
     }
 
     return {};
@@ -483,19 +884,36 @@ Colour Image::BitmapData::getPixelColour (int x, int y) const noexcept
 
 void Image::BitmapData::setPixelColour (int x, int y, Colour colour) const noexcept
 {
-    jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
-
-    auto pixel = getPixelPointer (x, y);
+    auto* pixel = getPixelPointer (x, y);
     auto col = colour.getPixelARGB();
 
     switch (pixelFormat)
     {
-        case Image::ARGB:           ((PixelARGB*)  pixel)->set (col); break;
-        case Image::RGB:            ((PixelRGB*)   pixel)->set (col); break;
-        case Image::SingleChannel:  ((PixelAlpha*) pixel)->set (col); break;
-        case Image::UnknownFormat:
-        default:                    jassertfalse; break;
+        case ARGB:           return BitmapDataDetail::setPixelColour (pixel, col, BitmapDataDetail::ARGB{});
+        case RGB:            return BitmapDataDetail::setPixelColour (pixel, col, BitmapDataDetail::RGB{});
+        case SingleChannel:  return BitmapDataDetail::setPixelColour (pixel, col, BitmapDataDetail::A{});
+        case UnknownFormat:
+        default:             jassertfalse; break;
     }
+}
+
+bool Image::BitmapData::convertFrom (const BitmapData& source)
+{
+    return BitmapDataDetail::convert (source, *this);
+}
+
+bool Image::setBackupEnabled (bool enabled)
+{
+    if (auto ptr = image)
+    {
+        if (auto* ext = ptr->getBackupExtensions())
+        {
+            ext->setBackupEnabled (enabled);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 //==============================================================================
@@ -544,73 +962,16 @@ void Image::multiplyAlphaAt (int x, int y, float multiplier)
     }
 }
 
-template <class PixelType>
-struct PixelIterator
-{
-    template <class PixelOperation>
-    static void iterate (const Image::BitmapData& data, const PixelOperation& pixelOp)
-    {
-        for (int y = 0; y < data.height; ++y)
-        {
-            auto p = data.getLinePointer (y);
-
-            for (int x = 0; x < data.width; ++x)
-            {
-                pixelOp (*reinterpret_cast<PixelType*> (p));
-                p += data.pixelStride;
-            }
-        }
-    }
-};
-
-template <class PixelOperation>
-static void performPixelOp (const Image::BitmapData& data, const PixelOperation& pixelOp)
-{
-    switch (data.pixelFormat)
-    {
-        case Image::ARGB:           PixelIterator<PixelARGB> ::iterate (data, pixelOp); break;
-        case Image::RGB:            PixelIterator<PixelRGB>  ::iterate (data, pixelOp); break;
-        case Image::SingleChannel:  PixelIterator<PixelAlpha>::iterate (data, pixelOp); break;
-        case Image::UnknownFormat:
-        default:                    jassertfalse; break;
-    }
-}
-
-struct AlphaMultiplyOp
-{
-    float alpha;
-
-    template <class PixelType>
-    void operator() (PixelType& pixel) const
-    {
-        pixel.multiplyAlpha (alpha);
-    }
-};
-
 void Image::multiplyAllAlphas (float amountToMultiplyBy)
 {
-    jassert (hasAlphaChannel());
-
-    const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), BitmapData::readWrite);
-    performPixelOp (destData, AlphaMultiplyOp { amountToMultiplyBy });
+    if (auto ptr = image)
+        ptr->multiplyAllAlphas (amountToMultiplyBy);
 }
-
-struct DesaturateOp
-{
-    template <class PixelType>
-    void operator() (PixelType& pixel) const
-    {
-        pixel.desaturate();
-    }
-};
 
 void Image::desaturate()
 {
-    if (isARGB() || isRGB())
-    {
-        const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), BitmapData::readWrite);
-        performPixelOp (destData, DesaturateOp());
-    }
+    if (auto ptr = image)
+        ptr->desaturate();
 }
 
 void Image::createSolidAreaMask (RectangleList<int>& result, float alphaThreshold) const
@@ -663,191 +1024,49 @@ void Image::createSolidAreaMask (RectangleList<int>& result, float alphaThreshol
     }
 }
 
-void Image::moveImageSection (int dx, int dy,
-                              int sx, int sy,
-                              int w, int h)
+void Image::moveImageSection (int dx, int dy, int sx, int sy, int w, int h)
 {
-    if (dx < 0)
-    {
-        w += dx;
-        sx -= dx;
-        dx = 0;
-    }
-
-    if (dy < 0)
-    {
-        h += dy;
-        sy -= dy;
-        dy = 0;
-    }
-
-    if (sx < 0)
-    {
-        w += sx;
-        dx -= sx;
-        sx = 0;
-    }
-
-    if (sy < 0)
-    {
-        h += sy;
-        dy -= sy;
-        sy = 0;
-    }
-
-    const int minX = jmin (dx, sx);
-    const int minY = jmin (dy, sy);
-
-    w = jmin (w, getWidth()  - jmax (sx, dx));
-    h = jmin (h, getHeight() - jmax (sy, dy));
-
-    if (w > 0 && h > 0)
-    {
-        auto maxX = jmax (dx, sx) + w;
-        auto maxY = jmax (dy, sy) + h;
-
-        const BitmapData destData (*this, minX, minY, maxX - minX, maxY - minY, BitmapData::readWrite);
-
-        auto dst = destData.getPixelPointer (dx - minX, dy - minY);
-        auto src = destData.getPixelPointer (sx - minX, sy - minY);
-
-        auto lineSize = (size_t) destData.pixelStride * (size_t) w;
-
-        if (dy > sy)
-        {
-            while (--h >= 0)
-            {
-                const int offset = h * destData.lineStride;
-                memmove (dst + offset, src + offset, lineSize);
-            }
-        }
-        else if (dst != src)
-        {
-            while (--h >= 0)
-            {
-                memmove (dst, src, lineSize);
-                dst += destData.lineStride;
-                src += destData.lineStride;
-            }
-        }
-    }
-}
-
-void ImageEffects::applyGaussianBlurEffect (float radius, const Image& input, Image& result)
-{
-    auto* image = input.getPixelData();
-
-    if (image == nullptr)
-    {
-        result = {};
-        return;
-    }
-
-    auto copy = result;
-    image->applyGaussianBlurEffect (radius, copy);
-
-    if (copy.isValid())
-    {
-        result = std::move (copy);
-        return;
-    }
-
-    const auto tie = [] (const auto& x) { return std::tuple (x.getFormat(), x.getWidth(), x.getHeight()); };
-
-    if (tie (input) != tie (result))
-        result = Image { input.getFormat(), input.getWidth(), input.getHeight(), false };
-
-    ImageConvolutionKernel blurKernel (roundToInt (radius * 2.0f));
-
-    blurKernel.createGaussianBlur (radius);
-
-    blurKernel.applyToImage (result, input, result.getBounds());
-}
-
-static void blurDataTriplets (uint8* d, int num, const int delta) noexcept
-{
-    uint32 last = d[0];
-    d[0] = (uint8) ((d[0] + d[delta] + 1) / 3);
-    d += delta;
-
-    num -= 2;
-
-    do
-    {
-        const uint32 newLast = d[0];
-        d[0] = (uint8) ((last + d[0] + d[delta] + 1) / 3);
-        d += delta;
-        last = newLast;
-    }
-    while (--num > 0);
-
-    d[0] = (uint8) ((last + d[0] + 1) / 3);
-}
-
-static void blurSingleChannelImage (uint8* const data, const int width, const int height,
-                                    const int lineStride, const int repetitions) noexcept
-{
-    jassert (width > 2 && height > 2);
-
-    for (int y = 0; y < height; ++y)
-        for (int i = repetitions; --i >= 0;)
-            blurDataTriplets (data + lineStride * y, width, 1);
-
-    for (int x = 0; x < width; ++x)
-        for (int i = repetitions; --i >= 0;)
-            blurDataTriplets (data + x, height, lineStride);
-}
-
-static void blurSingleChannelImage (Image& image, int radius)
-{
-    const Image::BitmapData bm (image, Image::BitmapData::readWrite);
-    blurSingleChannelImage (bm.data, bm.width, bm.height, bm.lineStride, 2 * radius);
-}
-
-void ImageEffects::applySingleChannelBoxBlurEffect (int radius, const Image& input, Image& result)
-{
-    auto* image = input.getPixelData();
-
-    if (image == nullptr)
-    {
-        result = {};
-        return;
-    }
-
-    auto copy = result;
-    image->applySingleChannelBoxBlurEffect (radius, copy);
-
-    if (copy.isValid())
-    {
-        result = std::move (copy);
-        return;
-    }
-
-    const auto inputConfig = std::tuple (Image::SingleChannel, input.getWidth(), input.getHeight());
-    const auto outputConfig = std::tuple (result.getFormat(), result.getWidth(), result.getHeight());
-
-    if (inputConfig != outputConfig)
-        result = Image { Image::SingleChannel, input.getWidth(), input.getHeight(), false };
-
-    {
-        Image::BitmapData source { input, Image::BitmapData::readOnly };
-        Image::BitmapData dest { result, Image::BitmapData::writeOnly };
-        BitmapDataDetail::convert (source, dest);
-    }
-
-    blurSingleChannelImage (result, radius);
+    if (image != nullptr)
+        image->moveImageSection ({ dx, dy }, { sx, sy, w, h });
 }
 
 //==============================================================================
 #if JUCE_ALLOW_STATIC_NULL_VARIABLES
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 const Image Image::null;
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
+
+#endif
+
+#if JUCE_UNIT_TESTS
+
+class ImagePixelDataClippingTests : public UnitTest
+{
+public:
+    ImagePixelDataClippingTests()
+        : UnitTest ("ImagePixelDataClippingTests", UnitTestCategories::graphics)
+    {
+    }
+
+    void runTest() override
+    {
+        beginTest ("MoveImageParams constrains arguments appropriately");
+        {
+            expect ((MoveImageParams { { 300, 400 }, { 5, 5 } }.constrained (350, 450) == MoveImageParams { { 300, 400 }, { 5, 5 } }));
+            expect ((MoveImageParams { { 350, 450 }, { 5, 5 } }.constrained (300, 400) == MoveImageParams { { 295, 395 }, { 5, 5 } }));
+            expect ((MoveImageParams { { -5, -10, 20, 30 }, { 0, 0 } }.constrained (100, 100) == MoveImageParams { { 15, 20 }, { 5, 10 } }));
+            expect ((MoveImageParams { { 1, 2, 10, 10 }, { -5, -5 } }.constrained (20, 20) == MoveImageParams { { 6, 7, 5, 5 }, { 0, 0 } }));
+            expect ((MoveImageParams { { 40, 50, 100, 100 }, { 10, 10 } }.constrained (100, 100) == MoveImageParams { { 40, 50, 60, 50 }, { 10, 10 } }));
+            expect ((MoveImageParams { { 20, 20, 10, 10 }, { -20, -20 } }.constrained (20, 20) == MoveImageParams { { 0, 0, 0, 0 }, { 0, 0 } }));
+            expect ((MoveImageParams { { -20, -30, 100, 100 }, { -30, -40 } }.constrained (100, 100) == MoveImageParams { { 10, 10, 70, 60 }, { 0, 0 } }));
+        }
+    }
+};
+
+static ImagePixelDataClippingTests imagePixelDataClippingTests;
 
 #endif
 

@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce::universal_midi_packets
 {
 
@@ -160,6 +159,4 @@ struct U32ToUMPHandler : public U32InputHandler
 };
 
 } // namespace juce::universal_midi_packets
-
-
-#endif
+/** @endcond */

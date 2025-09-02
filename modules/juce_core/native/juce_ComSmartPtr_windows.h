@@ -116,6 +116,8 @@ public:
     ComSmartPtr& operator= (const ComSmartPtr<U>& newP) { ComSmartPtr copy { newP }; std::swap (copy.p, p); return *this; }
     ComSmartPtr& operator= (const ComSmartPtr&    newP) { ComSmartPtr copy { newP }; std::swap (copy.p, p); return *this; }
 
+    ComClass* get() const noexcept { return p; }
+
     operator ComClass*() const noexcept     { return p; }
     ComClass& operator*() const noexcept    { return *p; }
     ComClass* operator->() const noexcept   { return p; }

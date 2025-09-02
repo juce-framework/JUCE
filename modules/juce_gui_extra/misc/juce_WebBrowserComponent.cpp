@@ -142,7 +142,7 @@ if (
     }
 
     removeEventListener([eventId, id]) {
-      this.listeners.removeEventListener(eventId, id);
+      this.listeners.removeEventListener([eventId, id]);
     }
 
     emitEvent(eventId, object) {

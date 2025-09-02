@@ -251,12 +251,12 @@ public:
 
     //==============================================================================
 
-  #ifndef DOXYGEN
+    /** @cond */
     // @internal
     static AudioProcessor::WrapperType jucePlugInClientCurrentWrapperType;
     static std::function<bool (AudioProcessor&)> jucePlugInIsRunningInAudioSuiteFn;
     static String hostIdReportedByWrapper;
-  #endif
+    /** @endcond */
 
 private:
     static HostType getHostType();

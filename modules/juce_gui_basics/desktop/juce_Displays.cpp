@@ -383,14 +383,14 @@ void Displays::updateToLogical()
     }
 }
 
-#ifndef DOXYGEN
- // explicit template instantiations
- template Point<int>   Displays::physicalToLogical (Point<int>,   const Display*) const noexcept;
- template Point<float> Displays::physicalToLogical (Point<float>, const Display*) const noexcept;
+/** @cond */
+// explicit template instantiations
+template Point<int>   Displays::physicalToLogical (Point<int>,   const Display*) const noexcept;
+template Point<float> Displays::physicalToLogical (Point<float>, const Display*) const noexcept;
 
- template Point<int>   Displays::logicalToPhysical (Point<int>,   const Display*) const noexcept;
- template Point<float> Displays::logicalToPhysical (Point<float>, const Display*) const noexcept;
-#endif
+template Point<int>   Displays::logicalToPhysical (Point<int>,   const Display*) const noexcept;
+template Point<float> Displays::logicalToPhysical (Point<float>, const Display*) const noexcept;
+/** @endcond */
 
 //==============================================================================
 // Deprecated methods

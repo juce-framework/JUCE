@@ -106,14 +106,21 @@ public:
 
     uint64_t getFrameId() const override { return frame; }
 
+    std::unique_ptr<ImageType> getPreferredImageTypeForTemporaryImages() const override
+    {
+        return std::make_unique<NativeImageType>();
+    }
+
     Direct2DMetrics::Ptr metrics;
 
-    //==============================================================================
-    // Min & max frame sizes; same as Direct3D texture size limits
-    static int constexpr minFrameSize = 1;
-    static int constexpr maxFrameSize = 16384;
-
 protected:
+    template <typename Shape, typename Fn>
+    void paintPrimitive (const Shape& shape, Fn&& primitiveOp);
+
+    static Line<float> offsetShape (Line<float> a, Point<float> b);
+    static Rectangle<float> offsetShape (Rectangle<float> a, Point<float> b);
+    static RectangleList<float> offsetShape (RectangleList<float> a, Point<float> b);
+
     struct SavedState;
     SavedState* currentState = nullptr;
 
@@ -122,29 +129,46 @@ protected:
     public:
         void clipTo (Rectangle<float> i)
         {
-            list.clipTo (i);
+            if (std::exchange (clipApplied, true))
+                list.clipTo (i);
+            else
+                list = i;
         }
 
         template <typename Numeric>
         void clipTo (const RectangleList<Numeric>& other)
         {
-            list.clipTo (other);
+            if (std::exchange (clipApplied, true))
+            {
+                list.clipTo (other);
+            }
+            else
+            {
+                list.clear();
+
+                for (const auto& r : other)
+                    list.add (r.toFloat());
+            }
         }
 
         void subtract (Rectangle<float> i)
         {
             list.subtract (i);
+            clipApplied = true;
         }
 
         RectangleList<float> getList() const { return list; }
+        bool isClipApplied() const { return clipApplied; }
 
         void reset (Rectangle<float> maxBounds)
         {
             list = maxBounds;
+            clipApplied = false;
         }
 
     private:
         RectangleList<float> list;
+        bool clipApplied = false;
     };
 
     PendingClipList pendingClipList;

@@ -274,10 +274,38 @@ public:
 
         memset (&vstEffect, 0, sizeof (vstEffect));
         vstEffect.magic = 0x56737450 /* 'VstP' */;
-        vstEffect.dispatcher = (Vst2::AEffectDispatcherProc) dispatcherCB;
+        vstEffect.dispatcher = [] (Vst2::AEffect* vstInterface,
+                                   Vst2::VstInt32 opCode,
+                                   Vst2::VstInt32 index,
+                                   Vst2::VstIntPtr value,
+                                   void* ptr,
+                                   float opt) -> Vst2::VstIntPtr
+        {
+            auto* wrapper = getWrapper (vstInterface);
+            VstOpCodeArguments args = { index, value, ptr, opt };
+
+            if (opCode == Vst2::effClose)
+            {
+                wrapper->dispatcher (opCode, args);
+                delete wrapper;
+                return 1;
+            }
+
+            return wrapper->dispatcher (opCode, args);
+        };
+
         vstEffect.process = nullptr;
-        vstEffect.setParameter = (Vst2::AEffectSetParameterProc) setParameterCB;
-        vstEffect.getParameter = (Vst2::AEffectGetParameterProc) getParameterCB;
+
+        vstEffect.setParameter = [] (Vst2::AEffect* vstInterface, Vst2::VstInt32 index, float value)
+        {
+            getWrapper (vstInterface)->setParameter (index, value);
+        };
+
+        vstEffect.getParameter = [] (Vst2::AEffect* vstInterface, Vst2::VstInt32 index) -> float
+        {
+            return getWrapper (vstInterface)->getParameter (index);
+        };
+
         vstEffect.numPrograms = jmax (1, processor->getNumPrograms());
         vstEffect.numParams = juceParameters.getNumParameters();
         vstEffect.numInputs = maxNumInChannels;
@@ -292,8 +320,21 @@ public:
         vstEffect.version = JucePlugin_VersionCode;
        #endif
 
-        vstEffect.processReplacing = (Vst2::AEffectProcessProc) processReplacingCB;
-        vstEffect.processDoubleReplacing = (Vst2::AEffectProcessDoubleProc) processDoubleReplacingCB;
+        vstEffect.processReplacing = [] (Vst2::AEffect* vstInterface,
+                                         float** inputs,
+                                         float** outputs,
+                                         Vst2::VstInt32 sampleFrames)
+        {
+            getWrapper (vstInterface)->processReplacing (inputs, outputs, sampleFrames);
+        };
+
+        vstEffect.processDoubleReplacing = [] (Vst2::AEffect* vstInterface,
+                                               double** inputs,
+                                               double** outputs,
+                                               Vst2::VstInt32 sampleFrames)
+        {
+            getWrapper (vstInterface)->processDoubleReplacing (inputs, outputs, sampleFrames);
+        };
 
         vstEffect.flags |= Vst2::effFlagsHasEditor;
 
@@ -505,20 +546,10 @@ public:
         internalProcessReplacing (inputs, outputs, sampleFrames, floatTempBuffers);
     }
 
-    static void processReplacingCB (Vst2::AEffect* vstInterface, float** inputs, float** outputs, int32 sampleFrames)
-    {
-        getWrapper (vstInterface)->processReplacing (inputs, outputs, sampleFrames);
-    }
-
     void processDoubleReplacing (double** inputs, double** outputs, int32 sampleFrames)
     {
         jassert (processor->isUsingDoublePrecision());
         internalProcessReplacing (inputs, outputs, sampleFrames, doubleTempBuffers);
-    }
-
-    static void processDoubleReplacingCB (Vst2::AEffect* vstInterface, double** inputs, double** outputs, int32 sampleFrames)
-    {
-        getWrapper (vstInterface)->processDoubleReplacing (inputs, outputs, sampleFrames);
     }
 
     //==============================================================================
@@ -678,20 +709,10 @@ public:
         return 0.0f;
     }
 
-    static float getParameterCB (Vst2::AEffect* vstInterface, int32 index)
-    {
-        return getWrapper (vstInterface)->getParameter (index);
-    }
-
     void setParameter (int32 index, float value)
     {
         if (auto* param = juceParameters.getParamForIndex (index))
             setValueAndNotifyIfChanged (*param, value);
-    }
-
-    static void setParameterCB (Vst2::AEffect* vstInterface, int32 index, float value)
-    {
-        getWrapper (vstInterface)->setParameter (index, value);
     }
 
     void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override
@@ -897,25 +918,10 @@ public:
             case Vst2::effSetProcessPrecision:      return handleSetSampleFloatType (args);
             case Vst2::effGetNumMidiInputChannels:  return handleGetNumMidiInputChannels();
             case Vst2::effGetNumMidiOutputChannels: return handleGetNumMidiOutputChannels();
+            case Vst2::effGetMidiKeyName:           return handleGetMidiKeyName (args);
             case Vst2::effEditIdle:                 return handleEditIdle();
             default:                                return 0;
         }
-    }
-
-    static pointer_sized_int dispatcherCB (Vst2::AEffect* vstInterface, int32 opCode, int32 index,
-                                           pointer_sized_int value, void* ptr, float opt)
-    {
-        auto* wrapper = getWrapper (vstInterface);
-        VstOpCodeArguments args = { index, value, ptr, opt };
-
-        if (opCode == Vst2::effClose)
-        {
-            wrapper->dispatcher (opCode, args);
-            delete wrapper;
-            return 1;
-        }
-
-        return wrapper->dispatcher (opCode, args);
     }
 
     //==============================================================================
@@ -1793,10 +1799,33 @@ private:
         return convertHexVersionToDecimal (JucePlugin_VersionCode);
     }
 
+    static std::optional<pointer_sized_int> handleVST3Compatibility ([[maybe_unused]] VstOpCodeArguments args)
+    {
+       #if ! JUCE_VST3_CAN_REPLACE_VST2
+        return {};
+       #else
+        if (args.index != (int32) ByteOrder::bigEndianInt ("stCA")
+            && args.index != (int32) ByteOrder::bigEndianInt ("stCa"))
+            return {};
+
+        if (args.value != (int32) ByteOrder::bigEndianInt ("FUID"))
+            return {};
+
+        if (args.ptr == nullptr)
+            return 0;
+
+        const auto uid = VST3Interface::vst2PluginId (JucePlugin_VSTUniqueID,
+                                                      JucePlugin_Name,
+                                                      VST3Interface::Type::component);
+        std::copy (uid.begin(), uid.end(), reinterpret_cast<std::byte*> (args.ptr));
+        return 1;
+       #endif
+    }
+
     pointer_sized_int handleManufacturerSpecific (VstOpCodeArguments args)
     {
-        if (detail::PluginUtilities::handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt))
-            return 1;
+        if (const auto result = handleVST3Compatibility (args))
+            return *result;
 
         if (args.index == (int32) ByteOrder::bigEndianInt ("PreS")
              && args.value == (int32) ByteOrder::bigEndianInt ("AeCs"))
@@ -2015,6 +2044,22 @@ private:
            #else
             return 16;
            #endif
+        }
+
+        return 0;
+    }
+
+    pointer_sized_int handleGetMidiKeyName (VstOpCodeArguments args)
+    {
+        if (processor != nullptr)
+        {
+            auto keyName = (Vst2::MidiKeyName*) args.ptr;
+
+            if (auto name = processor->getNameForMidiNoteNumber (keyName->thisKeyNumber, args.index))
+            {
+                name->copyToUTF8 (keyName->keyName, Vst2::kVstMaxNameLen);
+                return 1;
+            }
         }
 
         return 0;

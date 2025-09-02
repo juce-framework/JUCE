@@ -36,6 +36,11 @@ namespace juce
 {
 
 //==============================================================================
+FocusTraverser::FocusTraverser (SkipDisabledComponents skipDisabledComponentsIn)
+    : skipDisabledComponents (skipDisabledComponentsIn)
+{
+}
+
 Component* FocusTraverser::getNextComponent (Component* current)
 {
     jassert (current != nullptr);
@@ -43,7 +48,8 @@ Component* FocusTraverser::getNextComponent (Component* current)
     return detail::FocusHelpers::navigateFocus (current,
                                                 current->findFocusContainer(),
                                                 detail::FocusHelpers::NavigationDirection::forwards,
-                                                &Component::isFocusContainer);
+                                                &Component::isFocusContainer,
+                                                skipDisabledComponents);
 }
 
 Component* FocusTraverser::getPreviousComponent (Component* current)
@@ -53,7 +59,8 @@ Component* FocusTraverser::getPreviousComponent (Component* current)
     return detail::FocusHelpers::navigateFocus (current,
                                                 current->findFocusContainer(),
                                                 detail::FocusHelpers::NavigationDirection::backwards,
-                                                &Component::isFocusContainer);
+                                                &Component::isFocusContainer,
+                                                skipDisabledComponents);
 }
 
 Component* FocusTraverser::getDefaultComponent (Component* parentComponent)
@@ -61,9 +68,11 @@ Component* FocusTraverser::getDefaultComponent (Component* parentComponent)
     if (parentComponent != nullptr)
     {
         std::vector<Component*> components;
+
         detail::FocusHelpers::findAllComponents (parentComponent,
                                                  components,
-                                                 &Component::isFocusContainer);
+                                                 &Component::isFocusContainer,
+                                                 skipDisabledComponents);
 
         if (! components.empty())
             return components.front();
@@ -77,7 +86,8 @@ std::vector<Component*> FocusTraverser::getAllComponents (Component* parentCompo
     std::vector<Component*> components;
     detail::FocusHelpers::findAllComponents (parentComponent,
                                              components,
-                                             &Component::isFocusContainer);
+                                             &Component::isFocusContainer,
+                                             skipDisabledComponents);
 
     return components;
 }
@@ -116,14 +126,23 @@ struct FocusTraverserTests final : public UnitTest
                                 [] (const Component* c1, const Component& c2) { return c1 == &c2; }));
         }
 
-        beginTest ("Disabled components are ignored");
+        beginTest ("Disabled components are not ignored by default");
         {
-            checkIgnored ([] (Component& c) { c.setEnabled (false); });
+            TestComponent parent;
+            parent.children[2].setEnabled (false);
+            parent.children[5].setEnabled (false);
+            expect (traverser.getAllComponents (&parent).size() == parent.children.size());
+        }
+
+        beginTest ("Disabled components can be ignored");
+        {
+            FocusTraverser ignoringTraverser { FocusTraverser::SkipDisabledComponents::yes };
+            checkIgnored ([] (Component& c) { c.setEnabled (false); }, ignoringTraverser);
         }
 
         beginTest ("Invisible components are ignored");
         {
-            checkIgnored ([] (Component& c) { c.setVisible (false); });
+            checkIgnored ([] (Component& c) { c.setVisible (false); }, traverser);
         }
 
         beginTest ("Explicit focus order comes before unspecified");
@@ -253,21 +272,21 @@ private:
         }
     }
 
-    void checkIgnored (const std::function<void(Component&)>& makeIgnored)
+    void checkIgnored (const std::function<void (Component&)>& makeIgnored, FocusTraverser& traverserToUse)
     {
         TestComponent parent;
 
         auto iter = parent.children.begin();
 
         makeIgnored (*iter);
-        expect (traverser.getDefaultComponent (&parent) == std::addressof (*std::next (iter)));
+        expect (traverserToUse.getDefaultComponent (&parent) == std::addressof (*std::next (iter)));
 
         iter += 5;
         makeIgnored (*iter);
-        expect (traverser.getNextComponent (std::addressof (*std::prev (iter))) == std::addressof (*std::next (iter)));
-        expect (traverser.getPreviousComponent (std::addressof (*std::next (iter))) == std::addressof (*std::prev (iter)));
+        expect (traverserToUse.getNextComponent (std::addressof (*std::prev (iter))) == std::addressof (*std::next (iter)));
+        expect (traverserToUse.getPreviousComponent (std::addressof (*std::next (iter))) == std::addressof (*std::prev (iter)));
 
-        auto allComponents = traverser.getAllComponents (&parent);
+        auto allComponents = traverserToUse.getAllComponents (&parent);
 
         expect (std::find (allComponents.cbegin(), allComponents.cend(), &parent.children.front()) == allComponents.cend());
         expect (std::find (allComponents.cbegin(), allComponents.cend(), std::addressof (*iter)) == allComponents.cend());

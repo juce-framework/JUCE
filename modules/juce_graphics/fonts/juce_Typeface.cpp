@@ -175,17 +175,27 @@ using HbFace   = std::unique_ptr<hb_face_t, FunctionPointerDestructor<hb_face_de
 using HbBuffer = std::unique_ptr<hb_buffer_t, FunctionPointerDestructor<hb_buffer_destroy>>;
 using HbBlob   = std::unique_ptr<hb_blob_t, FunctionPointerDestructor<hb_blob_destroy>>;
 
+struct TypefaceFallbackColourGlyphSupport
+{
+    virtual ~TypefaceFallbackColourGlyphSupport() = default;
+    virtual std::vector<GlyphLayer> getFallbackColourGlyphLayers (int, const AffineTransform&) const = 0;
+};
+
 class Typeface::Native
 {
 public:
-    Native (hb_font_t* fontRef, TypefaceAscentDescent nonPortableMetricsIn)
-        : font (fontRef), nonPortable (nonPortableMetricsIn)
+    Native (hb_font_t* fontRef,
+            TypefaceAscentDescent nonPortableMetricsIn,
+            const TypefaceFallbackColourGlyphSupport* colourGlyphSupportIn = {})
+        : font (fontRef),
+          nonPortable (nonPortableMetricsIn),
+          colourGlyphSupport (colourGlyphSupportIn)
     {
     }
 
     auto* getFont() const { return font; }
 
-    TypefaceAscentDescent getMetrics (TypefaceMetricsKind kind) const
+    TypefaceAscentDescent getAscentDescent (TypefaceMetricsKind kind) const
     {
         switch (kind)
         {
@@ -199,10 +209,9 @@ public:
         return {};
     }
 
-    HbFont getFontAtSizeAndScale (TypefaceMetricsKind kind, float height, float horizontalScale) const
+    HbFont getFontAtPointSizeAndScale (float points, float horizontalScale) const
     {
         HbFont subFont { hb_font_create_sub_font (font) };
-        const auto points = height * getMetrics (kind).getHeightToPointsFactor();
 
         hb_font_set_ptem (subFont.get(), points);
         hb_font_set_scale (subFont.get(), HbScale::juceToHb (points * horizontalScale), HbScale::juceToHb (points));
@@ -212,6 +221,15 @@ public:
        #endif
 
         return subFont;
+    }
+
+    std::vector<GlyphLayer> getFallbackColourGlyphLayers (int glyph,
+                                                          const AffineTransform& transform) const
+    {
+        if (colourGlyphSupport != nullptr)
+            return colourGlyphSupport->getFallbackColourGlyphLayers (glyph, transform);
+
+        return {};
     }
 
 private:
@@ -236,6 +254,7 @@ private:
 
     TypefaceAscentDescent nonPortable;
     TypefaceAscentDescent portable = findPortableMetrics (font, nonPortable);
+    const TypefaceFallbackColourGlyphSupport* colourGlyphSupport = nullptr;
 };
 
 struct FontStyleHelpers
@@ -405,8 +424,10 @@ void Typeface::getOutlineForGlyph (TypefaceMetricsKind kind, int glyphNumber, Pa
 {
     const auto native = getNativeDetails();
     auto* font = native.getFont();
-    const auto metrics = native.getMetrics (kind);
-    const auto scale = metrics.getHeightToPointsFactor() / (float) hb_face_get_upem (hb_font_get_face (font));
+    const auto metrics = native.getAscentDescent (kind);
+    const auto factor = metrics.getHeightToPointsFactor();
+    jassert (! std::isinf (factor));
+    const auto scale = factor / (float) hb_face_get_upem (hb_font_get_face (font));
 
     // getTypefaceGlyph returns glyphs in em space, getOutlineForGlyph returns glyphs in "special JUCE units" space
     path = getGlyphPathInGlyphUnits ((hb_codepoint_t) glyphNumber, getNativeDetails().getFont());
@@ -422,8 +443,10 @@ Rectangle<float> Typeface::getGlyphBounds (TypefaceMetricsKind kind, int glyphNu
         return {};
 
     const auto native = getNativeDetails();
-    const auto metrics = native.getMetrics (kind);
-    const auto scale = metrics.getHeightToPointsFactor() / (float) hb_face_get_upem (hb_font_get_face (font));
+    const auto metrics = native.getAscentDescent (kind);
+    const auto factor = metrics.getHeightToPointsFactor();
+    jassert (! std::isinf (factor));
+    const auto scale = factor / (float) hb_face_get_upem (hb_font_get_face (font));
 
     return Rectangle { (float) extents.width, (float) extents.height }
             .withPosition ((float) extents.x_bearing, (float) extents.y_bearing)
@@ -521,11 +544,16 @@ static std::vector<GlyphLayer> getBitmapLayer (const Typeface& typeface, int gly
     return { GlyphLayer { ImageLayer { juceImage, transform } } };
 }
 
-std::vector<GlyphLayer> Typeface::getLayersForGlyph (TypefaceMetricsKind kind, int glyphNumber, const AffineTransform& transform, float) const
+std::vector<GlyphLayer> Typeface::getLayersForGlyph (TypefaceMetricsKind kind,
+                                                     int glyphNumber,
+                                                     const AffineTransform& transform) const
 {
-    auto* font = getNativeDetails().getFont();
-    const auto metrics = getNativeDetails().getMetrics (kind);
-    const auto scale = metrics.getHeightToPointsFactor() / (float) hb_face_get_upem (hb_font_get_face (font));
+    auto native = getNativeDetails();
+    auto* font = native.getFont();
+    const auto metrics = native.getAscentDescent (kind);
+    const auto factor = metrics.getHeightToPointsFactor();
+    jassert (! std::isinf (factor));
+    const auto scale = factor / (float) hb_face_get_upem (hb_font_get_face (font));
     const auto combinedTransform = AffineTransform::scale (scale, -scale).followedBy (transform);
 
     if (auto bitmapLayer = getBitmapLayer (*this, glyphNumber, combinedTransform); ! bitmapLayer.empty())
@@ -537,7 +565,14 @@ std::vector<GlyphLayer> Typeface::getLayersForGlyph (TypefaceMetricsKind kind, i
     if (auto layers = getCOLRv0Layers (*this, glyphNumber, combinedTransform); ! layers.empty())
         return layers;
 
-    // No bitmap or COLRv0 for this glyph, so just get a simple monochromatic outline
+    // Some fonts (e.g. Noto Color Emoji on Android) might only contain COLRv1 data, which we can't
+    // easily display. In such cases, we can use system facilities to render the glyph into a
+    // bitmap. If the face has colour info that wasn't already handled, try rendering to a bitmap.
+    if (getColourGlyphFormats() != 0)
+        if (auto layer = native.getFallbackColourGlyphLayers (glyphNumber, combinedTransform); ! layer.empty())
+            return layer;
+
+    // No colour info available for this glyph, so just get a simple monochromatic outline
     auto path = getGlyphPathInGlyphUnits ((hb_codepoint_t) glyphNumber, font);
 
     if (path.isEmpty())
@@ -558,7 +593,7 @@ int Typeface::getColourGlyphFormats() const
 
 TypefaceMetrics Typeface::getMetrics (TypefaceMetricsKind kind) const
 {
-    return getNativeDetails().getMetrics (kind).getTypefaceMetrics();
+    return getNativeDetails().getAscentDescent (kind).getTypefaceMetrics();
 }
 
 Typeface::Ptr Typeface::createSystemTypefaceFor (const void* fontFileData, size_t fontFileDataSize)
@@ -601,7 +636,8 @@ static float doSimpleShapeWithNoBreaks (const Typeface& typeface,
     hb_buffer_guess_segment_properties (buffer.get());
 
     const auto& native = typeface.getNativeDetails();
-    const auto sized = native.getFontAtSizeAndScale (kind, height, horizontalScale);
+    const auto points = typeface.getMetrics (kind).heightToPoints * height;
+    const auto sized = native.getFontAtPointSizeAndScale (points, horizontalScale);
     auto* font = sized.get();
 
     // Disable ligatures, because TextEditor requires a 1:1 codepoint/glyph mapping for caret
@@ -689,6 +725,50 @@ void Typeface::getGlyphPositions (TypefaceMetricsKind kind,
     });
 
     xOffsets.add (width);
+}
+
+std::vector<FontFeatureTag> Typeface::getSupportedFeatures() const
+{
+    std::vector<FontFeatureTag> features;
+
+    static constexpr hb_tag_t tagTables[]
+    {
+        HB_OT_TAG_GPOS,
+        HB_OT_TAG_GSUB
+    };
+
+    auto* face = hb_font_get_face (getNativeDetails().getFont());
+
+    for (auto table : tagTables)
+    {
+        auto featureCount = hb_ot_layout_table_get_feature_tags (face,
+                                                                 table,
+                                                                 0,
+                                                                 nullptr,
+                                                                 nullptr);
+
+        if (featureCount == 0)
+            continue;
+
+        std::vector<hb_tag_t> arr;
+        arr.resize (featureCount);
+        features.reserve (features.size() + arr.size());
+        hb_ot_layout_table_get_feature_tags (face,
+                                             table,
+                                             0,
+                                             &featureCount,
+                                             arr.data());
+
+        std::transform (arr.begin(), arr.end(), std::back_inserter (features), [] (hb_tag_t tag)
+        {
+            return FontFeatureTag { (uint32) tag };
+        });
+    }
+
+    std::sort (features.begin(), features.end());
+    features.erase (std::unique (features.begin(), features.end()), features.end());
+
+    return features;
 }
 
 //==============================================================================
@@ -973,10 +1053,150 @@ public:
         R"({"name":"Karla_Regular_Typo_Off_Offsets_Off","os":1024,"ascent":0.798751175403595,"descent":0.201248824596405,"heightToPoints":0.798751175403595,"A":[{"g":116,"a":0.3611911535263062},{"g":104,"a":0.5797309875488281},{"g":101,"a":0.4932756423950195},{"g":32,"a":0.228145956993103},{"g":113,"a":0.5614793300628662},{"g":117,"a":0.5816521644592285},{"g":105,"a":0.2862632274627686},{"g":99,"a":0.4956772327423096},{"g":107,"a":0.5413064956665039},{"g":32,"a":0.2281460762023926},{"g":98,"a":0.5691642761230469},{"g":114,"a":0.3472623825073242},{"g":111,"a":0.5249757766723633},{"g":119,"a":0.6959652900695801},{"g":110,"a":0.5797309875488281},{"g":32,"a":0.2281460762023926},{"g":102,"a":0.3290104866027832},{"g":111,"a":0.5249757766723633},{"g":120,"a":0.4913539886474609},{"g":32,"a":0.2281455993652344},{"g":106,"a":0.3011531829833984},{"g":117,"a":0.5816526412963867},{"g":109,"a":0.8986549377441406},{"g":112,"a":0.5614795684814453},{"g":115,"a":0.5048027038574219},{"g":32,"a":0.2281455993652344},{"g":111,"a":0.5249757766723633},{"g":118,"a":0.4827089309692383},{"g":101,"a":0.4932756423950195},{"g":114,"a":0.3472623825073242},{"g":32,"a":0.2281455993652344},{"g":116,"a":0.3611907958984375},{"g":104,"a":0.5797309875488281},{"g":101,"a":0.4932756423950195},{"g":32,"a":0.2281455993652344},{"g":108,"a":0.2689723968505859},{"g":97,"a":0.5288181304931641},{"g":122,"a":0.4558124542236328},{"g":121,"a":0.4471664428710938},{"g":32,"a":0.2281455993652344},{"g":100,"a":0.5691642761230469},{"g":111,"a":0.5249767303466797},{"g":103,"a":0.542266845703125}],"B":[{"g":83,"a":0.5806916356086731},{"g":80,"a":0.5317003130912781},{"g":72,"a":0.6421709060668945},{"g":73,"a":0.2689721584320068},{"g":78,"a":0.6570603847503662},{"g":88,"a":0.616234302520752},{"g":32,"a":0.2281460762023926},{"g":79,"a":0.6200766563415527},{"g":70,"a":0.5033621788024902},{"g":32,"a":0.2281460762023926},{"g":66,"a":0.5970220565795898},{"g":76,"a":0.4490876197814941},{"g":65,"a":0.5518732070922852},{"g":67,"a":0.5888566970825195},{"g":75,"a":0.5835733413696289},{"g":32,"a":0.2281460762023926},{"g":81,"a":0.6258406639099121},{"g":85,"a":0.6272811889648438},{"g":65,"a":0.5518732070922852},{"g":82,"a":0.5883769989013672},{"g":84,"a":0.4807872772216797},{"g":90,"a":0.5682039260864258},{"g":32,"a":0.2281455993652344},{"g":74,"a":0.387608528137207},{"g":85,"a":0.6272811889648438},{"g":68,"a":0.6340055465698242},{"g":71,"a":0.6186361312866211},{"g":69,"a":0.5398654937744141},{"g":32,"a":0.2281455993652344},{"g":77,"a":0.8136405944824219},{"g":89,"a":0.5268974304199219},{"g":32,"a":0.2281455993652344},{"g":86,"a":0.5403461456298828},{"g":79,"a":0.6200771331787109},{"g":87,"a":0.8587894439697266}]})",
         R"({"name":"Karla_Regular_Typo_On_Offsets_Off","os":1024,"ascent":0.7691982984542847,"descent":0.2308017015457153,"heightToPoints":0.7691982984542847,"A":[{"g":116,"a":0.3172995746135712},{"g":104,"a":0.5092827081680298},{"g":101,"a":0.4333332777023315},{"g":32,"a":0.200421929359436},{"g":113,"a":0.4932489395141602},{"g":117,"a":0.5109704732894897},{"g":105,"a":0.2514767646789551},{"g":99,"a":0.4354431629180908},{"g":107,"a":0.4755275249481201},{"g":32,"a":0.2004220485687256},{"g":98,"a":0.5},{"g":114,"a":0.3050632476806641},{"g":111,"a":0.461181640625},{"g":119,"a":0.6113924980163574},{"g":110,"a":0.5092825889587402},{"g":32,"a":0.2004218101501465},{"g":102,"a":0.289029598236084},{"g":111,"a":0.461181640625},{"g":120,"a":0.431645393371582},{"g":32,"a":0.2004218101501465},{"g":106,"a":0.264556884765625},{"g":117,"a":0.5109701156616211},{"g":109,"a":0.7894515991210938},{"g":112,"a":0.4932489395141602},{"g":115,"a":0.4434595108032227},{"g":32,"a":0.2004222869873047},{"g":111,"a":0.461181640625},{"g":118,"a":0.4240503311157227},{"g":101,"a":0.4333333969116211},{"g":114,"a":0.3050632476806641},{"g":32,"a":0.2004222869873047},{"g":116,"a":0.3172998428344727},{"g":104,"a":0.5092830657958984},{"g":101,"a":0.4333333969116211},{"g":32,"a":0.2004222869873047},{"g":108,"a":0.2362871170043945},{"g":97,"a":0.4645566940307617},{"g":122,"a":0.4004220962524414},{"g":121,"a":0.392827033996582},{"g":32,"a":0.2004222869873047},{"g":100,"a":0.5},{"g":111,"a":0.4611806869506836},{"g":103,"a":0.4763717651367188}],"B":[{"g":83,"a":0.5101265907287598},{"g":80,"a":0.4670885801315308},{"g":72,"a":0.564134955406189},{"g":73,"a":0.2362868785858154},{"g":78,"a":0.5772151947021484},{"g":88,"a":0.5413501262664795},{"g":32,"a":0.2004220485687256},{"g":79,"a":0.5447256565093994},{"g":70,"a":0.4421942234039307},{"g":32,"a":0.2004218101501465},{"g":66,"a":0.524472713470459},{"g":76,"a":0.3945145606994629},{"g":65,"a":0.4848103523254395},{"g":67,"a":0.5172996520996094},{"g":75,"a":0.5126581192016602},{"g":32,"a":0.2004218101501465},{"g":81,"a":0.5497889518737793},{"g":85,"a":0.5510544776916504},{"g":65,"a":0.4848098754882812},{"g":82,"a":0.5168771743774414},{"g":84,"a":0.42236328125},{"g":90,"a":0.4991559982299805},{"g":32,"a":0.2004222869873047},{"g":74,"a":0.3405065536499023},{"g":85,"a":0.5510549545288086},{"g":68,"a":0.5569620132446289},{"g":71,"a":0.5434598922729492},{"g":69,"a":0.4742612838745117},{"g":32,"a":0.2004222869873047},{"g":77,"a":0.7147674560546875},{"g":89,"a":0.4628696441650391},{"g":32,"a":0.2004222869873047},{"g":86,"a":0.4746837615966797},{"g":79,"a":0.5447254180908203},{"g":87,"a":0.7544307708740234}]})",
     };
-
 };
 
 static TypefaceTests typefaceTests;
+
+class FontFeatureTests : public UnitTest
+{
+public:
+    FontFeatureTests() : UnitTest ("Font Features", UnitTestCategories::graphics) {}
+
+    void runTest() override
+    {
+        auto block = unpackFontData();
+        auto typeface = Typeface::createSystemTypefaceFor (block.getData(), block.getSize());
+
+        beginTest ("Check Typeface::getSupportedFeatures detects GSUB table features");
+        expect (std::invoke ([&]
+        {
+            const auto features = typeface->getSupportedFeatures();
+            return std::find (features.begin(), features.end(), "aalt") != features.end();
+        }));
+
+        Array<int> glyphs;
+        Array<float> offsets;
+        typeface->getGlyphPositions (TypefaceMetricsKind::legacy, "AD", glyphs, offsets);
+
+        const auto aIndex = glyphs[0];
+        const auto dIndex = glyphs[1];
+
+        beginTest ("Check feature disablement");
+        {
+            Font baseFont { FontOptions { typeface }.withPointHeight (22)
+                                                    .withFeatureDisabled ("aalt") };
+
+            auto ga = makeGlyphArrangement ("AD", baseFont);
+            expectEquals (ga.getGlyph (0).getGlyphIndex(), aIndex);
+            expectEquals (ga.getGlyph (1).getGlyphIndex(), dIndex);
+        }
+
+        beginTest ("Check feature enablement");
+        {
+            Font aaltFont { FontOptions { typeface }.withPointHeight (22)
+                                                    .withFeatureEnabled ("aalt") };
+
+            auto ga = makeGlyphArrangement ("AD", aaltFont);
+            expectEquals (ga.getGlyph (0).getGlyphIndex(), aIndex);
+            expectEquals (ga.getGlyph (1).getGlyphIndex(), aIndex);
+        }
+    }
+
+private:
+    static GlyphArrangement makeGlyphArrangement (const String& text, const Font& font)
+    {
+        GlyphArrangement ga;
+        ga.addLineOfText (font, text, 0, 0);
+        return ga;
+    }
+
+    static MemoryBlock unpackFontData()
+    {
+        // This is a very simple font with glyphs for 'A', 'D'.
+        // It also has a single GSUB feature (aalt) that will substitute 'D' with 'A' when enabled.
+        static constexpr uint8_t testFontZip[] =
+        {
+            0x50, 0x4b, 0x03, 0x04, 0x14, 0x00, 0x00, 0x00, 0x08, 0x00, 0x08, 0x9f,
+            0xb0, 0x5a, 0xda, 0xa4, 0x50, 0xbd, 0x61, 0x02, 0x00, 0x00, 0x50, 0x04,
+            0x00, 0x00, 0x08, 0x00, 0x1c, 0x00, 0x74, 0x65, 0x73, 0x74, 0x2e, 0x6f,
+            0x74, 0x66, 0x55, 0x54, 0x09, 0x00, 0x03, 0x50, 0x8a, 0x27, 0x68, 0x52,
+            0x8a, 0x27, 0x68, 0x75, 0x78, 0x0b, 0x00, 0x01, 0x04, 0xf5, 0x01, 0x00,
+            0x00, 0x04, 0x14, 0x00, 0x00, 0x00, 0xa5, 0x53, 0xcf, 0x6b, 0x13, 0x41,
+            0x14, 0xfe, 0x66, 0x67, 0x37, 0x89, 0x35, 0xa6, 0xb1, 0x3f, 0x24, 0x05,
+            0x29, 0x41, 0x22, 0x55, 0x69, 0x63, 0xda, 0x83, 0x94, 0x58, 0x51, 0xd3,
+            0x34, 0x7a, 0xa8, 0xc4, 0xb6, 0xb1, 0x14, 0x29, 0xe8, 0xea, 0x6e, 0x9b,
+            0x40, 0x7e, 0x99, 0x6c, 0x68, 0x0f, 0x22, 0x82, 0xa0, 0x42, 0x2e, 0xe2,
+            0x41, 0x0f, 0x7a, 0xf5, 0xe6, 0xc9, 0x93, 0x7a, 0x11, 0x2f, 0xa2, 0x37,
+            0xff, 0x88, 0x1c, 0x04, 0x0b, 0x2b, 0x52, 0x69, 0x28, 0xd2, 0xf5, 0xcd,
+            0x66, 0x12, 0x92, 0x5e, 0x7a, 0xf0, 0xc1, 0xee, 0xfb, 0xde, 0x37, 0x33,
+            0xdf, 0xcc, 0xbc, 0xf7, 0x26, 0x9d, 0xc9, 0xa4, 0xd1, 0x87, 0x87, 0xe0,
+            0x08, 0xcf, 0xa6, 0x52, 0xe1, 0xab, 0x8f, 0xdf, 0x6d, 0x00, 0x3c, 0x09,
+            0xe0, 0xfd, 0x95, 0xa5, 0x1b, 0x89, 0x37, 0xbf, 0x3f, 0x70, 0x8a, 0xff,
+            0x52, 0x9c, 0x4c, 0x2f, 0x9d, 0x9d, 0x9a, 0x9b, 0x9e, 0x1b, 0x01, 0x58,
+            0x90, 0xe2, 0xdb, 0x77, 0x0b, 0x7a, 0x19, 0x37, 0xf1, 0x1a, 0x50, 0x7e,
+            0x50, 0x3c, 0x93, 0x35, 0x75, 0xe3, 0x8c, 0xef, 0x63, 0x83, 0xf0, 0x5b,
+            0xfa, 0xce, 0x65, 0x89, 0xd0, 0x9e, 0xb3, 0x18, 0x61, 0xc1, 0x45, 0xb2,
+            0x05, 0x6b, 0x53, 0x1b, 0x62, 0xe3, 0x80, 0x7a, 0x89, 0xe2, 0x40, 0x41,
+            0xdf, 0x2c, 0x43, 0xbd, 0x4e, 0x90, 0xf9, 0xe8, 0xe7, 0x29, 0xea, 0x05,
+            0xf3, 0xd7, 0xb7, 0x07, 0x29, 0x8a, 0xcb, 0xf4, 0x6d, 0x94, 0x4b, 0x55,
+            0x8b, 0xce, 0x45, 0xc6, 0x23, 0xf4, 0x0b, 0x83, 0x89, 0xa9, 0xc0, 0xd6,
+            0x3d, 0xcf, 0x8b, 0x5b, 0xfd, 0x33, 0x7f, 0xc0, 0x55, 0x31, 0x88, 0xc6,
+            0xb5, 0xf8, 0xf7, 0x8e, 0x37, 0x60, 0xb0, 0x6d, 0x2e, 0xce, 0xc3, 0xa1,
+            0xa0, 0x65, 0xb4, 0x86, 0x4f, 0xe3, 0x2b, 0x9d, 0x73, 0x05, 0xc6, 0x9e,
+            0x9f, 0x6d, 0xbb, 0x4a, 0xdd, 0x46, 0xbb, 0xd0, 0x39, 0x84, 0x1c, 0x57,
+            0x56, 0xd8, 0x33, 0x68, 0x50, 0x71, 0xb0, 0xf5, 0xa8, 0x5c, 0x24, 0x23,
+            0x77, 0x19, 0x49, 0xda, 0x0b, 0xed, 0x1d, 0x7b, 0xac, 0x75, 0x83, 0x20,
+            0xbe, 0xc8, 0x95, 0xcc, 0xdd, 0xa5, 0x85, 0x15, 0x78, 0x29, 0x62, 0xf2,
+            0x34, 0x23, 0x38, 0x2c, 0xb1, 0x0a, 0x3f, 0x22, 0x12, 0x6b, 0xc4, 0xc6,
+            0x24, 0xf6, 0x74, 0x78, 0xb5, 0x4b, 0x47, 0x95, 0x3a, 0x1c, 0x4c, 0x3d,
+            0x44, 0x8c, 0x0f, 0xe7, 0x25, 0x56, 0x10, 0xc0, 0xac, 0xc4, 0x1c, 0x53,
+            0x58, 0x90, 0x58, 0x45, 0x08, 0x8f, 0x24, 0xd6, 0x70, 0x0c, 0xaf, 0x24,
+            0xf6, 0x74, 0xf8, 0xc1, 0x2e, 0x9d, 0xc1, 0x96, 0x4e, 0xc6, 0xac, 0x5a,
+            0x8b, 0xe6, 0x7a, 0x2d, 0xaf, 0x57, 0xd6, 0x4a, 0x45, 0x2b, 0x51, 0xcb,
+            0xe5, 0x0d, 0xb3, 0x12, 0x0f, 0x0b, 0x3e, 0x2a, 0x07, 0x04, 0x9e, 0x90,
+            0x78, 0xd9, 0xac, 0x54, 0x73, 0xa5, 0x62, 0x38, 0x16, 0x9d, 0x44, 0x06,
+            0x26, 0xaa, 0xb0, 0xb0, 0x48, 0x7e, 0x1d, 0x35, 0xe4, 0xa1, 0xa3, 0x82,
+            0x35, 0x94, 0x50, 0x24, 0x36, 0x41, 0x4c, 0x8e, 0x38, 0x83, 0x46, 0x2b,
+            0x88, 0x53, 0xca, 0xda, 0xf3, 0xa3, 0xfb, 0x56, 0xb4, 0xf9, 0x89, 0x7d,
+            0xfc, 0xb2, 0xbb, 0xb2, 0x4a, 0x2a, 0x42, 0x31, 0x4c, 0x09, 0x8b, 0x62,
+            0xb2, 0x95, 0x61, 0xb7, 0xce, 0x18, 0x12, 0x37, 0x71, 0xbd, 0x8a, 0x53,
+            0x6e, 0x26, 0x45, 0x06, 0x15, 0x51, 0x39, 0xc7, 0x69, 0x55, 0xd0, 0x71,
+            0x9c, 0xcf, 0xce, 0xa7, 0x4e, 0x7d, 0xf9, 0x41, 0x6d, 0xa0, 0x32, 0x30,
+            0xc6, 0x8e, 0x74, 0x5f, 0x59, 0x10, 0x63, 0xcd, 0xe3, 0xca, 0xe8, 0x4b,
+            0xf3, 0xce, 0x6a, 0xd0, 0xa9, 0xd7, 0x3b, 0xc0, 0xef, 0xb5, 0xed, 0xe6,
+            0xd3, 0xdd, 0xfb, 0x5a, 0xa3, 0xbf, 0xbe, 0x33, 0x3f, 0xf0, 0xf3, 0x28,
+            0x14, 0xc6, 0x3c, 0x03, 0xd1, 0x62, 0x2d, 0x9f, 0xef, 0x51, 0x20, 0xe5,
+            0x27, 0x38, 0x81, 0x93, 0x24, 0xcf, 0x86, 0x4f, 0x5f, 0x58, 0x68, 0x6e,
+            0xd9, 0xf6, 0xf0, 0x6e, 0xc8, 0x6b, 0x8f, 0xed, 0xac, 0xd6, 0x6d, 0xdb,
+            0xb7, 0x17, 0xf2, 0x06, 0xfe, 0x87, 0x73, 0xef, 0xd7, 0x87, 0x51, 0x8c,
+            0x83, 0x25, 0x53, 0xf3, 0x19, 0xaa, 0xb2, 0xdb, 0xf5, 0x94, 0x05, 0xf7,
+            0xa5, 0xe9, 0x7a, 0xde, 0x82, 0x4f, 0x76, 0x16, 0x93, 0xdd, 0x29, 0x7a,
+            0x81, 0xc1, 0xe3, 0xce, 0x61, 0xe2, 0xb5, 0x50, 0xa9, 0x00, 0xc3, 0xf5,
+            0x84, 0xfe, 0x01, 0x50, 0x4b, 0x01, 0x02, 0x1e, 0x03, 0x14, 0x00, 0x00,
+            0x00, 0x08, 0x00, 0x08, 0x9f, 0xb0, 0x5a, 0xda, 0xa4, 0x50, 0xbd, 0x61,
+            0x02, 0x00, 0x00, 0x50, 0x04, 0x00, 0x00, 0x08, 0x00, 0x18, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa4, 0x81, 0x00, 0x00, 0x00,
+            0x00, 0x74, 0x65, 0x73, 0x74, 0x2e, 0x6f, 0x74, 0x66, 0x55, 0x54, 0x05,
+            0x00, 0x03, 0x50, 0x8a, 0x27, 0x68, 0x75, 0x78, 0x0b, 0x00, 0x01, 0x04,
+            0xf5, 0x01, 0x00, 0x00, 0x04, 0x14, 0x00, 0x00, 0x00, 0x50, 0x4b, 0x05,
+            0x06, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x4e, 0x00, 0x00,
+            0x00, 0xa3, 0x02, 0x00, 0x00, 0x00, 0x00
+        };
+
+        MemoryInputStream memoryStream { (const void*) testFontZip, std::size (testFontZip), false };
+        ZipFile zip { &memoryStream, false };
+
+        auto stream = rawToUniquePtr (zip.createStreamForEntry (zip.getIndexOfFileName ("test.otf")));
+        jassert (stream != nullptr);
+
+        MemoryBlock data;
+        stream->readIntoMemoryBlock (data);
+
+        return data;
+    }
+};
+
+static FontFeatureTests fontFeatureTests;
 
 #endif
 

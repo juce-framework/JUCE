@@ -78,7 +78,6 @@ private:
     float radius = 2.0f;
     Colour colour { Colours::white };
     Point<int> offset;
-    Image cachedImage;
 
     JUCE_LEAK_DETECTOR (GlowEffect)
 };

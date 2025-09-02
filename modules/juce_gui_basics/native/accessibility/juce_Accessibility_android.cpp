@@ -60,27 +60,22 @@ namespace juce
  METHOD (setText,                  "setText",                  "(Ljava/lang/CharSequence;)V") \
  METHOD (setMovementGranularities, "setMovementGranularities", "(I)V") \
  METHOD (addAction,                "addAction",                "(I)V") \
+ METHOD (setCollectionInfo, "setCollectionInfo", "(Landroid/view/accessibility/AccessibilityNodeInfo$CollectionInfo;)V") \
+ METHOD (setCollectionItemInfo, "setCollectionItemInfo", "(Landroid/view/accessibility/AccessibilityNodeInfo$CollectionItemInfo;)V")
 
  DECLARE_JNI_CLASS (AndroidAccessibilityNodeInfo, "android/view/accessibility/AccessibilityNodeInfo")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (setCollectionInfo, "setCollectionInfo", "(Landroid/view/accessibility/AccessibilityNodeInfo$CollectionInfo;)V") \
- METHOD (setCollectionItemInfo, "setCollectionItemInfo", "(Landroid/view/accessibility/AccessibilityNodeInfo$CollectionItemInfo;)V")
-
- DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidAccessibilityNodeInfo19, "android/view/accessibility/AccessibilityNodeInfo", 19)
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  STATICMETHOD (obtain, "obtain", "(IIZ)Landroid/view/accessibility/AccessibilityNodeInfo$CollectionInfo;")
 
- DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidAccessibilityNodeInfoCollectionInfo, "android/view/accessibility/AccessibilityNodeInfo$CollectionInfo", 19)
+ DECLARE_JNI_CLASS (AndroidAccessibilityNodeInfoCollectionInfo, "android/view/accessibility/AccessibilityNodeInfo$CollectionInfo")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  STATICMETHOD (obtain, "obtain", "(IIIIZ)Landroid/view/accessibility/AccessibilityNodeInfo$CollectionItemInfo;")
 
- DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidAccessibilityNodeInfoCollectionItemInfo, "android/view/accessibility/AccessibilityNodeInfo$CollectionItemInfo", 19)
+ DECLARE_JNI_CLASS (AndroidAccessibilityNodeInfoCollectionItemInfo, "android/view/accessibility/AccessibilityNodeInfo$CollectionItemInfo")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -235,7 +230,7 @@ static jobject makeAndroidRect (Rectangle<int> r)
                                 r.getBottom());
 }
 
-static jobject makeAndroidPoint (Point<int> p)
+static inline jobject makeAndroidPoint (Point<int> p)
 {
     return getEnv()->NewObject (AndroidPoint,
                                 AndroidPoint.create,
@@ -338,7 +333,7 @@ public:
 
         env->CallVoidMethod (info,
                              AndroidAccessibilityNodeInfo.setEnabled,
-                             ! state.isIgnored());
+                             ! state.isIgnored() && accessibilityHandler.getComponent().isEnabled());
         env->CallVoidMethod (info,
                              AndroidAccessibilityNodeInfo.setVisibleToUser,
                              true);
@@ -500,7 +495,7 @@ public:
                                                                                   (jint) rows,
                                                                                   (jint) columns,
                                                                                   (jboolean) false) };
-            env->CallVoidMethod (info, AndroidAccessibilityNodeInfo19.setCollectionInfo, collectionInfo.get());
+            env->CallVoidMethod (info, AndroidAccessibilityNodeInfo.setCollectionInfo, collectionInfo.get());
         }
 
         if (auto* enclosingTableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (&accessibilityHandler, &AccessibilityHandler::getTableInterface))
@@ -521,7 +516,7 @@ public:
                                                                                           (jint) columns.begin,
                                                                                           (jint) columns.num,
                                                                                           (jboolean) (header == IsHeader::yes)) };
-                env->CallVoidMethod (info, AndroidAccessibilityNodeInfo19.setCollectionItemInfo, collectionItemInfo.get());
+                env->CallVoidMethod (info, AndroidAccessibilityNodeInfo.setCollectionItemInfo, collectionItemInfo.get());
             };
 
             if (rowSpan.hasValue() && columnSpan.hasValue())
@@ -1053,6 +1048,11 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString,
         getEnv()->CallVoidMethod (rootView.get(),
                                   AndroidView.announceForAccessibility,
                                   javaString (announcementString).get());
+}
+
+bool AccessibilityHandler::areAnyAccessibilityClientsActive()
+{
+    return AccessibilityNativeHandle::areAnyAccessibilityClientsActive();
 }
 
 } // namespace juce

@@ -2,6 +2,7 @@
  * jutils.c
  *
  * Copyright (C) 1991-1996, Thomas G. Lane.
+ * Modified 2009-2020 by Guido Vollbeding.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -51,16 +52,67 @@ const int jpeg_zigzag_order[DCTSIZE2] = {
  */
 
 const int jpeg_natural_order[DCTSIZE2+16] = {
-  0,  1,  8, 16,  9,  2,  3, 10,
- 17, 24, 32, 25, 18, 11,  4,  5,
- 12, 19, 26, 33, 40, 48, 41, 34,
- 27, 20, 13,  6,  7, 14, 21, 28,
- 35, 42, 49, 56, 57, 50, 43, 36,
- 29, 22, 15, 23, 30, 37, 44, 51,
- 58, 59, 52, 45, 38, 31, 39, 46,
- 53, 60, 61, 54, 47, 55, 62, 63,
- 63, 63, 63, 63, 63, 63, 63, 63, /* extra entries for safety in decoder */
- 63, 63, 63, 63, 63, 63, 63, 63
+   0,  1,  8, 16,  9,  2,  3, 10,
+  17, 24, 32, 25, 18, 11,  4,  5,
+  12, 19, 26, 33, 40, 48, 41, 34,
+  27, 20, 13,  6,  7, 14, 21, 28,
+  35, 42, 49, 56, 57, 50, 43, 36,
+  29, 22, 15, 23, 30, 37, 44, 51,
+  58, 59, 52, 45, 38, 31, 39, 46,
+  53, 60, 61, 54, 47, 55, 62, 63,
+  63, 63, 63, 63, 63, 63, 63, 63, /* extra entries for safety in decoder */
+  63, 63, 63, 63, 63, 63, 63, 63
+};
+
+const int jpeg_natural_order7[7*7+16] = {
+   0,  1,  8, 16,  9,  2,  3, 10,
+  17, 24, 32, 25, 18, 11,  4,  5,
+  12, 19, 26, 33, 40, 48, 41, 34,
+  27, 20, 13,  6, 14, 21, 28, 35,
+  42, 49, 50, 43, 36, 29, 22, 30,
+  37, 44, 51, 52, 45, 38, 46, 53,
+  54,
+  63, 63, 63, 63, 63, 63, 63, 63, /* extra entries for safety in decoder */
+  63, 63, 63, 63, 63, 63, 63, 63
+};
+
+const int jpeg_natural_order6[6*6+16] = {
+   0,  1,  8, 16,  9,  2,  3, 10,
+  17, 24, 32, 25, 18, 11,  4,  5,
+  12, 19, 26, 33, 40, 41, 34, 27,
+  20, 13, 21, 28, 35, 42, 43, 36,
+  29, 37, 44, 45,
+  63, 63, 63, 63, 63, 63, 63, 63, /* extra entries for safety in decoder */
+  63, 63, 63, 63, 63, 63, 63, 63
+};
+
+const int jpeg_natural_order5[5*5+16] = {
+   0,  1,  8, 16,  9,  2,  3, 10,
+  17, 24, 32, 25, 18, 11,  4, 12,
+  19, 26, 33, 34, 27, 20, 28, 35,
+  36,
+  63, 63, 63, 63, 63, 63, 63, 63, /* extra entries for safety in decoder */
+  63, 63, 63, 63, 63, 63, 63, 63
+};
+
+const int jpeg_natural_order4[4*4+16] = {
+   0,  1,  8, 16,  9,  2,  3, 10,
+  17, 24, 25, 18, 11, 19, 26, 27,
+  63, 63, 63, 63, 63, 63, 63, 63, /* extra entries for safety in decoder */
+  63, 63, 63, 63, 63, 63, 63, 63
+};
+
+const int jpeg_natural_order3[3*3+16] = {
+   0,  1,  8, 16,  9,  2, 10, 17,
+  18,
+  63, 63, 63, 63, 63, 63, 63, 63, /* extra entries for safety in decoder */
+  63, 63, 63, 63, 63, 63, 63, 63
+};
+
+const int jpeg_natural_order2[2*2+16] = {
+   0,  1,  8,  9,
+  63, 63, 63, 63, 63, 63, 63, 63, /* extra entries for safety in decoder */
+  63, 63, 63, 63, 63, 63, 63, 63
 };
 
 
@@ -96,37 +148,48 @@ jround_up (long a, long b)
  * is not all that great, because these routines aren't very heavily used.)
  */
 
-#ifndef NEED_FAR_POINTERS	/* normal case, same as regular macros */
+#ifndef NEED_FAR_POINTERS	/* normal case, same as regular macro */
 #define FMEMCOPY(dest,src,size)	MEMCOPY(dest,src,size)
-#define FMEMZERO(target,size)	MEMZERO(target,size)
 #else				/* 80x86 case, define if we can */
 #ifdef USE_FMEM
 #define FMEMCOPY(dest,src,size)	_fmemcpy((void FAR *)(dest), (const void FAR *)(src), (size_t)(size))
-#define FMEMZERO(target,size)	_fmemset((void FAR *)(target), 0, (size_t)(size))
+#else
+/* This function is for use by the FMEMZERO macro defined in jpegint.h.
+ * Do not call this function directly, use the FMEMZERO macro instead.
+ */
+GLOBAL(void)
+jzero_far (void FAR * target, size_t bytestozero)
+/* Zero out a chunk of FAR memory. */
+/* This might be sample-array data, block-array data, or alloc_large data. */
+{
+  register char FAR * ptr = (char FAR *) target;
+  register size_t count;
+
+  for (count = bytestozero; count > 0; count--) {
+    *ptr++ = 0;
+  }
+}
 #endif
 #endif
 
 
 GLOBAL(void)
-jcopy_sample_rows (JSAMPARRAY input_array, int source_row,
-		   JSAMPARRAY output_array, int dest_row,
+jcopy_sample_rows (JSAMPARRAY input_array,
+		   JSAMPARRAY output_array,
 		   int num_rows, JDIMENSION num_cols)
 /* Copy some rows of samples from one place to another.
- * num_rows rows are copied from input_array[source_row++]
- * to output_array[dest_row++]; these areas may overlap for duplication.
+ * num_rows rows are copied from *input_array++ to *output_array++;
+ * these areas may overlap for duplication.
  * The source and destination arrays must be at least as wide as num_cols.
  */
 {
-  JSAMPROW inptr, outptr;
+  register JSAMPROW inptr, outptr;
 #ifdef FMEMCOPY
-  size_t count = (size_t) (num_cols * SIZEOF(JSAMPLE));
+  register size_t count = (size_t) num_cols * SIZEOF(JSAMPLE);
 #else
-  JDIMENSION count;
+  register JDIMENSION count;
 #endif
-  int row;
-
-  input_array += source_row;
-  output_array += dest_row;
+  register int row;
 
   for (row = num_rows; row > 0; row--) {
     inptr = *input_array++;
@@ -147,33 +210,15 @@ jcopy_block_row (JBLOCKROW input_row, JBLOCKROW output_row,
 /* Copy a row of coefficient blocks from one place to another. */
 {
 #ifdef FMEMCOPY
-  FMEMCOPY(output_row, input_row, num_blocks * (DCTSIZE2 * SIZEOF(JCOEF)));
+  FMEMCOPY(output_row, input_row, (size_t) num_blocks * (DCTSIZE2 * SIZEOF(JCOEF)));
 #else
-  JCOEFPTR inptr, outptr;
-  long count;
+  register JCOEFPTR inptr, outptr;
+  register long count;
 
   inptr = (JCOEFPTR) input_row;
   outptr = (JCOEFPTR) output_row;
   for (count = (long) num_blocks * DCTSIZE2; count > 0; count--) {
     *outptr++ = *inptr++;
-  }
-#endif
-}
-
-
-GLOBAL(void)
-jzero_far (void FAR * target, size_t bytestozero)
-/* Zero out a chunk of FAR memory. */
-/* This might be sample-array data, block-array data, or alloc_large data. */
-{
-#ifdef FMEMZERO
-  FMEMZERO(target, bytestozero);
-#else
-  char FAR * ptr = (char FAR *) target;
-  size_t count;
-
-  for (count = bytestozero; count > 0; count--) {
-    *ptr++ = 0;
   }
 #endif
 }

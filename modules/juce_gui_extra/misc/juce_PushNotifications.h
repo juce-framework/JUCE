@@ -54,9 +54,9 @@ namespace juce
 class JUCE_API PushNotifications    : private DeletedAtShutdown
 {
 public:
-   #ifndef DOXYGEN
+    /** @cond */
     JUCE_DECLARE_SINGLETON_INLINE (PushNotifications, false)
-   #endif
+    /** @endcond */
 
     //==============================================================================
     /** Represents a notification that can be sent or received. */
@@ -403,8 +403,8 @@ public:
         */
         struct Category
         {
-            juce::String identifier;         /**< unique identifier */
-            juce::Array<Action> actions;     /**< optional list of actions within this category */
+            String identifier;               /**< unique identifier */
+            Array<Action> actions;           /**< optional list of actions within this category */
             bool sendDismissAction = false;  /**< whether dismiss action will be sent to the app */
         };
 
@@ -703,12 +703,8 @@ private:
     friend struct JuceFirebaseMessagingService;
    #endif
 
-  #if JUCE_PUSH_NOTIFICATIONS
-    struct Pimpl;
-    friend struct Pimpl;
-
-    std::unique_ptr<Pimpl> pimpl;
-  #endif
+    struct Impl;
+    std::unique_ptr<Impl> pimpl;
 };
 
 } // namespace juce

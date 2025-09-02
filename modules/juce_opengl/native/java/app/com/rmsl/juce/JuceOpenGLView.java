@@ -64,24 +64,6 @@ public class JuceOpenGLView extends SurfaceView
     }
 
     @Override
-    protected void onAttachedToWindow ()
-    {
-        super.onAttachedToWindow ();
-
-        if (host != 0)
-            onAttchedWindowNative (host);
-    }
-
-    @Override
-    protected void onDetachedFromWindow ()
-    {
-        if (host != 0)
-            onDetachedFromWindowNative (host);
-
-        super.onDetachedFromWindow ();
-    }
-
-    @Override
     protected void dispatchDraw (Canvas canvas)
     {
         super.dispatchDraw (canvas);

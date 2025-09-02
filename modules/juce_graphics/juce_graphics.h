@@ -44,7 +44,7 @@
 
   ID:                 juce_graphics
   vendor:             juce
-  version:            8.0.4
+  version:            8.0.9
   name:               JUCE graphics classes
   description:        Classes for 2D vector graphics, image loading/saving, font handling, etc.
   website:            http://www.juce.com/juce
@@ -131,24 +131,29 @@ namespace juce
 #include "images/juce_ImageCache.h"
 #include "images/juce_ImageConvolutionKernel.h"
 #include "images/juce_ImageFileFormat.h"
+#include "fonts/juce_GlyphArrangementOptions.h"
 #include "contexts/juce_GraphicsContext.h"
 #include "images/juce_Image.h"
 #include "colour/juce_FillType.h"
+#include "fonts/juce_FontFeatures.h"
 #include "fonts/juce_Typeface.h"
 #include "fonts/juce_FontOptions.h"
 #include "fonts/juce_Font.h"
 #include "detail/juce_Ranges.h"
+#include "detail/juce_SimpleShapedText.h"
+#include "detail/juce_JustifiedText.h"
+#include "detail/juce_ShapedText.h"
 #include "fonts/juce_AttributedString.h"
 #include "fonts/juce_GlyphArrangement.h"
 #include "fonts/juce_TextLayout.h"
 #include "contexts/juce_LowLevelGraphicsContext.h"
 #include "images/juce_ScaledImage.h"
-#include "fonts/juce_LruCache.h"
 #include "native/juce_RenderingHelpers.h"
 #include "contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
 #include "effects/juce_ImageEffectFilter.h"
 #include "effects/juce_DropShadowEffect.h"
 #include "effects/juce_GlowEffect.h"
+#include "detail/juce_Unicode.h"
 
 #if JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS && (JUCE_MAC || JUCE_IOS)
  #include "native/juce_CoreGraphicsHelpers_mac.h"

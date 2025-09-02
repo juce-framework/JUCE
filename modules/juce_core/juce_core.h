@@ -44,7 +44,7 @@
 
   ID:                 juce_core
   vendor:             juce
-  version:            8.0.4
+  version:            8.0.9
   name:               JUCE core classes
   description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:            http://www.juce.com/juce
@@ -236,6 +236,7 @@ namespace juce
 }
 
 #include "misc/juce_EnumHelpers.h"
+#include "misc/juce_OrderedContainerHelpers.h"
 #include "memory/juce_Memory.h"
 #include "maths/juce_MathsFunctions.h"
 #include "memory/juce_ByteOrder.h"
@@ -318,6 +319,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "files/juce_File.h"
 #include "files/juce_DirectoryIterator.h"
 #include "files/juce_RangedDirectoryIterator.h"
+#include "detail/juce_NativeFileHandle.h"
 #include "files/juce_FileInputStream.h"
 #include "files/juce_FileOutputStream.h"
 #include "files/juce_FileSearchPath.h"
@@ -372,6 +374,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "misc/juce_OptionsHelpers.h"
 
 #include "detail/juce_CallbackListenerList.h"
+#include "detail/juce_LruCache.h"
 
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
  #include "native/juce_CFHelpers_mac.h"
@@ -391,7 +394,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
  #include "unit_tests/juce_UnitTestCategories.h"
 #endif
 
-#ifndef DOXYGEN
+/** @cond */
 namespace juce
 {
  /*
@@ -412,7 +415,7 @@ namespace juce
   static this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode compileUnitMismatchSentinel;
  #endif
 }
-#endif
+/** @endcond */
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 

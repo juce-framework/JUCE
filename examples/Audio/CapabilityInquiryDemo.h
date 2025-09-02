@@ -1218,6 +1218,12 @@ private:
     });
 };
 
+static constexpr auto ioLabelText = R"(Pick the input and output used to talk to the Capability Inquiry (CI) responder.
+
+In order to use this demo you'll need another program/device that understands MIDI CI.
+You could run a second copy of this CapabilityInquiryDemo, or install and use one of the apps listed below.
+If you want to communicate with a program that doesn't have its own virtual MIDI ports, you may need to set up virtual ports yourself, e.g. by enabling the IAC MIDI driver on macOS.)";
+
 class IOPickerLists : public Component
 {
 public:
@@ -1227,16 +1233,34 @@ public:
     {
         addAndMakeVisible (inputs);
         addAndMakeVisible (outputs);
+
+        addAndMakeVisible (label);
+        addAndMakeVisible (toolsHeader);
+        addAndMakeVisible (workbenchButton);
+        addAndMakeVisible (responderButton);
+        toolsHeader.setJustificationType (Justification::centred);
     }
 
     void resized() override
     {
-        Utils::doColumnLayout (getLocalBounds().reduced (Utils::padding), inputs, outputs);
+        auto bounds = getLocalBounds().reduced (Utils::padding);
+
+        responderButton.setBounds (bounds.removeFromBottom (20));
+        workbenchButton.setBounds (bounds.removeFromBottom (20));
+        toolsHeader.setBounds (bounds.removeFromBottom (20));
+        label.setBounds (bounds.removeFromBottom (200).withSizeKeepingCentre (jmin (600, bounds.getWidth()), 200));
+
+        Utils::doColumnLayout (bounds, inputs, outputs);
     }
 
 private:
     IOPickerList<MidiInput> inputs;
     IOPickerList<MidiOutput> outputs;
+    Label label { "", ioLabelText };
+
+    Label toolsHeader { "", "Other MIDI-CI software for testing:" };
+    HyperlinkButton workbenchButton { "MIDI 2.0 Workbench", URL { "https://github.com/midi2-dev/MIDI2.0Workbench" } };
+    HyperlinkButton responderButton { "Bome MIDI-CI Responder", URL { "https://www.bome.com/products/midi-ci-tools" } };
 };
 
 class SectionHeader : public Component
@@ -2110,10 +2134,11 @@ public:
     DiscoveryInfoPanel (State<ci::MUID> m, State<Model::DeviceInfo> s)
         : muidState (m), state (s)
     {
+        const auto setStateCallback = [this] { setStateFromUI(); };
         [&] (auto&&... item)
         {
             (addAndMakeVisible (item), ...);
-            ((item.onCommit ([this] { setStateFromUI(); })), ...);
+            ((item.onCommit (setStateCallback)), ...);
         } (manufacturer, family, modelNumber, revision, maxSysExSize);
 
         [&] (auto&&... item)
@@ -2261,10 +2286,9 @@ public:
                 auto updated = *state;
                 auto& props = updated.properties;
 
-                if (auto* item = props.getSelected())
+                if (0 <= props.selection)
                 {
-                    const auto toErase = props.items.begin() + props.selection;
-                    props.items.erase (toErase);
+                    props.items.erase (props.items.begin() + props.selection);
                     props.selection = -1;
 
                     state = std::move (updated);
@@ -2627,8 +2651,9 @@ private:
                     return;
                 }
 
+                constexpr auto isEditable = editable == Editable::yes;
                 const auto canSetFull = item->canSet != Model::CanSet::none
-                                        || editable == Editable::yes;
+                                        || isEditable;
                 setFull.setEnabled (canSetFull);
                 setPartial.setEnabled (item->canSet == Model::CanSet::partial);
                 get.setEnabled (item->canGet);
@@ -2681,7 +2706,9 @@ public:
     explicit PropertyInfoPanel (State<Model::Properties> s)
         : state (s)
     {
-        if constexpr (editable == Editable::yes)
+        constexpr auto isEditable = editable == Editable::yes;
+
+        if constexpr (isEditable)
         {
 
             addAndMakeVisible (canSet);
@@ -2693,11 +2720,13 @@ public:
             addAndMakeVisible (canSetField);
         }
 
+        const auto updateStateCallback = [this] { updateStateFromUI(); };
+
         [&] (auto&&... args)
         {
             (addAndMakeVisible (args), ...);
-            (args.setClickingTogglesState (editable == Editable::yes), ...);
-            ((args.onClick = [this] { updateStateFromUI(); }), ...);
+            (args.setClickingTogglesState (isEditable), ...);
+            ((args.onClick = updateStateCallback), ...);
         } (canGet,
            canSubscribe,
            canPaginate,
@@ -2714,11 +2743,11 @@ public:
         [&] (auto&&... args)
         {
             (addAndMakeVisible (args), ...);
-            (args.setReadOnly (editable == Editable::no), ...);
+            (args.setReadOnly (! isEditable), ...);
             (args.setMultiLine (true), ...);
             ((args.onReturnKey = args.onEscapeKey
                                = args.onFocusLost
-                               = [this] { updateStateFromUI(); }), ...);
+                               = updateStateCallback), ...);
         } (schema, mediaTypes, columns);
 
         addAndMakeVisible (name);
@@ -3684,11 +3713,15 @@ public:
 
     void resized() override
     {
-        tabs.setBounds (getLocalBounds());
+        auto bounds = getLocalBounds();
+        auto buttonStrip = bounds.getWidth() < 650 ? bounds.removeFromTop (tabs.getTabBarDepth())
+                                                   : getLocalBounds().removeFromTop (tabs.getTabBarDepth());
 
-        const auto buttonBounds = getLocalBounds().removeFromTop (tabs.getTabBarDepth())
-                                                  .removeFromRight (300)
-                                                  .reduced (2);
+        tabs.setBounds (bounds);
+
+        const auto buttonBounds = buttonStrip.removeFromTop (tabs.getTabBarDepth())
+                                             .removeFromRight (300)
+                                             .reduced (2);
         Utils::doColumnLayout (buttonBounds, loadButton, saveButton);
     }
 

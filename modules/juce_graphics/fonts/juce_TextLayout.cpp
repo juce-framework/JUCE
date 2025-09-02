@@ -283,39 +283,72 @@ void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& te
     createLayoutWithBalancedLineLengths (text, maxWidth, 1.0e7f);
 }
 
-void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& text, float maxWidth, float maxHeight)
+void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& text,
+                                                      float maxWidth,
+                                                      float maxHeight)
 {
     auto minimumWidth = maxWidth / 2.0f;
     auto bestWidth = maxWidth;
-    float bestLineProportion = 0.0f;
+    auto bestScore = std::numeric_limits<float>::max();
+
+    auto widthProbeText = text;
+
+    if (widthProbeText.getWordWrap() == AttributedString::byChar)
+        widthProbeText.setWordWrap (AttributedString::byWord);
+
+    std::optional<float> advanceWidth;
 
     while (maxWidth > minimumWidth)
     {
-        createLayout (text, maxWidth, maxHeight);
+        createLayout (widthProbeText, maxWidth, maxHeight);
 
-        if (getNumLines() < 2)
+        const auto numLines = getNumLines();
+
+        if (numLines < 2)
             return;
 
-        auto line1 = lines.getUnchecked (lines.size() - 1)->getLineBoundsX().getLength();
-        auto line2 = lines.getUnchecked (lines.size() - 2)->getLineBoundsX().getLength();
-        auto shortest = jmin (line1, line2);
-        auto longest  = jmax (line1, line2);
-        auto prop = shortest > 0 ? longest / shortest : 1.0f;
+        std::vector<float> lineLengths;
+        lineLengths.reserve ((size_t) numLines);
+        std::transform (lines.begin(),
+                        lines.end(),
+                        std::back_inserter (lineLengths),
+                        [] (const auto& line) { return line->getLineBoundsX().getLength(); });
 
-        if (prop > 0.9f && prop < 1.1f)
-            return;
+        const auto longestLineLength = *std::max_element (lineLengths.begin(), lineLengths.end());
 
-        if (prop > bestLineProportion)
+        auto accumulateScore = [longestLineLength] (auto scoreSum, auto lineLength)
         {
-            bestLineProportion = prop;
+            const auto unusedSpace = 1.0f - (lineLength / longestLineLength);
+            return scoreSum + (unusedSpace * unusedSpace);
+        };
+
+        const auto score = std::accumulate (lineLengths.begin(),
+                                            lineLengths.end(),
+                                            0.0f, accumulateScore) / (float) numLines;
+
+        if (score < bestScore)
+        {
+            bestScore = score;
             bestWidth = maxWidth;
+
+            if (score < 0.4f)
+                break;
         }
 
-        maxWidth -= 10.0f;
+        if (! advanceWidth.has_value())
+        {
+            advanceWidth = std::numeric_limits<float>::max();
+
+            for (const auto& line : lines)
+                for (const auto& run : line->runs)
+                    for (const auto& glyph : run->glyphs)
+                        advanceWidth = jmin (*advanceWidth, glyph.width);
+        }
+
+        maxWidth -= *advanceWidth;
     }
 
-    if (! approximatelyEqual (bestWidth, maxWidth))
-        createLayout (text, bestWidth, maxHeight);
+    createLayout (text, bestWidth, maxHeight);
 }
 
 //==============================================================================
@@ -325,22 +358,7 @@ static auto castTo (const Range<U>& r)
     return Range<T> (static_cast<T> (r.getStart()), static_cast<T> (r.getEnd()));
 }
 
-static auto getFontsForRange (const detail::RangedValues<Font>& fonts)
-{
-    std::vector<FontForRange> result;
-    result.reserve (fonts.size());
-
-    std::transform (fonts.begin(),
-                    fonts.end(),
-                    std::back_inserter (result),
-                    [] (auto entry) {
-                        return FontForRange { entry.range, entry.value };
-                    });
-
-    return result;
-}
-
-static Range<int64> getInputRange (const ShapedText& st, Range<int64> glyphRange)
+static Range<int64> getInputRange (const detail::ShapedText& st, Range<int64> glyphRange)
 {
     if (glyphRange.isEmpty())
     {
@@ -356,11 +374,13 @@ static Range<int64> getInputRange (const ShapedText& st, Range<int64> glyphRange
              std::max (startInputRange.getEnd(), endInputRange.getEnd()) };
 }
 
-static Range<int64> getLineInputRange (const ShapedText& st, int64 lineNumber)
+static Range<int64> getLineInputRange (const detail::ShapedText& st, int64 lineNumber)
 {
-    return getInputRange (st, ShapedText::Detail { &st }.getSimpleShapedText()
-                                                        .getLineNumbers()
-                                                        .getItem ((size_t) lineNumber).range);
+    using namespace detail;
+
+    return getInputRange (st, st.getSimpleShapedText()
+                                .getLineNumbersForGlyphRanges()
+                                .getItem ((size_t) lineNumber).range);
 }
 
 struct MaxFontAscentAndDescent
@@ -368,19 +388,19 @@ struct MaxFontAscentAndDescent
     float ascent{}, descent{};
 };
 
-static MaxFontAscentAndDescent getMaxFontAscentAndDescentInEnclosingLine (const ShapedText& st,
+static MaxFontAscentAndDescent getMaxFontAscentAndDescentInEnclosingLine (const detail::ShapedText& st,
                                                                           Range<int64> lineChunkRange)
 {
-    const auto sst = ShapedText::Detail { &st }.getSimpleShapedText();
+    const auto sst = st.getSimpleShapedText();
 
-    const auto lineRange = sst.getLineNumbers()
+    const auto lineRange = sst.getLineNumbersForGlyphRanges()
                               .getItemWithEnclosingRange (lineChunkRange.getStart())->range;
 
     const auto fonts = sst.getResolvedFonts().getIntersectionsWith (lineRange);
 
     MaxFontAscentAndDescent result;
 
-    for (const auto& pair : fonts)
+    for (const auto pair : fonts)
     {
         result.ascent = std::max (result.ascent, pair.value.getAscent());
         result.descent = std::max (result.descent, pair.value.getDescent());
@@ -389,8 +409,10 @@ static MaxFontAscentAndDescent getMaxFontAscentAndDescentInEnclosingLine (const 
     return result;
 }
 
-static std::optional<TextDirection> getTextDirection (const AttributedString& text)
+static std::optional<detail::TextDirection> getTextDirection (const AttributedString& text)
 {
+    using namespace detail;
+
     using ReadingDirection = AttributedString::ReadingDirection;
 
     const auto dir = text.getReadingDirection();
@@ -406,18 +428,23 @@ static std::optional<TextDirection> getTextDirection (const AttributedString& te
 
 void TextLayout::createStandardLayout (const AttributedString& text)
 {
-    detail::RangedValues<Font> fonts;
-    detail::RangedValues<Colour> colours;
+    using namespace detail;
+
+    detail::Ranges::Operations ops;
+
+    RangedValues<Font> fonts;
+    RangedValues<Colour> colours;
 
     for (auto i = 0, iMax = text.getNumAttributes(); i < iMax; ++i)
     {
         const auto& attribute = text.getAttribute (i);
         const auto range = castTo<int64> (attribute.range);
-        fonts.set (range, attribute.font);
-        colours.set (range, attribute.colour);
+        fonts.set (range, attribute.font, ops);
+        colours.set (range, attribute.colour, ops);
+        ops.clear();
     }
 
-    auto shapedTextOptions = ShapedTextOptions{}.withFontsForRange (getFontsForRange (fonts))
+    auto shapedTextOptions = ShapedTextOptions{}.withFonts (fonts)
                                                 .withLanguage (SystemStats::getUserLanguage())
                                                 .withTrailingWhitespacesShouldFit (false)
                                                 .withJustification (justification)
@@ -425,30 +452,32 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                                 .withAdditiveLineSpacing (text.getLineSpacing());
 
     if (text.getWordWrap() != AttributedString::none)
-        shapedTextOptions = shapedTextOptions.withMaxWidth (width);
+        shapedTextOptions = shapedTextOptions.withWordWrapWidth (width);
 
-    ShapedText shapedText { text.getText(), shapedTextOptions };
+    if (text.getWordWrap() == AttributedString::WordWrap::byChar)
+        shapedTextOptions = shapedTextOptions.withAllowBreakingInsideWord (true);
+
+    ShapedText st { text.getText(), shapedTextOptions };
 
     std::optional<int64> lastLineNumber;
     std::unique_ptr<Line> line;
 
-    auto& jt = ShapedText::Detail { &shapedText }.getJustifiedText();
-    jt.accessTogetherWith ([&] (Span<const ShapedGlyph> glyphs,
-                                Span<Point<float>> positions,
+    st.accessTogetherWith ([&] (Span<const ShapedGlyph> glyphs,
+                                Span<const Point<float>> positions,
                                 Font font,
                                 Range<int64> glyphRange,
-                                int64 lineNumber,
+                                LineMetrics lineMetrics,
                                 Colour colour)
                            {
-                               if (std::exchange (lastLineNumber, lineNumber) != lineNumber)
+                               if (std::exchange (lastLineNumber, lineMetrics.lineNumber) != lineMetrics.lineNumber)
                                {
                                    if (line != nullptr)
                                        addLine (std::move (line));
 
-                                   const auto ascentAndDescent = getMaxFontAscentAndDescentInEnclosingLine (shapedText,
+                                   const auto ascentAndDescent = getMaxFontAscentAndDescentInEnclosingLine (st,
                                                                                                             glyphRange);
 
-                                   line = std::make_unique<Line> (castTo<int> (getLineInputRange (shapedText, lineNumber)),
+                                   line = std::make_unique<Line> (castTo<int> (getLineInputRange (st, lineMetrics.lineNumber)),
                                                                   positions[0],
                                                                   ascentAndDescent.ascent,
                                                                   ascentAndDescent.descent,
@@ -456,7 +485,7 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                                                   0);
                                }
 
-                               auto run = std::make_unique<Run> (castTo<int> (getInputRange (shapedText, glyphRange)), 0);
+                               auto run = std::make_unique<Run> (castTo<int> (getInputRange (st, glyphRange)), 0);
 
                                run->font = font;
                                run->colour = colour;
@@ -467,7 +496,7 @@ void TextLayout::createStandardLayout (const AttributedString& text)
 
                                    for (auto it  = std::reverse_iterator { glyphs.end() },
                                              end = std::reverse_iterator { glyphs.begin() };
-                                        it != end && it->whitespace;
+                                        it != end && it->isWhitespace();
                                         ++it)
                                    {
                                        --i;
@@ -477,7 +506,14 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                }();
 
                                for (size_t i = 0; i < beyondLastNonWhitespace; ++i)
-                                   run->glyphs.add ({ (int) glyphs[i].glyphId, positions[i] - line->lineOrigin, glyphs[i].advance.x });
+                               {
+                                   if (glyphs[i].isPlaceholderForLigature())
+                                       continue;
+
+                                   run->glyphs.add ({ (int) glyphs[i].glyphId,
+                                                      positions[i] - line->lineOrigin,
+                                                      glyphs[i].advance.x });
+                               }
 
                                line->runs.add (std::move (run));
                            },

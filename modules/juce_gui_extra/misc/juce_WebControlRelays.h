@@ -39,9 +39,12 @@ namespace juce
 
 /** Helper class that relays audio parameter information to an object inside a WebBrowserComponent.
 
-    In order to create a relay you need to specify a WebBrowserComponent object and an identifier
-    for the relayed state. This will result in a Javascript object becoming available inside the
-    WebBrowserComponent under the provided identifier.
+    In order to create a relay you need to specify an identifier for the relayed state. This will
+    result in a Javascript object becoming available inside the WebBrowserComponent under the
+    provided identifier.
+
+    Pass the relay object to WebBrowserComponent::Options::withOptionsFrom() to associate it with
+    a WebBrowserComponent instance.
 
     You can then use a WebSliderParameterAttachment as you would a SliderAttachment, to attach the
     relay to a RangedAudioParameter. This will synchronise the state and events of the Javascript
@@ -49,7 +52,8 @@ namespace juce
 
     @code
     // Add a relay to your AudioProcessorEditor members
-    WebSliderRelay cutoffSliderRelay { webComponent, "cutoffSlider" };
+    WebSliderRelay cutoffSliderRelay { "cutoffSlider" };
+    WebBrowserComponent webComponent { WebBrowserComponent::Options{}::withOptionsFrom (cutoffSliderRelay) };
     @endcode
 
     @code
@@ -114,9 +118,12 @@ private:
 
 /** Helper class that relays audio parameter information to an object inside a WebBrowserComponent.
 
-    In order to create a relay you need to specify a WebBrowserComponent object and an identifier
-    for the relayed state. This will result in a Javascript object becoming available inside the
-    WebBrowserComponent under the provided identifier.
+    In order to create a relay you need to specify an identifier for the relayed state. This will
+    result in a Javascript object becoming available inside the WebBrowserComponent under the
+    provided identifier.
+
+    Pass the relay object to WebBrowserComponent::Options::withOptionsFrom() to associate it with
+    a WebBrowserComponent instance.
 
     You can then use a WebToggleButtonParameterAttachment as you would a ButtonParameterAttachment,
     to attach the relay to a RangedAudioParameter. This will synchronise the state and events of
@@ -124,7 +131,8 @@ private:
 
     @code
     // Add a relay to your AudioProcessorEditor members
-    WebToggleButtonRelay muteToggleRelay { webComponent, "muteToggle" };
+    WebToggleButtonRelay muteToggleRelay { "muteToggle" };
+    WebBrowserComponent webComponent { WebBrowserComponent::Options{}::withOptionsFrom (muteToggleRelay) };
     @endcode
 
     @code
@@ -187,9 +195,12 @@ private:
 
 /** Helper class that relays audio parameter information to an object inside a WebBrowserComponent.
 
-    In order to create a relay you need to specify a WebBrowserComponent object and an identifier
-    for the relayed state. This will result in a Javascript object becoming available inside the
-    WebBrowserComponent under the provided identifier.
+    In order to create a relay you need to specify an identifier for the relayed state. This will
+    result in a Javascript object becoming available inside the WebBrowserComponent under the
+    provided identifier.
+
+    Pass the relay object to WebBrowserComponent::Options::withOptionsFrom() to associate it with
+    a WebBrowserComponent instance.
 
     You can then use a WebComboBoxParameterAttachment as you would a ComboBoxParameterAttachment,
     to attach the relay to a RangedAudioParameter. This will synchronise the state and events of
@@ -197,7 +208,8 @@ private:
 
     @code
     // Add a relay to your AudioProcessorEditor members
-    WebComboBoxRelay filterTypeComboRelay { webComponent, "filterTypeCombo" };
+    WebComboBoxRelay filterTypeComboRelay { "filterTypeCombo" };
+    WebBrowserComponent webComponent { WebBrowserComponent::Options{}::withOptionsFrom (filterTypeComboRelay) };
     @endcode
 
     @code

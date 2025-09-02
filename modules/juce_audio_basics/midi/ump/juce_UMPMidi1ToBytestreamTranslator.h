@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce::universal_midi_packets
 {
 
@@ -223,5 +222,4 @@ private:
 };
 
 } // namespace juce::universal_midi_packets
-
-#endif
+/** @endcond */

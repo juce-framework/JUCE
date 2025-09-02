@@ -627,7 +627,8 @@ public:
               valueLabel (label),
               defaultValue (normaliseParamValue (defaultParameterValue))
         {
-            auValueStrings = Parameter::getAllValueStrings();
+            if (getNumSteps() <= maxStringsToCache)
+                auValueStrings = getDiscreteValueStrings();
         }
 
         float getValue() const override
@@ -747,7 +748,15 @@ public:
 
         StringArray getAllValueStrings() const override
         {
-            return auValueStrings;
+            if (! auValueStrings.isEmpty())
+                return auValueStrings;
+
+            // If this is hit, the returned array of strings is going to be very large!
+            // Consider alternative approaches - perhaps you could fetch value strings
+            // one-at-a-time to avoid needing to have all the strings in memory simultaneously.
+            jassert (getNumSteps() <= maxStringsToCache);
+
+            return getDiscreteValueStrings();
         }
 
         String getParameterID() const override
@@ -787,6 +796,23 @@ public:
         void setLabel (String&& newLabel) { valueLabel = std::move (newLabel); }
 
     private:
+        static constexpr auto maxStringsToCache = 10'000;
+
+        StringArray getDiscreteValueStrings() const
+        {
+            if (! isDiscrete())
+                return {};
+
+            StringArray result;
+
+            const auto maxIndex = getNumSteps() - 1;
+
+            for (int i = 0; i < getNumSteps(); ++i)
+                result.add (getText ((float) i / (float) maxIndex, 1024));
+
+            return result;
+        }
+
         AudioUnitPluginInstance& pluginInstance;
         const UInt32 paramID;
         String name;
@@ -1391,11 +1417,22 @@ public:
                 for (const auto metadata : midiMessages)
                 {
                     if (metadata.numBytes <= 3)
+                    {
+                        const auto getByteOrZero = [&metadata] (int index)
+                        {
+                            return index < metadata.numBytes ? metadata.data[index] : (uint8) 0;
+                        };
+
                         MusicDeviceMIDIEvent (audioUnit,
-                                              metadata.data[0], metadata.data[1], metadata.data[2],
+                                              getByteOrZero (0),
+                                              getByteOrZero (1),
+                                              getByteOrZero (2),
                                               (UInt32) metadata.samplePosition);
+                    }
                     else
+                    {
                         MusicDeviceSysEx (audioUnit, metadata.data, (UInt32) metadata.numBytes);
+                    }
                 }
 
                 midiMessages.clear();
@@ -1612,9 +1649,9 @@ public:
     //==============================================================================
     void updateTrackProperties (const TrackProperties& properties) override
     {
-        if (properties.name.isNotEmpty())
+        if (properties.name.has_value())
         {
-            CFObjectHolder<CFStringRef> contextName { properties.name.toCFString() };
+            CFObjectHolder<CFStringRef> contextName { properties.name->toCFString() };
             AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ContextName, kAudioUnitScope_Global,
                                   0, &contextName.object, sizeof (contextName.object));
         }

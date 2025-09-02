@@ -1,5 +1,318 @@
 # JUCE breaking changes
 
+# Version 8.0.9
+
+## Change
+
+The signatures of OpenGLFrameBuffer::readPixels() and
+OpenGLFrameBuffer::writePixels() have changed, adding a new RowOrder parameter.
+
+**Possible Issues**
+
+Code that does not specify this parameter will not compile.
+
+**Workaround**
+
+Pass the extra parameter to specify whether the pixel data should be ordered
+with the top-most or bottom-most row first.
+
+**Rationale**
+
+The previous function calls did not allow the pixel order to be configured.
+readPixels() would return pixel data with the bottom-most row first (this is
+convention for the OpenGL API), but writePixels() would expect the top-most row
+first. This meant that reading and then immediately writing the same data would
+have the unexpected effect of flipping the image. Changing readPixels() to
+order pixels from top to bottom would be slightly dangerous, as it would
+introduce a change of behaviour with no accompanying compiler warning.
+Additionally, flipping the pixel storage introduces additional work that can be
+safely skipped when the pixel data is going to be written back to the
+framebuffer later.
+
+
+## Change
+
+The behaviour of the default constructed FocusTraverser objects has changed, and
+they will now navigate onto disabled components. This only affects navigation by
+screen readers and not general keyboard navigation, as the latter depends on the
+KeyboardFocusTraverser class.
+
+**Possible Issues**
+
+Disabled child components of focus containers that used the JUCE default
+FocusTraverser will now be discoverable by screen readers. They will accept
+accessibility focus, their title will be reported as well as their disabled
+state.
+
+Children of components that returned a custom ComponentTraverser object are not
+affected.
+
+**Workaround**
+
+If you wish to hide disabled components from screen readers, you can restore the
+old behaviour by overriding `Component::createFocusTraverser()` for your focus
+containers, and returning a FocusTraverser object created using the
+`FocusTraverser::SkipDisabledComponents::yes` argument.
+
+**Rationale**
+
+Disabled components are typically rendered in a dimmed or inactive state, but 
+are still prominently visible for sighted users. The old behaviour made these
+components entirely missing from the accessibility tree, making them 
+non-discoverable with screen readers. 
+
+This was in contrast to the behaviour of native OS components, that are still
+accessible using screen readers, but their disabled/dimmed state is also
+reported.
+
+
+## Change
+
+The default Visual Studio project settings for "Debug Information Format" have
+changed in the Projucer. By default debug symbols are generated using the /Zi
+flag.
+
+**Possible Issues**
+
+PDB file generation may change depending on the combination of "Debug
+Information Format" settings.
+
+**Workaround**
+
+Change the "Debug Information Format" setting for each Visual Studio
+configuration as required.
+
+**Rationale**
+
+The previous change to "/Z7" for the "Debug Information Format" flag caused
+build artefacts to drastically increase in size in some configurations, which
+could lead to build failures. In particular, when link-time code-generation is
+enabled, .obj files generated with the debug info mode set to "Z7" or "None"
+may be much larger than when using "Zi" instead.
+
+
+## Change
+
+The "Debug Information Format" flag has been changed to "/Zi" from "/Z7" when
+building JUCE on Windows using CMake.
+
+**Possible Issues**
+
+Some CI tooling (e.g., sscache) may experience issues writing debug information.
+Debug information will no longer be stored inside the object files during the
+build process.
+
+**Workaround**
+
+You can override the "Debug Information Format" flag with the
+"CMAKE_MSVC_DEBUG_INFORMATION_FORMAT" which is available under policy "CMP0141".
+
+This can be enabled at configuration time:
+    -DCMAKE_POLICY_DEFAULT_CMP0141=NEW
+    -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded (for "/Z7")
+    or
+    -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=ProgramDatabase (for "/Zi")
+
+**Rationale**
+
+The previous change to "/Z7" for the "Debug Information Format" flag caused
+build artefacts to drastically increase in size in some configurations, which
+could lead to build failures. In particular, when link-time code-generation is
+enabled, .obj files generated with the debug info mode set to "Z7" or "None"
+may be much larger than when using "Zi" instead.
+
+
+## Change
+
+The AudioFormat class now only has one virtual createWriterFor member function:
+`createWriterFor (std::unique_ptr<OutputStream>&, const AudioFormatWriterOptions&)`.
+
+The older createWriterFor overloads are now non-virtual and deprecated.
+
+**Possible Issues**
+
+Classes overriding the old AudioFormat::createWriterFor functions will fail to
+compile.
+
+Additionally, code calling the old functions will emit a deprecation warning.
+
+**Workaround**
+
+Classes inheriting from AudioFormat should override the new createWriterFor
+function that takes an AudioFormatWriterOptions parameter.
+
+**Rationale**
+
+Adding support for writing wav files in 32-bit PCM format required the addition
+of another parameter to the AudioFormat::createWriterFor interface. This
+function already had many parameters, some of them already superfluous for some
+of the formats that share this interface. The introduction of a new options type
+makes it easier to extend this interface now and in the future. The old
+functions are marked deprecated, as allowing to override them would have made
+the implementation more complicated. The new signature better communicates
+resource ownership, helping to avoid bugs due to misuse.
+
+
+## Change
+
+Some functions and types have been moved from the VST3ClientExtentions class
+into a new VST3Interface struct and JUCE_VST3_COMPATIBLE_CLASSES preprocessor
+definition.
+
+**Possible Issues**
+
+Your project may not compile.
+
+**Workaround**
+
+Replace relevant types and function calls with the equivalent in the
+VST3Interface struct, and/or define the JUCE_VST3_COMPATIBLE_CLASSES
+preprocessor definition in your Projucer or CMake project.
+
+**Rationale**
+
+This change allows the VST3 helper executable to be built without needing to
+depend on, and load, the plugin as part of the post build steps.
+
+
+# Version 8.0.7
+
+## Change
+
+The default Visual Studio project settings for "Debug Information Format" and
+"Force Generation of Debug Symbols" have changed in the Projucer. By default
+debug symbols are generated using the /Z7 flag.
+
+**Possible Issues**
+
+PDB file generation may change depending on the combination of "Debug
+Information Format" and "Force Generation of Debug Symbols" settings.
+
+**Workaround**
+
+Change the "Debug Information Format" and "Force Generation of Debug Symbols"
+settings for each Visual Studio configuration as required.
+
+**Rationale**
+
+The default behaviour of using "Program Database (/Zi)" is incompatible with
+some CI workflows and caching mechanisms. Enabling "Force Generation of Debug
+Symbols" by default also ensures /Z7 behaves more like /Zi by always generating
+a PDB file.
+
+
+## Change
+
+The signatures of virtual functions ImagePixelData::applyGaussianBlurEffect()
+and ImagePixelData::applySingleChannelBoxBlurEffect() have changed.
+ImageEffects::applyGaussianBlurEffect() and
+ImageEffects::applySingleChannelBoxBlurEffect() have been removed.
+
+**Possible Issues**
+
+User code overriding or calling these functions will fail to compile.
+
+**Workaround**
+
+The blur functions now operate within a specified area of the image. Update
+overriding implementations accordingly. Instead of using the ImageEffects
+static functions, call the corresponding ImagePixelData member functions
+directly.
+
+**Rationale**
+
+The blur functions had a 'temporary storage' parameter which was not
+particularly useful in practice, so this has been removed. Moving the
+functionality of the ImageEffects static members directly into corresponding
+member functions of ImagePixelData simplifies the public API.
+
+
+# Version 8.0.5
+
+## Change
+
+HeaderItemComponent::getIdealSize no longer applies modifiers to the result
+directly. Instead, these changes have been moved to the respective LookAndFeel
+methods, enabling better customization.
+
+**Possible Issues**
+
+Code that overrides LookAndFeel::getIdealPopupMenuItemSize and relied on the
+previous modifiers applied in HeaderItemComponent::getIdealSize may now behave
+differently.
+
+**Workaround**
+
+Review any overrides of LookAndFeel::getIdealPopupMenuItemSize and apply the
+necessary adjustments to account for any missing modifiers or changes in
+behavior.
+
+**Rationale**
+
+The previous approach did not allow users to customize the applied modifiers
+through the LookAndFeel class. Moving this logic to LookAndFeel methods ensures
+consistent and flexible customization.
+
+
+## Change
+
+The behavior of AudioTransportSource::hasStreamFinished has been updated to
+correctly return true when the stream has finished.
+
+**Possible Issues**
+
+This change may affect any code that relied on the previous behavior, where the
+method never returned true.
+
+**Workaround**
+
+Review and update any code that depends on hasStreamFinished or any registered
+ChangeListeners that respond to stream completion.
+
+**Rationale**
+
+The previous behavior, where hasStreamFinished never returned true, was
+incorrect. This update ensures the method works as intended.
+
+
+## Change
+
+AudioProcessor::TrackProperties now uses std::optional.
+
+**Possible Issues**
+
+Code that accessed TrackProperties properties directly will no longer compile.
+
+**Workaround**
+
+Use std::optional::has_value() to check if a property is set. Or Access the
+property value safely using std::optional::value() or operator*.
+
+**Rationale**
+
+Previously, it was not possible to distinguish whether a TrackProperty was
+explicitly set or if the default value was being used.
+
+
+## Change
+
+Support for Arm32 in Projucer has been removed for Windows targets.
+
+**Possible Issues**
+
+Projucer projects targeting Arm32 on Windows will no longer be able to select
+that option.
+
+**Workaround**
+
+Select Arm64 or Arm64EC instead of Arm32, and port any 32-bit specific code to
+64-bit.
+
+**Rationale**
+
+32-bit Arm support has been deprecated in current versions of Windows 11.
+
+
 # Version 8.0.4
 
 ## Change
@@ -8,7 +321,8 @@ The Javascript implementation has been moved into a independent juce module.
 
 **Possible Issues**
 
-Any existing use of JavascriptEngine, JSCursor, or JSObject will fail to compile.
+Any existing use of JavascriptEngine, JSCursor, or JSObject will fail to
+compile.
 
 **Workaround**
 
@@ -18,6 +332,27 @@ Add the new juce_javascript module to the project.
 
 The Javascript implementation increases compilation times while being required
 by only a select number of projects.
+
+
+## Change
+
+The return type for VST3ClientExtensions::getCompatibleClasses() has changed
+from a String to an array of 16 bytes.
+
+**Possible Issues**
+
+Any inherited classes overriding this method might fail to compile.
+
+**Workaround**
+
+Either explicitly switch to creating a 16-byte std::array or use
+VST3ClientExtensions::toInterfaceId() to convert a string to a 16-byte array.
+
+**Rationale**
+
+As part of adding functionality to support migrating parameter IDs from
+compatible plugins it was useful to switch to a safer type for representing
+VST3 interface IDs that closer matches the VST3 SDK types.
 
 
 ## Change
@@ -193,7 +528,7 @@ encoded string literal, for example for file comparison, Base64 encoding, or any
 encryption, may result in false negatives for JSON data containing the same data
 between versions of JUCE.
 
-Note: JSON files that only ever encoded ASCII text will NOT be effected.
+Note: JSON files that only ever encoded ASCII text will NOT be affected.
 
 **Workaround**
 

@@ -235,13 +235,13 @@ public:
         addChild (std::forward<Args> (remainingChildren)...);
     }
 
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("This class now has a move operator, so if you're trying to move them around, you "
                  "should use that, or if you really need to swap two groups, just call std::swap. "
                  "However, remember that swapping a group that's already owned by an AudioProcessor "
                  "will most likely crash the host, so don't do that.")]]
     void swapWith (AudioProcessorParameterGroup& other)  { std::swap (*this, other); }
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

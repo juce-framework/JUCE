@@ -912,7 +912,7 @@ void TableHeaderComponent::showColumnChooserMenu (const int columnIdClicked)
     {
         m.setLookAndFeel (&getLookAndFeel());
 
-        m.showMenuAsync (PopupMenu::Options(),
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (this).withMousePosition(),
                          ModalCallbackFunction::forComponent (tableHeaderMenuCallback, this, columnIdClicked));
     }
 }

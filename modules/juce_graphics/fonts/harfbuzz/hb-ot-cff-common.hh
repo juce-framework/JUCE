@@ -308,8 +308,8 @@ struct FDSelect
   {
     switch (format)
     {
-    case 0: return format.static_size + u.format0.get_size (num_glyphs);
-    case 3: return format.static_size + u.format3.get_size ();
+    case 0: hb_barrier (); return format.static_size + u.format0.get_size (num_glyphs);
+    case 3: hb_barrier (); return format.static_size + u.format3.get_size ();
     default:return 0;
     }
   }
@@ -320,8 +320,8 @@ struct FDSelect
 
     switch (format)
     {
-    case 0: return u.format0.get_fd (glyph);
-    case 3: return u.format3.get_fd (glyph);
+    case 0: hb_barrier (); return u.format0.get_fd (glyph);
+    case 3: hb_barrier (); return u.format3.get_fd (glyph);
     default:return 0;
     }
   }
@@ -332,8 +332,8 @@ struct FDSelect
 
     switch (format)
     {
-    case 0: return u.format0.get_fd_range (glyph);
-    case 3: return u.format3.get_fd_range (glyph);
+    case 0: hb_barrier (); return u.format0.get_fd_range (glyph);
+    case 3: hb_barrier (); return u.format3.get_fd_range (glyph);
     default:return {0, 1};
     }
   }
@@ -347,8 +347,8 @@ struct FDSelect
 
     switch (format)
     {
-    case 0: return_trace (u.format0.sanitize (c, fdcount));
-    case 3: return_trace (u.format3.sanitize (c, fdcount));
+    case 0: hb_barrier (); return_trace (u.format0.sanitize (c, fdcount));
+    case 3: hb_barrier (); return_trace (u.format3.sanitize (c, fdcount));
     default:return_trace (false);
     }
   }

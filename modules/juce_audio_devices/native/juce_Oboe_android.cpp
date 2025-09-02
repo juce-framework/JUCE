@@ -666,44 +666,9 @@ private:
               sampleRate (sampleRateToUse),
               bufferSize (bufferSizeToUse),
               streamFormat (streamFormatToUse),
-              bitDepth (bitDepthToUse),
-              outputStream (new OboeStream (outputDeviceId,
-                                            oboe::Direction::Output,
-                                            oboe::SharingMode::Exclusive,
-                                            numOutputChannels,
-                                            streamFormatToUse,
-                                            sampleRateToUse,
-                                            bufferSizeToUse,
-                                            this))
+              bitDepth (bitDepthToUse)
         {
-            if (numInputChannels > 0)
-            {
-                inputStream.reset (new OboeStream (inputDeviceId,
-                                                   oboe::Direction::Input,
-                                                   oboe::SharingMode::Exclusive,
-                                                   numInputChannels,
-                                                   streamFormatToUse,
-                                                   sampleRateToUse,
-                                                   bufferSizeToUse,
-                                                   nullptr));
-
-                if (inputStream->openedOk() && outputStream->openedOk())
-                {
-                    const auto getSampleRate = [] (auto nativeStream)
-                    {
-                        return nativeStream != nullptr ? nativeStream->getSampleRate() : 0;
-                    };
-                    // Input & output sample rates should match!
-                    jassert (getSampleRate (inputStream->getNativeStream())
-                               == getSampleRate (outputStream->getNativeStream()));
-                }
-
-                checkStreamSetup (inputStream.get(), inputDeviceId, numInputChannels,
-                                  sampleRate, bufferSize, streamFormat);
-            }
-
-            checkStreamSetup (outputStream.get(), outputDeviceId, numOutputChannels,
-                              sampleRate, bufferSize, streamFormat);
+            openStreams();
         }
 
         // Not strictly required as these should not change, but recommended by Google anyway
@@ -733,6 +698,47 @@ private:
                 return nativeStream->getBufferCapacityInFrames();
 
             return 0;
+        }
+
+        void openStreams()
+        {
+            outputStream = std::make_unique<OboeStream> (outputDeviceId,
+                                                         oboe::Direction::Output,
+                                                         oboe::SharingMode::Exclusive,
+                                                         numOutputChannels,
+                                                         streamFormat,
+                                                         sampleRate,
+                                                         bufferSize,
+                                                         static_cast<AudioStreamCallback*> (this));
+
+            checkStreamSetup (outputStream.get(), outputDeviceId, numOutputChannels,
+                              sampleRate, bufferSize, streamFormat);
+
+            if (numInputChannels <= 0)
+                return;
+
+            inputStream = std::make_unique<OboeStream> (inputDeviceId,
+                                                        oboe::Direction::Input,
+                                                        oboe::SharingMode::Exclusive,
+                                                        numInputChannels,
+                                                        streamFormat,
+                                                        sampleRate,
+                                                        bufferSize,
+                                                        nullptr);
+
+            checkStreamSetup (inputStream.get(), inputDeviceId, numInputChannels,
+                              sampleRate, bufferSize, streamFormat);
+
+            if (! inputStream->openedOk() || ! outputStream->openedOk())
+                return;
+
+            const auto getSampleRate = [] (auto nativeStream)
+            {
+                return nativeStream != nullptr ? nativeStream->getSampleRate() : 0;
+            };
+            // Input & output sample rates should match!
+            jassert (getSampleRate (inputStream->getNativeStream())
+                     == getSampleRate (outputStream->getNativeStream()));
         }
 
         OboeAudioIODevice& owner;
@@ -782,8 +788,7 @@ private:
         {
             const SpinLock::ScopedLockType lock { audioCallbackMutex };
 
-            inputStream  = nullptr;
-            outputStream = nullptr;
+            destroyStreams();
         }
 
         int getOutputLatencyInSamples() override    { return outputLatency; }
@@ -958,30 +963,26 @@ private:
 
             JUCE_OBOE_LOG ("Oboe stream onErrorAfterClose(): " + getOboeString (error));
 
-            if (error == oboe::Result::ErrorDisconnected)
-            {
-                const SpinLock::ScopedTryLockType streamRestartLock { streamRestartMutex };
+            const SpinLock::ScopedTryLockType streamRestartLock { streamRestartMutex };
 
-                if (streamRestartLock.isLocked())
-                {
-                    // Close, recreate, and start the stream, not much use in current one.
-                    // Use default device id, to let the OS pick the best ID (since our was disconnected).
+            if (! streamRestartLock.isLocked())
+                return;
 
-                    const SpinLock::ScopedLockType audioCallbackLock { audioCallbackMutex };
+            const SpinLock::ScopedLockType audioCallbackLock { audioCallbackMutex };
 
-                    outputStream = nullptr;
-                    outputStream.reset (new OboeStream (oboe::kUnspecified,
-                                                        oboe::Direction::Output,
-                                                        oboe::SharingMode::Exclusive,
-                                                        numOutputChannels,
-                                                        streamFormat,
-                                                        sampleRate,
-                                                        bufferSize,
-                                                        this));
+            destroyStreams();
 
-                    outputStream->start();
-                }
-            }
+            if (error != oboe::Result::ErrorDisconnected)
+                return;
+
+            openStreams();
+            start();
+        }
+
+        void destroyStreams()
+        {
+            inputStream = nullptr;
+            outputStream = nullptr;
         }
 
         std::vector<SampleType> inputStreamNativeBuffer;
@@ -1196,8 +1197,7 @@ public:
 
     bool supportsDevicesInfo() const
     {
-        static auto result = getAndroidSDKVersion() >= 23;
-        return result;
+        return true;
     }
 
     void addDevice (const LocalRef<jobject>& device, JNIEnv* env)

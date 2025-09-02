@@ -96,7 +96,7 @@ enum class TypefaceMetricsKind
 */
 struct TypefaceMetrics
 {
-    /** The proportion of the typeface's height that it above the baseline, as a value between 0 and 1.
+    /** The proportion of the typeface's height that is above the baseline, as a value between 0 and 1.
         Note that 'height' here refers to the result of adding the absolute ascent and descent values.
         That is, the sum of the ascent and descent will equal 1.
         The sum of the ascent and descent will normally differ from the em size of the font.
@@ -107,6 +107,8 @@ struct TypefaceMetrics
 
     /** The factor by which a JUCE font height should be multiplied in order to convert to a font
         size in points.
+
+        May be inf if the font ascent and descent overrides have both been set to 0!
     */
     float heightToPoints{};
 };
@@ -253,13 +255,10 @@ public:
         Support for SVG and COLRv1 may be added in the future, depending on demand. However, this
         would require significant additions to JUCE's rendering code, so it has been omitted for
         now.
-
-        The height is specified in JUCE font-height units.
     */
     std::vector<GlyphLayer> getLayersForGlyph (TypefaceMetricsKind,
                                                int glyphNumber,
-                                               const AffineTransform&,
-                                               float normalisedHeight) const;
+                                               const AffineTransform&) const;
 
     /** Kinds of colour glyph format that may be implemented by a particular typeface.
         Most typefaces are monochromatic, and do not support any colour formats.
@@ -384,6 +383,16 @@ public:
         still renders slightly smaller than Verdana, but the differences are less pronounced.
     */
     static Typeface::Ptr findSystemTypeface();
+
+    /** Returns the OpenType features supported by this typeface.
+
+        This method returns a list of all OpenType font features (such as ligatures,
+        small caps, stylistic alternates, etc.) that are available in the current
+        typeface.
+
+        @see FontFeatureTag, FontFeatureSetting, FontOptions, Font
+     */
+    std::vector<FontFeatureTag> getSupportedFeatures() const;
 
 private:
     //==============================================================================

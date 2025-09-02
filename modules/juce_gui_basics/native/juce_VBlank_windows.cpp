@@ -56,12 +56,7 @@ public:
     {
         cancelPendingUpdate();
 
-        {
-            const std::scoped_lock lock { mutex };
-            threadState = ThreadState::exit;
-        }
-
-        condvar.notify_one();
+        state |= flagExit;
 
         stopThread (-1);
     }
@@ -107,6 +102,9 @@ public:
 
     static HMONITOR getMonitorFromOutput (ComSmartPtr<IDXGIOutput> output)
     {
+        if (output == nullptr)
+            return nullptr;
+
         DXGI_OUTPUT_DESC desc = {};
         return (FAILED (output->GetDesc (&desc)) || ! desc.AttachedToDesktop)
                    ? nullptr
@@ -121,24 +119,24 @@ private:
         {
             if (output->WaitForVBlank() == S_OK)
             {
-                if (const auto now = Time::getMillisecondCounterHiRes();
-                    now - lastVBlankEvent.exchange (now) < 1.0)
-                {
-                    Thread::sleep (1);
-                }
+                const auto now = Time::getMillisecondCounterHiRes();
 
-                std::unique_lock lock { mutex };
-                condvar.wait (lock, [this] { return threadState != ThreadState::sleep; });
+                if (now - lastVBlankEvent.exchange (now) < 1.0)
+                    sleep (1);
 
-                if (threadState == ThreadState::exit)
+                const auto stateToRead = state.fetch_or (flagPaintPending);
+
+                if ((stateToRead & flagExit) != 0)
                     return;
 
-                threadState = ThreadState::sleep;
+                if ((stateToRead & flagPaintPending) != 0)
+                    continue;
+
                 triggerAsyncUpdate();
             }
             else
             {
-                Thread::sleep (1);
+                sleep (1);
             }
         }
     }
@@ -150,32 +148,22 @@ private:
         for (auto& listener : listeners)
             listener.get().onVBlank (timestampSec);
 
-        {
-            const std::scoped_lock lock { mutex };
-
-            if (threadState == ThreadState::sleep)
-                threadState = ThreadState::paint;
-        }
-
-        condvar.notify_one();
+        state &= ~flagPaintPending;
     }
+
+    enum Flags
+    {
+        flagExit = 1 << 0,
+        flagPaintPending = 1 << 1,
+    };
 
     //==============================================================================
     ComSmartPtr<IDXGIOutput> output;
     HMONITOR monitor = nullptr;
     std::vector<std::reference_wrapper<VBlankListener>> listeners;
 
-    enum class ThreadState
-    {
-        sleep,
-        paint,
-        exit,
-    };
-
     std::atomic<double> lastVBlankEvent{};
-    ThreadState threadState = ThreadState::paint;
-    std::condition_variable condvar;
-    std::mutex mutex;
+    std::atomic<int> state{};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VBlankThread)
     JUCE_DECLARE_NON_MOVEABLE (VBlankThread)
@@ -227,21 +215,24 @@ public:
         if (threadWithListener != threads.end())
             removeListener (threadWithListener, listener);
 
-        SharedResourcePointer<DirectX> directX;
         for (const auto& adapter : directX->adapters.getAdapterArray())
         {
-            UINT i = 0;
-            ComSmartPtr<IDXGIOutput> output;
-
-            while (adapter->dxgiAdapter->EnumOutputs (i, output.resetAndGetPointerAddress()) != DXGI_ERROR_NOT_FOUND)
+            for (UINT i = 0;; ++i)
             {
-                if (VBlankThread::getMonitorFromOutput (output) == monitor)
-                {
-                    threads.emplace_back (std::make_unique<VBlankThread> (output, monitor, listener));
-                    return;
-                }
+                ComSmartPtr<IDXGIOutput> output;
+                const auto result = adapter->dxgiAdapter->EnumOutputs (i, output.resetAndGetPointerAddress());
 
-                ++i;
+                if (result == DXGI_ERROR_NOT_CURRENTLY_AVAILABLE)
+                    break;
+
+                if (result == DXGI_ERROR_NOT_FOUND)
+                    break;
+
+                if (VBlankThread::getMonitorFromOutput (output) != monitor)
+                    continue;
+
+                threads.emplace_back (std::make_unique<VBlankThread> (output, monitor, listener));
+                break;
             }
         }
     }
@@ -255,7 +246,6 @@ public:
 
     void reconfigureDisplays()
     {
-        SharedResourcePointer<DirectX> directX;
         directX->adapters.updateAdapters();
 
         for (auto& thread : threads)
@@ -301,6 +291,7 @@ private:
 
     //==============================================================================
     Threads threads;
+    SharedResourcePointer<DirectX> directX;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VBlankDispatcher)
     JUCE_DECLARE_NON_MOVEABLE (VBlankDispatcher)

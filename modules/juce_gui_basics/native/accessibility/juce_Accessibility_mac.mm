@@ -167,7 +167,7 @@ private:
             addMethod (@selector (accessibilityFrame), [] (id self, SEL)
             {
                 if (auto* handler = getHandler (self))
-                    return flippedScreenRect (makeNSRect (handler->getComponent().getScreenBounds()));
+                    return flippedScreenRect (makeCGRect (handler->getComponent().getScreenBounds()));
 
                 return NSZeroRect;
             });
@@ -429,7 +429,7 @@ private:
             addMethod (@selector (accessibilityFrameForRange:), [] (id self, SEL, NSRange range)
             {
                 if (auto* textInterface = getTextInterface (self))
-                    return flippedScreenRect (makeNSRect (textInterface->getTextBounds (nsRangeToJuce (range)).getBounds()));
+                    return flippedScreenRect (makeCGRect (textInterface->getTextBounds (nsRangeToJuce (range)).getBounds()));
 
                 return NSZeroRect;
             });
@@ -937,6 +937,11 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
                             NSAccessibilityAnnouncementRequestedNotification,
                             @{ NSAccessibilityAnnouncementKey: juceStringToNS (announcementString),
                                NSAccessibilityPriorityKey:     @(nsPriority) });
+}
+
+bool AccessibilityHandler::areAnyAccessibilityClientsActive()
+{
+    return juce::areAnyAccessibilityClientsActive();
 }
 
 } // namespace juce

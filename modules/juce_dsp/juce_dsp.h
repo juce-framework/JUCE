@@ -44,7 +44,7 @@
 
   ID:                 juce_dsp
   vendor:             juce
-  version:            8.0.4
+  version:            8.0.9
   name:               JUCE DSP classes
   description:        Classes for audio buffer manipulation, digital audio processing, filtering, oversampling, fast math functions etc.
   website:            http://www.juce.com/juce
@@ -85,13 +85,25 @@
 #elif JUCE_ARM
 
  #ifndef JUCE_USE_SIMD
-  #define JUCE_USE_SIMD 1
+  #if JUCE_USE_ARM_NEON
+   #define JUCE_USE_SIMD 1
+  #else
+   #define JUCE_USE_SIMD 0
+  #endif
  #endif
 
- #if JUCE_64BIT && JUCE_WINDOWS
-  #include <arm64_neon.h>
- #else
-  #include <arm_neon.h>
+ #if JUCE_USE_SIMD
+  #if JUCE_WINDOWS
+   #if JUCE_64BIT
+    #if ! JUCE_CLANG
+     #include <arm64_neon.h>
+    #endif
+   #else
+    #include <arm_neon.h>
+   #endif
+  #else
+   #include <arm_neon.h>
+  #endif
  #endif
 
 #else
@@ -213,19 +225,19 @@ namespace util
     /** Use this function to prevent denormals on intel CPUs.
         This function will work with both primitives and simple containers.
     */
-  #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
+   #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
     inline void snapToZero (float&       x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
-   #ifndef DOXYGEN
+    /** @cond */
     inline void snapToZero (double&      x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
     inline void snapToZero (long double& x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
-   #endif
-  #else
+    /** @endcond */
+   #else
     inline void snapToZero ([[maybe_unused]] float&       x) noexcept            {}
-   #ifndef DOXYGEN
+    /** @cond */
     inline void snapToZero ([[maybe_unused]] double&      x) noexcept            {}
     inline void snapToZero ([[maybe_unused]] long double& x) noexcept            {}
+    /** @endcond */
    #endif
-  #endif
 }
 
 }

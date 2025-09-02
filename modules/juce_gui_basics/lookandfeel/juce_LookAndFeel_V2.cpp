@@ -571,7 +571,11 @@ void LookAndFeel_V2::drawProgressBar (Graphics& g, ProgressBar& progressBar,
                                 x, (float) height,
                                 x - (float) stripeWidth * 0.5f, (float) height);
 
-        Image im (Image::ARGB, width, height, true);
+        Image im (Image::ARGB,
+                  width,
+                  height,
+                  true,
+                  *g.getInternalContext().getPreferredImageTypeForTemporaryImages());
 
         {
             Graphics g2 (im);
@@ -899,6 +903,22 @@ void LookAndFeel_V2::getIdealPopupMenuItemSizeWithOptions (const String& text,
                                standardMenuItemHeight,
                                idealWidth,
                                idealHeight);
+}
+
+void LookAndFeel_V2::getIdealPopupMenuSectionHeaderSizeWithOptions (const String& text,
+                                                                    int standardMenuItemHeight,
+                                                                    int& idealWidth,
+                                                                    int& idealHeight,
+                                                                    const PopupMenu::Options& options)
+{
+    getIdealPopupMenuItemSizeWithOptions (text,
+                                          false,
+                                          standardMenuItemHeight,
+                                          idealWidth,
+                                          idealHeight,
+                                          options);
+    idealHeight += idealHeight / 2;
+    idealWidth += idealWidth / 4;
 }
 
 void LookAndFeel_V2::drawPopupMenuBackground (Graphics& g, int width, int height)
@@ -2626,7 +2646,13 @@ void LookAndFeel_V2::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
 {
     if (cachedImage.isNull())
     {
-        cachedImage = Image (Image::ARGB, box.getWidth(), box.getHeight(), true);
+        cachedImage = Image (Image::ARGB,
+                             box.getWidth(),
+                             box.getHeight(),
+                             true,
+                             *g.getInternalContext().getPreferredImageTypeForTemporaryImages());
+        cachedImage.setBackupEnabled (false);
+
         Graphics g2 (cachedImage);
 
         DropShadow (Colours::black.withAlpha (0.7f), 8, Point<int> (0, 2)).drawForPath (g2, path);

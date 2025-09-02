@@ -124,19 +124,18 @@ IconParseResults parseIconArguments (juce::ArgumentList&& args)
     args.checkMinNumArguments (2);
     const auto output = args.arguments.removeAndReturn (0);
 
-    const auto popDrawable = [&args]() -> std::unique_ptr<juce::Drawable>
+    const auto popFile = [&args]() -> juce::File
     {
         if (args.size() == 0)
             return {};
 
-        const auto firstArgText = args.arguments.removeAndReturn (0).text;
-        return juce::Drawable::createFromImageFile (firstArgText);
+        return args.arguments.removeAndReturn (0).text;
     };
 
-    auto smallIcon = popDrawable();
-    auto bigIcon   = popDrawable();
+    const auto smallIcon = popFile();
+    const auto bigIcon   = popFile();
 
-    return { { std::move (smallIcon), std::move (bigIcon) }, output.text };
+    return { juce::build_tools::Icons::fromFilesSmallAndBig (smallIcon, bigIcon), output.text };
 }
 
 int writeMacIcon (juce::ArgumentList&& argumentList)
@@ -252,6 +251,8 @@ juce::build_tools::PlistOptions parsePlistOptions (const juce::File& file,
     updateField ("CAMERA_PERMISSION_TEXT",               result.cameraPermissionText);
     updateField ("BLUETOOTH_PERMISSION_ENABLED",         result.bluetoothPermissionEnabled);
     updateField ("BLUETOOTH_PERMISSION_TEXT",            result.bluetoothPermissionText);
+    updateField ("LOCAL_NETWORK_PERMISSION_ENABLED",     result.localNetworkPermissionEnabled);
+    updateField ("LOCAL_NETWORK_PERMISSION_TEXT",        result.localNetworkPermissionText);
     updateField ("SEND_APPLE_EVENTS_PERMISSION_ENABLED", result.sendAppleEventsPermissionEnabled);
     updateField ("SEND_APPLE_EVENTS_PERMISSION_TEXT",    result.sendAppleEventsPermissionText);
     updateField ("SHOULD_ADD_STORYBOARD",                result.shouldAddStoryboardToProject);
@@ -298,6 +299,8 @@ juce::build_tools::PlistOptions parsePlistOptions (const juce::File& file,
                 "This app requires access to Bluetooth to function correctly.");
     setIfEmpty (result.sendAppleEventsPermissionText,
                 "This app requires the ability to send Apple events to function correctly.");
+    setIfEmpty (result.localNetworkPermissionText,
+                "This app requires access to the local network to function correctly.");
 
     result.documentExtensions = result.documentExtensions.replace (";", ",");
 

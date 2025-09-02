@@ -1,0 +1,31 @@
+name: JUCE Private Nightly Trigger
+on:
+  schedule:
+    - cron: '0 3 * * *'
+env:
+  GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  TRIGGER_WORKFLOW_REF: develop
+jobs:
+  juce-private-nightly-trigger:
+    if: github.repository == 'juce-framework/JUCE-dev'
+    name: JUCE Nightly Trigger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          sparse-checkout: ./.github/workflows
+      - env:
+          TRIGGER_WORKFLOW_INPUTS: |
+            {"triggerer":"Nightly Build","nightly-targets":${{ vars.NIGHTLY_BUILD_TARGETS }}}
+        run: python3 ./.github/workflows/trigger_workflow.py
+      - if: ${{ contains(fromJSON(vars.NIGHTLY_BUILD_TARGETS), 'cpp20') }}
+        env:
+          TRIGGER_WORKFLOW_INPUTS: |
+            {"triggerer":"Nightly Build C++20","cpp-std":"20"}
+        run: python3 ./.github/workflows/trigger_workflow.py
+      - if: ${{ contains(fromJSON(vars.NIGHTLY_BUILD_TARGETS), 'cpp23') }}
+        env:
+          TRIGGER_WORKFLOW_INPUTS: |
+            {"triggerer":"Nightly Build C++23","cpp-std":"23"}
+        run: python3 ./.github/workflows/trigger_workflow.py
+

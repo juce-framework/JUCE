@@ -63,15 +63,12 @@ public:
     StringArray getQualityOptions() override;
 
     //==============================================================================
+    std::unique_ptr<AudioFormatWriter> createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
+                                                        const AudioFormatWriterOptions& options) override;
+
     AudioFormatReader* createReaderFor (InputStream* sourceStream,
                                         bool deleteStreamIfOpeningFails) override;
 
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex) override;
     using AudioFormat::createWriterFor;
 
 private:

@@ -35,7 +35,7 @@
 namespace juce
 {
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 class OpenGLContext::NativeContext
 {
@@ -220,7 +220,7 @@ public:
             const auto newArea = peer->getAreaCoveredBy (owner);
 
             if (convertToRectInt ([view frame]) != newArea)
-                [view setFrame: makeNSRect (newArea)];
+                [view setFrame: makeCGRect (newArea)];
         }
     }
 
@@ -295,6 +295,9 @@ public:
         double videoRefreshPeriodS = 1.0 / 60.0;
     };
 
+    void addListener (NativeContextListener&) {}
+    void removeListener (NativeContextListener&) {}
+
     Component& owner;
     NSOpenGLContext* renderContext = nil;
     NSOpenGLView* view = nil;
@@ -308,10 +311,30 @@ public:
     {
         MouseForwardingNSOpenGLViewClass()  : ObjCClass ("JUCEGLView_")
         {
-            addMethod (@selector (rightMouseDown:),       [] (id self, SEL, NSEvent* ev)     { [[(NSOpenGLView*) self superview] rightMouseDown: ev]; });
-            addMethod (@selector (rightMouseUp:),         [] (id self, SEL, NSEvent* ev)     { [[(NSOpenGLView*) self superview] rightMouseUp:   ev]; });
-            addMethod (@selector (acceptsFirstMouse:),    [] (id, SEL, NSEvent*) -> BOOL     { return YES; });
-            addMethod (@selector (accessibilityHitTest:), [] (id self, SEL, NSPoint p) -> id { return [[(NSOpenGLView*) self superview] accessibilityHitTest: p]; });
+            addMethod (@selector (rightMouseDown:), [] (id self, SEL, NSEvent* ev)
+            {
+                [[(NSOpenGLView*) self superview] rightMouseDown: ev];
+            });
+
+            addMethod (@selector (rightMouseUp:), [] (id self, SEL, NSEvent* ev)
+            {
+                [[(NSOpenGLView*) self superview] rightMouseUp:   ev];
+            });
+
+            addMethod (@selector (acceptsFirstMouse:), [] (id, SEL, NSEvent*) -> BOOL
+            {
+                return YES;
+            });
+
+            addMethod (@selector (accessibilityHitTest:), [] (id self, SEL, NSPoint p) -> id
+            {
+                return [[(NSOpenGLView*) self superview] accessibilityHitTest: p];
+            });
+
+            addMethod (@selector (hitTest:), [] (id, SEL, NSPoint) -> NSView*
+            {
+                return nil;
+            });
 
             registerClass();
         }
@@ -326,6 +349,6 @@ bool OpenGLHelpers::isContextActive()
     return CGLGetCurrentContext() != CGLContextObj();
 }
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 } // namespace juce

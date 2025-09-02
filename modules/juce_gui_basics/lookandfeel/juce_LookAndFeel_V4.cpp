@@ -550,7 +550,7 @@ void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, const ProgressBar& prog
                                 x, static_cast<float> (height),
                                 x - (float) stripeWidth * 0.5f, static_cast<float> (height));
 
-        Image im (Image::ARGB, width, height, true);
+        Image im (Image::ARGB, width, height, true, *g.getInternalContext().getPreferredImageTypeForTemporaryImages());
 
         {
             Graphics g2 (im);
@@ -1311,7 +1311,9 @@ void LookAndFeel_V4::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
 {
     if (cachedImage.isNull())
     {
-        cachedImage = { Image::ARGB, box.getWidth(), box.getHeight(), true };
+        cachedImage = { Image::ARGB, box.getWidth(), box.getHeight(), true, *g.getInternalContext().getPreferredImageTypeForTemporaryImages() };
+        cachedImage.setBackupEnabled (false);
+
         Graphics g2 (cachedImage);
 
         DropShadow (Colours::black.withAlpha (0.7f), 8, { 0, 2 }).drawForPath (g2, path);

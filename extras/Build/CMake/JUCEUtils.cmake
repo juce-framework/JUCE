@@ -354,6 +354,8 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content CAMERA_PERMISSION_TEXT               ${target} JUCE_CAMERA_PERMISSION_TEXT)
     _juce_append_target_property(file_content BLUETOOTH_PERMISSION_ENABLED         ${target} JUCE_BLUETOOTH_PERMISSION_ENABLED)
     _juce_append_target_property(file_content BLUETOOTH_PERMISSION_TEXT            ${target} JUCE_BLUETOOTH_PERMISSION_TEXT)
+    _juce_append_target_property(file_content LOCAL_NETWORK_PERMISSION_ENABLED     ${target} JUCE_LOCAL_NETWORK_PERMISSION_ENABLED)
+    _juce_append_target_property(file_content LOCAL_NETWORK_PERMISSION_TEXT        ${target} JUCE_LOCAL_NETWORK_PERMISSION_TEXT)
     _juce_append_target_property(file_content SEND_APPLE_EVENTS_PERMISSION_ENABLED ${target} JUCE_SEND_APPLE_EVENTS_PERMISSION_ENABLED)
     _juce_append_target_property(file_content SEND_APPLE_EVENTS_PERMISSION_TEXT    ${target} JUCE_SEND_APPLE_EVENTS_PERMISSION_TEXT)
     _juce_append_target_property(file_content SHOULD_ADD_STORYBOARD                ${target} JUCE_SHOULD_ADD_STORYBOARD)
@@ -476,7 +478,16 @@ function(juce_add_binary_data target)
     endforeach()
 
     set(input_file_list "${juce_binary_data_folder}/input_file_list")
-    file(WRITE "${input_file_list}" "${newline_delimited_input}")
+
+    set(old_input_file_list "")
+
+    if(EXISTS "${input_file_list}")
+        file(READ "${input_file_list}" old_input_file_list)
+    endif()
+
+    if(NOT "${old_input_file_list}" STREQUAL "${newline_delimited_input}")
+        file(WRITE "${input_file_list}" "${newline_delimited_input}")
+    endif()
 
     add_custom_command(OUTPUT ${binary_file_names}
         COMMAND juce::juceaide binarydata "${JUCE_ARG_NAMESPACE}" "${JUCE_ARG_HEADER_NAME}"
@@ -877,6 +888,8 @@ function(_juce_create_windows_package source_target dest_target extension defaul
         set(desktop_ini "${output_folder}/desktop.ini")
         set(plugin_ico "${output_folder}/Plugin.ico")
 
+        target_sources(${dest_target} PRIVATE "${desktop_ini}" "${icon_file}")
+
         file(GENERATE OUTPUT "${desktop_ini}"
             CONTENT
             "[.ShellClassInfo]\nIconResource=Plugin.ico,0\nIconFile=Plugin.ico\nIconIndex=0\n")
@@ -884,7 +897,6 @@ function(_juce_create_windows_package source_target dest_target extension defaul
             COMMAND "${CMAKE_COMMAND}" -E copy "${icon_file}" "${plugin_ico}"
             COMMAND attrib +s "${desktop_ini}"
             COMMAND attrib +s "${output_folder}"
-            DEPENDS "${icon_file}" "${desktop_ini}"
             VERBATIM)
     endif()
 endfunction()
@@ -1017,8 +1029,10 @@ endfunction()
 
 # ==================================================================================================
 
-function(_juce_add_vst3_manifest_helper_target)
-    if(TARGET juce_vst3_helper
+function(_juce_add_vst3_manifest_helper_target shared_code_target)
+    set(vst3_helper_target ${shared_code_target}_vst3_helper)
+
+    if(TARGET ${vst3_helper_target}
        OR (CMAKE_SYSTEM_NAME STREQUAL "iOS")
        OR (CMAKE_SYSTEM_NAME STREQUAL "Android")
        OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
@@ -1036,32 +1050,27 @@ function(_juce_add_vst3_manifest_helper_target)
 
     set(source "${module_path}/juce_audio_plugin_client/VST3/juce_VST3ManifestHelper.${extension}")
 
-    add_executable(juce_vst3_helper "${source}")
-    add_executable(juce::juce_vst3_helper ALIAS juce_vst3_helper)
+    add_executable(${vst3_helper_target} "${source}")
+    add_executable(juce::${vst3_helper_target} ALIAS ${vst3_helper_target})
 
-    target_include_directories(juce_vst3_helper PRIVATE "${vst3_dir}" "${module_path}")
+    target_include_directories(${vst3_helper_target} PRIVATE "${vst3_dir}" "${module_path}")
 
-    add_library(juce_interface_definitions INTERFACE)
-    _juce_add_standard_defs(juce_interface_definitions)
-    target_link_libraries(juce_vst3_helper PRIVATE juce_interface_definitions)
-    target_compile_features(juce_vst3_helper PRIVATE cxx_std_17)
+    target_compile_definitions(${vst3_helper_target} PRIVATE
+        $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},COMPILE_DEFINITIONS>>)
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        _juce_link_frameworks(juce_vst3_helper PRIVATE Cocoa)
-        target_compile_options(juce_vst3_helper PRIVATE -fobjc-arc)
-    endif()
+    target_include_directories(${vst3_helper_target} PRIVATE
+        $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>>)
 
-    if(MSYS OR MINGW)
-        target_link_options(juce_vst3_helper PRIVATE -municode)
-    endif()
+    target_compile_features(${vst3_helper_target} PRIVATE cxx_std_17)
 
-    set_target_properties(juce_vst3_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package(Threads REQUIRED)
-    target_link_libraries(juce_vst3_helper PRIVATE Threads::Threads ${CMAKE_DL_LIBS} juce_recommended_config_flags)
+    target_link_libraries(${vst3_helper_target} PRIVATE juce_recommended_config_flags)
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
-        target_link_libraries(juce_vst3_helper PRIVATE stdc++fs)
+        target_link_libraries(${vst3_helper_target} PRIVATE stdc++fs)
+    endif()
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        _juce_link_frameworks(${vst3_helper_target} PRIVATE Foundation)
     endif()
 endfunction()
 
@@ -1083,11 +1092,6 @@ function(juce_enable_vst3_manifest_step shared_code_target)
             "juce_enable_copy_plugin_step too.")
     endif()
 
-    if((MSYS OR MINGW) AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
-        message(WARNING "VST3 manifest generation is disabled for ${shared_code_target} because the compiler is not supported.")
-        return()
-    endif()
-
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT JUCE_WINDOWS_HELPERS_CAN_RUN)
         message(WARNING "VST3 manifest generation is disabled for ${shared_code_target} because a "
             "${JUCE_TARGET_ARCHITECTURE} manifest helper cannot run on a host system processor detected to be "
@@ -1103,7 +1107,7 @@ function(juce_enable_vst3_manifest_step shared_code_target)
     endif()
 
     # Add a target for the helper tool
-    _juce_add_vst3_manifest_helper_target()
+    _juce_add_vst3_manifest_helper_target(${shared_code_target})
 
     get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
 
@@ -1111,14 +1115,9 @@ function(juce_enable_vst3_manifest_step shared_code_target)
 
     # Use the helper tool to write out the moduleinfo.json
     add_custom_command(TARGET ${target_name} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "creating ${ouput_path}"
+        COMMAND ${CMAKE_COMMAND} -E echo "creating ${output_path}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${product}/Contents/Resources"
-        COMMAND juce_vst3_helper
-            -create
-            -version "${target_version_string}"
-            -path "${product}"
-            -output "${ouput_path}"
-        VERBATIM)
+        COMMAND ${shared_code_target}_vst3_helper > "${ouput_path}")
 
     set_target_properties(${shared_code_target} PROPERTIES _JUCE_VST3_MANIFEST_STEP_ADDED TRUE)
 endfunction()
@@ -1318,9 +1317,9 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
             _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_UNITY_COPY_DIR)
         else()
             # On windows and linux, the gui script needs to be copied next to the unity output
+            target_sources(${target_name} PRIVATE "${script_file}")
             add_custom_command(TARGET ${target_name} POST_BUILD
                 COMMAND "${CMAKE_COMMAND}" -E copy "${script_file}" "${products_folder}"
-                DEPENDS "${script_file}"
                 VERBATIM)
 
             _juce_set_copy_properties(${shared_code_target}
@@ -1977,6 +1976,8 @@ function(_juce_initialise_target target)
         SEND_APPLE_EVENTS_PERMISSION_TEXT
         BLUETOOTH_PERMISSION_ENABLED
         BLUETOOTH_PERMISSION_TEXT
+        LOCAL_NETWORK_PERMISSION_ENABLED
+        LOCAL_NETWORK_PERMISSION_TEXT
         FILE_SHARING_ENABLED            # iOS only
         DOCUMENT_BROWSER_ENABLED        # iOS only
         LAUNCH_STORYBOARD_FILE          # iOS only

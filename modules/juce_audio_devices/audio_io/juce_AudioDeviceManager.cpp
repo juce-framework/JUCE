@@ -73,12 +73,88 @@ bool AudioDeviceManager::AudioDeviceSetup::operator!= (const AudioDeviceManager:
 }
 
 //==============================================================================
-class AudioDeviceManager::CallbackHandler final : public AudioIODeviceCallback,
-                                                  public MidiInputCallback,
-                                                  public AudioIODeviceType::Listener
+/*  This class is used to ensure that audio callbacks use buffers with a
+    predictable maximum size.
+
+    On some platforms (such as iOS 10), the expected buffer size reported in
+    audioDeviceAboutToStart may be smaller than the blocks passed to
+    audioDeviceIOCallbackWithContext. This can lead to out-of-bounds reads if
+    the render callback depends on additional buffers which were initialised
+    using the smaller size.
+
+    As a workaround, this class will ensure that the render callback will only
+    ever be called with a block with a length less than or equal to the
+    expected block size.
+*/
+class CallbackMaxSizeEnforcer  : public AudioIODeviceCallback
 {
 public:
-    CallbackHandler (AudioDeviceManager& adm) noexcept  : owner (adm) {}
+    explicit CallbackMaxSizeEnforcer (AudioIODeviceCallback& callbackIn)
+        : inner (callbackIn) {}
+
+    void audioDeviceAboutToStart (AudioIODevice* device) override
+    {
+        maximumSize = device->getCurrentBufferSizeSamples();
+        storedInputChannels .resize ((size_t) device->getActiveInputChannels() .countNumberOfSetBits());
+        storedOutputChannels.resize ((size_t) device->getActiveOutputChannels().countNumberOfSetBits());
+
+        inner.audioDeviceAboutToStart (device);
+    }
+
+    void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
+                                           [[maybe_unused]] int numInputChannels,
+                                           float* const* outputChannelData,
+                                           [[maybe_unused]] int numOutputChannels,
+                                           int numSamples,
+                                           const AudioIODeviceCallbackContext& context) override
+    {
+        jassert ((int) storedInputChannels.size()  == numInputChannels);
+        jassert ((int) storedOutputChannels.size() == numOutputChannels);
+
+        int position = 0;
+
+        while (position < numSamples)
+        {
+            const auto blockLength = jmin (maximumSize, numSamples - position);
+
+            const auto addOffset = [position] (auto ptr) { return ptr + position; };
+            std::transform (inputChannelData,  inputChannelData  + numInputChannels,  storedInputChannels .begin(), addOffset);
+            std::transform (outputChannelData, outputChannelData + numOutputChannels, storedOutputChannels.begin(), addOffset);
+
+            inner.audioDeviceIOCallbackWithContext (storedInputChannels.data(),
+                                                    (int) storedInputChannels.size(),
+                                                    storedOutputChannels.data(),
+                                                    (int) storedOutputChannels.size(),
+                                                    blockLength,
+                                                    context);
+
+            position += blockLength;
+        }
+    }
+
+    void audioDeviceStopped() override
+    {
+        inner.audioDeviceStopped();
+    }
+
+private:
+    std::vector<const float*> storedInputChannels;
+    std::vector<float*> storedOutputChannels;
+    AudioIODeviceCallback& inner;
+    int maximumSize = 0;
+};
+
+//==============================================================================
+class AudioDeviceManager::CallbackHandler final : private MidiInputCallback,
+                                                  private AudioIODeviceType::Listener,
+                                                  private AudioIODeviceCallback
+{
+public:
+    explicit CallbackHandler (AudioDeviceManager& adm) noexcept  : owner (adm) {}
+
+    MidiInputCallback* getMidiInputCallback() { return this; }
+    AudioIODeviceType::Listener* getAudioIODeviceTypeListener() { return this; }
+    AudioIODeviceCallback* getAudioIODeviceCallback() { return &enforcer; }
 
 private:
     void audioDeviceIOCallbackWithContext (const float* const* ins,
@@ -117,6 +193,7 @@ private:
     }
 
     AudioDeviceManager& owner;
+    CallbackMaxSizeEnforcer enforcer { *this };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallbackHandler)
 };
@@ -271,7 +348,7 @@ void AudioDeviceManager::addAudioDeviceType (std::unique_ptr<AudioIODeviceType> 
         availableDeviceTypes.add (newDeviceType.release());
         lastDeviceTypeConfigs.add (new AudioDeviceSetup());
 
-        availableDeviceTypes.getLast()->addListener (callbackHandler.get());
+        availableDeviceTypes.getLast()->addListener (callbackHandler->getAudioIODeviceTypeListener());
     }
 }
 
@@ -285,7 +362,7 @@ void AudioDeviceManager::removeAudioDeviceType (AudioIODeviceType* deviceTypeToR
 
         if (auto removed = std::unique_ptr<AudioIODeviceType> (availableDeviceTypes.removeAndReturn (index)))
         {
-            removed->removeListener (callbackHandler.get());
+            removed->removeListener (callbackHandler->getAudioIODeviceTypeListener());
             lastDeviceTypeConfigs.remove (index, true);
         }
     }
@@ -433,6 +510,16 @@ String AudioDeviceManager::initialiseFromXML (const XmlElement& xml,
         else if (auto* firstType = availableDeviceTypes.getFirst())
             currentDeviceType = firstType->getTypeName();
     }
+
+    const auto deviceNameMissing = (numInputChansNeeded  > 0 && setup.inputDeviceName .isEmpty())
+                                || (numOutputChansNeeded > 0 && setup.outputDeviceName.isEmpty());
+
+    // If there's no device name, then normally this would prevent a device from opening.
+    // If failing to open a device would conflict with the number of requested channels, then we
+    // pre-emptively treat this as a failure and fall back to using devices that're able to provide
+    // the requested channel counts.
+    if (selectDefaultDeviceOnFailure && deviceNameMissing)
+        insertDefaultDeviceNames (setup);
 
     setup.bufferSize = xml.getIntAttribute ("audioDeviceBufferSize", setup.bufferSize);
     setup.sampleRate = xml.getDoubleAttribute ("audioDeviceRate", setup.sampleRate);
@@ -586,6 +673,10 @@ void AudioDeviceManager::insertDefaultDeviceNames (AudioDeviceSetup& setup) cons
 
         if (setup.inputDeviceName.isEmpty() && ! inputsToTest.isEmpty())
             setup.inputDeviceName = inputsToTest[0];
+
+        // No pairs to validate
+        if (outputsToTest.size() < 2 && inputsToTest.size() < 2)
+            return;
 
         // We check all possible in-out pairs until the first validation pass. If no pair passes we
         // leave the setup unchanged.
@@ -814,7 +905,7 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
     {
         currentDeviceType = currentAudioDevice->getTypeName();
 
-        currentAudioDevice->start (callbackHandler.get());
+        currentAudioDevice->start (callbackHandler->getAudioIODeviceCallback());
 
         error = currentAudioDevice->getLastError();
     }
@@ -922,10 +1013,8 @@ void AudioDeviceManager::updateXml()
 
     if (currentAudioDevice != nullptr)
     {
-        lastExplicitSettings->setAttribute ("audioDeviceRate", currentAudioDevice->getCurrentSampleRate());
-
-        if (currentAudioDevice->getDefaultBufferSize() != currentAudioDevice->getCurrentBufferSizeSamples())
-            lastExplicitSettings->setAttribute ("audioDeviceBufferSize", currentAudioDevice->getCurrentBufferSizeSamples());
+        lastExplicitSettings->setAttribute ("audioDeviceRate",       currentAudioDevice->getCurrentSampleRate());
+        lastExplicitSettings->setAttribute ("audioDeviceBufferSize", currentAudioDevice->getCurrentBufferSizeSamples());
 
         if (! currentSetup.useDefaultInputChannels)
             lastExplicitSettings->setAttribute ("audioDeviceInChans", currentSetup.inputChannels.toString (2));
@@ -1120,7 +1209,7 @@ void AudioDeviceManager::setMidiInputDeviceEnabled (const String& identifier, bo
     {
         if (enabled)
         {
-            if (auto midiIn = MidiInput::openDevice (identifier, callbackHandler.get()))
+            if (auto midiIn = MidiInput::openDevice (identifier, callbackHandler->getMidiInputCallback()))
             {
                 enabledMidiInputs.push_back (std::move (midiIn));
                 enabledMidiInputs.back()->start();
@@ -1398,6 +1487,8 @@ public:
 
     void runTest() override
     {
+        ScopedJuceInitialiser_GUI libraryInitialiser;
+
         beginTest ("When the AudioDeviceSetup has non-empty device names, initialise uses the requested devices");
         {
             AudioDeviceManager manager;

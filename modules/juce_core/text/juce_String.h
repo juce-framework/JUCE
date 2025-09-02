@@ -32,7 +32,8 @@
   ==============================================================================
 */
 
-#if ! defined (DOXYGEN) && (JUCE_MAC || JUCE_IOS)
+#if JUCE_MAC || JUCE_IOS
+ /** @cond */
  // Annoyingly we can only forward-declare a typedef by forward-declaring the
  // aliased type
  #if __has_attribute(objc_bridge)
@@ -44,6 +45,7 @@
  typedef const struct JUCE_CF_BRIDGED_TYPE(NSString) __CFString * CFStringRef;
 
  #undef JUCE_CF_BRIDGED_TYPE
+ /** @endcond */
 #endif
 
 namespace juce
@@ -1051,11 +1053,11 @@ public:
     */
     String (double doubleValue, int numberOfDecimalPlaces, bool useScientificNotation = false);
 
-   #ifndef DOXYGEN
+    /** @cond */
     // Automatically creating a String from a bool opens up lots of nasty type conversion edge cases.
     // If you want a String representation of a bool you can cast the bool to an int first.
     explicit String (bool) = delete;
-   #endif
+    /** @endcond */
 
     /** Reads the value of the string as a decimal number (up to 32 bits in size).
 
@@ -1157,11 +1159,10 @@ public:
             return "0";
         }
 
-        auto numDigitsBeforePoint = (int) std::ceil (std::log10 (number < 0 ? -number : number));
-
-        auto shift = numberOfSignificantFigures - numDigitsBeforePoint;
-        auto factor = std::pow (10.0, shift);
-        auto rounded = std::round (number * factor) / factor;
+        const auto numDigitsBeforePoint = (int) std::floor (std::log10 (std::abs (number)) + DecimalType (1));
+        const auto shift = numberOfSignificantFigures - numDigitsBeforePoint;
+        const auto factor = std::pow (10.0, shift);
+        const auto rounded = std::round (number * factor) / factor;
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision (std::max (shift, 0)) << rounded;
@@ -1360,12 +1361,14 @@ public:
     int getReferenceCount() const noexcept;
 
     //==============================================================================
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES && ! defined (DOXYGEN)
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** @cond */
     [[deprecated ("This was a static empty string object, but is now deprecated as it's too easy to accidentally "
                  "use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation "
                  "problems. If you need an empty String object, just use String() or {}. For returning an empty "
                  "String from a function by reference, use a function-local static String object and return that.")]]
     static const String empty;
+    /** @endcond */
    #endif
 
 private:
@@ -1470,11 +1473,11 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, float number);
 /** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, double number);
 
-#ifndef DOXYGEN
+/** @cond */
 // Automatically creating a String from a bool opens up lots of nasty type conversion edge cases.
 // If you want a String representation of a bool you can cast the bool to an int first.
 String& JUCE_CALLTYPE operator<< (String&, bool) = delete;
-#endif
+/** @endcond */
 
 //==============================================================================
 /** Case-sensitive comparison of two strings. */
@@ -1530,7 +1533,7 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef
 
 } // namespace juce
 
-#ifndef DOXYGEN
+/** @cond */
 namespace std
 {
     template <> struct hash<juce::String>
@@ -1538,4 +1541,4 @@ namespace std
         size_t operator() (const juce::String& s) const noexcept    { return s.hash(); }
     };
 }
-#endif
+/** @endcond */

@@ -34,10 +34,9 @@
 
 #include <juce_core/system/juce_CompilerWarnings.h>
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 4127 4189 4244 4245 4265 4267 4309 4310 4312 4456 4457 4458 4459 4701 4702 4706 4996 6001 6011 6239 6244 6246 6262 6297 6313 6319 6326 6336 6385 6386 28251)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 4127 4189 4244 4245 4265 4267 4309 4310 4312 4456 4457 4458 4459 4701 4702 4706 6001 6011 6239 6244 6246 6262 6297 6313 6319 6326 6336 6385 6386 28251)
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
-                                     "-Wcast-function-type",
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type",
                                      "-Wsign-conversion",
                                      "-Wzero-as-null-pointer-constant",
                                      "-Wformat-pedantic",
@@ -54,7 +53,10 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
                                      "-Wunsafe-loop-optimizations",
                                      "-Wformat-overflow",
                                      "-Woverflow",
+                                     "-Wnontrivial-memcall",
                                      "-Wimplicit-fallthrough")
+
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 #define HAVE_ATEXIT 1
 
@@ -95,5 +97,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
 #undef HAVE_FREETYPE
 #undef HAVE_CORETEXT
 
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 JUCE_END_IGNORE_WARNINGS_MSVC

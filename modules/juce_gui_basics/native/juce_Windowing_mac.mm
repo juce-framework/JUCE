@@ -62,73 +62,84 @@ static NSView* getNSViewForDragEvent (Component* sourceComp)
     return nil;
 }
 
-class NSDraggingSourceHelper final : public ObjCClass<NSObject<NSDraggingSource>>
+class NSDraggingSourceHelper final : public ObjCClass<NSObject<NSDraggingSource, NSPasteboardItemDataProvider>>
 {
 public:
-    static void setText (id self, const String& text)
+    struct DataMembers
     {
-        object_setInstanceVariable (self, "text", new String (text));
-    }
+        std::function<void()> callback;
+        String text;
+        NSDragOperation operation;
+        Component::SafePointer<Component> originator;
+    };
 
-    static void setCompletionCallback (id self, std::function<void()> cb)
-    {
-        object_setInstanceVariable (self, "callback", new std::function<void()> (cb));
-    }
-
-    static void setDragOperation (id self, NSDragOperation op)
-    {
-        object_setInstanceVariable (self, "operation", new NSDragOperation (op));
-    }
-
-    static NSDraggingSourceHelper& get()
+    static auto* create (DataMembers members)
     {
         static NSDraggingSourceHelper draggingSourceHelper;
-        return draggingSourceHelper;
+        auto* result = [[draggingSourceHelper.createInstance() init] autorelease];
+        object_setInstanceVariable (result, "members", new DataMembers (std::move (members)));
+        return result;
     }
 
 private:
+    static DataMembers* getMembers (id self)
+    {
+        return getIvar<DataMembers*> (self, "members");
+    }
+
     NSDraggingSourceHelper()
         : ObjCClass ("JUCENSDraggingSourceHelper_")
     {
-        addIvar<std::function<void()>*> ("callback");
-        addIvar<String*> ("text");
-        addIvar<NSDragOperation*> ("operation");
+        addIvar<DataMembers*> ("members");
 
         addMethod (@selector (dealloc), [] (id self, SEL)
         {
-            delete getIvar<String*> (self, "text");
-            delete getIvar<std::function<void()>*> (self, "callback");
-            delete getIvar<NSDragOperation*> (self, "operation");
-
+            delete getMembers (self);
             sendSuperclassMessage<void> (self, @selector (dealloc));
         });
 
-        addMethod (@selector (pasteboard:item:provideDataForType:), [] (id self, SEL, NSPasteboard* sender, NSPasteboardItem*, NSString* type)
+        addMethod (@selector (pasteboard:item:provideDataForType:),
+                   [] (id self, SEL, NSPasteboard* sender, NSPasteboardItem*, NSString* type)
         {
             if ([type compare: NSPasteboardTypeString] == NSOrderedSame)
-                if (auto* text = getIvar<String*> (self, "text"))
-                    [sender setData: [juceStringToNS (*text) dataUsingEncoding: NSUTF8StringEncoding]
+                if (auto* members = getMembers (self))
+                    [sender setData: [juceStringToNS (members->text) dataUsingEncoding: NSUTF8StringEncoding]
                             forType: NSPasteboardTypeString];
         });
 
-        addMethod (@selector (draggingSession:sourceOperationMaskForDraggingContext:), [] (id self, SEL, NSDraggingSession*, NSDraggingContext)
+        addMethod (@selector (draggingSession:sourceOperationMaskForDraggingContext:),
+                   [] (id self, SEL, NSDraggingSession*, NSDraggingContext) -> NSDragOperation
         {
-            return *getIvar<NSDragOperation*> (self, "operation");
+            if (auto* members = getMembers (self))
+                return members->operation;
+
+            return {};
         });
 
-        addMethod (@selector (draggingSession:endedAtPoint:operation:), [] (id self, SEL, NSDraggingSession*, NSPoint p, NSDragOperation)
+        addMethod (@selector (draggingSession:endedAtPoint:operation:),
+                   [] (id self, SEL, NSDraggingSession*, NSPoint p, NSDragOperation)
         {
             // Our view doesn't receive a mouse up when the drag ends so we need to generate one here and send it...
-            if (auto* view = getNSViewForDragEvent (nullptr))
-                if (auto* cgEvent = CGEventCreateMouseEvent (nullptr, kCGEventLeftMouseUp, CGPointMake (p.x, p.y), kCGMouseButtonLeft))
-                    if (id e = [NSEvent eventWithCGEvent: cgEvent])
+            auto* members = getMembers (self);
+
+            if (members == nullptr)
+                return;
+
+            auto* cgEvent = CGEventCreateMouseEvent (nullptr,
+                                                     kCGEventLeftMouseUp,
+                                                     CGPointMake (p.x, p.y),
+                                                     kCGMouseButtonLeft);
+
+            if (cgEvent != nullptr)
+                if (id e = [NSEvent eventWithCGEvent: cgEvent])
+                    if (auto* view = getNSViewForDragEvent (members->originator))
                         [view mouseUp: e];
 
-            if (auto* cb = getIvar<std::function<void()>*> (self, "callback"))
-                cb->operator()();
+            NullCheckedInvocation::invoke (members->callback);
         });
 
         addProtocol (@protocol (NSPasteboardItemDataProvider));
+        addProtocol (@protocol (NSDraggingSource));
 
         registerClass();
     }
@@ -146,12 +157,10 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
         {
             if (auto event = [[view window] currentEvent])
             {
-                id helper = [NSDraggingSourceHelper::get().createInstance() init];
-                NSDraggingSourceHelper::setText (helper, text);
-                NSDraggingSourceHelper::setDragOperation (helper, NSDragOperationCopy);
-
-                if (callback != nullptr)
-                    NSDraggingSourceHelper::setCompletionCallback (helper, callback);
+                auto* helper = NSDraggingSourceHelper::create ({ std::move (callback),
+                                                                 text,
+                                                                 NSDragOperationCopy,
+                                                                 sourceComponent });
 
                 auto pasteboardItem = [[NSPasteboardItem new] autorelease];
                 [pasteboardItem setDataProvider: helper
@@ -211,13 +220,10 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
                     [dragItem release];
                 }
 
-                auto helper = [NSDraggingSourceHelper::get().createInstance() autorelease];
-
-                if (callback != nullptr)
-                    NSDraggingSourceHelper::setCompletionCallback (helper, callback);
-
-                NSDraggingSourceHelper::setDragOperation (helper, canMoveFiles ? NSDragOperationMove
-                                                                               : NSDragOperationCopy);
+                auto* helper = NSDraggingSourceHelper::create ({ std::move (callback),
+                                                                 "",
+                                                                 canMoveFiles ? NSDragOperationMove : NSDragOperationCopy,
+                                                                 sourceComponent });
 
                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
                 return [view beginDraggingSessionWithItems: dragItems
@@ -603,12 +609,12 @@ static Image createNSWindowSnapshot (NSWindow* nsWindow)
 
        #else
 
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+        JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
         return createImageFromCGImage ((CGImageRef) CFAutorelease (CGWindowListCreateImage (CGRectNull,
                                                                                             kCGWindowListOptionIncludingWindow,
                                                                                             (CGWindowID) [nsWindow windowNumber],
                                                                                             kCGWindowImageBoundsIgnoreFraming)));
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
        #endif
     }

@@ -89,7 +89,7 @@ public:
         @param maxValue            The maximum parameter value
         @param defaultValueIn      The default value
         @param parameterLabel      An optional label for the parameter's value
-        @param stringFromInt       An optional lambda function that converts a int
+        @param stringFromInt       An optional lambda function that converts an int
                                    value to a string with a maximum length. This may
                                    be used by hosts to display the parameter's value.
         @param intFromString       An optional lambda function that parses a string

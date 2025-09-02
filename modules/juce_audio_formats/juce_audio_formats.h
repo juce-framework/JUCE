@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_formats
   vendor:             juce
-  version:            8.0.4
+  version:            8.0.9
   name:               JUCE audio file format codecs
   description:        Classes for reading and writing various audio file formats.
   website:            http://www.juce.com/juce
@@ -121,6 +121,7 @@
 
 //==============================================================================
 #include "format/juce_AudioFormatReader.h"
+#include "format/juce_AudioFormatWriterOptions.h"
 #include "format/juce_AudioFormatWriter.h"
 #include "format/juce_MemoryMappedAudioFormatReader.h"
 #include "format/juce_AudioFormat.h"

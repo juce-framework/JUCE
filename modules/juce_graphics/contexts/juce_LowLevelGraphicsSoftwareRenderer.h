@@ -59,6 +59,11 @@ public:
     /** Destructor. */
     ~LowLevelGraphicsSoftwareRenderer() override;
 
+    std::unique_ptr<ImageType> getPreferredImageTypeForTemporaryImages() const override
+    {
+        return std::make_unique<SoftwareImageType>();
+    }
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsSoftwareRenderer)
 };

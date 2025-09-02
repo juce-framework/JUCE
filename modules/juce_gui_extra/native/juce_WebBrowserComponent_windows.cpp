@@ -658,6 +658,9 @@ public:
            #endif
         }();
 
+        if (createWebViewEnvironmentWithOptions == nullptr)
+            return {};
+
         auto webViewOptions = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
 
         const auto userDataFolder = options.getWinWebView2BackendOptions().getUserDataFolder().getFullPathName();
@@ -683,7 +686,6 @@ public:
         if (webView == nullptr)
         {
             scriptsWaitingForExecution.push_back ({ script, std::move (callbackIn) });
-            triggerAsyncUpdate();
             return;
         }
 
@@ -727,20 +729,24 @@ private:
     }
 
     //==============================================================================
-    template <class ArgType>
-    static String getUriStringFromArgs (ArgType* args)
+    template <typename ArgType>
+    static std::optional<String> callMethodWithLpwstrResult (ArgType* args, HRESULT (ArgType::* method) (LPWSTR*))
     {
-        if (args != nullptr)
+        // According to the API reference for WebView2, the result of any method with an LPWSTR
+        // out-parameter should be freed by the caller using CoTaskMemFree.
+        if (LPWSTR result{}; args != nullptr && SUCCEEDED ((args->*method) (&result)))
         {
-            LPWSTR uri;
-            args->get_Uri (&uri);
-            String result { CharPointer_UTF16 { uri } };
-            CoTaskMemFree (uri);
-
-            return result;
+            const ScopeGuard scope { [&] { CoTaskMemFree (result); } };
+            return String { CharPointer_UTF16 { result } };
         }
 
         return {};
+    }
+
+    template <typename ArgType>
+    static String getUriStringFromArgs (ArgType* args)
+    {
+        return callMethodWithLpwstrResult (args, &ArgType::get_Uri).value_or ("");
     }
 
     //==============================================================================
@@ -783,10 +789,7 @@ private:
             webView->add_NavigationCompleted (Callback<ICoreWebView2NavigationCompletedEventHandler> (
                 [this] (ICoreWebView2* sender, ICoreWebView2NavigationCompletedEventArgs* args) -> HRESULT
                 {
-                    LPWSTR uri;
-                    sender->get_Source (&uri);
-
-                    String uriString (uri);
+                    const auto uriString = callMethodWithLpwstrResult (sender, &ICoreWebView2::get_Source).value_or ("");
 
                     if (uriString.isNotEmpty())
                     {
@@ -843,7 +846,7 @@ private:
                     ComSmartPtr<ICoreWebView2WebResourceRequest> request;
                     args->get_Request (request.resetAndGetPointerAddress());
 
-                    auto uriString = getUriStringFromArgs<ICoreWebView2WebResourceRequest> (request);
+                    auto uriString = getUriStringFromArgs (request.get());
 
                     if (! urlRequest.url.isEmpty() && uriString == urlRequest.url
                         || (uriString.endsWith ("/") && uriString.upToLastOccurrenceOf ("/", false, false) == urlRequest.url))
@@ -911,11 +914,8 @@ private:
             webView->add_WebMessageReceived (Callback<ICoreWebView2WebMessageReceivedEventHandler> (
                                                  [this] (ICoreWebView2*, ICoreWebView2WebMessageReceivedEventArgs* args) -> HRESULT
                                                  {
-                                                     if (LPWSTR message = {};
-                                                         args->TryGetWebMessageAsString (std::addressof (message)) == S_OK)
-                                                     {
-                                                         owner.impl->handleNativeEvent (JSON::fromString (StringRef { CharPointer_UTF16 (message) }));
-                                                     }
+                                                     if (const auto str = callMethodWithLpwstrResult (args, &ICoreWebView2WebMessageReceivedEventArgs::TryGetWebMessageAsString))
+                                                         owner.impl->handleNativeEvent (JSON::fromString (*str));
 
                                                      return S_OK;
                                                  }).Get(), &webMessageReceivedToken);
@@ -1058,6 +1058,7 @@ private:
                     {
                         if (weakThis != nullptr)
                         {
+                            weakThis->triggerAsyncUpdate();
                             webView2ConstructionHelper.webView2BeingCreated = nullptr;
 
                             if (controller != nullptr)
@@ -1155,15 +1156,9 @@ private:
     //==============================================================================
     void handleAsyncUpdate() override
     {
-        if (webView == nullptr && ! webViewBeingCreated)
+        if (webView == nullptr)
         {
-            webViewBeingCreated = true;
             createWebView();
-        }
-
-        if (webView == nullptr && ! scriptsWaitingForExecution.empty())
-        {
-            triggerAsyncUpdate();
             return;
         }
 
@@ -1205,7 +1200,6 @@ private:
     WebViewHandle webViewHandle;
     ComSmartPtr<ICoreWebView2Controller> webViewController;
     ComSmartPtr<ICoreWebView2> webView;
-    bool webViewBeingCreated = false;
 
     EventRegistrationToken navigationStartingToken   { 0 },
                            newWindowRequestedToken   { 0 },

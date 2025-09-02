@@ -298,6 +298,15 @@ public:
     */
     void desaturate();
 
+    /** This is a shorthand for dereferencing the internal ImagePixelData's BackupExtensions
+        and calling setBackupEnabled() if the extensions exist.
+
+        @returns true if the extensions exist and the backup flag was updated, or false otherwise
+
+        @see ImagePixelDataBackupExtensions::setBackupEnabled()
+    */
+    bool setBackupEnabled (bool);
+
     //==============================================================================
     /** Retrieves a section of an image as raw pixel data, so it can be read or written to.
 
@@ -326,21 +335,27 @@ public:
         };
 
         BitmapData (Image& image, int x, int y, int w, int h, ReadWriteMode mode);
+        BitmapData (const Image& image, Rectangle<int>, ReadWriteMode mode);
         BitmapData (const Image& image, int x, int y, int w, int h);
         BitmapData (const Image& image, ReadWriteMode mode);
-        ~BitmapData();
 
         /** Returns a pointer to the start of a line in the image.
             The coordinate you provide here isn't checked, so it's the caller's responsibility to make
             sure it's not out-of-range.
         */
-        inline uint8* getLinePointer (int y) const noexcept                 { return data + (size_t) y * (size_t) lineStride; }
+        inline uint8* getLinePointer (int y) const noexcept
+        {
+            return data + (ptrdiff_t) y * (ptrdiff_t) lineStride;
+        }
 
         /** Returns a pointer to a pixel in the image.
             The coordinates you give here are not checked, so it's the caller's responsibility to make sure they're
             not out-of-range.
         */
-        inline uint8* getPixelPointer (int x, int y) const noexcept         { return data + (size_t) y * (size_t) lineStride + (size_t) x * (size_t) pixelStride; }
+        inline uint8* getPixelPointer (int x, int y) const noexcept
+        {
+            return data + (ptrdiff_t) y * (ptrdiff_t) lineStride + (ptrdiff_t) x * (ptrdiff_t) pixelStride;
+        }
 
         /** Returns the colour of a given pixel.
             For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
@@ -356,6 +371,15 @@ public:
 
         /** Returns the size of the bitmap. */
         Rectangle<int> getBounds() const noexcept                           { return Rectangle<int> (width, height); }
+
+        /** Attempts to copy the contents of src into this bitmap data.
+            Returns true on success, and false otherwise.
+
+            The source BitmapData must be readable, and the destination (current) BitmapData must
+            be writeable. This function cannot check for this precondition, so you must ensure this
+            yourself!
+        */
+        bool convertFrom (const Image::BitmapData& src);
 
         uint8* data;             /**< The raw pixel data, packed according to the image's pixel format. */
         size_t size;             /**< The number of valid/allocated bytes after data. May be smaller than "lineStride * height" if this is a section of a larger image. */
@@ -418,16 +442,18 @@ public:
 
     //==============================================================================
     /** @internal */
-    ImagePixelData* getPixelData() const noexcept       { return image.get(); }
+    ReferenceCountedObjectPtr<ImagePixelData> getPixelData() const noexcept       { return image; }
 
     /** @internal */
     explicit Image (ReferenceCountedObjectPtr<ImagePixelData>) noexcept;
 
     //==============================================================================
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES && ! defined (DOXYGEN)
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** @cond */
     /* A null Image object that can be used when you need to return an invalid image. */
     [[deprecated ("If you need a default-constructed var, just use Image() or {}.")]]
     static const Image null;
+    /** @endcond */
    #endif
 
 private:
@@ -437,6 +463,110 @@ private:
     JUCE_LEAK_DETECTOR (Image)
 };
 
+//==============================================================================
+/**
+    The methods on this interface allow clients of ImagePixelData to query and control
+    the automatic-backup process from graphics memory to main memory, if this mechanism is
+    relevant and supported.
+
+    Some image types (Direct2D, OpenGL) are backed by textures that live in graphics memory.
+    Such textures are quick to display, but they will be lost if the graphics device goes away.
+
+    Normally, a backup of the texture will be kept in main memory, so that the image can still
+    be used even if any graphics device goes away. While this has the benefit that programs are
+    automatically resilient to graphics devices going away, it also incurs some performance
+    overhead, because the texture content must be copied back to main memory after each
+    modification.
+
+    For performance-sensitive applications it can be beneficial to disable the automatic sync
+    behaviour, and to sync manually instead, which can be achieved using the methods of this type.
+
+    The following table shows how to interpret the results of this type's member functions.
+
+    needsBackup()   | canBackup()   | meaning
+    --------------------------------------------------------------------------------------------
+    true            | true          | the main-memory copy of the image is outdated, but there's an
+                    |               | up-to-date copy in graphics memory
+                    |               |
+    true            | false         | although main memory is out-of-date, the most recent copy of
+                    |               | the image in graphics memory has been lost
+                    |               |
+    false           | true          | main memory is up-to-date with graphics memory; graphics
+                    |               | memory is still available;
+                    |               |
+    false           | false         | main memory has an up-to-date copy of the image, but the most
+                    |               | recent copy of the image in graphics memory has been lost
+
+    @tags{Graphics}
+*/
+class ImagePixelDataBackupExtensions
+{
+public:
+    /** The automatic image backup mechanism can be disabled by passing false to this function, or
+        enabled by passing true.
+
+        If you disable automatic backup for a particular image, make sure you test that your
+        software behaves as expected when graphics devices are disconnected. One easy way to test
+        this on Windows is to use your program over a remote desktop session, and to end and
+        re-start the session while the image is being displayed.
+
+        The most common scenario where this flag is useful is when drawing single-use images.
+        e.g. for a drop shadow or other effect, the following series of steps might be carried
+        out on each paint call:
+        - Create a path that matches the shadowed component's outline
+        - Draw the path into a temporary image
+        - Blur the temporary image
+        - Draw the temporary image into some other context
+        - (destroy the temporary image)
+
+        In this case, where the image is created, modified, used, and destroyed in quick succession,
+        there's no need to keep a resilient backup of the image around, so it's reasonable to call
+        setBackupEnabled(false) after constructing the image.
+
+        @see isBackupEnabled(), backupNow()
+    */
+    virtual void setBackupEnabled (bool) = 0;
+
+    /** @see setBackupEnabled(), backupNow() */
+    virtual bool isBackupEnabled() const = 0;
+
+    /** This function will attempt to make the image resilient to graphics device disconnection by
+        copying from graphics memory to main memory.
+
+        By default, backups happen automatically, so there's no need to call this function unless
+        auto-backup has been disabled on this image.
+
+        Flushing may fail if the graphics device goes away before its memory can be read.
+        If needsBackup() returns false, then backupNow() will always return true without doing any
+        work.
+
+        @returns true if the main-memory copy of the image is up-to-date, or false otherwise.
+
+        @see setBackupEnabled(), isBackupEnabled()
+    */
+    virtual bool backupNow() = 0;
+
+    /** Returns true if the main-memory copy of the image is out-of-date, false if it's up-to-date.
+
+        @see canBackup()
+    */
+    virtual bool needsBackup() const = 0;
+
+    /** Returns if there is an up-to-date copy of this image in graphics memory, or false otherwise.
+
+        @see needsBackup()
+    */
+    virtual bool canBackup() const = 0;
+
+protected:
+    // Not intended for virtual destruction
+    ~ImagePixelDataBackupExtensions() = default;
+};
+
+/** @internal
+    @tags{Graphics}
+ */
+class ImagePixelDataNativeExtensions;
 
 //==============================================================================
 /**
@@ -454,6 +584,9 @@ private:
 class JUCE_API  ImagePixelData  : public ReferenceCountedObject
 {
 public:
+    using BackupExtensions = ImagePixelDataBackupExtensions;
+    using NativeExtensions = ImagePixelDataNativeExtensions;
+
     ImagePixelData (Image::PixelFormat, int width, int height);
     ~ImagePixelData() override;
 
@@ -465,6 +598,13 @@ public:
     virtual Ptr clone() = 0;
     /** Creates an instance of the type of this image. */
     virtual std::unique_ptr<ImageType> createType() const = 0;
+
+    /** Returns a raw pointer to an instance of ImagePixelDataBackupExtensions if this ImagePixelData
+        provides this extension, or nullptr otherwise.
+    */
+    virtual BackupExtensions* getBackupExtensions() { return nullptr; }
+    virtual const BackupExtensions* getBackupExtensions() const { return nullptr; }
+
     /** Initialises a BitmapData object. */
     virtual void initialiseBitmapData (Image::BitmapData&, int x, int y, Image::BitmapData::ReadWriteMode) = 0;
     /** Returns the number of Image objects which are currently referring to the same internal
@@ -473,30 +613,66 @@ public:
     */
     virtual int getSharedCount() const noexcept;
 
+    //==============================================================================
+    /** Copies a section of the image to somewhere else within itself. */
+    void moveImageSection (Point<int> destTopLeft, Rectangle<int> sourceRect);
+
     /** Applies a native blur effect to this image, if available.
         This blur applies to all channels of the input image. It may be more expensive to
         calculate than a box blur, but should produce higher-quality results.
 
-        Implementations should attempt to re-use the storage provided in the result out-parameter
-        when possible.
-
-        If native blurs are unsupported, or if creating a blur fails for any other reason,
-        the result out-parameter will be reset to an invalid image.
+        The default implementation will modify the image pixel-by-pixel on the CPU, which will be slow.
+        Native image types may provide optimised implementations.
     */
-    virtual void applyGaussianBlurEffect (float radius, Image& result);
+    virtual void applyGaussianBlurEffectInArea (Rectangle<int> bounds, float radius);
+
+    /** @see applyGaussianBlurEffectInArea() */
+    void applyGaussianBlurEffect (float radius)
+    {
+        applyGaussianBlurEffectInArea ({ width, height }, radius);
+    }
 
     /** Applies a native blur effect to this image, if available.
         This is intended for blurring single-channel images, which is useful when rendering drop
         shadows. This is implemented as several box-blurs in series. The results should be visually
         similar to a Gaussian blur, but less accurate.
 
-        Implementations should attempt to re-use the storage provided in the result out-parameter
-        when possible.
-
-        If native blurs are unsupported, or if creating a blur fails for any other reason,
-        the result out-parameter will be reset to an invalid image.
+        The default implementation will modify the image pixel-by-pixel on the CPU, which will be slow.
+        Native image types may provide optimised implementations.
     */
-    virtual void applySingleChannelBoxBlurEffect (int radius, Image& result);
+    virtual void applySingleChannelBoxBlurEffectInArea (Rectangle<int> bounds, int radius);
+
+    /** @see applySingleChannelBoxBlurEffectInArea() */
+    void applySingleChannelBoxBlurEffect (int radius)
+    {
+        applySingleChannelBoxBlurEffectInArea ({ width, height }, radius);
+    }
+
+    /** Multiples all alpha-channel values in the image by the specified amount.
+
+        The default implementation will modify the image pixel-by-pixel on the CPU, which will be slow.
+        Native image types may provide optimised implementations.
+    */
+    virtual void multiplyAllAlphasInArea (Rectangle<int> bounds, float amount);
+
+    /** @see multiplyAllAlphasInArea() */
+    void multiplyAllAlphas (float amount)
+    {
+        multiplyAllAlphasInArea ({ width, height }, amount);
+    }
+
+    /** Changes all the colours to be shades of grey, based on their current luminosity.
+
+        The default implementation will modify the image pixel-by-pixel on the CPU, which will be slow.
+        Native image types may provide optimised implementations.
+    */
+    virtual void desaturateInArea (Rectangle<int> bounds);
+
+    /** @see desaturateInArea() */
+    void desaturate()
+    {
+        desaturateInArea ({ width, height });
+    }
 
     /** The pixel format of the image data. */
     const Image::PixelFormat pixelFormat;
@@ -521,7 +697,16 @@ public:
 
     void sendDataChangeMessage();
 
+    /** @internal intentionally not callable from user code */
+    virtual NativeExtensions getNativeExtensions();
+
 private:
+    /*  Called by moveImageSection().
+        The source and destination rects are both guaranteed to be within the image bounds, and
+        non-empty.
+    */
+    virtual void moveValidatedImageSection (Point<int> destTopLeft, Rectangle<int> sourceRect);
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePixelData)
 };
 
@@ -586,45 +771,6 @@ public:
 
     ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
     int getTypeID() const override;
-};
-
-//==============================================================================
-/**
-    Utility functions for applying effects to images. These effects may or may not
-    be hardware-accelerated.
-
-    @tags{Graphics}
-*/
-struct ImageEffects
-{
-    ImageEffects() = delete;
-
-    /** Applies a blur to this image, placing the blurred image in the result out-parameter.
-        This will attempt to call the applyGaussianBlurEffect() member of the input image's
-        underlying ImagePixelData, which will use hardware acceleration if available. If this
-        fails, then a software blur will be applied instead.
-
-        This blur applies to all channels of the input image. It may be more expensive to
-        calculate than a box blur, but should produce higher-quality results.
-
-        If result is already the correct size, then its storage will be reused directly.
-        Otherwise, new storage may be allocated for the blurred image.
-    */
-    static void applyGaussianBlurEffect (float radius, const Image& input, Image& result);
-
-    /** Applies a blur to this image, placing the blurred image in the result out-parameter.
-        This will attempt to call the applySingleChannelBoxBlurEffect() member of the input image's
-        underlying ImagePixelData, which will use hardware acceleration if available. If this
-        fails, then a software blur will be applied instead.
-
-        This kind of blur is only capable of blurring single-channel images, which is useful when
-        rendering drop shadows. The blur is implemented as several box-blurs in series. The results
-        should be visually similar to a Gaussian blur, but less accurate.
-
-        If result is already the correct size, then its storage will be reused directly.
-        Otherwise, new storage may be allocated for the blurred image.
-    */
-    static void applySingleChannelBoxBlurEffect (int radius, const Image& input, Image& result);
 };
 
 } // namespace juce

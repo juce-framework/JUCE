@@ -55,6 +55,11 @@ using MessageCallbackFunction = void* (void* userData);
 */
 class JUCE_API  MessageManager  final
 {
+    template <typename FunctionResult>
+    using CallSyncResult = std::conditional_t<std::is_same_v<FunctionResult, void>,
+                                              bool,
+                                              std::optional<FunctionResult>>;
+
 public:
     //==============================================================================
     /** Returns the global instance of the MessageManager. */
@@ -103,10 +108,24 @@ public:
     //==============================================================================
     /** Asynchronously invokes a function or C++11 lambda on the message thread.
 
-        @returns  true if the message was successfully posted to the message queue,
-                  or false otherwise.
+        @param function  the function to call, which should have no arguments
+        @returns         true if the message was successfully posted to the message queue,
+                         or false otherwise.
     */
-    static bool callAsync (std::function<void()> functionToCall);
+    template <typename Function>
+    static bool callAsync (Function&& function)
+    {
+        using NonRef = std::remove_cv_t<std::remove_reference_t<Function>>;
+
+        struct AsyncCallInvoker final : public MessageBase
+        {
+            explicit AsyncCallInvoker (NonRef f) : fn (std::move (f)) {}
+            void messageCallback() override { fn(); }
+            NonRef fn;
+        };
+
+        return (new AsyncCallInvoker { std::move (function) })->post();
+    }
 
     /** Calls a function using the message-thread.
 
@@ -127,6 +146,47 @@ public:
         @see MessageManagerLock
     */
     void* callFunctionOnMessageThread (MessageCallbackFunction* callback, void* userData);
+
+    /** Similar to callFunctionOnMessageThread(), calls a function on the message thread,
+        blocking the current thread until a result is available.
+
+        Be careful not to cause any deadlocks with this! It's easy to do - e.g. if the caller
+        thread has a critical section locked, which an unrelated message callback then tries to lock
+        before the message thread gets round to processing this callback.
+
+        @param function     the function to call, which should have no parameters
+        @returns            if function() returns void, then callSync returns a boolean where
+                            'true' indicates that the function was called successfully, and 'false'
+                            indicates that the message could not be posted.
+                            if function() returns any other type 'T', then callSync returns
+                            std::optional<T>, where the optional value will be valid if the function
+                            was called successfully, or nullopt otherwise.
+    */
+    template <typename Function>
+    static auto callSync (Function&& function) -> CallSyncResult<decltype (function())>
+    {
+        using FinalResult = CallSyncResult<decltype (function())>;
+
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+            return transformResult (std::forward<Function> (function));
+
+        std::promise<FinalResult> promise;
+        auto future = promise.get_future();
+
+        const auto sent = callAsync ([p = std::move (promise), fn = std::move (function)]() mutable
+        {
+            p.set_value (transformResult (std::move (fn)));
+        });
+
+        if (! sent)
+        {
+            // Failed to post message!
+            jassertfalse;
+            return {};
+        }
+
+        return future.get();
+    }
 
     /** Returns true if the caller-thread is the message thread. */
     bool isThisTheMessageThread() const noexcept;
@@ -329,11 +389,11 @@ public:
     };
 
     //==============================================================================
-   #ifndef DOXYGEN
     // Internal methods - do not use!
+    /** @cond */
     void deliverBroadcastMessage (const String&);
     ~MessageManager() noexcept;
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================
@@ -351,6 +411,20 @@ private:
     Thread::ThreadID messageThreadId;
     Atomic<Thread::ThreadID> threadWithLock;
     mutable std::mutex messageThreadIdMutex;
+
+    template <typename Function>
+    static auto transformResult (Function&& f)
+    {
+        if constexpr (std::is_same_v<decltype (f()), void>)
+        {
+            f();
+            return true;
+        }
+        else
+        {
+            return f();
+        }
+    }
 
     static bool postMessageToSystemQueue (MessageBase*);
     static void* exitModalLoopCallback (void*);

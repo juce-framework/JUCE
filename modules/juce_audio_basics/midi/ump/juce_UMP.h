@@ -47,11 +47,9 @@
 #include "juce_UMPDispatcher.h"
 #include "juce_UMPReceiver.h"
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce
 {
 namespace ump = universal_midi_packets;
 }
-
-#endif
+/** @endcond */

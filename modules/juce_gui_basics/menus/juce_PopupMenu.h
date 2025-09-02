@@ -997,6 +997,12 @@ public:
                                                            int& idealHeight,
                                                            const Options&) = 0;
 
+        virtual void getIdealPopupMenuSectionHeaderSizeWithOptions (const String& text,
+                                                                    int standardMenuItemHeight,
+                                                                    int& idealWidth,
+                                                                    int& idealHeight,
+                                                                    const Options&) = 0;
+
         virtual int getMenuWindowFlags() = 0;
 
         virtual void drawMenuBarBackground (Graphics&, int width, int height,
@@ -1044,10 +1050,10 @@ public:
     };
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("Use the new method.")]]
     int drawPopupMenuItem (Graphics&, int, int, bool, bool, bool, bool, bool, const String&, const String&, Image*, const Colour*) { return 0; }
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

@@ -1,0 +1,24 @@
+name: JUCE Private Push Trigger
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - bugfix/**
+      - feature/**
+jobs:
+  juce-private-push-trigger:
+    if: github.repository == 'juce-framework/JUCE-dev'
+    name: JUCE Push Trigger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          sparse-checkout: ./.github/workflows
+      - name: Trigger a private build using the GitHub API
+        env:
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TRIGGER_WORKFLOW_INPUTS: |
+            {"triggerer":"${{ github.actor }}"}
+        run: python3 ./.github/workflows/trigger_workflow.py
+

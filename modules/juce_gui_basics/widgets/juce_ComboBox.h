@@ -356,7 +356,7 @@ public:
         These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
         methods.
 
-        To change the colours of the menu that pops up, you can set the colour IDs in PopupMenu::ColourIDs.
+        To change the colours of the menu that pops up, you can set the colour IDs in PopupMenu::ColourIds.
 
         @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
     */
@@ -432,13 +432,13 @@ public:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     // These methods' bool parameters have changed: see their new method signatures.
     [[deprecated]] void clear (bool);
     [[deprecated]] void setSelectedId (int, bool);
     [[deprecated]] void setSelectedItemIndex (int, bool);
     [[deprecated]] void setText (const String&, bool);
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

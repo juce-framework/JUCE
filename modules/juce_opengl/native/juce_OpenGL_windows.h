@@ -142,7 +142,9 @@ public:
     void swapBuffers() noexcept
     {
         SwapBuffers (dc.get());
-        triggerAsyncUpdate();
+
+        if (! std::exchange (haveBuffersBeenSwapped, true))
+            triggerAsyncUpdate();
     }
 
     bool setSwapInterval (int numFramesPerSwap)
@@ -193,6 +195,9 @@ public:
 
         return nullptr;
     }
+
+    void addListener (NativeContextListener&) {}
+    void removeListener (NativeContextListener&) {}
 
 private:
     //==============================================================================
@@ -425,6 +430,7 @@ private:
     OpenGLContext* context = nullptr;
     void* sharedContext = nullptr;
     double nativeScaleFactor = 1.0;
+    bool haveBuffersBeenSwapped = false;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)

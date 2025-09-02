@@ -50,14 +50,24 @@ struct StandardCachedComponentImage : public CachedComponentImage
 
         if (image.isNull() || image.getBounds() != imageBounds)
         {
+            auto tempImageType = g.getInternalContext().getPreferredImageTypeForTemporaryImages();
             image = Image (owner.isOpaque() ? Image::RGB
                                             : Image::ARGB,
                            jmax (1, imageBounds.getWidth()),
                            jmax (1, imageBounds.getHeight()),
-                           ! owner.isOpaque());
-
+                           ! owner.isOpaque(),
+                           *tempImageType);
+            image.setBackupEnabled (false);
             validArea.clear();
         }
+
+        // If the cached image is outdated but cannot be backed-up, this indicates that the graphics
+        // device holding the most recent copy of the cached image has gone away. Therefore, we've
+        // effectively lost the contents of the cache, and we must repaint the entire component.
+        if (auto ptr = image.getPixelData())
+            if (auto* extensions = ptr->getBackupExtensions())
+                if (extensions->needsBackup() && ! extensions->canBackup())
+                    validArea.clear();
 
         if (! validArea.containsRectangle (compBounds))
         {

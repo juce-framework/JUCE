@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_processors
   vendor:             juce
-  version:            8.0.4
+  version:            8.0.9
   name:               JUCE audio processor classes
   description:        Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors.
   website:            http://www.juce.com/juce
@@ -142,6 +142,7 @@
 //==============================================================================
 #include "utilities/juce_AAXClientExtensions.h"
 #include "utilities/juce_VST2ClientExtensions.h"
+#include "utilities/juce_VST3Interface.h"
 #include "utilities/juce_VST3ClientExtensions.h"
 #include "format_types/juce_ARACommon.h"
 #include "utilities/juce_ExtensionsVisitor.h"

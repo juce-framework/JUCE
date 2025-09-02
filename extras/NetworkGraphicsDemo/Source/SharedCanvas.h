@@ -429,6 +429,11 @@ public:
         }
     }
 
+    std::unique_ptr<ImageType> getPreferredImageTypeForTemporaryImages() const override
+    {
+        return std::make_unique<NativeImageType>();
+    }
+
 private:
     //==============================================================================
     struct SharedCanvasHolder final : public ReferenceCountedObject

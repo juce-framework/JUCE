@@ -77,64 +77,64 @@ struct JUCE_API FloatVectorOperationsBase
     /** Copies a vector of floating point numbers, multiplying each value by a given multiplier */
     static void JUCE_CALLTYPE copyWithMultiply (FloatType* dest, const FloatType* src, FloatType multiplier, CountType numValues) noexcept;
 
-    /** Adds a fixed value to the destination values. */
+    /** Adds a fixed value to the dest values. */
     static void JUCE_CALLTYPE add (FloatType* dest, FloatType amountToAdd, CountType numValues) noexcept;
 
-    /** Adds a fixed value to each source value and stores it in the destination array. */
+    /** Adds a fixed value to each src value and stores it in the dest array. */
     static void JUCE_CALLTYPE add (FloatType* dest, const FloatType* src, FloatType amount, CountType numValues) noexcept;
 
-    /** Adds the source values to the destination values. */
+    /** Adds each src value to the corresponding dest value. */
     static void JUCE_CALLTYPE add (FloatType* dest, const FloatType* src, CountType numValues) noexcept;
 
-    /** Adds each source1 value to the corresponding source2 value and stores the result in the destination array. */
+    /** Adds each src1 value to the corresponding src2 value and stores the result in the dest array. */
     static void JUCE_CALLTYPE add (FloatType* dest, const FloatType* src1, const FloatType* src2, CountType num) noexcept;
 
-    /** Subtracts the source values from the destination values. */
+    /** Subtracts the src values from the dest values. */
     static void JUCE_CALLTYPE subtract (FloatType* dest, const FloatType* src, CountType numValues) noexcept;
 
-    /** Subtracts each source2 value from the corresponding source1 value and stores the result in the destination array. */
+    /** Subtracts each src2 value from the corresponding src1 value and stores the result in the dest array. */
     static void JUCE_CALLTYPE subtract (FloatType* dest, const FloatType* src1, const FloatType* src2, CountType num) noexcept;
 
-    /** Multiplies each source value by the given multiplier, then adds it to the destination value. */
+    /** Multiplies each src value by the given multiplier, then adds it to the dest value. */
     static void JUCE_CALLTYPE addWithMultiply (FloatType* dest, const FloatType* src, FloatType multiplier, CountType numValues) noexcept;
 
-    /** Multiplies each source1 value by the corresponding source2 value, then adds it to the destination value. */
+    /** Multiplies each src1 value by the corresponding src2 value, then adds it to the dest value. */
     static void JUCE_CALLTYPE addWithMultiply (FloatType* dest, const FloatType* src1, const FloatType* src2, CountType num) noexcept;
 
-    /** Multiplies each source value by the given multiplier, then subtracts it to the destination value. */
+    /** Multiplies each src value by the given multiplier, then subtracts it from the dest value. */
     static void JUCE_CALLTYPE subtractWithMultiply (FloatType* dest, const FloatType* src, FloatType multiplier, CountType numValues) noexcept;
 
-    /** Multiplies each source1 value by the corresponding source2 value, then subtracts it to the destination value. */
+    /** Multiplies each src1 value by the corresponding src2 value, then subtracts it from the dest value. */
     static void JUCE_CALLTYPE subtractWithMultiply (FloatType* dest, const FloatType* src1, const FloatType* src2, CountType num) noexcept;
 
-    /** Multiplies the destination values by the source values. */
+    /** Multiplies the dest values by the src values. */
     static void JUCE_CALLTYPE multiply (FloatType* dest, const FloatType* src, CountType numValues) noexcept;
 
-    /** Multiplies each source1 value by the corresponding source2 value, then stores it in the destination array. */
+    /** Multiplies each src1 value by the corresponding src2 value, then stores it in the dest array. */
     static void JUCE_CALLTYPE multiply (FloatType* dest, const FloatType* src1, const FloatType* src2, CountType numValues) noexcept;
 
-    /** Multiplies each of the destination values by a fixed multiplier. */
+    /** Multiplies each of the dest values by a fixed multiplier. */
     static void JUCE_CALLTYPE multiply (FloatType* dest, FloatType multiplier, CountType numValues) noexcept;
 
-    /** Multiplies each of the source values by a fixed multiplier and stores the result in the destination array. */
+    /** Multiplies each of the src values by a fixed multiplier and stores the result in the dest array. */
     static void JUCE_CALLTYPE multiply (FloatType* dest, const FloatType* src, FloatType multiplier, CountType num) noexcept;
 
-    /** Copies a source vector to a destination, negating each value. */
+    /** Copies the src vector to dest, negating each value. */
     static void JUCE_CALLTYPE negate (FloatType* dest, const FloatType* src, CountType numValues) noexcept;
 
-    /** Copies a source vector to a destination, taking the absolute of each value. */
+    /** Copies the src vector to dest, taking the absolute of each value. */
     static void JUCE_CALLTYPE abs (FloatType* dest, const FloatType* src, CountType numValues) noexcept;
 
-    /** Each element of dest will be the minimum of the corresponding element of the source array and the given comp value. */
+    /** Each element of dest will be the minimum of the corresponding element of the src array and the given comp value. */
     static void JUCE_CALLTYPE min (FloatType* dest, const FloatType* src, FloatType comp, CountType num) noexcept;
 
-    /** Each element of dest will be the minimum of the corresponding source1 and source2 values. */
+    /** Each element of dest will be the minimum of the corresponding src1 and src2 values. */
     static void JUCE_CALLTYPE min (FloatType* dest, const FloatType* src1, const FloatType* src2, CountType num) noexcept;
 
-    /** Each element of dest will be the maximum of the corresponding element of the source array and the given comp value. */
+    /** Each element of dest will be the maximum of the corresponding element of the src array and the given comp value. */
     static void JUCE_CALLTYPE max (FloatType* dest, const FloatType* src, FloatType comp, CountType num) noexcept;
 
-    /** Each element of dest will be the maximum of the corresponding source1 and source2 values. */
+    /** Each element of dest will be the maximum of the corresponding src1 and src2 values. */
     static void JUCE_CALLTYPE max (FloatType* dest, const FloatType* src1, const FloatType* src2, CountType num) noexcept;
 
     /** Each element of dest is calculated by hard clipping the corresponding src element so that it is in the range specified by the arguments low and high. */
@@ -150,7 +150,7 @@ struct JUCE_API FloatVectorOperationsBase
     static FloatType JUCE_CALLTYPE findMaximum (const FloatType* src, CountType numValues) noexcept;
 };
 
-#if ! DOXYGEN
+/** @cond */
 namespace detail
 {
 
@@ -177,7 +177,7 @@ struct NameForwarder : public Bases...
 };
 
 } // namespace detail
-#endif
+/** @endcond */
 
 //==============================================================================
 /**

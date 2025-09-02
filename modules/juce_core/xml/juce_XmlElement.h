@@ -35,6 +35,61 @@
 namespace juce
 {
 
+/** A name-value pair representing an attribute of an XML tag.
+
+    @see XmlElement
+
+    @tags{Core}
+*/
+struct XmlAttribute
+{
+    /** The name of the attribute. */
+    Identifier name;
+
+    /** The value of the attribute. */
+    String value;
+
+    /** Returns true if the name and value of this attribute compare equal to the passed-in strings.
+
+        The 'ignoreCase' option only affects the value strings.
+    */
+    bool equals (StringRef otherName, StringRef otherValue, bool ignoreCase) const
+    {
+        if (name != otherName)
+            return false;
+
+        return ignoreCase ? value.equalsIgnoreCase (otherValue)
+                          : value == otherValue;
+    }
+
+    /** Returns true if this attribute compares equal to the passed-in attribute.
+
+        The 'ignoreCase' option only affects the value strings.
+    */
+    bool equals (const XmlAttribute& other, bool ignoreCase) const
+    {
+        return equals (other.name, other.value, ignoreCase);
+    }
+
+    /** Returns true if both attributes are equal.
+
+        This comparison is case-sensitive.
+    */
+    bool operator== (const XmlAttribute& other) const
+    {
+        return equals (other, false);
+    }
+
+    /** Returns true if the attributes have different values.
+
+        This comparison is case-sensitive.
+    */
+    bool operator!= (const XmlAttribute& other) const
+    {
+        return ! operator== (other);
+    }
+};
+
 //==============================================================================
 /** Used to build a tree of elements representing an XML document.
 
@@ -262,6 +317,15 @@ public:
     bool compareAttribute (StringRef attributeName,
                            StringRef stringToCompareAgainst,
                            bool ignoreCase = false) const noexcept;
+
+    /** Compares the value of a named attribute with a value passed-in.
+
+        @param attribute    the name-value pair to search for in the current element
+        @param ignoreCase   whether the value comparison should be case-insensitive
+        @returns    true if the value of the attribute is the same as the string passed-in;
+                    false if it's different (or if no such attribute exists)
+    */
+    bool compareAttribute (const XmlAttribute& attribute, bool ignoreCase = false) const noexcept;
 
     /** Returns the value of a named attribute as an integer.
 
@@ -657,14 +721,30 @@ private:
     //==============================================================================
     struct GetNextElement
     {
-        XmlElement* getNext (const XmlElement& e) const { return e.getNextElement(); }
+        using Value = XmlElement*;
+        using Element = XmlElement*;
+
+        Element getNext (Element e) const { return e->getNextElement(); }
+
+        static const Value& deref (const Element& e)
+        {
+            return e;
+        }
     };
 
     struct GetNextElementWithTagName
     {
+        using Value = XmlElement*;
+        using Element = XmlElement*;
+
         GetNextElementWithTagName() = default;
         explicit GetNextElementWithTagName (String n) : name (std::move (n)) {}
-        XmlElement* getNext (const XmlElement& e) const { return e.getNextElementWithTagName (name); }
+        Element getNext (Element e) const { return e->getNextElementWithTagName (name); }
+
+        static const Value& deref (const Element& e)
+        {
+            return e;
+        }
 
         String name;
     };
@@ -675,15 +755,17 @@ private:
     {
     public:
         using difference_type   = ptrdiff_t;
-        using value_type        = XmlElement*;
+        using value_type        = typename Traits::Value;
         using pointer           = const value_type*;
-        using reference         = value_type;
+        using reference         = const value_type&;
         using iterator_category = std::input_iterator_tag;
+
+        using Element = typename Traits::Element;
 
         Iterator() = default;
 
         template <typename... Args>
-        Iterator (XmlElement* e, Args&&... args)
+        Iterator (Element e, Args&&... args)
             : Traits (std::forward<Args> (args)...), element (e) {}
 
         Iterator begin()    const { return *this; }
@@ -692,12 +774,12 @@ private:
         bool operator== (const Iterator& other) const { return element == other.element; }
         bool operator!= (const Iterator& other) const { return ! operator== (other); }
 
-        reference operator*()  const { return  element; }
-        pointer   operator->() const { return &element; }
+        reference operator*()  const { return Traits::deref (element); }
+        pointer   operator->() const { return std::addressof (Traits::deref (element)); }
 
         Iterator& operator++()
         {
-            element = Traits::getNext (*element);
+            element = Traits::getNext (element);
             return *this;
         }
 
@@ -709,8 +791,39 @@ private:
         }
 
     private:
-        value_type element = nullptr;
+        Element element{};
     };
+
+    struct XmlAttributeNode
+    {
+        XmlAttributeNode (const XmlAttributeNode&) noexcept;
+        XmlAttributeNode (const Identifier&, const String&) noexcept;
+        XmlAttributeNode (String::CharPointerType, String::CharPointerType);
+
+        XmlAttributeNode& operator= (const XmlAttributeNode&) = delete;
+        XmlAttributeNode& operator= (XmlAttributeNode&&) = delete;
+
+        LinkedListPointer<XmlAttributeNode> nextListItem;
+        XmlAttribute attribute;
+    };
+
+    struct AttributeIteratorTraits
+    {
+        using Value = XmlAttribute;
+        using Element = const XmlAttributeNode*;
+
+        static Element getNext (Element node)
+        {
+            return node->nextListItem.get();
+        }
+
+        static const Value& deref (const Element& node)
+        {
+            return node->attribute;
+        }
+    };
+
+    using AttributeIterator = Iterator<AttributeIteratorTraits>;
 
 public:
     //==============================================================================
@@ -744,7 +857,24 @@ public:
         return Iterator<GetNextElementWithTagName> { getChildByName (name), name };
     }
 
-   #ifndef DOXYGEN
+    /** Allows iterating all attributes of an XmlElement using range-for syntax.
+
+        @code
+        void doSomethingWithXmlAttributes (const XmlElement& myParentXml)
+        {
+            for (const auto& attribute : myParentXml.getAttributeIterator())
+            {
+                // Name and value are available as attribute.name and attribute.value
+            }
+        }
+        @endcode
+    */
+    AttributeIterator getAttributeIterator() const
+    {
+        return AttributeIterator { attributes.get() };
+    }
+
+    /** @cond */
     [[deprecated]] void macroBasedForLoop() const noexcept {}
 
     [[deprecated ("This has been deprecated in favour of the toString method.")]]
@@ -767,29 +897,14 @@ public:
                       StringRef dtdToUse,
                       StringRef encodingType = "UTF-8",
                       int lineWrapLength = 60) const;
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================
-    struct XmlAttributeNode
-    {
-        XmlAttributeNode (const XmlAttributeNode&) noexcept;
-        XmlAttributeNode (const Identifier&, const String&) noexcept;
-        XmlAttributeNode (String::CharPointerType, String::CharPointerType);
-
-        LinkedListPointer<XmlAttributeNode> nextListItem;
-        Identifier name;
-        String value;
-
-    private:
-        XmlAttributeNode& operator= (const XmlAttributeNode&) = delete;
-    };
-
     friend class XmlDocument;
     friend class LinkedListPointer<XmlAttributeNode>;
     friend class LinkedListPointer<XmlElement>;
     friend class LinkedListPointer<XmlElement>::Appender;
-    friend class NamedValueSet;
 
     LinkedListPointer<XmlElement> nextListItem, firstChildElement;
     LinkedListPointer<XmlAttributeNode> attributes;
@@ -800,9 +915,9 @@ private:
     void writeElementAsText (OutputStream&, int, int, const char*) const;
     void getChildElementsAsArray (XmlElement**) const noexcept;
     void reorderChildElements (XmlElement**, int) noexcept;
-    XmlAttributeNode* getAttribute (StringRef) const noexcept;
+    const XmlAttribute* getAttribute (StringRef) const noexcept;
 
-    // Sigh.. L"" or _T ("") string literals are problematic in general, and really inappropriate
+    // L"" or _T ("") string literals are problematic in general, and really inappropriate
     // for XML tags. Use a UTF-8 encoded literal instead, or if you're really determined to use
     // UTF-16, cast it to a String and use the other constructor.
     XmlElement (const wchar_t*) = delete;
@@ -811,7 +926,7 @@ private:
 };
 
 //==============================================================================
-#ifndef DOXYGEN
+/** @cond */
 
 /** DEPRECATED: A handy macro to make it easy to iterate all the child elements in an XmlElement.
 
@@ -864,6 +979,6 @@ private:
 #define forEachXmlChildElementWithTagName(parentXmlElement, childElementVariableName, requiredTagName) \
     for (auto* (childElementVariableName) : ((parentXmlElement).macroBasedForLoop(), (parentXmlElement).getChildWithTagNameIterator ((requiredTagName))))
 
-#endif
+/** @endcond */
 
 } // namespace juce

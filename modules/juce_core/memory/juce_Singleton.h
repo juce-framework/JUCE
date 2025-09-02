@@ -135,7 +135,7 @@ struct SingletonHolder  : private MutexType // (inherited so we can use the empt
     std::atomic<Type*> instance { nullptr };
 };
 
-#ifndef DOXYGEN
+/** @cond */
 #define JUCE_PRIVATE_DECLARE_SINGLETON(Classname, mutex, doNotRecreate, inlineToken, getter) \
     static inlineToken juce::SingletonHolder<Classname, mutex, doNotRecreate> singletonHolder; \
     friend juce::SingletonHolder<Classname, mutex, doNotRecreate>; \
@@ -143,7 +143,7 @@ struct SingletonHolder  : private MutexType // (inherited so we can use the empt
     static Classname* JUCE_CALLTYPE getInstanceWithoutCreating() noexcept   { return singletonHolder.instance; } \
     static void JUCE_CALLTYPE deleteInstance() noexcept                     { singletonHolder.deleteInstance(); } \
     void clearSingletonInstance() noexcept                                  { singletonHolder.clear (this); }
-#endif
+/** @endcond */
 
 //==============================================================================
 /**
@@ -281,14 +281,14 @@ struct SingletonHolder  : private MutexType // (inherited so we can use the empt
     JUCE_PRIVATE_DECLARE_SINGLETON (Classname, juce::DummyCriticalSection, false, inline, getWithoutChecking)
 
 //==============================================================================
-#ifndef DOXYGEN
- // These are ancient macros, and have now been updated with new names to match the JUCE style guide,
- // so please update your code to use the newer versions!
- #define juce_DeclareSingleton(Classname, doNotRecreate)                JUCE_DECLARE_SINGLETON(Classname, doNotRecreate)
- #define juce_DeclareSingleton_SingleThreaded(Classname, doNotRecreate) JUCE_DECLARE_SINGLETON_SINGLETHREADED(Classname, doNotRecreate)
- #define juce_DeclareSingleton_SingleThreaded_Minimal(Classname)        JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL(Classname)
- #define juce_ImplementSingleton(Classname)                             JUCE_IMPLEMENT_SINGLETON(Classname)
- #define juce_ImplementSingleton_SingleThreaded(Classname)              JUCE_IMPLEMENT_SINGLETON(Classname)
-#endif
+/** @cond */
+// These are ancient macros, and have now been updated with new names to match the JUCE style guide,
+// so please update your code to use the newer versions!
+#define juce_DeclareSingleton(Classname, doNotRecreate)                JUCE_DECLARE_SINGLETON(Classname, doNotRecreate)
+#define juce_DeclareSingleton_SingleThreaded(Classname, doNotRecreate) JUCE_DECLARE_SINGLETON_SINGLETHREADED(Classname, doNotRecreate)
+#define juce_DeclareSingleton_SingleThreaded_Minimal(Classname)        JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL(Classname)
+#define juce_ImplementSingleton(Classname)                             JUCE_IMPLEMENT_SINGLETON(Classname)
+#define juce_ImplementSingleton_SingleThreaded(Classname)              JUCE_IMPLEMENT_SINGLETON(Classname)
+/** @endcond */
 
 } // namespace juce

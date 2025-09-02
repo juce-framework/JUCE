@@ -312,11 +312,12 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
 
 //==============================================================================
 #define DECLARE_JNI_CLASS_WITH_MIN_SDK(CppClassName, javaPath, minSDK) \
+    static_assert (minSDK >= 24, "There's no need to supply a min SDK lower than JUCE's minimum requirement"); \
     DECLARE_JNI_CLASS_WITH_BYTECODE (CppClassName, javaPath, minSDK, nullptr)
 
 //==============================================================================
 #define DECLARE_JNI_CLASS(CppClassName, javaPath) \
-    DECLARE_JNI_CLASS_WITH_MIN_SDK (CppClassName, javaPath, 16)
+    DECLARE_JNI_CLASS_WITH_MIN_SDK (CppClassName, javaPath, 24)
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -349,7 +350,10 @@ DECLARE_JNI_CLASS (AndroidContext, "android/content/Context")
  METHOD (startActivityForResult,               "startActivityForResult",          "(Landroid/content/Intent;I)V") \
  METHOD (getFragmentManager,                   "getFragmentManager",              "()Landroid/app/FragmentManager;") \
  METHOD (setContentView,                       "setContentView",                  "(Landroid/view/View;)V") \
- METHOD (getWindow,                            "getWindow",                       "()Landroid/view/Window;")
+ METHOD (addContentView,                       "addContentView",                  "(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V") \
+ METHOD (getActionBar,                         "getActionBar",                    "()Landroid/app/ActionBar;") \
+ METHOD (getWindow,                            "getWindow",                       "()Landroid/view/Window;") \
+ METHOD (isInMultiWindowMode,                  "isInMultiWindowMode",             "()Z") \
 
 DECLARE_JNI_CLASS (AndroidActivity, "android/app/Activity")
 #undef JNI_CLASS_MEMBERS
@@ -359,7 +363,7 @@ DECLARE_JNI_CLASS (AndroidActivity, "android/app/Activity")
  METHOD (startActivityForResult,               "startActivityForResult",          "(Landroid/content/Intent;I)V") \
  METHOD (setArguments,                         "setArguments",                    "(Landroid/os/Bundle;)V")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidFragment, "android/app/Fragment", 11)
+DECLARE_JNI_CLASS (AndroidFragment, "android/app/Fragment")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -369,7 +373,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidFragment, "android/app/Fragment", 11)
   METHOD (setContentType, "setContentType", "(I)Landroid/media/AudioAttributes$Builder;") \
   METHOD (setUsage,       "setUsage",       "(I)Landroid/media/AudioAttributes$Builder;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidAudioAttributesBuilder, "android/media/AudioAttributes$Builder", 21)
+DECLARE_JNI_CLASS (AndroidAudioAttributesBuilder, "android/media/AudioAttributes$Builder")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -472,6 +476,7 @@ DECLARE_JNI_CLASS (AndroidHandlerThread, "android/os/HandlerThread")
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   STATICMETHOD (createChooser, "createChooser", "(Landroid/content/Intent;Ljava/lang/CharSequence;)Landroid/content/Intent;") \
+  STATICMETHOD (createChooserWithSender, "createChooser", "(Landroid/content/Intent;Ljava/lang/CharSequence;Landroid/content/IntentSender;)Landroid/content/Intent;") \
   METHOD (addCategory,                    "addCategory",    "(Ljava/lang/String;)Landroid/content/Intent;") \
   METHOD (constructor,                    "<init>",         "()V") \
   METHOD (constructorWithContextAndClass, "<init>",         "(Landroid/content/Context;Ljava/lang/Class;)V") \
@@ -498,12 +503,6 @@ DECLARE_JNI_CLASS (AndroidHandlerThread, "android/os/HandlerThread")
   METHOD (setType,                        "setType",        "(Ljava/lang/String;)Landroid/content/Intent;") \
 
 DECLARE_JNI_CLASS (AndroidIntent, "android/content/Intent")
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-  STATICMETHOD (createChooser, "createChooser", "(Landroid/content/Intent;Ljava/lang/CharSequence;Landroid/content/IntentSender;)Landroid/content/Intent;") \
-
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidIntent22, "android/content/Intent", 22)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -542,6 +541,7 @@ DECLARE_JNI_CLASS (AndroidPackageManager, "android/content/pm/PackageManager")
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD (constructor,   "<init>",           "(I)V") \
+ METHOD (defaultConstructor, "<init>",      "()V") \
  METHOD (setColor,      "setColor",         "(I)V") \
  METHOD (setAlpha,      "setAlpha",         "(I)V") \
  METHOD (setTypeface,   "setTypeface",      "(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;") \
@@ -568,6 +568,12 @@ DECLARE_JNI_CLASS (AndroidPaint, "android/graphics/Paint")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (drawGlyphs, "drawGlyphs", "([II[FIILandroid/graphics/fonts/Font;Landroid/graphics/Paint;)V")
+
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidCanvas31, "android/graphics/Canvas", 31)
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   STATICMETHOD (getActivity, "getActivity", "(Landroid/content/Context;ILandroid/content/Intent;I)Landroid/app/PendingIntent;") \
   STATICMETHOD (getBroadcast, "getBroadcast", "(Landroid/content/Context;ILandroid/content/Intent;I)Landroid/app/PendingIntent;") \
   METHOD (getIntentSender, "getIntentSender", "()Landroid/content/IntentSender;") \
@@ -578,7 +584,7 @@ DECLARE_JNI_CLASS (AndroidPendingIntent, "android/app/PendingIntent")
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (toString, "toString", "()Ljava/lang/String;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidRange, "android/util/Range", 21)
+DECLARE_JNI_CLASS (AndroidRange, "android/util/Range")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -617,7 +623,7 @@ DECLARE_JNI_CLASS (AndroidConfiguration, "android/content/res/Configuration")
   METHOD (getHeight, "getHeight", "()I") \
   METHOD (getWidth,  "getWidth",  "()I")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidSize, "android/util/Size", 21)
+DECLARE_JNI_CLASS (AndroidSize, "android/util/Size")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -642,20 +648,18 @@ DECLARE_JNI_CLASS (AndroidUri, "android/net/Uri")
  METHOD (invalidate,                "invalidate",                "(IIII)V") \
  METHOD (setVisibility,             "setVisibility",             "(I)V") \
  METHOD (setLayoutParams,           "setLayoutParams",           "(Landroid/view/ViewGroup$LayoutParams;)V") \
+ METHOD (getLayoutParams,           "getLayoutParams",           "()Landroid/view/ViewGroup$LayoutParams;") \
  METHOD (setSystemUiVisibility,     "setSystemUiVisibility",     "(I)V") \
  METHOD (findViewById,              "findViewById",              "(I)Landroid/view/View;") \
+ METHOD (getWindowToken,            "getWindowToken",            "()Landroid/os/IBinder;") \
  METHOD (getRootView,               "getRootView",               "()Landroid/view/View;") \
  METHOD (addOnLayoutChangeListener, "addOnLayoutChangeListener", "(Landroid/view/View$OnLayoutChangeListener;)V") \
  METHOD (announceForAccessibility,  "announceForAccessibility",  "(Ljava/lang/CharSequence;)V")  \
+ METHOD (setOnApplyWindowInsetsListener, "setOnApplyWindowInsetsListener", "(Landroid/view/View$OnApplyWindowInsetsListener;)V") \
+ METHOD (getRootWindowInsets, "getRootWindowInsets", "()Landroid/view/WindowInsets;") \
+ METHOD (getWindowSystemUiVisibility, "getWindowSystemUiVisibility", "()I") \
 
 DECLARE_JNI_CLASS (AndroidView, "android/view/View")
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (setOnApplyWindowInsetsListener, "setOnApplyWindowInsetsListener", "(Landroid/view/View$OnApplyWindowInsetsListener;)V") \
- METHOD (getRootWindowInsets, "getRootWindowInsets", "()Landroid/view/WindowInsets;")
-
- DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidView23, "android/view/View", 23)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -667,17 +671,33 @@ DECLARE_JNI_CLASS (AndroidViewGroup, "android/view/ViewGroup")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (getDecorView, "getDecorView",       "()Landroid/view/View;") \
- METHOD (setFlags,     "setFlags",           "(II)V") \
- METHOD (clearFlags,   "clearFlags",         "(I)V")
+ METHOD (getDecorView,  "getDecorView",       "()Landroid/view/View;") \
+ METHOD (getAttributes, "getAttributes",      "()Landroid/view/WindowManager$LayoutParams;") \
+ METHOD (setFlags,      "setFlags",           "(II)V") \
+ METHOD (clearFlags,    "clearFlags",         "(I)V") \
+ METHOD (setStatusBarColor, "setStatusBarColor", "(I)V") \
+ METHOD (setNavigationBarColor, "setNavigationBarColor", "(I)V") \
 
 DECLARE_JNI_CLASS (AndroidWindow, "android/view/Window")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (getDefaultDisplay, "getDefaultDisplay", "()Landroid/view/Display;")
+ METHOD (setNavigationBarContrastEnforced, "setNavigationBarContrastEnforced", "(Z)V") \
+
+DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidWindow29, "android/view/Window", 29)
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getDefaultDisplay, "getDefaultDisplay", "()Landroid/view/Display;") \
+ METHOD (removeViewImmediate, "removeViewImmediate", "(Landroid/view/View;)V") \
 
 DECLARE_JNI_CLASS (AndroidWindowManager, "android/view/WindowManager")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getCurrentWindowMetrics, "getCurrentWindowMetrics", "()Landroid/view/WindowMetrics;")
+
+DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidWindowManager30, "android/view/WindowManager", 30)
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -703,8 +723,10 @@ DECLARE_JNI_CLASS (JavaBoolean, "java/lang/Boolean")
   METHOD (remaining,  "remaining", "()I") \
   METHOD (hasArray,   "hasArray",  "()Z") \
   METHOD (array,      "array",     "()[B") \
+  METHOD (put,        "put",       "([B)Ljava/nio/ByteBuffer;") \
   METHOD (setOrder,   "order",     "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;") \
-  STATICMETHOD (wrap, "wrap",      "([B)Ljava/nio/ByteBuffer;")
+  STATICMETHOD (wrap, "wrap",      "([B)Ljava/nio/ByteBuffer;") \
+  STATICMETHOD (allocateDirect, "allocateDirect", "(I)Ljava/nio/ByteBuffer;") \
 
 DECLARE_JNI_CLASS (JavaByteBuffer, "java/nio/ByteBuffer")
 #undef JNI_CLASS_MEMBERS
@@ -994,9 +1016,11 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
                                        const String& interfaceName);
 
 //==============================================================================
-class ActivityLifecycleCallbacks     : public AndroidInterfaceImplementer
+class ActivityLifecycleCallbacks
 {
 public:
+    virtual ~ActivityLifecycleCallbacks() = default;
+
     virtual void onActivityPreCreated            (jobject /*activity*/, jobject /*bundle*/)  {}
     virtual void onActivityPreDestroyed          (jobject /*activity*/)                      {}
     virtual void onActivityPrePaused             (jobject /*activity*/)                      {}
@@ -1022,15 +1046,27 @@ public:
     virtual void onActivityPostStopped           (jobject /*activity*/)                      {}
 
     virtual void onActivityConfigurationChanged  (jobject /*activity*/)                      {}
+};
+
+class ActivityLifecycleCallbackForwarder : private AndroidInterfaceImplementer
+{
+public:
+    ActivityLifecycleCallbackForwarder (GlobalRef appContext, ActivityLifecycleCallbacks* callbacks);
+
+    ~ActivityLifecycleCallbackForwarder() override;
 
 private:
     jobject invoke (jobject, jobject, jobjectArray) override;
+
+    GlobalRef appContext;
+    GlobalRef myself;
+    ActivityLifecycleCallbacks* callbacks = nullptr;
 };
 
 //==============================================================================
-struct SurfaceHolderCallback    : AndroidInterfaceImplementer
+struct SurfaceHolderCallback    : public AndroidInterfaceImplementer
 {
-    virtual ~SurfaceHolderCallback() override = default;
+    ~SurfaceHolderCallback() override = default;
 
     virtual void surfaceChanged (LocalRef<jobject> holder, int format, int width, int height) = 0;
     virtual void surfaceCreated (LocalRef<jobject> holder) = 0;

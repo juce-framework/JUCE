@@ -196,7 +196,7 @@ public:
 
     //==============================================================================
     /** Can be used to save and restore the editor's caret position, selection state, etc. */
-    struct State
+    struct JUCE_API State
     {
         /** Creates an object containing the state of the given editor. */
         State (const CodeEditorComponent&);
@@ -253,7 +253,7 @@ public:
     struct JUCE_API  ColourScheme
     {
         /** Defines a colour for a token type */
-        struct TokenType
+        struct JUCE_API TokenType
         {
             String name;
             Colour colour;

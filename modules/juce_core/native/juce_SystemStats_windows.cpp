@@ -247,21 +247,34 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
 RTL_OSVERSIONINFOW getWindowsVersionInfo();
 RTL_OSVERSIONINFOW getWindowsVersionInfo()
 {
+    using RtlGetVersion = LONG (WINAPI*) (PRTL_OSVERSIONINFOW);
+
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type")
+
+    static const auto rtlGetVersion = std::invoke ([]() -> RtlGetVersion
+    {
+        if (auto* moduleHandle = ::GetModuleHandleW (L"ntdll.dll"))
+            if (auto* result = (RtlGetVersion) ::GetProcAddress (moduleHandle, "RtlGetVersion"))
+                return result;
+
+        // Unable to locate function! Please let the JUCE team know your current platform/environment
+        // so that we can fix this issue.
+        jassertfalse;
+        return {};
+    });
+
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+    if (rtlGetVersion == nullptr)
+        return {};
+
     RTL_OSVERSIONINFOW versionInfo = {};
 
-    if (auto* moduleHandle = ::GetModuleHandleW (L"ntdll.dll"))
-    {
-        using RtlGetVersion = LONG (WINAPI*) (PRTL_OSVERSIONINFOW);
+    versionInfo.dwOSVersionInfoSize = sizeof (versionInfo);
+    LONG STATUS_SUCCESS = 0;
 
-        if (auto* rtlGetVersion = (RtlGetVersion) ::GetProcAddress (moduleHandle, "RtlGetVersion"))
-        {
-            versionInfo.dwOSVersionInfoSize = sizeof (versionInfo);
-            LONG STATUS_SUCCESS = 0;
-
-            if (rtlGetVersion (&versionInfo) != STATUS_SUCCESS)
-                versionInfo = {};
-        }
-    }
+    if (rtlGetVersion (&versionInfo) != STATUS_SUCCESS)
+        versionInfo = {};
 
     return versionInfo;
 }
@@ -332,18 +345,23 @@ bool SystemStats::isOperatingSystem64Bit()
    #if JUCE_64BIT
     return true;
    #else
-    typedef BOOL (WINAPI* LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+    using LPFN_ISWOW64PROCESS = BOOL (WINAPI*) (HANDLE, PBOOL);
 
-    const auto moduleHandle = GetModuleHandleA ("kernel32");
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type")
 
-    if (moduleHandle == nullptr)
+    static const auto fnIsWow64Process = std::invoke ([]() -> LPFN_ISWOW64PROCESS
     {
-        jassertfalse;
-        return false;
-    }
+        if (auto* moduleHandle = ::GetModuleHandleA ("kernel32"))
+            if (auto* result = (LPFN_ISWOW64PROCESS) ::GetProcAddress (moduleHandle, "IsWow64Process"))
+                return result;
 
-    LPFN_ISWOW64PROCESS fnIsWow64Process
-        = (LPFN_ISWOW64PROCESS) GetProcAddress (moduleHandle, "IsWow64Process");
+        // Unable to locate function! Please let the JUCE team know your current platform/environment
+        // so that we can fix this issue.
+        jassertfalse;
+        return {};
+    });
+
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     BOOL isWow64 = FALSE;
 

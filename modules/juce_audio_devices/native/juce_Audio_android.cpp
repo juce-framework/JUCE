@@ -207,8 +207,7 @@ public:
                                                                          STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
                                                                          (jint) (minBufferSizeOut * numDeviceOutputChannels * static_cast<int> (sizeof (int16))), MODE_STREAM)));
 
-            const bool supportsUnderrunCount = (getAndroidSDKVersion() >= 24);
-            getUnderrunCount = supportsUnderrunCount ? env->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : nullptr;
+            getUnderrunCount = env->GetMethodID (AudioTrack, "getUnderrunCount", "()I");
 
             int outputDeviceState = env->CallIntMethod (outputDevice, AudioTrack.getState);
             if (outputDeviceState > 0)

@@ -1131,7 +1131,7 @@ public:
 
         @see getCurrentProgramStateInformation
     */
-    virtual void getStateInformation (juce::MemoryBlock& destData) = 0;
+    virtual void getStateInformation (MemoryBlock& destData) = 0;
 
     /** The host will call this method if it wants to save the state of just the processor's
         current program.
@@ -1144,7 +1144,7 @@ public:
 
         @see getStateInformation, setCurrentProgramStateInformation
     */
-    virtual void getCurrentProgramStateInformation (juce::MemoryBlock& destData);
+    virtual void getCurrentProgramStateInformation (MemoryBlock& destData);
 
     /** This must restore the processor's state from a block of data previously created
         using getStateInformation().
@@ -1154,7 +1154,18 @@ public:
 
         See also the helper function getXmlFromBinary() for loading settings as XML.
 
-        @see setCurrentProgramStateInformation
+        In the case that this AudioProcessor is implementing a VST3 that has declared compatible
+        plugins via JUCE_VST3_COMPATIBLE_CLASSES, the state passed to this function may have
+        been created by one of these compatible plugins.
+
+        If the parameter IDs of the current plugin differ from the IDs of the plugin whose state
+        was passed to this function, you can use information from the plugin state
+        to determine which parameter mapping to use if necessary.
+        VST3ClientExtensions::getCompatibleParameterIds() will always be called after
+        setStateInformation(), and that function should return the parameter mapping from the most
+        recently-loaded state.
+
+        @see setCurrentProgramStateInformation, VST3ClientExtensions::getCompatibleParameterIds
     */
     virtual void setStateInformation (const void* data, int sizeInBytes) = 0;
 
@@ -1301,8 +1312,8 @@ public:
         AudioProcessor is loaded. */
     struct TrackProperties
     {
-        String name;    // The name of the track - this will be empty if the track name is not known
-        Colour colour;  // The colour of the track - this will be transparentBlack if the colour is not known
+        std::optional<String> name;     // The name of the track - this will be empty if the track name is not known
+        std::optional<Colour> colour;   // The colour of the track - this will be empty if the colour is not known
 
         // other properties may be added in the future
     };
@@ -1323,6 +1334,21 @@ public:
     */
     virtual void updateTrackProperties (const TrackProperties& properties);
 
+    /** Returns a custom name for a MIDI note number.
+
+        This method allows the host to query your plugin for a custom name to display
+        for a given MIDI note number. It's useful for plugins that work with drum kits,
+        microtonal scales, or other mappings.
+
+        @param note         The MIDI note number for which the name is being requested.
+                            Some DAWs can request a note range outside of the standard
+                            [0-127]. Ensure your plugin can handle this.
+        @param midiChannel  The MIDI channel associated with the note. This is a 1-based
+                            index (1-16). Use this parameter if your plugin provides
+                            channel-specific note mappings.
+    */
+    virtual std::optional<String> getNameForMidiNoteNumber (int note, int midiChannel);
+
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
 
@@ -1333,7 +1359,7 @@ public:
         from a binary blob.
     */
     static void copyXmlToBinary (const XmlElement& xml,
-                                 juce::MemoryBlock& destData);
+                                 MemoryBlock& destData);
 
     /** Retrieves an XML element that was stored as binary with the copyXmlToBinary() method.
         This might return nullptr if the data's unsuitable or corrupted.
@@ -1457,11 +1483,8 @@ protected:
     /** @internal */
     std::atomic<AudioPlayHead*> playHead { nullptr };
 
-    /** @internal */
-    void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
-
 public:
-   #ifndef DOXYGEN
+    /** @cond */
     // These methods are all deprecated in favour of using AudioProcessorParameter
     // and AudioProcessorParameterGroup
     [[deprecated]] virtual int getNumParameters();
@@ -1480,9 +1503,6 @@ public:
     [[deprecated]] virtual bool isParameterAutomatable (int parameterIndex) const;
     [[deprecated]] virtual bool isMetaParameter (int parameterIndex) const;
     [[deprecated]] virtual AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const;
-    [[deprecated]] void beginParameterChangeGesture (int parameterIndex);
-    [[deprecated]] void endParameterChangeGesture (int parameterIndex);
-    [[deprecated]] void setParameterNotifyingHost (int parameterIndex, float newValue);
 
     // These functions are deprecated: your audio processor can inform the host
     // on its bus and channel layouts and names using the AudioChannelSet and various bus classes.
@@ -1494,7 +1514,32 @@ public:
     [[deprecated]] virtual const String getOutputChannelName (int channelIndex) const;
     [[deprecated]] virtual bool isInputChannelStereoPair  (int index) const;
     [[deprecated]] virtual bool isOutputChannelStereoPair (int index) const;
-   #endif
+    /** @endcond */
+
+    /** @internal
+        Used to convert new-style per-parameter callbacks into old-style processor-change
+        callbacks.
+        This type will be removed in the future!
+    */
+    class ParameterChangeForwarder : public AudioProcessorParameter::Listener
+    {
+    public:
+        explicit ParameterChangeForwarder (AudioProcessor* o) : owner (o) {}
+
+        ParameterChangeForwarder (const ParameterChangeForwarder& other) : owner (other.owner) {}
+
+        ParameterChangeForwarder& operator= (const ParameterChangeForwarder& other)
+        {
+            owner = other.owner;
+            return *this;
+        }
+
+        void parameterValueChanged (int, float) override;
+        void parameterGestureChanged (int, bool) override;
+
+    private:
+        AudioProcessor* owner = nullptr;
+    };
 
 private:
     //==============================================================================
@@ -1568,6 +1613,8 @@ private:
     AudioProcessorParameterGroup parameterTree;
     Array<AudioProcessorParameter*> flatParameterList;
 
+    ParameterChangeForwarder parameterListener { this };
+
     AudioProcessorParameter* getParamChecked (int) const;
 
   #if JUCE_DEBUG
@@ -1595,7 +1642,6 @@ private:
     template <typename floatType>
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);
 
-    friend class AudioProcessorParameter;
     friend class LADSPAPluginInstance;
 
     [[deprecated ("This method is no longer used - you can delete it from your AudioProcessor classes.")]]

@@ -286,11 +286,13 @@ MainComponent::MainComponent()
 
         if (isHeavyweight)
         {
-           #if JUCE_MAC && USE_COREGRAPHICS_RENDERING
-            setRenderingEngine (1);
-           #elif ! JUCE_WINDOWS
-            setRenderingEngine (0);
+           #if (JUCE_MAC && USE_COREGRAPHICS_RENDERING) || JUCE_WINDOWS
+            constexpr auto fallbackEngine = 1;
+           #else
+            constexpr auto fallbackEngine = 0;
            #endif
+
+            setRenderingEngine (fallbackEngine);
         }
 
         isShowingHeavyweightDemo = isHeavyweight;
@@ -306,6 +308,7 @@ MainComponent::MainComponent()
 
     demosPanel.setTitle ("Demos");
     demosPanel.setFocusContainerType (FocusContainerType::focusContainer);
+    demosPanel.setContentRestrictedToSafeArea (true);
 
     showDemosButton.onClick = [this] { demosPanel.showOrHide (true); };
 
@@ -439,7 +442,7 @@ void MainComponent::parentHierarchyChanged()
            #if JUCE_ANDROID
             currentRenderingEngineIdx = (renderingEngines.size() - 1);
            #else
-            currentRenderingEngineIdx = peer->getCurrentRenderingEngine();
+            currentRenderingEngineIdx = peer != nullptr ? peer->getCurrentRenderingEngine() : -1;
            #endif
         }
 
@@ -459,7 +462,9 @@ void MainComponent::updateRenderingEngine (int renderingEngineIndex)
     else
     {
         openGLContext.detach();
-        peer->setCurrentRenderingEngine (renderingEngineIndex);
+
+        if (peer != nullptr)
+            peer->setCurrentRenderingEngine (renderingEngineIndex);
     }
 
     currentRenderingEngineIdx = renderingEngineIndex;

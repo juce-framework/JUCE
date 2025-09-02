@@ -195,8 +195,6 @@ public:
         initialiseSynth();
     }
 
-    ~JuceDemoPluginAudioProcessor() override = default;
-
     //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
@@ -250,6 +248,8 @@ public:
         delayBufferFloat .clear();
         delayBufferDouble.clear();
     }
+
+    bool supportsDoublePrecisionProcessing() const override { return true; }
 
     //==============================================================================
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
@@ -470,8 +470,8 @@ private:
             auto trackColour = getProcessor().getTrackProperties().colour;
             auto& lf = getLookAndFeel();
 
-            backgroundColour = (trackColour == Colour() ? lf.findColour (ResizableWindow::backgroundColourId)
-                                                        : trackColour.withAlpha (1.0f).withBrightness (0.266f));
+            backgroundColour = (trackColour.has_value() ? trackColour->withAlpha (1.0f).withBrightness (0.266f)
+                                                        : lf.findColour (ResizableWindow::backgroundColourId));
             repaint();
         }
 

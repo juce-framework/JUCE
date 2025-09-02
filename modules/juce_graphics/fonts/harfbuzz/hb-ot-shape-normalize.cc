@@ -153,7 +153,7 @@ decompose_current_character (const hb_ot_shape_normalize_context_t *c, bool shor
   hb_codepoint_t u = buffer->cur().codepoint;
   hb_codepoint_t glyph = 0;
 
-  if (shortest && c->font->get_nominal_glyph (u, &glyph, c->not_found))
+  if (shortest && c->font->get_nominal_glyph (u, &glyph, buffer->not_found))
   {
     next_char (buffer, glyph);
     return;
@@ -165,7 +165,7 @@ decompose_current_character (const hb_ot_shape_normalize_context_t *c, bool shor
     return;
   }
 
-  if (!shortest && c->font->get_nominal_glyph (u, &glyph, c->not_found))
+  if (!shortest && c->font->get_nominal_glyph (u, &glyph, buffer->not_found))
   {
     next_char (buffer, glyph);
     return;
@@ -220,6 +220,12 @@ handle_variation_selector_cluster (const hb_ot_shape_normalize_context_t *c,
 	/* Just pass on the two characters separately, let GSUB do its magic. */
 	set_glyph (buffer->cur(), font);
 	(void) buffer->next_glyph ();
+
+        buffer->scratch_flags |= HB_BUFFER_SCRATCH_FLAG_HAS_VARIATION_SELECTOR_FALLBACK;
+	_hb_glyph_info_set_variation_selector (&buffer->cur(), true);
+	if (buffer->not_found_variation_selector != HB_CODEPOINT_INVALID)
+	  _hb_glyph_info_clear_default_ignorable (&buffer->cur());
+
 	set_glyph (buffer->cur(), font);
 	(void) buffer->next_glyph ();
       }
@@ -295,7 +301,8 @@ _hb_ot_shape_normalize (const hb_ot_shape_plan_t *plan,
     buffer,
     font,
     buffer->unicode,
-    buffer->not_found,
+    plan->shaper->decompose ? plan->shaper->decompose : hb_ot_shape_normalize_context_t::decompose_unicode,
+    plan->shaper->compose   ? plan->shaper->compose   : hb_ot_shape_normalize_context_t::compose_unicode
   };
   c.override_decompose_and_compose (plan->shaper->decompose, plan->shaper->compose);
 

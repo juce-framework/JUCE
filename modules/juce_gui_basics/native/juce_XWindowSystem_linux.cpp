@@ -411,7 +411,9 @@ namespace Keys
         MiddleButton = 2,
         RightButton = 3,
         WheelUp = 4,
-        WheelDown = 5
+        WheelDown = 5,
+        BackButton = 6,
+        ForwardButton = 7
     };
 
     static int AltMask = 0;
@@ -437,11 +439,11 @@ namespace Keys
     {
         if (modifierKeysAreStale)
         {
-            const auto oldMods = ModifierKeys::currentModifiers;
+            const auto oldMods = ModifierKeys::getCurrentModifiers();
             XWindowSystem::getInstance()->getNativeRealtimeModifiers();
             ModifierKeys::currentModifiers = oldMods.withoutMouseButtons()
-                                                    .withFlags (ModifierKeys::currentModifiers.withOnlyMouseButtons()
-                                                                                              .getRawFlags());
+                                                    .withFlags (ModifierKeys::getCurrentModifiers().withOnlyMouseButtons()
+                                                                                                   .getRawFlags());
             modifierKeysAreStale = false;
         }
     }
@@ -539,7 +541,7 @@ static void updateKeyModifiers (int status) noexcept
     if ((status & ControlMask)   != 0) keyMods |= ModifierKeys::ctrlModifier;
     if ((status & Keys::AltMask) != 0) keyMods |= ModifierKeys::altModifier;
 
-    ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
+    ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withOnlyMouseButtons().withFlags (keyMods);
 
     Keys::numLock  = ((status & Keys::NumLockMask) != 0);
     Keys::capsLock = ((status & LockMask)          != 0);
@@ -581,8 +583,8 @@ static bool updateKeyModifiersFromSym (KeySym sym, bool press) noexcept
             break;
     }
 
-    ModifierKeys::currentModifiers = press ? ModifierKeys::currentModifiers.withFlags (modifier)
-                                           : ModifierKeys::currentModifiers.withoutFlags (modifier);
+    ModifierKeys::currentModifiers = press ? ModifierKeys::getCurrentModifiers().withFlags (modifier)
+                                           : ModifierKeys::getCurrentModifiers().withoutFlags (modifier);
 
     return isModifier;
 }
@@ -2207,7 +2209,7 @@ void XWindowSystem::blitToWindow (::Window windowH, Image image, Rectangle<int> 
 {
     jassert (windowH != 0);
 
-    auto* xbitmap = static_cast<XBitmapImage*> (image.getPixelData());
+    auto* xbitmap = static_cast<XBitmapImage*> (image.getPixelData().get());
 
     xbitmap->blitToWindow (windowH,
                            destinationRect.getX(), destinationRect.getY(),
@@ -2518,6 +2520,7 @@ ModifierKeys XWindowSystem::getNativeRealtimeModifiers() const
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
+    // xQueryPointer doesn't emit masks for back/forward buttons.
     if (X11Symbols::getInstance()->xQueryPointer (display,
                                                   X11Symbols::getInstance()->xRootWindow (display,
                                                                                           X11Symbols::getInstance()->xDefaultScreen (display)),
@@ -2531,10 +2534,10 @@ ModifierKeys XWindowSystem::getNativeRealtimeModifiers() const
         ((mask & ControlMask)   != 0 ? keyboardMods : keyboardClearMods) |= ModifierKeys::ctrlModifier;
     }
 
-    ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons()
-                                                                   .withFlags (mouseMods)
-                                                                   .withoutFlags (keyboardClearMods)
-                                                                   .withFlags (keyboardMods);
+    ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons()
+                                                                        .withFlags (mouseMods)
+                                                                        .withoutFlags (keyboardClearMods)
+                                                                        .withFlags (keyboardMods);
 
     // We are keeping track of the state of modifier keys and mouse buttons with the assumption that
     // for every mouse down we are going to receive a mouse up etc.
@@ -2548,7 +2551,7 @@ ModifierKeys XWindowSystem::getNativeRealtimeModifiers() const
     // receives an event again.
     Keys::modifierKeysAreStale = true;
 
-    return ModifierKeys::currentModifiers;
+    return ModifierKeys::getCurrentModifiers();
 }
 
 static bool hasWorkAreaData (const XWindowSystemUtilities::GetXProperty& prop)
@@ -3077,26 +3080,24 @@ void XWindowSystem::setWindowType (::Window windowH, int styleFlags) const
 
 void XWindowSystem::initialisePointerMap()
 {
-    auto numButtons = X11Symbols::getInstance()->xGetPointerMapping (display, nullptr, 0);
-    pointerMap[2] = pointerMap[3] = pointerMap[4] = Keys::NoButton;
+    const auto numButtons = X11Symbols::getInstance()->xGetPointerMapping (display, nullptr, 0);
+    std::fill_n (pointerMap, std::size (pointerMap), Keys::NoButton);
 
-    if (numButtons == 2)
-    {
-        pointerMap[0] = Keys::LeftButton;
-        pointerMap[1] = Keys::RightButton;
-    }
-    else if (numButtons >= 3)
-    {
-        pointerMap[0] = Keys::LeftButton;
-        pointerMap[1] = Keys::MiddleButton;
-        pointerMap[2] = Keys::RightButton;
+    constexpr unsigned char twoButtons[] { Keys::LeftButton, Keys::RightButton };
+    constexpr unsigned char moreButtons[] { Keys::LeftButton,
+                                            Keys::MiddleButton,
+                                            Keys::RightButton,
+                                            Keys::WheelUp,
+                                            Keys::WheelDown,
+                                            Keys::NoButton,
+                                            Keys::NoButton,
+                                            Keys::BackButton,
+                                            Keys::ForwardButton };
+    static_assert (std::size (moreButtons) >= std::size (decltype (pointerMap){}));
 
-        if (numButtons >= 5)
-        {
-            pointerMap[3] = Keys::WheelUp;
-            pointerMap[4] = Keys::WheelDown;
-        }
-    }
+    auto* sourceArray = numButtons == 2 ? twoButtons : moreButtons;
+    const auto numToCopy = jmin (numButtons, (int) std::size (pointerMap));
+    std::copy (sourceArray, sourceArray + numToCopy, pointerMap);
 }
 
 void XWindowSystem::deleteIconPixmaps (::Window windowH) const
@@ -3425,7 +3426,7 @@ void XWindowSystem::handleWindowMessage (LinuxComponentPeer* peer, XEvent& event
 
 void XWindowSystem::handleKeyPressEvent (LinuxComponentPeer* peer, XKeyEvent& keyEvent) const
 {
-    auto oldMods = ModifierKeys::currentModifiers;
+    auto oldMods = ModifierKeys::getCurrentModifiers();
     Keys::refreshStaleModifierKeys();
 
     char utf8 [64] = { 0 };
@@ -3450,7 +3451,7 @@ void XWindowSystem::handleKeyPressEvent (LinuxComponentPeer* peer, XKeyEvent& ke
 
         if (keyCode < 0x20)
             keyCode = (int) X11Symbols::getInstance()->xkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0,
-                                                                           ModifierKeys::currentModifiers.isShiftDown() ? 1 : 0);
+                                                                           ModifierKeys::getCurrentModifiers().isShiftDown() ? 1 : 0);
 
         keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
     }
@@ -3534,7 +3535,7 @@ void XWindowSystem::handleKeyPressEvent (LinuxComponentPeer* peer, XKeyEvent& ke
     if (utf8[0] != 0 || ((sym & 0xff00) == 0 && sym >= 8))
         keyPressed = true;
 
-    if (oldMods != ModifierKeys::currentModifiers)
+    if (oldMods != ModifierKeys::getCurrentModifiers())
         peer->handleModifierKeysChange();
 
     if (keyDownChange)
@@ -3572,10 +3573,10 @@ void XWindowSystem::handleKeyReleaseEvent (LinuxComponentPeer* peer, const XKeyE
             sym = X11Symbols::getInstance()->xkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0, 0);
         }
 
-        auto oldMods = ModifierKeys::currentModifiers;
+        auto oldMods = ModifierKeys::getCurrentModifiers();
         auto keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, false);
 
-        if (oldMods != ModifierKeys::currentModifiers)
+        if (oldMods != ModifierKeys::getCurrentModifiers())
             peer->handleModifierKeysChange();
 
         if (keyDownChange)
@@ -3598,10 +3599,10 @@ void XWindowSystem::handleWheelEvent (LinuxComponentPeer* peer, const XButtonPre
 
 void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent, int buttonModifierFlag) const
 {
-    ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withFlags (buttonModifierFlag);
+    ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withFlags (buttonModifierFlag);
     peer->toFront (true);
     peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (buttonPressEvent, peer->getPlatformScaleFactor()),
-                            ModifierKeys::currentModifiers, MouseInputSource::defaultPressure,
+                            ModifierKeys::getCurrentModifiers(), MouseInputSource::defaultPressure,
                             MouseInputSource::defaultOrientation, getEventTime (buttonPressEvent), {});
 }
 
@@ -3620,6 +3621,9 @@ void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, const XBut
             case Keys::LeftButton:      handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::leftButtonModifier); break;
             case Keys::RightButton:     handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::rightButtonModifier); break;
             case Keys::MiddleButton:    handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::middleButtonModifier); break;
+            case Keys::BackButton:      handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::backButtonModifier); break;
+            case Keys::ForwardButton:   handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::forwardButtonModifier); break;
+
             default: break;
         }
     }
@@ -3638,9 +3642,12 @@ void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer* peer, const XB
     {
         switch (pointerMap[mapIndex])
         {
-            case Keys::LeftButton:      ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutFlags (ModifierKeys::leftButtonModifier);   break;
-            case Keys::RightButton:     ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutFlags (ModifierKeys::rightButtonModifier);  break;
-            case Keys::MiddleButton:    ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutFlags (ModifierKeys::middleButtonModifier); break;
+            case Keys::LeftButton:      ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::leftButtonModifier);    break;
+            case Keys::RightButton:     ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::rightButtonModifier);   break;
+            case Keys::MiddleButton:    ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::middleButtonModifier);  break;
+            case Keys::BackButton:      ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::backButtonModifier);    break;
+            case Keys::ForwardButton:   ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutFlags (ModifierKeys::forwardButtonModifier); break;
+
             default: break;
         }
     }
@@ -3651,7 +3658,7 @@ void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer* peer, const XB
         dragState.handleExternalDragButtonReleaseEvent();
 
     peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (buttonRelEvent, peer->getPlatformScaleFactor()),
-                            ModifierKeys::currentModifiers, MouseInputSource::defaultPressure, MouseInputSource::defaultOrientation, getEventTime (buttonRelEvent));
+                            ModifierKeys::getCurrentModifiers(), MouseInputSource::defaultPressure, MouseInputSource::defaultOrientation, getEventTime (buttonRelEvent));
 }
 
 void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer* peer, const XPointerMovedEvent& movedEvent) const
@@ -3665,7 +3672,7 @@ void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer* peer, const XPo
         dragState.handleExternalDragMotionNotify();
 
     peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (movedEvent, peer->getPlatformScaleFactor()),
-                            ModifierKeys::currentModifiers, MouseInputSource::defaultPressure,
+                            ModifierKeys::getCurrentModifiers(), MouseInputSource::defaultPressure,
                             MouseInputSource::defaultOrientation, getEventTime (movedEvent));
 }
 
@@ -3674,11 +3681,11 @@ void XWindowSystem::handleEnterNotifyEvent (LinuxComponentPeer* peer, const XEnt
     if (peer->getParentWindow() != 0)
         peer->updateWindowBounds();
 
-    if (! ModifierKeys::currentModifiers.isAnyMouseButtonDown())
+    if (! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
     {
         updateKeyModifiers ((int) enterEvent.state);
         peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (enterEvent, peer->getPlatformScaleFactor()),
-                                ModifierKeys::currentModifiers, MouseInputSource::defaultPressure,
+                                ModifierKeys::getCurrentModifiers(), MouseInputSource::defaultPressure,
                                 MouseInputSource::defaultOrientation, getEventTime (enterEvent));
     }
 }
@@ -3688,12 +3695,12 @@ void XWindowSystem::handleLeaveNotifyEvent (LinuxComponentPeer* peer, const XLea
     // Suppress the normal leave if we've got a pointer grab, or if
     // it's a bogus one caused by clicking a mouse button when running
     // in a Window manager
-    if (((! ModifierKeys::currentModifiers.isAnyMouseButtonDown()) && leaveEvent.mode == NotifyNormal)
+    if (((! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown()) && leaveEvent.mode == NotifyNormal)
          || leaveEvent.mode == NotifyUngrab)
     {
         updateKeyModifiers ((int) leaveEvent.state);
         peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (leaveEvent, peer->getPlatformScaleFactor()),
-                                ModifierKeys::currentModifiers, MouseInputSource::defaultPressure,
+                                ModifierKeys::getCurrentModifiers(), MouseInputSource::defaultPressure,
                                 MouseInputSource::defaultOrientation, getEventTime (leaveEvent));
     }
 }

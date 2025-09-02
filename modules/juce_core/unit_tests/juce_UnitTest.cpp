@@ -66,6 +66,20 @@ Array<UnitTest*> UnitTest::getTestsInCategory (const String& category)
     return unitTests;
 }
 
+Array<UnitTest*> UnitTest::getTestsWithName (const String& name)
+{
+    if (name.isEmpty())
+        return getAllTests();
+
+    Array<UnitTest*> unitTests;
+
+    for (auto* test : getAllTests())
+        if (test->getName() == name)
+            unitTests.add (test);
+
+    return unitTests;
+}
+
 StringArray UnitTest::getAllCategories()
 {
     StringArray categories;
@@ -194,6 +208,11 @@ void UnitTestRunner::runAllTests (int64 randomSeed)
 void UnitTestRunner::runTestsInCategory (const String& category, int64 randomSeed)
 {
     runTests (UnitTest::getTestsInCategory (category), randomSeed);
+}
+
+void UnitTestRunner::runTestsWithName (const String& name, int64 randomSeed)
+{
+    runTests (UnitTest::getTestsWithName (name), randomSeed);
 }
 
 void UnitTestRunner::logMessage (const String& message)

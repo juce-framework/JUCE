@@ -36,15 +36,14 @@ namespace juce
 {
 
 //==============================================================================
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 /**
     Describes the attributes of a file or folder.
 
     @tags{Core}
 */
-class DirectoryEntry final
+class JUCE_API DirectoryEntry final
 {
 public:
     /** The path to a file or folder. */
@@ -108,7 +107,7 @@ inline const DirectoryEntry& operator* (const DirectoryEntry& e) noexcept { retu
 
     @tags{Core}
 */
-class RangedDirectoryIterator final
+class JUCE_API RangedDirectoryIterator final
 {
 public:
     using difference_type   = std::ptrdiff_t;
@@ -196,7 +195,6 @@ inline RangedDirectoryIterator begin (const RangedDirectoryIterator& it) { retur
 inline RangedDirectoryIterator end   (const RangedDirectoryIterator&)    { return {}; }
 
 
-JUCE_END_IGNORE_WARNINGS_MSVC
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 } // namespace juce

@@ -359,7 +359,10 @@ struct gvar
     out->glyphCountX = hb_min (0xFFFFu, num_glyphs);
 
     unsigned glyph_var_data_size = glyph_vars.compiled_byte_size ();
-    bool long_offset = glyph_var_data_size & ~0xFFFFu || force_long_offsets;
+    /* According to the spec: If the short format (Offset16) is used for offsets,
+     * the value stored is the offset divided by 2, so the maximum data size should
+     * be 2 * 0xFFFFu, which is 0x1FFFEu */
+    bool long_offset = glyph_var_data_size > 0x1FFFEu || force_long_offsets;
     out->flags = long_offset ? 1 : 0;
 
     HBUINT8 *glyph_var_data_offsets = c->allocate_size<HBUINT8> ((long_offset ? 4 : 2) * (num_glyphs + 1), false);
@@ -440,7 +443,10 @@ struct gvar
       subset_data_size += get_glyph_var_data_bytes (c->source_blob, glyph_count, old_gid).length;
     }
 
-    bool long_offset = (subset_data_size & ~0xFFFFu);
+    /* According to the spec: If the short format (Offset16) is used for offsets,
+     * the value stored is the offset divided by 2, so the maximum data size should
+     * be 2 * 0xFFFFu, which is 0x1FFFEu */
+    bool long_offset = subset_data_size > 0x1FFFEu;
 #ifdef HB_EXPERIMENTAL_API
     long_offset = long_offset || (c->plan->flags & HB_SUBSET_FLAGS_IFTB_REQUIREMENTS);
 #endif
@@ -540,7 +546,7 @@ struct gvar
   unsigned get_offset (unsigned glyph_count, unsigned i) const
   {
     if (unlikely (i > glyph_count)) return 0;
-    _hb_compiler_memory_r_barrier ();
+    hb_barrier ();
     return is_long_offset () ? get_long_offset_array ()[i] : get_short_offset_array ()[i] * 2;
   }
 

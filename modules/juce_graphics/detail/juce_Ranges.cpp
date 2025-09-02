@@ -100,14 +100,16 @@ public:
 
     void runTest() override
     {
+        Ranges::Operations ops;
+
         beginTest ("Ranges::set() - basics");
         {
             Ranges ranges;
 
-            ranges.set ({ -3, 14 });
+            ranges.set ({ -3, 14 }, ops);
             expectRange (ranges.get (0), { -3, 14 });
 
-            ranges.set ({ 7, 20 });
+            ranges.set ({ 7, 20 }, ops);
             expectRange (ranges.get (0), { -3, 7 });
             expectRange (ranges.get (1), { 7, 20 });
         }
@@ -115,9 +117,9 @@ public:
         beginTest ("Ranges::set() - neighbouring ranges extents are modified");
         {
             Ranges ranges;
-            ranges.set ({ -3, 14 });
-            ranges.set ({ 19, 30 });
-            ranges.set ({ 10, 25 });
+            ranges.set ({ -3, 14 }, ops);
+            ranges.set ({ 19, 30 }, ops);
+            ranges.set ({ 10, 25 }, ops);
 
             // size_t doesn't always map to an existing overload for String::operator<< on all platforms
             expectEquals ((int64) ranges.size(), (int64)  3);
@@ -129,12 +131,12 @@ public:
         beginTest ("Ranges::set() - setting a range inside another one splits that range");
         {
             Ranges ranges;
-            ranges.set ({ -3, 14 });
+            ranges.set ({ -3, 14 }, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 1);
 
             //==============================================================================
-            ranges.set ({ 3, 7 });
+            ranges.set ({ 3, 7 }, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 3);
             expectRange (ranges.get (0), { -3, 3 });
@@ -145,16 +147,16 @@ public:
         beginTest ("Ranges::set() - old ranges falling within the bounds of a newly set are erased");
         {
             Ranges ranges;
-            ranges.set ({ 0, 5 });
-            ranges.set ({ 5, 10 });
-            ranges.set ({ 15, 20 });
-            ranges.set ({ 25, 30 });
-            ranges.set ({ 35, 50 });
+            ranges.set ({ 0, 5 }, ops);
+            ranges.set ({ 5, 10 }, ops);
+            ranges.set ({ 15, 20 }, ops);
+            ranges.set ({ 25, 30 }, ops);
+            ranges.set ({ 35, 50 }, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 5);
 
             //==============================================================================
-            ranges.set ({ 4, 36 });
+            ranges.set ({ 4, 36 }, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 3);
             expectRange (ranges.get (0), { 0, 4 });
@@ -166,7 +168,8 @@ public:
         {
             Ranges ranges;
 
-            auto ops = ranges.set ({ 0, 0 });
+            ops.clear();
+            ranges.set ({ 0, 0 }, ops);
             expect (ranges.isEmpty());
             expect (ops.empty());
         }
@@ -175,9 +178,9 @@ public:
         {
             Ranges ranges;
 
-            ranges.set ({ 0, 48 });
-            ranges.set ({ 48, 127 });
-            ranges.set ({ 49, 94 });
+            ranges.set ({ 0, 48 }, ops);
+            ranges.set ({ 48, 127 }, ops);
+            ranges.set ({ 49, 94 }, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 4, "");
             expectRange (ranges.get (0), { 0, 48 });
@@ -190,10 +193,11 @@ public:
         {
             Ranges ranges;
 
-            ranges.set ({ 0, 48 });
-            ranges.set ({ 48, 127 });
+            ranges.set ({ 0, 48 }, ops);
+            ranges.set ({ 48, 127 }, ops);
 
-            auto ops = ranges.split (47);
+            ops.clear();
+            ranges.split (47, ops);
 
             expectEquals ((int64) ops.size(), (int64) 1, "");
             const auto op0 = std::get_if<Ranges::Ops::Split> (&ops[0]);
@@ -212,10 +216,11 @@ public:
         {
             Ranges ranges;
 
-            ranges.set ({ 0, 48 });
-            ranges.set ({ 48, 127 });
+            ranges.set ({ 0, 48 }, ops);
+            ranges.set ({ 48, 127 }, ops);
 
-            auto ops = ranges.split (48);
+            ops.clear();
+            ranges.split (48, ops);
             expectEquals ((int64) ops.size(), (int64) 0, "");
 
             expectEquals ((int64) ranges.size(), (int64) 2, "");
@@ -227,10 +232,10 @@ public:
         {
             Ranges ranges;
 
-            ranges.insert ({ -3, 14 });
+            ranges.insert ({ -3, 14 }, ops);
             expectRange (ranges.get (0), { -3, 14 });
 
-            ranges.insert ({ 7, 20 });
+            ranges.insert ({ 7, 20 }, ops);
             expectRange (ranges.get (0), { -3, 7 });
             expectRange (ranges.get (1), { 7, 20 });
             expectRange (ranges.get (2), { 20, 27 });
@@ -240,8 +245,8 @@ public:
         {
             Ranges ranges;
 
-            ranges.insert ({ 10, 11 });
-            ranges.insert ({ 0, 1 });
+            ranges.insert ({ 10, 11 }, ops);
+            ranges.insert ({ 0, 1 }, ops);
 
             expectRange (ranges.get (0), { 0, 1 });
             expectRange (ranges.get (1), { 11, 12 });
@@ -251,19 +256,20 @@ public:
         {
             Ranges ranges;
 
-            auto ops = ranges.insert ({ 0, 0 });
+            ops.clear();
+            ranges.insert ({ 0, 0 }, ops);
             expect (ranges.isEmpty());
             expect (ops.empty());
         }
 
-        const auto getTestRanges = []
+        const auto getTestRanges = [&ops]
         {
             Ranges ranges;
 
-            ranges.set ({ 0, 48 });
-            ranges.set ({ 48, 49 });
-            ranges.set ({ 55, 94 });
-            ranges.set ({ 94, 127 });
+            ranges.set ({ 0, 48 }, ops);
+            ranges.set ({ 48, 49 }, ops);
+            ranges.set ({ 55, 94 }, ops);
+            ranges.set ({ 94, 127 }, ops);
 
             return ranges;
         };
@@ -271,7 +277,7 @@ public:
         beginTest ("Ranges::eraseFrom() - erasing beyond all ranges has no effect");
         {
             auto ranges = getTestRanges();
-            ranges.eraseFrom (ranges.get (ranges.size() - 1).getEnd() + 5);
+            ranges.eraseFrom (ranges.get (ranges.size() - 1).getEnd() + 5, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 4, "");
             expectRange (ranges.get (0), { 0, 48 });
@@ -283,7 +289,7 @@ public:
         beginTest ("Ranges::eraseFrom() - erasing modifies the range that encloses the starting index");
         {
             auto ranges = getTestRanges();
-            ranges.eraseFrom (122);
+            ranges.eraseFrom (122, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 4, "");
             expectRange (ranges.get (0), { 0, 48 });
@@ -295,7 +301,7 @@ public:
         beginTest ("Ranges::eraseFrom() - ranges starting after the erased index are deleted entirely");
         {
             auto ranges = getTestRanges();
-            ranges.eraseFrom (60);
+            ranges.eraseFrom (60, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 3, "");
             expectRange (ranges.get (0), { 0, 48 });
@@ -306,7 +312,7 @@ public:
         beginTest ("Ranges::eraseFrom() - erasing from a location outside any ranges will still drop subsequent ranges");
         {
             auto ranges = getTestRanges();
-            ranges.eraseFrom (51);
+            ranges.eraseFrom (51, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 2, "");
             expectRange (ranges.get (0), { 0, 48 });
@@ -317,7 +323,7 @@ public:
         {
             auto ranges = getTestRanges();
 
-            ranges.erase ({ 30, 30 });
+            ranges.erase ({ 30, 30 }, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 4, "");
             expectRange (ranges.get (0), { 0, 48 });
@@ -330,7 +336,7 @@ public:
         {
             auto ranges = getTestRanges();
 
-            ranges.erase ({ 30, 31 });
+            ranges.erase ({ 30, 31 }, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 5, "");
             expectRange (ranges.get (0), { 0, 30 });
@@ -344,7 +350,7 @@ public:
         {
             auto ranges = getTestRanges();
 
-            ranges.erase ({ 30, 70 });
+            ranges.erase ({ 30, 70 }, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 3, "");
             expectRange (ranges.get (0), { 0, 30 });
@@ -356,7 +362,7 @@ public:
         {
             auto ranges = getTestRanges();
 
-            ranges.erase ({ 51, 53 });
+            ranges.erase ({ 51, 53 }, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 4, "");
             expectRange (ranges.get (0), { 0, 48 });
@@ -369,7 +375,7 @@ public:
         {
             auto ranges = getTestRanges();
 
-            ranges.erase ({ -1000, 1000 });
+            ranges.erase ({ -1000, 1000 }, ops);
 
             expect (ranges.isEmpty());
         }
@@ -378,7 +384,7 @@ public:
         {
             auto ranges = getTestRanges();
 
-            ranges.drop ({ 48, 49 });
+            ranges.drop ({ 48, 49 }, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 3, "");
             expectRange (ranges.get (0), { 0, 48 });
@@ -390,7 +396,7 @@ public:
         {
             auto ranges = getTestRanges();
 
-            ranges.drop ({ 51, 53 });
+            ranges.drop ({ 51, 53 }, ops);
 
             expectEquals ((int64) ranges.size(), (int64) 4, "");
             expectRange (ranges.get (0), { 0, 48 });
@@ -403,8 +409,35 @@ public:
         {
             auto ranges = getTestRanges();
 
-            ranges.drop ({ -1000, 1000 });
+            ranges.drop ({ -1000, 1000 }, ops);
             expect (ranges.isEmpty());
+        }
+
+        beginTest ("Ranges::covers()");
+        {
+            Ranges ranges;
+
+            ranges.set ({ 0, 48 }, ops);
+            ranges.set ({ 48, 49 }, ops);
+            ranges.set ({ 55, 94 }, ops);
+            ranges.set ({ 94, 127 }, ops);
+            ranges.set ({ 127, 150 }, ops);
+
+            expect (ranges.covers ({ 0, 48 }));
+            expect (ranges.covers ({ 0, 20 }));
+            expect (ranges.covers ({ 10, 30 }));
+            expect (ranges.covers ({ 30, 48 }));
+            expect (ranges.covers ({ 30, 49 }));
+            expect (ranges.covers ({ 55, 150 }));
+            expect (ranges.covers ({ 60, 145 }));
+
+            expect (! ranges.covers ({ -1, 10 }));
+            expect (! ranges.covers ({ 1, 50 }));
+            expect (! ranges.covers ({ 50, 140 }));
+            expect (! ranges.covers ({ 149, 151 }));
+
+            expect (ranges.covers ({ 10, 10 }));
+            expect (! ranges.covers ({ 151, 151 }));
         }
     }
 };
@@ -433,14 +466,15 @@ public:
     void runTest() override
     {
         auto random = getRandom();
+        Ranges::Operations ops;
 
         const auto createRangedValuesObject = [&]
         {
             RangedValues<char> rangedValues;
 
-            rangedValues.set ({ 0, 10 }, 'a');
-            rangedValues.set ({ 11, 20 }, 'b');
-            rangedValues.set ({ 23, 30 }, 'c');
+            rangedValues.set ({ 0, 10 }, 'a', ops);
+            rangedValues.set ({ 11, 20 }, 'b', ops);
+            rangedValues.set ({ 23, 30 }, 'c', ops);
 
             return rangedValues;
         };
@@ -449,7 +483,7 @@ public:
         {
             auto rangedValues = createRangedValuesObject();
 
-            rangedValues.set ({ 5, 15 }, 'd');
+            rangedValues.set ({ 5, 15 }, 'd', ops);
 
             expect (! rangedValues.isEmpty());
 
@@ -458,7 +492,7 @@ public:
             expectRangedValuesItem (rangedValues.getItem (2), { 15, 20 }, 'b');
             expectRangedValuesItem (rangedValues.getItem (3), { 23, 30 }, 'c');
 
-            rangedValues.set ({ 19, 24 }, 'e');
+            rangedValues.set ({ 19, 24 }, 'e', ops);
 
             expectRangedValuesItem (rangedValues.getItem (2), { 15, 19 }, 'b');
             expectRangedValuesItem (rangedValues.getItem (3), { 19, 24 }, 'e');
@@ -469,7 +503,7 @@ public:
         {
             auto rangedValues = createRangedValuesObject();
 
-            rangedValues.set ({ -1, 0 }, 'd');
+            rangedValues.set ({ -1, 0 }, 'd', ops);
 
             expectRangedValuesItem (rangedValues.getItem (0), { -1, 0 }, 'd');
             expectRangedValuesItem (rangedValues.getItem (1), { 0, 10 }, 'a');
@@ -479,7 +513,7 @@ public:
         {
             auto rangedValues = createRangedValuesObject();
 
-            rangedValues.set<MergeEqualItems::no> ({ 5, 15 }, 'b');
+            rangedValues.set ({ 5, 15 }, 'b', ops, MergeEqualItemsNo{});
 
             expectRangedValuesItem (rangedValues.getItem (0), { 0, 5 },   'a');
             expectRangedValuesItem (rangedValues.getItem (1), { 5, 15 },  'b');
@@ -491,7 +525,7 @@ public:
         {
             auto rangedValues = createRangedValuesObject();
 
-            rangedValues.set<MergeEqualItems::yes> ({ 5, 15 }, 'b');
+            rangedValues.set ({ 5, 15 }, 'b', ops, MergeEqualItemsYes{});
 
             expectRangedValuesItem (rangedValues.getItem (0), { 0, 5 },   'a');
             expectRangedValuesItem (rangedValues.getItem (1), { 5, 20 },  'b');
@@ -502,7 +536,8 @@ public:
         {
             RangedValues<char> rangedValues;
 
-            auto ops = rangedValues.set ({ 0, 0 }, 'a');
+            ops.clear();
+            rangedValues.set ({ 0, 0 }, 'a', ops);
             expect (rangedValues.isEmpty());
             expect (ops.empty());
         }
@@ -511,9 +546,9 @@ public:
         {
             RangedValues<char> rangedValues;
 
-            rangedValues.set ({ 0, 48 }, 'a');
-            rangedValues.set ({ 48, 127 }, 'b');
-            rangedValues.set ({ 49, 94 }, 'c');
+            rangedValues.set ({ 0, 48 }, 'a', ops);
+            rangedValues.set ({ 48, 127 }, 'b', ops);
+            rangedValues.set ({ 49, 94 }, 'c', ops);
 
             expectEquals ((int64) rangedValues.size(), (int64) 4, "");
 
@@ -530,15 +565,15 @@ public:
             {
                 const auto intersections = rangedValues.getIntersectionsWith ({ 5, 43 });
 
-                expectRangedValuesItem (intersections[0], { 5, 10 }, 'a');
-                expectRangedValuesItem (intersections[1], { 11, 20 }, 'b');
-                expectRangedValuesItem (intersections[2], { 23, 30 }, 'c');
+                expectRangedValuesItem (intersections.getItem (0), { 5, 10 }, 'a');
+                expectRangedValuesItem (intersections.getItem (1), { 11, 20 }, 'b');
+                expectRangedValuesItem (intersections.getItem (2), { 23, 30 }, 'c');
             }
 
             {
                 const auto intersections = rangedValues.getIntersectionsWith ({ -10, 3 });
 
-                expectRangedValuesItem (intersections[0], { 0, 3 }, 'a');
+                expectRangedValuesItem (intersections.getItem (0), { 0, 3 }, 'a');
             }
         }
 
@@ -554,13 +589,17 @@ public:
                 const auto beginInsertionAt = (int64) random.nextInt (100) - 50;
                 const auto numElemsToInsert = (int64) random.nextInt (1000);
 
-                rangedValuesNotMerged.insert<MergeEqualItems::no> ({ Range<int64>::withStartAndLength (beginInsertionAt, numElemsToInsert) },
-                                                                   'a' + (char) random.nextInt (25));
+                rangedValuesNotMerged.insert ({ Range<int64>::withStartAndLength (beginInsertionAt, numElemsToInsert) },
+                                              'a' + (char) random.nextInt (25),
+                                              ops,
+                                              MergeEqualItemsNo{});
 
                 expectEquals (getCumulativeRangeLengths (rangedValuesNotMerged) - totalLengthBeforeInsert, numElemsToInsert);
 
-                rangedValuesMerged.insert<MergeEqualItems::yes> ({ Range<int64>::withStartAndLength (beginInsertionAt, numElemsToInsert) },
-                                                                 'a' + (char) random.nextInt (25));
+                rangedValuesMerged.insert ({ Range<int64>::withStartAndLength (beginInsertionAt, numElemsToInsert) },
+                                           'a' + (char) random.nextInt (25),
+                                           ops,
+                                           MergeEqualItemsYes{});
 
                 expectEquals (getCumulativeRangeLengths (rangedValuesMerged) - totalLengthBeforeInsert, numElemsToInsert);
             }
@@ -572,7 +611,7 @@ public:
 
             expectEquals ((int64) rangedValues.size(), (int64) 3);
 
-            rangedValues.insert ({ 2, 4 }, 'd');
+            rangedValues.insert ({ 2, 4 }, 'd', ops);
 
             expectEquals ((int64) rangedValues.size(), (int64) 5);
 
@@ -590,7 +629,7 @@ public:
 
                 expectEquals ((int64) rangedValues.size(), (int64) 3);
 
-                rangedValues.insert<MergeEqualItems::yes> ({ 2, 4 }, 'a');
+                rangedValues.insert ({ 2, 4 }, 'a', ops, MergeEqualItemsYes{});
 
                 expectEquals ((int64) rangedValues.size(), (int64) 3);
 
@@ -603,7 +642,7 @@ public:
 
                 expectEquals ((int64) rangedValues.size(), (int64) 3);
 
-                rangedValues.insert<MergeEqualItems::no> ({ 2, 4 }, 'a');
+                rangedValues.insert ({ 2, 4 }, 'a', ops, MergeEqualItemsNo{});
 
                 expectEquals ((int64) rangedValues.size(), (int64) 5);
 
@@ -620,16 +659,18 @@ public:
             {
                 RangedValues<char> emptyRangedValues;
 
-                auto ops = emptyRangedValues.insert ({ 0, 0 }, 'a');
+                ops.clear();
+                emptyRangedValues.insert ({ 0, 0 }, 'a', ops);
                 expect (emptyRangedValues.isEmpty());
                 expect (ops.empty());
             }
 
             {
                 RangedValues<char> rangedValues;
-                rangedValues.set ({ 0, 10 }, 'a');
+                rangedValues.set ({ 0, 10 }, 'a', ops);
 
-                auto ops = rangedValues.insert ({ 0, 0 }, 'a');
+                ops.clear();
+                rangedValues.insert ({ 0, 0 }, 'a', ops);
                 expect (ops.empty());
                 expectEquals ((int64) rangedValues.size(), (int64) 1);
                 expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },   'a');
@@ -640,11 +681,11 @@ public:
         {
             RangedValues<char> rangedValues;
 
-            rangedValues.set ({ 0, 10 }, 'a');
-            rangedValues.set ({ 11, 20 }, 'b');
-            rangedValues.set ({ 23, 30 }, 'c');
-            rangedValues.set ({ 35, 45 }, 'c');
-            rangedValues.set ({ 45, 60 }, 'd');
+            rangedValues.set ({ 0, 10 }, 'a', ops);
+            rangedValues.set ({ 11, 20 }, 'b', ops);
+            rangedValues.set ({ 23, 30 }, 'c', ops);
+            rangedValues.set ({ 35, 45 }, 'c', ops);
+            rangedValues.set ({ 45, 60 }, 'd', ops);
 
             return rangedValues;
         };
@@ -653,7 +694,7 @@ public:
         {
             auto rangedValues = createRangedValuesObjectForErase();
 
-            rangedValues.erase ({ 15, 16 });
+            rangedValues.erase ({ 15, 16 }, ops);
 
             expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },  'a');
             expectRangedValuesItem (rangedValues.getItem (1), { 11, 15 }, 'b');
@@ -663,11 +704,46 @@ public:
             expectRangedValuesItem (rangedValues.getItem (5), { 45, 60 }, 'd');
         }
 
+        beginTest ("RangedValues::eraseUpTo() - erasing before all ranges has no effect");
+        {
+            auto rangedValues = createRangedValuesObjectForErase();
+
+            rangedValues.eraseUpTo (rangedValues.getRanges().get (0).getStart(), ops);
+
+            expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },  'a');
+            expectRangedValuesItem (rangedValues.getItem (1), { 11, 20 }, 'b');
+            expectRangedValuesItem (rangedValues.getItem (2), { 23, 30 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (3), { 35, 45 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (4), { 45, 60 }, 'd');
+        }
+
+        beginTest ("RangedValues::eraseUpTo() - erasing values up to, not including 15");
+        {
+            auto rangedValues = createRangedValuesObjectForErase();
+
+            rangedValues.eraseUpTo (15, ops);
+
+            expectRangedValuesItem (rangedValues.getItem (0), { 15, 20 }, 'b');
+            expectRangedValuesItem (rangedValues.getItem (1), { 23, 30 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (2), { 35, 45 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (3), { 45, 60 }, 'd');
+        }
+
+        beginTest ("RangedValues::eraseUpTo() - erasing up to the end of all ranges clears the container");
+        {
+            auto rangedValues = createRangedValuesObjectForErase();
+            const auto ranges = rangedValues.getRanges();
+
+            rangedValues.eraseUpTo (ranges.get (ranges.size() - 1).getEnd(), ops);
+
+            expect (rangedValues.isEmpty());
+        }
+
         beginTest ("RangedValues::drop() - drop shifts ranges downward on the right side");
         {
             auto rangedValues = createRangedValuesObjectForErase();
 
-            rangedValues.drop<MergeEqualItems::no> ({ 15, 16 });
+            rangedValues.drop ({ 15, 16 }, ops, MergeEqualItemsNo{});
 
             expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },  'a');
             expectRangedValuesItem (rangedValues.getItem (1), { 11, 15 }, 'b');
@@ -681,7 +757,7 @@ public:
         {
             auto rangedValues = createRangedValuesObjectForErase();
 
-            rangedValues.drop<MergeEqualItems::yes> ({ 15, 16 });
+            rangedValues.drop ({ 15, 16 }, ops, MergeEqualItemsYes{});
 
             expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },  'a');
             expectRangedValuesItem (rangedValues.getItem (1), { 11, 19 }, 'b');
@@ -693,9 +769,9 @@ public:
         beginTest ("RangedValues::drop() - the merge happens at the seam caused by the drop and does not extend beyond");
         {
             auto rangedValues = createRangedValuesObjectForErase();
-            rangedValues.set<MergeEqualItems::no> ({ 20, 30 }, 'b');
+            rangedValues.set ({ 20, 30 }, 'b', ops, MergeEqualItemsNo{});
 
-            rangedValues.drop<MergeEqualItems::yes> ({ 15, 16 });
+            rangedValues.drop ({ 15, 16 }, ops, MergeEqualItemsYes{});
 
             expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },  'a');
 
@@ -718,23 +794,25 @@ public:
 
     void runTest() override
     {
+        Ranges::Operations ops;
+
         beginTest ("IntersectingRangedValuesTests - iterating over multiple RangedValues");
         {
             RangedValues<int> rv1;
-            rv1.set ({ 3, 8},   1);
-            rv1.set ({ 9, 16},  2);
-            rv1.set ({ 30, 40}, 3);
+            rv1.set ({ 3, 8},   1, ops);
+            rv1.set ({ 9, 16},  2, ops);
+            rv1.set ({ 30, 40}, 3, ops);
 
             RangedValues<int> rv2;
-            rv2.set ({ 0, 4},   7);
-            rv2.set ({ 4, 6},   11);
-            rv2.set ({ 6, 25},  13);
-            rv2.set ({ 27, 55}, 17);
+            rv2.set ({ 0, 4},   7, ops);
+            rv2.set ({ 4, 6},   11, ops);
+            rv2.set ({ 6, 25},  13, ops);
+            rv2.set ({ 27, 55}, 17, ops);
 
             RangedValues<int> rv3;
-            rv3.set ({ -2, 10}, -1);
-            rv3.set ({ 15, 19}, -2);
-            rv3.set ({ 22, 36}, -3);
+            rv3.set ({ -2, 10}, -1, ops);
+            rv3.set ({ 15, 19}, -2, ops);
+            rv3.set ({ 22, 36}, -3, ops);
 
             int iteration = 0;
 

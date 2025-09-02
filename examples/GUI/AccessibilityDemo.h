@@ -35,10 +35,11 @@
                    platforms.
 
  dependencies:     juce_core, juce_data_structures, juce_events, juce_graphics,
-                   juce_gui_basics
+                   juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2022, androidstudio, xcode_iphone
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+                   JUCE_PUSH_NOTIFICATIONS=1
 
  type:             Component
  mainClass:        AccessibilityDemo
@@ -1356,86 +1357,172 @@ private:
 
 //==============================================================================
 /**
-    The top-level component containing an example of how to post system announcements.
+    The top-level component containing an example of how to post system announcements
+    and notifications.
 
     The AccessibilityHandler::postAnnouncement() method will post some text to the native
     screen reader application to be read out along with a priority determining how
     it should be read out (whether it should interrupt other announcements, etc.).
+
+    The AccessibilityHandler::postSystemNotification() method will post a system
+    notification to the OS via the push notification client on macOS, Android, and iOS
+    and the system tray component on Windows.
 */
-class AnnouncementsComponent final : public Component
+class AnnouncementsAndNotificationsComponent final : public Component
 {
 public:
-    AnnouncementsComponent()
+    AnnouncementsAndNotificationsComponent()
     {
+        setTitle ("Announcements and Notifications");
+        setDescription ("A demo of posting system announcements and notifications.");
+        setFocusContainerType (FocusContainerType::focusContainer);
+
         addAndMakeVisible (descriptionLabel);
 
-        textEntryBox.setMultiLine (true);
-        textEntryBox.setReturnKeyStartsNewLine (true);
-        textEntryBox.setText ("Announcement text.");
-        addAndMakeVisible (textEntryBox);
-
-        priorityComboBox.addItemList ({ "Priority - Low", "Priority - Medium", "Priority - High" }, 1);
-        priorityComboBox.setSelectedId (2);
-        addAndMakeVisible (priorityComboBox);
-
-        announceButton.onClick = [this]
-        {
-            auto priority = [this]
-            {
-                switch (priorityComboBox.getSelectedId())
-                {
-                    case 1:   return AccessibilityHandler::AnnouncementPriority::low;
-                    case 2:   return AccessibilityHandler::AnnouncementPriority::medium;
-                    case 3:   return AccessibilityHandler::AnnouncementPriority::high;
-                }
-
-                jassertfalse;
-                return AccessibilityHandler::AnnouncementPriority::medium;
-            }();
-
-            AccessibilityHandler::postAnnouncement (textEntryBox.getText(), priority);
-        };
-
-        addAndMakeVisible (announceButton);
-
-        setTitle ("Announcements");
-        setHelpText ("Type some text into the box and click the announce button to have it read out.");
-        setFocusContainerType (FocusContainerType::focusContainer);
+        addAndMakeVisible (announcements);
+        addAndMakeVisible (notifications);
     }
 
     void resized() override
     {
         Grid grid;
 
-        grid.templateRows = { Grid::TrackInfo (Grid::Fr (3)),
-                              Grid::TrackInfo (Grid::Fr (1)),
-                              Grid::TrackInfo (Grid::Fr (1)),
-                              Grid::TrackInfo (Grid::Fr (1)),
-                              Grid::TrackInfo (Grid::Fr (1)),
-                              Grid::TrackInfo (Grid::Fr (1)) };
+        grid.templateRows = { Grid::TrackInfo (Grid::Fr (1)), Grid::TrackInfo (Grid::Fr (3)), Grid::TrackInfo (Grid::Fr (3)) };
+        grid.templateColumns = { Grid::TrackInfo (Grid::Fr (1)) };
 
-        grid.templateColumns = { Grid::TrackInfo (Grid::Fr (3)),
-                                 Grid::TrackInfo (Grid::Fr (2)) };
-
-        grid.items = { GridItem (descriptionLabel).withMargin (2).withColumn ({ GridItem::Span (2), {} }),
-                       GridItem (textEntryBox).withMargin (2).withArea ({ 2 }, { 1 }, { 5 }, { 2 }),
-                       GridItem (priorityComboBox).withMargin (2).withArea ({ 5 }, { 1 }, { 6 }, { 2 }),
-                       GridItem (announceButton).withMargin (2).withArea ({ 4 }, { 2 }, { 5 }, { 3 }) };
+        grid.items = { GridItem (descriptionLabel).withMargin ({ 2 }),
+                       GridItem (announcements).withMargin ({ 2 }),
+                       GridItem (notifications).withMargin ({ 2 }) };
 
         grid.performLayout (getLocalBounds());
     }
 
 private:
-    Label descriptionLabel { {}, "This is a demo of posting system announcements that will be read out by an accessibility client.\n\n"
-                                 "You can enter some text to be read out in the text box below, set a priority for the message and then "
-                                 "post it using the \"Announce\" button." };
+    struct AnnouncementsComponent  : public Component
+    {
+        AnnouncementsComponent()
+        {
+            textEntryBox.setMultiLine (true);
+            textEntryBox.setReturnKeyStartsNewLine (true);
+            textEntryBox.setText ("Announcement text.");
+            addAndMakeVisible (textEntryBox);
 
-    TextEditor textEntryBox;
-    ComboBox priorityComboBox;
-    TextButton announceButton { "Announce" };
+            priorityComboBox.addItemList ({ "Priority - Low", "Priority - Medium", "Priority - High" }, 1);
+            priorityComboBox.setSelectedId (2);
+            addAndMakeVisible (priorityComboBox);
+
+            announceButton.onClick = [this]
+            {
+                auto priority = [this]
+                {
+                    switch (priorityComboBox.getSelectedId())
+                    {
+                        case 1:   return AccessibilityHandler::AnnouncementPriority::low;
+                        case 2:   return AccessibilityHandler::AnnouncementPriority::medium;
+                        case 3:   return AccessibilityHandler::AnnouncementPriority::high;
+                    }
+
+                    jassertfalse;
+                    return AccessibilityHandler::AnnouncementPriority::medium;
+                }();
+
+                AccessibilityHandler::postAnnouncement (textEntryBox.getText(), priority);
+            };
+
+            addAndMakeVisible (announceButton);
+        }
+
+        void resized() override
+        {
+            Grid grid;
+
+            grid.templateRows = { Grid::TrackInfo (Grid::Fr (1)),
+                                  Grid::TrackInfo (Grid::Fr (1)),
+                                  Grid::TrackInfo (Grid::Fr (1)),
+                                  Grid::TrackInfo (Grid::Fr (1)),
+                                  Grid::TrackInfo (Grid::Fr (1)) };
+
+            grid.templateColumns = { Grid::TrackInfo (Grid::Fr (3)),
+                                     Grid::TrackInfo (Grid::Fr (2)) };
+
+            grid.items = { GridItem (textEntryBox).withMargin (2).withArea ({ 1 }, { 1 }, { 4 }, { 2 }),
+                           GridItem (priorityComboBox).withMargin (2).withArea ({ 4 }, { 1 }, { 5 }, { 2 }),
+                           GridItem (announceButton).withMargin (2).withArea ({ 3 }, { 2 }, { 4 }, { 3 }) };
+
+            grid.performLayout (getLocalBounds());
+        }
+
+        TextEditor textEntryBox;
+        ComboBox priorityComboBox;
+        TextButton announceButton { "Announce" };
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AnnouncementsComponent)
+    };
+
+    struct NotificationsComponent  : public Component
+    {
+        NotificationsComponent()
+        {
+            titleBox.setText ("Notification title.");
+            addAndMakeVisible (titleBox);
+
+            descriptionBox.setMultiLine (true);
+            descriptionBox.setReturnKeyStartsNewLine (true);
+            descriptionBox.setText ("Notification body.");
+            addAndMakeVisible (descriptionBox);
+
+            postButton.onClick = [this]
+            {
+                AccessibilityHandler::postSystemNotification (titleBox.getText(),
+                                                              descriptionBox.getText());
+            };
+
+            addAndMakeVisible (postButton);
+        }
+
+        void resized() override
+        {
+            Grid grid;
+
+            grid.templateRows = { Grid::TrackInfo (Grid::Fr (1)),
+                                  Grid::TrackInfo (Grid::Fr (1)),
+                                  Grid::TrackInfo (Grid::Fr (1)),
+                                  Grid::TrackInfo (Grid::Fr (1)),
+                                  Grid::TrackInfo (Grid::Fr (1)) };
+
+            grid.templateColumns = { Grid::TrackInfo (Grid::Fr (3)),
+                                     Grid::TrackInfo (Grid::Fr (2)) };
+
+            grid.items = { GridItem (titleBox).withMargin (2).withArea ({ 1 }, { 1 }, { 2 }, { 2 }),
+                           GridItem (descriptionBox).withMargin (2).withArea ({ 2 }, { 1 }, { 5 }, { 2 }),
+                           GridItem (postButton).withMargin (2).withArea ({ 3 }, { 2 }, { 4 }, { 3 }) };
+
+            grid.performLayout (getLocalBounds());
+        }
+
+        TextEditor titleBox, descriptionBox;
+        TextButton postButton { "Post" };
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NotificationsComponent)
+    };
+
+    Label descriptionLabel { {}, "This is a demo of posting system announcements and notifications.\n\n"
+                                 "The \"Announcements\" section will post an announcement to be read out by the screen reader client.\n"
+                                 "The \"Notifications\" section will post a system notification to the OS.\n" };
+
+    AnnouncementsComponent announcementsComponent;
+    NotificationsComponent notificationsComponent;
+
+    ContentComponent announcements { "Announcements",
+                                     "Type some text into the box and click the announce button to have it read out.",
+                                     announcementsComponent };
+    ContentComponent notifications { "Notifications",
+                                     "Fill out the notification title and description fields and click the post button "
+                                     "to post it to the system.",
+                                     notificationsComponent };
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AnnouncementsComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AnnouncementsAndNotificationsComponent)
 };
 
 //==============================================================================
@@ -1457,10 +1544,10 @@ public:
 
         const auto tabColour = getLookAndFeel().findColour (ResizableWindow::backgroundColourId).darker (0.1f);
 
-        tabs.addTab ("JUCE Widgets",      tabColour, &juceWidgetsComponent,      false);
-        tabs.addTab ("Custom Widget",     tabColour, &customWidgetComponent,     false);
-        tabs.addTab ("Custom Navigation", tabColour, &customNavigationComponent, false);
-        tabs.addTab ("Announcements",     tabColour, &announcementsComponent,    false);
+        tabs.addTab ("JUCE Widgets",                    tabColour, &juceWidgetsComponent,                   false);
+        tabs.addTab ("Custom Widget",                   tabColour, &customWidgetComponent,                  false);
+        tabs.addTab ("Custom Navigation",               tabColour, &customNavigationComponent,              false);
+        tabs.addTab ("Announcements and Notifications", tabColour, &announcementsAndNotificationsComponent, false);
         addAndMakeVisible (tabs);
 
         setSize (800, 600);
@@ -1484,7 +1571,7 @@ private:
     JUCEWidgetsComponent juceWidgetsComponent;
     CustomWidgetComponent customWidgetComponent;
     CustomNavigationComponent customNavigationComponent;
-    AnnouncementsComponent announcementsComponent;
+    AnnouncementsAndNotificationsComponent announcementsAndNotificationsComponent;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AccessibilityDemo)

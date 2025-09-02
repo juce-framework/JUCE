@@ -1,0 +1,50 @@
+name: Download Artifacts
+description: Download artifacts preserving file permissions
+inputs:
+  keys:
+    description: The artifact keys
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Download artifacts
+      shell: python3 {0}
+      run: |
+        import sys
+        import os
+        sys.path.append(os.path.abspath('.github/workflows'))
+
+        from configure_logger import configure_logger
+        from github_api_request import json_github_api_request, download_github_api_request
+
+        from logging import getLogger
+        from os import environ
+        from zipfile import ZipFile
+        import tarfile
+
+        logger = getLogger(__name__)
+        configure_logger(logger)
+
+        input_keys = """${{ inputs.keys }}"""
+        logger.debug(f'Input keys: {input_keys}')
+        artifact_keys = list(filter(None, [x.strip() for x in input_keys.split('\n')]))
+        logger.info(f'Downloading keys: {artifact_keys}')
+
+        api_prefix = 'actions'
+        artifacts_info = json_github_api_request(f'{api_prefix}/runs/{environ["GITHUB_RUN_ID"]}/artifacts')
+
+        for key in artifact_keys:
+            artifact_id = [x['id'] for x in artifacts_info['artifacts'] if x['name'] == key][0]
+            logger.debug(f'Artifact id for {key}: {artifact_id}')
+            zip_file = f'{key}.zip'
+            download_github_api_request(zip_file, f'{api_prefix}/artifacts/{artifact_id}/zip')
+            logger.debug(f'Unzipping: {zip_file}')
+            with ZipFile(zip_file) as archive:
+                archive.extractall()
+            os.remove(zip_file)
+            tar_file = f'{key}.tar'
+            logger.debug(f'Extracting: {tar_file}')
+            with tarfile.open(tar_file, 'r') as tar:
+                tar.extractall()
+            os.remove(tar_file)
+

@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce
 {
 
@@ -46,8 +45,7 @@ class [[deprecated]] ScopedPointer
 {
 public:
     //==============================================================================
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+    JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
     inline ScopedPointer() {}
 
@@ -154,13 +152,11 @@ private:
     ScopedPointer& operator= (const ScopedPointer&) = delete;
    #endif
 
-    JUCE_END_IGNORE_WARNINGS_MSVC
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    JUCE_END_IGNORE_DEPRECATION_WARNINGS
 };
 
 //==============================================================================
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 template <typename ObjectType1, typename ObjectType2>
 bool operator== (ObjectType1* pointer1, const ScopedPointer<ObjectType2>& pointer2) noexcept
@@ -228,9 +224,7 @@ template <typename Type>
 void deleteAndZero (ScopedPointer<Type>&)  { static_assert (sizeof (Type) == 12345,
                                                             "Attempt to call deleteAndZero() on a ScopedPointer"); }
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 } // namespace juce
-
-#endif
+/** @endcond */

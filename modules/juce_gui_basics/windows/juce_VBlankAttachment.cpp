@@ -80,9 +80,9 @@ VBlankAttachment::~VBlankAttachment()
     cleanup();
 }
 
-void VBlankAttachment::onVBlank (double timestampMs)
+void VBlankAttachment::onVBlank (double timestampSec)
 {
-    NullCheckedInvocation::invoke (callback, timestampMs);
+    NullCheckedInvocation::invoke (callback, timestampSec);
 }
 
 void VBlankAttachment::componentParentHierarchyChanged (Component&)
