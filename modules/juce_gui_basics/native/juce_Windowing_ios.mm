@@ -613,7 +613,9 @@ struct TemporaryWindow
         if (@available (ios 13, *))
         {
             SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
-            return [[UIWindow alloc] initWithWindowScene: windowSceneTracker->getWindowScene()];
+
+            if (auto* scene = windowSceneTracker->getWindowScene())
+                return [[UIWindow alloc] initWithWindowScene: scene];
         }
 
         return [[UIWindow alloc] init];
