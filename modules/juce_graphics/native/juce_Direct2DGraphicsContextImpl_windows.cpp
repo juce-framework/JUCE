@@ -471,19 +471,8 @@ public:
 
         if (fillType.isGradient())
         {
-            auto p1 = fillType.gradient->point1;
-            auto p2 = fillType.gradient->point2;
-
-            if (transform.isOnlyTranslation())
-            {
-                Point<float> translation { transform.getTranslationX(), transform.getTranslationY() };
-                p1 += translation;
-                p2 += translation;
-            }
-            else
-            {
-                currentBrush->SetTransform (D2DUtilities::transformToMatrix (transform));
-            }
+            const auto p1 = fillType.gradient->point1;
+            const auto p2 = fillType.gradient->point2;
 
             if (fillType.gradient->isRadial)
             {
@@ -498,11 +487,8 @@ public:
                 linearGradient->SetEndPoint ({ p2.x, p2.y });
             }
         }
-        else
-        {
-            currentBrush->SetTransform (D2DUtilities::transformToMatrix (transform));
-        }
 
+        currentBrush->SetTransform (D2DUtilities::transformToMatrix (transform));
         currentBrush->SetOpacity (fillType.getOpacity());
 
         return currentBrush;
