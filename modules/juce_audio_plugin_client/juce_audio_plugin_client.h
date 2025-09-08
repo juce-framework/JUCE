@@ -60,10 +60,6 @@
 
 #pragma once
 
-#include <juce_gui_basics/juce_gui_basics.h>
-#include <juce_audio_basics/juce_audio_basics.h>
-#include <juce_audio_processors/juce_audio_processors.h>
-
 /** Config: JUCE_VST3_CAN_REPLACE_VST2
 
     Enable this if you want your VST3 plug-in to load and save VST2 compatible
@@ -150,5 +146,3 @@
 #ifndef JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING
  #define JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING 0
 #endif
-
-#include "detail/juce_CreatePluginFilter.h"
