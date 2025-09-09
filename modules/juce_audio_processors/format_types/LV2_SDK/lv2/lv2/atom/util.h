@@ -17,6 +17,8 @@
 #ifndef LV2_ATOM_UTIL_H
 #define LV2_ATOM_UTIL_H
 
+// NOLINTBEGIN(clang-analyzer-security.ArrayBound)
+
 /**
    @file util.h Helper functions for the LV2 Atom extension.
 
@@ -519,5 +521,7 @@ lv2_atom_object_get_typed(const LV2_Atom_Object* object, ...)
    @}
    @}
 */
+
+// NOLINTEND(clang-analyzer-security.ArrayBound)
 
 #endif /* LV2_ATOM_UTIL_H */
