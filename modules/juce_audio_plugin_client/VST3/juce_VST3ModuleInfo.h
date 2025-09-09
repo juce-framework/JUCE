@@ -360,7 +360,9 @@ private:
             return Steinberg::kInvalidArgument;
         }
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wclass-memaccess")
         std::memcpy (info, &(getClassEntry (index).*source), sizeof (*info));
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         return Steinberg::kResultOk;
     }
 
