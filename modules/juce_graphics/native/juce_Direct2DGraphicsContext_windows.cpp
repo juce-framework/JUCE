@@ -1130,6 +1130,13 @@ void Direct2DGraphicsContext::drawGlyphs (Span<const uint16_t> glyphNumbers,
     if (brush == nullptr)
         return;
 
+    const auto getBrushTransform = [] (auto brushIn) -> AffineTransform
+    {
+        D2D1::Matrix3x2F matrix{};
+        brushIn->GetTransform (&matrix);
+        return D2DUtilities::matrixToTransform (matrix);
+    };
+
     applyPendingClipList();
 
     D2D1_POINT_2F baselineOrigin { 0.0f, 0.0f };
@@ -1140,12 +1147,17 @@ void Direct2DGraphicsContext::drawGlyphs (Span<const uint16_t> glyphNumbers,
     }
     else
     {
-        D2D1::Matrix3x2F matrix{};
-        brush->GetTransform (&matrix);
-        const auto brushTransform = D2DUtilities::matrixToTransform (matrix);
-        brush->SetTransform (D2DUtilities::transformToMatrix (brushTransform.followedBy (textTransform.inverted())));
+        if (brush != currentState->colourBrush)
+        {
+            const auto brushTransform = getBrushTransform (brush);
+            brush->SetTransform (D2DUtilities::transformToMatrix (brushTransform.followedBy (textTransform.inverted())));
+        }
+
         getPimpl()->setDeviceContextTransform (textAndWorldTransform);
     }
+
+    // There's no need to transform a plain colour brush
+    jassert (brush != currentState->colourBrush || getBrushTransform (brush).isIdentity());
 
     auto& run = getPimpl()->glyphRun;
     run.replace (positions, fontScale);
