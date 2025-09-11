@@ -34,6 +34,15 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </VS2022>
+    <VS2026 targetFolder="Builds/VisualStudio2026">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="BinaryBuilder"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="BinaryBuilder"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2026>
   </EXPORTFORMATS>
   <MAINGROUP id="TTBP5JihO" name="BinaryBuilder">
     <GROUP id="noYkBuTg" name="Source">
