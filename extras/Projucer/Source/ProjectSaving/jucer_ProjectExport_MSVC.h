@@ -2863,3 +2863,48 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2022)
 };
+
+//==============================================================================
+class MSVCProjectExporterVC2026 final : public MSVCProjectExporterBase
+{
+public:
+    MSVCProjectExporterVC2026 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterBase (p, t, getTargetFolderName())
+    {
+        name = getDisplayName();
+
+        targetPlatformVersion.setDefault (defaultTargetPlatform);
+        platformToolsetValue.setDefault (defaultToolset);
+    }
+
+    static String getDisplayName()        { return "Visual Studio 2026"; }
+    static String getValueTreeTypeName()  { return "VS2026"; }
+    static String getTargetFolderName()   { return "VisualStudio2026"; }
+
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
+
+    int getVisualStudioVersion() const override                      { return 18; }
+    String getSolutionComment() const override                       { return "# Visual Studio Version 18"; }
+    String getToolsVersion() const override                          { return "18.0"; }
+    String getDefaultToolset() const override                        { return defaultToolset; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
+
+    static MSVCProjectExporterVC2026* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
+    {
+        if (settingsToUse.hasType (getValueTreeTypeName()))
+            return new MSVCProjectExporterVC2026 (projectToUse, settingsToUse);
+
+        return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        addToolsetProperty (props, { "v140", "v140_xp", "v141", "v141_xp", "v142", "v143", "v145", "ClangCL" });
+        MSVCProjectExporterBase::createExporterProperties (props);
+    }
+
+private:
+    const String defaultToolset { "v145" }, defaultTargetPlatform { "10.0" };
+
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2026)
+};

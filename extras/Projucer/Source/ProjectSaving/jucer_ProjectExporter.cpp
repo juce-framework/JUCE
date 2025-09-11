@@ -90,6 +90,7 @@ std::vector<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypeI
           XcodeProjectExporter::getTargetFolderNameiOS(),
           createIcon (export_xcode_svg, (size_t) export_xcode_svgSize) },
 
+        createExporterTypeInfo<MSVCProjectExporterVC2026> (export_visualStudio_svg, export_visualStudio_svgSize),
         createExporterTypeInfo<MSVCProjectExporterVC2022> (export_visualStudio_svg, export_visualStudio_svgSize),
         createExporterTypeInfo<MSVCProjectExporterVC2019> (export_visualStudio_svg, export_visualStudio_svgSize),
 
@@ -160,6 +161,7 @@ std::unique_ptr<ProjectExporter> ProjectExporter::createExporterFromSettings (Pr
     return tryCreatingExporter (project,
                                 settings,
                                 Tag<XcodeProjectExporter>{},
+                                Tag<MSVCProjectExporterVC2026>{},
                                 Tag<MSVCProjectExporterVC2022>{},
                                 Tag<MSVCProjectExporterVC2019>{},
                                 Tag<MakefileProjectExporter>{},
@@ -176,6 +178,7 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
              XcodeProjectExporter::getValueTreeTypeNameMac(),
              XcodeProjectExporter::getValueTreeTypeNameiOS(),
             #elif JUCE_WINDOWS
+             MSVCProjectExporterVC2026::getValueTreeTypeName(),
              MSVCProjectExporterVC2022::getValueTreeTypeName(),
              MSVCProjectExporterVC2019::getValueTreeTypeName(),
             #endif
