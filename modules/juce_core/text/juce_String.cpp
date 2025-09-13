@@ -32,10 +32,14 @@
   ==============================================================================
 */
 
+#include <limits>
+#include "juce_NewLine.h"
+
 namespace juce
 {
-
+#if defined(JUCE_BEGIN_IGNORE_WARNINGS_MSVC)
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4996)
+#endif
 
 NewLine newLine;
 
@@ -324,7 +328,7 @@ String::String (const char* const t)
         any unicode string to a valid C++ string literal, creating ascii escape sequences that will
         work in any compiler.
     */
-    jassert (t == nullptr || CharPointer_ASCII::isValidString (t, std::numeric_limits<int>::max()));
+    jassert (t == nullptr || CharPointer_ASCII::isValidString (t, (std::numeric_limits<int>::max)()));
 }
 
 String::String (const char* const t, const size_t maxChars)
@@ -367,7 +371,7 @@ String::String (const char8_t* const t) : String (CharPointer_UTF8 (reinterpret_
     /*  If you get an assertion here, then you're trying to create a string using the standard C++
         type for UTF-8 character representation, but the data consists of invalid UTF-8 characters!
     */
-    jassert (t == nullptr || CharPointer_UTF8::isValidString (reinterpret_cast<const char*> (t), std::numeric_limits<int>::max()));
+    jassert (t == nullptr || CharPointer_UTF8::isValidString (reinterpret_cast<const char*> (t), (std::numeric_limits<int>::max)()));
 }
 
 String::String (const char8_t* t, size_t maxChars) : String (CharPointer_UTF8 (reinterpret_cast<const char*> (t)), maxChars)
@@ -2148,7 +2152,7 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 
     if (bufferSizeBytes < 0)
     {
-        jassert (CharPointer_UTF8::isValidString (buffer, std::numeric_limits<int>::max()));
+    jassert (CharPointer_UTF8::isValidString (buffer, (std::numeric_limits<int>::max)()));
         return { CharPointer_UTF8 (buffer) };
     }
 
@@ -2197,7 +2201,7 @@ StringRef::StringRef (const char* stringLiteral) noexcept
         because there's no other way to represent these strings in a way that isn't dependent on
         the compiler, source code editor and platform.
     */
-    jassert (CharPointer_ASCII::isValidString (stringLiteral, std::numeric_limits<int>::max()));
+    jassert (CharPointer_ASCII::isValidString (stringLiteral, (std::numeric_limits<int>::max)()));
    #endif
 }
 
