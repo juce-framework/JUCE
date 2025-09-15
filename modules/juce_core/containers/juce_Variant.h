@@ -262,6 +262,8 @@ public:
     var getProperty (const Identifier& propertyName, const var& defaultReturnValue) const;
     /** Returns true if this variant is an object and if it has the given property. */
     bool hasProperty (const Identifier& propertyName) const noexcept;
+    /** Returns property names if this variant is an object. */
+    Array<Identifier> getProperties() const;
 
     /** Invokes a named method call with no arguments. */
     var call (const Identifier& method) const;
@@ -354,4 +356,42 @@ JUCE_API bool operator== (const var&, const String&);
 JUCE_API bool operator!= (const var&, const String&);
 JUCE_API bool operator== (const var&, const char*);
 JUCE_API bool operator!= (const var&, const char*);
+
+
+//==============================================================================
+/** Iterator for a var.
+    You shouldn't ever need to use this class directly - it's used internally by begin()
+    and end() to allow range-based-for loops on a var.
+*/
+struct VarIterator
+{
+    struct NamedValue
+    {
+        var name;
+        var value;
+    };
+
+    VarIterator (const var&, bool isEnd);
+    VarIterator& operator++();
+
+    bool operator== (const VarIterator&) const;
+    bool operator!= (const VarIterator&) const;
+    NamedValue operator*() const;
+
+    using difference_type    = std::ptrdiff_t;
+    using value_type         = NamedValue;
+    using reference          = NamedValue&;
+    using pointer            = NamedValue*;
+    using iterator_category  = std::forward_iterator_tag;
+
+private:
+    const var& v;
+    int index = 0;
+    const void* itr = nullptr;
+};
+
+VarIterator begin (const var&);
+VarIterator end (const var&);
+
+
 } // namespace juce
