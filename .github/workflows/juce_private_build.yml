@@ -60,7 +60,7 @@ jobs:
             post_response = json_github_api_request(f'statuses/{sha}', 'POST', data)
             print(post_response)
   build:
-    if: ${{ !cancelled() && (success() || needs.setup.result == 'skipped') && (needs.setup.outputs.build == '1' || contains(fromJSON('["master"]'), github.ref_name)) }}
+    if: ${{ !cancelled() && (success() || needs.setup.result == 'skipped') && (inputs.nightly-targets != '[]' || inputs.cpp-std != '' || needs.setup.outputs.build == '1' || contains(fromJSON('["master"]'), github.ref_name)) }}
     needs: [setup]
     name: .
     # Not having the ability to do a dynamic 'uses' call is a real pain. To
