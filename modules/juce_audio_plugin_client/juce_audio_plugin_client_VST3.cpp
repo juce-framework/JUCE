@@ -845,6 +845,7 @@ class JuceVST3EditController final : public Vst::EditController,
                                     #if JucePlugin_Enable_ARA
                                      public Presonus::IPlugInViewEmbedding,
                                     #endif
+                                     public Presonus::IContextInfoHandler,
                                      public AudioProcessorListener,
                                      private ComponentRestarter::Listener
 {
@@ -1099,6 +1100,48 @@ public:
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgramChangeParameter)
     };
+
+    void notifyContextInfoChange() override
+    {
+        if (! PluginHostType().isStudioOne())
+            return;
+
+        if (auto* instance = getPluginInstance())
+        {
+            bool hasUsableContextInfoChange = false;
+            AudioProcessor::TrackProperties trackProperties;
+            FUnknownPtr<Presonus::IContextInfoProvider> contextInfoProvider (componentHandler);
+            Steinberg::int32 channelColour = 0;
+            if (contextInfoProvider->getContextInfoValue (channelColour, Presonus::ContextInfo::kColor)
+                       == kResultTrue)
+            {
+                // PreSonus uses RGBA
+                uint8 r = (channelColour) &0x000000FF;
+                uint8 g = (channelColour >> 8) & 0x000000FF;
+                uint8 b = (channelColour >> 16) & 0x000000FF;
+                uint8 a = (channelColour >> 24) & 0x000000FF;
+                trackProperties.colour = std::make_optional (Colour (r, g, b, a));
+                hasUsableContextInfoChange = true;
+            }
+
+            Vst::TChar channelName[128] = {0};
+            if (contextInfoProvider->getContextInfoString (channelName, 128, Presonus::ContextInfo::kName)
+                == kResultTrue)
+            {
+                trackProperties.name = std::make_optional (toString (channelName));
+                hasUsableContextInfoChange = true;
+            }
+
+            if (! hasUsableContextInfoChange)
+                return;
+
+            if (MessageManager::getInstance()->isThisTheMessageThread())
+                instance->updateTrackProperties (trackProperties);
+            else
+                MessageManager::callAsync ([trackProperties, instance]
+                                           { instance->updateTrackProperties (trackProperties); });
+        }
+    }
 
     //==============================================================================
     tresult PLUGIN_API getCompatibleParamID (const TUID pluginToReplaceUID,
@@ -1689,6 +1732,7 @@ private:
                                              UniqueBase<Vst::IUnitInfo>{},
                                              UniqueBase<Vst::IRemapParamID>{},
                                              UniqueBase<Vst::ChannelContext::IInfoListener>{},
+                                             UniqueBase<Presonus::IContextInfoHandler>{},
                                              SharedBase<IPluginBase, Vst::IEditController>{},
                                              UniqueBase<IDependent>{},
                                             #if JucePlugin_Enable_ARA
