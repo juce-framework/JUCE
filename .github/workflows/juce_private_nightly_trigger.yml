@@ -1,5 +1,6 @@
 name: JUCE Private Nightly Trigger
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 3 * * *'
 env:
