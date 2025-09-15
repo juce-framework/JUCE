@@ -131,6 +131,9 @@ public:
     {
         askUserToChooseNewFile ("SourceCode.h", "*.h;*.cpp", parent, [this, parent] (File newFile)
         {
+            if (newFile == File{})
+                return;
+
             if (NewCppFileWizard::create (*this, parent, newFile.withFileExtension ("h"),   "jucer_NewCppFileTemplate_h"))
                 NewCppFileWizard::create (*this, parent, newFile.withFileExtension ("cpp"), "jucer_NewCppFileTemplate_cpp");
         });

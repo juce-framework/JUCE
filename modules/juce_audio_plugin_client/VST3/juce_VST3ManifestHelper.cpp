@@ -117,6 +117,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #include <juce_audio_processors/format_types/juce_VST3Utilities.h>
 #include <juce_audio_processors/utilities/juce_VST3Interface.h>
+#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
 #include "juce_VST3ModuleInfo.h"
 
 //==============================================================================

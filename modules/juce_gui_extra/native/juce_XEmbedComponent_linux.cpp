@@ -459,6 +459,9 @@ private:
     //==============================================================================
     bool getXEmbedMappedFlag()
     {
+        if (client == 0)
+            return false;
+
         XWindowSystemUtilities::GetXProperty embedInfo (getDisplay(), client, infoAtom, 0, 2, false, infoAtom);
 
         if (embedInfo.success && embedInfo.actualFormat == 32

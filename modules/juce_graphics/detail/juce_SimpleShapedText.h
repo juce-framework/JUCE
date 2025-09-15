@@ -272,7 +272,7 @@ struct ShapedGlyph
     bool isPlaceholderForLigature() const { return distanceFromLigature > 0; }
 
     int8_t getDistanceFromLigature() const { return distanceFromLigature; }
-    int8_t getNumTrailingLigaturePlaceholders() const { return -distanceFromLigature; }
+    int8_t getNumTrailingLigaturePlaceholders() const { return (int8_t) -distanceFromLigature; }
 
     Point<float> advance;
     Point<float> offset;

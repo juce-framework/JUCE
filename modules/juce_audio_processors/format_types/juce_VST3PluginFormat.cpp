@@ -608,8 +608,8 @@ struct VST3HostContext final : public Vst::IComponentHandler,  // From VST V3.0.
     //==============================================================================
     struct ContextMenu final : public Vst::IContextMenu
     {
-        ContextMenu (VST3PluginInstance& pluginInstance)  : owner (pluginInstance) {}
-        virtual ~ContextMenu() {}
+        explicit ContextMenu (VST3PluginInstance& pluginInstance)  : owner (pluginInstance) {}
+        ~ContextMenu() = default;
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -915,7 +915,7 @@ private:
     {
     public:
         AttributeList() = default;
-        virtual ~AttributeList() = default;
+        ~AttributeList() = default;
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -1002,7 +1002,7 @@ private:
     struct Message final : public Vst::IMessage
     {
         Message() = default;
-        virtual ~Message() = default;
+        ~Message() = default;
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -2180,7 +2180,7 @@ public:
     {
     }
 
-    virtual ~HostToClientParamQueue() = default;
+    ~HostToClientParamQueue() = default;
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
     JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -2285,7 +2285,7 @@ public:
     {
     }
 
-    virtual ~ClientToHostParamQueue() = default;
+    ~ClientToHostParamQueue() = default;
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
     JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -2366,7 +2366,7 @@ class ParameterChanges final : public Vst::IParameterChanges
     using Queues = std::vector<Entry*>;
 
 public:
-    virtual ~ParameterChanges() = default;
+    ~ParameterChanges() = default;
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
     JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -3108,8 +3108,8 @@ public:
 
     struct TrackPropertiesAttributeList final : public Vst::IAttributeList
     {
-        TrackPropertiesAttributeList (const TrackProperties& properties) : props (properties) {}
-        virtual ~TrackPropertiesAttributeList() {}
+        explicit TrackPropertiesAttributeList (const TrackProperties& properties) : props (properties) {}
+        ~TrackPropertiesAttributeList() = default;
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
 

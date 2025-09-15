@@ -2358,9 +2358,9 @@ public:
 
     /** This method is called when a colour is changed by the setColour() method,
         or when the look-and-feel is changed by the setLookAndFeel() or
-        sendLookAndFeelChanged() methods.
+        sendLookAndFeelChange() methods.
 
-        @see setColour, findColour, setLookAndFeel, sendLookAndFeelChanged
+        @see setColour, findColour, setLookAndFeel, sendLookAndFeelChange
     */
     virtual void colourChanged();
 

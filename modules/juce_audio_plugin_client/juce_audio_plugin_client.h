@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_plugin_client
   vendor:             juce
-  version:            8.0.9
+  version:            8.0.10
   name:               JUCE audio plugin wrapper classes
   description:        Classes for building VST, VST3, AU, AUv3, LV2 and AAX plugins.
   website:            http://www.juce.com/juce
@@ -59,10 +59,6 @@
 
 
 #pragma once
-
-#include <juce_gui_basics/juce_gui_basics.h>
-#include <juce_audio_basics/juce_audio_basics.h>
-#include <juce_audio_processors/juce_audio_processors.h>
 
 /** Config: JUCE_VST3_CAN_REPLACE_VST2
 
@@ -150,5 +146,3 @@
 #ifndef JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING
  #define JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING 0
 #endif
-
-#include "detail/juce_CreatePluginFilter.h"

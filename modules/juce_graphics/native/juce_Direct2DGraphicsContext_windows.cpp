@@ -1130,6 +1130,13 @@ void Direct2DGraphicsContext::drawGlyphs (Span<const uint16_t> glyphNumbers,
     if (brush == nullptr)
         return;
 
+    const auto getBrushTransform = [] (auto brushIn) -> AffineTransform
+    {
+        D2D1::Matrix3x2F matrix{};
+        brushIn->GetTransform (&matrix);
+        return D2DUtilities::matrixToTransform (matrix);
+    };
+
     applyPendingClipList();
 
     D2D1_POINT_2F baselineOrigin { 0.0f, 0.0f };
@@ -1140,12 +1147,17 @@ void Direct2DGraphicsContext::drawGlyphs (Span<const uint16_t> glyphNumbers,
     }
     else
     {
-        D2D1::Matrix3x2F matrix{};
-        brush->GetTransform (&matrix);
-        const auto brushTransform = D2DUtilities::matrixToTransform (matrix);
-        brush->SetTransform (D2DUtilities::transformToMatrix (brushTransform.followedBy (textTransform.inverted())));
+        if (brush != currentState->colourBrush)
+        {
+            const auto brushTransform = getBrushTransform (brush);
+            brush->SetTransform (D2DUtilities::transformToMatrix (brushTransform.followedBy (textTransform.inverted())));
+        }
+
         getPimpl()->setDeviceContextTransform (textAndWorldTransform);
     }
+
+    // There's no need to transform a plain colour brush
+    jassert (brush != currentState->colourBrush || getBrushTransform (brush).isIdentity());
 
     auto& run = getPimpl()->glyphRun;
     run.replace (positions, fontScale);
@@ -1386,6 +1398,13 @@ public:
             testGradientFillTransform (1.0f);
             testGradientFillTransform (1.5f);
         }
+
+        beginTest ("Text gradient fill transform should compose with world transform correctly");
+        {
+            testTextGradientFillTransform (2.0f);
+            testTextGradientFillTransform (1.5f);
+            testTextGradientFillTransform (1.0f);
+        }
     }
 
     static Image createEdgeMask (int sourceWidth,
@@ -1487,14 +1506,6 @@ public:
                 return p.toFloat().transformedBy (AffineTransform::scale (scale)).roundToInt();
             };
 
-            const auto approximatelyEqual = [] (const Colour& a, const Colour& b)
-            {
-                return    std::abs (a.getRed() - b.getRed()) < 2
-                       && std::abs (a.getGreen() - b.getGreen()) < 2
-                       && std::abs (a.getBlue() - b.getBlue()) < 2
-                       && std::abs (a.getAlpha() - b.getAlpha()) < 2;
-            };
-
             const Point<int> centre { circleSize / 2, circleSize / 2 };
             const Point<int> brushOffset { brushTranslation, brushTranslation };
 
@@ -1511,6 +1522,68 @@ public:
             const auto blackPosition = getScaled ({ circleSize - 2, 2 });
             expect (image.getPixelAt (blackPosition.getX(), blackPosition.getY()) == Colours::black);
         }
+    }
+
+    void testTextGradientFillTransform (float scale)
+    {
+        const auto typeface = loadTypeface (FontBinaryData::Karla_Regular_Typo_Off_Offsets_Off);
+
+        constexpr int size = 500;
+
+        Image image { Image::RGB,
+                      roundToInt (size * scale),
+                      roundToInt (size * scale),
+                      true };
+
+        const auto fillCol1 = Colours::cyan;
+        const auto fillCol2 = Colours::magenta;
+        const auto fillColMiddle = fillCol1.interpolatedWith (fillCol2, 0.5f);
+
+        {
+            Graphics g { image };
+            g.addTransform (AffineTransform::scale (scale));
+
+            g.setFont (FontOptions { typeface }.withPointHeight (50));
+            g.setGradientFill ({ fillCol1, { size * 0.5f - 80, 0 }, fillCol2, { size * 0.5f + 80, 0.0f }, false });
+
+            for (auto i = 0; i != 10; ++i)
+            {
+                g.drawText (String::repeatedString ("-", 100),
+                            Rectangle { size * 2, size }.translated (i * 50 - 500, i * 50),
+                            Justification::topLeft,
+                            false);
+            }
+        }
+
+        const auto getPixelAtScaled = [&image, scale] (Point<int> p)
+        {
+            const auto scaled = p.toFloat().transformedBy (AffineTransform::scale (scale)).roundToInt();
+            return image.getPixelAt (scaled.x, scaled.y);
+        };
+
+        expect (approximatelyEqual (getPixelAtScaled ({ 15, 27 }), fillCol1));
+        expect (approximatelyEqual (getPixelAtScaled ({ 485, 27 }), fillCol2));
+
+        expect (approximatelyEqual (getPixelAtScaled ({ 15, 77 }), fillCol1));
+        expect (approximatelyEqual (getPixelAtScaled ({ 485, 77 }), fillCol2));
+        expect (approximatelyEqual (getPixelAtScaled ({ 250, 77 }), fillColMiddle));
+
+        expect (approximatelyEqual (getPixelAtScaled ({ 15, 477 }), fillCol1));
+        expect (approximatelyEqual (getPixelAtScaled ({ 485, 477 }), fillCol2));
+        expect (approximatelyEqual (getPixelAtScaled ({ 250, 477 }), fillColMiddle));
+    }
+
+    static bool approximatelyEqual (const Colour& a, const Colour& b)
+    {
+        return    std::abs (a.getRed() - b.getRed()) < 2
+               && std::abs (a.getGreen() - b.getGreen()) < 2
+               && std::abs (a.getBlue() - b.getBlue()) < 2
+               && std::abs (a.getAlpha() - b.getAlpha()) < 2;
+    }
+
+    static Typeface::Ptr loadTypeface (Span<const unsigned char> data)
+    {
+        return Typeface::createSystemTypefaceFor (data.data(), data.size());
     }
 };
 

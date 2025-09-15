@@ -1056,10 +1056,10 @@ function(_juce_add_vst3_manifest_helper_target shared_code_target)
     target_include_directories(${vst3_helper_target} PRIVATE "${vst3_dir}" "${module_path}")
 
     target_compile_definitions(${vst3_helper_target} PRIVATE
-        $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},COMPILE_DEFINITIONS>>)
+        $<TARGET_GENEX_EVAL:${shared_code_target},$<TARGET_PROPERTY:${shared_code_target},COMPILE_DEFINITIONS>>)
 
     target_include_directories(${vst3_helper_target} PRIVATE
-        $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>>)
+        $<TARGET_GENEX_EVAL:${shared_code_target},$<TARGET_PROPERTY:${shared_code_target},INCLUDE_DIRECTORIES>>)
 
     target_compile_features(${vst3_helper_target} PRIVATE cxx_std_17)
 

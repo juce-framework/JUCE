@@ -9,6 +9,7 @@ directory. The following modifications were made:
   multiple times
 - Fixed a leak of plugin classes when calling lilv_world_load_plugin_classes
   multiple times
+- Added clang-tidy warning suppression comments to atom/util.h
 
 Remember to update the versions in the config headers if you ever update the
 library versions!

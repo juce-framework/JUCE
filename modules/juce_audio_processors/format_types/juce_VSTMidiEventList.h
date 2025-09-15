@@ -53,12 +53,14 @@ class VSTMidiEventList
     static auto& getEvent (Events& events, int index)
     {
         using EventType = decltype (&*events.events);
+        static constexpr auto offset = offsetof (Vst2::VstEvents, events);
 
-        // We static cast rather than using a direct array index here to circumvent
-        // UB sanitizer's bounds-checks. The original struct is supposed to contain
-        // a variable-length array, but the declaration uses a size of "2" for this
-        // member.
-        return static_cast<EventType> (events.events)[index];
+        auto* bytes = reinterpret_cast<std::conditional_t<std::is_const_v<std::remove_pointer_t<EventType>>,
+                                                          const std::byte*,
+                                                          std::byte*>> (&events);
+        auto* array = reinterpret_cast<EventType> (bytes + offset);
+
+        return array[index];
     }
 
     Vst2::VstEvent* const& getEvent (int index) const { return getEvent (*events, index); }

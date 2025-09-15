@@ -26,7 +26,7 @@ run-name: "[${{ inputs.triggerer && inputs.triggerer || github.event.sender.logi
 
 jobs:
   setup:
-    if: ${{ inputs.nightly-targets == '[]' }}
+    if: ${{ (inputs.nightly-targets == '[]') && (inputs.cpp-std == '') }}
     name: Check and set CI commit status
     runs-on: ubuntu-latest
     env:
@@ -60,7 +60,7 @@ jobs:
             post_response = json_github_api_request(f'statuses/{sha}', 'POST', data)
             print(post_response)
   build:
-    if: ${{ !cancelled() && (success() || needs.setup.result == 'skipped') && (needs.setup.outputs.build == '1' || contains(fromJSON('["master"]'), github.ref_name)) }}
+    if: ${{ !cancelled() && (success() || needs.setup.result == 'skipped') && (inputs.nightly-targets != '[]' || inputs.cpp-std != '' || needs.setup.outputs.build == '1' || contains(fromJSON('["master"]'), github.ref_name)) }}
     needs: [setup]
     name: .
     # Not having the ability to do a dynamic 'uses' call is a real pain. To
@@ -86,7 +86,7 @@ jobs:
     uses: juce-framework/JUCE-utils/.github/workflows/docs.yml@master
     secrets: inherit
   set-commit-status:
-    if: ${{ always() && inputs.nightly-targets == '[]' }}
+    if: ${{ always() && (inputs.nightly-targets == '[]') && (inputs.cpp-std == '') }}
     needs: [setup, build, deploy, docs]
     name: Set CI commit status
     runs-on: ubuntu-latest
@@ -102,7 +102,7 @@ jobs:
           description: ${{ env.result }}
           targetUrl: ${{ env.target_url }}
   notify:
-    if: ${{ always() && !contains(needs.*.result, 'cancelled') && !startsWith(inputs.triggerer, 'Nightly Build') }}
+    if: ${{ always() && !contains(needs.*.result, 'cancelled') }}
     needs: [setup, build, deploy, docs]
     name: Notify
     uses: juce-framework/JUCE-utils/.github/workflows/notify.yml@master

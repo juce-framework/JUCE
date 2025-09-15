@@ -3,6 +3,15 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.10
+
+  - Avoided restarting Android Activities on system theme change
+  - Fixed an issue with PopupMenu item visibility
+  - Fixed iOS screen size detection in plug-ins
+  - Fixed some LLVM 21 compiler warnings
+  - Fixed some Direct2D drawning issues
+  - Fixed an XEmbedComponent issue
+
 ## Version 8.0.9
 
   - Added support for configurable font features (ligatures, kerning, ...)
