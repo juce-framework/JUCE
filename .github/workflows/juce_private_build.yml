@@ -26,7 +26,7 @@ run-name: "[${{ inputs.triggerer && inputs.triggerer || github.event.sender.logi
 
 jobs:
   setup:
-    if: ${{ inputs.nightly-targets == '[]' }}
+    if: ${{ (inputs.nightly-targets == '[]') && (inputs.cpp-std == '') }}
     name: Check and set CI commit status
     runs-on: ubuntu-latest
     env:
@@ -86,7 +86,7 @@ jobs:
     uses: juce-framework/JUCE-utils/.github/workflows/docs.yml@master
     secrets: inherit
   set-commit-status:
-    if: ${{ always() && inputs.nightly-targets == '[]' }}
+    if: ${{ always() && (inputs.nightly-targets == '[]') && (inputs.cpp-std == '') }}
     needs: [setup, build, deploy, docs]
     name: Set CI commit status
     runs-on: ubuntu-latest
@@ -102,7 +102,7 @@ jobs:
           description: ${{ env.result }}
           targetUrl: ${{ env.target_url }}
   notify:
-    if: ${{ always() && !contains(needs.*.result, 'cancelled') && !startsWith(inputs.triggerer, 'Nightly Build') }}
+    if: ${{ always() && !contains(needs.*.result, 'cancelled') }}
     needs: [setup, build, deploy, docs]
     name: Notify
     uses: juce-framework/JUCE-utils/.github/workflows/notify.yml@master
