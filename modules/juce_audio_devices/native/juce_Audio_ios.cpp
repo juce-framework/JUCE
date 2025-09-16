@@ -542,7 +542,14 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         // On iOS 18 the AVAudioSession sample rate is not always accurate but
         // probing the sample rate via an AudioQueue seems to work reliably
         if (@available (ios 18, *))
+        {
+            // On iOS 26, things seem to work as expected again,
+            // so avoid creating an AudioQueue
+            if (@available (ios 26, *))
+                return session.sampleRate;
+
             return getSampleRateFromAudioQueue().value_or (session.sampleRate);
+        }
 
         return session.sampleRate;
     }
