@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019, 2021, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2021, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -291,7 +291,13 @@ public:
      *  
      *
 	 */	
-	AAX_CParameter(AAX_CParamID identifier, const AAX_IString& name, T defaultValue, const AAX_ITaperDelegate<T>& taperDelegate, const AAX_IDisplayDelegate<T>& displayDelegate, bool automatable=false);
+	AAX_CParameter(
+		AAX_CParamID identifier,
+		const AAX_IString& name,
+		T defaultValue,
+		const AAX_ITaperDelegate<T>& taperDelegate,
+		const AAX_IDisplayDelegate<T>& displayDelegate,
+		bool automatable=false);
 	
 	/*!
 	 *  \brief Constructs an \ref AAX_CParameter object using the specified taper and display delegates.
@@ -299,7 +305,13 @@ public:
 	 *	This constructor uses an \ref AAX_IString for the parameter identifier, which can be a more
 	 *	flexible solution for some plug-ins.
 	 */
-	AAX_CParameter(const AAX_IString& identifier, const AAX_IString& name, T defaultValue, const AAX_ITaperDelegate<T>& taperDelegate, const AAX_IDisplayDelegate<T>& displayDelegate, bool automatable=false);
+	AAX_CParameter(
+		const AAX_IString& identifier,
+		const AAX_IString& name,
+		T defaultValue,
+		const AAX_ITaperDelegate<T>& taperDelegate,
+		const AAX_IDisplayDelegate<T>& displayDelegate,
+		bool automatable=false);
 	
 	/*!
 	 *	\brief Constructs an \ref AAX_CParameter object with no delegates
@@ -310,7 +322,11 @@ public:
 	 *	- \sa \ref AAX_CParameter::SetTaperDelegate()
 	 *	- \sa \ref AAX_CParameter::SetDisplayDelegate()
 	 */
-	AAX_CParameter(const AAX_IString& identifier, const AAX_IString& name, T defaultValue, bool automatable=false);
+	AAX_CParameter(
+		const AAX_IString& identifier,
+		const AAX_IString& name,
+		T defaultValue,
+		bool automatable=false);
 	
 	/*!
 	 *	\brief Constructs an \ref AAX_CParameter object with no delegates or default value
@@ -322,7 +338,10 @@ public:
 	 *	- \sa \ref AAX_CParameter::SetTaperDelegate()
 	 *	- \sa \ref AAX_CParameter::SetDisplayDelegate()
 	 */
-	AAX_CParameter(const AAX_IString& identifier, const AAX_IString& name, bool automatable=false);
+	AAX_CParameter(
+		const AAX_IString& identifier,
+		const AAX_IString& name,
+		bool automatable=false);
 	
 	/** Move constructor and move assignment operator are allowed */
 	AAX_DEFAULT_MOVE_CTOR(AAX_CParameter);
@@ -504,7 +523,13 @@ private:
 ////// AAX_CParameter Template Definition ///////
 
 template <typename T>
-AAX_CParameter<T>::AAX_CParameter(AAX_CParamID identifier, const AAX_IString& name, T defaultValue, const AAX_ITaperDelegate<T>& taperDelegate, const AAX_IDisplayDelegate<T>& displayDelegate, bool automatable)
+AAX_CParameter<T>::AAX_CParameter(
+	AAX_CParamID identifier,
+	const AAX_IString& name,
+	T defaultValue,
+	const AAX_ITaperDelegate<T>& taperDelegate,
+	const AAX_IDisplayDelegate<T>& displayDelegate,
+	bool automatable)
 : mNames(name)
 , mAutomatable(automatable)
 , mNumSteps(0) // Default set below for discrete/continuous
@@ -522,7 +547,13 @@ AAX_CParameter<T>::AAX_CParameter(AAX_CParamID identifier, const AAX_IString& na
 }
 
 template <typename T>
-AAX_CParameter<T>::AAX_CParameter(const AAX_IString& identifier, const AAX_IString& name, T defaultValue, const AAX_ITaperDelegate<T>& taperDelegate, const AAX_IDisplayDelegate<T>& displayDelegate, bool automatable)
+AAX_CParameter<T>::AAX_CParameter(
+	const AAX_IString& identifier,
+	const AAX_IString& name,
+	T defaultValue,
+	const AAX_ITaperDelegate<T>& taperDelegate,
+	const AAX_IDisplayDelegate<T>& displayDelegate,
+	bool automatable)
 : mNames(name)
 , mAutomatable(automatable)
 , mNumSteps(0) // Default set below for discrete/continuous
@@ -540,7 +571,11 @@ AAX_CParameter<T>::AAX_CParameter(const AAX_IString& identifier, const AAX_IStri
 }
 
 template <typename T>
-AAX_CParameter<T>::AAX_CParameter(const AAX_IString& identifier, const AAX_IString& name, T defaultValue, bool automatable)
+AAX_CParameter<T>::AAX_CParameter(
+	const AAX_IString& identifier,
+	const AAX_IString& name,
+	T defaultValue,
+	bool automatable)
 : mNames(name)
 , mAutomatable(automatable)
 , mNumSteps(0)
@@ -554,11 +589,14 @@ AAX_CParameter<T>::AAX_CParameter(const AAX_IString& identifier, const AAX_IStri
 , mDefaultValue(defaultValue)
 {
 	this->InitializeNumberOfSteps();
-	this->SetToDefaultValue();
+	// set to default value occurs when the taper delegate is set
 }
 
 template <typename T>
-AAX_CParameter<T>::AAX_CParameter(const AAX_IString& identifier, const AAX_IString& name, bool automatable)
+AAX_CParameter<T>::AAX_CParameter(
+	const AAX_IString& identifier,
+	const AAX_IString& name,
+	bool automatable)
 : mNames(name)
 , mAutomatable(automatable)
 , mNumSteps(0)
@@ -572,7 +610,7 @@ AAX_CParameter<T>::AAX_CParameter(const AAX_IString& identifier, const AAX_IStri
 , mDefaultValue()
 {
 	this->InitializeNumberOfSteps();
-	this->SetToDefaultValue(); // WARNING: uninitialized default value
+	// set to default value occurs when the taper delegate is set
 }
 
 template <typename T>
@@ -581,10 +619,15 @@ AAX_CParameter<T>::~AAX_CParameter()
 	//Make sure to remove any registration with the token system.
 	SetAutomationDelegate(0);
 	
-	delete mTaperDelegate;
-	mTaperDelegate = 0;
-	delete mDisplayDelegate;
-	mDisplayDelegate = 0;
+	if (mTaperDelegate) {
+		delete mTaperDelegate;
+		mTaperDelegate = 0;
+	}
+	
+	if (mDisplayDelegate) {
+		delete mDisplayDelegate;
+		mDisplayDelegate = 0;
+	}
 }
 
 template <typename T>
@@ -637,6 +680,10 @@ void				AAX_CParameter<T>::ClearShortenedNames()
 template<typename T>
 void	AAX_CParameter<T>::SetValue( T newValue )
 {
+	if (!mTaperDelegate) {
+		return;
+	}
+	
 	double	newNormalizedValue = mTaperDelegate->RealToNormalized(newValue);
 
 	// <DMT> Always go through the automation delegate even if the control isn't automatable to prevent fighting with other GUIs.
@@ -669,6 +716,10 @@ void	AAX_CParameter<T>::SetValue( T newValue )
 template <typename T>
 void	AAX_CParameter<T>::UpdateNormalizedValue(double newNormalizedValue)
 {
+	if (!mTaperDelegate) {
+		return;
+	}
+	
 	T newValue = mTaperDelegate->NormalizedToReal(newNormalizedValue);
 	if (mNeedNotify || (mValue.Get() != newValue))
 	{
@@ -811,22 +862,25 @@ bool		AAX_CParameter<AAX_CString>::SetValueWithString(const AAX_IString& value);
 template<typename T>
 void	AAX_CParameter<T>::SetNormalizedDefaultValue(double newNormalizedDefault)
 {
-	T newDefaultValue = mTaperDelegate->NormalizedToReal(newNormalizedDefault);
-	SetDefaultValue(newDefaultValue);
+	if (mTaperDelegate) {
+		T newDefaultValue = mTaperDelegate->NormalizedToReal(newNormalizedDefault);
+		SetDefaultValue(newDefaultValue);
+	}
 }
 
 template<typename T>
 double	AAX_CParameter<T>::GetNormalizedDefaultValue() const
 {
-	double normalizedDefault = mTaperDelegate->RealToNormalized(mDefaultValue);
-	return normalizedDefault;
+	return mTaperDelegate ? mTaperDelegate->RealToNormalized(mDefaultValue) : 0.f;
 }
 
 template<typename T>
 void	AAX_CParameter<T>::SetDefaultValue(T newDefaultValue)
 {
-	newDefaultValue = mTaperDelegate->ConstrainRealValue(newDefaultValue);
-	mDefaultValue = newDefaultValue;
+	if (mTaperDelegate) {
+		newDefaultValue = mTaperDelegate->ConstrainRealValue(newDefaultValue);
+		mDefaultValue = newDefaultValue;
+	}
 }
 
 template<typename T>
@@ -934,28 +988,31 @@ AAX_EParameterOrientation	AAX_CParameter<T>::GetOrientation() const
 template<typename T>
 void	AAX_CParameter<T>::SetNormalizedValue(double normalizedNewValue)
 {
-	T newValue = mTaperDelegate->NormalizedToReal(normalizedNewValue);
-	this->SetValue(newValue);
+	if (mTaperDelegate)
+	{
+		T newValue = mTaperDelegate->NormalizedToReal(normalizedNewValue);
+		this->SetValue(newValue);
+	}
 }
 
 template<typename T>
 double	AAX_CParameter<T>::GetNormalizedValue()	const
 {
 	T val = GetValue();
-	return mTaperDelegate->RealToNormalized(val);
-}	
+	return mTaperDelegate ? mTaperDelegate->RealToNormalized(val) : 0.;
+}
 
 
 template<typename T>
 bool	AAX_CParameter<T>::GetValueString(AAX_CString*	valueString) const
 {
-	return mDisplayDelegate->ValueToString(this->GetValue(), valueString);
+	return mDisplayDelegate ? mDisplayDelegate->ValueToString(this->GetValue(), valueString) : false;
 }
 
 template<typename T>
 bool	AAX_CParameter<T>::GetValueString(int32_t /*iMaxNumChars*/, AAX_CString*	valueString) const
 {
-	return mDisplayDelegate->ValueToString(this->GetValue(), valueString);
+	return mDisplayDelegate ? mDisplayDelegate->ValueToString(this->GetValue(), valueString) : false;
 }
 
 template <typename T>
@@ -993,6 +1050,10 @@ bool	AAX_CParameter<double>::GetNormalizedValueFromDouble(double value, double *
 template <typename T>
 bool	AAX_CParameter<T>::GetNormalizedValueFromString(const AAX_CString&	valueString, double *normalizedValue) const
 {
+	if (!mDisplayDelegate || !mTaperDelegate) {
+		return false;
+	}
+	
 	//First, convert the string to a value using the wrapped parameter's display delegate.
 	T value;
 	if (!mDisplayDelegate->StringToValue(valueString, &value))
@@ -1040,6 +1101,10 @@ bool		AAX_CParameter<double>::GetDoubleFromNormalizedValue(double inNormalizedVa
 template <typename T>
 bool	AAX_CParameter<T>::GetStringFromNormalizedValue(double normalizedValue, AAX_CString&	valueString) const
 {
+	if (!mTaperDelegate || !mDisplayDelegate) {
+		return false;
+	}
+	
 	T value = mTaperDelegate->NormalizedToReal(normalizedValue);
 	if (!mDisplayDelegate->ValueToString(value, &valueString))
 		return false;	
@@ -1053,6 +1118,10 @@ bool	AAX_CParameter<T>::GetStringFromNormalizedValue(double normalizedValue, AAX
 template <typename T>
 bool	AAX_CParameter<T>::GetStringFromNormalizedValue(double normalizedValue, int32_t iMaxNumChars, AAX_CString&	valueString) const
 {
+	if (!mTaperDelegate || !mDisplayDelegate) {
+		return false;
+	}
+	
 	T value = mTaperDelegate->NormalizedToReal(normalizedValue);
 	if (!mDisplayDelegate->ValueToString(value, iMaxNumChars, &valueString))
 		return false;	
@@ -1065,7 +1134,11 @@ bool	AAX_CParameter<T>::GetStringFromNormalizedValue(double normalizedValue, int
 
 template<typename T>
 bool	AAX_CParameter<T>::SetValueFromString(const AAX_CString&	newValueString)
-{	
+{
+	if (!mDisplayDelegate) {
+		return false;
+	}
+	
 	T newValue;
 	if (!mDisplayDelegate->StringToValue(newValueString, &newValue))
 		return false;
@@ -1076,16 +1149,28 @@ bool	AAX_CParameter<T>::SetValueFromString(const AAX_CString&	newValueString)
 template<typename T>
 void	AAX_CParameter<T>::SetTaperDelegate(AAX_ITaperDelegateBase& inTaperDelegate,bool inPreserveValue)
 {
-	double	normalizeValue = this->GetNormalizedValue ();
+	// if the object was created without a taper delegate then its default value has not been set
+	bool const setToDefault = (nullptr == mTaperDelegate);
+
+	double const normalizedValue = mTaperDelegate ? this->GetNormalizedValue () : 0.f;
 
 	AAX_ITaperDelegate<T>* oldDelegate = mTaperDelegate;
 	mTaperDelegate = ((AAX_ITaperDelegate<T> &) inTaperDelegate).Clone();
-	delete oldDelegate;
+	
+	if (oldDelegate) {
+		delete oldDelegate;
+	}
 
 	mNeedNotify = true;
-	if ( inPreserveValue )
+	if ( setToDefault ) {
+		this->SetToDefaultValue();
+	}
+	else if ( inPreserveValue ) {
 		this->SetValue ( mValue.Get() );
-	else this->UpdateNormalizedValue ( normalizeValue );
+	}
+	else {
+		this->UpdateNormalizedValue ( normalizedValue );
+	}
 }
 
 template<typename T>
@@ -1093,7 +1178,9 @@ void	AAX_CParameter<T>::SetDisplayDelegate(AAX_IDisplayDelegateBase& inDisplayDe
 {
 	AAX_IDisplayDelegate<T>* oldDelegate = mDisplayDelegate;
 	mDisplayDelegate = ((AAX_IDisplayDelegate<T> &)inDisplayDelegate).Clone();
-	delete oldDelegate;
+	if (oldDelegate) {
+		delete oldDelegate;
+	}
 	
 	if (mAutomationDelegate != 0)
 		mAutomationDelegate->PostCurrentValue(this->Identifier(), this->GetNormalizedValue());		//<DMT> Make sure GUIs are all notified of the change.

@@ -49,7 +49,7 @@
 	version of AAX_CLinearTaperDelegate without that class' additional RealPrecision
 	templatization.
 
-	\ingroup TaperDelegates
+	\ingroup AAXLibraryFeatures_ParameterManager_TaperDelegates
 
  */
 template <typename T>

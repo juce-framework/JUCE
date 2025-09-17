@@ -1,6 +1,6 @@
 /*================================================================================================*/
 /*
- *	Copyright 2013-2017, 2019, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -227,6 +227,20 @@ AAX_CBoolean AAX_VPropertyMap::GetPointerProperty ( AAX_EProperty inProperty, co
 // ******************************************************************************************
 AAX_Result AAX_VPropertyMap::AddProperty ( AAX_EProperty inProperty, AAX_CPropertyValue inValue )
 {
+	// AAX_eProperty_StemFormat is an alias to register equivalent input/output stem formats
+	if (AAX_eProperty_StemFormat == inProperty)
+	{
+		AAX_Result inputResult = this->AddProperty(AAX_eProperty_InputStemFormat, inValue);
+		AAX_Result outputResult = this->AddProperty(AAX_eProperty_OutputStemFormat, inValue);
+		if (inputResult != AAX_SUCCESS) {
+			return inputResult;
+		}
+		if (outputResult != AAX_SUCCESS) {
+			return outputResult;
+		}
+		return AAX_SUCCESS;
+	}
+
 	// PT-223581: Pro Tools removes plug-ins from the insert menu if unsupported stem formats are detected
 	if ( (AAX_eProperty_InputStemFormat == inProperty) || (AAX_eProperty_OutputStemFormat == inProperty))
 	{
@@ -246,7 +260,7 @@ AAX_Result AAX_VPropertyMap::AddProperty ( AAX_EProperty inProperty, AAX_CProper
 		}
 		// otherwise, it is fine to register stem formats which are unknown to the host
 	}
-	
+
 	if ( mIACFPropertyMap )
 	{
 		return mIACFPropertyMap->AddProperty ( inProperty, inValue );

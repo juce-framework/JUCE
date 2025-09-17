@@ -45,7 +45,7 @@
 	This display delegate converts a parameter value to a numeric string using a specified
 	precision.
 
-	\ingroup DisplayDelegates
+	\ingroup AAXLibraryFeatures_ParameterManager_DisplayDelegates
 
  */
 template <typename T, uint32_t Precision=2, uint32_t SpaceAfter=0>

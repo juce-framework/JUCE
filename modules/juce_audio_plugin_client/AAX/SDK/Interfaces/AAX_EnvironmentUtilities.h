@@ -3,7 +3,7 @@
 
 	AAX_EnvironmentUtilities.h
 
-	Copyright 2018-2019, 2023-2024 Avid Technology, Inc.
+	Copyright 2018-2019, 2023-2025 Avid Technology, Inc.
 	All rights reserved.
 	
 	This file is part of the Avid AAX SDK.
@@ -35,7 +35,39 @@
 #ifndef _AAX_ENVIRONMENTUTILITIES_H_
 #define _AAX_ENVIRONMENTUTILITIES_H_
 
-#include <cstdlib>
+
+/** @name C++ compiler macros
+ */
+//@{
+/** @def TI_VERSION
+ @brief Preprocessor flag indicating compilation for TI
+ */
+/** @def AAX_CPP11_SUPPORT
+ @brief Preprocessor toggle for code which requires C++11 compiler support
+ */
+//@} C++ compiler macros
+
+#ifndef TI_VERSION
+	#if defined _TMS320C6X
+		#define TI_VERSION 1
+	#elif defined DOXYGEN_PREPROCESSOR
+		#define TI_VERSION 0
+	#endif
+#endif
+
+
+#ifndef AAX_CPP11_SUPPORT
+	#if (defined __cplusplus) && (__cplusplus >= 201103L)
+		#define AAX_CPP11_SUPPORT	1
+	// VS2015 supports all features except expression SFINAE
+	#elif ((defined _MSVC_LANG) && (_MSVC_LANG >= 201402))
+		#define AAX_CPP11_SUPPORT	1
+	// Let Doxygen see the C++11 version of all code
+	#elif defined DOXYGEN_PREPROCESSOR
+		#define AAX_CPP11_SUPPORT	1
+	#endif
+#endif
+
 
 #if (!defined (WINDOWS_VERSION))
 #  if (defined (_WIN32))
@@ -64,24 +96,9 @@
 #  error "AAX SDK: Cannot declare more than one OS environment"
 #endif
 
-#if (!defined (WINDOWS_VERSION) && !defined (MAC_VERSION) && !defined (LINUX_VERSION))
+
+#if (!defined (AAX_ALLOW_UNKNOWN_ENVIRONMENT) && !defined (WINDOWS_VERSION) && !defined (MAC_VERSION) && !defined (LINUX_VERSION))
 #  warning "AAX SDK: Unknown OS environment"
 #endif
-
-namespace AAX
-{
-    static bool IsVenueSystem(void)
-    {
-#if WINDOWS_VERSION
-    	static const char * const environmentVariableName = "JEX_HOST_TYPE";
-    	static const char * const venueEnvironment = "venue";
-    	static const char * const environment = std::getenv ( environmentVariableName );
-    	static const bool isVenue = ( NULL != environment) && (0 == strcmp ( environment, venueEnvironment ) );
-    	return isVenue;
-#else
-        return false;
-#endif
-    }
-}
 
 #endif // _AAX_ENVIRONMENTUTILITIES_H_

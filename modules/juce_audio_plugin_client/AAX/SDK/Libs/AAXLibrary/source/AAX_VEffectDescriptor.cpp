@@ -1,6 +1,6 @@
 /*================================================================================================*/
 /*
- *	Copyright 2013-2017, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -26,6 +26,7 @@
 #include "AAX_VEffectDescriptor.h"
 #include "AAX_VComponentDescriptor.h"
 #include "AAX_VPropertyMap.h"
+#include "AAX_Errors.h"
 
 #include "AAX_UIDs.h"
 #include "acfbaseapi.h"
@@ -114,10 +115,20 @@ AAX_Result AAX_VEffectDescriptor::AddName( const char * inPlugInName )
 // ******************************************************************************************
 AAX_Result AAX_VEffectDescriptor::AddCategory( uint32_t inCategory )
 {
+	// For now, not checking that the value only contains category bits
 	if ( mIACFEffectDescriptor )
 		return mIACFEffectDescriptor->AddCategory( inCategory );
 	
 	return AAX_ERROR_NULL_OBJECT;
+}
+
+// ******************************************************************************************
+// METHOD:	SetRole
+// ******************************************************************************************
+AAX_Result AAX_VEffectDescriptor::SetRole( uint32_t inRole )
+{
+	// For now, not checking that the value only contains role bits
+	return this->AddCategory( inRole );
 }
 
 // ******************************************************************************************

@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -66,6 +66,7 @@ public:
 	AAX_Result						AddComponent ( AAX_IComponentDescriptor * inComponentDescriptor ) AAX_OVERRIDE; ///< \copydoc AAX_IEffectDescriptor::AddComponent()
 	AAX_Result						AddName ( const char * inPlugInName ) AAX_OVERRIDE; ///< \copydoc AAX_IEffectDescriptor::AddName()
 	AAX_Result						AddCategory ( uint32_t inCategory ) AAX_OVERRIDE; ///< \copydoc AAX_IEffectDescriptor::AddCategory()
+	AAX_Result						SetRole ( uint32_t inRole ) AAX_OVERRIDE; ///< \copydoc AAX_IEffectDescriptor::SetRole()
 	AAX_Result						AddCategoryBypassParameter ( uint32_t inCategory, AAX_CParamID inParamID ) AAX_OVERRIDE; ///< \copydoc AAX_IEffectDescriptor::AddCategoryBypassParameter()
 	AAX_Result						AddProcPtr ( void * inProcPtr, AAX_CProcPtrID inProcID ) AAX_OVERRIDE; ///< \copydoc AAX_IEffectDescriptor::AddProcPtr()
 	/** \copydoc AAX_IEffectDescriptor::NewPropertyMap()

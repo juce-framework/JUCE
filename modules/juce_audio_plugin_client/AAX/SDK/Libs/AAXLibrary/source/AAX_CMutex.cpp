@@ -35,7 +35,7 @@
 #if defined(__GNUC__)
 #include <pthread.h>
 #include <errno.h>
-#elif defined(WIN32)
+#elif defined(_WIN32)
 #include <windows.h>
 #else
 #error AAX_CMutex not implemented
@@ -46,7 +46,7 @@ struct opaque_aax_mutex_t
 #if defined(__GNUC__)
 	pthread_t		mOwner;
 	pthread_mutex_t	mSysMutex;	
-#elif defined(WIN32)
+#elif defined(_WIN32)
 	DWORD			mOwner;
 	HANDLE			mSysMutex;	
 #endif
@@ -61,7 +61,7 @@ AAX_CMutex::AAX_CMutex()
 	mMutex->mOwner = 0;
 #if defined(__GNUC__)
 	if (::pthread_mutex_init(&mMutex->mSysMutex, NULL) != 0)
-#elif defined(WIN32)			
+#elif defined(_WIN32)
 	mMutex->mSysMutex = ::CreateMutex(NULL, false, NULL);
 	if (0 == mMutex->mSysMutex)
 #endif
@@ -80,7 +80,7 @@ AAX_CMutex::~AAX_CMutex()
 	{
 #if defined(__GNUC__)
 		::pthread_mutex_destroy(&mMutex->mSysMutex);
-#elif defined(WIN32)	
+#elif defined(_WIN32)
 		::CloseHandle(mMutex->mSysMutex);
 #endif
 		delete mMutex;		
@@ -104,7 +104,7 @@ bool AAX_CMutex::Lock()
 			mMutex->mOwner = curThread;
 			result = true;
 		}
-#elif defined(WIN32)
+#elif defined(_WIN32)
 		DWORD curThread = ::GetCurrentThreadId();
 		if(mMutex->mOwner != curThread)
 		{
@@ -130,7 +130,7 @@ void AAX_CMutex::Unlock()
 			mMutex->mOwner = 0;
 			::pthread_mutex_unlock(&mMutex->mSysMutex);
 		}
-#elif defined(WIN32)
+#elif defined(_WIN32)
 		if(mMutex->mOwner == ::GetCurrentThreadId())
 		{
 			mMutex->mOwner = 0;
@@ -177,7 +177,7 @@ bool AAX_CMutex::Try_Lock()
 			// current thread already owns the lock
 			result = true;
 		}
-#elif defined(WIN32)
+#elif defined(_WIN32)
 		if(mMutex->mOwner != ::GetCurrentThreadId())
 		{
 			// try to acquire the mutex

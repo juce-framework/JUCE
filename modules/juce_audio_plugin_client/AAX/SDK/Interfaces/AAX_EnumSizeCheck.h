@@ -1,6 +1,7 @@
 /*================================================================================================*/
 /*
- *	Copyright 1993-2015, 2023-2025 Avid Technology, Inc.
+ *
+ *	Copyright 2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -21,21 +22,39 @@
  *	DISCLAIMED.
  *
  */
+
+/**  
+ *	\file AAX_EnumSizeCheck.h
+ *
+ *	\brief Utility for verifying the underlying type size of %AAX enums
+ *
+ */ 
 /*================================================================================================*/
 
-#include "AAX_IEffectGUI.h"
-#include "AAX_UIDs.h"
-#include "acfextras.h"
+#ifndef AAX_ENUMSIZECHECK_H
+#define AAX_ENUMSIZECHECK_H
 
-ACFMETHODIMP AAX_IEffectGUI::InternalQueryInterface(const acfIID & riid, void **ppvObjOut)
-{
-    if (   riid == IID_IAAXEffectGUIV1
-        || riid == IID_IAAXEffectGUIV2)
-    { 
-		*ppvObjOut = static_cast<IACFUnknown *>(this);
-        ( static_cast<IACFUnknown *>(*ppvObjOut))->AddRef();
-        return ACF_OK;
-    }
-	
-	return this->CACFUnknown::InternalQueryInterface(riid, ppvObjOut);	
-}
+#include "AAX_EnvironmentUtilities.h"
+
+#ifndef _TMS320C6X
+#include <cstdint>
+#endif
+
+/** @def AAX_ENUM_SIZE_CHECK
+ @brief Macro to ensure enum type consistency across binaries
+
+ Verifies that the underlying type for checked %AAX enums is always 4 bytes.
+ */
+
+#ifndef _TMS320C6X
+ #if defined(AAX_CPP11_SUPPORT)
+	 #define AAX_ENUM_SIZE_CHECK(x) static_assert(sizeof(x) == sizeof(uint32_t), "Enum size check failed for " #x)
+ #else
+	 // force a compiler error if the size is not 4 bytes
+	 #define AAX_ENUM_SIZE_CHECK(x) extern int __enumSizeCheck[ 2*(sizeof(uint32_t)==sizeof(x)) - 1]
+ #endif
+#else
+ #define AAX_ENUM_SIZE_CHECK(x)
+#endif
+
+#endif // AAX_ENUMSIZECHECK_H

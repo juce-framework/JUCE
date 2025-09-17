@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2023-2024 Avid Technology, Inc.
+ *	Copyright 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -44,7 +44,7 @@
  * 
  * \ingroup AuxInterface_TaskAgent
  */ 
-class AAX_ITaskAgent : public AAX_IACFTaskAgent
+class AAX_ITaskAgent : public AAX_IACFTaskAgent_V2
 					 , public CACFUnknown
 {
 public:

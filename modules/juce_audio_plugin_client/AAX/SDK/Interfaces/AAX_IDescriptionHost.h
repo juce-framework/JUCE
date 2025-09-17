@@ -30,6 +30,10 @@ class AAX_IFeatureInfo;
 
 
 /** Interface to host services provided during plug-in description
+
+	\warning %AAX plugin description details are cached and might not be re-scanned even if
+	attributes of the host description change. Be careful to avoid changing any cacheable
+	information based on this data. See \ref describe_host_feature_checks for more information.
  */
 class AAX_IDescriptionHost
 {

@@ -1,6 +1,6 @@
 /*================================================================================================*/
 /*
- *	Copyright 2016-2017, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2016-2017, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -24,6 +24,7 @@
 #ifndef AAXLibrary_AAX_IACFFeatureInfo_h
 #define AAXLibrary_AAX_IACFFeatureInfo_h
 
+#include "AAX_Enums.h"
 #include "AAX.h"
 
 class AAX_IACFPropertyMap;

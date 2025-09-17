@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -35,6 +35,7 @@
 #ifndef AAX_IACFEFFECTPARAMETERS_H
 #define AAX_IACFEFFECTPARAMETERS_H
 
+#include "AAX_Enums.h"
 #include "AAX.h"
 
 class AAX_IString;

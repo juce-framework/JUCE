@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *  Copyright 2014-2016, 2018, 2023-2024 Avid Technology, Inc.
+ *  Copyright 2014-2016, 2018, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -34,8 +34,9 @@
 #define	AAXLibrary_AAX_StringUtilities_h
 
 // AAX headers
-#include "AAX.h"
+#include "AAX_Properties.h"
 #include "AAX_Enums.h"
+#include "AAX.h"
 
 // Standard Library headers
 #include <string>

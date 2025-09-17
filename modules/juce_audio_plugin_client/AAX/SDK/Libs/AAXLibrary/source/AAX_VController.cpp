@@ -1,6 +1,6 @@
 /*================================================================================================*/
 /*
- *	Copyright 2013-2017, 2019, 2021, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2021, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -28,6 +28,7 @@
 #include "AAX_IACFPageTableController.h"
 #include "AAX_UIDs.h"
 #include "AAX_Assert.h"
+#include "AAX_Errors.h"
 
 #include "acfbaseapi.h"
 
@@ -43,6 +44,8 @@ AAX_VController::AAX_VController( IACFUnknown* pUnknown )
 		pUnknown->QueryInterface(IID_IAAXControllerV1, (void **)&mIController);
 		pUnknown->QueryInterface(IID_IAAXControllerV2, (void **)&mIControllerV2);
 		pUnknown->QueryInterface(IID_IAAXControllerV3, (void **)&mIControllerV3);
+		pUnknown->QueryInterface(IID_IAAXControllerV4, (void **)&mIControllerV4);
+		pUnknown->QueryInterface(IID_IAAXControllerV5, (void **)&mIControllerV5);
 		pUnknown->QueryInterface(IID_IAAXPageTableController, (void **)&mIPageTableController);
 		pUnknown->QueryInterface(IID_IAAXPageTableControllerV2, (void **)&mIPageTableControllerV2);
 		
@@ -55,7 +58,7 @@ AAX_VController::AAX_VController( IACFUnknown* pUnknown )
 			// swallow any failure here - just clear the smart pointer
 			mComponentFactory = NULL;
 		}
-	}	
+	}
 }
 
 // ******************************************************************************************
@@ -94,6 +97,17 @@ AAX_Result AAX_VController::SendNotification (AAX_CTypeID inNotificationType)
 {
 	if (mIControllerV2)
 		return mIControllerV2->SendNotification(inNotificationType, NULL, 0);
+	
+	return AAX_ERROR_UNIMPLEMENTED;
+}
+
+// ******************************************************************************************
+// METHOD:	RegisterForNotification
+// ******************************************************************************************
+AAX_Result	AAX_VController::RegisterForNotification(/* AAX_ENotificationEvent */ AAX_CTypeID inNotificationType, IACFUnknown const * inSubscriberObject)
+{
+	if (mIControllerV5)
+		return mIControllerV5->RegisterForNotification(inNotificationType, inSubscriberObject);
 	
 	return AAX_ERROR_UNIMPLEMENTED;
 }
@@ -318,6 +332,28 @@ AAX_Result AAX_VController::GetIsAudioSuite(AAX_CBoolean* outIsAudioSuite) const
 {
 	if (mIControllerV3)
 		return mIControllerV3->GetIsAudioSuite(outIsAudioSuite);
+	
+	return AAX_ERROR_UNIMPLEMENTED;
+}
+
+// ******************************************************************************************
+// METHOD:	GetInstanceGroupID
+// ******************************************************************************************
+AAX_Result AAX_VController::GetInstanceGroupID(AAX_CInstanceGroupID* outInstanceGroupID) const
+{
+	if (mIControllerV4)
+		return mIControllerV4->GetInstanceGroupID(outInstanceGroupID);
+	
+	return AAX_ERROR_UNIMPLEMENTED;
+}
+
+// ******************************************************************************************
+// METHOD:	GetInstanceID
+// ******************************************************************************************
+AAX_Result AAX_VController::GetInstanceID(AAX_CInstanceID* outInstanceID) const
+{
+	if (mIControllerV5)
+		return mIControllerV5->GetInstanceID(outInstanceID);
 	
 	return AAX_ERROR_UNIMPLEMENTED;
 }
