@@ -1,0 +1,249 @@
+/*
+Modified Doxygen Theme for JUCE
+
+Don't edit the main doxygen-1.14.css file, edit this instead.
+
+This file is included after the base theme to override specific styles.
+*/
+
+/* Use Open Sans everywhere, Inconsalata for code */
+html,
+body {
+  --font-family-normal: "Open Sans", Helvetica, Arial, sans-serif;
+  --font-family-monospace: "Inconsolata", monospace;
+  --font-family-nav: "Open Sans", Helvetica, Arial, sans-serif;
+  --font-family-title: "Open Sans", Helvetica, Arial, sans-serif;
+  --font-family-toc: "Open Sans", Helvetica, Arial, sans-serif;
+  --font-family-search: "Open Sans", Helvetica, Arial, sans-serif;
+  --font-family-icon: Arial, Helvetica;
+  --font-family-tooltip: "Open Sans", Helvetica, Arial, sans-serif;
+}
+
+/* 14px is a good readable minimum */
+body,
+table,
+div,
+p,
+dl {
+  font-size: 14px;
+}
+
+/* slightly larger text blocks for better readability */
+p {
+  line-height: 1.5em;
+}
+
+/* nicer code blocks */
+pre {
+  margin-bottom: 1em;
+}
+
+pre code {
+  border-radius: 4px;
+}
+
+code {
+  font-family: var(--font-family-monospace);
+}
+
+/* all links should display underline on hover */
+a:hover {
+  color: var(--page-link-color);
+  text-decoration: underline;
+}
+
+/* make sure we aren't hugging the sides for readablity */
+#doc-content {
+  margin: 0 1.5em;
+}
+
+#main-nav {
+  padding: 0 1em;
+}
+
+/* Readability is TERRIBLE with unlimited widths. UX 101 */
+div.textblock {
+  max-width: 750px;
+}
+
+div.textblock h2 {
+  margin-top: 1.5em;
+}
+
+/* Tame the search UX */
+#MSearchField {
+  font-size: 16px;
+}
+
+.SRPage {
+  margin: 0.5em;
+}
+
+.SRPage .SREntry {
+  font-size: 14px;
+}
+
+.SRChildren {
+  font-size: 12px;
+}
+
+#navrow1 .tablist>li:last-child {
+  margin-top: 0.3em;
+}
+
+/* Give the header a bit of room  */
+div.header {
+  background-color: transparent;
+  border-bottom: none;
+  margin-top: 1em;
+}
+
+/* Align this sub-nav with the heading */
+div.summary {
+  margin-top: 1.5em;
+}
+
+/* Breadcrumbs aren't useful, so lets hide them */
+div#nav-path {
+  display: none;
+}
+
+/* Hide the unnecessarily noisy "Detailed Description" header */
+h2.groupheader#header-details {
+  display: none;
+}
+
+/* remove noisy extra lines in headers */
+td h2.groupheader {
+  box-shadow: none;
+}
+
+/* Doxygen uses monospace for headings, which is rough on scannability.
+  It's also using 1990s style css with tables and "float left" for layout
+*/
+h2.memtitle {
+  font-family: var(--font-family-normal);
+  font-size: 20px;
+  font-weight: 300;
+  float: none;
+  width: max-content;
+  /* this is what they wanted vs. float */
+}
+
+/* limit the width of member lists for basic readability */
+div.memitem {
+  max-width: 750px;
+}
+
+/* member declarations should also not be monospace */
+.memberdecls tr[class^='memitem'] {
+  font-family: var(--font-family-normal);
+}
+
+/* better spacing around section headers */
+tr.heading h2 {
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
+
+/* sane line height on class index */
+.classindex dd {
+  line-height: 1.5em;
+}
+
+/* descriptions should be readable */
+div.contents div.textblock p {
+  font-size: 16px;
+}
+
+/* get rid of crufty borders and background colors */
+.memItemLeft,
+.memItemRight,
+memTemplParams {
+  background-color: transparent;
+  border-right: none;
+  border-left: none;
+  border-bottom: none;
+  padding: 0.6em 0 0 0;
+}
+
+.mdescLeft,
+.mdescRight {
+  border-right: none;
+  border-left: none;
+  padding: 0 0 0.6em 0;
+}
+
+tr[class^='memdesc'] {
+  box-shadow: none;
+}
+
+/* tame crufty borders on member lists */
+.memproto,
+dl.reflist dt {
+  border-bottom: none;
+}
+
+/* chill out on the 1990s crufty rolodex card borders */
+html {
+  --memdef-border-color: #a8b8d949;
+}
+
+/* JUCE MODULES */
+.juce-modules-continer {
+  margin-left: 1em;
+}
+
+.juce-module-toc-table {
+  margin-left: 1em;
+}
+
+.juce-module-toc-divider {
+  border-bottom: 1px solid;
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+.juce-module-toc-module-name {
+  padding-right: 1em;
+}
+
+.juce-module-desc {
+  margin-left: 1em;
+}
+
+.juce-module-contents {
+  margin-top: 1em;
+  margin-left: 1em;
+}
+
+.juce-module-title {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.juce-module-icon {
+  height: 1.5em;
+  margin-right: 0.75em;
+  vertical-align: middle;
+  fill: var(--page-foreground-color);
+}
+
+.juce-module-name {
+  font-size: 1.5em;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+.juce-module-dir-name {
+  font-size: 1.1em;
+  font-weight: bold;
+  vertical-align: top;
+  padding-right: 1em;
+}
+
+.juce-module-class-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 1.5em;
+}
