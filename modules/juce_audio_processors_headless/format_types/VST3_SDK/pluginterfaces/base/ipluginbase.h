@@ -42,7 +42,7 @@ public:
 		@note Extensive memory allocations etc. should be performed in this method rather than in
 	   the class' constructor! If the method does NOT return kResultOk, the object is released
 	   immediately. In this case terminate is not called! */
-	virtual tresult PLUGIN_API initialize (FUnknown* context) = 0;
+	virtual tresult PLUGIN_API initialize (FUnknown* context /*in*/) = 0;
 
 	/** This function is called before the plug-in is unloaded and can be used for
 	    cleanups. You have to release all references to any host application interfaces. */
@@ -194,7 +194,7 @@ class IPluginFactory : public FUnknown
 public:
 //------------------------------------------------------------------------
 	/** Fill a PFactoryInfo structure with information about the plug-in vendor. */
-	virtual tresult PLUGIN_API getFactoryInfo (PFactoryInfo* info) = 0;
+	virtual tresult PLUGIN_API getFactoryInfo (PFactoryInfo* info /*inout*/) = 0;
 
 	/** Returns the number of exported classes by this factory. If you are using the CPluginFactory
 	 * implementation provided by the SDK, it returns the number of classes you registered with
@@ -202,10 +202,11 @@ public:
 	virtual int32 PLUGIN_API countClasses () = 0;
 
 	/** Fill a PClassInfo structure with information about the class at the specified index. */
-	virtual tresult PLUGIN_API getClassInfo (int32 index, PClassInfo* info) = 0;
+	virtual tresult PLUGIN_API getClassInfo (int32 index /*in*/, PClassInfo* info /*inout*/) = 0;
 
 	/** Create a new class instance. */
-	virtual tresult PLUGIN_API createInstance (FIDString cid, FIDString _iid, void** obj) = 0;
+	virtual tresult PLUGIN_API createInstance (FIDString cid /*in*/, FIDString _iid /*in*/,
+	                                           void** obj /*out*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;
@@ -322,7 +323,7 @@ class IPluginFactory2 : public IPluginFactory
 public:
 //------------------------------------------------------------------------
 	/** Returns the class info (version 2) for a given index. */
-	virtual tresult PLUGIN_API getClassInfo2 (int32 index, PClassInfo2* info) = 0;
+	virtual tresult PLUGIN_API getClassInfo2 (int32 index /*in*/, PClassInfo2* info /*out*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;
@@ -448,10 +449,11 @@ class IPluginFactory3 : public IPluginFactory2
 public:
 //------------------------------------------------------------------------
 	/** Returns the unicode class info for a given index. */
-	virtual tresult PLUGIN_API getClassInfoUnicode (int32 index, PClassInfoW* info) = 0;
+	virtual tresult PLUGIN_API getClassInfoUnicode (int32 index /*in*/,
+	                                                PClassInfoW* info /*out*/) = 0;
 
 	/** Receives information about host*/
-	virtual tresult PLUGIN_API setHostContext (FUnknown* context) = 0;
+	virtual tresult PLUGIN_API setHostContext (FUnknown* context /*in*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;

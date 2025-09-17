@@ -40,7 +40,7 @@ class IAutomationState : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
-	enum AutomationStates
+	enum AutomationStates : int32
 	{
 		kNoAutomation = 0,		///< Not Read and not Write
 		kReadState = 1 << 0,	///< Read state
@@ -49,8 +49,9 @@ public:
 		kReadWriteState = kReadState | kWriteState, ///< Read and Write enable
 	};
 
-	/** Sets the current Automation state. */
-	virtual tresult PLUGIN_API setAutomationState (int32 state) = 0;
+	/** Sets the current Automation state.
+	 * \note [UI-thread & Connected] */
+	virtual tresult PLUGIN_API setAutomationState (int32 state /*in*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;

@@ -514,7 +514,7 @@ void Unit::setName (const String128 newName)
 // ProgramList implementation
 //------------------------------------------------------------------------
 ProgramList::ProgramList (const String128 name, ProgramListID listId, UnitID unitId)
-: unitId (unitId), parameter (nullptr)
+: unitId (unitId)
 {
 	UString128 (name).copyTo (info.name, 128);
 	info.id = listId;
@@ -526,7 +526,6 @@ ProgramList::ProgramList (const ProgramList& programList)
 : info (programList.info)
 , unitId (programList.unitId)
 , programNames (programList.programNames)
-, parameter (nullptr)
 {
 }
 
@@ -536,7 +535,26 @@ int32 ProgramList::addProgram (const String128 name)
 	++info.programCount;
 	programNames.emplace_back (name);
 	programInfos.emplace_back ();
+
+	if (parameter)
+	{
+		static_cast<StringListParameter*> (parameter)->appendString (name);
+	}
+
 	return static_cast<int32> (programNames.size ()) - 1;
+}
+
+//------------------------------------------------------------------------
+void ProgramList::clearPrograms ()
+{
+	info.programCount = 0;
+	programNames.clear ();
+	programInfos.clear ();
+
+	if (parameter)
+	{
+		static_cast<StringListParameter*> (parameter)->clear ();
+	}
 }
 
 //------------------------------------------------------------------------

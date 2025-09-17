@@ -60,6 +60,10 @@ struct ParameterInfo
 
 	int32 flags;		///< ParameterFlags (see below)
 
+	/** Parameter flags
+	 *
+	 * Note that all non defined bits are reserved for future use!
+	 */
 	enum ParameterFlags : int32
 	{
 		/** No flags wanted.
@@ -215,20 +219,24 @@ class IComponentHandler : public FUnknown
 public:
 //------------------------------------------------------------------------
 	/** To be called before calling a performEdit (e.g. on mouse-click-down event).
-	 * This must be called in the UI-Thread context! */
+	 * This must be called in the UI-Thread context!
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API beginEdit (ParamID id /*in*/) = 0;
 
 	/** Called between beginEdit and endEdit to inform the handler that a given parameter has a new
-	 * value. This must be called in the UI-Thread context! */
+	 * value. This must be called in the UI-Thread context!
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API performEdit (ParamID id /*in*/,
 	                                        ParamValue valueNormalized /*in*/) = 0;
 
 	/** To be called after calling a performEdit (e.g. on mouse-click-up event).
-	 * This must be called in the UI-Thread context! */
+	 * This must be called in the UI-Thread context!
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API endEdit (ParamID id /*in*/) = 0;
 
 	/** Instructs host to restart the component. This must be called in the UI-Thread context!
-	 * @param[in] flags is a combination of RestartFlags */
+	 * @param[in] flags is a combination of RestartFlags
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API restartComponent (int32 flags /*in*/) = 0;
 
 //------------------------------------------------------------------------
@@ -301,23 +309,27 @@ class IComponentHandler2 : public FUnknown
 public:
 //------------------------------------------------------------------------
 	/** Tells host that the plug-in is dirty (something besides parameters has changed since last
-	 * save), if true the host should apply a save before quitting. */
+	 * save), if true the host should apply a save before quitting.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API setDirty (TBool state /*in*/) = 0;
 
 	/** Tells host that it should open the plug-in editor the next time it's possible. You should
 	 * use this instead of showing an alert and blocking the program flow (especially on loading
-	 * projects). */
-	virtual tresult PLUGIN_API requestOpenEditor (FIDString name = ViewType::kEditor) = 0;
+	 * projects).
+	 * \note [UI-thread & Connected] */
+	virtual tresult PLUGIN_API requestOpenEditor (FIDString name = ViewType::kEditor /*in*/) = 0;
 
 //------------------------------------------------------------------------
 	/** Starts the group editing (call before a \ref IComponentHandler::beginEdit),
 	 * the host will keep the current timestamp at this call and will use it for all
 	 * \ref IComponentHandler::beginEdit, \ref IComponentHandler::performEdit,
-	 * \ref IComponentHandler::endEdit calls until a \ref finishGroupEdit (). */
+	 * \ref IComponentHandler::endEdit calls until a \ref finishGroupEdit ().
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API startGroupEdit () = 0;
 
 	/** Finishes the group editing started by a \ref startGroupEdit (call after a \ref
-	 * IComponentHandler::endEdit). */
+	 * IComponentHandler::endEdit).
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API finishGroupEdit () = 0;
 
 //------------------------------------------------------------------------
@@ -354,7 +366,8 @@ class IComponentHandlerBusActivation : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
-	/** request the host to activate or deactivate a specific bus. */
+	/** request the host to activate or deactivate a specific bus.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API requestBusActivation (MediaType type /*in*/, BusDirection dir /*in*/,
 	                                                 int32 index /*in*/, TBool state /*in*/) = 0;
 
@@ -372,13 +385,13 @@ DECLARE_CLASS_IID (IComponentHandlerBusActivation, 0x067D02C1, 0x5B4E274D, 0xA92
 - [released: 3.7.0]
 - [optional]
 
-Allows the plug-in to request the host to create a progress for some specific tasks which take
-some time. The host can visualize the progress as read-only UI elements. For example,
-after loading a project where a plug-in needs to load extra
-data (e.g. samples) in a background thread, this enables the host to get and visualize the current
-status of the loading progress and to inform the user when the loading is finished. Note: During the
-progress, the host can unload the plug-in at any time. Make sure that the plug-in supports this use
-case.
+Allows the plug-in to request the host to create a progress for some specific tasks which take some
+time. The host can visualize the progress as read-only UI elements.
+For example, after loading a project where a plug-in needs to load extra data (e.g. samples) in a
+background thread, this enables the host to get and visualize the current status of the loading
+progress and to inform the user when the loading is finished.
+Note: During the progress, the host can unload the plug-in at any time. Make sure that the plug-in
+supports this use case.
 
 \section IProgressExample Example
 
@@ -390,7 +403,7 @@ case.
 FUnknownPtr<IProgress> progress (componentHandler);
 if (progress)
     progress->start (IProgress::ProgressType::UIBackgroundTask, STR ("Load Samples..."),
-					 mProgressID);
+                     mProgressID);
 
 // ...
 myProgressValue += incProgressStep;
@@ -422,15 +435,18 @@ public:
 	using ID = uint64;
 
 	/** Start a new progress of a given type and optional Description. outID is as ID created by the
-	 * host to identify this newly created progress (for update and finish method) */
+	 * host to identify this newly created progress (for update and finish method).
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API start (ProgressType type /*in*/,
 	                                  const tchar* optionalDescription /*in*/,
 	                                  ID& outID /*out*/) = 0;
 
-	/** Update the progress value (normValue between [0, 1]) associated to the given id */
+	/** Update the progress value (normValue between [0, 1]) associated to the given id.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API update (ID id /*in*/, ParamValue normValue /*in*/) = 0;
 
-	/** Finish the progress associated to the given id */
+	/** Finish the progress associated to the given id.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API finish (ID id /*in*/) = 0;
 
 //------------------------------------------------------------------------
@@ -453,59 +469,72 @@ class IEditController : public IPluginBase
 {
 public:
 //------------------------------------------------------------------------
-	/** Receives the component state. */
+	/** Receives the component state.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API setComponentState (IBStream* state /*in*/) = 0;
 
-	/** Sets the controller state. */
+	/** Sets the controller state.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API setState (IBStream* state /*in*/) = 0;
 
-	/** Gets the controller state. */
+	/** Gets the controller state.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API getState (IBStream* state /*inout*/) = 0;
 
 	// parameters -------------------------
-	/** Returns the number of parameters exported. */
+	/** Returns the number of parameters exported.
+	 * \note [UI-thread & Connected] */
 	virtual int32 PLUGIN_API getParameterCount () = 0;
 
-	/** Gets for a given index the parameter information. */
+	/** Gets for a given index the parameter information.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API getParameterInfo (int32 paramIndex /*in*/,
 	                                             ParameterInfo& info /*out*/) = 0;
 
-	/** Gets for a given paramID and normalized value its associated string representation. */
+	/** Gets for a given paramID and normalized value its associated string representation.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API getParamStringByValue (ParamID id /*in*/,
 	                                                  ParamValue valueNormalized /*in*/,
 	                                                  String128 string /*out*/) = 0;
 
-	/** Gets for a given paramID and string its normalized value. */
+	/** Gets for a given paramID and string its normalized value.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API getParamValueByString (ParamID id /*in*/, TChar* string /*in*/,
 	                                                  ParamValue& valueNormalized /*out*/) = 0;
 
 	/** Returns for a given paramID and a normalized value its plain representation
-	 * (for example -6 for -6dB - see \ref vst3AutomationIntro). */
+	 * (for example -6 for -6dB - see \ref vst3AutomationIntro).
+	 * \note [UI-thread & Connected] */
 	virtual ParamValue PLUGIN_API normalizedParamToPlain (ParamID id /*in*/,
 	                                                      ParamValue valueNormalized /*in*/) = 0;
 
 	/** Returns for a given paramID and a plain value its normalized value. (see \ref
-	 * vst3AutomationIntro). */
+	 * vst3AutomationIntro).
+	 * \note [UI-thread & Connected] */
 	virtual ParamValue PLUGIN_API plainParamToNormalized (ParamID id /*in*/,
 	                                                      ParamValue plainValue /*in*/) = 0;
 
-	/** Returns the normalized value of the parameter associated to the paramID. */
+	/** Returns the normalized value of the parameter associated to the paramID.
+	 * \note [UI-thread & Connected] */
 	virtual ParamValue PLUGIN_API getParamNormalized (ParamID id /*in*/) = 0;
 
 	/** Sets the normalized value to the parameter associated to the paramID. The controller must
 	 * never pass this value-change back to the host via the IComponentHandler.
-	 * It should update the according GUI element(s) only! */
+	 * It should update the according GUI element(s) only!
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API setParamNormalized (ParamID id /*in*/, ParamValue value /*in*/) = 0;
 
 	// handler ----------------------------
 	/** Gets from host a handler which allows the Plugin-in to communicate with the host.
-	 * Note: This is mandatory if the host is using the IEditController! */
+	 * \note This is mandatory if the host is using the IEditController!
+	 * \note [UI-thread & Initialized] */
 	virtual tresult PLUGIN_API setComponentHandler (IComponentHandler* handler /*in*/) = 0;
 
 	// view -------------------------------
 	/** Creates the editor view of the plug-in, currently only "editor" is supported, see \ref
 	 * ViewType. The life time of the editor view will never exceed the life time of this controller
-	 * instance. */
+	 * instance.
+	 * \note [UI-thread & Connected] */
 	virtual IPlugView* PLUGIN_API createView (FIDString name /*in*/) = 0;
 
 //------------------------------------------------------------------------
@@ -515,12 +544,11 @@ public:
 DECLARE_CLASS_IID (IEditController, 0xDCD7BBE3, 0x7742448D, 0xA874AACC, 0x979C759E)
 
 //------------------------------------------------------------------------
-/** \defgroup vst3typedef VST 3 Data Types */
-/*@{*/
-//------------------------------------------------------------------------
+/** \ingroup vst3typedef */
+/**@{*/
 /** Knob Mode Type */
 using KnobMode = int32;
-/*@}*/
+/**@}*/
 
 //------------------------------------------------------------------------
 /** Knob Mode */
@@ -548,17 +576,20 @@ class IEditController2 : public FUnknown
 {
 public:
 	/** Host could set the Knob Mode for the plug-in. Return kResultFalse means not supported mode.
-	 * \see KnobModes. */
+	 * \see KnobModes.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API setKnobMode (KnobMode mode /*in*/) = 0;
 
 	/** Host could ask to open the plug-in help (could be: opening a PDF document or link to a web
 	 * page). The host could call it with onlyCheck set to true for testing support of open Help.
-	 * Return kResultFalse means not supported function. */
+	 * Return kResultFalse means not supported function.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API openHelp (TBool onlyCheck /*in*/) = 0;
 
 	/** Host could ask to open the plug-in about box.
 	 * The host could call it with onlyCheck set to true for testing support of open AboutBox.
-	 * Return kResultFalse means not supported function. */
+	 * Return kResultFalse means not supported function.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API openAboutBox (TBool onlyCheck /*in*/) = 0;
 
 //------------------------------------------------------------------------
@@ -598,8 +629,8 @@ class MyEditController: public EditControllerEx1, public IMidiMapping
     //...
     //---IMidiMapping---------------------------
     tresult PLUGIN_API getMidiControllerAssignment (int32 busIndex, int16 channel,
-													CtrlNumber midiControllerNumber,
-													ParamID& id) override;
+                                                    CtrlNumber midiControllerNumber,
+                                                    ParamID& id) override;
     //---Interface---------
     OBJ_METHODS (MyEditController, EditControllerEx1)
     DEFINE_INTERFACES
@@ -611,9 +642,9 @@ class MyEditController: public EditControllerEx1, public IMidiMapping
 //--------------------------------------
 // in myeditcontroller.cpp
 tresult PLUGIN_API MyEditController::getMidiControllerAssignment (int32 busIndex,
-														          int16 midiChannel,
+                                                                  int16 midiChannel,
                                                                   CtrlNumber midiControllerNumber,
-																  ParamID& tag)
+                                                                  ParamID& tag)
 {
     // for my first Event bus and for MIDI channel 0 and for MIDI CC Volume only
     if (busIndex == 0 && midiChannel == 0 && midiControllerNumber == kCtrlVolume)
@@ -624,7 +655,6 @@ tresult PLUGIN_API MyEditController::getMidiControllerAssignment (int32 busIndex
     return kResultFalse;
 }
 \endcode
-
 */
 class IMidiMapping : public FUnknown
 {
@@ -636,7 +666,8 @@ public:
 	 * @param[in] midiControllerNumber - see \ref ControllerNumbers for expected values (could be
 	 * bigger than 127)
 	 * @param[out] id - return the associated ParamID to the given midiControllerNumber
-	 */
+	 * 
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API getMidiControllerAssignment (int32 busIndex /*in*/,
 	                                                        int16 channel /*in*/,
 	                                                        CtrlNumber midiControllerNumber /*in*/,
@@ -678,10 +709,12 @@ class IEditControllerHostEditing : public FUnknown
 {
 public:
 	/** Called before a setParamNormalized sequence, a endEditFromHost will be call at the end of
-	 * the editing action. */
+	 * the editing action.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API beginEditFromHost (ParamID paramID /*in*/) = 0;
 
-	/** Called after a beginEditFromHost and a sequence of setParamNormalized. */
+	/** Called after a beginEditFromHost and a sequence of setParamNormalized.
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API endEditFromHost (ParamID paramID /*in*/) = 0;
 
 //------------------------------------------------------------------------
@@ -703,7 +736,8 @@ class IComponentHandlerSystemTime : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
-	/** get the current systemTime (the same as the one used in ProcessContext::systemTime). */
+	/** get the current systemTime (the same as the one used in ProcessContext::systemTime).
+	 * \note [UI-thread & Connected] */
 	virtual tresult PLUGIN_API getSystemTime (int64& systemTime /*out*/) = 0;
 //------------------------------------------------------------------------
 	static const FUID iid;

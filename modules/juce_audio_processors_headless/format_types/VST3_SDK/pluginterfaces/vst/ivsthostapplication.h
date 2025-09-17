@@ -36,10 +36,12 @@ class IHostApplication : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
-	/** Gets host application name. */
+	/** Gets host application name.
+	 * \note [UI-thread & Initialized] */
 	virtual tresult PLUGIN_API getName (String128 name) = 0;
 
-	/** Creates host object (e.g. Vst::IMessage). */
+	/** Creates host object (for example: Vst::IMessage).
+	 * \note [UI-thread & Initialized] */
 	virtual tresult PLUGIN_API createInstance (TUID cid, TUID _iid, void** obj) = 0;
 
 //------------------------------------------------------------------------

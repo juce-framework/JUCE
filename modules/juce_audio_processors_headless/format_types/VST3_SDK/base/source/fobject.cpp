@@ -140,13 +140,14 @@ uint32 PLUGIN_API FObject::release ()
 	}
 #endif
 
-	if (FUnknownPrivate::atomicAdd (refCount, -1) == 0)
+	auto rc = FUnknownPrivate::atomicAdd (refCount, -1);
+	if (rc == 0)
 	{
 		refCount = -1000;
 		delete this;
 		return 0;
 	}
-	return refCount;
+	return rc;
 }
 
 //------------------------------------------------------------------------

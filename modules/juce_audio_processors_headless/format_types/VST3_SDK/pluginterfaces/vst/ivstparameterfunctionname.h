@@ -73,28 +73,28 @@ controls, such as the wet-dry mix knob or Randomize button.
 // here an example of how a VST3 plug-in could support this IParameterFunctionName interface.
 // we need to define somewhere the iids:
 
-in MyController class declaration
+// in MyController class declaration
 class MyController : public Vst::EditController, public Vst::IParameterFunctionName
 {
-    ...
+    // ...
     tresult PLUGIN_API getParameterIDFromFunctionName (UnitID unitID, FIDString functionName,
-                                                    Vst::ParamID& paramID) override;
-    ...
+                                                       Vst::ParamID& paramID) override;
+    // ...
 
     OBJ_METHODS (MyController, Vst::EditController)
     DEFINE_INTERFACES
-        ...
+        // ...
         DEF_INTERFACE (Vst::IParameterFunctionName)
     END_DEFINE_INTERFACES (Vst::EditController)
     DELEGATE_REFCOUNT (Vst::EditController)
-    ...
+    // ...
 }
 
 #include "ivstparameterfunctionname.h"
 namespace Steinberg {
-    namespace Vst {
-        DEF_CLASS_IID (IParameterFunctionName)
-    }
+namespace Vst {
+    DEF_CLASS_IID (IParameterFunctionName)
+}
 }
 
 //------------------------------------------------------------------------
@@ -112,13 +112,13 @@ functionName, Vst::ParamID& paramID)
 }
 
 //--- a host implementation example: --------------------
-...
+// ...
 FUnknownPtr<Vst::IParameterFunctionName> functionName (mEditController->getIEditController ());
 if (functionName)
 {
     Vst::ParamID paramID;
     if (functionName->getParameterIDFromFunctionName (kRootUnitId,
-                                                      Vst::FunctionNameType::kCompGainReduction, paramID) == kResultTrue)
+                       Vst::FunctionNameType::kCompGainReduction, paramID) == kResultTrue)
     {
         // paramID could be cached for performance issue
         ParamValue norm = mEditController->getIEditController ()->getParamNormalized (paramID);
@@ -131,12 +131,15 @@ if (functionName)
 class IParameterFunctionName : public FUnknown
 {
 public:
-	//------------------------------------------------------------------------
+//------------------------------------------------------------------------
 	/** Gets for the given unitID the associated paramID to a function Name.
-		Returns kResultFalse when no found parameter (paramID is set to kNoParamId in this case). */
-	virtual tresult PLUGIN_API getParameterIDFromFunctionName (UnitID unitID, FIDString functionName, ParamID& paramID) = 0;
+	 * Returns kResultFalse when no found parameter (paramID is set to kNoParamId in this case).
+	 * \note [UI-thread & (Initialized | Connected)] */
+	virtual tresult PLUGIN_API getParameterIDFromFunctionName (UnitID unitID /*in*/,
+	                                                           FIDString functionName /*in*/,
+	                                                           ParamID& paramID /*inout*/) = 0;
 
-	//------------------------------------------------------------------------
+//------------------------------------------------------------------------
 	static const FUID iid;
 };
 

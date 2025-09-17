@@ -87,6 +87,12 @@ const FIDString kPlatformTypeX11EmbedWindowID = "X11EmbedWindowID"; ///< X11 Win
 - [plug imp]
 - [released: 3.0.0]
 
+\par Coordinates
+The coordinates utilized within the ViewRect are native to the view system of the parent type.
+This implies that on macOS (kPlatformTypeNSView), the coordinates are expressed in logical 
+units (independent of the screen scale factor), whereas on Windows (kPlatformTypeHWND) and 
+Linux (kPlatformTypeX11EmbedWindowID), the coordinates are expressed in physical units (pixels).
+
 \par Sizing of a view
 Usually, the size of a plug-in view is fixed. But both the host and the plug-in can cause
 a view to be resized:
@@ -206,7 +212,6 @@ public:
 
 DECLARE_CLASS_IID (IPlugFrame, 0x367FAF01, 0xAFA94693, 0x8D4DA2A0, 0xED0882A3)
 
-#if SMTG_OS_LINUX
 //------------------------------------------------------------------------
 namespace Linux {
 
@@ -280,8 +285,4 @@ DECLARE_CLASS_IID (IRunLoop, 0x18C35366, 0x97764F1A, 0x9C5B8385, 0x7A871389)
 
 //------------------------------------------------------------------------
 } // namespace Linux
-
-#endif
-
-//------------------------------------------------------------------------
 } // namespace Steinberg

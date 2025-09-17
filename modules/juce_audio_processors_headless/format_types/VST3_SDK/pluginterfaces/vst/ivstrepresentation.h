@@ -180,9 +180,10 @@ Here an example of what should be passed in the stream of getXmlRepresentationSt
 class IXmlRepresentationController : public FUnknown
 {
 public:
-	/** Retrieves a stream containing a XmlRepresentation for a wanted representation info */
+	/** Retrieves a stream containing a XmlRepresentation for a wanted representation info.
+	 * \note [UI-thread & Initialized] */
 	virtual tresult PLUGIN_API getXmlRepresentationStream (RepresentationInfo& info /*in*/,
-	                                                       IBStream* stream /*out*/) = 0;
+	                                                       IBStream* stream /*inout*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;

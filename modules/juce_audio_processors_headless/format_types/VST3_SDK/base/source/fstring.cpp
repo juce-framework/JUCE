@@ -40,15 +40,15 @@
 #include "pluginterfaces/base/futils.h"
 #include "pluginterfaces/base/fvariant.h"
 
-#include <cstdlib>
-#include <cctype>
-#include <cstdio>
-#include <cstdarg>
-#include <utility>
-#include <complex>
-#include <cmath>
 #include <algorithm>
 #include <cassert>
+#include <cctype>
+#include <cmath>
+#include <complex>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <utility>
 
 #if SMTG_OS_WINDOWS
 #ifndef NOMINMAX
@@ -56,16 +56,16 @@
 #endif
 #include <windows.h>
 #ifdef _MSC_VER
-#pragma warning (disable : 4244)
-#pragma warning (disable : 4267)
-#pragma warning (disable : 4996)
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4267)
+#pragma warning(disable : 4996)
 
 #if DEVELOPMENT
 #include <crtdbg.h>
 
-#define malloc(s) _malloc_dbg(s, _NORMAL_BLOCK, __FILE__, __LINE__)
-#define realloc(p,s) _realloc_dbg(p,s,  _NORMAL_BLOCK, __FILE__, __LINE__)
-#define free(p) _free_dbg(p, _NORMAL_BLOCK)
+#define malloc(s) _malloc_dbg (s, _NORMAL_BLOCK, __FILE__, __LINE__)
+#define realloc(p, s) _realloc_dbg (p, s, _NORMAL_BLOCK, __FILE__, __LINE__)
+#define free(p) _free_dbg (p, _NORMAL_BLOCK)
 
 #endif // DEVELOPMENT
 #endif // _MSC_VER
@@ -76,22 +76,22 @@
 #endif
 
 #if SMTG_OS_MACOS
-#include <CoreFoundation/CoreFoundation.h>
 #include <CoreFoundation/CFString.h>
 #include <CoreFoundation/CFStringEncodingExt.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <wchar.h>
 
-#if defined (__GNUC__) && (__GNUC__ >= 4) && !__LP64__
+#if defined(__GNUC__) && (__GNUC__ >= 4) && !__LP64__
 // on 32 bit Mac OS X we can safely ignore the format warnings as sizeof(int) == sizeof(long)
 #pragma GCC diagnostic ignored "-Wformat"
 #endif
 
 #define SMTG_ENABLE_DEBUG_CFALLOCATOR 0
-#define SMTG_DEBUG_CFALLOCATOR	(DEVELOPMENT && SMTG_ENABLE_DEBUG_CFALLOCATOR)
+#define SMTG_DEBUG_CFALLOCATOR (DEVELOPMENT && SMTG_ENABLE_DEBUG_CFALLOCATOR)
 
 #if SMTG_DEBUG_CFALLOCATOR
-#include <libkern/OSAtomic.h>
 #include <dlfcn.h>
+#include <libkern/OSAtomic.h>
 #endif
 
 namespace Steinberg {
@@ -169,7 +169,6 @@ struct CFStringDebugAllocator : CFAllocatorContext
 	{
 		return static_cast<CFStringDebugAllocator*> (info)->doReallocate (ptr, newsize, hint);
 	}
-
 	static void deallocateCallBack (void* ptr, void* info)
 	{
 		static_cast<CFStringDebugAllocator*> (info)->doDeallocate (ptr);
@@ -198,11 +197,13 @@ static void* toCFStringRef (const Steinberg::char8* source, Steinberg::uint32 en
 }
 
 //-----------------------------------------------------------------------------
-static bool fromCFStringRef (Steinberg::char8* dest, Steinberg::int32 destSize, const void* cfStr, Steinberg::uint32 encoding)
+static bool fromCFStringRef (Steinberg::char8* dest, Steinberg::int32 destSize, const void* cfStr,
+                             Steinberg::uint32 encoding)
 {
 	CFIndex usedBytes;
 	CFRange range = {0, CFStringGetLength ((CFStringRef)cfStr)};
-	bool result = CFStringGetBytes ((CFStringRef)cfStr, range, encoding, '?', false, (UInt8*)dest, destSize, &usedBytes);
+	bool result = CFStringGetBytes ((CFStringRef)cfStr, range, encoding, '?', false, (UInt8*)dest,
+	                                destSize, &usedBytes);
 	dest[usedBytes] = 0;
 	return result;
 }
@@ -229,7 +230,8 @@ static inline int vsnwprintf (Steinberg::char16* buffer, size_t bufferSize,
 }
 
 //-----------------------------------------------------------------------------
-static inline Steinberg::int32 sprintf16 (Steinberg::char16* str, const Steinberg::char16* format, ...)
+static inline Steinberg::int32 sprintf16 (Steinberg::char16* str, const Steinberg::char16* format,
+                                          ...)
 {
 	va_list marker;
 	va_start (marker, format);
@@ -237,12 +239,12 @@ static inline Steinberg::int32 sprintf16 (Steinberg::char16* str, const Steinber
 }
 
 #elif SMTG_OS_LINUX
-#include <codecvt>
-#include <locale>
-#include <cstring>
-#include <string>
-#include <limits>
 #include <cassert>
+#include <codecvt>
+#include <cstring>
+#include <limits>
+#include <locale>
+#include <string>
 #include <wchar.h>
 
 using ConverterFacet = std::codecvt_utf8_utf16<char16_t>;
@@ -299,10 +301,10 @@ static inline int sprintf16 (Steinberg::char16* wcs, const Steinberg::char16* fo
 
 //-----------------------------------------------------------------------------
 static inline int vsnwprintf (Steinberg::char16* wcs, size_t maxlen,
-							  const Steinberg::char16* format, va_list args)
+                              const Steinberg::char16* format, va_list args)
 {
 	Steinberg::char8 str8[kPrintfBufferSize];
-	auto format_utf8 = converter ().to_bytes(format);
+	auto format_utf8 = converter ().to_bytes (format);
 	auto len = vsnprintf (str8, kPrintfBufferSize, format_utf8.data (), args);
 
 	auto tmp_str = converter ().from_bytes (str8, str8 + len);
@@ -326,7 +328,8 @@ static inline Steinberg::char16* strrchr16 (const Steinberg::char16* str, Steinb
 #define strnicmp strncasecmp
 
 //-----------------------------------------------------------------------------
-static inline Steinberg::int32 strnicmp16 (const Steinberg::char16* str1, const Steinberg::char16* str2, size_t size)
+static inline Steinberg::int32 strnicmp16 (const Steinberg::char16* str1,
+                                           const Steinberg::char16* str2, size_t size)
 {
 	if (size == 0)
 		return 0;
@@ -335,45 +338,53 @@ static inline Steinberg::int32 strnicmp16 (const Steinberg::char16* str1, const 
 	CFIndex str2Len = Steinberg::strlen16 (str2);
 	if (static_cast<CFIndex> (size) < str2Len) // range is not applied to second string
 		str2Len = size;
-	CFStringRef cfStr1 = CFStringCreateWithCharactersNoCopy (Steinberg::kCFAllocator, (UniChar*)str1, str1Len, kCFAllocatorNull);
-	CFStringRef cfStr2 = CFStringCreateWithCharactersNoCopy (Steinberg::kCFAllocator, (UniChar*)str2, str2Len, kCFAllocatorNull);
-	CFComparisonResult result = CFStringCompareWithOptions (cfStr1, cfStr2, CFRangeMake (0, size), kCFCompareCaseInsensitive);
+	CFStringRef cfStr1 = CFStringCreateWithCharactersNoCopy (
+	    Steinberg::kCFAllocator, (UniChar*)str1, str1Len, kCFAllocatorNull);
+	CFStringRef cfStr2 = CFStringCreateWithCharactersNoCopy (
+	    Steinberg::kCFAllocator, (UniChar*)str2, str2Len, kCFAllocatorNull);
+	CFComparisonResult result = CFStringCompareWithOptions (cfStr1, cfStr2, CFRangeMake (0, size),
+	                                                        kCFCompareCaseInsensitive);
 	CFRelease (cfStr1);
 	CFRelease (cfStr2);
 	switch (result)
 	{
-		case kCFCompareEqualTo:	return 0;
+		case kCFCompareEqualTo: return 0;
 		case kCFCompareLessThan: return -1;
-		case kCFCompareGreaterThan: 
+		case kCFCompareGreaterThan:
 		default: return 1;
 	};
 }
 
 //-----------------------------------------------------------------------------
-static inline Steinberg::int32 stricmp16 (const Steinberg::char16* str1, CFIndex str1Len, const Steinberg::char16* str2, CFIndex str2Len)
+static inline Steinberg::int32 stricmp16 (const Steinberg::char16* str1, CFIndex str1Len,
+                                          const Steinberg::char16* str2, CFIndex str2Len)
 {
-	CFStringRef cfStr1 = CFStringCreateWithCharactersNoCopy (Steinberg::kCFAllocator, (UniChar*)str1, str1Len, kCFAllocatorNull);
-	CFStringRef cfStr2 = CFStringCreateWithCharactersNoCopy (Steinberg::kCFAllocator, (UniChar*)str2, str2Len, kCFAllocatorNull);
+	CFStringRef cfStr1 = CFStringCreateWithCharactersNoCopy (
+	    Steinberg::kCFAllocator, (UniChar*)str1, str1Len, kCFAllocatorNull);
+	CFStringRef cfStr2 = CFStringCreateWithCharactersNoCopy (
+	    Steinberg::kCFAllocator, (UniChar*)str2, str2Len, kCFAllocatorNull);
 	CFComparisonResult result = CFStringCompare (cfStr1, cfStr2, kCFCompareCaseInsensitive);
 	CFRelease (cfStr1);
 	CFRelease (cfStr2);
 	switch (result)
 	{
-		case kCFCompareEqualTo:	return 0;
+		case kCFCompareEqualTo: return 0;
 		case kCFCompareLessThan: return -1;
-		case kCFCompareGreaterThan: 
+		case kCFCompareGreaterThan:
 		default: return 1;
 	};
 }
 
 //-----------------------------------------------------------------------------
-static inline Steinberg::int32 stricmp16 (const Steinberg::ConstString& str1, const Steinberg::ConstString& str2)
+static inline Steinberg::int32 stricmp16 (const Steinberg::ConstString& str1,
+                                          const Steinberg::ConstString& str2)
 {
 	return stricmp16 (str1.text16 (), str1.length (), str2.text16 (), str2.length ());
 }
 
 //-----------------------------------------------------------------------------
-static inline Steinberg::int32 stricmp16 (const Steinberg::char16* str1, const Steinberg::char16* str2)
+static inline Steinberg::int32 stricmp16 (const Steinberg::char16* str1,
+                                          const Steinberg::char16* str2)
 {
 	CFIndex str1Len = Steinberg::strlen16 (str1);
 	CFIndex str2Len = Steinberg::strlen16 (str2);
@@ -387,19 +398,23 @@ static inline Steinberg::char16* strrchr16 (const Steinberg::char16* str, Steinb
 	while (len > 0)
 	{
 		if (str[len] == c)
-			return const_cast<Steinberg::char16*>(str + len);
+			return const_cast<Steinberg::char16*> (str + len);
 		len--;
 	}
 	return 0;
 }
 
 //-----------------------------------------------------------------------------
-static inline Steinberg::int32 vsnwprintf (Steinberg::char16* str, Steinberg::int32 size, const Steinberg::char16* format, va_list ap)
+static inline Steinberg::int32 vsnwprintf (Steinberg::char16* str, Steinberg::int32 size,
+                                           const Steinberg::char16* format, va_list ap)
 {
 	// wrapped using CoreFoundation's CFString
-	CFMutableStringRef formatString = (CFMutableStringRef)Steinberg::ConstString (format).toCFStringRef (0xFFFF, true);
-	CFStringFindAndReplace (formatString, CFSTR("%s"), CFSTR("%S"), CFRangeMake (0, CFStringGetLength (formatString)), 0);
-	CFStringRef resultString = CFStringCreateWithFormatAndArguments (Steinberg::kCFAllocator, 0, formatString, ap);
+	CFMutableStringRef formatString =
+	    (CFMutableStringRef)Steinberg::ConstString (format).toCFStringRef (0xFFFF, true);
+	CFStringFindAndReplace (formatString, CFSTR ("%s"), CFSTR ("%S"),
+	                        CFRangeMake (0, CFStringGetLength (formatString)), 0);
+	CFStringRef resultString =
+	    CFStringCreateWithFormatAndArguments (Steinberg::kCFAllocator, 0, formatString, ap);
 	CFRelease (formatString);
 	if (resultString)
 	{
@@ -413,7 +428,8 @@ static inline Steinberg::int32 vsnwprintf (Steinberg::char16* str, Steinberg::in
 }
 
 //-----------------------------------------------------------------------------
-static inline Steinberg::int32 sprintf16 (Steinberg::char16* str, const Steinberg::char16* format, ...)
+static inline Steinberg::int32 sprintf16 (Steinberg::char16* str, const Steinberg::char16* format,
+                                          ...)
 {
 	va_list marker;
 	va_start (marker, format);
@@ -444,15 +460,13 @@ static inline bool isCaseSensitive (ConstString::CompareMode mode)
 ConstString::ConstString (const char8* str, int32 length)
 : buffer8 ((char8*)str)
 , len (length < 0 ? (str ? static_cast<uint32> (strlen (str)) : 0) : length)
-, isWide (0) 
+, isWide (0)
 {
 }
 
 //-----------------------------------------------------------------------------
 ConstString::ConstString (const char16* str, int32 length)
-: buffer16 ((char16*)str)
-, len (length < 0 ? (str ? strlen16 (str) : 0) : length)
-, isWide (1) 
+: buffer16 ((char16*)str), len (length < 0 ? (str ? strlen16 (str) : 0) : length), isWide (1)
 {
 }
 
@@ -472,10 +486,7 @@ ConstString::ConstString (const ConstString& str, int32 offset, int32 length)
 }
 
 //-----------------------------------------------------------------------------
-ConstString::ConstString (const FVariant& var)
-: buffer (nullptr)
-, len (0)
-, isWide (0) 
+ConstString::ConstString (const FVariant& var) : buffer (nullptr), len (0), isWide (0)
 {
 	switch (var.getType ())
 	{
@@ -494,10 +505,7 @@ ConstString::ConstString (const FVariant& var)
 }
 
 //-----------------------------------------------------------------------------
-ConstString::ConstString ()
-: buffer (nullptr)
-, len (0)
-, isWide (0) 
+ConstString::ConstString () : buffer (nullptr), len (0), isWide (0)
 {
 }
 
@@ -538,10 +546,11 @@ bool ConstString::testChar16 (uint32 index, char16 c) const
 //-----------------------------------------------------------------------------
 bool ConstString::extract (String& result, uint32 idx, int32 n) const
 {
-	// AddressSanitizer : when extracting part of "this" on itself, it can lead to heap-use-after-free.
+	// AddressSanitizer : when extracting part of "this" on itself, it can lead to
+	// heap-use-after-free.
 	SMTG_ASSERT (this != static_cast<ConstString*> (&result))
-	
-	if (len == 0|| idx >= len)
+
+	if (len == 0 || idx >= len)
 		return false;
 
 	if ((idx + n > len) || n < 0)
@@ -596,7 +605,7 @@ int32 ConstString::copyTo16 (char16* str, uint32 idx, int32 n) const
 			return 0;
 		return tmp.copyTo16 (str, idx, n);
 	}
-	
+
 	if (isEmpty () || idx >= len || !buffer16)
 	{
 		str[0] = 0;
@@ -605,7 +614,7 @@ int32 ConstString::copyTo16 (char16* str, uint32 idx, int32 n) const
 
 	if ((idx + n > len) || n < 0)
 		n = len - idx;
-	
+
 	memcpy (str, &(buffer16[idx]), n * sizeof (char16));
 	str[n] = 0;
 	return n;
@@ -626,7 +635,7 @@ void ConstString::copyTo (IStringResult* result) const
 {
 	if (isWideString () == false)
 	{
-		result->setText (text8 ());	
+		result->setText (text8 ());
 	}
 	else
 	{
@@ -652,8 +661,6 @@ void ConstString::copyTo (IString& string) const
 	else
 		string.setText8 (text8 ());
 }
-
-
 
 //-----------------------------------------------------------------------------
 int32 ConstString::compare (const ConstString& str, int32 n, CompareMode mode) const
@@ -766,7 +773,7 @@ int32 ConstString::compareAt (uint32 index, const ConstString& str, int32 n, Com
 			return strncmp16 (toCompare, str.text16 (), n);
 		return strnicmp16 (toCompare, str.text16 (), n);
 	}
-	
+
 	if (isWide)
 	{
 		String tmp (str.text8 ());
@@ -774,7 +781,7 @@ int32 ConstString::compareAt (uint32 index, const ConstString& str, int32 n, Com
 			return -1;
 		return compareAt (index, tmp, n, mode);
 	}
-		
+
 	String tmp (text8 ());
 	if (tmp.toWideString () == false)
 		return 1;
@@ -782,7 +789,8 @@ int32 ConstString::compareAt (uint32 index, const ConstString& str, int32 n, Com
 }
 
 //------------------------------------------------------------------------
-Steinberg::int32 ConstString::naturalCompare (const ConstString& str, CompareMode mode /*= kCaseSensitive*/) const
+Steinberg::int32 ConstString::naturalCompare (const ConstString& str,
+                                              CompareMode mode /*= kCaseSensitive*/) const
 {
 	if (str.isEmpty ())
 	{
@@ -797,7 +805,7 @@ Steinberg::int32 ConstString::naturalCompare (const ConstString& str, CompareMod
 		return strnatcmp8 (buffer8, str.text8 (), isCaseSensitive (mode));
 	if (isWide && str.isWide)
 		return strnatcmp16 (buffer16, str.text16 (), isCaseSensitive (mode));
-	
+
 	if (isWide)
 	{
 		String tmp (str.text8 ());
@@ -879,8 +887,10 @@ bool ConstString::endsWith (const ConstString& str, CompareMode mode /*= kCaseSe
 	if (isWide && str.isWide)
 	{
 		if (isCaseSensitive (mode))
-			return strncmp16 (buffer16 + (length () - str.length ()), str.buffer16, str.length ()) == 0;
-		return strnicmp16 (buffer16 + (length () - str.length ()), str.buffer16, str.length ()) == 0;
+			return strncmp16 (buffer16 + (length () - str.length ()), str.buffer16,
+			                  str.length ()) == 0;
+		return strnicmp16 (buffer16 + (length () - str.length ()), str.buffer16, str.length ()) ==
+		       0;
 	}
 	if (isWide)
 	{
@@ -889,16 +899,20 @@ bool ConstString::endsWith (const ConstString& str, CompareMode mode /*= kCaseSe
 		if (tmp.length () > length ())
 			return false;
 		if (isCaseSensitive (mode))
-			return strncmp16 (buffer16 + (length () - tmp.length ()), tmp.buffer16, tmp.length ()) == 0;
-		return strnicmp16 (buffer16 + (length () - tmp.length ()), tmp.buffer16, tmp.length ()) == 0;
+			return strncmp16 (buffer16 + (length () - tmp.length ()), tmp.buffer16,
+			                  tmp.length ()) == 0;
+		return strnicmp16 (buffer16 + (length () - tmp.length ()), tmp.buffer16, tmp.length ()) ==
+		       0;
 	}
 	String tmp (text8 ());
 	tmp.toWideString ();
 	if (str.length () > tmp.length ())
 		return false;
 	if (isCaseSensitive (mode))
-		return strncmp16 (tmp.buffer16 + (tmp.length () - str.length ()), str.buffer16, str.length ()) == 0;
-	return strnicmp16 (tmp.buffer16 + (tmp.length () - str.length ()), str.buffer16, str.length ()) == 0;
+		return strncmp16 (tmp.buffer16 + (tmp.length () - str.length ()), str.buffer16,
+		                  str.length ()) == 0;
+	return strnicmp16 (tmp.buffer16 + (tmp.length () - str.length ()), str.buffer16,
+	                   str.length ()) == 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -908,7 +922,8 @@ bool ConstString::contains (const ConstString& str, CompareMode m) const
 }
 
 //-----------------------------------------------------------------------------
-int32 ConstString::findNext (int32 startIndex, const ConstString& str, int32 n, CompareMode mode, int32 endIndex) const
+int32 ConstString::findNext (int32 startIndex, const ConstString& str, int32 n, CompareMode mode,
+                             int32 endIndex) const
 {
 	uint32 endLength = len;
 	if (endIndex > -1 && (uint32)endIndex < len)
@@ -973,7 +988,7 @@ int32 ConstString::findNext (int32 startIndex, const ConstString& str, int32 n, 
 	{
 		tmp = str.text8 ();
 		tmp.toWideString ();
-		return findNext (startIndex, tmp, n , mode, endIndex);
+		return findNext (startIndex, tmp, n, mode, endIndex);
 	}
 	tmp = text8 ();
 	tmp.toWideString ();
@@ -1143,7 +1158,8 @@ int32 ConstString::findPrev (int32 startIndex, char16 c, CompareMode mode) const
 }
 
 //-----------------------------------------------------------------------------
-int32 ConstString::findPrev (int32 startIndex, const ConstString& str, int32 n, CompareMode mode) const
+int32 ConstString::findPrev (int32 startIndex, const ConstString& str, int32 n,
+                             CompareMode mode) const
 {
 	if (isWide && str.isWide)
 	{
@@ -1278,7 +1294,7 @@ int32 ConstString::getFirstDifferent (const ConstString& str, CompareMode mode) 
 				return -1;
 			return getFirstDifferent (tmp, mode);
 		}
-		
+
 		String tmp (text8 ());
 		if (tmp.toWideString () == false)
 			return -1;
@@ -1387,7 +1403,7 @@ bool ConstString::scanUInt32 (uint32& value, uint32 offset, bool scanToEnd) cons
 
 //-----------------------------------------------------------------------------
 bool ConstString::scanInt64_8 (const char8* text, int64& value, bool scanToEnd)
-{	
+{
 	while (text && text[0])
 	{
 		if (sscanf (text, "%" FORMAT_INT64A, &value) == 1)
@@ -1441,7 +1457,7 @@ bool ConstString::scanUInt64_16 (const char16* text, uint64& value, bool scanToE
 bool ConstString::scanInt64 (const tchar* text, int64& value, bool scanToEnd)
 {
 #ifdef UNICODE
-	return scanInt64_16 (text, value,scanToEnd);
+	return scanInt64_16 (text, value, scanToEnd);
 #else
 	return scanInt64_8 (text, value, scanToEnd);
 #endif
@@ -1507,8 +1523,8 @@ bool ConstString::scanFloat (double& value, uint32 offset, bool scanToEnd) const
 	int32 pos = -1;
 	if (isWide)
 	{
-		if ((pos = str.findNext (offset, STR(','))) >= 0 && ((uint32)pos) >= offset)
-			str.setChar (pos, STR('.'));
+		if ((pos = str.findNext (offset, STR (','))) >= 0 && ((uint32)pos) >= offset)
+			str.setChar (pos, STR ('.'));
 
 		str.toMultiByte (kCP_Default); // scanf uses default codepage
 	}
@@ -1533,57 +1549,60 @@ bool ConstString::scanFloat (double& value, uint32 offset, bool scanToEnd) const
 //-----------------------------------------------------------------------------
 char16 ConstString::toLower (char16 c)
 {
-	#if SMTG_OS_WINDOWS
-		WCHAR temp[2] = {c, 0};
-        ::CharLowerW (temp);
-        return temp[0];
-	#elif SMTG_OS_MACOS
-		// only convert characters which in lowercase are also single characters
-		UniChar characters [2] = {0};
-		characters[0] = c;
-		CFMutableStringRef str = CFStringCreateMutableWithExternalCharactersNoCopy (kCFAllocator, characters, 1, 2, kCFAllocatorNull);
-		if (str)
-		{
-			CFStringLowercase (str, NULL);
-			CFRelease (str);
-			if (characters[1] == 0)
-				return characters[0];
-		}
-		return c;
-	#elif SMTG_OS_LINUX
+#if SMTG_OS_WINDOWS
+	WCHAR temp[2] = {c, 0};
+	::CharLowerW (temp);
+	return temp[0];
+#elif SMTG_OS_MACOS
+	// only convert characters which in lowercase are also single characters
+	UniChar characters[2] = {0};
+	characters[0] = c;
+	CFMutableStringRef str = CFStringCreateMutableWithExternalCharactersNoCopy (
+	    kCFAllocator, characters, 1, 2, kCFAllocatorNull);
+	if (str)
+	{
+		CFStringLowercase (str, NULL);
+		CFRelease (str);
+		if (characters[1] == 0)
+			return characters[0];
+	}
+	return c;
+#elif SMTG_OS_LINUX
 	assert (false && "DEPRECATED No Linux implementation");
-		return c;
-	#else
-		return towlower (c);
-	#endif
+	return c;
+#else
+	return towlower (c);
+#endif
 }
 
 //-----------------------------------------------------------------------------
 char16 ConstString::toUpper (char16 c)
 {
-	#if SMTG_OS_WINDOWS
-		WCHAR temp[2] = {c, 0};
-        ::CharUpperW (temp);
-        return temp[0];
-	#elif SMTG_OS_MACOS
-		// only convert characters which in uppercase are also single characters (don't translate a sharp-s which would result in SS)
-		UniChar characters [2] = {0};
-		characters[0] = c;
-		CFMutableStringRef str = CFStringCreateMutableWithExternalCharactersNoCopy (kCFAllocator, characters, 1, 2, kCFAllocatorNull);
-		if (str)
-		{
-			CFStringUppercase (str, NULL);
-			CFRelease (str);
-			if (characters[1] == 0)
-				return characters[0];
-		}
-		return c;
-    #elif SMTG_OS_LINUX
+#if SMTG_OS_WINDOWS
+	WCHAR temp[2] = {c, 0};
+	::CharUpperW (temp);
+	return temp[0];
+#elif SMTG_OS_MACOS
+	// only convert characters which in uppercase are also single characters (don't translate a
+	// sharp-s which would result in SS)
+	UniChar characters[2] = {0};
+	characters[0] = c;
+	CFMutableStringRef str = CFStringCreateMutableWithExternalCharactersNoCopy (
+	    kCFAllocator, characters, 1, 2, kCFAllocatorNull);
+	if (str)
+	{
+		CFStringUppercase (str, NULL);
+		CFRelease (str);
+		if (characters[1] == 0)
+			return characters[0];
+	}
+	return c;
+#elif SMTG_OS_LINUX
 	assert (false && "DEPRECATED No Linux implementation");
-		return c;
-	#else
-		return towupper (c);
-	#endif
+	return c;
+#else
+	return towupper (c);
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1591,13 +1610,13 @@ char8 ConstString::toLower (char8 c)
 {
 	if ((c >= 'A') && (c <= 'Z'))
 		return c + ('a' - 'A');
-	#if SMTG_OS_WINDOWS
-		CHAR temp[2] = {c, 0};
-        ::CharLowerA (temp);
-        return temp[0];
-	#else
-		return static_cast<char8> (tolower (c));
-	#endif
+#if SMTG_OS_WINDOWS
+	CHAR temp[2] = {c, 0};
+	::CharLowerA (temp);
+	return temp[0];
+#else
+	return static_cast<char8> (tolower (c));
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1605,13 +1624,13 @@ char8 ConstString::toUpper (char8 c)
 {
 	if ((c >= 'a') && (c <= 'z'))
 		return c - ('a' - 'A');
-	#if SMTG_OS_WINDOWS
-		CHAR temp[2] = {c, 0};
-        ::CharUpperA (temp);
-        return temp[0];
-	#else
-		return static_cast<char8> (toupper (c));
-	#endif
+#if SMTG_OS_WINDOWS
+	CHAR temp[2] = {c, 0};
+	::CharUpperA (temp);
+	return temp[0];
+#else
+	return static_cast<char8> (toupper (c));
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1639,8 +1658,7 @@ bool ConstString::isCharSpace (const char16 character)
 		case 0x200B:
 		case 0x202F:
 		case 0x205F:
-		case 0x3000:
-			return true;
+		case 0x3000: return true;
 	}
 	return false;
 }
@@ -1666,7 +1684,8 @@ bool ConstString::isCharAlphaNum (const char8 character)
 //-----------------------------------------------------------------------------
 bool ConstString::isCharAlphaNum (const char16 character)
 {
-	return iswalnum (character) != 0; // this may not work on macOSX when another locale is set inside the c-lib
+	// this may not work on macOSX when another locale is set inside the c-lib
+	return iswalnum (character) != 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -1678,7 +1697,8 @@ bool ConstString::isCharDigit (const char8 character)
 //-----------------------------------------------------------------------------
 bool ConstString::isCharDigit (const char16 character)
 {
-	return iswdigit (character) != 0;	// this may not work on macOSX when another locale is set inside the c-lib
+	// this may not work on macOSX when another locale is set inside the c-lib
+	return iswdigit (character) != 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -1736,7 +1756,7 @@ int32 ConstString::getTrailingNumberIndex (uint32 width) const
 
 	int32 endIndex = len - 1;
 	int32 i = endIndex;
-	while (isDigit ((uint32) i) && i >= 0)
+	while (isDigit ((uint32)i) && i >= 0)
 		i--;
 
 	// now either all are digits or i is on the first non digit
@@ -1765,8 +1785,6 @@ int64 ConstString::getTrailingNumber (int64 fallback) const
 	return fallback;
 }
 
-
-
 //-----------------------------------------------------------------------------
 void ConstString::toVariant (FVariant& var) const
 {
@@ -1787,18 +1805,17 @@ bool ConstString::isAsciiString () const
 	if (isWide)
 	{
 		for (i = 0; i < len; i++)
-			if (ConstString::isCharAscii (buffer16 [i]) == false)
+			if (ConstString::isCharAscii (buffer16[i]) == false)
 				return false;
 	}
 	else
 	{
 		for (i = 0; i < len; i++)
-			if (ConstString::isCharAscii (buffer8 [i]) == false)
+			if (ConstString::isCharAscii (buffer8[i]) == false)
 				return false;
 	}
 	return true;
 }
-
 
 #if SMTG_OS_MACOS
 uint32 kDefaultSystemEncoding = kCFStringEncodingMacRoman;
@@ -1807,20 +1824,22 @@ static CFStringEncoding MBCodePageToCFStringEncoding (uint32 codePage)
 {
 	switch (codePage)
 	{
-		case kCP_ANSI:		return kDefaultSystemEncoding; // MacRoman or JIS
-		case kCP_MAC_ROMAN:	return kCFStringEncodingMacRoman;
-		case kCP_ANSI_WEL:	return kCFStringEncodingWindowsLatin1;
-		case kCP_MAC_CEE:	return kCFStringEncodingMacCentralEurRoman;
-		case kCP_Utf8:		return kCFStringEncodingUTF8;
-		case kCP_ShiftJIS:	return kCFStringEncodingShiftJIS_X0213_00;
-		case kCP_US_ASCII:	return kCFStringEncodingASCII;
+		case kCP_ANSI:
+			return kDefaultSystemEncoding; // MacRoman or JIS
+		case kCP_MAC_ROMAN: return kCFStringEncodingMacRoman;
+		case kCP_ANSI_WEL: return kCFStringEncodingWindowsLatin1;
+		case kCP_MAC_CEE: return kCFStringEncodingMacCentralEurRoman;
+		case kCP_Utf8: return kCFStringEncodingUTF8;
+		case kCP_ShiftJIS: return kCFStringEncodingShiftJIS_X0213_00;
+		case kCP_US_ASCII: return kCFStringEncodingASCII;
 	}
 	return kCFStringEncodingASCII;
 }
 #endif
 
 //-----------------------------------------------------------------------------
-int32 ConstString::multiByteToWideString (char16* dest, const char8* source, int32 charCount, uint32 sourceCodePage)
+int32 ConstString::multiByteToWideString (char16* dest, const char8* source, int32 charCount,
+                                          uint32 sourceCodePage)
 {
 	if (source == nullptr || source[0] == 0)
 	{
@@ -1832,7 +1851,8 @@ int32 ConstString::multiByteToWideString (char16* dest, const char8* source, int
 	}
 	int32 result = 0;
 #if SMTG_OS_WINDOWS
-	result = MultiByteToWideChar (sourceCodePage, MB_ERR_INVALID_CHARS, source, -1, wscast (dest), charCount);
+	result = MultiByteToWideChar (sourceCodePage, MB_ERR_INVALID_CHARS, source, -1, wscast (dest),
+	                              charCount);
 #endif
 
 #if SMTG_OS_MACOS
@@ -1886,10 +1906,12 @@ int32 ConstString::multiByteToWideString (char16* dest, const char8* source, int
 }
 
 //-----------------------------------------------------------------------------
-int32 ConstString::wideStringToMultiByte (char8* dest, const char16* wideString, int32 charCount, uint32 destCodePage)
+int32 ConstString::wideStringToMultiByte (char8* dest, const char16* wideString, int32 charCount,
+                                          uint32 destCodePage)
 {
 #if SMTG_OS_WINDOWS
-	return WideCharToMultiByte (destCodePage, 0, wscast (wideString), -1, dest, charCount, nullptr, nullptr);
+	return WideCharToMultiByte (destCodePage, 0, wscast (wideString), -1, dest, charCount, nullptr,
+	                            nullptr);
 
 #elif SMTG_OS_MACOS
 	int32 result = 0;
@@ -1897,17 +1919,20 @@ int32 ConstString::wideStringToMultiByte (char8* dest, const char16* wideString,
 	{
 		if (dest)
 		{
-			CFStringRef cfStr = CFStringCreateWithCharactersNoCopy (kCFAllocator, (const UniChar*)wideString, strlen16 (wideString), kCFAllocatorNull);
+			CFStringRef cfStr = CFStringCreateWithCharactersNoCopy (
+			    kCFAllocator, (const UniChar*)wideString, strlen16 (wideString), kCFAllocatorNull);
 			if (cfStr)
 			{
-				if (fromCFStringRef (dest, charCount, cfStr, MBCodePageToCFStringEncoding (destCodePage)))
+				if (fromCFStringRef (dest, charCount, cfStr,
+				                     MBCodePageToCFStringEncoding (destCodePage)))
 					result = static_cast<int32> (strlen (dest) + 1);
 				CFRelease (cfStr);
 			}
 		}
 		else
 		{
-			return static_cast<int32> (CFStringGetMaximumSizeForEncoding (strlen16 (wideString), MBCodePageToCFStringEncoding (destCodePage)));
+			return static_cast<int32> (CFStringGetMaximumSizeForEncoding (
+			    strlen16 (wideString), MBCodePageToCFStringEncoding (destCodePage)));
 		}
 	}
 	return result;
@@ -1964,7 +1989,6 @@ int32 ConstString::wideStringToMultiByte (char8* dest, const char16* wideString,
 	assert (false && "DEPRECATED No Linux implementation");
 	return 0;
 #endif
-
 }
 
 //-----------------------------------------------------------------------------
@@ -1977,10 +2001,11 @@ bool ConstString::isNormalized (UnicodeNormalization n)
 #ifdef UNICODE
 	if (n != kUnicodeNormC)
 		return false;
-	uint32 normCharCount = static_cast<uint32> (FoldString (MAP_PRECOMPOSED, wscast (buffer16), len, nullptr, 0));
+	uint32 normCharCount =
+	    static_cast<uint32> (FoldString (MAP_PRECOMPOSED, wscast (buffer16), len, nullptr, 0));
 	return (normCharCount == len);
 #else
-	return false; 
+	return false;
 #endif
 
 #elif SMTG_OS_MACOS
@@ -2098,7 +2123,7 @@ String& String::operator= (String&& str)
 {
 	SMTG_ASSERT (buffer == nullptr || buffer != str.buffer);
 	tryFreeBuffer ();
-	
+
 	isWide = str.isWide;
 	buffer = str.buffer;
 	len = str.len;
@@ -2133,7 +2158,8 @@ bool String::_toWideString (const char8* src, int32 length, uint32 sourceCodePag
 	{
 		if (src && length > 0)
 		{
-			int32 bytesNeeded = multiByteToWideString (nullptr, src, 0, sourceCodePage) * sizeof (char16);
+			int32 bytesNeeded =
+			    multiByteToWideString (nullptr, src, 0, sourceCodePage) * sizeof (char16);
 			if (bytesNeeded)
 			{
 				bytesNeeded += sizeof (char16);
@@ -2164,9 +2190,9 @@ bool String::_toWideString (const char8* src, int32 length, uint32 sourceCodePag
 #define SMTG_STRING_CHECK_CONVERSION_NO_BREAK 1
 
 #if SMTG_STRING_CHECK_CONVERSION_NO_BREAK
-	#define SMTG_STRING_CHECK_MSG FDebugPrint
+#define SMTG_STRING_CHECK_MSG FDebugPrint
 #else
-	#define SMTG_STRING_CHECK_MSG FDebugBreak
+#define SMTG_STRING_CHECK_MSG FDebugBreak
 #endif
 //-----------------------------------------------------------------------------
 bool String::checkToMultiByte (uint32 destCodePage) const
@@ -2182,21 +2208,21 @@ bool String::checkToMultiByte (uint32 destCodePage) const
 		if (buffer16[i] > 127)
 			++debugNonASCII;
 	}
-	
+
 	String* backUp = nullptr;
 	if (debugNonASCII > 0)
 		backUp = NEW String (*this);
 #endif
 
 	// this should be avoided, since it can lead to information loss
-	bool result = const_cast <String&> (*this).toMultiByte (destCodePage);
+	bool result = const_cast<String&> (*this).toMultiByte (destCodePage);
 
 #if DEVELOPMENT && SMTG_STRING_CHECK_CONVERSION
 	if (backUp)
 	{
 		String temp (*this);
 		temp.toWideString (destCodePage);
-		
+
 		if (temp != *backUp)
 		{
 			backUp->toMultiByte (kCP_Utf8);
@@ -2219,8 +2245,9 @@ bool String::toMultiByte (uint32 destCodePage)
 	{
 		if (buffer16 && len > 0)
 		{
-			int32 numChars = wideStringToMultiByte (nullptr, buffer16, 0, destCodePage) + sizeof (char8);
-			char8* newStr = (char8*) malloc (numChars * sizeof (char8));
+			int32 numChars =
+			    wideStringToMultiByte (nullptr, buffer16, 0, destCodePage) + sizeof (char8);
+			char8* newStr = (char8*)malloc (numChars * sizeof (char8));
 			if (wideStringToMultiByte (newStr, buffer16, numChars, destCodePage) <= 0)
 			{
 				free (newStr);
@@ -2264,18 +2291,20 @@ bool String::normalize (UnicodeNormalization n)
 	if (n != kUnicodeNormC)
 		return false;
 
-	uint32 normCharCount = static_cast<uint32> (FoldString (MAP_PRECOMPOSED, wscast (buffer16), len, nullptr, 0));
+	uint32 normCharCount =
+	    static_cast<uint32> (FoldString (MAP_PRECOMPOSED, wscast (buffer16), len, nullptr, 0));
 	if (normCharCount == len)
 		return true;
 
 	char16* newString = (char16*)malloc ((normCharCount + 1) * sizeof (char16));
-	uint32 converterCount = static_cast<uint32> (FoldString (MAP_PRECOMPOSED, wscast (buffer16), len, wscast (newString), normCharCount + 1));
+	uint32 converterCount = static_cast<uint32> (FoldString (
+	    MAP_PRECOMPOSED, wscast (buffer16), len, wscast (newString), normCharCount + 1));
 	if (converterCount != normCharCount)
 	{
 		free (newString);
 		return false;
 	}
-	newString [converterCount] = 0;
+	newString[converterCount] = 0;
 	free (buffer16);
 	buffer16 = newString;
 	updateLength ();
@@ -2374,9 +2403,9 @@ bool String::resize (uint32 newLength, bool wide, bool fill)
 		{
 			if (isWide)
 			{
-				char16 c = ' ';	
+				char16 c = ' ';
 				for (uint32 i = len; i < newLength; i++)
-					buffer16 [i] = c;
+					buffer16[i] = c;
 			}
 			else
 			{
@@ -2402,12 +2431,12 @@ bool String::setChar8 (uint32 index, char8 c)
 			len = index;
 			return true;
 		}
-		
+
 		if (resize (index + 1, isWide, true) == false)
 			return false;
 		len = index + 1;
 	}
-	
+
 	if (index < len && buffer)
 	{
 		if (isWide)
@@ -2499,7 +2528,7 @@ String& String::assign (const char8* str, int32 n, bool isTerminated)
 
 	if (isTerminated)
 	{
-		uint32 stringLength = (uint32)((str) ? strlen (str) : 0);
+		uint32 stringLength = (uint32) ((str) ? strlen (str) : 0);
 		n = n < 0 ? stringLength : Min<uint32> (n, stringLength);
 	}
 	else if (n < 0)
@@ -2526,7 +2555,7 @@ String& String::assign (const char16* str, int32 n, bool isTerminated)
 
 	if (isTerminated)
 	{
-		uint32 stringLength = (uint32)((str) ? strlen16 (str) : 0);
+		uint32 stringLength = (uint32) ((str) ? strlen16 (str) : 0);
 		n = n < 0 ? stringLength : Min<uint32> (n, stringLength);
 	}
 	else if (n < 0)
@@ -2559,7 +2588,6 @@ String& String::assign (char8 c, int32 n)
 		len = n;
 	}
 	return *this;
-
 }
 
 //-----------------------------------------------------------------------------
@@ -2605,7 +2633,7 @@ String& String::append (const char8* str, int32 n)
 		return append (tmp.buffer16, n);
 	}
 
-	uint32 stringLength = (uint32)((str) ? strlen (str) : 0);
+	uint32 stringLength = (uint32) ((str) ? strlen (str) : 0);
 	n = n < 0 ? stringLength : Min<uint32> (n, stringLength);
 
 	if (n > 0)
@@ -2640,7 +2668,7 @@ String& String::append (const char16* str, int32 n)
 			return *this;
 	}
 
-	uint32 stringLength = (uint32)((str) ? strlen16 (str) : 0);
+	uint32 stringLength = (uint32) ((str) ? strlen16 (str) : 0);
 	n = n < 0 ? stringLength : Min<uint32> (n, stringLength);
 
 	if (n > 0)
@@ -2748,7 +2776,7 @@ String& String::insertAt (uint32 idx, const char8* str, int32 n)
 		return insertAt (idx, tmp.buffer16, n);
 	}
 
-	uint32 stringLength = (uint32)((str) ? strlen (str) : 0);
+	uint32 stringLength = (uint32) ((str) ? strlen (str) : 0);
 	n = n < 0 ? stringLength : Min<uint32> (n, stringLength);
 
 	if (n > 0)
@@ -2782,7 +2810,7 @@ String& String::insertAt (uint32 idx, const char16* str, int32 n)
 			return *this;
 	}
 
-	uint32 stringLength = (uint32)((str) ? strlen16 (str) : 0);
+	uint32 stringLength = (uint32) ((str) ? strlen16 (str) : 0);
 	n = n < 0 ? stringLength : Min<uint32> (n, stringLength);
 
 	if (n > 0)
@@ -2835,7 +2863,7 @@ String& String::replace (uint32 idx, int32 n1, const char8* str, int32 n2)
 	if (n1 == 0)
 		return *this;
 
-	uint32 stringLength = (uint32)((str) ? strlen (str) : 0);
+	uint32 stringLength = (uint32) ((str) ? strlen (str) : 0);
 	n2 = n2 < 0 ? stringLength : Min<uint32> (n2, stringLength);
 
 	uint32 newlen = len - n1 + n2;
@@ -2847,7 +2875,9 @@ String& String::replace (uint32 idx, int32 n1, const char8* str, int32 n2)
 	{
 		memmove (buffer8 + idx + n2, buffer8 + idx + n1, (len - (idx + n1)) * sizeof (char8));
 		memcpy (buffer8 + idx, str, n2 * sizeof (char8));
-		buffer8[newlen] = 0;	// cannot be removed because resize is not called called in all cases (newlen > len)
+
+		// cannot be removed because resize is not called called in all cases (newlen > len)
+		buffer8[newlen] = 0;
 	}
 
 	len = newlen;
@@ -2872,7 +2902,7 @@ String& String::replace (uint32 idx, int32 n1, const char16* str, int32 n2)
 	if (n1 == 0)
 		return *this;
 
-	uint32 stringLength = (uint32)((str) ? strlen16 (str) : 0);
+	uint32 stringLength = (uint32) ((str) ? strlen16 (str) : 0);
 	n2 = n2 < 0 ? stringLength : Min<uint32> (n2, stringLength);
 
 	uint32 newlen = len - n1 + n2;
@@ -2884,7 +2914,9 @@ String& String::replace (uint32 idx, int32 n1, const char16* str, int32 n2)
 	{
 		memmove (buffer16 + idx + n2, buffer16 + idx + n1, (len - (idx + n1)) * sizeof (char16));
 		memcpy (buffer16 + idx, str, n2 * sizeof (char16));
-		buffer16[newlen] = 0;	// cannot be removed because resize is not called called in all cases (newlen > len)
+
+		// cannot be removed because resize is not called called in all cases (newlen > len)
+		buffer16[newlen] = 0;
 	}
 
 	len = newlen;
@@ -2911,7 +2943,7 @@ int32 String::replace (const char8* toReplace, const char8* toReplaceWith, bool 
 			result++;
 
 			if (all)
-				idx = findNext (idx + toReplaceWithLen , toReplace, -1, m);
+				idx = findNext (idx + toReplaceWithLen, toReplace, -1, m);
 			else
 				break;
 		}
@@ -2921,7 +2953,8 @@ int32 String::replace (const char8* toReplace, const char8* toReplaceWith, bool 
 }
 
 //-----------------------------------------------------------------------------
-int32 String::replace (const char16* toReplace, const char16* toReplaceWith, bool all, CompareMode m)
+int32 String::replace (const char16* toReplace, const char16* toReplaceWith, bool all,
+                       CompareMode m)
 {
 	if (toReplace == nullptr || toReplaceWith == nullptr)
 		return 0;
@@ -3012,7 +3045,7 @@ bool String::replaceChars16 (const char16* toReplace, char16 toReplaceBy)
 
 		if (toReplaceA.length () > 1)
 		{
-			SMTG_WARNING("cannot replace non ASCII chars on non Wide String")
+			SMTG_WARNING ("cannot replace non ASCII chars on non Wide String")
 			return false;
 		}
 
@@ -3138,9 +3171,9 @@ bool String::trim (String::CharGroup group)
 			else
 				newLength = performTrim<char8> (buffer8, len, isalpha, false);
 			break;
-            
-        default: // Undefined enum value
-            return false;
+
+		default: // Undefined enum value
+			return false;
 	}
 
 	if (newLength != len)
@@ -3201,9 +3234,9 @@ void String::removeChars (CharGroup group)
 			else
 				newLength = performRemove<char8> (buffer8, len, isalpha, false);
 			break;
-            
-        default: // Undefined enum value
-            return;
+
+		default: // Undefined enum value
+			return;
 	}
 
 	if (newLength != len)
@@ -3300,11 +3333,10 @@ String& String::printf (const char8* format, ...)
 
 	va_list marker;
 	va_start (marker, format);
-	
-	vsnprintf (string, kPrintfBufferSize-1, format, marker);
+
+	vsnprintf (string, kPrintfBufferSize - 1, format, marker);
 	return assign (string);
 }
-
 
 //-----------------------------------------------------------------------------
 String& String::printf (const char16* format, ...)
@@ -3313,8 +3345,8 @@ String& String::printf (const char16* format, ...)
 
 	va_list marker;
 	va_start (marker, format);
-	
-	vsnwprintf (string, kPrintfBufferSize-1, format, marker);
+
+	vsnwprintf (string, kPrintfBufferSize - 1, format, marker);
 	return assign (string);
 }
 
@@ -3323,7 +3355,7 @@ String& String::vprintf (const char8* format, va_list args)
 {
 	char8 string[kPrintfBufferSize];
 
-	vsnprintf (string, kPrintfBufferSize-1, format, args);
+	vsnprintf (string, kPrintfBufferSize - 1, format, args);
 	return assign (string);
 }
 
@@ -3332,7 +3364,7 @@ String& String::vprintf (const char16* format, va_list args)
 {
 	char16 string[kPrintfBufferSize];
 
-	vsnwprintf (string, kPrintfBufferSize-1, format, args);
+	vsnwprintf (string, kPrintfBufferSize - 1, format, args);
 	return assign (string);
 }
 
@@ -3341,11 +3373,11 @@ String& String::printInt64 (int64 value)
 {
 	if (isWide)
 	{
-	#if SMTG_CPP11
-		return String::printf (STR("%") STR(FORMAT_INT64A), value);
-	#else
-		return String::printf (STR("%" FORMAT_INT64A), value);
-	#endif
+#if SMTG_CPP11
+		return String::printf (STR ("%") STR (FORMAT_INT64A), value);
+#else
+		return String::printf (STR ("%" FORMAT_INT64A), value);
+#endif
 	}
 	else
 		return String::printf ("%" FORMAT_INT64A, value);
@@ -3356,7 +3388,8 @@ String& String::printFloat (double value, uint32 maxPrecision)
 {
 	static constexpr auto kMaxAfterCommaResolution = 16;
 	// escape point for integer values, avoid unnecessary complexity later on
-	const bool withinInt64Boundaries = value <= std::numeric_limits<int64>::max () && value >= std::numeric_limits<int64>::lowest ();
+	const bool withinInt64Boundaries = value <= std::numeric_limits<int64>::max () &&
+	                                   value >= std::numeric_limits<int64>::lowest ();
 	if (withinInt64Boundaries && (maxPrecision == 0 || std::round (value) == value))
 		return printInt64 (value);
 
@@ -3378,11 +3411,11 @@ String& String::printFloat (double value, uint32 maxPrecision)
 	// trim trail zeros
 	for (int32 i = length () - 1; i >= 0; i--)
 	{
-		if (isWide && testChar16 (i, '0') || testChar8 (i, '0'))
+		if ((isWide && testChar16 (i, '0')) || testChar8 (i, '0'))
 			remove (i);
-		else if (isWide && testChar16(i,'.') || testChar8(i, '.'))
+		else if ((isWide && testChar16 (i, '.')) || testChar8 (i, '.'))
 		{
-			remove(i);
+			remove (i);
 			break;
 		}
 		else
@@ -3393,7 +3426,8 @@ String& String::printFloat (double value, uint32 maxPrecision)
 }
 
 //-----------------------------------------------------------------------------
-bool String::incrementTrailingNumber (uint32 width, tchar separator, uint32 minNumber, bool applyOnlyFormat)
+bool String::incrementTrailingNumber (uint32 width, tchar separator, uint32 minNumber,
+                                      bool applyOnlyFormat)
 {
 	if (width > 32)
 		return false;
@@ -3422,12 +3456,12 @@ bool String::incrementTrailingNumber (uint32 width, tchar separator, uint32 minN
 		if (separator && isEmpty () == false)
 		{
 			sprintf16 (format, STR16 ("%%c%%0%uu"), width);
-			sprintf16 (trail, format, separator, (uint32) number);
+			sprintf16 (trail, format, separator, (uint32)number);
 		}
 		else
 		{
 			sprintf16 (format, STR16 ("%%0%uu"), width);
-			sprintf16 (trail, format, (uint32) number);
+			sprintf16 (trail, format, (uint32)number);
 		}
 		append (trail);
 	}
@@ -3440,12 +3474,12 @@ bool String::incrementTrailingNumber (uint32 width, tchar separator, uint32 minN
 		if (separator && isEmpty () == false)
 		{
 			snprintf (format, kFormatSize, "%%c%%0%uu", width);
-			snprintf (trail, kTrailSize, format, separator, (uint32) number);
+			snprintf (trail, kTrailSize, format, separator, (uint32)number);
 		}
 		else
 		{
 			snprintf (format, kFormatSize, "%%0%uu", width);
-			snprintf (trail, kTrailSize, format, (uint32) number);
+			snprintf (trail, kTrailSize, format, (uint32)number);
 		}
 		append (trail);
 	}
@@ -3474,7 +3508,8 @@ void String::toLower ()
 		if (isWide)
 		{
 #if SMTG_OS_MACOS
-			CFMutableStringRef cfStr = CFStringCreateMutableWithExternalCharactersNoCopy (kCFAllocator, (UniChar*)buffer16, len, len+1, kCFAllocatorNull);
+			CFMutableStringRef cfStr = CFStringCreateMutableWithExternalCharactersNoCopy (
+			    kCFAllocator, (UniChar*)buffer16, len, len + 1, kCFAllocatorNull);
 			CFStringLowercase (cfStr, NULL);
 			CFRelease (cfStr);
 #else
@@ -3519,7 +3554,8 @@ void String::toUpper ()
 		if (isWide)
 		{
 #if SMTG_OS_MACOS
-			CFMutableStringRef cfStr = CFStringCreateMutableWithExternalCharactersNoCopy (kCFAllocator, (UniChar*)buffer16, len, len+1, kCFAllocatorNull);
+			CFMutableStringRef cfStr = CFStringCreateMutableWithExternalCharactersNoCopy (
+			    kCFAllocator, (UniChar*)buffer16, len, len + 1, kCFAllocatorNull);
 			CFStringUppercase (cfStr, NULL);
 			CFRelease (cfStr);
 #else
@@ -3549,31 +3585,40 @@ bool String::fromVariant (const FVariant& var)
 	switch (var.getType ())
 	{
 		case FVariant::kString8:
+		{
 			assign (var.getString8 ());
 			return true;
+		}
 
 		case FVariant::kString16:
+		{
 			assign (var.getString16 ());
 			return true;
+		}
 
 		case FVariant::kFloat:
+		{
 			printFloat (var.getFloat ());
 			return true;
+		}
 
 		case FVariant::kInteger:
+		{
 			printInt64 (var.getInt ());
 			return true;
+		}
 
 		case FVariant::kObject:
 			if (auto string = ICast<Steinberg::IString> (var.getObject ()))
+			{
 				if (string->isWideString ())
 					assign (string->getText16 ());
 				else
 					assign (string->getText8 ());
+			}
 			return true;
 
-		default:
-			remove ();
+		default: remove ();
 	}
 	return false;
 }
@@ -3681,7 +3726,6 @@ void String::passToVariant (FVariant& var)
 	}
 }
 
-
 //-----------------------------------------------------------------------------
 unsigned char* String::toPascalString (unsigned char* buf)
 {
@@ -3705,7 +3749,7 @@ unsigned char* String::toPascalString (unsigned char* buf)
 		}
 		return buf;
 	}
-	
+
 	*buf = 0;
 	return buf;
 }
@@ -3735,15 +3779,16 @@ bool String::fromCFStringRef (const void* cfStr, uint32 encoding)
 	CFStringRef strRef = (CFStringRef)cfStr;
 	if (isWide)
 	{
-		CFRange range = { 0, CFStringGetLength (strRef)};
+		CFRange range = {0, CFStringGetLength (strRef)};
 		CFIndex usedBytes;
 		if (resize (static_cast<int32> (range.length + 1), true))
 		{
 			if (encoding == 0xFFFF)
 				encoding = kCFStringEncodingUnicode;
-			if (CFStringGetBytes (strRef, range, encoding, ' ', false, (UInt8*)buffer16, range.length * 2, &usedBytes) > 0)
+			if (CFStringGetBytes (strRef, range, encoding, ' ', false, (UInt8*)buffer16,
+			                      range.length * 2, &usedBytes) > 0)
 			{
-				buffer16[usedBytes/2] = 0;
+				buffer16[usedBytes / 2] = 0;
 				this->len = strlen16 (buffer16);
 				return true;
 			}
@@ -3777,7 +3822,7 @@ void* ConstString::toCFStringRef (uint32 encoding, bool mutableCFString) const
 		CFMutableStringRef str = CFStringCreateMutable (kCFAllocator, 0);
 		if (isWide)
 		{
-			CFStringAppendCharacters (str, (const UniChar *)buffer16, len);
+			CFStringAppendCharacters (str, (const UniChar*)buffer16, len);
 			return str;
 		}
 		else
@@ -3794,7 +3839,8 @@ void* ConstString::toCFStringRef (uint32 encoding, bool mutableCFString) const
 		{
 			if (encoding == 0xFFFF)
 				encoding = kCFStringEncodingUnicode;
-			return (void*)CFStringCreateWithBytes (kCFAllocator, (const unsigned char*)buffer16, len * 2, encoding, false);
+			return (void*)CFStringCreateWithBytes (kCFAllocator, (const unsigned char*)buffer16,
+			                                       len * 2, encoding, false);
 		}
 		else
 		{
@@ -3836,7 +3882,8 @@ uint32 hashString16 (const char16* s, uint32 m)
 }
 
 //------------------------------------------------------------------------
-template <class T> int32 tstrnatcmp (const T* s1, const T* s2, bool caseSensitive = true)
+template <class T>
+int32 tstrnatcmp (const T* s1, const T* s2, bool caseSensitive = true)
 {
 	if (s1 == nullptr && s2 == nullptr)
 		return 0;
@@ -3876,7 +3923,7 @@ template <class T> int32 tstrnatcmp (const T* s1, const T* s2, bool caseSensitiv
 			{
 				// countS1Digits == countS2Digits
 				if (*s1 != *s2)
-					return (int32)(*s1 - *s2); // the digits differ
+					return (int32) (*s1 - *s2); // the digits differ
 				s1++;
 				s2++;
 			}
@@ -3891,10 +3938,10 @@ template <class T> int32 tstrnatcmp (const T* s1, const T* s2, bool caseSensitiv
 				T srcToUpper = static_cast<T> (toupper (*s1));
 				T dstToUpper = static_cast<T> (toupper (*s2));
 				if (srcToUpper != dstToUpper)
-					return (int32)(srcToUpper - dstToUpper);
+					return (int32) (srcToUpper - dstToUpper);
 			}
 			else if (*s1 != *s2)
-				return (int32)(*s1 - *s2);
+				return (int32) (*s1 - *s2);
 
 			s1++;
 			s2++;
@@ -3907,7 +3954,7 @@ template <class T> int32 tstrnatcmp (const T* s1, const T* s2, bool caseSensitiv
 		return -1;
 	if (*s2 == 0)
 		return 1;
-	return (int32)(*s1 - *s2);
+	return (int32) (*s1 - *s2);
 }
 
 //------------------------------------------------------------------------
@@ -3932,7 +3979,7 @@ void PLUGIN_API StringObject::setText (const char8* text)
 
 //-----------------------------------------------------------------------------
 void PLUGIN_API StringObject::setText8 (const char8* text)
-{	
+{
 	assign (text);
 }
 

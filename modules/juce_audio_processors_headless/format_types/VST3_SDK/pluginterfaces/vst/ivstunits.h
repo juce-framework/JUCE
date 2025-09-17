@@ -62,7 +62,7 @@ struct ProgramListInfo
 
 //------------------------------------------------------------------------
 /** Special programIndex value for IUnitHandler::notifyProgramListChange */
-static const int32 kAllProgramInvalid =	-1;		///< all program information is invalid
+static const int32 kAllProgramInvalid =	-1;	///< all program information is invalid
 
 //------------------------------------------------------------------------
 /** Host callback for unit support: Vst::IUnitHandler
@@ -81,13 +81,19 @@ class IUnitHandler : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
-	/** Notify host when a module is selected in plug-in GUI. */
+	/** Notify host when a module is selected in plug-in GUI.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual tresult PLUGIN_API notifyUnitSelection (UnitID unitId) = 0;
 
-	/** Tell host that the plug-in controller changed a program list (rename, load, PitchName changes).
-	    \param listId is the specified program list ID to inform.
-		\param programIndex : when kAllProgramInvalid, all program information is invalid, otherwise only the program of given index. */
-	virtual tresult PLUGIN_API notifyProgramListChange (ProgramListID listId, int32 programIndex) = 0;
+	/** Tell host that the plug-in controller changed a program list (rename, load, PitchName
+	 * changes).
+	 * \param listId is the specified program list ID to inform.
+	 * \param programIndex: when kAllProgramInvalid, all program information is invalid, otherwise
+	 * only the program of given index.
+	 * 
+	 * \note [UI-thread & (Initialized | Connected)] */
+	virtual tresult PLUGIN_API notifyProgramListChange (ProgramListID listId,
+	                                                    int32 programIndex) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;
@@ -116,7 +122,8 @@ class IUnitHandler2 : public FUnknown
 {
 public:
 	//------------------------------------------------------------------------
-	/** Tell host that assignment Unit-Bus defined by IUnitInfo::getUnitByBus has changed. */
+	/** Tell host that assignment Unit-Bus defined by IUnitInfo::getUnitByBus has changed.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual tresult PLUGIN_API notifyUnitByBusChange () = 0;
 
 	//------------------------------------------------------------------------
@@ -145,52 +152,73 @@ class IUnitInfo : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
-	/** Returns the flat count of units. */
+	/** Returns the flat count of units.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual int32 PLUGIN_API getUnitCount () = 0;
 
-	/** Gets UnitInfo for a given index in the flat list of unit. */
-	virtual tresult PLUGIN_API getUnitInfo (int32 unitIndex, UnitInfo& info /*out*/) = 0;
+	/** Gets UnitInfo for a given index in the flat list of unit.
+	 * \note [UI-thread & (Initialized | Connected)] */
+	virtual tresult PLUGIN_API getUnitInfo (int32 unitIndex, UnitInfo& info /*inout*/) = 0;
 
-	/** Component intern program structure. */
-	/** Gets the count of Program List. */
+	//--- Component intern program structure ----------------
+	/** Gets the count of Program List.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual int32 PLUGIN_API getProgramListCount () = 0;
 
-	/** Gets for a given index the Program List Info. */
-	virtual tresult PLUGIN_API getProgramListInfo (int32 listIndex, ProgramListInfo& info /*out*/) = 0;
+	/** Gets for a given index the Program List Info.
+	 * \note [UI-thread & (Initialized | Connected)] */
+	virtual tresult PLUGIN_API getProgramListInfo (int32 listIndex,
+	                                               ProgramListInfo& info /*inout*/) = 0;
 
-	/** Gets for a given program list ID and program index its program name. */
-	virtual tresult PLUGIN_API getProgramName (ProgramListID listId, int32 programIndex, String128 name /*out*/) = 0;
+	/** Gets for a given program list ID and program index its program name.
+	 * \note [UI-thread & (Initialized | Connected)] */
+	virtual tresult PLUGIN_API getProgramName (ProgramListID listId, int32 programIndex,
+	                                           String128 name /*inout*/) = 0;
 
-	/** Gets for a given program list ID, program index and attributeId the associated attribute value. */
+	/** Gets for a given program list ID, program index and attributeId the associated attribute
+	 * value.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual tresult PLUGIN_API getProgramInfo (ProgramListID listId, int32 programIndex,
-		CString attributeId /*in*/, String128 attributeValue /*out*/) = 0;
+	                                           CString attributeId /*in*/,
+	                                           String128 attributeValue /*inout*/) = 0;
 
-	/** Returns kResultTrue if the given program index of a given program list ID supports PitchNames. */
+	/** Returns kResultTrue if the given program index of a given program list ID supports
+	 * PitchNames.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual tresult PLUGIN_API hasProgramPitchNames (ProgramListID listId, int32 programIndex) = 0;
 
 	/** Gets the PitchName for a given program list ID, program index and pitch.
-		If PitchNames are changed the plug-in should inform the host with IUnitHandler::notifyProgramListChange. */
+	 * If PitchNames are changed the plug-in should inform the host with
+	 * IUnitHandler::notifyProgramListChange.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual tresult PLUGIN_API getProgramPitchName (ProgramListID listId, int32 programIndex,
-		int16 midiPitch, String128 name /*out*/) = 0;
+	                                                int16 midiPitch, String128 name /*inout*/) = 0;
 
-	// units selection --------------------
-	/** Gets the current selected unit. */
+	//--- units selection --------------------
+	/** Gets the current selected unit.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual UnitID PLUGIN_API getSelectedUnit () = 0;
 
-	/** Sets a new selected unit. */
+	/** Sets a new selected unit.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual tresult PLUGIN_API selectUnit (UnitID unitId) = 0;
 
-	/** Gets the according unit if there is an unambiguous relation between a channel or a bus and a unit.
-	    This method mainly is intended to find out which unit is related to a given MIDI input channel. */
+	/** Gets the according unit if there is an unambiguous relation between a channel or a bus and a
+	 * unit. This method mainly is intended to find out which unit is related to a given MIDI input
+	 * channel.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual tresult PLUGIN_API getUnitByBus (MediaType type, BusDirection dir, int32 busIndex,
-		int32 channel, UnitID& unitId /*out*/) = 0;
+	                                         int32 channel, UnitID& unitId /*inout*/) = 0;
 
 	/** Receives a preset data stream.
-	    - If the component supports program list data (IProgramListData), the destination of the data
-		  stream is the program specified by list-Id and program index (first and second parameter)
-		- If the component supports unit data (IUnitData), the destination is the unit specified by the first
-		  parameter - in this case parameter programIndex is < 0). */
-	virtual tresult PLUGIN_API setUnitProgramData (int32 listOrUnitId, int32 programIndex, IBStream* data) = 0;
+	 * - If the component supports program list data (IProgramListData), the destination of the data
+	 *   stream is the program specified by list-Id and program index (first and second parameter)
+	 * - If the component supports unit data (IUnitData), the destination is the unit specified by
+	 * the first parameter - in this case parameter programIndex is < 0).
+	 * 
+	 * \note [UI-thread & (Initialized | Connected)] */
+	virtual tresult PLUGIN_API setUnitProgramData (int32 listOrUnitId, int32 programIndex,
+	                                               IBStream* data /*in*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;
@@ -215,14 +243,19 @@ class IProgramListData : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
-	/** Returns kResultTrue if the given Program List ID supports Program Data. */
+	/** Returns kResultTrue if the given Program List ID supports Program Data.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual tresult PLUGIN_API programDataSupported (ProgramListID listId) = 0;
 
-	/** Gets for a given program list ID and program index the program Data. */
-	virtual tresult PLUGIN_API getProgramData (ProgramListID listId, int32 programIndex, IBStream* data) = 0;
+	/** Gets for a given program list ID and program index the program Data.
+	 * \note [UI-thread & (Initialized | Connected)] */
+	virtual tresult PLUGIN_API getProgramData (ProgramListID listId, int32 programIndex,
+	                                           IBStream* data /*inout*/) = 0;
 
-	/** Sets for a given program list ID and program index a program Data. */
-	virtual tresult PLUGIN_API setProgramData (ProgramListID listId, int32 programIndex, IBStream* data) = 0;
+	/** Sets for a given program list ID and program index a program Data.
+	 * \note [UI-thread & (Initialized | Connected)] */
+	virtual tresult PLUGIN_API setProgramData (ProgramListID listId, int32 programIndex,
+	                                           IBStream* data /*in*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;
@@ -247,14 +280,17 @@ class IUnitData : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
-	/** Returns kResultTrue if the specified unit supports export and import of preset data. */
+	/** Returns kResultTrue if the specified unit supports export and import of preset data.
+	 * \note [UI-thread & (Initialized | Connected)] */
 	virtual tresult PLUGIN_API unitDataSupported (UnitID unitID) = 0;
 
-	/** Gets the preset data for the specified unit. */
-	virtual tresult PLUGIN_API getUnitData (UnitID unitId, IBStream* data) = 0;
+	/** Gets the preset data for the specified unit.
+	 * \note [UI-thread & (Initialized | Connected)] */
+	virtual tresult PLUGIN_API getUnitData (UnitID unitId, IBStream* data /*inout*/) = 0;
 
-	/** Sets the preset data for the specified unit. */
-	virtual tresult PLUGIN_API setUnitData (UnitID unitId, IBStream* data) = 0;
+	/** Sets the preset data for the specified unit.
+	 * \note [UI-thread & (Initialized | Connected)] */
+	virtual tresult PLUGIN_API setUnitData (UnitID unitId, IBStream* data /*in*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;

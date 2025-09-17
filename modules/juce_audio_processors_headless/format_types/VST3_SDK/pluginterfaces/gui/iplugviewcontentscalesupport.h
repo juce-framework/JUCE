@@ -44,8 +44,8 @@ The host may call setContentScaleFactor in a different context, for example: sca
 editor for better readability.
 
 When a plug-in handles this (by returning kResultTrue), it needs to scale the width and height of
-its view by the scale factor and inform the host via a IPlugFrame::resizeView(). The host will then
-call IPlugView::onSize().
+its view by the scale factor and inform the host via a IPlugFrame::resizeView (). The host will then
+call IPlugView::onSize ().
 
 Note that the host is allowed to call setContentScaleFactor() at any time the IPlugView is valid.
 If this happens before the IPlugFrame object is set on your view, make sure that when the host calls
@@ -60,7 +60,11 @@ public:
 //------------------------------------------------------------------------
 	typedef float ScaleFactor;
 
-	virtual tresult PLUGIN_API setContentScaleFactor (ScaleFactor factor) = 0;
+	/** Set the Content Scale Factor
+	* @param factor the scale factor requested by the host
+	* @return kResultTrue when a plug-in handles this
+	* \note [UI-thread] */
+	virtual tresult PLUGIN_API setContentScaleFactor (ScaleFactor factor /*in*/) = 0;
 //------------------------------------------------------------------------
 	static const FUID iid;
 };

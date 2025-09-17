@@ -36,5 +36,11 @@
 	#else
 		#pragma pack(8)
 	#endif
+#elif SMTG_OS_LINUX
+	#if SMTG_PLATFORM_64
+		#pragma pack(push, 16)
+	#else
+		#pragma pack(push, 8)
+	#endif
 #endif
 //----------------------------------------------------------------------------------------------

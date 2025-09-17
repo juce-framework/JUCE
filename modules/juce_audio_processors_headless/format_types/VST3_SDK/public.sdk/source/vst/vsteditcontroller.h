@@ -238,17 +238,20 @@ public:
 	/** Creates and returns the program parameter. */
 	virtual Parameter* getParameter ();
 
+	/** Clear all programs. */
+	virtual void clearPrograms ();
+
 	OBJ_METHODS (ProgramList, FObject)
 //------------------------------------------------------------------------
 protected:
 	using StringMap = std::map<std::string, std::u16string>;
 	using StringVector = std::vector<std::u16string>;
 	using ProgramInfoVector = std::vector<StringMap>;
-	ProgramListInfo info;
+	ProgramListInfo info {};
 	UnitID unitId;
 	StringVector programNames;
 	ProgramInfoVector programInfos;
-	Parameter* parameter;
+	Parameter* parameter {nullptr};
 };
 
 //------------------------------------------------------------------------

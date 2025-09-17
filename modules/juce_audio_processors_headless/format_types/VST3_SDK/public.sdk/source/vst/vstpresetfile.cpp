@@ -543,7 +543,7 @@ bool PresetFile::restoreControllerState (IEditController* editController)
 	if (e)
 	{
 		auto readOnlyBStream = owned (new ReadOnlyBStream (stream, e->offset, e->size));
-		return verify (editController->setState (readOnlyBStream));
+		return verify (editController->setState (readOnlyBStream)) || e->size == 0;
 	}
 	return false;
 }

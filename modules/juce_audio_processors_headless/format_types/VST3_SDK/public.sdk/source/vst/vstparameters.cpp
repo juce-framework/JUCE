@@ -298,6 +298,15 @@ bool StringListParameter::replaceString (int32 index, const String128 string)
 }
 
 //------------------------------------------------------------------------
+void StringListParameter::clear ()
+{
+	for (auto& string : strings)
+		std::free (string);
+	strings.clear ();
+	info.stepCount = -1;
+}
+
+//------------------------------------------------------------------------
 void StringListParameter::toString (ParamValue _valueNormalized, String128 string) const
 {
 	int32 index = static_cast<int32> (toPlain (_valueNormalized));

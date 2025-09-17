@@ -45,7 +45,8 @@ class IParameterFinder: public FUnknown
 {
 public:
 	//------------------------------------------------------------------------
-	/** Find out which parameter in plug-in view is at given position (relative to plug-in view). */
+	/** Find out which parameter in plug-in view is at given position (relative to plug-in view).
+	 * \note [UI-thread & (Initialized | Connected) & plugView] */
 	virtual tresult PLUGIN_API findParameter (int32 xPos, int32 yPos, ParamID& resultTag /*out*/) = 0;
 	//------------------------------------------------------------------------
 	static const FUID iid;

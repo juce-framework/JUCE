@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2025, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -176,12 +176,13 @@ public:
 		namespace StringConvert = Steinberg::Vst::StringConvert;
 
 		filesystem::path p (inPath);
+
 		auto filename = p.filename ();
 		p /= "Contents";
 		p /= archString;
 		p /= filename;
-		auto wideStr = StringConvert::convert (p.string ());
-		HINSTANCE instance = LoadLibraryW (reinterpret_cast<LPCWSTR> (wideStr.data ()));
+		const std::wstring wString = p.generic_wstring ();
+		HINSTANCE instance = LoadLibraryW (reinterpret_cast<LPCWSTR> (wString.data ()));
 #if SMTG_CPU_ARM_64EC
 		if (instance == nullptr)
 			instance = loadAsPackage (inPath, errorDescription, architectureArm64XString);
@@ -214,7 +215,7 @@ public:
 	//--- -----------------------------------------------------------------------
 	bool load (const std::string& inPath, std::string& errorDescription) override
 	{
-// filesystem::u8path is deprecated in C++20
+		// filesystem::u8path is deprecated in C++20
 #if SMTG_CPP20
 		const filesystem::path tmp (inPath);
 #else
@@ -288,7 +289,8 @@ bool openVST3Package (const filesystem::path& p, const char* archString,
 	path /= "Contents";
 	path /= archString;
 	path /= p.filename ();
-	auto hFile = CreateFileW (reinterpret_cast<LPCWSTR> (path.c_str ()), GENERIC_READ,
+	const std::wstring wString = path.generic_wstring ();
+	auto hFile = CreateFileW (reinterpret_cast<LPCWSTR> (wString.data ()), GENERIC_READ,
 	                          FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
@@ -323,11 +325,11 @@ bool isFolderSymbolicLink (const filesystem::path& p)
 	if (/*filesystem::exists (p) &&*/ filesystem::is_symlink (p))
 		return true;
 #else
-	std::wstring wString = p.generic_wstring ();
-	auto attrib = GetFileAttributesW (reinterpret_cast<LPCWSTR> (wString.c_str ()));
+	const std::wstring wString = p.generic_wstring ();
+	auto attrib = GetFileAttributesW (reinterpret_cast<LPCWSTR> (wString.data ()));
 	if (attrib & FILE_ATTRIBUTE_REPARSE_POINT)
 	{
-		auto hFile = CreateFileW (reinterpret_cast<LPCWSTR> (wString.c_str ()), GENERIC_READ,
+		auto hFile = CreateFileW (reinterpret_cast<LPCWSTR> (wString.data ()), GENERIC_READ,
 		                          FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
 		if (hFile == INVALID_HANDLE_VALUE)
 			return true;
@@ -428,7 +430,14 @@ void findFilesWithExt (const filesystem::path& path, const std::string& ext,
 			filesystem::path result;
 			if (checkVST3Package (finalPath, &result))
 			{
-				addToPathList (pathList, result.generic_string ());
+#if SMTG_CPP20
+				std::u8string u8str = result.generic_u8string ();
+				std::string str;
+				str.assign (std::begin (u8str), std::end (u8str));
+				addToPathList (pathList, str);
+#else
+				addToPathList (pathList, result.generic_u8string ());
+#endif
 				continue;
 			}
 		}
@@ -439,7 +448,16 @@ void findFilesWithExt (const filesystem::path& path, const std::string& ext,
 				findFilesWithExt (finalPath, ext, pathList, recursive);
 		}
 		else if (cpExt == ext)
-			addToPathList (pathList, finalPath.generic_string ());
+		{
+#if SMTG_CPP20
+			std::u8string u8str = finalPath.generic_u8string ();
+			std::string str;
+			str.assign (std::begin (u8str), std::end (u8str));
+			addToPathList (pathList, str);
+#else
+			addToPathList (pathList, finalPath.generic_u8string ());
+#endif
+		}
 #else
 		const auto& cp = p.path ();
 		const auto& cpExt = cp.extension ();
@@ -510,7 +528,12 @@ void findModules (const filesystem::path& path, Module::PathList& pathList)
 Optional<filesystem::path> getContentsDirectoryFromModuleExecutablePath (
     const std::string& modulePath)
 {
+	// filesystem::u8path is deprecated in C++20
+#if SMTG_CPP20
 	filesystem::path path (modulePath);
+#else
+	filesystem::path path = filesystem::u8path (modulePath);
+#endif
 
 	path = path.parent_path ();
 	if (path.filename () != architectureString)
@@ -550,7 +573,12 @@ Module::PathList Module::getModulePaths ()
 	PathList list;
 	if (auto knownFolder = getKnownFolder (FOLDERID_UserProgramFilesCommon))
 	{
+		// filesystem::u8path is deprecated in C++20
+#if SMTG_CPP20
 		filesystem::path path (*knownFolder);
+#else
+		filesystem::path path = filesystem::u8path (*knownFolder);
+#endif
 		path.append ("VST3");
 #if LOG_ENABLE
 		std::cout << "Check folder: " << path << "\n";
@@ -560,7 +588,12 @@ Module::PathList Module::getModulePaths ()
 
 	if (auto knownFolder = getKnownFolder (FOLDERID_ProgramFilesCommon))
 	{
+		// filesystem::u8path is deprecated in C++20
+#if SMTG_CPP20
 		filesystem::path path (*knownFolder);
+#else
+		filesystem::path path = filesystem::u8path (*knownFolder);
+#endif
 		path.append ("VST3");
 #if LOG_ENABLE
 		std::cout << "Check folder: " << path << "\n";
@@ -572,7 +605,13 @@ Module::PathList Module::getModulePaths ()
 	WCHAR modulePath[kIPPathNameMax];
 	GetModuleFileNameW (nullptr, modulePath, kIPPathNameMax);
 	auto appPath = StringConvert::convert (Steinberg::wscast (modulePath));
+
+	// filesystem::u8path is deprecated in C++20
+#if SMTG_CPP20
 	filesystem::path path (appPath);
+#else
+	filesystem::path path = filesystem::u8path (appPath);
+#endif
 	path = path.parent_path ();
 	path = path.append ("VST3");
 #if LOG_ENABLE
@@ -608,6 +647,48 @@ Optional<std::string> Module::getModuleInfoPath (const std::string& modulePath)
 }
 
 //------------------------------------------------------------------------
+bool Module::validateBundleStructure (const std::string& modulePath, std::string& errorDescription)
+{
+	try
+	{
+		auto path = getContentsDirectoryFromModuleExecutablePath (modulePath);
+		if (!path)
+		{
+			filesystem::path p;
+			if (!checkVST3Package ({modulePath}, &p))
+			{
+				errorDescription = "Not a bundle: '" + modulePath + "'.";
+				return false;
+			}
+			p = p.parent_path ();
+			p = p.parent_path ();
+			path = Optional<filesystem::path> {p};
+		}
+		if (path->filename () != "Contents")
+		{
+			errorDescription = "Unexpected directory name, should be 'Contents' but is '" +
+			                   path->filename ().string () + "'.";
+			return false;
+		}
+		auto bundlePath = path->parent_path ();
+		*path /= architectureString;
+		*path /= bundlePath.filename ();
+		if (std::filesystem::exists (*path) == false)
+		{
+			errorDescription = "Shared library name is not equal to bundle folder name. Must be '" +
+			                   bundlePath.filename ().string () + "'.";
+			return false;
+		}
+		return true;
+	}
+	catch (const std::exception& exc)
+	{
+		errorDescription = exc.what ();
+		return false;
+	}
+}
+
+//------------------------------------------------------------------------
 Module::SnapshotList Module::getSnapshots (const std::string& modulePath)
 {
 	SnapshotList result;
@@ -632,7 +713,12 @@ Module::SnapshotList Module::getSnapshots (const std::string& modulePath)
 	findFilesWithExt (*path, ".png", pngList, false);
 	for (auto& png : pngList)
 	{
-		filesystem::path p (png);
+		// filesystem::u8path is deprecated in C++20
+#if SMTG_CPP20
+		const filesystem::path p (png);
+#else
+		const filesystem::path p = filesystem::u8path (png);
+#endif
 		auto filename = p.filename ().generic_string ();
 		auto uid = Snapshot::decodeUID (filename);
 		if (!uid)

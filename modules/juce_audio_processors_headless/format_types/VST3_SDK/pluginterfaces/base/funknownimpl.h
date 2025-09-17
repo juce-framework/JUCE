@@ -276,14 +276,15 @@ struct RefCounted
 
 	uint32 PLUGIN_API release ()
 	{
-		if (--refCount == 0)
+		auto rc = --refCount;
+		if (rc == 0)
 		{
 			destroyInstance ();
 			refCount = -1000;
 			delete this;
-			return 0;
+			return uint32 ();
 		}
-		return refCount;
+		return rc;
 	}
 
 //------------------------------------------------------------------------

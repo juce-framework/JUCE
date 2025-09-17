@@ -182,6 +182,8 @@ public:
 	static SnapshotList getSnapshots (const std::string& modulePath);
 	/** get the path to the module info json file if it exists */
 	static Optional<std::string> getModuleInfoPath (const std::string& modulePath);
+	/** validate the bundle structure */
+	static bool validateBundleStructure (const std::string& path, std::string& errorDescription);
 
 	const std::string& getName () const noexcept { return name; }
 	const std::string& getPath () const noexcept { return path; }

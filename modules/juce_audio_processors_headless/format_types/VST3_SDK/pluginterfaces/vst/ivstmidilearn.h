@@ -42,18 +42,18 @@ Use this if you want to implement custom MIDI-Learn functionality in your plug-i
 // in MyController class declaration
 class MyController : public Vst::EditController, public Vst::IMidiLearn
 {
-	// ...
-	//--- IMidiLearn ---------------------------------
-	tresult PLUGIN_API onLiveMIDIControllerInput (int32 busIndex, int16 channel,
-												  CtrlNumber midiCC) SMTG_OVERRIDE;
-	// ...
+    // ...
+    //--- IMidiLearn ---------------------------------
+    tresult PLUGIN_API onLiveMIDIControllerInput (int32 busIndex, int16 channel,
+                                                  CtrlNumber midiCC) SMTG_OVERRIDE;
+    // ...
 
-	OBJ_METHODS (MyController, Vst::EditController)
-	DEFINE_INTERFACES
-		// ...
-		DEF_INTERFACE (Vst::IMidiLearn)
-	END_DEFINE_INTERFACES (Vst::EditController)
-	//...
+    OBJ_METHODS (MyController, Vst::EditController)
+    DEFINE_INTERFACES
+        // ...
+        DEF_INTERFACE (Vst::IMidiLearn)
+    END_DEFINE_INTERFACES (Vst::EditController)
+    //...
 }
 
 //------------------------------------------------
@@ -61,45 +61,46 @@ class MyController : public Vst::EditController, public Vst::IMidiLearn
 #include "pluginterfaces/vst/ivstmidilearn.h
 
 namespace Steinberg {
-	namespace Vst {
-		DEF_CLASS_IID (IMidiLearn)
-	}
+    namespace Vst {
+        DEF_CLASS_IID (IMidiLearn)
+    }
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API MyController::onLiveMIDIControllerInput (int32 busIndex, 
-							int16 channel, CtrlNumber midiCC)
+tresult PLUGIN_API MyController::onLiveMIDIControllerInput (int32 busIndex,
+                            int16 channel, CtrlNumber midiCC)
 {
-	// if we are not in doMIDILearn (triggered by a UI button for example) 
-	// or wrong channel then return
-	if (!doMIDILearn || busIndex != 0 || channel != 0 || midiLearnParamID == InvalidParamID)
-		return kResultFalse;
+    // if we are not in doMIDILearn (triggered by a UI button for example)
+    // or wrong channel then return
+    if (!doMIDILearn || busIndex != 0 || channel != 0 || midiLearnParamID == InvalidParamID)
+        return kResultFalse;
 
-	// adapt our internal MIDICC -> parameterID mapping
-	midiCCMapping[midiCC] = midiLearnParamID;
+    // adapt our internal MIDICC -> parameterID mapping
+    midiCCMapping[midiCC] = midiLearnParamID;
 
-	// new mapping then inform the host that our MIDI assignment has changed
-	if (auto componentHandler = getComponentHandler ())
-	{
-		componentHandler->restartComponent (kMidiCCAssignmentChanged);
-	}
-	return kResultTrue;
+    // new mapping then inform the host that our MIDI assignment has changed
+    if (auto componentHandler = getComponentHandler ())
+    {
+        componentHandler->restartComponent (kMidiCCAssignmentChanged);
+    }
+    return kResultTrue;
 }
 \endcode
 */
 class IMidiLearn : public FUnknown
 {
 public:
-	/** Called on live input MIDI-CC change associated to a given bus index and MIDI channel */
-	virtual tresult PLUGIN_API onLiveMIDIControllerInput (int32 busIndex, int16 channel,
-													      CtrlNumber midiCC) = 0;
+	/** Called on live input MIDI-CC change associated to a given bus index and MIDI channel.
+	 * \note [UI-thread & (Initialized | Connected)] */
+	virtual tresult PLUGIN_API onLiveMIDIControllerInput (int32 busIndex /*in*/,
+	                                                      int16 channel /*in*/,
+	                                                      CtrlNumber midiCC /*in*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;
 };
 
 DECLARE_CLASS_IID (IMidiLearn, 0x6B2449CC, 0x419740B5, 0xAB3C79DA, 0xC5FE5C86)
-
 
 //------------------------------------------------------------------------
 } // namespace Vst

@@ -28,14 +28,13 @@ namespace Steinberg {
 namespace Vst {
 
 //------------------------------------------------------------------------
-/** \defgroup vst3typedef VST 3 Data Types */
-/*@{*/
-//------------------------------------------------------------------------
+/** \ingroup vst3typedef */
+/**@{*/
 /** Note Expression Types */
 typedef uint32 NoteExpressionTypeID;
 /** Note Expression Value */
 typedef double NoteExpressionValue;
-/*@}*/
+/**@}*/
 
 //------------------------------------------------------------------------
 /** NoteExpressionTypeIDs describes the type of the note expression.
@@ -64,9 +63,10 @@ enum NoteExpressionTypeIDs : uint32
 
 //------------------------------------------------------------------------
 /** Description of a Note Expression Type
-This structure is part of the NoteExpressionTypeInfo structure, it describes for given NoteExpressionTypeID its default value
-(for example 0.5 for a kTuningTypeID (kIsBipolar: centered)), its minimum and maximum (for predefined NoteExpressionTypeID the full range is predefined too)
-and a stepCount when the given NoteExpressionTypeID is limited to discrete values (like on/off state).
+This structure is part of the NoteExpressionTypeInfo structure, it describes for given
+NoteExpressionTypeID its default value (for example 0.5 for a kTuningTypeID (kIsBipolar: centered)),
+its minimum and maximum (for predefined NoteExpressionTypeID the full range is predefined too) and a
+stepCount when the given NoteExpressionTypeID is limited to discrete values (like on/off state).
 \see NoteExpressionTypeInfo
 */
 struct NoteExpressionValueDescription
@@ -83,11 +83,12 @@ struct NoteExpressionValueDescription
 //------------------------------------------------------------------------
 /** Note Expression Value event. Used in \ref Event (union)
 A note expression event affects one single playing note (referring its noteId).
-This kind of event is send from host to the plug-in like other events (NoteOnEvent, NoteOffEvent,...) in \ref ProcessData during the process call.
-Note expression events for a specific noteId can only occur after a NoteOnEvent. The host must take care that the event list (\ref IEventList) is properly sorted.
-Expression events are always absolute normalized values [0.0, 1.0].
-The predefined types have a predefined mapping of the normalized values (see \ref NoteExpressionTypeIDs)
-\sa INoteExpressionController
+This kind of event is send from host to the plug-in like other events (NoteOnEvent,
+NoteOffEvent,...) in \ref ProcessData during the process call. Note expression events for a specific
+noteId can only occur after a NoteOnEvent. The host must take care that the event list (\ref
+IEventList) is properly sorted. Expression events are always absolute normalized values [0.0, 1.0].
+The predefined types have a predefined mapping of the normalized values (see \ref
+NoteExpressionTypeIDs) \sa INoteExpressionController
 */
 struct NoteExpressionValueEvent
 {
@@ -144,20 +145,22 @@ struct NoteExpressionTypeInfo
 };
 
 //------------------------------------------------------------------------
-/** Extended plug-in interface IEditController for note expression event support: Vst::INoteExpressionController
+/** Extended plug-in interface IEditController for note expression event support:
+Vst::INoteExpressionController
 \ingroup vstIPlug vst350
 - [plug imp]
 - [extends IEditController]
 - [released: 3.5.0]
 - [optional]
 
-With this plug-in interface, the host can retrieve all necessary note expression information supported by the plug-in.
-Note expression information (\ref NoteExpressionTypeInfo) are specific for given channel and event bus.
+With this plug-in interface, the host can retrieve all necessary note expression information
+supported by the plug-in. Note expression information (\ref NoteExpressionTypeInfo) are specific for
+given channel and event bus.
 
 Note that there is only one NoteExpressionTypeID per given channel of an event bus.
 
-The method getNoteExpressionStringByValue allows conversion from a normalized value to a string representation
-and the getNoteExpressionValueByString method from a string to a normalized value.
+The method getNoteExpressionStringByValue allows conversion from a normalized value to a string
+representation and the getNoteExpressionValueByString method from a string to a normalized value.
 
 When the note expression state changes (for example when switching presets) the plug-in needs
 to inform the host about it via \ref IComponentHandler::restartComponent (kNoteExpressionChanged).
@@ -165,19 +168,30 @@ to inform the host about it via \ref IComponentHandler::restartComponent (kNoteE
 class INoteExpressionController : public FUnknown
 {
 public:
-	/** Returns number of supported note change types for event bus index and channel. */
-	virtual int32 PLUGIN_API getNoteExpressionCount (int32 busIndex, int16 channel) = 0;
+	/** Returns number of supported note change types for event bus index and channel.
+	 * \note [UI-thread & Connected] */
+	virtual int32 PLUGIN_API getNoteExpressionCount (int32 busIndex /*in*/,
+	                                                 int16 channel /*in*/) = 0;
 
-	/** Returns note change type info. */
-	virtual tresult PLUGIN_API getNoteExpressionInfo (int32 busIndex, int16 channel, int32 noteExpressionIndex, NoteExpressionTypeInfo& info /*out*/) = 0;
+	/** Returns note change type info.
+	 * \note [UI-thread & Connected] */
+	virtual tresult PLUGIN_API getNoteExpressionInfo (int32 busIndex /*in*/, int16 channel /*in*/,
+	                                                  int32 noteExpressionIndex /*in*/,
+	                                                  NoteExpressionTypeInfo& info /*out*/) = 0;
 
-	/** Gets a user readable representation of the normalized note change value. */
-	virtual tresult PLUGIN_API getNoteExpressionStringByValue (int32 busIndex, int16 channel, NoteExpressionTypeID id, NoteExpressionValue valueNormalized /*in*/, String128 string /*out*/) = 0;
+	/** Gets a user readable representation of the normalized note change value.
+	 * \note [UI-thread & Connected] */
+	virtual tresult PLUGIN_API getNoteExpressionStringByValue (
+	    int32 busIndex /*in*/, int16 channel /*in*/, NoteExpressionTypeID id /*in*/,
+	    NoteExpressionValue valueNormalized /*in*/, String128 string /*out*/) = 0;
 
-	/** Converts the user readable representation to the normalized note change value. */
-	virtual tresult PLUGIN_API getNoteExpressionValueByString (int32 busIndex, int16 channel, NoteExpressionTypeID id, const TChar* string /*in*/, NoteExpressionValue& valueNormalized /*out*/) = 0;
+	/** Converts the user readable representation to the normalized note change value.
+	 * \note [UI-thread & Connected] */
+	virtual tresult PLUGIN_API getNoteExpressionValueByString (
+	    int32 busIndex /*in*/, int16 channel /*in*/, NoteExpressionTypeID id /*in*/,
+	    const TChar* string /*in*/, NoteExpressionValue& valueNormalized /*out*/) = 0;
 
-	//------------------------------------------------------------------------
+//------------------------------------------------------------------------
 	static const FUID iid;
 };
 
@@ -196,6 +210,7 @@ enum KeyswitchTypeIDs : uint32
 	kKeyRangeTypeID				///< key should be maintained pressed for playing
 };
 
+/** \ingroup vst3typedef */
 typedef uint32 KeyswitchTypeID;
 
 //------------------------------------------------------------------------
@@ -227,20 +242,25 @@ struct KeyswitchInfo
 - [released: 3.5.0]
 - [optional]
 
-When a (instrument) plug-in supports such interface, the host could get from the plug-in the current set
-of used key switches (megatrig/articulation) for a given channel of a event bus and then automatically use them (like in Cubase 6) to
-create VST Expression Map (allowing to associated symbol to a given articulation / key switch).
+When a (instrument) plug-in supports such interface, the host could get from the plug-in the current
+set of used key switches (megatrig/articulation) for a given channel of a event bus and then
+automatically use them (like in Cubase 6) to create VST Expression Map (allowing to associated
+symbol to a given articulation / key switch).
 */
 class IKeyswitchController : public FUnknown
 {
 public:
-	/** Returns number of supported key switches for event bus index and channel. */
-	virtual int32 PLUGIN_API getKeyswitchCount (int32 busIndex, int16 channel) = 0;
+	/** Returns number of supported key switches for event bus index and channel.
+	 * \note [UI-thread & Connected] */
+	virtual int32 PLUGIN_API getKeyswitchCount (int32 busIndex /*in*/, int16 channel /*in*/) = 0;
 
-	/** Returns key switch info. */
-	virtual tresult PLUGIN_API getKeyswitchInfo (int32 busIndex, int16 channel, int32 keySwitchIndex, KeyswitchInfo& info /*out*/) = 0;
+	/** Returns key switch info.
+	 * \note [UI-thread & Connected] */
+	virtual tresult PLUGIN_API getKeyswitchInfo (int32 busIndex /*in*/, int16 channel /*in*/,
+	                                             int32 keySwitchIndex /*in*/,
+	                                             KeyswitchInfo& info /*out*/) = 0;
 
-	//------------------------------------------------------------------------
+//------------------------------------------------------------------------
 	static const FUID iid;
 };
 

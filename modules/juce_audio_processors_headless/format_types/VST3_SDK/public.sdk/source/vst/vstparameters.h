@@ -165,6 +165,9 @@ public:
 	/** Replaces the string at index. Index must be between 0 and stepCount+1 */
 	virtual bool replaceString (int32 index, const String128 string);
 
+	/** clear all added String */
+	virtual void clear ();
+
 	/** Converts a normalized value to a string. */
 	void toString (ParamValue _valueNormalized, String128 string) const SMTG_OVERRIDE;
 	/** Converts a string to a normalized value. */

@@ -53,8 +53,7 @@ HostApplication::HostApplication ()
 //-----------------------------------------------------------------------------
 tresult PLUGIN_API HostApplication::getName (String128 name)
 {
-	return StringConvert::convert ("My VST3 HostApplication", name) ? kResultTrue :
-	                                                                        kInternalError;
+	return StringConvert::convert ("My VST3 HostApplication", name) ? kResultTrue : kInternalError;
 }
 
 //-----------------------------------------------------------------------------
@@ -86,7 +85,7 @@ tresult PLUGIN_API HostApplication::queryInterface (const char* _iid, void** obj
 	QUERY_INTERFACE (_iid, obj, FUnknown::iid, IHostApplication)
 	QUERY_INTERFACE (_iid, obj, IHostApplication::iid, IHostApplication)
 
-	if (mPlugInterfaceSupport && mPlugInterfaceSupport->queryInterface (iid, obj) == kResultTrue)
+	if (mPlugInterfaceSupport && mPlugInterfaceSupport->queryInterface (_iid, obj) == kResultTrue)
 		return kResultOk;
 
 	*obj = nullptr;
@@ -176,8 +175,8 @@ struct HostAttributeList::Attribute
 		v.binaryValue = new char[sizeInBytes];
 		memcpy (v.binaryValue, value, sizeInBytes);
 	}
-	Attribute (Attribute&& o) { *this = std::move (o); }
-	Attribute& operator= (Attribute&& o)
+	Attribute (Attribute&& o) SMTG_NOEXCEPT { *this = std::move (o); }
+	Attribute& operator= (Attribute&& o) SMTG_NOEXCEPT
 	{
 		v = o.v;
 		size = o.size;
@@ -216,7 +215,7 @@ private:
 		double floatValue;
 		TChar* stringValue;
 		char* binaryValue;
-	} v;
+	} v {};
 	uint32 size {0};
 	Type type {Type::kUninitialized};
 };
@@ -236,10 +235,7 @@ IPtr<IAttributeList> HostAttributeList::make ()
 HostAttributeList::HostAttributeList () {FUNKNOWN_CTOR}
 
 //-----------------------------------------------------------------------------
-HostAttributeList::~HostAttributeList () noexcept
-{
-	FUNKNOWN_DTOR
-}
+HostAttributeList::~HostAttributeList () noexcept {FUNKNOWN_DTOR}
 
 //-----------------------------------------------------------------------------
 tresult PLUGIN_API HostAttributeList::setInt (AttrID aid, int64 value)
@@ -338,5 +334,6 @@ tresult PLUGIN_API HostAttributeList::getBinary (AttrID aid, const void*& data, 
 	return kResultFalse;
 }
 
-} // Vst
-} // Steinberg
+//------------------------------------------------------------------------
+} // namespace Vst
+} // namespace Steinberg

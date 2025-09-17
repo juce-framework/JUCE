@@ -27,12 +27,11 @@ namespace Steinberg {
 namespace Vst {
 
 //------------------------------------------------------------------------
-/** \defgroup vst3typedef VST 3 Data Types */
-/*@{*/
-//------------------------------------------------------------------------
+/** \ingroup vst3typedef */
+/**@{*/
 /** Physical UI Type */
 typedef uint32 PhysicalUITypeID;
-/*@}*/
+/**@}*/
 
 //------------------------------------------------------------------------
 /** PhysicalUITypeIDs describes the type of Physical UI (PUI) which could be associated to a note
@@ -150,9 +149,10 @@ class INoteExpressionPhysicalUIMapping : public FUnknown
 {
 public:
 	/** Fills the list of mapped [physical UI (in) - note expression (out)] for a given bus index
-	 * and channel. */
-	virtual tresult PLUGIN_API getPhysicalUIMapping (int32 busIndex, int16 channel,
-	                                                 PhysicalUIMapList& list) = 0;
+	 * and channel. 
+	 * \note [UI-thread & Connected] */
+	virtual tresult PLUGIN_API getPhysicalUIMapping (int32 busIndex /*in*/, int16 channel /*in*/,
+	                                                 PhysicalUIMapList& list /*inout*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;

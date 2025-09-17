@@ -92,10 +92,12 @@ public:
 	virtual int32 PLUGIN_API getPointCount () = 0;
 
 	/** Gets the value and offset at a given index. */
-	virtual tresult PLUGIN_API getPoint (int32 index, int32& sampleOffset /*out*/, ParamValue& value /*out*/) = 0;
+	virtual tresult PLUGIN_API getPoint (int32 index /*in*/, int32& sampleOffset /*out*/,
+	                                     ParamValue& value /*out*/) = 0;
 
 	/** Adds a new value at the end of the queue, its index is returned. */
-	virtual tresult PLUGIN_API addPoint (int32 sampleOffset, ParamValue value, int32& index /*out*/) = 0;
+	virtual tresult PLUGIN_API addPoint (int32 sampleOffset /*in*/, ParamValue value /*in*/,
+	                                     int32& index /*out*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;
@@ -124,11 +126,12 @@ public:
 	virtual int32 PLUGIN_API getParameterCount () = 0;
 
 	/** Returns the queue at a given index. */
-	virtual IParamValueQueue* PLUGIN_API getParameterData (int32 index) = 0;
+	virtual IParamValueQueue* PLUGIN_API getParameterData (int32 index /*in*/) = 0;
 
 	/** Adds a new parameter queue with a given ID at the end of the list,
 	returns it and its index in the parameter changes list. */
-	virtual IParamValueQueue* PLUGIN_API addParameterData (const ParamID& id, int32& index /*out*/) = 0;
+	virtual IParamValueQueue* PLUGIN_API addParameterData (const ParamID& id /*in*/,
+	                                                       int32& index /*out*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;

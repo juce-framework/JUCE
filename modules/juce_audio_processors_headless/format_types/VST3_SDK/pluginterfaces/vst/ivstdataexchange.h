@@ -30,9 +30,12 @@ namespace Vst {
 class IAudioProcessor;
 
 //------------------------------------------------------------------------
+/** \ingroup vst3typedef */
+/**@{*/
 typedef uint32 DataExchangeQueueID;
 typedef uint32 DataExchangeBlockID;
 typedef uint32 DataExchangeUserContextID;
+/**@}*/
 
 //------------------------------------------------------------------------
 static SMTG_CONSTEXPR DataExchangeQueueID InvalidDataExchangeQueueID = kMaxInt32;

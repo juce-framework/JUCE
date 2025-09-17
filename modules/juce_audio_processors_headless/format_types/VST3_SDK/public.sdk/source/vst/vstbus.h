@@ -41,7 +41,7 @@
 #include "pluginterfaces/vst/ivstaudioprocessor.h"
 
 #include <string>
-#if SMTG_CPP_17
+#if defined(SMTG_CPP_17) && SMTG_CPP_17
 #include <string_view>
 #endif
 #include <vector>
@@ -67,7 +67,7 @@ public:
 	/** Activates the bus. */
 	void setActive (TBool state) { active = state; }
 
-#if SMTG_CPP_17
+#if defined(SMTG_CPP_17) && SMTG_CPP_17
 	/** Sets a new name for this bus. */
 	void setName (std::u16string_view newName) { name = newName; }
 #else

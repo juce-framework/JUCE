@@ -41,32 +41,36 @@ class IAttributeList : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
+	/** \ingroup vst3typedef */
 	typedef const char* AttrID;
 
 	/** Sets integer value. */
-	virtual tresult PLUGIN_API setInt (AttrID id, int64 value) = 0;
+	virtual tresult PLUGIN_API setInt (AttrID id /*in*/, int64 value /*in*/) = 0;
 
 	/** Gets integer value. */
-	virtual tresult PLUGIN_API getInt (AttrID id, int64& value) = 0;
+	virtual tresult PLUGIN_API getInt (AttrID id /*in*/, int64& value /*out*/) = 0;
 
 	/** Sets float value. */
-	virtual tresult PLUGIN_API setFloat (AttrID id, double value) = 0;
+	virtual tresult PLUGIN_API setFloat (AttrID id /*in*/, double value /*in*/) = 0;
 
 	/** Gets float value. */
-	virtual tresult PLUGIN_API getFloat (AttrID id, double& value) = 0;
+	virtual tresult PLUGIN_API getFloat (AttrID id /*in*/, double& value /*out*/) = 0;
 
 	/** Sets string value (UTF16) (must be null-terminated!). */
-	virtual tresult PLUGIN_API setString (AttrID id, const TChar* string) = 0;
+	virtual tresult PLUGIN_API setString (AttrID id /*in*/, const TChar* string /*in*/) = 0;
 
 	/** Gets string value (UTF16). Note that Size is in Byte, not the string Length!
-		Do not forget to multiply the length by sizeof (TChar)! */
-	virtual tresult PLUGIN_API getString (AttrID id, TChar* string, uint32 sizeInBytes) = 0;
+	    Do not forget to multiply the length by sizeof (TChar)! */
+	virtual tresult PLUGIN_API getString (AttrID id /*in*/, TChar* string /*out*/,
+	                                      uint32 sizeInBytes /*in*/) = 0;
 
 	/** Sets binary data. */
-	virtual tresult PLUGIN_API setBinary (AttrID id, const void* data, uint32 sizeInBytes) = 0;
+	virtual tresult PLUGIN_API setBinary (AttrID id /*in*/, const void* data /*in*/,
+	                                      uint32 sizeInBytes /*in*/) = 0;
 
 	/** Gets binary data. */
-	virtual tresult PLUGIN_API getBinary (AttrID id, const void*& data, uint32& sizeInBytes) = 0;
+	virtual tresult PLUGIN_API getBinary (AttrID id /*in*/, const void*& data /*out*/,
+	                                      uint32& sizeInBytes) = 0;
 //------------------------------------------------------------------------
 	static const FUID iid;
 };
@@ -81,9 +85,10 @@ DECLARE_CLASS_IID (IAttributeList, 0x1E5F0AEB, 0xCC7F4533, 0xA2544011, 0x38AD5EE
 - [released: 3.6.0]
 - [optional]
 
-Interface to access preset meta information from stream, used, for example, in setState in order to inform the plug-in about
-the current context in which the preset loading occurs (Project context or Preset load (see \ref StateType))
-or used to get the full file path of the loaded preset (if available).
+Interface to access preset meta information from stream, for example used in setState\getState
+in order to inform the plug-in about the current context in which the preset loading\saving occurs
+(Project context or Preset load\save (see \ref StateType)) or used to get the full file path of the
+loaded preset (if available).
 
 \code{.cpp}
 //------------------------------------------------------------------------
@@ -96,12 +101,12 @@ tresult PLUGIN_API MyPlugin::setState (IBStream* state)
 	FUnknownPtr<IStreamAttributes> stream (state);
 	if (stream)
 	{
-		IAttributeList* list = stream->getAttributes ();
-		if (list)
+		if (IAttributeList* list = stream->getAttributes ())
 		{
 			// get the current type (project/Default..) of this state
 			String128 string;
-			if (list->getString (PresetAttributes::kStateType, string, 128 * sizeof (TChar)) == kResultTrue)
+			if (list->getString (PresetAttributes::kStateType, string, 128 * sizeof (TChar)) ==
+				kResultTrue)
 			{
 				UString128 tmp (string);
 				char ascii[128];
@@ -114,15 +119,16 @@ tresult PLUGIN_API MyPlugin::setState (IBStream* state)
 
 			// get the full file path of this state
 			TChar fullPath[1024];
-			if (list->getString (PresetAttributes::kFilePathStringType, fullPath, 1024 * sizeof (TChar)) == kResultTrue)
+			if (list->getString (PresetAttributes::kFilePathStringType, fullPath,
+								 1024 * sizeof (TChar)) == kResultTrue)
 			{
 				// here we have the full path ...
 			}
 		}
 	}
 
-	//...read the state here.....
-	return kResultTrue;
+    //...read the state here.....
+    return kResultTrue;
 }
 \endcode
 */
@@ -131,7 +137,7 @@ class IStreamAttributes : public FUnknown
 public:
 	//------------------------------------------------------------------------
 	/** Gets filename (without file extension) of the stream. */
-	virtual tresult PLUGIN_API getFileName (String128 name) = 0;
+	virtual tresult PLUGIN_API getFileName (String128 name /*inout*/) = 0;
 
 	/** Gets meta information list. */
 	virtual IAttributeList* PLUGIN_API getAttributes () = 0;

@@ -22,9 +22,8 @@
 
 #if SMTG_OS_WINDOWS
 #include <objbase.h>
-#endif
 
-#if SMTG_OS_MACOS
+#elif SMTG_OS_MACOS
 #include <CoreFoundation/CoreFoundation.h>
 
 #if !defined (SMTG_USE_STDATOMIC_H)
@@ -115,7 +114,6 @@ int32 PLUGIN_API atomicAdd (int32& var, int32 d)
 //------------------------------------------------------------------------
 //	FUID implementation
 //------------------------------------------------------------------------
-
 FUID::FUID ()
 {
 	memset (data, 0, sizeof (TUID));
@@ -140,6 +138,7 @@ FUID::FUID (FUID&& other)
 	memcpy (data, other.data, sizeof (TUID));
 }
 
+//------------------------------------------------------------------------
 FUID& FUID::operator= (FUID&& other)
 {
 	memcpy (data, other.data, sizeof (TUID));
@@ -151,10 +150,6 @@ FUID& FUID::operator= (FUID&& other)
 bool FUID::generate ()
 {
 #if SMTG_OS_WINDOWS
-#if defined(_M_ARM64) || defined(_M_ARM)
-	//#warning implement me!
-	return false;
-#else
 	GUID guid;
 	HRESULT hr = CoCreateGuid (&guid);
 	switch (hr)
@@ -164,7 +159,6 @@ bool FUID::generate ()
 		case (HRESULT)RPC_S_UUID_LOCAL_ONLY:
 		default: return false;
 	}
-#endif
 
 #elif SMTG_OS_MACOS
 	CFUUIDRef uuid = CFUUIDCreate (kCFAllocatorDefault);

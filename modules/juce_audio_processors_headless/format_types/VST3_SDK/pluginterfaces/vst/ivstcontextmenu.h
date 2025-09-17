@@ -30,31 +30,33 @@ namespace Vst {
 class IContextMenu;
 
 //------------------------------------------------------------------------
-/** Extended host callback interface Vst::IComponentHandler3 for an edit controller. 
+/** Extended host callback interface Vst::IComponentHandler3 for an edit controller.
 \ingroup vstIHost vst350
 - [host imp]
 - [extends IComponentHandler]
 - [released: 3.5.0]
 - [optional]
 
-A plug-in can ask the host to create a context menu for a given exported parameter ID or a generic context menu.\n
+A plug-in can ask the host to create a context menu for a given exported parameter ID or a generic
+context menu.\n
 
-The host may pre-fill this context menu with specific items regarding the parameter ID like "Show automation for parameter",
-"MIDI learn" etc...\n
+The host may pre-fill this context menu with specific items regarding the parameter ID like "Show
+automation for parameter", "MIDI learn" etc...\n
 
 The plug-in can use the context menu in two ways :
-- add its own items to the menu via the IContextMenu interface and call IContextMenu::popup(..) to create the pop-up. See the \ref IContextMenuExample.
+- add its own items to the menu via the IContextMenu interface and call IContextMenu::popup(..) to
+create the pop-up. See the \ref IContextMenuExample.
 - extract the host menu items and add them to a context menu created by the plug-in.
 
-\b Note: You can and should use this even if you do not add your own items to the menu as this is considered to be a big user value.
+\b Note: You can and should use this even if you do not add your own items to the menu as this is
+considered to be a big user value.
 
 \sa IContextMenu
 \sa IContextMenuTarget
 
 \section IContextMenuExample Examples
-- For example, Cubase adds its owned entries in the context menu opened with right-click on an exported parameter when the plug-in uses createContextMenu.
-\image html "contextmenuexample.png"
-\n
+- For example, Cubase adds its owned entries in the context menu opened with right-click on an
+exported parameter when the plug-in uses createContextMenu. \image html "contextmenuexample.png" \n
 - Adding plug-in specific items to the context menu:
 
 \code{.cpp}
@@ -62,56 +64,60 @@ The plug-in can use the context menu in two ways :
 class PluginContextMenuTarget : public IContextMenuTarget, public FObject
 {
 public:
-	PluginContextMenuTarget () {}
+    PluginContextMenuTarget () {}
 
-	virtual tresult PLUGIN_API executeMenuItem (int32 tag)
-	{
-		// this will be called if the user has executed one of the menu items of the plug-in.
-		// It will not be called for items of the host.
-		switch (tag)
-		{
-			case 1: break;
-			case 2: break;
-		}
-		return kResultTrue;
-	}
+    tresult PLUGIN_API executeMenuItem (int32 tag) override
+    {
+        // this will be called if the user has executed one of the menu items of the plug-in.
+        // It will not be called for items of the host.
+        switch (tag)
+        {
+            case 1: break;
+            case 2: break;
+        }
+        return kResultTrue;
+    }
 
-	OBJ_METHODS(PluginContextMenuTarget, FObject)
-	DEFINE_INTERFACES
-		DEF_INTERFACE (IContextMenuTarget)
-	END_DEFINE_INTERFACES (FObject)
-	REFCOUNT_METHODS(FObject)
+    OBJ_METHODS(PluginContextMenuTarget, FObject)
+    DEFINE_INTERFACES
+        DEF_INTERFACE (IContextMenuTarget)
+    END_DEFINE_INTERFACES (FObject)
+    REFCOUNT_METHODS(FObject)
 };
 
 // The following is the code to create the context menu
-void popupContextMenu (IComponentHandler* componentHandler, IPlugView* view, const ParamID* paramID, UCoord x, UCoord y)
+void popupContextMenu (IComponentHandler* componentHandler, IPlugView* view, const ParamID* paramID,
+UCoord x, UCoord y)
 {
-	if (componentHandler == 0 || view == 0)
-		return;
-	FUnknownPtr<IComponentHandler3> handler (componentHandler);
-	if (handler == 0)
-		return;
-	IContextMenu* menu = handler->createContextMenu (view, paramID);
-	if (menu)
-	{
-		// here you can add your entries (optional)
-		PluginContextMenuTarget* target = new PluginContextMenuTarget ();
-		
-		IContextMenu::Item item = {0};
-		UString128 ("My Item 1").copyTo (item.name, 128);
-		item.tag = 1;
-		menu->addItem (item, target);
+    if (componentHandler == 0 || view == 0)
+        return;
+    FUnknownPtr<IComponentHandler3> handler (componentHandler);
+    if (handler == 0)
+        return;
+    if (IContextMenu* menu = handler->createContextMenu (view, paramID))
+    {
+        // here you can add your entries (optional)
+        PluginContextMenuTarget* target = new PluginContextMenuTarget ();
+        
 
-		UString128 ("My Item 2").copyTo (item.name, 128);
-		item.tag = 2;
-		menu->addItem (item, target);
-		target->release ();
-		//--end of adding new entries
-		
-		// here the the context menu will be pop-up (and it waits a user interaction)
-		menu->popup (x, y);
-		menu->release ();
-	}
+
+        IContextMenu::Item item = {0};
+        UString128 ("My Item 1").copyTo (item.name, 128);
+        item.tag = 1;
+        menu->addItem (item, target);
+
+        UString128 ("My Item 2").copyTo (item.name, 128);
+        item.tag = 2;
+        menu->addItem (item, target);
+        target->release ();
+        //--end of adding new entries
+        
+
+
+        // here the the context menu will be pop-up (and it waits a user interaction)
+        menu->popup (x, y);
+        menu->release ();
+    }
 }
 \endcode
 */
@@ -119,12 +125,14 @@ class IComponentHandler3 : public FUnknown
 {
 public:
 	/** Creates a host context menu for a plug-in:
-		- If paramID is zero, the host may create a generic context menu.
-		- The IPlugView object must be valid.
-		- The return IContextMenu object needs to be released afterwards by the plug-in.
-	*/
-	virtual IContextMenu* PLUGIN_API createContextMenu (IPlugView* plugView, const ParamID* paramID) = 0;
-	//------------------------------------------------------------------------
+	 *   - If paramID is zero, the host may create a generic context menu.
+	 *   - The IPlugView object must be valid.
+	 *   - The return IContextMenu object needs to be released afterwards by the plug-in.
+	 * 
+	 * \note [UI-thread & (Initialized | Connected) & plugView] */
+	virtual IContextMenu* PLUGIN_API createContextMenu (IPlugView* plugView /*in*/,
+	                                                    const ParamID* paramID /*in*/) = 0;
+//------------------------------------------------------------------------
 	static const FUID iid;
 };
 
@@ -146,8 +154,9 @@ this menu item.
 class IContextMenuTarget : public FUnknown
 {
 public:
-	/** Called when an menu item was executed. */
-	virtual tresult PLUGIN_API executeMenuItem (int32 tag) = 0;
+	/** Called when an menu item was executed.
+	 * \note [UI-thread & (Initialized | Connected) & plugView] */
+	virtual tresult PLUGIN_API executeMenuItem (int32 tag /*in*/) = 0;
 	//------------------------------------------------------------------------
 	static const FUID iid;
 };
@@ -189,22 +198,30 @@ class IContextMenu : public FUnknown
 public:
 	typedef IContextMenuItem Item;
 	
-	/** Gets the number of menu items. */
+	/** Gets the number of menu items.
+	 * \note [UI-thread] */
 	virtual int32 PLUGIN_API getItemCount () = 0;
 
-	/** Gets a menu item and its target (target could be not assigned). */
-	virtual tresult PLUGIN_API getItem (int32 index, Item& item /*out*/, IContextMenuTarget** target /*out*/) = 0;
+	/** Gets a menu item and its target (target could be not assigned).
+	 * \note [UI-thread] */
+	virtual tresult PLUGIN_API getItem (int32 index /*in*/, Item& item /*out*/,
+	                                    IContextMenuTarget** target /*out*/) = 0;
 
-	/** Adds a menu item and its target. */
-	virtual tresult PLUGIN_API addItem (const Item& item, IContextMenuTarget* target) = 0;
+	/** Adds a menu item and its target.
+	 * \note [UI-thread] */
+	virtual tresult PLUGIN_API addItem (const Item& item /*in*/,
+	                                    IContextMenuTarget* target /*in*/) = 0;
 
-	/** Removes a menu item. */
-	virtual tresult PLUGIN_API removeItem (const Item& item, IContextMenuTarget* target) = 0;
+	/** Removes a menu item.
+	 * \note [UI-thread] */
+	virtual tresult PLUGIN_API removeItem (const Item& item /*in*/,
+	                                       IContextMenuTarget* target /*in*/) = 0;
 
-	/** Pop-ups the menu. Coordinates are relative to the top-left position of the plug-ins view. */
-	virtual tresult PLUGIN_API popup (UCoord x, UCoord y) = 0;
+	/** Pop-ups the menu. Coordinates are relative to the top-left position of the plug-ins view.
+	 * \note [UI-thread] */
+	virtual tresult PLUGIN_API popup (UCoord x /*in*/, UCoord y /*in*/) = 0;
 
-	//------------------------------------------------------------------------
+//------------------------------------------------------------------------
 	static const FUID iid;
 };
 

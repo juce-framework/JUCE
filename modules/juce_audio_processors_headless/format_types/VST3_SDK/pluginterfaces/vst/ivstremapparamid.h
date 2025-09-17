@@ -51,14 +51,16 @@ public:
 	 * plug-ins).
 	 * The retrieved paramID should match the one it replaces, maintaining the same
 	 * behavior during automation playback. Called in UI-Thread context.
+	 *
 	 * @param[in] pluginToReplaceUID - TUID of plug-in (processor) that will be replaced
 	 * @param[in] oldParamID - paramID (or index for VST 2 plug-ins) to be replaced
 	 * @param[out] newParamID - contains the associated paramID to be used
 	 *
 	 * @return kResultTrue if a compatible parameter is available (newParamID has the appropriate
 	 * value, it could be the same than oldParamID), or kResultFalse if no compatible parameter is
-	 * available (newParamID is undefined)
-	 */
+	 * available (newParamID is undefined).
+	 *
+	 * \note [UI-thread & Initialized] */
 	virtual tresult PLUGIN_API getCompatibleParamID (const TUID pluginToReplaceUID /*in*/,
 	                                                 ParamID oldParamID /*in*/,
 	                                                 ParamID& newParamID /*out*/) = 0;
@@ -67,7 +69,6 @@ public:
 };
 
 DECLARE_CLASS_IID (IRemapParamID, 0x2B88021E, 0x6286B646, 0xB49DF76A, 0x5663061C)
-
 
 //------------------------------------------------------------------------
 } // namespace Vst

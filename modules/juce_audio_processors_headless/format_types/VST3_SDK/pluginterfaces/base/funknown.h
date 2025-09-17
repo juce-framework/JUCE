@@ -119,7 +119,8 @@ public:																			        \
 
 //------------------------------------------------------------------------
 #define FUNKNOWN_CTOR	{ __funknownRefCount = 1; }
-#if SMTG_FUNKNOWN_DTOR_ASSERT
+
+#if defined(SMTG_FUNKNOWN_DTOR_ASSERT) && SMTG_FUNKNOWN_DTOR_ASSERT
 #include <cassert>
 #define FUNKNOWN_DTOR { assert (__funknownRefCount == 0); }
 #else

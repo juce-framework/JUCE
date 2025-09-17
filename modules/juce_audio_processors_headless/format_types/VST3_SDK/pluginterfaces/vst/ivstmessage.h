@@ -65,7 +65,8 @@ DECLARE_CLASS_IID (IMessage, 0x936F033B, 0xC6C047DB, 0xBB0882F8, 0x13C1E613)
 - [mandatory]
 
 This interface is used for the communication of separate components.
-Note that some hosts will place a proxy object between the components so that they are not directly connected.
+Note that some hosts will place a proxy object between the components so that they are not directly
+connected.
 
 \see \ref vst3Communication
 */
@@ -73,14 +74,17 @@ class IConnectionPoint : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
-	/** Connects this instance with another connection point. */
-	virtual tresult PLUGIN_API connect (IConnectionPoint* other) = 0;
+	/** Connects this instance with another connection point.
+	 * \note [UI-thread & Initialized] */
+	virtual tresult PLUGIN_API connect (IConnectionPoint* other /*in*/) = 0;
 
-	/** Disconnects a given connection point from this. */
-	virtual tresult PLUGIN_API disconnect (IConnectionPoint* other) = 0;
+	/** Disconnects a given connection point from this.
+	 * \note [UI-thread & Connected] */
+	virtual tresult PLUGIN_API disconnect (IConnectionPoint* other /*in*/) = 0;
 
-	/** Called when a message has been sent from the connection point to this. */
-	virtual tresult PLUGIN_API notify (IMessage* message) = 0;
+	/** Called when a message has been sent from the connection point to this.
+	 * \note [UI-thread & Connected] */
+	virtual tresult PLUGIN_API notify (IMessage* message /*in*/) = 0;
 
 //------------------------------------------------------------------------
 	static const FUID iid;

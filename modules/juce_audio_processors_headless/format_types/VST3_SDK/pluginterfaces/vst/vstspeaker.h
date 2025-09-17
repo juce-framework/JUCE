@@ -35,8 +35,8 @@ const SpeakerArrangement kStereo = kSpeakerL | kSpeakerR; // => hex: 0x03 / bina
 
 //------------------------------------------------------------------------
 /** Speaker Definitions.
-\ingroup speakerArrangements */
-//------------------------------------------------------------------------
+ * \ingroup speakerArrangements
+ */
 /**@{*/
 const Speaker kSpeakerL    = 1 << 0;		///< Left (L)
 const Speaker kSpeakerR    = 1 << 1;		///< Right (R)
@@ -115,9 +115,10 @@ namespace SpeakerArr
 {
 //------------------------------------------------------------------------
 /** Speaker Arrangement Definitions.
-* for example: 5.0.5.3 for 5x Middle + 0x LFE + 5x Top + 3x Bottom
-\ingroup speakerArrangements */
-/*@{*/
+ * for example: 5.0.5.3 for 5x Middle + 0x LFE + 5x Top + 3x Bottom
+ * \ingroup speakerArrangements
+ */
+/**@{*/
 const SpeakerArrangement kEmpty			 = 0;          ///< empty arrangement
 const SpeakerArrangement kMono			 = kSpeakerM;  ///< M
 const SpeakerArrangement kStereo		 = kSpeakerL   | kSpeakerR;    ///< L R
@@ -443,8 +444,9 @@ const SpeakerArrangement k50_4_4 = kSpeakerL | kSpeakerR | kSpeakerC | kSpeakerL
 
 //------------------------------------------------------------------------
 /** Speaker Arrangement String Representation.
-\ingroup speakerArrangements */
-/*@{*/
+ * \ingroup speakerArrangements
+ */
+/**@{*/
 const CString kStringEmpty		= "";
 const CString kStringMono		= "Mono";
 const CString kStringStereo		= "Stereo";
@@ -552,12 +554,13 @@ const CString kStringAmbi4thOrder = "4OA";
 const CString kStringAmbi5thOrder = "5OA";
 const CString kStringAmbi6thOrder = "6OA";
 const CString kStringAmbi7thOrder = "7OA";
-/*@}*/
+/**@}*/
 
 //------------------------------------------------------------------------
 /** Speaker Arrangement String Representation with Speakers Name.
-\ingroup speakerArrangements */
-/*@{*/
+ * \ingroup speakerArrangements
+ */
+/**@{*/
 const CString kStringMonoS		= "M";
 const CString kStringStereoS	= "L R";
 const CString kStringStereoWideS = "Lw Rw";
@@ -659,12 +662,13 @@ const CString kStringAmbi4thOrderS = "0..24";
 const CString kStringAmbi5thOrderS = "0..35";
 const CString kStringAmbi6thOrderS = "0..48";
 const CString kStringAmbi7thOrderS = "0..63";
-/*@}*/
+/**@}*/
 
 //------------------------------------------------------------------------
 /** Returns number of channels used in speaker arrangement.
-\ingroup speakerArrangements */
-/*@{*/
+ * \ingroup speakerArrangements
+ */
+/**@{*/
 inline int32 getChannelCount (SpeakerArrangement arr)
 {
 	int32 count = 0;
@@ -679,7 +683,9 @@ inline int32 getChannelCount (SpeakerArrangement arr)
 
 //------------------------------------------------------------------------
 /** Returns the index of a given speaker in a speaker arrangement (-1 if speaker is not part of the
- * arrangement). */
+ * arrangement).
+ * \ingroup speakerArrangements
+ */
 inline int32 getSpeakerIndex (Speaker speaker, SpeakerArrangement arrangement)
 {
 	// check if speaker is present in arrangement
@@ -699,7 +705,10 @@ inline int32 getSpeakerIndex (Speaker speaker, SpeakerArrangement arrangement)
 }
 
 //------------------------------------------------------------------------
-/** Returns the speaker for a given index in a speaker arrangement (return 0 when out of range). */
+/** Returns the speaker for a given index in a speaker arrangement
+ * Return 0 when out of range.
+ * \ingroup speakerArrangements
+ */
 inline Speaker getSpeaker (const SpeakerArrangement& arr, int32 index)
 {
 	SpeakerArrangement arrTmp = arr;
@@ -713,7 +722,7 @@ inline Speaker getSpeaker (const SpeakerArrangement& arr, int32 index)
 		pos++;
 		if (index2 == index)
 			return (Speaker)1 << pos;
-		
+
 		arrTmp = arrTmp >> 1;
 	}
 	return 0;
@@ -721,14 +730,18 @@ inline Speaker getSpeaker (const SpeakerArrangement& arr, int32 index)
 
 //------------------------------------------------------------------------
 /** Returns true if arrSubSet is a subset speaker of arr (means each speaker of arrSubSet is
- * included in arr). */
+ * included in arr).
+ * \ingroup speakerArrangements
+ */
 inline bool isSubsetOf (const SpeakerArrangement& arrSubSet, const SpeakerArrangement& arr)
 {
 	return (arrSubSet == (arrSubSet & arr));
 }
 
 //------------------------------------------------------------------------
-/** Returns true if arrangement is a Auro configuration. */
+/** Returns true if arrangement is a Auro configuration.
+ * \ingroup speakerArrangements
+ */
 inline bool isAuro (const SpeakerArrangement& arr)
 {
 	if (arr == k90 || arr == k91 || arr == k100 || arr == k101 || arr == k110 || arr == k111 ||
@@ -740,7 +753,9 @@ inline bool isAuro (const SpeakerArrangement& arr)
 }
 
 //------------------------------------------------------------------------
-/** Returns true if arrangement contains top (upper layer) speakers */
+/** Returns true if arrangement contains top (upper layer) speakers
+ * \ingroup speakerArrangements
+ */
 inline bool hasTopSpeakers (const SpeakerArrangement& arr)
 {
 	if (arr & kSpeakerTc || arr & kSpeakerTfl || arr & kSpeakerTfc || arr & kSpeakerTfr ||
@@ -751,18 +766,21 @@ inline bool hasTopSpeakers (const SpeakerArrangement& arr)
 }
 
 //------------------------------------------------------------------------
-/** Returns true if arrangement contains bottom (lower layer) speakers */
+/** Returns true if arrangement contains bottom (lower layer) speakers
+ * \ingroup speakerArrangements
+ */
 inline bool hasBottomSpeakers (const SpeakerArrangement& arr)
 {
-	if (arr & kSpeakerBfl || arr & kSpeakerBfc || arr & kSpeakerBfr || 
-		arr & kSpeakerBsl || arr & kSpeakerBsr ||
-		arr & kSpeakerBrr || arr & kSpeakerBrl || arr & kSpeakerBrc)
+	if (arr & kSpeakerBfl || arr & kSpeakerBfc || arr & kSpeakerBfr || arr & kSpeakerBsl ||
+	    arr & kSpeakerBsr || arr & kSpeakerBrr || arr & kSpeakerBrl || arr & kSpeakerBrc)
 		return true;
 	return false;
 }
 
 //------------------------------------------------------------------------
-/** Returns true if arrangement contains middle layer (at ears level) speakers */
+/** Returns true if arrangement contains middle layer (at ears level) speakers
+ * \ingroup speakerArrangements
+ */
 inline bool hasMiddleSpeakers (const SpeakerArrangement& arr)
 {
 	if (arr & kSpeakerL || arr & kSpeakerR || arr & kSpeakerC || arr & kSpeakerLs ||
@@ -775,7 +793,9 @@ inline bool hasMiddleSpeakers (const SpeakerArrangement& arr)
 }
 
 //------------------------------------------------------------------------
-/** Returns true if arrangement contains LFE speakers */
+/** Returns true if arrangement contains LFE speakers
+ * \ingroup speakerArrangements
+ */
 inline bool hasLfe (const SpeakerArrangement& arr)
 {
 	if (arr & kSpeakerLfe || arr & kSpeakerLfe2)
@@ -784,7 +804,9 @@ inline bool hasLfe (const SpeakerArrangement& arr)
 }
 
 //------------------------------------------------------------------------
-/** Returns true if arrangement is a 3D configuration ((top or bottom) and middle) */
+/** Returns true if arrangement is a 3D configuration ((top or bottom) and middle)
+ * \ingroup speakerArrangements
+ */
 inline bool is3D (const SpeakerArrangement& arr)
 {
 	bool top = hasTopSpeakers (arr);
@@ -797,7 +819,9 @@ inline bool is3D (const SpeakerArrangement& arr)
 }
 
 //------------------------------------------------------------------------
-/** Returns true if arrangement is a Ambisonic configuration. */
+/** Returns true if arrangement is a Ambisonic configuration.
+ * \ingroup speakerArrangements
+ */
 inline bool isAmbisonics (const SpeakerArrangement& arr)
 {
 	if (arr == kAmbi1stOrderACN || arr == kAmbi2cdOrderACN || arr == kAmbi3rdOrderACN ||
@@ -809,9 +833,11 @@ inline bool isAmbisonics (const SpeakerArrangement& arr)
 	return false;
 }
 
-
 //------------------------------------------------------------------------
-/** Converts a speaker of a Ambisonic order 1 to 4 to a Ambisonic order 7 (5 to 7) (return 0 when out of range).*/
+/** Converts a speaker of a Ambisonic order 1 to 4 to a Ambisonic order 7 (5 to 7)
+ * Return 0 when out of range.
+ * \ingroup speakerArrangements
+ */
 inline Speaker convertSpeaker_Ambi_1234Order_to_Ambi567Order (Speaker speaker_1234_order)
 {
 	int32 idx = getSpeakerIndex (speaker_1234_order, kAmbi4thOrderACN);
@@ -821,7 +847,10 @@ inline Speaker convertSpeaker_Ambi_1234Order_to_Ambi567Order (Speaker speaker_12
 }
 
 //------------------------------------------------------------------------
-/** Converts a speaker of a Ambisonic order 5 to 7 to a Ambisonic order 4 (1 to 4) (return 0 when out of range).*/
+/** Converts a speaker of a Ambisonic order 5 to 7 to a Ambisonic order 4 (1 to 4).
+ * Return 0 when out of range.
+ * \ingroup speakerArrangements
+ */
 inline Speaker convertSpeaker_Ambi_567Order_to_Ambi1234Order (Speaker speaker_567_order)
 {
 	int32 idx = getSpeakerIndex (speaker_567_order, kAmbi7thOrderACN);
@@ -832,7 +861,9 @@ inline Speaker convertSpeaker_Ambi_567Order_to_Ambi1234Order (Speaker speaker_56
 
 //------------------------------------------------------------------------
 /** Returns the speaker arrangement associated to a string representation.
-    Returns kEmpty if no associated arrangement is known. */
+ *  Returns kEmpty if no associated arrangement is known.
+ * \ingroup speakerArrangements
+ */
 inline SpeakerArrangement getSpeakerArrangementFromString (CString arrStr)
 {
 	if (!strcmp8 (arrStr, kStringMono))
@@ -858,7 +889,7 @@ inline SpeakerArrangement getSpeakerArrangementFromString (CString arrStr)
 	if (!strcmp8 (arrStr, kStringStereoBF))
 		return kStereoBF;
 	if (!strcmp8 (arrStr, kStringCineFront))
-		return kCineFront; 
+		return kCineFront;
 	if (!strcmp8 (arrStr, kString30Cine))
 		return k30Cine;
 	if (!strcmp8 (arrStr, kString30Music))
@@ -916,7 +947,7 @@ inline SpeakerArrangement getSpeakerArrangementFromString (CString arrStr)
 	if (!strcmp8 (arrStr, kString71CineCenterHigh))
 		return k71CineCenterHigh;
 	if (!strcmp8 (arrStr, kString50_2))
-		return k50_2; 
+		return k50_2;
 	if (!strcmp8 (arrStr, kString51_2))
 		return k51_2;
 	if (!strcmp8 (arrStr, kString50_2TopSide))
@@ -926,11 +957,11 @@ inline SpeakerArrangement getSpeakerArrangementFromString (CString arrStr)
 	if (!strcmp8 (arrStr, kString71CineFullRear))
 		return k71CineFullRear;
 	if (!strcmp8 (arrStr, kString90Cine))
-		return k90Cine; 
+		return k90Cine;
 	if (!strcmp8 (arrStr, kString91Cine))
 		return k91Cine;
 	if (!strcmp8 (arrStr, kString100Cine))
-		return k100Cine; 
+		return k100Cine;
 	if (!strcmp8 (arrStr, kString101Cine))
 		return k101Cine;
 	if (!strcmp8 (arrStr, kString50_4))
@@ -944,7 +975,7 @@ inline SpeakerArrangement getSpeakerArrangementFromString (CString arrStr)
 	if (!strcmp8 (arrStr, kString41_4_1))
 		return k41_4_1;
 	if (!strcmp8 (arrStr, kString70_2))
-		return k70_2; 
+		return k70_2;
 	if (!strcmp8 (arrStr, kString71_2))
 		return k71_2;
 	if (!strcmp8 (arrStr, kString70_2_TF))
@@ -964,7 +995,7 @@ inline SpeakerArrangement getSpeakerArrangementFromString (CString arrStr)
 	if (!strcmp8 (arrStr, kString71_6))
 		return k71_6;
 	if (!strcmp8 (arrStr, kString90_4))
-		return k90_4; 
+		return k90_4;
 	if (!strcmp8 (arrStr, kString91_4))
 		return k91_4;
 	if (!strcmp8 (arrStr, kString90_6))
@@ -1006,7 +1037,7 @@ inline SpeakerArrangement getSpeakerArrangementFromString (CString arrStr)
 	if (!strcmp8 (arrStr, kString50_4_2))
 		return k50_4_2;
 	if (!strcmp8 (arrStr, kString70_4_2))
-		return k70_4_2;		
+		return k70_4_2;
 
 	if (!strcmp8 (arrStr, kString50_5_Sony))
 		return k50_5_Sony;
@@ -1042,7 +1073,9 @@ inline SpeakerArrangement getSpeakerArrangementFromString (CString arrStr)
 
 //------------------------------------------------------------------------
 /** Returns the string representation of a given speaker arrangement.
-    Returns kStringEmpty if arr is unknown. */
+ *  Returns kStringEmpty if arr is unknown. 
+ * \ingroup speakerArrangements
+ */
 inline CString getSpeakerArrangementString (SpeakerArrangement arr, bool withSpeakersName)
 {
 	switch (arr)
@@ -1170,7 +1203,9 @@ inline CString getSpeakerArrangementString (SpeakerArrangement arr, bool withSpe
 }
 
 //------------------------------------------------------------------------
-/** Returns a CString representation of a given speaker in a given arrangement */
+/** Returns a CString representation of a given speaker in a given arrangement.
+ * \ingroup speakerArrangements
+ */
 inline CString getSpeakerShortName (const SpeakerArrangement& arr, int32 index)
 {
 	SpeakerArrangement arrTmp = arr;
@@ -1324,7 +1359,7 @@ inline CString getSpeakerShortName (const SpeakerArrangement& arr, int32 index)
 	return "";
 }
 
-/*@}*/
+/**@}*/
 
 //------------------------------------------------------------------------
 } // namespace SpeakerArr
