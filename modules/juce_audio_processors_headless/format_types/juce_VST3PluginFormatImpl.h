@@ -632,23 +632,23 @@ struct VST3HostContextHeadless : public Vst::IComponentHandler,
         return kResultOk;
     }
 
-    tresult PLUGIN_API createInstance (TUID cid, TUID iid, void** obj) override
+    tresult PLUGIN_API createInstance (TUID cid, TUID iidToCreate, void** obj) override
     {
         *obj = nullptr;
 
-        if (! doUIDsMatch (cid, iid))
+        if (! doUIDsMatch (cid, iidToCreate))
         {
             jassertfalse;
             return kInvalidArgument;
         }
 
-        if (doUIDsMatch (cid, Vst::IMessage::iid) && doUIDsMatch (iid, Vst::IMessage::iid))
+        if (doUIDsMatch (cid, Vst::IMessage::iid) && doUIDsMatch (iidToCreate, Vst::IMessage::iid))
         {
             *obj = new Message;
             return kResultOk;
         }
 
-        if (doUIDsMatch (cid, Vst::IAttributeList::iid) && doUIDsMatch (iid, Vst::IAttributeList::iid))
+        if (doUIDsMatch (cid, Vst::IAttributeList::iid) && doUIDsMatch (iidToCreate, Vst::IAttributeList::iid))
         {
             *obj = new AttributeList;
             return kResultOk;
@@ -668,10 +668,10 @@ struct VST3HostContextHeadless : public Vst::IComponentHandler,
     inline tresult PLUGIN_API notifyProgramListChange (Vst::ProgramListID, Steinberg::int32) override;
 
     //==============================================================================
-    tresult PLUGIN_API queryInterface (const TUID iid, void** obj) override
+    tresult PLUGIN_API queryInterface (const TUID iidToQuery, void** obj) override
     {
         return testForMultiple (*this,
-                                iid,
+                                iidToQuery,
                                 UniqueBase<Vst::IComponentHandler>{},
                                 UniqueBase<Vst::IComponentHandler2>{},
                                 UniqueBase<Vst::IComponentHandler3>{},
