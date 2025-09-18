@@ -355,9 +355,6 @@ static void setDPIAwareness()
 
     hasCheckedForDPIAwareness = true;
 
-    if (! JUCEApplicationBase::isStandaloneApp())
-        return;
-
     loadDPIAwarenessFunctions();
 
     if (SetProcessDpiAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
@@ -380,9 +377,6 @@ static bool isPerMonitorDPIAwareProcess()
     static bool dpiAware = []() -> bool
     {
         setDPIAwareness();
-
-        if (! JUCEApplication::isStandaloneApp())
-            return false;
 
         PROCESS_DPI_AWARENESS context{};
         GetProcessDpiAwareness (nullptr, &context);
@@ -580,8 +574,7 @@ static Point<int> convertLogicalScreenPointToPhysical (Point<int> p, HWND h) noe
     return p;
 }
 
-JUCE_API double getScaleFactorForWindow (HWND h);
-JUCE_API double getScaleFactorForWindow (HWND h)
+static double getScaleFactorForWindow (HWND h)
 {
     return (double) GetDpiForWindow (h) / USER_DEFAULT_SCREEN_DPI;
 }
@@ -618,7 +611,7 @@ RTL_OSVERSIONINFOW getWindowsVersionInfo();
 
 double Desktop::getDefaultMasterScale()
 {
-    if (! JUCEApplicationBase::isStandaloneApp() || isPerMonitorDPIAwareProcess())
+    if (isPerMonitorDPIAwareProcess())
         return 1.0;
 
     return getGlobalDPI() / USER_DEFAULT_SCREEN_DPI;
@@ -3397,12 +3390,6 @@ private:
     //==============================================================================
     LRESULT handleDPIChanging (int newDPI, RECT newRect)
     {
-        // Sometimes, windows that should not be automatically scaled (secondary windows in plugins)
-        // are sent WM_DPICHANGED. The size suggested by the OS is incorrect for our unscaled
-        // window, so we should ignore it.
-        if (! isPerMonitorDPIAwareWindow (hwnd))
-            return 0;
-
         const auto newScale = (double) newDPI / USER_DEFAULT_SCREEN_DPI;
 
         if (approximatelyEqual (scaleFactor, newScale))
