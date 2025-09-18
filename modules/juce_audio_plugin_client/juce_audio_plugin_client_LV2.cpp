@@ -346,12 +346,12 @@ public:
         const auto numerator   = parser.parseNumericAtom<float>   (atomBeatsPerBar);
         const auto denominator = parser.parseNumericAtom<int32_t> (atomBeatUnit);
 
-        if (numerator.hasValue() && denominator.hasValue())
+        if (numerator.has_value() && denominator.has_value())
             info->setTimeSignature (TimeSignature { (int) *numerator, (int) *denominator });
 
         info->setBpm (parser.parseNumericAtom<float> (atomBeatsPerMinute));
         info->setPpqPosition (parser.parseNumericAtom<double> (atomBeat));
-        info->setIsPlaying (! approximatelyEqual (parser.parseNumericAtom<float> (atomSpeed).orFallback (0.0f), 0.0f));
+        info->setIsPlaying (! approximatelyEqual (parser.parseNumericAtom<float> (atomSpeed).value_or (0.0f), 0.0f));
         info->setBarCount (parser.parseNumericAtom<int64_t> (atomBar));
 
         if (const auto parsed = parser.parseNumericAtom<int64_t> (atomFrame))
@@ -1451,7 +1451,7 @@ LV2_SYMBOL_EXPORT const LV2_Descriptor* lv2_descriptor (uint32_t index)
             const auto blockLengthUrid = mapFeature->map (mapFeature->handle, LV2_BUF_SIZE__maxBlockLength);
             const auto blockSize = parser.parseNumericOption<int64_t> (findMatchingOption (options, blockLengthUrid));
 
-            if (! blockSize.hasValue())
+            if (! blockSize.has_value())
             {
                 // The host doesn't specify a maximum block size
                 jassertfalse;
