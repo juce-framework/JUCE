@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_processors_headless
   vendor:             juce
-  version:            8.0.8
+  version:            8.0.10
   name:               JUCE audio processor classes without UI
   description:        Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors without UI.
   website:            http://www.juce.com/juce
