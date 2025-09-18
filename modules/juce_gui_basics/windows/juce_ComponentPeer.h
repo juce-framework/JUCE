@@ -194,6 +194,12 @@ public:
 
         If the native window is contained in another window, then the coordinates are
         relative to the parent window's origin, not the screen origin.
+        In this case, the position is specified in the same coordinate space as the size.
+
+        As an example, imagine that setBounds() is called on a contained ComponentPeer
+        with newBounds set to { 10, 20, 30, 40 }, where the peer's native scale factor is 1.5.
+        The new bounds will be converted to physical pixels, { 15, 30, 45, 60 }, meaning that
+        the peer will be positioned at { 15, 30 } *physical pixels* in the parent.
 
         This should result in a callback to handleMovedOrResized().
     */

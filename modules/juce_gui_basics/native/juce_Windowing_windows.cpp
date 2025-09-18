@@ -1422,20 +1422,7 @@ public:
 
     void setBounds (const Rectangle<int>& bounds, bool isNowFullScreen) override
     {
-        // If we try to set new bounds while handling an existing position change,
-        // Windows may get confused about our current scale and size.
-        // This can happen when moving a window between displays, because the mouse-move
-        // generator in handlePositionChanged can cause the window to move again.
-        if (inHandlePositionChanged)
-            return;
-
-        if (isNowFullScreen != isFullScreen())
-            setFullScreen (isNowFullScreen);
-
-        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
-
-        const auto borderSize = findPhysicalBorderSize().value_or (BorderSize<int>{});
-        auto newBounds = borderSize.addedTo ([&]
+        setBoundsPhysical (std::invoke ([&]
         {
             ScopedThreadDPIAwarenessSetter setter { hwnd };
 
@@ -1445,47 +1432,12 @@ public:
             if (inDpiChange)
                 return convertLogicalScreenRectangleToPhysical (bounds, hwnd);
 
+            if (GetParent (hwnd) != nullptr)
+                return (bounds.toDouble() * getPlatformScaleFactor()).toNearestInt();
+
             return convertLogicalScreenRectangleToPhysical (bounds, hwnd)
                     .withPosition (Desktop::getInstance().getDisplays().logicalToPhysical (bounds.getTopLeft()));
-        }());
-
-        if (getTransparencyKind() == TransparencyKind::perPixel)
-        {
-            if (auto parentHwnd = GetParent (hwnd))
-            {
-                auto parentRect = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (parentHwnd)), hwnd);
-                newBounds.translate (parentRect.getX(), parentRect.getY());
-            }
-        }
-
-        const auto oldBounds = [this]
-        {
-            ScopedThreadDPIAwarenessSetter setter { hwnd };
-            RECT result;
-            GetWindowRect (hwnd, &result);
-            return D2DUtilities::toRectangle (result);
-        }();
-
-        const bool hasMoved = (oldBounds.getPosition() != bounds.getPosition());
-        const bool hasResized = (oldBounds.getWidth() != bounds.getWidth()
-                                  || oldBounds.getHeight() != bounds.getHeight());
-
-        DWORD flags = SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED;
-        if (! hasMoved)    flags |= SWP_NOMOVE;
-        if (! hasResized)  flags |= SWP_NOSIZE;
-
-        SetWindowPos (hwnd,
-                      nullptr,
-                      newBounds.getX(),
-                      newBounds.getY(),
-                      newBounds.getWidth(),
-                      newBounds.getHeight(),
-                      flags);
-
-        if (hasResized && isValidPeer (this))
-        {
-            repaintNowIfTransparent();
-        }
+        }), isNowFullScreen);
     }
 
     Rectangle<int> getBounds() const override
@@ -4303,6 +4255,62 @@ private:
         }
 
         return DefWindowProc (h, message, wParam, lParam);
+    }
+
+    void setBoundsPhysical (const Rectangle<int>& bounds, bool isNowFullScreen)
+    {
+        // If we try to set new bounds while handling an existing position change,
+        // Windows may get confused about our current scale and size.
+        // This can happen when moving a window between displays, because the mouse-move
+        // generator in handlePositionChanged can cause the window to move again.
+        if (inHandlePositionChanged)
+            return;
+
+        if (isNowFullScreen != isFullScreen())
+            setFullScreen (isNowFullScreen);
+
+        const ScopedValueSetter scope (shouldIgnoreModalDismiss, true);
+
+        const auto borderSize = findPhysicalBorderSize().value_or (BorderSize<int>{});
+        auto newBounds = borderSize.addedTo (bounds);
+
+        if (getTransparencyKind() == TransparencyKind::perPixel)
+        {
+            if (auto parentHwnd = GetParent (hwnd))
+            {
+                auto parentRect = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (parentHwnd)), hwnd);
+                newBounds.translate (parentRect.getX(), parentRect.getY());
+            }
+        }
+
+        const auto oldBounds = std::invoke ([this]
+        {
+            ScopedThreadDPIAwarenessSetter setter { hwnd };
+            RECT result;
+            GetWindowRect (hwnd, &result);
+            return D2DUtilities::toRectangle (result);
+        });
+
+        const bool hasMoved = (oldBounds.getPosition() != bounds.getPosition());
+        const bool hasResized = (oldBounds.getWidth() != bounds.getWidth()
+                                  || oldBounds.getHeight() != bounds.getHeight());
+
+        DWORD flags = SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED;
+        if (! hasMoved)    flags |= SWP_NOMOVE;
+        if (! hasResized)  flags |= SWP_NOSIZE;
+
+        SetWindowPos (hwnd,
+                      nullptr,
+                      newBounds.getX(),
+                      newBounds.getY(),
+                      newBounds.getWidth(),
+                      newBounds.getHeight(),
+                      flags);
+
+        if (hasResized && isValidPeer (this))
+        {
+            repaintNowIfTransparent();
+        }
     }
 
     bool sendInputAttemptWhenModalMessage()
