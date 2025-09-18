@@ -558,7 +558,8 @@ static Rectangle<ValueType> convertLogicalScreenRectangleToPhysical (Rectangle<V
     return r;
 }
 
-static Point<int> convertPhysicalScreenPointToLogical (Point<int> p, HWND h) noexcept
+template <typename ValueType>
+static Point<ValueType> convertPhysicalScreenPointToLogical (Point<ValueType> p, HWND h) noexcept
 {
     if (isPerMonitorDPIAwareWindow (h))
         return Desktop::getInstance().getDisplays().physicalToLogical (p, getCurrentDisplayFromScaleFactor (h));
@@ -566,7 +567,8 @@ static Point<int> convertPhysicalScreenPointToLogical (Point<int> p, HWND h) noe
     return p;
 }
 
-static Point<int> convertLogicalScreenPointToPhysical (Point<int> p, HWND h) noexcept
+template <typename ValueType>
+static Point<ValueType> convertLogicalScreenPointToPhysical (Point<ValueType> p, HWND h) noexcept
 {
     if (isPerMonitorDPIAwareWindow (h))
         return Desktop::getInstance().getDisplays().logicalToPhysical (p, getCurrentDisplayFromScaleFactor (h));
@@ -1471,8 +1473,19 @@ public:
         return convertPhysicalScreenPointToLogical (getClientRectInScreen().getPosition(), hwnd);
     }
 
-    Point<float> localToGlobal (Point<float> relativePosition) override  { return relativePosition + getScreenPosition().toFloat(); }
-    Point<float> globalToLocal (Point<float> screenPosition) override    { return screenPosition   - getScreenPosition().toFloat(); }
+    Point<float> localToGlobal (Point<float> relativePosition) override
+    {
+        const auto localPhysical = relativePosition * getPlatformScaleFactor();
+        const auto physical = localPhysical + getClientRectInScreen().getPosition().toFloat();
+        return convertPhysicalScreenPointToLogical (physical, hwnd);
+    }
+
+    Point<float> globalToLocal (Point<float> screenPosition) override
+    {
+        const auto physical = convertLogicalScreenPointToPhysical (screenPosition, hwnd);
+        const auto localPhysical = physical - getClientRectInScreen().getPosition().toFloat();
+        return localPhysical / getPlatformScaleFactor();
+    }
 
     using ComponentPeer::localToGlobal;
     using ComponentPeer::globalToLocal;
@@ -1578,12 +1591,13 @@ public:
 
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        auto r = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (hwnd)), hwnd);
+        const auto localPhysical = localPos.toFloat() / getPlatformScaleFactor();
+        auto r = D2DUtilities::toRectangle (getWindowScreenRect (hwnd)).toFloat();
 
-        if (! r.withZeroOrigin().contains (localPos))
+        if (! r.withZeroOrigin().contains (localPhysical))
             return false;
 
-        const auto screenPos = convertLogicalScreenPointToPhysical (localPos + getScreenPosition(), hwnd);
+        const auto screenPos = (localPhysical + getClientRectInScreen().getPosition().toFloat()).roundToInt();
 
         auto w = WindowFromPoint (D2DUtilities::toPOINT (screenPos));
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
@@ -1596,7 +1610,7 @@ public:
 
     BorderSize<int> getFrameSize() const override
     {
-        return findPhysicalBorderSize().value_or (BorderSize<int>{}).multipliedBy (1.0 / scaleFactor);
+        return findPhysicalBorderSize().value_or (BorderSize<int>{}).multipliedBy (1.0 / getPlatformScaleFactor());
     }
 
     bool setAlwaysOnTop (bool alwaysOnTop) override
@@ -1993,7 +2007,7 @@ public:
         return peer->doKeyUp (msg.wParam);
     }
 
-    double getPlatformScaleFactor() const noexcept override
+    double getPlatformScaleFactorWithoutOverride() const noexcept
     {
        #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
         return 1.0;
@@ -2011,6 +2025,31 @@ public:
 
         return scaleFactor;
        #endif
+    }
+
+    double getPlatformScaleFactor() const noexcept override
+    {
+        if (scaleFactorOverride.has_value())
+            return *scaleFactorOverride;
+
+        return getPlatformScaleFactorWithoutOverride();
+    }
+
+    void setCustomPlatformScaleFactor (std::optional<double> scaleIn) override
+    {
+        const auto prev = getPlatformScaleFactor();
+        scaleFactorOverride = scaleIn;
+        const auto next = getPlatformScaleFactor();
+
+        if (approximatelyEqual (prev, next))
+            return;
+
+        scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (next); });
+    }
+
+    std::optional<double> getCustomPlatformScaleFactor() const override
+    {
+        return scaleFactorOverride;
     }
 
     static void getLastError()
@@ -2065,7 +2104,6 @@ public:
     }
 
     bool hasTitleBar() const                 { return (styleFlags & windowHasTitleBar) != 0; }
-    double getScaleFactor() const            { return scaleFactor; }
 
 private:
     HWND hwnd, parentToAddTo;
@@ -2083,6 +2121,7 @@ private:
    #endif
 
     double scaleFactor = 1.0;
+    std::optional<double> scaleFactorOverride;
     bool inDpiChange = 0, inHandlePositionChanged = 0;
     HMONITOR currentMonitor = nullptr;
 
@@ -4264,8 +4303,8 @@ private:
         {
             if (auto parentHwnd = GetParent (hwnd))
             {
-                auto parentRect = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (parentHwnd)), hwnd);
-                newBounds.translate (parentRect.getX(), parentRect.getY());
+                const auto parentRect = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (parentHwnd)), hwnd);
+                newBounds += parentRect.getPosition();
             }
         }
 
@@ -5787,7 +5826,7 @@ static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
     const auto scaleToLookFor = [&]
     {
         if (auto* peer = HWNDComponentPeer::getOwnerOfWindow (hwnd))
-            return peer->getPlatformScaleFactor();
+            return peer->getPlatformScaleFactorWithoutOverride();
 
         return getScaleFactorForWindow (hwnd);
     }();

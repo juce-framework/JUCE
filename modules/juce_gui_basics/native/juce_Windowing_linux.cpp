@@ -106,7 +106,7 @@ public:
         updateScaleFactorFromNewBounds (bounds, false);
 
         auto physicalBounds = parentWindow == 0 ? Desktop::getInstance().getDisplays().logicalToPhysical (bounds)
-                                                : bounds * currentScaleFactor;
+                                                : bounds * getPlatformScaleFactor();
 
         WeakReference<Component> deletionChecker (&component);
 
@@ -140,14 +140,14 @@ public:
     {
         auto physicalParentPosition = XWindowSystem::getInstance()->getPhysicalParentScreenPosition();
         auto parentPosition = parentWindow == 0 ? Desktop::getInstance().getDisplays().physicalToLogical (physicalParentPosition)
-                                                : physicalParentPosition / currentScaleFactor;
+                                                : physicalParentPosition / getPlatformScaleFactor();
 
         auto screenBounds = parentWindow == 0 ? bounds
                                               : bounds.translated (parentPosition.x, parentPosition.y);
 
         if (physical)
             return parentWindow == 0 ? Desktop::getInstance().getDisplays().logicalToPhysical (screenBounds.getTopLeft())
-                                     : screenBounds.getTopLeft() * currentScaleFactor;
+                                     : screenBounds.getTopLeft() * getPlatformScaleFactor();
 
         return screenBounds.getTopLeft();
     }
@@ -270,7 +270,7 @@ public:
         if (trueIfInAChildWindow)
             return true;
 
-        return XWindowSystem::getInstance()->contains (windowH, localPos * currentScaleFactor);
+        return XWindowSystem::getInstance()->contains (windowH, localPos * getPlatformScaleFactor());
     }
 
     void toFront (bool makeActive) override
@@ -332,7 +332,24 @@ public:
 
     double getPlatformScaleFactor() const noexcept override
     {
-        return currentScaleFactor;
+        return scaleFactorOverride.value_or (currentScaleFactor);
+    }
+
+    void setCustomPlatformScaleFactor (std::optional<double> scaleIn) override
+    {
+        const auto prev = getPlatformScaleFactor();
+        scaleFactorOverride = scaleIn;
+        const auto next = getPlatformScaleFactor();
+
+        if (approximatelyEqual (prev, next))
+            return;
+
+        scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (next); });
+    }
+
+    std::optional<double> getCustomPlatformScaleFactor() const override
+    {
+        return scaleFactorOverride;
     }
 
     void setAlpha (float) override                                  {}
@@ -386,7 +403,7 @@ public:
         updateScaleFactorFromNewBounds (physicalBounds, true);
 
         bounds = parentWindow == 0 ? Desktop::getInstance().getDisplays().physicalToLogical (physicalBounds)
-                                   : physicalBounds / currentScaleFactor;
+                                   : physicalBounds / getPlatformScaleFactor();
 
         updateVBlankTimer();
     }
@@ -403,7 +420,7 @@ public:
             windowBorder = [&]()
             {
                 if (auto unscaledBorderSize = XWindowSystem::getInstance()->getBorderSize (windowH))
-                    return OptionalBorderSize { (*unscaledBorderSize).multipliedBy (1.0 / currentScaleFactor) };
+                    return OptionalBorderSize { (*unscaledBorderSize).multipliedBy (1.0 / getPlatformScaleFactor()) };
 
                 return OptionalBorderSize {};
             }();
@@ -460,7 +477,7 @@ private:
 
         void repaint (Rectangle<int> area)
         {
-            regionsNeedingRepaint.add (area * peer.currentScaleFactor);
+            regionsNeedingRepaint.add (area * peer.getPlatformScaleFactor());
         }
 
         void performAnyPendingRepaintsNow()
@@ -511,7 +528,7 @@ private:
                     auto context = peer.getComponent().getLookAndFeel()
                                      .createGraphicsContext (image, -totalArea.getPosition(), adjustedList);
 
-                    context->addTransform (AffineTransform::scale ((float) peer.currentScaleFactor));
+                    context->addTransform (AffineTransform::scale ((float) peer.getPlatformScaleFactor()));
                     peer.handlePaint (*context);
                 }
 
@@ -607,6 +624,7 @@ private:
     Rectangle<int> bounds;
     ComponentPeer::OptionalBorderSize windowBorder;
     bool fullScreen = false, isAlwaysOnTop = false;
+    std::optional<double> scaleFactorOverride;
     double currentScaleFactor = 1.0;
     Array<Component*> glRepaintListeners;
     ScopedWindowAssociation association;
