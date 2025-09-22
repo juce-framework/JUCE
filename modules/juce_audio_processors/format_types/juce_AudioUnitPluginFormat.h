@@ -35,7 +35,7 @@
 namespace juce
 {
 
-#if (JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)) || DOXYGEN
+#if JUCE_INTERNAL_HAS_AU || DOXYGEN
 
 //==============================================================================
 /**

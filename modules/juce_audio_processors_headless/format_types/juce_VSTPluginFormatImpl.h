@@ -34,7 +34,7 @@
 
 #pragma once
 
-#if JUCE_PLUGINHOST_VST
+#if JUCE_INTERNAL_HAS_VST
 
 //==============================================================================
 #undef PRAGMA_ALIGN_SUPPORTED

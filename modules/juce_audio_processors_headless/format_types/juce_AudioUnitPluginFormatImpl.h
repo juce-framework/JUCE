@@ -34,14 +34,14 @@
 
 #pragma once
 
-#if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
+#if JUCE_INTERNAL_HAS_AU
 
 #if JUCE_MAC
 #include <AudioUnit/AUCocoaUIView.h>
 #include <CoreAudioKit/AUGenericView.h>
 #include <AudioToolbox/AudioUnitUtilities.h>
 
-#if JUCE_PLUGINHOST_ARA
+#if JUCE_INTERNAL_HAS_ARA
  #include <ARA_API/ARAAudioUnit.h>
 #endif
 
@@ -412,7 +412,7 @@ namespace AudioUnitFormatHelpers
 
 static inline bool hasARAExtension ([[maybe_unused]] AudioUnit audioUnit)
 {
-   #if JUCE_PLUGINHOST_ARA
+   #if JUCE_INTERNAL_HAS_ARA
     UInt32 propertySize = sizeof (ARA::ARAAudioUnitFactory);
     Boolean isWriteable = FALSE;
 
@@ -441,7 +441,7 @@ using AudioUnitWeakPtr = std::weak_ptr<std::remove_pointer_t<AudioUnit>>;
 
 static std::shared_ptr<const ARA::ARAFactory> getARAFactory ([[maybe_unused]] AudioUnitSharedPtr audioUnit)
 {
-   #if JUCE_PLUGINHOST_ARA
+   #if JUCE_INTERNAL_HAS_ARA
     jassert (audioUnit != nullptr);
 
     UInt32 propertySize = sizeof (ARA::ARAAudioUnitFactory);
@@ -1123,7 +1123,7 @@ public:
         desc.numOutputChannels = getTotalNumOutputChannels();
         desc.isInstrument = (componentDesc.componentType == kAudioUnitType_MusicDevice);
 
-       #if JUCE_PLUGINHOST_ARA
+       #if JUCE_INTERNAL_HAS_ARA
         desc.hasARAExtension = [&]
         {
             UInt32 propertySize = sizeof (ARA::ARAAudioUnitFactory);
@@ -1154,7 +1154,7 @@ public:
 
         visitor.visitAudioUnitClient (Extensions { this });
 
-       #ifdef JUCE_PLUGINHOST_ARA
+       #ifdef JUCE_INTERNAL_HAS_ARA
         struct ARAExtensions final : public ExtensionsVisitor::ARAClient
         {
             explicit ARAExtensions (const AudioUnitPluginInstanceHeadless* instanceIn) : instance (instanceIn) {}

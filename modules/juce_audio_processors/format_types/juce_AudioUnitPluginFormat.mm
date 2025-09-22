@@ -32,7 +32,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
+#if JUCE_INTERNAL_HAS_AU
 
 #include <juce_audio_processors_headless/format_types/juce_AudioUnitPluginFormatImpl.h>
 

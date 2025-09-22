@@ -40,7 +40,7 @@
 
 JUCE_BEGIN_NO_SANITIZE ("vptr")
 
-#if JUCE_PLUGINHOST_VST3
+#if JUCE_INTERNAL_HAS_VST3
  #if JUCE_MAC
   #include <CoreFoundation/CoreFoundation.h>
  #endif

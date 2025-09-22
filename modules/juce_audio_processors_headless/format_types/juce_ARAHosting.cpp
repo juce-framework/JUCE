@@ -32,7 +32,7 @@
   ==============================================================================
 */
 
-#if (JUCE_PLUGINHOST_ARA && (JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_AU) && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX))
+#if JUCE_INTERNAL_HAS_ARA
 
 #include <ARA_Library/Dispatch/ARAHostDispatch.cpp>
 
@@ -366,7 +366,7 @@ public:
                                         if (araEntryPoint.loadFrom (iComponentPtr))
                                             pei = araEntryPoint->bindToDocumentControllerWithRoles (documentController.getRef(), knownRoles, assignedRoles);
                                     },
-                                   #if JUCE_PLUGINHOST_AU && JUCE_MAC
+                                   #if JUCE_INTERNAL_HAS_AU
                                     [this, &pei, knownRoles, assignedRoles] (const ExtensionsVisitor::AudioUnitClient& auClient)
                                     {
                                         auto audioUnit = auClient.getAudioUnitHandle();

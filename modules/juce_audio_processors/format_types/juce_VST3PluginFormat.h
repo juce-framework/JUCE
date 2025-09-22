@@ -35,7 +35,7 @@
 namespace juce
 {
 
-#if (JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)) || DOXYGEN
+#if JUCE_INTERNAL_HAS_VST3
 
 /**
     Implements a plugin format for VST3s.
@@ -47,6 +47,6 @@ class JUCE_API VST3PluginFormat : public VST3PluginFormatHeadless
     void createPluginInstance (const PluginDescription&, double, int, PluginCreationCallback) override;
 };
 
-#endif // JUCE_PLUGINHOST_VST3
+#endif
 
 } // namespace juce

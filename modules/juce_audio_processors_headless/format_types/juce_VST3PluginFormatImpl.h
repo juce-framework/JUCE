@@ -34,7 +34,7 @@
 
 #pragma once
 
-#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
+#if JUCE_INTERNAL_HAS_VST3
 
 #if (JUCE_LINUX || JUCE_BSD)
  #include <sys/utsname.h>
@@ -202,7 +202,7 @@ static std::vector<PluginDescription> createPluginDescriptions (const File& plug
     {
         std::unordered_set<String> factories;
 
-       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+       #if JUCE_INTERNAL_HAS_ARA
         for (const auto& c : info.classes)
             if (c.category == kARAMainFactoryClass)
                 factories.insert (CharPointer_UTF8 (c.name.c_str()));
@@ -979,7 +979,7 @@ struct DescriptionLister
         // The match is determined by the two classes having the same name.
         std::unordered_set<String> araMainFactoryClassNames;
 
-       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+       #if JUCE_INTERNAL_HAS_ARA
         for (Steinberg::int32 i = 0; i < numClasses; ++i)
         {
             PClassInfo info;
@@ -1401,7 +1401,7 @@ static int compareWithString (Type (&charArray)[N], const String& str)
 template <typename Callback>
 static void forEachARAFactory ([[maybe_unused]] IPluginFactory* pluginFactory, [[maybe_unused]] Callback&& cb)
 {
-   #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+   #if JUCE_INTERNAL_HAS_ARA
     const auto numClasses = pluginFactory->countClasses();
     for (Steinberg::int32 i = 0; i < numClasses; ++i)
     {
@@ -1423,7 +1423,7 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory ([[maybe_unused]] IP
 {
     std::shared_ptr<const ARA::ARAFactory> factory;
 
-   #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+   #if JUCE_INTERNAL_HAS_ARA
     forEachARAFactory (pluginFactory,
                        [&pluginFactory, &pluginName, &factory] (const auto& pcClassInfo)
                        {
@@ -3661,4 +3661,4 @@ JUCE_END_NO_SANITIZE
 
 } // namespace juce
 
-#endif // JUCE_PLUGINHOST_VST3
+#endif

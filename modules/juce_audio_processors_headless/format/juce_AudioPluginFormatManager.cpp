@@ -32,8 +32,6 @@
   ==============================================================================
 */
 
-#include <juce_audio_processors_headless/format/juce_PluginFormatDefs.h>
-
 namespace juce
 {
 

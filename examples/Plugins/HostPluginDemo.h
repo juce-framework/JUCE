@@ -40,10 +40,10 @@
                         juce_audio_processors_headless
  exporters:             xcode_mac, vs2022, vs2026, linux_make
 
- moduleFlags:           JUCE_STRICT_REFCOUNTEDPOINTER=1
-                        JUCE_PLUGINHOST_LV2=1
-                        JUCE_PLUGINHOST_VST3=1
-                        JUCE_PLUGINHOST_VST=0
+ moduleFlags:           JUCE_STRICT_REFCOUNTEDPOINTER=1,
+                        JUCE_PLUGINHOST_LV2=1,
+                        JUCE_PLUGINHOST_VST3=1,
+                        JUCE_PLUGINHOST_VST=0,
                         JUCE_PLUGINHOST_AU=1
 
  type:                  AudioProcessor

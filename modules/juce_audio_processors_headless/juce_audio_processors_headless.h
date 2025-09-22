@@ -66,6 +66,72 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_events/juce_events.h>
 
+//==============================================================================
+/** Config: JUCE_PLUGINHOST_VST
+    Enables the VST audio plugin hosting classes. You will need to have the VST2 SDK files in your header search paths. You can obtain the VST2 SDK files from on older version of the VST3 SDK.
+
+    @see VSTPluginFormat, VST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU, JUCE_PLUGINHOST_VST3, JUCE_PLUGINHOST_LADSPA
+*/
+#ifndef JUCE_PLUGINHOST_VST
+ #define JUCE_PLUGINHOST_VST 0
+#endif
+
+/** Config: JUCE_PLUGINHOST_VST3
+    Enables the VST3 audio plugin hosting classes.
+
+    @see VSTPluginFormat, VST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_AU, JUCE_PLUGINHOST_LADSPA
+*/
+#ifndef JUCE_PLUGINHOST_VST3
+ #define JUCE_PLUGINHOST_VST3 0
+#endif
+
+/** Config: JUCE_PLUGINHOST_AU
+    Enables the AudioUnit plugin hosting classes. This is Mac-only, of course.
+
+    @see AudioUnitPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_VST3, JUCE_PLUGINHOST_LADSPA
+*/
+#ifndef JUCE_PLUGINHOST_AU
+ #define JUCE_PLUGINHOST_AU 0
+#endif
+
+/** Config: JUCE_PLUGINHOST_LADSPA
+    Enables the LADSPA plugin hosting classes. This is Linux-only, of course.
+
+    @see LADSPAPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_VST3, JUCE_PLUGINHOST_AU
+ */
+#ifndef JUCE_PLUGINHOST_LADSPA
+ #define JUCE_PLUGINHOST_LADSPA 0
+#endif
+
+/** Config: JUCE_PLUGINHOST_LV2
+    Enables the LV2 plugin hosting classes.
+ */
+#ifndef JUCE_PLUGINHOST_LV2
+ #define JUCE_PLUGINHOST_LV2 0
+#endif
+
+/** Config: JUCE_PLUGINHOST_ARA
+    Enables the ARA plugin extension hosting classes. You will need to download the ARA SDK and specify the
+    path to it either in the Projucer, using juce_set_ara_sdk_path() in your CMake project file.
+
+    The directory can be obtained by recursively cloning https://github.com/Celemony/ARA_SDK and checking out
+    the tag releases/2.1.0.
+*/
+#ifndef JUCE_PLUGINHOST_ARA
+ #define JUCE_PLUGINHOST_ARA 0
+#endif
+
+/** Config: JUCE_CUSTOM_VST3_SDK
+    If enabled, the embedded VST3 SDK in JUCE will not be added to the project and instead you should
+    add the path to your custom VST3 SDK to the project's header search paths. Most users shouldn't
+    need to enable this and should just use the version of the SDK included with JUCE.
+*/
+#ifndef JUCE_CUSTOM_VST3_SDK
+ #define JUCE_CUSTOM_VST3_SDK 0
+#endif
+
+//==============================================================================
+#include <juce_audio_processors_headless/format/juce_PluginFormatDefs.h>
 #include <juce_audio_processors_headless/processors/juce_AudioProcessorListener.h>
 #include <juce_audio_processors_headless/utilities/juce_AAXClientExtensions.h>
 #include <juce_audio_processors_headless/utilities/juce_VST2ClientExtensions.h>

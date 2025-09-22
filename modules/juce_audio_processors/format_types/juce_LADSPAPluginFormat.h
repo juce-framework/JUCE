@@ -35,7 +35,7 @@
 namespace juce
 {
 
-#if (JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)) || DOXYGEN
+#if JUCE_INTERNAL_HAS_LADSPA || DOXYGEN
 
 //==============================================================================
 /** Provided for backwards compatibility; LADSPA plugins are always headless.

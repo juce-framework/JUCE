@@ -32,7 +32,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
+#if JUCE_INTERNAL_HAS_VST3
 
 #include <juce_audio_processors_headless/format_types/juce_VST3PluginFormatImpl.h>
 #include <juce_audio_processors/utilities/juce_NSViewComponentWithParent.h>
@@ -646,4 +646,4 @@ JUCE_END_NO_SANITIZE
 
 } // namespace juce
 
-#endif // JUCE_PLUGINHOST_VST3
+#endif

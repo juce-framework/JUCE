@@ -35,7 +35,7 @@
 #pragma once
 
 #if JUCE_BSD && ! JUCE_CUSTOM_VST3_SDK
- #error To build JUCE VST3 plug-ins on BSD you must use an external BSD-compatible VST3 SDK with JUCE_CUSTOM_VST3_SDK=1
+ #error To build JUCE VST3 plug-ins or hosts on BSD you must use an external BSD-compatible VST3 SDK with JUCE_CUSTOM_VST3_SDK=1
 #endif
 
 // It's important to include this *before* any of the Steinberg headers.
@@ -247,7 +247,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
-#if JucePlugin_Enable_ARA || JUCE_PLUGINHOST_ARA
+#if JucePlugin_Enable_ARA || JUCE_INTERNAL_HAS_ARA
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wpragma-pack")
  #include <ARA_API/ARAVST3.h>
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
@@ -261,7 +261,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
   DEF_CLASS_IID (ARA::IPlugInEntryPoint2)
   DEF_CLASS_IID (ARA::IMainFactory)
  #endif
-#endif // JucePlugin_Enable_ARA || JUCE_PLUGINHOST_ARA
+#endif // JucePlugin_Enable_ARA || JUCE_INTERNAL_HAS_ARA
 
 //==============================================================================
 #if JUCE_WINDOWS

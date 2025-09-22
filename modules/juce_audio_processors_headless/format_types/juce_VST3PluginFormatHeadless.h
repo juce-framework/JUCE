@@ -35,7 +35,7 @@
 namespace juce
 {
 
-#if (JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)) || DOXYGEN
+#if JUCE_INTERNAL_HAS_VST3 || DOXYGEN
 
 /**
     Implements a plugin format for VST3s.
@@ -85,6 +85,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginFormatHeadless)
 };
 
-#endif // JUCE_PLUGINHOST_VST3
+#endif
 
 } // namespace juce

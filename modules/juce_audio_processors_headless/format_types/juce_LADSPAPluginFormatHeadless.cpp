@@ -32,7 +32,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)
+#if JUCE_INTERNAL_HAS_LADSPA
 
 #include <juce_audio_processors_headless/utilities/juce_CommonProcessorUtilities.h>
 

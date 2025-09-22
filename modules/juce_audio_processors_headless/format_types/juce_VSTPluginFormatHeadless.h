@@ -32,7 +32,7 @@
   ==============================================================================
 */
 
-#if (JUCE_PLUGINHOST_VST || DOXYGEN)
+#if JUCE_INTERNAL_HAS_VST || DOXYGEN
 
 namespace juce
 {

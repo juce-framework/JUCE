@@ -32,7 +32,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST
+#if JUCE_INTERNAL_HAS_VST
 
 #include <juce_audio_processors_headless/format_types/juce_VSTPluginFormatImpl.h>
 #include <juce_audio_processors_headless/utilities/juce_CommonProcessorUtilities.h>

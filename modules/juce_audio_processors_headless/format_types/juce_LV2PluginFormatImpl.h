@@ -34,7 +34,7 @@
 
 #pragma once
 
-#if JUCE_PLUGINHOST_LV2 && (! (JUCE_ANDROID || JUCE_IOS))
+#if JUCE_INTERNAL_HAS_LV2
 
 #include <juce_audio_processors_headless/format_types/juce_LV2Common.h>
 #include <juce_audio_processors_headless/format_types/juce_LV2Resources.h>

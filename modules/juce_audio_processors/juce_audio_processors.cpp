@@ -52,7 +52,7 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 
 //==============================================================================
-#if JUCE_PLUGINHOST_VST && (JUCE_LINUX || JUCE_BSD)
+#if JUCE_INTERNAL_HAS_VST && (JUCE_LINUX || JUCE_BSD)
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wvariadic-macros")
  #include <X11/Xlib.h>
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
@@ -60,12 +60,7 @@
  #undef KeyPress
 #endif
 
-#if ! JUCE_WINDOWS && ! JUCE_MAC && ! JUCE_LINUX
- #undef JUCE_PLUGINHOST_VST3
- #define JUCE_PLUGINHOST_VST3 0
-#endif
-
-#if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
+#if JUCE_INTERNAL_HAS_AU
  #include <AudioUnit/AudioUnit.h>
 #endif
 
@@ -85,15 +80,15 @@
 #include "format_types/juce_LV2PluginFormat.cpp"
 
 #if JUCE_UNIT_TESTS
- #if JUCE_PLUGINHOST_VST3
+ #if JUCE_INTERNAL_HAS_VST3
   #include "format_types/juce_VST3PluginFormat_test.cpp"
  #endif
 
- #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
+ #if JUCE_INTERNAL_HAS_AU
   #include "format_types/juce_AudioUnitPluginFormat_test.cpp"
  #endif
 
- #if JUCE_PLUGINHOST_LV2 && (! (JUCE_ANDROID || JUCE_IOS))
+ #if JUCE_INTERNAL_HAS_LV2
   #include "format_types/juce_LV2PluginFormat_test.cpp"
  #endif
 #endif
