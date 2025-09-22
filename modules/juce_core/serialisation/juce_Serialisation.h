@@ -121,7 +121,7 @@ template <typename T> constexpr auto named (std::string_view c, const T& t) { re
 
     @tparam T   the (probably numeric) type of the size value
 
-    @see serialisztionSize()
+    @see serialisationSize()
 
     @tags{Core}
 */
