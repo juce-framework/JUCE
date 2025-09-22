@@ -82,7 +82,7 @@ void VST3PluginFormatHeadless::findAllTypesForFile (OwnedArray<PluginDescription
         if (pluginFactory == nullptr)
             continue;
 
-        auto host = addVSTComSmartPtrOwner (new VST3HostContextHeadless());
+        VSTComSmartPtr host { new VST3HostContextHeadless(), IncrementRef::yes };
 
         for (const auto& d : DescriptionLister::findDescriptionsSlow (*host, *pluginFactory, File (file)))
             results.add (new PluginDescription (d));
@@ -111,7 +111,7 @@ void VST3PluginFormatHeadless::createPluginInstance (const PluginDescription& de
                                                      PluginCreationCallback callback)
 {
     createVst3InstanceImpl<VST3PluginInstanceHeadless> (*this,
-                                                        becomeVSTComSmartPtrOwner (new VST3HostContextHeadless),
+                                                        { new VST3HostContextHeadless(), IncrementRef::no },
                                                         description,
                                                         callback);
 }

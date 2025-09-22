@@ -76,7 +76,7 @@ private:
 
             ItemAndTarget newItem;
             newItem.item = item;
-            newItem.target = addVSTComSmartPtrOwner (target);
+            newItem.target = VSTComSmartPtr (target, IncrementRef::yes);
 
             items.add (newItem);
             return kResultOk;
@@ -180,7 +180,9 @@ private:
             // Unfortunately, Steinberg's docs explicitly say this should be modal..
             handleResult (topLevelMenu->showMenu (options));
            #else
-            topLevelMenu->showMenuAsync (options, ModalCallbackFunction::create (menuFinished, addVSTComSmartPtrOwner (this)));
+            topLevelMenu->showMenuAsync (options,
+                                         ModalCallbackFunction::create (menuFinished,
+                                                                        VSTComSmartPtr (this, IncrementRef::yes)));
            #endif
 
             return kResultOk;
@@ -616,13 +618,13 @@ public:
         if (getActiveEditor() != nullptr)
             return true;
 
-        auto view = becomeVSTComSmartPtrOwner (tryCreatingView());
+        VSTComSmartPtr view { tryCreatingView(), IncrementRef::no };
         return view != nullptr;
     }
 
     VST3PluginWindow* createEditor() override
     {
-        if (auto view = becomeVSTComSmartPtrOwner (tryCreatingView()))
+        if (VSTComSmartPtr view { tryCreatingView(), IncrementRef::no })
             return new VST3PluginWindow (this, view);
 
         return nullptr;
@@ -635,7 +637,7 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
                                              PluginCreationCallback callback)
 {
     createVst3InstanceImpl<VST3PluginInstance> (*this,
-                                                becomeVSTComSmartPtrOwner (new VST3HostContextWithContextMenu),
+                                                { new VST3HostContextWithContextMenu, IncrementRef::no },
                                                 description,
                                                 callback);
 }

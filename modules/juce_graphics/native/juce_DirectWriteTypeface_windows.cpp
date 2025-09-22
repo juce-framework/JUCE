@@ -150,7 +150,8 @@ public:
         if (FAILED (factory->GetSystemFontFallback (fallback.resetAndGetPointerAddress())) || fallback == nullptr)
             return {};
 
-        auto analysisSource = becomeComSmartPtrOwner (new AnalysisSource (c, language));
+        ComSmartPtr analysisSource { new AnalysisSource (c, language), IncrementRef::no };
+
         const auto originalName = getLocalisedFamilyName (*dwFont);
 
         const auto mapped = factories->getFonts().mapCharacters (fallback,

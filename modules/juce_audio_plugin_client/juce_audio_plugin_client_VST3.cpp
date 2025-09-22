@@ -1231,7 +1231,7 @@ public:
     void setAudioProcessor (JuceAudioProcessor* audioProc)
     {
         if (audioProcessor.get() != audioProc)
-            installAudioProcessor (addVSTComSmartPtrOwner (audioProc));
+            installAudioProcessor ({ audioProc, IncrementRef::yes });
     }
 
     tresult PLUGIN_API connect (IConnectionPoint* other) override
@@ -1794,7 +1794,7 @@ private:
     {
         jassert (hostContext != nullptr);
 
-        if (auto message = becomeVSTComSmartPtrOwner (allocateMessage()))
+        if (VSTComSmartPtr message { allocateMessage(), IncrementRef::no })
         {
             message->setMessageID (idTag);
             message->getAttributes()->setInt (idTag, value);
@@ -1912,7 +1912,7 @@ private:
                 return {};
 
             const auto idToUse = parameter != nullptr ? processor.getVSTParamIDForIndex (parameter->getParameterIndex()) : 0;
-            const auto menu = becomeVSTComSmartPtrOwner (handler->createContextMenu (view, &idToUse));
+            VSTComSmartPtr menu { handler->createContextMenu (view, &idToUse), IncrementRef::no };
             return std::make_unique<EditorContextMenu> (editor, menu);
         }
 
@@ -1932,7 +1932,7 @@ private:
     public:
         JuceVST3Editor (JuceVST3EditController& ec, JuceAudioProcessor& p)
             : EditorView (&ec, nullptr),
-              owner (addVSTComSmartPtrOwner (&ec)),
+              owner (&ec, IncrementRef::yes),
               pluginInstance (*p.get())
         {
             createContentWrapperComponentIfNeeded();
@@ -2689,7 +2689,7 @@ public:
         // and not AudioChannelSet::discreteChannels (2) etc.
         jassert (checkBusFormatsAreNotDiscrete());
 
-        comPluginInstance = addVSTComSmartPtrOwner (new JuceAudioProcessor (pluginInstance));
+        comPluginInstance = VSTComSmartPtr (new JuceAudioProcessor (pluginInstance), IncrementRef::yes);
 
         zerostruct (processContext);
 
@@ -2780,7 +2780,8 @@ public:
 
             if (message->getAttributes()->getInt ("JuceVST3EditController", value) == kResultTrue)
             {
-                juceVST3EditController = addVSTComSmartPtrOwner ((JuceVST3EditController*) (pointer_sized_int) value);
+                juceVST3EditController = VSTComSmartPtr ((JuceVST3EditController*) (pointer_sized_int) value,
+                                                         IncrementRef::yes);
 
                 if (juceVST3EditController != nullptr)
                     juceVST3EditController->setAudioProcessor (comPluginInstance.get());

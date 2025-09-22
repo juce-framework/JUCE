@@ -35,33 +35,11 @@
 namespace juce
 {
 
-//==============================================================================
-class UIAProviderBase
+/** @internal */
+enum class IncrementRef
 {
-public:
-    explicit UIAProviderBase (AccessibilityNativeHandle* nativeHandleIn)
-        : nativeHandle (nativeHandleIn, IncrementRef::yes)
-    {
-    }
-
-    bool isElementValid() const
-    {
-        if (nativeHandle != nullptr)
-            return nativeHandle->isElementValid();
-
-        return false;
-    }
-
-    const AccessibilityHandler& getHandler() const
-    {
-        return nativeHandle->getHandler();
-    }
-
-private:
-    ComSmartPtr<AccessibilityNativeHandle> nativeHandle;
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIAProviderBase)
+    no,
+    yes
 };
 
 } // namespace juce

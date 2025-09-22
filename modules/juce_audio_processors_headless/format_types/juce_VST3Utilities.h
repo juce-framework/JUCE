@@ -173,8 +173,15 @@ public:
             source->release();
     }
 
+    VSTComSmartPtr (ObjectType* object, IncrementRef incrementRefCount) noexcept
+        : source (object)
+    {
+        if (source != nullptr && incrementRefCount == IncrementRef::yes)
+            source->addRef();
+    }
+
     VSTComSmartPtr (const VSTComSmartPtr& other) noexcept
-        : VSTComSmartPtr (other.get(), true) {}
+        : VSTComSmartPtr (other.get(), IncrementRef::yes) {}
 
     template <typename Other, std::enable_if_t<! std::is_same_v<Other, ObjectType>, int> = 0>
     VSTComSmartPtr (const VSTComSmartPtr<Other>& other) noexcept
@@ -219,42 +226,9 @@ public:
         return factory->createInstance (uuid, ObjectType::iid, (void**) &source) == Steinberg::kResultOk;
     }
 
-    /** Increments refcount. */
-    static auto addOwner (ObjectType* t)
-    {
-        return VSTComSmartPtr (t, true);
-    }
-
-    /** Does not initially increment refcount; assumes t has a positive refcount. */
-    static auto becomeOwner (ObjectType* t)
-    {
-        return VSTComSmartPtr (t, false);
-    }
-
 private:
-    VSTComSmartPtr (ObjectType* object, bool autoAddRef) noexcept
-        : source (object)
-    {
-        if (source != nullptr && autoAddRef)
-            source->addRef();
-    }
-
     ObjectType* source = nullptr;
 };
-
-/** Increments refcount. */
-template <class ObjectType>
-auto addVSTComSmartPtrOwner (ObjectType* t)
-{
-    return VSTComSmartPtr<ObjectType>::addOwner (t);
-}
-
-/** Does not initially increment refcount; assumes t has a positive refcount. */
-template <class ObjectType>
-auto becomeVSTComSmartPtrOwner (ObjectType* t)
-{
-    return VSTComSmartPtr<ObjectType>::becomeOwner (t);
-}
 
 // NOLINTEND(clang-analyzer-cplusplus.NewDelete)
 

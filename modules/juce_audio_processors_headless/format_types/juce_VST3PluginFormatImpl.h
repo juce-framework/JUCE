@@ -1096,7 +1096,7 @@ struct DLLHandle
     {
         if (factory == nullptr)
             if (auto* proc = (GetFactoryProc) getFunction (factoryFnName))
-                factory = becomeVSTComSmartPtrOwner (proc());
+                factory = VSTComSmartPtr (proc(), IncrementRef::no);
 
         // The plugin NEEDS to provide a factory to be able to be called a VST3!
         // Most likely you are trying to load a 32-bit VST3 from a 64-bit host
@@ -1887,7 +1887,9 @@ class ParameterChanges final : public Vst::IParameterChanges
 
     struct Entry
     {
-        explicit Entry (std::unique_ptr<Queue> queue) : ptr (addVSTComSmartPtrOwner (queue.release())) {}
+        explicit Entry (std::unique_ptr<Queue> queue)
+            : ptr (queue.release(), IncrementRef::yes)
+        {}
 
         VSTComSmartPtr<Queue> ptr;
         Steinberg::int32 index = notInVector;
@@ -2632,7 +2634,7 @@ public:
     {
         if (trackInfoListener != nullptr)
         {
-            auto l = addVSTComSmartPtrOwner (new TrackPropertiesAttributeList (properties));
+            VSTComSmartPtr l { new TrackPropertiesAttributeList (properties), IncrementRef::yes };
             trackInfoListener->setChannelContextInfos (l.get());
         }
     }
@@ -2886,7 +2888,7 @@ public:
 
     MemoryBlock getStateForPresetFile() const
     {
-        auto memoryStream = becomeVSTComSmartPtrOwner (new MemoryStream());
+        VSTComSmartPtr memoryStream { new MemoryStream(), IncrementRef::no };
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return {};
@@ -2905,7 +2907,8 @@ public:
     bool setStateFromPresetFile (const MemoryBlock& rawData) const
     {
         auto rawDataCopy = rawData;
-        auto memoryStream = becomeVSTComSmartPtrOwner (new MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize()));
+        VSTComSmartPtr memoryStream { new MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize()),
+                                      IncrementRef::no };
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return false;
@@ -3042,7 +3045,7 @@ private:
 
             if (mem.fromBase64Encoding (state->getAllSubText()))
             {
-                auto stream = becomeVSTComSmartPtrOwner (new MemoryStream());
+                VSTComSmartPtr stream { new MemoryStream(), IncrementRef::no };
                 stream->setSize ((TSize) mem.getSize());
                 mem.copyTo (stream->getData(), 0, mem.getSize());
                 return stream;
@@ -3053,10 +3056,20 @@ private:
     }
 
     CachedParamValues cachedParamValues;
-    VSTComSmartPtr<ParameterChanges<HostToClientParamQueue>> inputParameterChanges  = addVSTComSmartPtrOwner (new ParameterChanges<HostToClientParamQueue>);
-    VSTComSmartPtr<ParameterChanges<ClientToHostParamQueue>> outputParameterChanges = addVSTComSmartPtrOwner (new ParameterChanges<ClientToHostParamQueue>);
-    VSTComSmartPtr<MidiEventList> midiInputs  = addVSTComSmartPtrOwner (new MidiEventList);
-    VSTComSmartPtr<MidiEventList> midiOutputs = addVSTComSmartPtrOwner (new MidiEventList);
+    VSTComSmartPtr<ParameterChanges<HostToClientParamQueue>> inputParameterChanges
+    {
+        new ParameterChanges<HostToClientParamQueue>,
+        IncrementRef::yes
+    };
+
+    VSTComSmartPtr<ParameterChanges<ClientToHostParamQueue>> outputParameterChanges
+    {
+        new ParameterChanges<ClientToHostParamQueue>,
+        IncrementRef::yes
+    };
+
+    VSTComSmartPtr<MidiEventList> midiInputs { new MidiEventList, IncrementRef::yes };
+    VSTComSmartPtr<MidiEventList> midiOutputs { new MidiEventList, IncrementRef::yes };
     Vst::ProcessContext timingInfo; //< Only use this in processBlock()!
     bool isControllerInitialised = false, isActive = false, lastProcessBlockCallWasBypass = false;
     const bool hasMidiInput  = getNumSingleDirectionBusesFor (holder->component.get(), MediaKind::event, Direction::input) > 0,

@@ -1067,7 +1067,8 @@ DirectWriteCustomFontCollectionLoader::~DirectWriteCustomFontCollectionLoader()
 
 Uuid DirectWriteCustomFontCollectionLoader::addRawFontData (Span<const std::byte> blob)
 {
-    const auto loader = becomeComSmartPtrOwner (new MemoryFontFileLoader { { blob.data(), blob.size() } });
+    ComSmartPtr loader { new MemoryFontFileLoader { { blob.data(), blob.size() } },
+                         IncrementRef::no };
 
     factory.RegisterFontFileLoader (loader);
 
@@ -1148,7 +1149,9 @@ Direct2DFactories::Direct2DFactories()
       }) },
       collectionLoader { std::invoke ([&]() -> ComSmartPtr<DirectWriteCustomFontCollectionLoader>
       {
-          auto result = becomeComSmartPtrOwner (new DirectWriteCustomFontCollectionLoader { *directWriteFactory });
+          ComSmartPtr result { new DirectWriteCustomFontCollectionLoader { *directWriteFactory },
+                               IncrementRef::no };
+
           directWriteFactory->RegisterFontCollectionLoader (result);
 
           return result;

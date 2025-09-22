@@ -357,8 +357,8 @@ public:
 
     static jobjectArray JNICALL contentSharerGetStreamTypes (JNIEnv*, jobject /*contentProvider*/, jobject uri, jstring mimeTypeFilter)
     {
-        return getInstance().getStreamTypes (addLocalRefOwner (uri),
-                                             addLocalRefOwner (mimeTypeFilter));
+        return getInstance().getStreamTypes (LocalRef (uri, IncrementRef::yes),
+                                             LocalRef (mimeTypeFilter, IncrementRef::yes));
     }
 
 private:

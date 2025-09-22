@@ -606,7 +606,7 @@ private:
         if (audioSessionControl == nullptr)
             return;
 
-        sessionEventCallback = becomeComSmartPtrOwner (new SessionEventCallback (*this));
+        sessionEventCallback = ComSmartPtr { new SessionEventCallback (*this), IncrementRef::no };
         audioSessionControl->RegisterAudioSessionNotification (sessionEventCallback);
     }
 
@@ -1897,7 +1897,7 @@ private:
             if (! check (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
                 return {};
 
-            notifyClient = becomeComSmartPtrOwner (new ChangeNotificationClient (this));
+            notifyClient = ComSmartPtr (new ChangeNotificationClient (this), IncrementRef::no);
             enumerator->RegisterEndpointNotificationCallback (notifyClient);
         }
 

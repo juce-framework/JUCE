@@ -49,7 +49,20 @@ public:
         JNI, i.e. for native function callback parameters.
     */
     explicit LocalRef (JavaType o) noexcept
-        : LocalRef (o, false)
+        : LocalRef (o, IncrementRef::no)
+    {}
+
+    /*  We cannot delete local references that were not created by JNI, e.g. references that were
+        created by the VM and passed into the native function.
+
+        For these references we should use createNewLocalRef = true, which will create a new
+        local reference that this wrapper is allowed to delete.
+
+        Doing otherwise will result in an "Attempt to remove non-JNI local reference" warning in the
+        VM, which could even cause crashes in future VM implementations.
+    */
+    LocalRef (JavaType o, IncrementRef incrementRefCount) noexcept
+        : obj (incrementRefCount == IncrementRef::yes ? retain (o) : o)
     {}
 
     LocalRef (const LocalRef& other) noexcept    : obj (retain (other.obj)) {}
@@ -91,58 +104,14 @@ public:
         return std::exchange (obj, nullptr);
     }
 
-    /** Creates a new internal local reference. */
-    static auto addOwner (JavaType o)
-    {
-        return LocalRef { o, true };
-    }
-
-    /** Takes ownership of the passed in local reference, and deletes it when the LocalRef goes out
-        of scope.
-    */
-    static auto becomeOwner (JavaType o)
-    {
-        return LocalRef { o, false };
-    }
-
 private:
     static JavaType retain (JavaType obj)
     {
         return obj == nullptr ? nullptr : (JavaType) getEnv()->NewLocalRef (obj);
     }
 
-    /*  We cannot delete local references that were not created by JNI, e.g. references that were
-        created by the VM and passed into the native function.
-
-        For these references we should use createNewLocalRef = true, which will create a new
-        local reference that this wrapper is allowed to delete.
-
-        Doing otherwise will result in an "Attempt to remove non-JNI local reference" warning in the
-        VM, which could even cause crashes in future VM implementations.
-    */
-    LocalRef (JavaType o, bool createNewLocalRef) noexcept
-        : obj (createNewLocalRef ? retain (o) : o)
-    {}
-
     JavaType obj = nullptr;
 };
-
-/*  Creates a new local reference that shares ownership with the passed in pointer.
-
-    Can be used for wrapping function parameters that were created outside the JNI.
-*/
-template <class JavaType>
-auto addLocalRefOwner (JavaType t)
-{
-    return LocalRef<JavaType>::addOwner (t);
-}
-
-/*   Wraps a local reference and destroys it when it goes out of scope. */
-template <class JavaType>
-auto becomeLocalRefOwner (JavaType t)
-{
-    return LocalRef<JavaType>::becomeOwner (t);
-}
 
 //==============================================================================
 template <typename JavaType>
