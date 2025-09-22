@@ -227,10 +227,10 @@ public:
             if (shouldReparent)
                 X11Symbols::getInstance()->xReparentWindow (dpy, client, host, 0, 0);
 
+            updateMapping();
+
             if (supportsXembed)
                 sendXEmbedEvent (CurrentTime, XEMBED_EMBEDDED_NOTIFY, 0, (long) host, xembedVersion);
-
-            updateMapping();
         }
     }
 
@@ -478,11 +478,9 @@ private:
 
             return ((flags & XEMBED_MAPPED) != 0);
         }
-        else
-        {
-            supportsXembed = false;
-            xembedVersion = maxXEmbedVersionToSupport;
-        }
+
+        supportsXembed = false;
+        xembedVersion = maxXEmbedVersionToSupport;
 
         return true;
     }

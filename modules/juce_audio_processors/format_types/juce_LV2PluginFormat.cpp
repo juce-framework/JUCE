@@ -572,29 +572,15 @@ private:
     // If possible, try to keep platform-specific handing restricted to the implementation of
     // ViewComponent. Keep the interface of ViewComponent consistent on all platforms.
    #if JUCE_LINUX || JUCE_BSD
-    struct InnerHolder
-    {
-        struct Inner final : public XEmbedComponent
-        {
-            Inner() : XEmbedComponent (true, true)
-            {
-                setOpaque (true);
-                setVisible (true);
-                addToDesktop (0);
-            }
-        };
-
-        Inner inner;
-    };
-
-    struct ViewComponent final : public InnerHolder,
-                                 public XEmbedComponent
+    struct ViewComponent final : public XEmbedComponent
     {
         explicit ViewComponent (PhysicalResizeListener& l)
-            : XEmbedComponent ((unsigned long) inner.getPeer()->getNativeHandle(), true, false),
-              listener (inner, l)
+            : XEmbedComponent (true, false),
+              listener (*this, l)
         {
             setOpaque (true);
+
+            X11Symbols::getInstance()->xSync (XWindowSystem::getInstance()->getDisplay(), false);
         }
 
         ~ViewComponent()
@@ -604,10 +590,10 @@ private:
 
         void prepareForDestruction()
         {
-            inner.removeClient();
+            removeClient();
         }
 
-        LV2UI_Widget getWidget() { return lv2_shared::wordCast<LV2UI_Widget> (inner.getHostWindowID()); }
+        LV2UI_Widget getWidget() { return lv2_shared::wordCast<LV2UI_Widget> (getHostWindowID()); }
         void forceViewToSize() {}
         void fitToView() {}
 
