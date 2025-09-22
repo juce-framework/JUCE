@@ -169,8 +169,8 @@ private:
 
         switch (*p)
         {
-            case PacketProtocol::MIDI_1_0: return StreamConfigFlags { 1 };
-            case PacketProtocol::MIDI_2_0: return StreamConfigFlags { 2 };
+            case PacketProtocol::MIDI_1_0: return StreamConfigFlags (1);
+            case PacketProtocol::MIDI_2_0: return StreamConfigFlags (2);
         }
 
         return {};
