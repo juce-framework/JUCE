@@ -545,16 +545,29 @@ private:
     /*  Convert from the component's coordinate system to the hosted LV2's coordinate system. */
     Rectangle<int> componentToLv2Rect (Rectangle<int> r) const
     {
-        return localAreaToGlobal (r) * nativeScaleFactor * getDesktopScaleFactor();
+        const auto platformScale = getDesktopScaleFactor() * getPeerScale();
+        return (localAreaToGlobal (r.toFloat()) * platformScale).toNearestInt();
     }
 
     /*  Convert from the hosted LV2's coordinate system to the component's coordinate system. */
     Rectangle<int> lv2ToComponentRect (Rectangle<int> vr) const
     {
-        return getLocalArea (nullptr, vr / (nativeScaleFactor * getDesktopScaleFactor()));
+        const auto platformScale = getDesktopScaleFactor() * getPeerScale();
+        return (getLocalArea (nullptr, vr.toFloat() / platformScale)).toNearestInt();
     }
 
-    float getEffectiveScale() const     { return nativeScaleFactor * userScaleFactor; }
+    float getPeerScale() const
+    {
+        if (auto* peer = getPeer())
+            return peer->getPlatformScaleFactor();
+
+        return 1.0f;
+    }
+
+    float getEffectiveScale() const
+    {
+        return getPeerScale() * userScaleFactor;
+    }
 
     // If possible, try to keep platform-specific handing restricted to the implementation of
     // ViewComponent. Keep the interface of ViewComponent consistent on all platforms.
@@ -660,20 +673,14 @@ private:
             MessageManager::callAsync ([ref = Component::SafePointer<ConfiguredEditorComponent> (&window), platformScale]
             {
                 if (auto* r = ref.getComponent())
-                {
-                    if (approximatelyEqual (std::exchange (r->nativeScaleFactor, platformScale), platformScale))
-                        return;
-
-                    r->nativeScaleFactor = platformScale;
                     r->sendScaleFactorToPlugin();
-                }
             });
         }
     };
 
     LogicalResizeListener& resizeListener;
     int lastWidth = 0, lastHeight = 0;
-    float nativeScaleFactor = 1.0f, userScaleFactor = 1.0f;
+    float userScaleFactor = 1.0f;
     NativeScaleFactorNotifier scaleNotifier { this, ScaleNotifierCallback { *this } };
     ViewComponent viewComponent { *this };
     LV2_URID floatUrid, scaleFactorUrid;
