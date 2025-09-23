@@ -1381,7 +1381,6 @@ private:
               "\t\tui:idleInterface ,\n"
              #endif
               "\t\topts:interface ,\n"
-              "\t\tui:noUserResize ,\n" // resize and noUserResize are always present in the extension data array
               "\t\tui:resize ;\n"
               "\n"
               "\tlv2:requiredFeature\n"
@@ -1833,13 +1832,11 @@ LV2_SYMBOL_EXPORT const LV2UI_Descriptor* lv2ui_descriptor (uint32_t index)
                 }
             };
 
-            // We'll always define noUserResize and idle in the extension data array, but we'll
-            // only declare them in the ui.ttl if the UI is actually non-resizable, or requires
-            // idle callbacks.
+            // We'll always define idle in the extension data array, but we'll
+            // only declare it in the ui.ttl if the UI requires idle callbacks.
             // Well-behaved hosts should check the ttl before trying to search the
             // extension-data array.
             static const LV2_Feature features[] { { LV2_UI__resize, &resize },
-                                                  { LV2_UI__noUserResize, nullptr },
                                                   { LV2_UI__idleInterface, &idle },
                                                   { LV2_OPTIONS__interface, &options } };
 
