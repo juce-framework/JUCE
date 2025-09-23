@@ -464,6 +464,7 @@ public:
 
     void resized() override
     {
+        const ScopedValueSetter scope { resizingSelf, true };
         viewComponent.setBounds (getLocalBounds());
     }
 
@@ -471,6 +472,9 @@ public:
     {
         // If the editor changed size as a result of a request from the client,
         // we shouldn't send a notification back to the client.
+        if (resizeFromClient)
+            return;
+
         if (uiInstance != nullptr)
         {
             if (resizeClient.valid && resizeClient.extension.ui_resize != nullptr)
@@ -500,6 +504,9 @@ public:
 
     void childBoundsChanged (Component* c) override
     {
+        if (resizingSelf)
+            return;
+
         if (c == nullptr)
             resizeToFitView();
     }
@@ -518,13 +525,16 @@ public:
 
         if (optionsInterface.valid)
             optionsInterface.extension.set (uiInstance->instance.getHandle(), options);
-
-        applyLastRequestedPhysicalSize();
     }
 
 private:
     void viewRequestedResizeInLogicalPixels (int width, int height) override
     {
+        if (resizingSelf)
+            return;
+
+        const ScopedValueSetter scope { resizeFromClient, true };
+
         const auto physical = componentToLv2Rect ({ width, height });
         lastPhysicalWidth = physical.getWidth();
         lastPhysicalHeight = physical.getHeight();;
@@ -533,6 +543,11 @@ private:
 
     void viewRequestedResizeInPhysicalPixels (int width, int height) override
     {
+        if (resizingSelf)
+            return;
+
+        const ScopedValueSetter scope { resizeFromClient, true };
+
         lastPhysicalWidth = width;
         lastPhysicalHeight = height;
         const auto logical = lv2ToComponentRect ({ width, height });
@@ -568,7 +583,7 @@ private:
     float getPeerScale() const
     {
         if (auto* peer = getPeer())
-            return peer->getPlatformScaleFactor();
+            return (float) peer->getPlatformScaleFactor();
 
         return 1.0f;
     }
@@ -663,12 +678,15 @@ private:
     {
         ConfiguredEditorComponent& window;
 
-        void operator() (float platformScale) const
+        void operator() (float) const
         {
-            MessageManager::callAsync ([ref = Component::SafePointer<ConfiguredEditorComponent> (&window), platformScale]
+            MessageManager::callAsync ([ref = Component::SafePointer<ConfiguredEditorComponent> (&window)]
             {
                 if (auto* r = ref.getComponent())
+                {
                     r->sendScaleFactorToPlugin();
+                    r->viewComponent.forceViewToSize();
+                }
             });
         }
     };
@@ -682,6 +700,7 @@ private:
     std::unique_ptr<UiInstanceWithSupports> uiInstance;
     OptionalExtension<LV2UI_Resize> resizeClient;
     OptionalExtension<LV2_Options_Interface> optionsInterface;
+    bool resizingSelf = false, resizeFromClient = false;
     PeerChangedListener peerListener { *this, [this]
     {
         applyLastRequestedPhysicalSize();
