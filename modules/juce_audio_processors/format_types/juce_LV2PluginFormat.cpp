@@ -376,23 +376,22 @@ private:
 
 struct ViewSizeListener final : private ComponentMovementWatcher
 {
-    ViewSizeListener (Component& c, PhysicalResizeListener& l)
+    ViewSizeListener (Component& c, LogicalResizeListener& l)
         : ComponentMovementWatcher (&c), listener (l)
     {
     }
 
     void componentMovedOrResized (bool, bool wasResized) override
     {
-        if (wasResized)
-        {
-            const auto physicalSize = Desktop::getInstance().getDisplays()
-                                                            .logicalToPhysical (getComponent()->localAreaToGlobal (getComponent()->getLocalBounds()));
-            const auto width  = physicalSize.getWidth();
-            const auto height = physicalSize.getHeight();
+        if (! wasResized)
+            return;
 
-            if (width > 10 && height > 10)
-                listener.viewRequestedResizeInPhysicalPixels (width, height);
-        }
+        const auto bounds = getComponent()->getLocalBounds();
+        const auto width = bounds.getWidth();
+        const auto height = bounds.getHeight();
+
+        if (width > 10 && height > 10)
+            listener.viewRequestedResizeInLogicalPixels (width, height);
     }
 
     void componentPeerChanged() override {}
@@ -401,11 +400,12 @@ struct ViewSizeListener final : private ComponentMovementWatcher
     using ComponentMovementWatcher::componentVisibilityChanged;
     using ComponentMovementWatcher::componentMovedOrResized;
 
-    PhysicalResizeListener& listener;
+    LogicalResizeListener& listener;
 };
 
 class ConfiguredEditorComponent final : public Component,
-                                        private PhysicalResizeListener
+                                        private PhysicalResizeListener,
+                                        private LogicalResizeListener
 {
 public:
     ConfiguredEditorComponent (World& world,
@@ -445,10 +445,11 @@ public:
             return uiInstance->instance.getDetectedViewBounds();
         }();
 
+        lastPhysicalWidth  = boundsToUse.getWidth();
+        lastPhysicalHeight = boundsToUse.getHeight();
+
         const auto scaled = lv2ToComponentRect (boundsToUse);
-        lastWidth  = scaled.getWidth();
-        lastHeight = scaled.getHeight();
-        setSize (lastWidth, lastHeight);
+        setSize (scaled.getWidth(), scaled.getHeight());
     }
 
     ~ConfiguredEditorComponent() override
@@ -522,10 +523,18 @@ public:
     }
 
 private:
+    void viewRequestedResizeInLogicalPixels (int width, int height) override
+    {
+        const auto physical = componentToLv2Rect ({ width, height });
+        lastPhysicalWidth = physical.getWidth();
+        lastPhysicalHeight = physical.getHeight();;
+        resizeListener.viewRequestedResizeInLogicalPixels (width, height);
+    }
+
     void viewRequestedResizeInPhysicalPixels (int width, int height) override
     {
-        lastWidth = width;
-        lastHeight = height;
+        lastPhysicalWidth = width;
+        lastPhysicalHeight = height;
         const auto logical = lv2ToComponentRect ({ width, height });
         resizeListener.viewRequestedResizeInLogicalPixels (logical.getWidth(), logical.getHeight());
     }
@@ -538,7 +547,7 @@ private:
 
     void applyLastRequestedPhysicalSize()
     {
-        viewRequestedResizeInPhysicalPixels (lastWidth, lastHeight);
+        viewRequestedResizeInPhysicalPixels (lastPhysicalWidth, lastPhysicalHeight);
         viewComponent.forceViewToSize();
     }
 
@@ -574,7 +583,7 @@ private:
    #if JUCE_LINUX || JUCE_BSD
     struct ViewComponent final : public XEmbedComponent
     {
-        explicit ViewComponent (PhysicalResizeListener& l)
+        explicit ViewComponent (LogicalResizeListener& l)
             : XEmbedComponent (true, false),
               listener (*this, l)
         {
@@ -665,7 +674,7 @@ private:
     };
 
     LogicalResizeListener& resizeListener;
-    int lastWidth = 0, lastHeight = 0;
+    int lastPhysicalWidth = 0, lastPhysicalHeight = 0;
     float userScaleFactor = 1.0f;
     NativeScaleFactorNotifier scaleNotifier { this, ScaleNotifierCallback { *this } };
     ViewComponent viewComponent { *this };
