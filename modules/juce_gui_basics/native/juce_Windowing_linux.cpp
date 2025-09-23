@@ -116,7 +116,7 @@ public:
         // ConfigureNotify events, many of which has stale size information. By not calling
         // XWindowSystem::setBounds we are not actualising these old, incorrect sizes.
         if (! inConfigureNotifyHandler)
-            XWindowSystem::getInstance()->setBounds (windowH, physicalBounds, isNowFullScreen);
+            moveResizeSerial = jmax (moveResizeSerial, XWindowSystem::getInstance()->setBounds (windowH, physicalBounds, isNowFullScreen).value_or (0));
 
         fullScreen = isNowFullScreen;
 
@@ -429,6 +429,11 @@ public:
     bool focused = false;
     bool inConfigureNotifyHandler = false;
 
+    unsigned long getMoveResizeSerial() const
+    {
+        return moveResizeSerial;
+    }
+
 private:
     //==============================================================================
     class LinuxRepaintManager
@@ -605,6 +610,7 @@ private:
     double currentScaleFactor = 1.0;
     Array<Component*> glRepaintListeners;
     ScopedWindowAssociation association;
+    unsigned long moveResizeSerial = 0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LinuxComponentPeer)

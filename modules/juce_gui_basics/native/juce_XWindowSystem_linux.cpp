@@ -1736,7 +1736,7 @@ void XWindowSystem::setVisible (::Window windowH, bool shouldBeVisible) const
         X11Symbols::getInstance()->xUnmapWindow (display, windowH);
 }
 
-void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool isFullScreen) const
+std::optional<unsigned long> XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool isFullScreen) const
 {
     jassert (windowH != 0);
 
@@ -1792,12 +1792,16 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
             return {};
         }();
 
+        const auto serial = X11Symbols::getInstance()->xNextRequest (display);
         X11Symbols::getInstance()->xMoveResizeWindow (display, windowH,
                                                       newBounds.getX() - nativeWindowBorder.getLeft(),
                                                       newBounds.getY() - nativeWindowBorder.getTop(),
                                                       (unsigned int) newBounds.getWidth(),
                                                       (unsigned int) newBounds.getHeight());
+        return serial;
     }
+
+    return std::nullopt;
 }
 
 void XWindowSystem::startHostManagedResize (::Window windowH,
@@ -3780,6 +3784,11 @@ void XWindowSystem::dismissBlockingModals (LinuxComponentPeer* peer) const
 
 void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer* peer, XConfigureEvent& confEvent) const
 {
+    // If the incoming event serial is smaller than the serial of a move/resize request we sent previously,
+    // then we should ignore the incoming event because it will conflict with the pending request.
+    if (confEvent.serial < peer->getMoveResizeSerial())
+        return;
+
     const ScopedValueSetter<bool> scope { peer->inConfigureNotifyHandler, true };
 
     peer->updateWindowBounds();
