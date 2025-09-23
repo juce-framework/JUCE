@@ -2653,7 +2653,7 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
                                                   + ((static_cast<double> (crtc->height) * 25.4 * 0.5) / static_cast<double> (output->mm_height));
 
                                         auto scale = DisplayHelpers::getDisplayScale (output->name, d.dpi);
-                                        scale = (scale <= 0.1 || ! JUCEApplicationBase::isStandaloneApp()) ? 1.0 : scale;
+                                        scale = scale <= 0.1 ? 1.0 : scale;
 
                                         d.scale = masterScale * scale;
 
