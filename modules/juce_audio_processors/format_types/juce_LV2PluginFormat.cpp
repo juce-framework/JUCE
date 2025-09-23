@@ -847,7 +847,6 @@ private:
         };
 
         return uiDescriptor->hasExtensionData (world, LV2_UI__resize)
-               && ! uiDescriptor->hasExtensionData (world, LV2_UI__noUserResize)
                && noneOf (requiredFeatures.values, uriMatches)
                && noneOf (optionalFeatures.values, uriMatches);
     }
