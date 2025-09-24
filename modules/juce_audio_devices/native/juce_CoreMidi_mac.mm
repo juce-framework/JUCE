@@ -2049,12 +2049,12 @@ struct CoreMidiHelpers
               consumer (cb)
         {
             connection->addDisconnectionListener (disconnectListener);
-            connection->addConsumer (consumer);
+            connection->addConsumer (*this);
         }
 
         ~InputImplNative() override
         {
-            connection->removeConsumer (consumer);
+            connection->removeConsumer (*this);
             connection->removeDisconnectionListener (disconnectListener);
         }
 
