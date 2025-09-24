@@ -1851,24 +1851,18 @@ public:
 
         nodeStates.setState (settings);
 
-        topologyChanged (UpdateKind::sync);
+        topologyChanged (RebuildKind::immediate);
     }
 
     void releaseResources()
     {
         nodeStates.setState (nullopt);
-        topologyChanged (UpdateKind::sync);
+        topologyChanged (RebuildKind::immediate);
     }
 
     void rebuild (UpdateKind updateKind)
     {
-        if (updateKind == UpdateKind::none)
-            return;
-
-        if (updateKind == UpdateKind::sync && MessageManager::getInstance()->isThisTheMessageThread())
-            handleAsyncUpdate();
-        else
-            updater.triggerAsyncUpdate();
+        rebuild (getRebuildKind (updateKind));
     }
 
     void reset()
@@ -1918,16 +1912,67 @@ public:
     auto* getAudioThreadState() const { return renderSequenceExchange.getAudioThreadState(); }
 
 private:
+    enum class RebuildKind
+    {
+        none,                   // no rebuild
+        async,                  // always async on main thread
+        syncIfMainThread,       // sync if the rebuild request is on the main thread, async otherwise
+        immediate,              // synchronous regardless of the thread making the rebuild request
+    };
+
+    static RebuildKind getRebuildKind (UpdateKind kind)
+    {
+        switch (kind)
+        {
+            case UpdateKind::async:
+                return RebuildKind::async;
+
+            case UpdateKind::sync:
+                return RebuildKind::syncIfMainThread;
+
+            case UpdateKind::none:
+                return RebuildKind::none;
+        }
+
+        jassertfalse;
+        return RebuildKind::syncIfMainThread;
+    }
+
     void setParentGraph (AudioProcessor* p) const
     {
         if (auto* ioProc = dynamic_cast<AudioGraphIOProcessor*> (p))
             ioProc->setParentGraph (owner);
     }
 
-    void topologyChanged (UpdateKind updateKind)
+    void topologyChanged (UpdateKind kind)
+    {
+        topologyChanged (getRebuildKind (kind));
+    }
+
+    void topologyChanged (RebuildKind kind)
     {
         owner->sendChangeMessage();
-        rebuild (updateKind);
+        rebuild (kind);
+    }
+
+    void rebuild (RebuildKind kind)
+    {
+        if (kind == RebuildKind::none)
+            return;
+
+        const auto immediate = kind == RebuildKind::immediate
+                               || (kind == RebuildKind::syncIfMainThread
+                                   && MessageManager::getInstance()->isThisTheMessageThread());
+
+        if (immediate)
+        {
+            updater.cancelPendingUpdate();
+            handleAsyncUpdate();
+        }
+        else
+        {
+            updater.triggerAsyncUpdate();
+        }
     }
 
     void handleAsyncUpdate()
@@ -2399,6 +2444,40 @@ public:
             }
         }
 
+        beginTest ("graph can be prepared and unprepared from a background thread");
+        {
+            using UK = AudioProcessorGraph::UpdateKind;
+            AudioProcessorGraph graph;
+            auto nodeA = BasicProcessor::make ({}, MidiIn::no, MidiOut::yes);
+            auto nodeB = BasicProcessor::make ({}, MidiIn::yes, MidiOut::no);
+
+            auto* ptrA = nodeA.get();
+            auto* ptrB = nodeB.get();
+
+            const auto idA = graph.addNode (std::move (nodeA), {}, UK::none)->nodeID;
+            const auto idB = graph.addNode (std::move (nodeB), {}, UK::none)->nodeID;
+            expect (graph.addConnection ({ { idA, midiChannel }, { idB, midiChannel } }, UK::none));
+
+            expect (! ptrA->isPrepared());
+            expect (! ptrB->isPrepared());
+
+            std::ignore = std::async (std::launch::async, [&]
+            {
+                expect (! ptrA->isPrepared());
+                expect (! ptrB->isPrepared());
+
+                graph.prepareToPlay (44100, 512);
+
+                expect (ptrA->isPrepared());
+                expect (ptrB->isPrepared());
+
+                graph.releaseResources();
+
+                expect (! ptrA->isPrepared());
+                expect (! ptrB->isPrepared());
+            });
+        }
+
         beginTest ("large render sequence can be built");
         {
             AudioProcessorGraph graph;
@@ -2453,8 +2532,8 @@ private:
         void changeProgramName (int, const String&) override          {}
         void getStateInformation (MemoryBlock&) override              {}
         void setStateInformation (const void*, int) override          {}
-        void prepareToPlay (double, int) override                     {}
-        void releaseResources() override                              {}
+        void prepareToPlay (double, int) override                     { prepared = true; }
+        void releaseResources() override                              { prepared = false; }
         bool supportsDoublePrecisionProcessing() const override       { return doublePrecisionSupported; }
         bool isMidiEffect() const override                            { return {}; }
         void reset() override                                         {}
@@ -2510,11 +2589,14 @@ private:
 
         ProcessingPrecision getLastBlockPrecision() const { return blockPrecision; }
 
+        bool isPrepared() const { return prepared; }
+
     private:
         MidiIn midiIn;
         MidiOut midiOut;
         ProcessingPrecision blockPrecision = ProcessingPrecision (-1); // initially invalid
         bool doublePrecisionSupported = true;
+        bool prepared = false;
     };
 };
 
