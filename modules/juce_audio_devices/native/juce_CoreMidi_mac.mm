@@ -1762,7 +1762,8 @@ struct CoreMidiHelpers
         }
 
         static std::shared_ptr<ConnectionToSrc> make (std::shared_ptr<SharedEndpointsImplNative> cachedEndpoints,
-                                                      ump::EndpointId id)
+                                                      ump::EndpointId id,
+                                                      ump::PacketProtocol protocol)
         {
             const auto endpoint = cachedEndpoints->getNativeEndpointForId (ump::IOKind::src, id);
 
@@ -1780,7 +1781,7 @@ struct CoreMidiHelpers
             auto receiver = rawToUniquePtr (new ConnectionToSrc (cachedEndpoints));
 
             MIDIPortRef port;
-            const auto error = CreatorFunctionsToUse::createInputPort (ump::PacketProtocol::MIDI_2_0,
+            const auto error = CreatorFunctionsToUse::createInputPort (protocol,
                                                                        cachedEndpoints->getClient(),
                                                                        cfName.object,
                                                                        &receiver->receiver,
@@ -2361,7 +2362,7 @@ struct CoreMidiHelpers
                                                                 ump::PacketProtocol p,
                                                                 ump::Consumer& c) override
         {
-            if (auto src = findOrMakeSrc (id))
+            if (auto src = findOrMakeSrc (id, p))
                 return rawToUniquePtr (new InputImplNative { src, id, l, p, c });
 
             return {};
@@ -2396,7 +2397,8 @@ struct CoreMidiHelpers
 
                 if (connection != nullptr)
                 {
-                    connectionsSrc[connection->getId()] = connection->getSrc();
+                    connectionsSrc[{ connection->getId(), ump::PacketProtocol::MIDI_1_0 }] = connection->getSrc();
+                    connectionsSrc[{ connection->getId(), ump::PacketProtocol::MIDI_2_0 }] = connection->getSrc();
                     connectionsDst[connection->getId()] = connection->getDst();
                 }
 
@@ -2415,7 +2417,7 @@ struct CoreMidiHelpers
                 return {};
 
             auto result = LegacyVirtualEndpointImplNative::make (connection, id);
-            connectionsSrc[result->getId()] = connection;
+            connectionsSrc[{ result->getId(), ump::PacketProtocol::MIDI_1_0 }] = connection;
             return result;
         }
 
@@ -2440,14 +2442,14 @@ struct CoreMidiHelpers
         SessionImplNative (std::shared_ptr<SharedEndpointsImplNative> c, const String& n)
             : cachedEndpoints (c), name (n) {}
 
-        std::shared_ptr<ConnectionToSrc> findOrMakeSrc (const ump::EndpointId& id)
+        std::shared_ptr<ConnectionToSrc> findOrMakeSrc (const ump::EndpointId& id, ump::PacketProtocol protocol)
         {
-            auto& weak = connectionsSrc[id];
+            auto& weak = connectionsSrc[{ id, protocol }];
 
             if (auto strong = weak.lock())
                 return strong;
 
-            const auto strong = ConnectionToSrc::make (cachedEndpoints, id);
+            const auto strong = ConnectionToSrc::make (cachedEndpoints, id, protocol);
             weak = strong;
             return strong;
         }
@@ -2464,7 +2466,16 @@ struct CoreMidiHelpers
             return strong;
         }
 
-        std::map<ump::EndpointId, std::weak_ptr<ConnectionToSrc>> connectionsSrc;
+        struct SrcKey
+        {
+            ump::EndpointId id;
+            ump::PacketProtocol protocol;
+
+            auto tie() const { return std::tie (id, protocol); }
+            auto operator< (const SrcKey& other) const { return tie() < other.tie(); }
+        };
+
+        std::map<SrcKey, std::weak_ptr<ConnectionToSrc>> connectionsSrc;
         std::map<ump::EndpointId, std::weak_ptr<ConnectionToDst>> connectionsDst;
 
         std::shared_ptr<SharedEndpointsImplNative> cachedEndpoints;
