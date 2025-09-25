@@ -2857,8 +2857,6 @@ struct JuceNSWindowClass final : public NSViewComponentPeerWrapper<ObjCClass<NSW
             return false;
         });
 
-        addMethod (@selector (isFlipped), [] (id, SEL) { return true; });
-
         addMethod (@selector (windowWillUseStandardFrame:defaultFrame:), [] (id self, SEL, NSWindow* window, NSRect r)
         {
             if (auto* owner = getOwner (self))
