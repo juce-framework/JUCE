@@ -63,6 +63,46 @@ namespace juce
         }
     };
 
+    /*  Each successful call to beginBackgroundTask must be balanced
+        by a call to endBackgroundTask.
+    */
+    class TaskHandle
+    {
+    public:
+        TaskHandle() = default;
+
+        explicit TaskHandle (UIBackgroundTaskIdentifier t)
+            : task (t) {}
+
+        ~TaskHandle()
+        {
+            if (task != UIBackgroundTaskInvalid)
+                [[UIApplication sharedApplication] endBackgroundTask:task];
+        }
+
+        TaskHandle (TaskHandle&& other) noexcept
+        {
+            swap (other);
+        }
+
+        TaskHandle& operator= (TaskHandle&& other) noexcept
+        {
+            TaskHandle { std::move (other) }.swap (*this);
+            return *this;
+        }
+
+        TaskHandle (const TaskHandle&) = delete;
+        TaskHandle& operator= (const TaskHandle&) = delete;
+
+    private:
+        void swap (TaskHandle& other) noexcept
+        {
+            std::swap (other.task, task);
+        }
+
+        UIBackgroundTaskIdentifier task = UIBackgroundTaskInvalid;
+    };
+
     struct SceneUtils
     {
         // This will need to become more sophisticated to enable support for multiple scenes
@@ -80,20 +120,20 @@ namespace juce
                 appBecomingInactiveCallbacks.getReference (i)->appBecomingInactive();
         }
 
-        static void sceneDidEnterBackground()
+        template <typename Self>
+        static void sceneDidEnterBackground ([[maybe_unused]] Self* s)
         {
             if (auto* app = JUCEApplicationBase::getInstance())
             {
                #if JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK
-                appSuspendTask = [application beginBackgroundTaskWithName:@"JUCE Suspend Task" expirationHandler:^{
-                    if (appSuspendTask != UIBackgroundTaskInvalid)
-                    {
-                        [application endBackgroundTask:appSuspendTask];
-                        appSuspendTask = UIBackgroundTaskInvalid;
-                    }
-                }];
+                s->appSuspendTask = TaskHandle { [[UIApplication sharedApplication] beginBackgroundTaskWithName:@"JUCE Suspend Task"
+                                                                                              expirationHandler:^{ s->appSuspendTask = {}; }] };
 
-                MessageManager::callAsync ([app] { app->suspended(); });
+                MessageManager::callAsync ([app, s]
+                {
+                    app->suspended();
+                    s->appSuspendTask = {};
+                });
                #else
                 app->suspended();
                #endif
@@ -112,10 +152,17 @@ namespace juce
 
 API_AVAILABLE (ios (13.0))
 @interface JuceAppSceneDelegate : NSObject<UIWindowSceneDelegate>
+{
+    @public
+    TaskHandle appSuspendTask;
+}
 @end
 
 @implementation JuceAppSceneDelegate
-SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
+{
+    SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
+}
+
 - (void)           scene: (UIScene*) scene
     willConnectToSession: (UISceneSession*) session
                  options: (UISceneConnectionOptions*) connectionOptions
@@ -144,7 +191,7 @@ SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 
 - (void) sceneDidEnterBackground: (UIScene*) scene
 {
-    SceneUtils::sceneDidEnterBackground();
+    SceneUtils::sceneDidEnterBackground (self);
 }
 
 - (void) sceneWillEnterForeground: (UIScene*) scene
@@ -167,7 +214,8 @@ SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
 #endif
 {
-    UIBackgroundTaskIdentifier appSuspendTask;
+    @public
+    TaskHandle appSuspendTask;
     std::optional<ScopedJuceInitialiser_GUI> initialiser;
 }
 
@@ -216,13 +264,13 @@ SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 @end
 
 @implementation JuceAppStartupDelegate
-
+{
     NSObject* _pushNotificationsDelegate;
+}
 
 - (id) init
 {
     self = [super init];
-    appSuspendTask = UIBackgroundTaskInvalid;
 
    #if JUCE_PUSH_NOTIFICATIONS
     [UNUserNotificationCenter currentNotificationCenter].delegate = self;
@@ -260,7 +308,7 @@ SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 
 - (void) applicationDidEnterBackground: (UIApplication*) application
 {
-    SceneUtils::sceneDidEnterBackground();
+    SceneUtils::sceneDidEnterBackground (self);
 }
 
 - (void) applicationWillEnterForeground: (UIApplication*) application
