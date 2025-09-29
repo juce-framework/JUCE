@@ -6,10 +6,6 @@ import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 import re
 
-MODULES_DIR = Path('../../modules')
-assert MODULES_DIR.is_dir()
-ABS_MODULES_DIR = MODULES_DIR.resolve()
-
 def get_module_description(module_header: Path) -> str:
     with open(module_header, 'r') as f:
         content = f.read()
@@ -29,8 +25,7 @@ def createContentDict() -> dict:
     }
 
 def getContentObjectFromPath(root_object: dict, location: str) -> dict:
-    path_in_modules = Path(location).relative_to(ABS_MODULES_DIR)
-    path_components = path_in_modules.parts
+    path_components = Path(location).parts
     contents = root_object[path_components[0]]
     for path_component in path_components[1:-1]:
         if not (path_component in contents['dirs']):
@@ -128,9 +123,11 @@ print('--- Running Doxygen')
 subprocess.run("doxygen", shell=True, check=True)
 
 print('--- Parsing module headers')
+modules_dir = Path('../../modules')
+assert modules_dir.is_dir()
 modules = {}
-for module_name in os.listdir(MODULES_DIR):
-    module_dir = MODULES_DIR / module_name
+for module_name in os.listdir(modules_dir):
+    module_dir = modules_dir / module_name
     if not module_dir.is_dir():
         continue
     module_header = module_dir / f'{module_name}.h'
