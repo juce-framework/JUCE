@@ -1063,7 +1063,7 @@ struct AlsaMidiHelpers
 
             snd_seq_ump_event_t event{};
 
-            snd_seq_ev_set_source (&event, port->getPortId());
+            snd_seq_ev_set_source (&event, (unsigned char) port->getPortId());
             snd_seq_ev_set_subs (&event);
             snd_seq_ev_set_direct (&event);
 
