@@ -910,33 +910,47 @@ private:
                     auto supportedViewIndices = [[NSMutableIndexSet alloc] init];
                     auto n = [configs count];
 
-                    if (auto* editor = _this (self)->getAudioProcessor().createEditorIfNeeded())
+                    const auto getEditor = [&]
                     {
-                        // If you hit this assertion then your plug-in's editor is reporting that it doesn't support
-                        // any host MIDI controller configurations!
-                        jassert (editor->supportsHostMIDIControllerPresence (true) || editor->supportsHostMIDIControllerPresence (false));
+                        if (auto* editor = _this (self)->getAudioProcessor().getActiveEditor())
+                            return editor;
 
-                        for (auto i = 0u; i < n; ++i)
+                        return _this (self)->getAudioProcessor().createEditorIfNeeded();
+                    };
+
+                    MessageManager::callSync ([&]
+                    {
+                        if (auto* editor = getEditor())
                         {
-                            if (auto viewConfiguration = [configs objectAtIndex: i])
+                            // If you hit this assertion then your plug-in's editor is reporting that it doesn't support
+                            // any host MIDI controller configurations!
+                            jassert (   editor->supportsHostMIDIControllerPresence (true)
+                                     || editor->supportsHostMIDIControllerPresence (false));
+
+                            for (auto i = 0u; i < n; ++i)
                             {
-                                if (editor->supportsHostMIDIControllerPresence ([viewConfiguration hostHasController] == YES))
+                                if (auto viewConfiguration = [configs objectAtIndex: i])
                                 {
-                                    auto* constrainer = editor->getConstrainer();
-                                    auto height = (int) [viewConfiguration height];
-                                    auto width  = (int) [viewConfiguration width];
+                                    if (editor->supportsHostMIDIControllerPresence ([viewConfiguration hostHasController] == YES))
+                                    {
+                                        auto* constrainer = editor->getConstrainer();
+                                        auto height = (int) [viewConfiguration height];
+                                        auto width  = (int) [viewConfiguration width];
 
-                                    const auto maxLimits = std::numeric_limits<int>::max() / 2;
-                                    const Rectangle<int> requestedBounds { width, height };
-                                    auto modifiedBounds = requestedBounds;
-                                    constrainer->checkBounds (modifiedBounds, editor->getBounds().withZeroOrigin(), { maxLimits, maxLimits }, false, false, false, false);
+                                        const auto maxLimits = std::numeric_limits<int>::max() / 2;
+                                        const Rectangle<int> requestedBounds { width, height };
+                                        auto modifiedBounds = requestedBounds;
+                                        constrainer->checkBounds (modifiedBounds,
+                                                                  editor->getBounds().withZeroOrigin(),
+                                                                  { maxLimits, maxLimits }, false, false, false, false);
 
-                                    if (modifiedBounds == requestedBounds)
-                                        [supportedViewIndices addIndex: i];
+                                        if (modifiedBounds == requestedBounds)
+                                            [supportedViewIndices addIndex: i];
+                                    }
                                 }
                             }
                         }
-                    }
+                    });
 
                     return [supportedViewIndices autorelease];
                 });
@@ -1972,14 +1986,14 @@ public:
     //==============================================================================
     AUAudioUnit* createAudioUnit (const AudioComponentDescription& descr, NSError** error)
     {
-        const auto holder = [&]
+        const auto holder = std::invoke ([&]
         {
             if (auto initialisedHolder = processorHolder.get())
                 return initialisedHolder;
 
-            waitForExecutionOnMainThread ([this] { [myself view]; });
+            MessageManager::callSync ([this] { [myself view]; });
             return processorHolder.get();
-        }();
+        });
 
         if (holder == nullptr)
             return nullptr;
@@ -1988,25 +2002,6 @@ public:
     }
 
 private:
-    template <typename Callback>
-    static void waitForExecutionOnMainThread (Callback&& callback)
-    {
-        if (MessageManager::getInstance()->isThisTheMessageThread())
-        {
-            callback();
-            return;
-        }
-
-        std::promise<void> promise;
-
-        MessageManager::callAsync ([&]
-        {
-            callback();
-            promise.set_value();
-        });
-
-        promise.get_future().get();
-    }
 
     // There's a chance that createAudioUnit will be called from a background
     // thread while the processorHolder is being updated on the main thread.
