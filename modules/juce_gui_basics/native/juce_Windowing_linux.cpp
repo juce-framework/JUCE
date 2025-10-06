@@ -631,11 +631,11 @@ void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool)
         comp->setBounds (getDisplays().getDisplayForRect (comp->getScreenBounds())->totalArea);
 }
 
-void Displays::findDisplays (float masterScale)
+void Displays::findDisplays (const Desktop& desktop)
 {
     if (XWindowSystem::getInstance()->getDisplay() != nullptr)
     {
-        displays = XWindowSystem::getInstance()->findDisplays (masterScale);
+        displays = XWindowSystem::getInstance()->findDisplays (desktop.getGlobalScaleFactor());
 
         if (! displays.isEmpty())
             updateToLogical();

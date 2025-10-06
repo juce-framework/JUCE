@@ -1896,6 +1896,8 @@ public:
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
+        refreshDisplays();
+
         if (auto p = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnitv3))
         {
             processorHolder = new AudioProcessorHolder (std::move (p));
@@ -1932,6 +1934,8 @@ public:
 
     void viewDidLayoutSubviews()
     {
+        refreshDisplays();
+
         if (auto holder = processorHolder.get())
         {
             if ([myself view] != nullptr)
@@ -2002,6 +2006,7 @@ public:
     }
 
 private:
+    static void refreshDisplays() { const_cast<Displays&> (Desktop::getInstance().getDisplays()).refresh(); }
 
     // There's a chance that createAudioUnit will be called from a background
     // thread while the processorHolder is being updated on the main thread.

@@ -6038,7 +6038,7 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT, LPARAM userInfo
     return TRUE;
 }
 
-void Displays::findDisplays (float masterScale)
+void Displays::findDisplays (const Desktop& desktop)
 {
     setDPIAwareness();
 
@@ -6057,6 +6057,8 @@ void Displays::findDisplays (float masterScale)
     for (int i = 1; i < monitors.size(); ++i)
         if (monitors.getReference (i).isMain)
             monitors.swap (i, 0);
+
+    const auto masterScale = desktop.getGlobalScaleFactor();
 
     for (auto& monitor : monitors)
     {
