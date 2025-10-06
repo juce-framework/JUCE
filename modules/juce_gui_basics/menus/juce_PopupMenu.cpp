@@ -373,13 +373,13 @@ struct MenuWindow final : public Component
         }
         else
         {
-            const auto shouldDisableAccessibility = [this]
+            const auto shouldDisableAccessibility = std::invoke ([this]
             {
                 const auto* compToCheck = parent != nullptr ? parent
                                                             : options.getTargetComponent();
 
                 return compToCheck != nullptr && ! compToCheck->isAccessible();
-            }();
+            });
 
             if (shouldDisableAccessibility)
                 setAccessible (false);
@@ -874,7 +874,7 @@ struct MenuWindow final : public Component
         auto parentArea = getParentArea (target.getCentre()) / scaleFactor;
 
         if (auto* pc = options.getParentComponent())
-            target = pc->getLocalArea (nullptr, target).getIntersection (parentArea);
+            target = pc->getLocalArea (nullptr, target).constrainedWithin (parentArea);
 
         auto maxMenuHeight = parentArea.getHeight() - 24;
 
