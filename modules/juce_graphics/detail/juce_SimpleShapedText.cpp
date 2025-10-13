@@ -211,7 +211,8 @@ static std::vector<hb_feature_t> getHarfbuzzFeatures (Span<const FontFeatureSett
 }
 
 /*  Returns glyphs in logical order as that favours wrapping. */
-static std::vector<ShapedGlyph> lowLevelShape (Span<const juce_wchar> string,
+static std::vector<ShapedGlyph> lowLevelShape (Span<const juce_wchar> unsanitisedString,
+                                               Span<const juce_wchar> string,
                                                Range<int64> range,
                                                const Font& font,
                                                TextScript script,
@@ -235,8 +236,13 @@ static std::vector<ShapedGlyph> lowLevelShape (Span<const juce_wchar> string,
                          0,
                          0);
 
+    const auto controlChars = [&]
+    {
+        const Span unsanitisedSpan { unsanitisedString.data() + range.getStart(), (size_t) range.getLength() };
+        return findControlCharacters (unsanitisedSpan);
+    }();
+
     const Span shapedSpan { string.data() + range.getStart(), (size_t) range.getLength() };
-    const auto controlChars = findControlCharacters (shapedSpan);
 
     for (const auto pair : enumerate (shapedSpan, size_t{}))
         hb_buffer_add (buffer.get(), static_cast<hb_codepoint_t> (pair.value), (unsigned int) pair.index);
@@ -852,6 +858,22 @@ static auto incrementCharPtr (CharPtr b, CharPtr e, int64 steps)
     return b;
 }
 
+static std::vector<juce_wchar> convertToVector (const String& stringIn, Range<int64> lineRange)
+{
+    std::vector<juce_wchar> result;
+
+    const auto end = stringIn.end();
+    const auto beginOfRange = incrementCharPtr (stringIn.begin(), end, lineRange.getStart());
+    const auto endOfRange = incrementCharPtr (beginOfRange, end, lineRange.getLength());
+
+    result.reserve (beginOfRange.lengthUpTo (endOfRange));
+
+    for (auto it = beginOfRange; it != endOfRange; ++it)
+        result.push_back (*it);
+
+    return result;
+}
+
 static std::vector<juce_wchar> sanitiseString (const String& stringIn, Range<int64> lineRange)
 {
     std::vector<juce_wchar> result;
@@ -884,7 +906,8 @@ static std::vector<juce_wchar> sanitiseString (const String& stringIn, Range<int
 struct Shaper
 {
     Shaper (const String& stringIn, Range<int64> lineRange, const ShapedTextOptions& options)
-        : string (sanitiseString (stringIn, lineRange))
+        : unsanitisedString (convertToVector (stringIn, lineRange)),
+          string (sanitiseString (stringIn, lineRange))
     {
         const auto analysis = Unicode::performAnalysis (stringIn.substring ((int) lineRange.getStart(),
                                                                             (int) lineRange.getEnd()));
@@ -977,7 +1000,8 @@ struct Shaper
                 const Range<int64> shapingRange { std::max (startFrom, it->range.getStart()), it->range.getEnd() };
                 jassert (! shapingRange.isEmpty());
 
-                auto g = lowLevelShape (string,
+                auto g = lowLevelShape (unsanitisedString,
+                                        string,
                                         shapingRange,
                                         it->value.resolvedFont,
                                         it->value.script,
@@ -1043,6 +1067,7 @@ struct Shaper
         return result;
     }
 
+    std::vector<juce_wchar> unsanitisedString;
     std::vector<juce_wchar> string;
     std::vector<size_t> visualOrder;
     RangedValues<ShapingParams> shaperRuns;
