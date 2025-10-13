@@ -505,8 +505,7 @@ int64 JustifiedText::getGlyphIndexToTheRightOf (Point<float> p) const
     for (const auto& glyph : glyphsInLine)
     {
         if (   p.getX() < glyphX + glyph.advance.getX() / 2.0f
-            || glyph.isNewline()
-            || (glyphIndex - lineIt->range.getStart() == (int64) glyphsInLine.size() - 1 && glyph.isWhitespace()))
+            || glyph.isNewline())
         {
             break;
         }
