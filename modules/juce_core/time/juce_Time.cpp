@@ -462,17 +462,26 @@ Time Time::fromISO8601 (StringRef iso)
     auto year = parseFixedSizeIntAndSkip (t, 4, '-');
 
     if (year < 0)
+    {
+        jassertfalse;
         return {};
+    }
 
     auto month = parseFixedSizeIntAndSkip (t, 2, '-');
 
     if (month < 0)
+    {
+        jassertfalse;
         return {};
+    }
 
     auto day = parseFixedSizeIntAndSkip (t, 2, 0);
 
     if (day < 0)
+    {
+        jassertfalse;
         return {};
+    }
 
     int hours = 0, minutes = 0, milliseconds = 0;
 
@@ -482,17 +491,26 @@ Time Time::fromISO8601 (StringRef iso)
         hours = parseFixedSizeIntAndSkip (t, 2, ':');
 
         if (hours < 0)
+        {
+            jassertfalse;
             return {};
+        }
 
         minutes = parseFixedSizeIntAndSkip (t, 2, ':');
 
         if (minutes < 0)
+        {
+            jassertfalse;
             return {};
+        }
 
         auto seconds = parseFixedSizeIntAndSkip (t, 2, 0);
 
         if (seconds < 0)
-             return {};
+        {
+            jassertfalse;
+            return {};
+        }
 
         if (*t == '.' || *t == ',')
         {
@@ -500,7 +518,10 @@ Time Time::fromISO8601 (StringRef iso)
             milliseconds = parseFixedSizeIntAndSkip (t, 3, 0);
 
             if (milliseconds < 0)
+            {
+                jassertfalse;
                 return {};
+            }
         }
 
         milliseconds += 1000 * seconds;
@@ -513,18 +534,25 @@ Time Time::fromISO8601 (StringRef iso)
         auto offsetHours = parseFixedSizeIntAndSkip (t, 2, ':');
 
         if (offsetHours < 0)
+        {
+            jassertfalse;
             return {};
+        }
 
         auto offsetMinutes = parseFixedSizeIntAndSkip (t, 2, 0);
 
         if (offsetMinutes < 0)
+        {
+            jassertfalse;
             return {};
+        }
 
         auto offsetMs = (offsetHours * 60 + offsetMinutes) * 60 * 1000;
         milliseconds += nextChar == '-' ? offsetMs : -offsetMs; // NB: this seems backwards but is correct!
     }
     else if (nextChar != 0 && nextChar != 'Z')
     {
+        jassertfalse;
         return {};
     }
 
