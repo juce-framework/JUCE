@@ -34,6 +34,7 @@
 
 #include <juce_core/system/juce_TargetPlatform.h>
 #include <juce_core/system/juce_CompilerWarnings.h>
+#include <juce_audio_processors_headless/format/juce_PluginFormatDefs.h>
 
 //==============================================================================
 #if JucePlugin_Build_VST3
