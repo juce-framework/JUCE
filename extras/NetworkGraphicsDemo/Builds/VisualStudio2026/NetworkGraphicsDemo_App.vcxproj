@@ -2229,6 +2229,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\LevelRun.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\Object.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\PairingLookup.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2239,6 +2242,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBBase.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBCodepoint.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBCodepointSequence.c">
@@ -4031,20 +4037,21 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_RenderingHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\placement\juce_Justification.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\placement\juce_RectanglePlacement.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBAlgorithm.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBBase.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBBidiType.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBCodepoint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBCodepointSequence.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBConfig.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBGeneralCategory.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBLine.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBMirrorLocator.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBParagraph.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBRun.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBScript.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBScriptLocator.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBAlgorithm.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBBase.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBBidiType.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBCodepoint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBCodepointSequence.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBConfig.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBGeneralCategory.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBLine.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBMirrorLocator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBParagraph.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBRun.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBScript.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBScriptLocator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBVersion.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SheenBidi.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\BidiChain.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\BidiTypeLookup.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\BracketQueue.h"/>
@@ -4052,6 +4059,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\GeneralCategoryLookup.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\IsolatingRun.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\LevelRun.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\Object.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\PairingLookup.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\RunExtrema.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\RunKind.h"/>
@@ -4059,6 +4067,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBAlgorithm.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBAssert.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBBase.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBCodepoint.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBCodepointSequence.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBLine.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBLog.h"/>
