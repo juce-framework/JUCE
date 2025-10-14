@@ -74,7 +74,7 @@ public:
 
         ++insertionCounter;
 
-        while (list.size() >= maxEntries)
+        while (map.size() >= maxEntries)
         {
             const auto toRemove = list.begin();
             map.erase (*toRemove);
