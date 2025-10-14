@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2018 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-#ifndef _SHEEN_BIDI_H
-#define _SHEEN_BIDI_H
+#ifndef _SB_PUBLIC_CONFIG_H
+#define _SB_PUBLIC_CONFIG_H
 
-#include "SBAlgorithm.h"
-#include "SBBase.h"
-#include "SBBidiType.h"
-#include "SBCodepoint.h"
-#include "SBCodepointSequence.h"
-#include "SBGeneralCategory.h"
-#include "SBLine.h"
-#include "SBMirrorLocator.h"
-#include "SBParagraph.h"
-#include "SBRun.h"
-#include "SBScript.h"
-#include "SBScriptLocator.h"
+/* #define SB_CONFIG_DLL_EXPORT */
+/* #define SB_CONFIG_DLL_IMPORT */
+/* #define SB_CONFIG_LOG */
+/* #define SB_CONFIG_UNITY */
+
+#ifdef SB_CONFIG_UNITY
+#define SB_INTERNAL static
+#else
+#define SB_INTERNAL
+#endif
 
 #endif

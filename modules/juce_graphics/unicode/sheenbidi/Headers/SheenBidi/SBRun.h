@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Muhammad Tayyab Akram
+ * Copyright (C) 2016-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef _SB_PUBLIC_CONFIG_H
-#define _SB_PUBLIC_CONFIG_H
+#ifndef _SB_PUBLIC_RUN_H
+#define _SB_PUBLIC_RUN_H
 
-/* #define SB_CONFIG_LOG */
-/* #define SB_CONFIG_UNITY */
+#include <SheenBidi/SBBase.h>
 
-#ifdef SB_CONFIG_UNITY
-#define SB_INTERNAL static
-#else
-#define SB_INTERNAL
-#endif
+SB_EXTERN_C_BEGIN
+
+/**
+ * A structure containing the information of a sequence of characters having the same embedding
+ * level.
+ */
+typedef struct _SBRun {
+    SBUInteger offset; /**< The index to the first code unit of the run in source string. */
+    SBUInteger length; /**< The number of code units covering the length of the run. */
+    SBLevel level;     /**< The embedding level of the run. */
+} SBRun;
+
+SB_EXTERN_C_END
 
 #endif

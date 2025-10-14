@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2018-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,15 @@
 #ifndef _SB_INTERNAL_SCRIPT_LOCATOR_H
 #define _SB_INTERNAL_SCRIPT_LOCATOR_H
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBBase.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SBCodepointSequence.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SBScriptLocator.h>
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBCodepointSequence.h>
+#include <SheenBidi/SBScriptLocator.h>
 
+#include "Object.h"
 #include "ScriptStack.h"
 
 typedef struct _SBScriptLocator {
+    Object _object;
     SBCodepointSequence _codepointSequence;
     ScriptStack _scriptStack;
     SBScriptAgent agent;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 Muhammad Tayyab Akram
+ * Copyright (C) 2016-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 #ifndef _SB_PUBLIC_CODEPOINT_SEQUENCE_H
 #define _SB_PUBLIC_CODEPOINT_SEQUENCE_H
 
-#include "SBBase.h"
-#include "SBCodepoint.h"
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBCodepoint.h>
+
+SB_EXTERN_C_BEGIN
 
 enum {
     SBStringEncodingUTF8 = 0,  /**< An 8-bit representation of Unicode code points. */
@@ -29,7 +31,7 @@ typedef SBUInt32 SBStringEncoding;
 
 typedef struct _SBCodepointSequence {
     SBStringEncoding stringEncoding; /**< The encoding of the string. */
-    void *stringBuffer;              /**< The source string containing the code units. */
+    const void *stringBuffer;        /**< The source string containing the code units. */
     SBUInteger stringLength;         /**< The length of the string in terms of code units. */
 } SBCodepointSequence;
 
@@ -45,8 +47,8 @@ typedef struct _SBCodepointSequence {
  *      The code point before the given string index, or SBCodepointInvalid if stringIndex is equal 
  *      to zero or larger than actual length of source string.
  */
-SBCodepoint SBCodepointSequenceGetCodepointBefore(const SBCodepointSequence *codepointSequence,
-    SBUInteger *stringIndex);
+SB_PUBLIC SBCodepoint SBCodepointSequenceGetCodepointBefore(
+    const SBCodepointSequence *codepointSequence, SBUInteger *stringIndex);
 
 /**
  * Returns the code point at the given string index.
@@ -60,7 +62,9 @@ SBCodepoint SBCodepointSequenceGetCodepointBefore(const SBCodepointSequence *cod
  *      The code point at the given string index, or SBCodepointInvalid if stringIndex is larger
  *      than or equal to actual length of source string.
  */
-SBCodepoint SBCodepointSequenceGetCodepointAt(const SBCodepointSequence *codepointSequence,
-    SBUInteger *stringIndex);
+SB_PUBLIC SBCodepoint SBCodepointSequenceGetCodepointAt(
+    const SBCodepointSequence *codepointSequence, SBUInteger *stringIndex);
+
+SB_EXTERN_C_END
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 Muhammad Tayyab Akram
+ * Copyright (C) 2016-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 #ifndef _SB_PUBLIC_ALGORITHM_H
 #define _SB_PUBLIC_ALGORITHM_H
 
-#include "SBBase.h"
-#include "SBBidiType.h"
-#include "SBCodepointSequence.h"
-#include "SBParagraph.h"
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBBidiType.h>
+#include <SheenBidi/SBCodepointSequence.h>
+#include <SheenBidi/SBParagraph.h>
+
+SB_EXTERN_C_BEGIN
 
 typedef struct _SBAlgorithm *SBAlgorithmRef;
 
@@ -33,7 +35,7 @@ typedef struct _SBAlgorithm *SBAlgorithmRef;
  * @return
  *      A reference to an algorithm object if the call was successful, NULL otherwise.
  */
-SBAlgorithmRef SBAlgorithmCreate(const SBCodepointSequence *codepointSequence);
+SB_PUBLIC SBAlgorithmRef SBAlgorithmCreate(const SBCodepointSequence *codepointSequence);
 
 /**
  * Returns a direct pointer to the bidirectional types of code units, stored in the algorithm
@@ -45,7 +47,7 @@ SBAlgorithmRef SBAlgorithmCreate(const SBCodepointSequence *codepointSequence);
  *      A valid pointer to an array of SBBidiType structures, whose length will be equal to that of
  *      string buffer.
  */
-const SBBidiType *SBAlgorithmGetBidiTypesPtr(SBAlgorithmRef algorithm);
+SB_PUBLIC const SBBidiType *SBAlgorithmGetBidiTypesPtr(SBAlgorithmRef algorithm);
 
 /**
  * Determines the boundary of first paragraph within the specified range.
@@ -69,7 +71,7 @@ const SBBidiType *SBAlgorithmGetBidiTypesPtr(SBAlgorithmRef algorithm);
  *      On output, the length of paragraph separator. This parameter can be set to NULL if not
  *      needed.
  */
-void SBAlgorithmGetParagraphBoundary(SBAlgorithmRef algorithm,
+SB_PUBLIC void SBAlgorithmGetParagraphBoundary(SBAlgorithmRef algorithm,
     SBUInteger paragraphOffset, SBUInteger suggestedLength,
     SBUInteger *acutalLength, SBUInteger *separatorLength);
 
@@ -94,7 +96,7 @@ void SBAlgorithmGetParagraphBoundary(SBAlgorithmRef algorithm,
  * @return
  *      A reference to a paragraph object if the call was successful, NULL otherwise.
  */
-SBParagraphRef SBAlgorithmCreateParagraph(SBAlgorithmRef algorithm,
+SB_PUBLIC SBParagraphRef SBAlgorithmCreateParagraph(SBAlgorithmRef algorithm,
     SBUInteger paragraphOffset, SBUInteger suggestedLength, SBLevel baseLevel);
 
 /**
@@ -105,7 +107,7 @@ SBParagraphRef SBAlgorithmCreateParagraph(SBAlgorithmRef algorithm,
  * @return
  *      The same algorithm object passed in as the parameter.
  */
-SBAlgorithmRef SBAlgorithmRetain(SBAlgorithmRef algorithm);
+SB_PUBLIC SBAlgorithmRef SBAlgorithmRetain(SBAlgorithmRef algorithm);
 
 /**
  * Decrements the reference count of an algorithm object. The object will be deallocated when its
@@ -114,6 +116,8 @@ SBAlgorithmRef SBAlgorithmRetain(SBAlgorithmRef algorithm);
  * @param algorithm
  *      The algorithm object whose reference count will be decremented.
  */
-void SBAlgorithmRelease(SBAlgorithmRef algorithm);
+SB_PUBLIC void SBAlgorithmRelease(SBAlgorithmRef algorithm);
+
+SB_EXTERN_C_END
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2018 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 #ifndef _SB_PUBLIC_MIRROR_LOCATOR_H
 #define _SB_PUBLIC_MIRROR_LOCATOR_H
 
-#include "SBBase.h"
-#include "SBCodepoint.h"
-#include "SBLine.h"
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBCodepoint.h>
+#include <SheenBidi/SBLine.h>
+
+SB_EXTERN_C_BEGIN
 
 typedef struct _SBMirrorLocator *SBMirrorLocatorRef;
 
@@ -38,7 +40,7 @@ typedef struct _SBMirrorAgent {
  * @return
  *      A reference to a mirror locator object.
  */
-SBMirrorLocatorRef SBMirrorLocatorCreate(void);
+SB_PUBLIC SBMirrorLocatorRef SBMirrorLocatorCreate(void);
 
 /**
  * Loads a line in the locator so that its mirror can be located.
@@ -50,7 +52,8 @@ SBMirrorLocatorRef SBMirrorLocatorCreate(void);
  * @param stringBuffer
  *      The string buffer from which the line's algorithm was created.
  */
-void SBMirrorLocatorLoadLine(SBMirrorLocatorRef locator, SBLineRef line, void *stringBuffer);
+SB_PUBLIC void SBMirrorLocatorLoadLine(SBMirrorLocatorRef locator, SBLineRef line,
+    void *stringBuffer);
 
 /**
  * Returns the agent containing the information of current located mirror.
@@ -58,7 +61,7 @@ void SBMirrorLocatorLoadLine(SBMirrorLocatorRef locator, SBLineRef line, void *s
  * @param locator
  *      The locator whose agent is returned.
  */
-const SBMirrorAgent *SBMirrorLocatorGetAgent(SBMirrorLocatorRef locator);
+SB_PUBLIC const SBMirrorAgent *SBMirrorLocatorGetAgent(SBMirrorLocatorRef locator);
 
 /**
  * Instructs the locator to find next mirror in the loaded line.
@@ -70,7 +73,7 @@ const SBMirrorAgent *SBMirrorLocatorGetAgent(SBMirrorLocatorRef locator);
  * @note
  *      The locator will be reset after locating last mirror.
  */
-SBBoolean SBMirrorLocatorMoveNext(SBMirrorLocatorRef locator);
+SB_PUBLIC SBBoolean SBMirrorLocatorMoveNext(SBMirrorLocatorRef locator);
 
 /**
  * Instructs the locator to reset itself so that mirrors of the loaded line can be obatained from
@@ -79,7 +82,7 @@ SBBoolean SBMirrorLocatorMoveNext(SBMirrorLocatorRef locator);
  * @param locator
  *      The locator whom you want to reset.
  */
-void SBMirrorLocatorReset(SBMirrorLocatorRef locator);
+SB_PUBLIC void SBMirrorLocatorReset(SBMirrorLocatorRef locator);
 
 /**
  * Increments the reference count of a mirror locator object.
@@ -89,7 +92,7 @@ void SBMirrorLocatorReset(SBMirrorLocatorRef locator);
  * @return
  *      The same mirror locator object passed in as the parameter.
  */
-SBMirrorLocatorRef SBMirrorLocatorRetain(SBMirrorLocatorRef locator);
+SB_PUBLIC SBMirrorLocatorRef SBMirrorLocatorRetain(SBMirrorLocatorRef locator);
 
 /**
  * Decrements the reference count of a mirror locator object. The object will be deallocated when
@@ -98,6 +101,8 @@ SBMirrorLocatorRef SBMirrorLocatorRetain(SBMirrorLocatorRef locator);
  * @param locator
  *      The mirror locator object whose reference count will be decremented.
  */
-void SBMirrorLocatorRelease(SBMirrorLocatorRef locator);
+SB_PUBLIC void SBMirrorLocatorRelease(SBMirrorLocatorRef locator);
+
+SB_EXTERN_C_END
 
 #endif

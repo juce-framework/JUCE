@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2018 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,43 @@
 #ifndef _SB_PUBLIC_BASE_H
 #define _SB_PUBLIC_BASE_H
 
-#include <stddef.h>
 #include <stdint.h>
+
+#ifdef __cplusplus
+#define SB_EXTERN_C_BEGIN extern "C" {
+#define SB_EXTERN_C_END }
+#else
+#define SB_EXTERN_C_BEGIN
+#define SB_EXTERN_C_END
+#endif
+
+#ifdef _WIN32
+
+#if defined(SB_CONFIG_DLL_EXPORT)
+#define SB_PUBLIC __declspec(dllexport)
+#elif defined(SB_CONFIG_DLL_IMPORT)
+#define SB_PUBLIC __declspec(dllimport)
+#endif
+
+#endif
+
+#ifndef SB_PUBLIC
+#define SB_PUBLIC
+#endif
+
+#if defined(__cplusplus) && __cplusplus >= 201402L
+#define SB_DEPRECATED [[deprecated]]
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
+#define SB_DEPRECATED [[deprecated]]
+#elif defined(__clang__) || defined(__GNUC__)
+#define SB_DEPRECATED __attribute__((deprecated))
+#elif defined(_MSC_VER)
+#define SB_DEPRECATED __declspec(deprecated)
+#else
+#define SB_DEPRECATED
+#endif
+
+SB_EXTERN_C_BEGIN
 
 /**
  * A type to represent an 8-bit signed integer.
@@ -115,5 +150,7 @@ typedef SBUInt8                     SBLevel;
  * A value specifying to set base level to one (right-to-left) if there is no strong character.
  */
 #define SBLevelDefaultRTL           0xFD
+
+SB_EXTERN_C_END
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Muhammad Tayyab Akram
+ * Copyright (C) 2018-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 #ifndef _SB_PUBLIC_GENERAL_CATEGORY_H
 #define _SB_PUBLIC_GENERAL_CATEGORY_H
 
-#include "SBBase.h"
+#include <SheenBidi/SBBase.h>
+
+SB_EXTERN_C_BEGIN
 
 /**
  * Constants that specify the general category of a character.
@@ -102,5 +104,7 @@ typedef SBUInt8 SBGeneralCategory;
  * Checks whether specified general category is other.
  */
 #define SBGeneralCategoryIsOther(gc)        SBUInt8InRange(gc, SBGeneralCategoryCC, SBGeneralCategoryCN)
+
+SB_EXTERN_C_END
 
 #endif

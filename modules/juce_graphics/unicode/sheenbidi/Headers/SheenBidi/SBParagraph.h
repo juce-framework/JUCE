@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2018 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 #ifndef _SB_PUBLIC_PARAGRAPH_H
 #define _SB_PUBLIC_PARAGRAPH_H
 
-#include "SBBase.h"
-#include "SBLine.h"
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBLine.h>
+
+SB_EXTERN_C_BEGIN
 
 typedef struct _SBParagraph *SBParagraphRef;
 
@@ -30,7 +32,7 @@ typedef struct _SBParagraph *SBParagraphRef;
  * @return
  *      The offset of the paragraph passed in.
  */
-SBUInteger SBParagraphGetOffset(SBParagraphRef paragraph);
+SB_PUBLIC SBUInteger SBParagraphGetOffset(SBParagraphRef paragraph);
 
 /**
  * Returns the number of code units covering the length of the paragraph.
@@ -40,7 +42,7 @@ SBUInteger SBParagraphGetOffset(SBParagraphRef paragraph);
  * @return
  *      The length of the paragraph passed in.
  */
-SBUInteger SBParagraphGetLength(SBParagraphRef paragraph);
+SB_PUBLIC SBUInteger SBParagraphGetLength(SBParagraphRef paragraph);
 
 /**
  * Returns the base level of the paragraph.
@@ -50,7 +52,7 @@ SBUInteger SBParagraphGetLength(SBParagraphRef paragraph);
  * @return
  *      The base level of the paragraph passed in.
  */
-SBLevel SBParagraphGetBaseLevel(SBParagraphRef paragraph);
+SB_PUBLIC SBLevel SBParagraphGetBaseLevel(SBParagraphRef paragraph);
 
 /**
  * Returns a direct pointer to the embedding levels, stored in the paragraph.
@@ -60,7 +62,7 @@ SBLevel SBParagraphGetBaseLevel(SBParagraphRef paragraph);
  * @return
  *      A valid pointer to an array of SBLevel structures.
  */
-const SBLevel *SBParagraphGetLevelsPtr(SBParagraphRef paragraph);
+SB_PUBLIC const SBLevel *SBParagraphGetLevelsPtr(SBParagraphRef paragraph);
 
 /**
  * Creates a line object of specified range by applying rules L1-L2 of Unicode Bidirectional
@@ -76,7 +78,8 @@ const SBLevel *SBParagraphGetLevelsPtr(SBParagraphRef paragraph);
  * @return
  *      A reference to a line object if the call was successful, NULL otherwise.
  */
-SBLineRef SBParagraphCreateLine(SBParagraphRef paragraph, SBUInteger lineOffset, SBUInteger lineLength);
+SB_PUBLIC SBLineRef SBParagraphCreateLine(SBParagraphRef paragraph, SBUInteger lineOffset,
+    SBUInteger lineLength);
 
 /**
  * Increments the reference count of a paragraph object.
@@ -86,7 +89,7 @@ SBLineRef SBParagraphCreateLine(SBParagraphRef paragraph, SBUInteger lineOffset,
  * @return
  *      The same paragraph object passed in as the parameter.
  */
-SBParagraphRef SBParagraphRetain(SBParagraphRef paragraph);
+SB_PUBLIC SBParagraphRef SBParagraphRetain(SBParagraphRef paragraph);
 
 /**
  * Decrements the reference count of a paragraph object. The object will be deallocated when its
@@ -95,6 +98,8 @@ SBParagraphRef SBParagraphRetain(SBParagraphRef paragraph);
  * @param paragraph
  *      The paragraph object whose reference count will be decremented.
  */
-void SBParagraphRelease(SBParagraphRef paragraph);
+SB_PUBLIC void SBParagraphRelease(SBParagraphRef paragraph);
+
+SB_EXTERN_C_END
 
 #endif

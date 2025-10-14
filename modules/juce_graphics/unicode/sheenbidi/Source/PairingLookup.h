@@ -6,10 +6,11 @@
 #ifndef _SB_INTERNAL_PAIRING_LOOKUP_H
 #define _SB_INTERNAL_PAIRING_LOOKUP_H
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBCodepoint.h>
+#include <SheenBidi/SBConfig.h>
 
 #include "BracketType.h"
-#include "SBBase.h"
 
 SB_INTERNAL SBCodepoint LookupMirror(SBCodepoint codepoint);
 SB_INTERNAL SBCodepoint LookupBracketPair(SBCodepoint codepoint, BracketType *bracketType);

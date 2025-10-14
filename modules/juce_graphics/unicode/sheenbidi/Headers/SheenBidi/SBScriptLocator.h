@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Muhammad Tayyab Akram
+ * Copyright (C) 2018-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 #ifndef _SB_PUBLIC_SCRIPT_LOCATOR_H
 #define _SB_PUBLIC_SCRIPT_LOCATOR_H
 
-#include "SBBase.h"
-#include "SBCodepointSequence.h"
-#include "SBScript.h"
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBCodepointSequence.h>
+#include <SheenBidi/SBScript.h>
+
+SB_EXTERN_C_BEGIN
 
 typedef struct _SBScriptLocator *SBScriptLocatorRef;
 
@@ -38,7 +40,7 @@ typedef struct _SBScriptAgent {
  * @return
  *      A reference to a script locator object.
  */
-SBScriptLocatorRef SBScriptLocatorCreate(void);
+SB_PUBLIC SBScriptLocatorRef SBScriptLocatorCreate(void);
 
 /**
  * Loads a code point sequence in the locator so that its script runs can be located.
@@ -48,7 +50,8 @@ SBScriptLocatorRef SBScriptLocatorCreate(void);
  * @param codepointSequence
  *      The code point sequence which will be loaded in the locator.
  */
-void SBScriptLocatorLoadCodepoints(SBScriptLocatorRef locator, const SBCodepointSequence *codepointSequence);
+SB_PUBLIC void SBScriptLocatorLoadCodepoints(SBScriptLocatorRef locator,
+    const SBCodepointSequence *codepointSequence);
 
 /**
  * Returns the agent containing the information of current located script run.
@@ -56,7 +59,7 @@ void SBScriptLocatorLoadCodepoints(SBScriptLocatorRef locator, const SBCodepoint
  * @param locator
  *      The locator whose agent is returned.
  */
-const SBScriptAgent *SBScriptLocatorGetAgent(SBScriptLocatorRef locator);
+SB_PUBLIC const SBScriptAgent *SBScriptLocatorGetAgent(SBScriptLocatorRef locator);
 
 /**
  * Instructs the locator to find next script run in the loaded code point sequence.
@@ -68,7 +71,7 @@ const SBScriptAgent *SBScriptLocatorGetAgent(SBScriptLocatorRef locator);
  * @note
  *      The locator will be reset after locating last script run.
  */
-SBBoolean SBScriptLocatorMoveNext(SBScriptLocatorRef locator);
+SB_PUBLIC SBBoolean SBScriptLocatorMoveNext(SBScriptLocatorRef locator);
 
 /**
  * Instructs the locator to reset itself so that script runs of the loaded line can be obatained
@@ -77,7 +80,7 @@ SBBoolean SBScriptLocatorMoveNext(SBScriptLocatorRef locator);
  * @param locator
  *      The locator whom you want to reset.
  */
-void SBScriptLocatorReset(SBScriptLocatorRef locator);
+SB_PUBLIC void SBScriptLocatorReset(SBScriptLocatorRef locator);
 
 /**
  * Increments the reference count of a script locator object.
@@ -87,7 +90,7 @@ void SBScriptLocatorReset(SBScriptLocatorRef locator);
  * @return
  *      The same script locator object passed in as the parameter.
  */
-SBScriptLocatorRef SBScriptLocatorRetain(SBScriptLocatorRef locator);
+SB_PUBLIC SBScriptLocatorRef SBScriptLocatorRetain(SBScriptLocatorRef locator);
 
 /**
  * Decrements the reference count of a script locator object. The object will be deallocated when
@@ -96,6 +99,8 @@ SBScriptLocatorRef SBScriptLocatorRetain(SBScriptLocatorRef locator);
  * @param locator
  *      The script locator object whose reference count will be decremented.
  */
-void SBScriptLocatorRelease(SBScriptLocatorRef locator);
+SB_PUBLIC void SBScriptLocatorRelease(SBScriptLocatorRef locator);
+
+SB_EXTERN_C_END
 
 #endif

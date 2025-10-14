@@ -6,10 +6,10 @@
 #ifndef _SB_INTERNAL_GENERAL_CATEGORY_LOOKUP_H
 #define _SB_INTERNAL_GENERAL_CATEGORY_LOOKUP_H
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SBGeneralCategory.h>
-
-#include "SBBase.h"
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBCodepoint.h>
+#include <SheenBidi/SBConfig.h>
+#include <SheenBidi/SBGeneralCategory.h>
 
 SB_INTERNAL SBGeneralCategory LookupGeneralCategory(SBCodepoint codepoint);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Muhammad Tayyab Akram
+ * Copyright (C) 2018-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 #ifndef _SB_PUBLIC_BIDI_TYPE_H
 #define _SB_PUBLIC_BIDI_TYPE_H
 
-#include "SBBase.h"
+#include <SheenBidi/SBBase.h>
+
+SB_EXTERN_C_BEGIN
 
 /**
  * Constants that specify the bidirectional types of a character.
@@ -77,5 +79,7 @@ typedef SBUInt8 SBBidiType;
  * Checks whether specified bidirectional type is format.
  */
 #define SBBidiTypeIsFormat(t)               SBUInt8InRange(t, SBBidiTypeLRI, SBBidiTypePDF)
+
+SB_EXTERN_C_END
 
 #endif

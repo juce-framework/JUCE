@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef _SB_PUBLIC_RUN_H
-#define _SB_PUBLIC_RUN_H
+#ifndef _SHEEN_BIDI_H
+#define _SHEEN_BIDI_H
 
-#include "SBBase.h"
-
-/**
- * A structure containing the information of a sequence of characters having the same embedding
- * level.
- */
-typedef struct _SBRun {
-    SBUInteger offset; /**< The index to the first code unit of the run in source string. */
-    SBUInteger length; /**< The number of code units covering the length of the run. */
-    SBLevel level;     /**< The embedding level of the run. */
-} SBRun;
+#include <SheenBidi/SBAlgorithm.h>
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBBidiType.h>
+#include <SheenBidi/SBCodepoint.h>
+#include <SheenBidi/SBCodepointSequence.h>
+#include <SheenBidi/SBGeneralCategory.h>
+#include <SheenBidi/SBLine.h>
+#include <SheenBidi/SBMirrorLocator.h>
+#include <SheenBidi/SBParagraph.h>
+#include <SheenBidi/SBRun.h>
+#include <SheenBidi/SBScript.h>
+#include <SheenBidi/SBScriptLocator.h>
+#include <SheenBidi/SBVersion.h>
 
 #endif
