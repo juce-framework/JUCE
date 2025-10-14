@@ -220,9 +220,41 @@ private:
 };
 
 #if DOXYGEN
+ /** An optional user defined preprocessor definition for declaring the VST3
+     plugin identifier as used by the host.
+
+     This is useful if you're creating a VST3 plugin using JUCE that needs to
+     replace a VST3 plugin that was not originally created using JUCE.
+
+     If there are multiple identifiers this plugin needs to replace take a look
+     at JUCE_VST3_COMPATIBLE_CLASSES. If required, both preprocessor definitions
+     can be used in combination for maximum compatibility.
+
+     The definition of this preprocessor must be defined at the project
+     level, normally in your CMake or Projucer project files.
+
+     If JUCE_VST3_CAN_REPLACE_VST2 is enabled, the VST3 plugin will have the
+     same identifier as the VST2 plugin and therefore this preprocessor
+     definition will have no effect!
+
+     This preprocessor definition should be defined as a string containing 32
+     hex characters, for example...
+
+     @code
+     JUCE_VST3_COMPONENT_CLASS="0F1E2D3C4B5A69788796A5B4C3D2E1F0"
+     @endcode
+
+     @see JUCE_VST3_COMPONENT_CLASS
+ */
+ #define JUCE_VST3_COMPONENT_CLASS
+
  /** An optional user defined preprocessor definition for declaring a comma
      separated list of VST2 and VST3 plugin identifiers that this VST3 plugin
      can replace in a DAW session.
+
+     At the time of writing not all hosts support this feature, if you don't
+     have multiple plugins with different identifiers already released, consider
+     using JUCE_VST3_COMPONENT_CLASS instead.
 
      The definition of this preprocessor must be defined at the project
      level, normally in your CMake or Projucer project files.
@@ -265,7 +297,7 @@ private:
      If the parameter IDs between compatible versions differ
      VST3ClientExtensions::getCompatibleParameterIds() should also be overridden.
 
-     @see VST3Interface VST3ClientExtensions::getCompatibleParameterIds()
+     @see JUCE_VST3_COMPONENT_CLASS, VST3Interface, VST3ClientExtensions::getCompatibleParameterIds()
  */
  #define JUCE_VST3_COMPATIBLE_CLASSES
 #endif // DOXYGEN

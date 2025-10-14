@@ -117,18 +117,76 @@ struct VST3Interface
         return iid;
     }
 
+    /** Converts a 32-character hex notation string to a VST3 interface ID.
+
+        @see jucePluginId, vst2PluginId
+     */
+    static inline Id hexStringToId (const char* hex)
+    {
+        jassert (std::strlen (hex) == 32);
+
+        const auto getByteValue = [](const char* str)
+        {
+            const auto getCharacterValue = [](const char c)
+            {
+                if (c >= '0' && c <= '9')
+                    return (std::byte) (c - '0');
+
+                if (c >= 'A' && c <= 'F')
+                    return (std::byte) (c - 'A' + 10);
+
+                if (c >= 'a' && c <= 'f')
+                    return (std::byte) (c - 'a' + 10);
+
+                // Invalid hex character!
+                jassertfalse;
+                return std::byte{};
+            };
+
+            return getCharacterValue (str[0]) << 4
+                 | getCharacterValue (str[1]);
+        };
+
+        return { getByteValue (hex),
+                 getByteValue (hex + 2),
+                 getByteValue (hex + 4),
+                 getByteValue (hex + 6),
+                 getByteValue (hex + 8),
+                 getByteValue (hex + 10),
+                 getByteValue (hex + 12),
+                 getByteValue (hex + 14),
+                 getByteValue (hex + 16),
+                 getByteValue (hex + 18),
+                 getByteValue (hex + 20),
+                 getByteValue (hex + 22),
+                 getByteValue (hex + 24),
+                 getByteValue (hex + 26),
+                 getByteValue (hex + 28),
+                 getByteValue (hex + 30) };
+    }
+
     /** Returns a 16-byte array indicating the VST3 interface ID used for a given
         JUCE VST3 plugin.
 
         Internally this is what JUCE will use to assign an ID to each VST3 interface,
         unless JUCE_VST3_CAN_REPLACE_VST2 is enabled.
 
-        @see vst2PluginId, hexStringToId
+        If JUCE_VST3_COMPONENT_CLASS is defined it will return this value when the
+        interface type is Type::component. This is useful if you're releasing a
+        VST3 plugin with JUCE that needs to replace a version of a VST3 plugin
+        that wasn't originally built using JUCE.
+
+        @see vst2PluginId, hexStringToId, JUCE_VST3_COMPONENT_CLASS
     */
     static inline Id jucePluginId (uint32_t manufacturerCode,
                                    uint32_t pluginCode,
                                    Type interfaceType = Type::component)
     {
+       #ifdef JUCE_VST3_COMPONENT_CLASS
+        if (interfaceType == Type::component)
+            return hexStringToId ( JUCE_VST3_COMPONENT_CLASS );
+       #endif
+
         const auto word0 = std::invoke ([&]() -> uint32_t
         {
             switch (interfaceType)
@@ -192,54 +250,6 @@ struct VST3Interface
             getByteFromLSB (pluginCode, 1),
             getByteFromLSB (pluginCode, 0)
         };
-    }
-
-    /** Converts a 32-character hex notation string to a VST3 interface ID.
-
-        @see jucePluginId, vst2PluginId
-     */
-    static inline Id hexStringToId (const char* hex)
-    {
-        jassert (std::strlen (hex) == 32);
-
-        const auto getByteValue = [](const char* str)
-        {
-            const auto getCharacterValue = [](const char c)
-            {
-                if (c >= '0' && c <= '9')
-                    return (std::byte) (c - '0');
-
-                if (c >= 'A' && c <= 'F')
-                    return (std::byte) (c - 'A' + 10);
-
-                if (c >= 'a' && c <= 'f')
-                    return (std::byte) (c - 'a' + 10);
-
-                // Invalid hex character!
-                jassertfalse;
-                return std::byte{};
-            };
-
-            return getCharacterValue (str[0]) << 4
-                 | getCharacterValue (str[1]);
-        };
-
-        return { getByteValue (hex),
-                 getByteValue (hex + 2),
-                 getByteValue (hex + 4),
-                 getByteValue (hex + 6),
-                 getByteValue (hex + 8),
-                 getByteValue (hex + 10),
-                 getByteValue (hex + 12),
-                 getByteValue (hex + 14),
-                 getByteValue (hex + 16),
-                 getByteValue (hex + 18),
-                 getByteValue (hex + 20),
-                 getByteValue (hex + 22),
-                 getByteValue (hex + 24),
-                 getByteValue (hex + 26),
-                 getByteValue (hex + 28),
-                 getByteValue (hex + 30) };
     }
 
     VST3Interface() = delete;
