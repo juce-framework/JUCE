@@ -17,11 +17,11 @@
 #ifndef _SB_INTERNAL_ALGORITHM_H
 #define _SB_INTERNAL_ALGORITHM_H
 
-#include <SheenBidi/SBAlgorithm.h>
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBBidiType.h>
-#include <SheenBidi/SBCodepointSequence.h>
-#include <SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBAlgorithm.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBidiType.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepointSequence.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "Object.h"
 

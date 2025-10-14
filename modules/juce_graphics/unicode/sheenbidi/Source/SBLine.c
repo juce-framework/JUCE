@@ -16,8 +16,8 @@
 
 #include <stddef.h>
 
-#include <SheenBidi/SBConfig.h>
-#include <SheenBidi/SBRun.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBRun.h>
 
 #include "Object.h"
 #include "PairingLookup.h"

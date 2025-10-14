@@ -17,7 +17,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include <SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "SBAssert.h"
 #include "SBBase.h"

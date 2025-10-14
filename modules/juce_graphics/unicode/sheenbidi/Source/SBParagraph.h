@@ -17,10 +17,10 @@
 #ifndef _SB_INTERNAL_PARAGRAPH_H
 #define _SB_INTERNAL_PARAGRAPH_H
 
-#include <SheenBidi/SBAlgorithm.h>
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBConfig.h>
-#include <SheenBidi/SBParagraph.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBAlgorithm.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBParagraph.h>
 
 #include "Object.h"
 

@@ -17,10 +17,10 @@
 #ifndef _SB_PUBLIC_ALGORITHM_H
 #define _SB_PUBLIC_ALGORITHM_H
 
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBBidiType.h>
-#include <SheenBidi/SBCodepointSequence.h>
-#include <SheenBidi/SBParagraph.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBidiType.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepointSequence.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBParagraph.h>
 
 SB_EXTERN_C_BEGIN
 

@@ -17,9 +17,9 @@
 #ifndef _SB_INTERNAL_MIRROR_LOCATOR_H
 #define _SB_INTERNAL_MIRROR_LOCATOR_H
 
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBLine.h>
-#include <SheenBidi/SBMirrorLocator.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBLine.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBMirrorLocator.h>
 
 #include "Object.h"
 

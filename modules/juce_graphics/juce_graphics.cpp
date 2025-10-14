@@ -153,7 +153,7 @@
 
 extern "C"
 {
-#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SheenBidi.h>
 } // extern "C"
 
 #if JUCE_UNIT_TESTS

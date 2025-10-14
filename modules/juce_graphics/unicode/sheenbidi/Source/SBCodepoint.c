@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "BidiTypeLookup.h"
 #include "GeneralCategoryLookup.h"

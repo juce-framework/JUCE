@@ -17,12 +17,12 @@
 #ifndef _SB_INTERNAL_LINE_H
 #define _SB_INTERNAL_LINE_H
 
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBCodepointSequence.h>
-#include <SheenBidi/SBConfig.h>
-#include <SheenBidi/SBLine.h>
-#include <SheenBidi/SBParagraph.h>
-#include <SheenBidi/SBRun.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepointSequence.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBLine.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBParagraph.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBRun.h>
 
 #include "Object.h"
 

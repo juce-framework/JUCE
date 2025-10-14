@@ -17,8 +17,8 @@
 #ifndef _SB_INTERNAL_CODEPOINT_H
 #define _SB_INTERNAL_CODEPOINT_H
 
-#include <SheenBidi/SBCodepoint.h>
-#include <SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepoint.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 SB_INTERNAL SBBoolean SBCodepointIsCanonicalEquivalentBracket(
     SBCodepoint codepoint, SBCodepoint bracket);

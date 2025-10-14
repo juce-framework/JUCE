@@ -17,9 +17,9 @@
 #ifndef _SB_INTERNAL_SCRIPT_STACK_H
 #define _SB_INTERNAL_SCRIPT_STACK_H
 
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBCodepoint.h>
-#include <SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepoint.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #define _SBScriptStackCapacity  63
 

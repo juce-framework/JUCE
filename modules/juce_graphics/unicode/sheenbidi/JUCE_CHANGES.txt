@@ -1,0 +1,2 @@
+- Include paths to SheenBidi headers in <angle brackets> have been swapped for
+  versions that explicitly point inside the juce_graphics module.

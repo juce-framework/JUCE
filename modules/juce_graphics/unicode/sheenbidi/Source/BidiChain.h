@@ -17,7 +17,7 @@
 #ifndef _SB_INTERNAL_BIDI_CHAIN_H
 #define _SB_INTERNAL_BIDI_CHAIN_H
 
-#include <SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "SBBase.h"
 

@@ -17,10 +17,10 @@
 #ifndef _SB_INTERNAL_BASE_H
 #define _SB_INTERNAL_BASE_H
 
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBBidiType.h>
-#include <SheenBidi/SBConfig.h>
-#include <SheenBidi/SBScript.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBidiType.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBScript.h>
 
 /**
  * A value that indicates an invalid unsigned index.

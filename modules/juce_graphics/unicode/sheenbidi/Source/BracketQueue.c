@@ -16,7 +16,7 @@
 
 #include <stddef.h>
 
-#include <SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "BidiChain.h"
 #include "Object.h"

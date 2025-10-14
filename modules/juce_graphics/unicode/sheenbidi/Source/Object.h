@@ -17,7 +17,7 @@
 #ifndef _SB_INTERNAL_OBJECT_H
 #define _SB_INTERNAL_OBJECT_H
 
-#include <SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "SBBase.h"
 

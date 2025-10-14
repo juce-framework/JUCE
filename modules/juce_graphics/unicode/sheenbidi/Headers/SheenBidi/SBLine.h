@@ -17,8 +17,8 @@
 #ifndef _SB_PUBLIC_LINE_H
 #define _SB_PUBLIC_LINE_H
 
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBRun.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBRun.h>
 
 SB_EXTERN_C_BEGIN
 

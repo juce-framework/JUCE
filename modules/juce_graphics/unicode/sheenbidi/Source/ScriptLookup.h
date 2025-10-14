@@ -6,10 +6,10 @@
 #ifndef _SB_INTERNAL_SCRIPT_LOOKUP_H
 #define _SB_INTERNAL_SCRIPT_LOOKUP_H
 
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBCodepoint.h>
-#include <SheenBidi/SBConfig.h>
-#include <SheenBidi/SBScript.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepoint.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBScript.h>
 
 SB_INTERNAL SBScript LookupScript(SBCodepoint codepoint);
 

@@ -17,18 +17,18 @@
 #ifndef _SHEEN_BIDI_H
 #define _SHEEN_BIDI_H
 
-#include <SheenBidi/SBAlgorithm.h>
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBBidiType.h>
-#include <SheenBidi/SBCodepoint.h>
-#include <SheenBidi/SBCodepointSequence.h>
-#include <SheenBidi/SBGeneralCategory.h>
-#include <SheenBidi/SBLine.h>
-#include <SheenBidi/SBMirrorLocator.h>
-#include <SheenBidi/SBParagraph.h>
-#include <SheenBidi/SBRun.h>
-#include <SheenBidi/SBScript.h>
-#include <SheenBidi/SBScriptLocator.h>
-#include <SheenBidi/SBVersion.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBAlgorithm.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBidiType.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepoint.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepointSequence.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBGeneralCategory.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBLine.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBMirrorLocator.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBParagraph.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBRun.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBScript.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBScriptLocator.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBVersion.h>
 
 #endif

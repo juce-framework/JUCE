@@ -17,9 +17,9 @@
 #ifndef _SB_INTERNAL_SCRIPT_LOCATOR_H
 #define _SB_INTERNAL_SCRIPT_LOCATOR_H
 
-#include <SheenBidi/SBBase.h>
-#include <SheenBidi/SBCodepointSequence.h>
-#include <SheenBidi/SBScriptLocator.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepointSequence.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBScriptLocator.h>
 
 #include "Object.h"
 #include "ScriptStack.h"
