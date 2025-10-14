@@ -473,7 +473,7 @@ public:
 
             auto actual = read (inChannel, &dst[pos], static_cast<size_t> (len - pos));
 
-            if (actual < 0)
+            if (actual <= 0)
             {
                 if (errno == EINTR)
                     continue;
