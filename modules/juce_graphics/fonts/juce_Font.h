@@ -659,12 +659,19 @@ public:
     */
     Native getNativeDetails() const;
 
+    /*  @internal
+        The factor by which a JUCE font height should be multiplied in order to convert to a font
+        size in points.
+
+        May be inf if the font ascent and descent overrides have both been set to 0!
+    */
+    float getHeightToPointsFactor() const;
+
 private:
     //==============================================================================
     static bool compare (const Font&, const Font&) noexcept;
 
     void dupeInternalIfShared();
-    float getHeightToPointsFactor() const;
 
     friend struct GraphicsFontHelpers;
 
