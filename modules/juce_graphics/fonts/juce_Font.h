@@ -290,7 +290,14 @@ public:
         This is the maximum height, from the top of the ascent to the bottom of the
         descenders.
 
-        @see withHeight, setHeightWithoutChangingWidth, getAscent
+        There can be a notable exception to this rule however, if you use the
+        ascent/descent override feature. This feature follows CSS semantics and acts
+        on the point height of the Font. So if you specified the font's height using
+        setHeight() and also specified an ascent or descent override, then the visually
+        rendered height of the Font can be different from the value returned by
+        getHeight().
+
+        @see withHeight, setHeightWithoutChangingWidth, getAscent, setAscentOverride
     */
     float getHeight() const noexcept;
 
