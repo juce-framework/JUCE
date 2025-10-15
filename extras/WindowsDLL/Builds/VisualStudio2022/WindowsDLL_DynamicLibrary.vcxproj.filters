@@ -2593,6 +2593,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\geometry\juce_Rectangle_test.cpp">
       <Filter>JUCE Modules\juce_graphics\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\geometry\juce_RectangleList_test.cpp">
+      <Filter>JUCE Modules\juce_graphics\geometry</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jaricom.c">
       <Filter>JUCE Modules\juce_graphics\image_formats\jpglib</Filter>
     </ClCompile>
