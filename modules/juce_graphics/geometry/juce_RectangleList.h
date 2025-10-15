@@ -212,113 +212,109 @@ public:
     */
     void subtract (const RectangleType rect)
     {
-        if (auto numRects = rects.size())
+        const auto numRects = rects.size();
+
+        if (numRects == 0)
+            return;
+
+        const auto x1 = rect.getX();
+        const auto y1 = rect.getY();
+        const auto x2 = x1 + rect.getWidth();
+        const auto y2 = y1 + rect.getHeight();
+
+        for (int i = numRects; --i >= 0;)
         {
-            const auto x1 = rect.getX();
-            const auto y1 = rect.getY();
-            const auto x2 = x1 + rect.getWidth();
-            const auto y2 = y1 + rect.getHeight();
+            auto& r = rects.getReference (i);
 
-            for (int i = numRects; --i >= 0;)
+            const auto rx1 = r.getX();
+            const auto ry1 = r.getY();
+            const auto rx2 = rx1 + r.getWidth();
+            const auto ry2 = ry1 + r.getHeight();
+
+            const auto isNotEqual = [&] (const RectangleType newRect)
             {
-                auto& r = rects.getReference (i);
-
-                const auto rx1 = r.getX();
-                const auto ry1 = r.getY();
-                const auto rx2 = rx1 + r.getWidth();
-                const auto ry2 = ry1 + r.getHeight();
-
-                const auto isNotEqual = [&] (const RectangleType newRect)
+                // When subtracting tiny slices from relatively large rectangles, the
+                // subtraction may have no effect (due to limited-precision floating point
+                // maths) and the original rectangle may remain unchanged.
+                // We check that any 'new' rectangle has different dimensions to the rectangle
+                // being tested before adding it to the rects array.
+                // Integer arithmetic is not susceptible to this problem, so there's no need
+                // for this additional equality check when working with integral rectangles.
+                if constexpr (std::is_floating_point_v<ValueType>)
                 {
-                    // When subtracting tiny slices from relatively large rectangles, the
-                    // subtraction may have no effect (due to limited-precision floating point
-                    // maths) and the original rectangle may remain unchanged.
-                    // We check that any 'new' rectangle has different dimensions to the rectangle
-                    // being tested before adding it to the rects array.
-                    // Integer arithmetic is not susceptible to this problem, so there's no need
-                    // for this additional equality check when working with integral rectangles.
-                    if constexpr (std::is_floating_point_v<ValueType>)
-                    {
-                        return newRect != r;
-                    }
-                    else
-                    {
-                        ignoreUnused (newRect);
-                        return true;
-                    }
-                };
-
-                if (rx1 < x2 && x1 < rx2 && ry1 < y2 && y1 < ry2)
+                    return newRect != r;
+                }
+                else
                 {
-                    if (rx1 < x1 && x1 < rx2)
-                    {
-                        if (y1 <= ry1 && ry2 <= y2 && rx2 <= x2)
-                        {
-                            r.setWidth (x1 - rx1);
-                        }
-                        else
-                        {
-                            if (const RectangleType newRect (rx1, ry1, x1 - rx1, ry2 - ry1); isNotEqual (newRect))
-                            {
-                                r.setX (x1);
-                                r.setWidth (rx2 - x1);
+                    ignoreUnused (newRect);
+                    return true;
+                }
+            };
 
-                                rects.insert (++i, newRect);
-                                ++i;
-                            }
-                        }
-                    }
-                    else if (rx1 < x2 && x2 < rx2)
-                    {
-                        r.setX (x2);
-                        r.setWidth (rx2 - x2);
+            if (! (rx1 < x2 && x1 < rx2 && ry1 < y2 && y1 < ry2))
+                continue;
 
-                        if (ry1 < y1 || y2 < ry2 || rx1 < x1)
-                        {
-                            if (const RectangleType newRect (rx1, ry1, x2 - rx1, ry2 - ry1); isNotEqual (newRect))
-                            {
-                                rects.insert (++i, newRect);
-                                ++i;
-                            }
-                        }
-                    }
-                    else if (ry1 < y1 && y1 < ry2)
-                    {
-                        if (x1 <= rx1 && rx2 <= x2 && ry2 <= y2)
-                        {
-                            r.setHeight (y1 - ry1);
-                        }
-                        else
-                        {
-                            if (const RectangleType newRect (rx1, ry1, rx2 - rx1, y1 - ry1); isNotEqual (newRect))
-                            {
-                                r.setY (y1);
-                                r.setHeight (ry2 - y1);
+            if (rx1 < x1 && x1 < rx2)
+            {
+                if (y1 <= ry1 && ry2 <= y2 && rx2 <= x2)
+                {
+                    r.setWidth (x1 - rx1);
+                }
+                else if (const RectangleType newRect (rx1, ry1, x1 - rx1, ry2 - ry1); isNotEqual (newRect))
+                {
+                    r.setX (x1);
+                    r.setWidth (rx2 - x1);
 
-                                rects.insert (++i, newRect);
-                                ++i;
-                            }
-                        }
-                    }
-                    else if (ry1 < y2 && y2 < ry2)
-                    {
-                        r.setY (y2);
-                        r.setHeight (ry2 - y2);
+                    rects.insert (++i, newRect);
+                    ++i;
+                }
+            }
+            else if (rx1 < x2 && x2 < rx2)
+            {
+                r.setX (x2);
+                r.setWidth (rx2 - x2);
 
-                        if (rx1 < x1 || x2 < rx2 || ry1 < y1)
-                        {
-                            if (const RectangleType newRect (rx1, ry1, rx2 - rx1, y2 - ry1); isNotEqual (newRect))
-                            {
-                                rects.insert (++i, newRect);
-                                ++i;
-                            }
-                        }
-                    }
-                    else
+                if (ry1 < y1 || y2 < ry2 || rx1 < x1)
+                {
+                    if (const RectangleType newRect (rx1, ry1, x2 - rx1, ry2 - ry1); isNotEqual (newRect))
                     {
-                        rects.remove (i);
+                        rects.insert (++i, newRect);
+                        ++i;
                     }
                 }
+            }
+            else if (ry1 < y1 && y1 < ry2)
+            {
+                if (x1 <= rx1 && rx2 <= x2 && ry2 <= y2)
+                {
+                    r.setHeight (y1 - ry1);
+                }
+                else if (const RectangleType newRect (rx1, ry1, rx2 - rx1, y1 - ry1); isNotEqual (newRect))
+                {
+                    r.setY (y1);
+                    r.setHeight (ry2 - y1);
+
+                    rects.insert (++i, newRect);
+                    ++i;
+                }
+            }
+            else if (ry1 < y2 && y2 < ry2)
+            {
+                r.setY (y2);
+                r.setHeight (ry2 - y2);
+
+                if (rx1 < x1 || x2 < rx2 || ry1 < y1)
+                {
+                    if (const RectangleType newRect (rx1, ry1, rx2 - rx1, y2 - ry1); isNotEqual (newRect))
+                    {
+                        rects.insert (++i, newRect);
+                        ++i;
+                    }
+                }
+            }
+            else
+            {
+                rects.remove (i);
             }
         }
     }
