@@ -210,6 +210,48 @@ static std::vector<hb_feature_t> getHarfbuzzFeatures (Span<const FontFeatureSett
     return features;
 }
 
+/*  Increment b by the requested number of steps, or to e, whichever is reached first. */
+template <typename CharPtr>
+static auto incrementCharPtr (CharPtr b, CharPtr e, int64 steps)
+{
+    while (b != e && steps > 0)
+    {
+        ++b;
+        --steps;
+    }
+
+    return b;
+}
+
+static std::vector<juce_wchar> sanitiseString (const String& stringIn, Range<int64> lineRange)
+{
+    std::vector<juce_wchar> result;
+
+    const auto end = stringIn.end();
+    const auto beginOfRange = incrementCharPtr (stringIn.begin(), end, lineRange.getStart());
+    const auto endOfRange = incrementCharPtr (beginOfRange, end, lineRange.getLength());
+
+    result.reserve (beginOfRange.lengthUpTo (endOfRange));
+
+    for (auto it = beginOfRange; it != endOfRange; ++it)
+    {
+        result.push_back (std::invoke ([&]
+        {
+            const auto cc = findControlCharacter (it, end);
+
+            if (! cc.has_value())
+                return *it;
+
+            constexpr juce_wchar wordJoiner       = 0x2060;
+            constexpr juce_wchar nonBreakingSpace = 0x00a0;
+
+            return cc == ControlCharacter::crFollowedByLf ? wordJoiner : nonBreakingSpace;
+        }));
+    }
+
+    return result;
+}
+
 /*  Returns glyphs in logical order as that favours wrapping. */
 static std::vector<ShapedGlyph> lowLevelShape (Span<const juce_wchar> string,
                                                Range<int64> range,
@@ -837,48 +879,6 @@ static auto rangedValuesWithOffset (detail::RangedValues<T> rv, int64 offset = 0
     ops.clear();
     rv.eraseUpTo (0, ops);
     return rv;
-}
-
-/*  Increment b by the requested number of steps, or to e, whichever is reached first. */
-template <typename CharPtr>
-static auto incrementCharPtr (CharPtr b, CharPtr e, int64 steps)
-{
-    while (b != e && steps > 0)
-    {
-        ++b;
-        --steps;
-    }
-
-    return b;
-}
-
-static std::vector<juce_wchar> sanitiseString (const String& stringIn, Range<int64> lineRange)
-{
-    std::vector<juce_wchar> result;
-
-    const auto end = stringIn.end();
-    const auto beginOfRange = incrementCharPtr (stringIn.begin(), end, lineRange.getStart());
-    const auto endOfRange = incrementCharPtr (beginOfRange, end, lineRange.getLength());
-
-    result.reserve (beginOfRange.lengthUpTo (endOfRange));
-
-    for (auto it = beginOfRange; it != endOfRange; ++it)
-    {
-        result.push_back (std::invoke ([&]
-        {
-            const auto cc = findControlCharacter (it, end);
-
-            if (! cc.has_value())
-                return *it;
-
-            constexpr juce_wchar wordJoiner       = 0x2060;
-            constexpr juce_wchar nonBreakingSpace = 0x00a0;
-
-            return cc == ControlCharacter::crFollowedByLf ? wordJoiner : nonBreakingSpace;
-        }));
-    }
-
-    return result;
 }
 
 struct Shaper
