@@ -212,95 +212,24 @@ public:
     */
     void subtract (const RectangleType rect)
     {
-        using PointType = Point<ValueType>;
-
-        const auto numRects = rects.size();
-
-        if (numRects == 0)
+        if (rects.isEmpty())
             return;
 
-        struct AABB
+        if constexpr (std::is_floating_point_v<ValueType>)
         {
-            AABB() = default;
-            AABB (const RectangleType& r) : tl (r.getTopLeft()), br (r.getBottomRight()) {}
-            AABB (PointType a, PointType b) : tl (a), br (b) {}
-            operator RectangleType() const { return RectangleType { tl, br }; }
+            Array<AABB> alternativeRepresentation;
+            alternativeRepresentation.resize (rects.size());
+            std::copy (rects.begin(), rects.end(), alternativeRepresentation.begin());
 
-            bool completelyOutside (const AABB& other) const
-            {
-                return other.br.x <= tl.x || br.x <= other.tl.x || other.br.y <= tl.y || br.y <= other.tl.y;
-            }
+            subtract (alternativeRepresentation, rect);
 
-            PointType tl, br;
-        };
-
-        Array<AABB> aabbs;
-        aabbs.resize (rects.size());
-        std::copy (rects.begin(), rects.end(), aabbs.begin());
-        const AABB aabb { rect };
-
-        for (int i = numRects; --i >= 0;)
-        {
-            auto& rRef = aabbs.getReference (i);;
-            const auto r = rRef;
-
-            if (r.completelyOutside (aabb))
-                continue;
-
-            if (r.tl.x < aabb.tl.x && aabb.tl.x < r.br.x)
-            {
-                if (aabb.tl.y <= r.tl.y && r.br.y <= aabb.br.y && r.br.x <= aabb.br.x)
-                {
-                    rRef.br.x = aabb.tl.x;
-                }
-                else
-                {
-                    rRef.tl.x = aabb.tl.x;
-                    aabbs.insert (++i, { r.tl, { aabb.tl.x, r.br.y } });
-                    ++i;
-                }
-            }
-            else if (r.tl.x < aabb.br.x && aabb.br.x < r.br.x)
-            {
-                rRef.tl.x = aabb.br.x;
-
-                if (r.tl.y < aabb.tl.y || aabb.br.y < r.br.y || r.tl.x < aabb.tl.x)
-                {
-                    aabbs.insert (++i, { r.tl, { aabb.br.x, r.br.y } });
-                    ++i;
-                }
-            }
-            else if (r.tl.y < aabb.tl.y && aabb.tl.y < r.br.y)
-            {
-                if (aabb.tl.x <= r.tl.x && r.br.x <= aabb.br.x && r.br.y <= aabb.br.y)
-                {
-                    rRef.br.y = aabb.tl.y;
-                }
-                else
-                {
-                    rRef.tl.y = aabb.tl.y;
-                    aabbs.insert (++i, { r.tl, { r.br.x, aabb.tl.y } });
-                    ++i;
-                }
-            }
-            else if (r.tl.y < aabb.br.y && aabb.br.y < r.br.y)
-            {
-                rRef.tl.y = aabb.br.y;
-
-                if (r.tl.x < aabb.tl.x || aabb.br.x < r.br.x || r.tl.y < aabb.tl.y)
-                {
-                    aabbs.insert (++i, { r.tl, { r.br.x, aabb.br.y } });
-                    ++i;
-                }
-            }
-            else
-            {
-                aabbs.remove (i);
-            }
+            rects.resize (alternativeRepresentation.size());
+            std::copy (alternativeRepresentation.begin(), alternativeRepresentation.end(), rects.begin());
         }
-
-        rects.resize (aabbs.size());
-        std::copy (aabbs.begin(), aabbs.end(), rects.begin());
+        else
+        {
+            subtract (rects, rect);
+        }
     }
 
     /** Removes all areas in another RectangleList from this one.
@@ -667,6 +596,130 @@ public:
     }
 
 private:
+    using PointType = Point<ValueType>;
+
+    struct AABB
+    {
+        AABB() = default;
+        AABB (const RectangleType& r) : tl (r.getTopLeft()), br (r.getBottomRight()) {}
+        AABB (PointType a, PointType b) : tl (a), br (b) {}
+        operator RectangleType() const { return RectangleType { tl, br }; }
+
+        bool completelyOutside (const AABB& other) const
+        {
+            return other.br.x <= tl.x || br.x <= other.tl.x || other.br.y <= tl.y || br.y <= other.tl.y;
+        }
+
+        PointType tl, br;
+    };
+
+    static PointType getTL (const AABB& aabb)
+    {
+        return aabb.tl;
+    }
+
+    static PointType getBR (const AABB& aabb)
+    {
+        return aabb.br;
+    }
+
+    static PointType getTL (const RectangleType& r)
+    {
+        return r.getTopLeft();
+    }
+
+    static PointType getBR (const RectangleType& r)
+    {
+        return r.getBottomRight();
+    }
+
+    template <typename Rect>
+    static void subtract (Array<Rect>& rectList, RectangleType rect)
+    {
+        jassert (! rectList.isEmpty());
+
+        const AABB rAABB { getTL (rect), getBR (rect) };
+
+        for (int i = rectList.size(); --i >= 0;)
+        {
+            auto& iRef = rectList.getReference (i);
+            const AABB iAABB { getTL (iRef), getBR (iRef) };
+
+            if (iAABB.completelyOutside (rAABB))
+                continue;
+
+            std::invoke ([&]
+            {
+                // For each rectangle in the list, we check for an overlap with the parameter rect
+                // and subdivide the list rectangles as necessary.
+                // The checks for each list rectangle happen in two stages, treating first the X
+                // then the Y axis as the 'major' axis. The terms 'major' and 'minor' are somewhat
+                // arbitrary. Essentially, in each pass, the rectangles in the list are only
+                // modified and/or subdivided on the major axis, without changing any minor axis
+                // coordinates. Subdividing an overlapping rect in this way may produce new rects
+                // that still overlap with the parameter rect. However, those will get cleaned up
+                // on the subsequent pass, where the major/minor axes are swapped.
+
+                struct Fields
+                {
+                    ValueType PointType::* major;
+                    ValueType PointType::* minor;
+                };
+
+                for (const auto& fields : { Fields { &PointType::x, &PointType::y },
+                                            Fields { &PointType::y, &PointType::x } })
+                {
+                    const auto replaceMajor = [&] (auto modified, const auto& replacement)
+                    {
+                        modified.*(fields.major) = replacement.*(fields.major);
+                        return modified;
+                    };
+
+                    const auto insert = [&] (const PointType& rAABBpt)
+                    {
+                        rectList.insert (++i, { iAABB.tl, replaceMajor (iAABB.br, rAABBpt) });
+                        ++i;
+                    };
+
+                    if (   iAABB.tl.*(fields.major) < rAABB.tl.*(fields.major)
+                        && rAABB.tl.*(fields.major) < iAABB.br.*(fields.major))
+                    {
+                        if (   rAABB.tl.*(fields.minor) <= iAABB.tl.*(fields.minor)
+                            && iAABB.br.*(fields.minor) <= rAABB.br.*(fields.minor)
+                            && iAABB.br.*(fields.major) <= rAABB.br.*(fields.major))
+                        {
+                            iRef = { iAABB.tl, replaceMajor (iAABB.br, rAABB.tl) };
+                        }
+                        else
+                        {
+                            iRef = { replaceMajor (iAABB.tl, rAABB.tl), iAABB.br };
+                            insert (rAABB.tl);
+                        }
+
+                        return;
+                    }
+
+                    if (   iAABB.tl.*(fields.major) < rAABB.br.*(fields.major)
+                        && rAABB.br.*(fields.major) < iAABB.br.*(fields.major))
+                    {
+                        iRef = { replaceMajor (iAABB.tl, rAABB.br), iAABB.br };
+
+                        if (   iAABB.tl.*(fields.minor) < rAABB.tl.*(fields.minor)
+                            || rAABB.br.*(fields.minor) < iAABB.br.*(fields.minor)
+                            || iAABB.tl.*(fields.major) < rAABB.tl.*(fields.major))
+                        {
+                            insert (rAABB.br);
+                        }
+
+                        return;
+                    }
+                }
+
+                rectList.remove (i);
+            });
+        }
+    }
+
     //==============================================================================
     Array<RectangleType> rects;
 };
