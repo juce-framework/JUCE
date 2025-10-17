@@ -38,7 +38,7 @@
                    juce_core, juce_cryptography, juce_data_structures, juce_dsp,
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra,
                    juce_opengl, juce_osc, juce_product_unlocking, juce_video,
-                   juce_midi_ci
+                   juce_midi_ci, juce_audio_processors_headless
  exporters:        xcode_mac, vs2022, vs2026, linux_make, androidstudio,
                    xcode_iphone
 
