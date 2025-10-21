@@ -3062,6 +3062,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiMessageCollector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_ScheduledEventThread.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_WaitFreeListeners.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\asio\asio.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\asio\asiosys.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\asio\iasiodrv.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\include\oboe\AudioStream.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\include\oboe\AudioStreamBase.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\include\oboe\AudioStreamBuilder.h"/>
@@ -4356,6 +4359,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\juce_icon.png"/>
+    <None Include="..\..\..\..\modules\juce_audio_devices\native\asio\LICENSE.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\common\README.md"/>
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\resampler\README.md"/>
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\CMakeLists.txt"/>

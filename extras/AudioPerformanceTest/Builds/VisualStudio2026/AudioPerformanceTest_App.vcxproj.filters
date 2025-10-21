@@ -47,6 +47,9 @@
     <Filter Include="JUCE Modules\juce_audio_devices\midi_io">
       <UniqueIdentifier>{092EFC17-7C95-7E04-0ACA-0D61A462EE81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_audio_devices\native\asio">
+      <UniqueIdentifier>{9DEBE9A8-0B63-A378-E790-66C382DC8010}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_audio_devices\native\oboe\include\oboe">
       <UniqueIdentifier>{285118C6-8FDA-7DCE-BEF4-FFB2120876C5}</UniqueIdentifier>
     </Filter>
@@ -3837,6 +3840,15 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_WaitFreeListeners.h">
       <Filter>JUCE Modules\juce_audio_devices\midi_io</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\asio\asio.h">
+      <Filter>JUCE Modules\juce_audio_devices\native\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\asio\asiosys.h">
+      <Filter>JUCE Modules\juce_audio_devices\native\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\asio\iasiodrv.h">
+      <Filter>JUCE Modules\juce_audio_devices\native\asio</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\include\oboe\AudioStream.h">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\include\oboe</Filter>
     </ClInclude>
@@ -7586,6 +7598,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\modules\juce_audio_devices\native\asio\LICENSE.txt">
+      <Filter>JUCE Modules\juce_audio_devices\native\asio</Filter>
+    </None>
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\common\README.md">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\common</Filter>
     </None>
