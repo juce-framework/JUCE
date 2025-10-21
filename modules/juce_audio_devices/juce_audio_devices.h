@@ -123,14 +123,29 @@
 
 /** Config: JUCE_ASIO
     Enables ASIO audio devices (MS Windows only).
-    Turning this on means that you'll need to have the Steinberg ASIO SDK installed
-    on your Windows build machine.
+    IMPORTANT: Turning this on will cause your program to depend on source files
+    from the ASIO SDK from Steinberg, so your resulting program must adhere to
+    the license terms of those files.
 
-    See the comments in the ASIOAudioIODevice class's header file for more
-    info about this.
+    By default, this option will use the bundled ASIO headers distributed
+    alongside JUCE. See the documentation for JUCE_ASIO_USE_EXTERNAL_SDK to
+    learn how to use a different version of those headers.
 */
 #ifndef JUCE_ASIO
  #define JUCE_ASIO 0
+#endif
+
+/** Config: JUCE_ASIO_USE_EXTERNAL_SDK
+    The default behaviour of the JUCE_ASIO flag is to include a bundled header
+    from the ASIO SDK. If you need to supply your own version of this header,
+    instead of using the bundled one, you can enable this flag. If you do,
+    then you must also ensure that the file "iasiodrv.h" from the SDK can be
+    located via your project's header include paths.
+
+    The option only has an effect when JUCE_ASIO is also enabled.
+*/
+#ifndef JUCE_ASIO_USE_EXTERNAL_SDK
+ #define JUCE_ASIO_USE_EXTERNAL_SDK 0
 #endif
 
 /** Config: JUCE_WASAPI

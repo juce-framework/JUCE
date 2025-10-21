@@ -1,5 +1,31 @@
 # JUCE breaking changes
 
+# develop
+
+## Change
+
+Enabling JUCE_ASIO will now default to using bundled ASIO sources.
+
+**Possible Issues**
+
+Programs that depend on specific versions of the ASIO SDK (perhaps with custom
+modifications) may be broken.
+
+**Workaround**
+
+To use a different version of the ASIO SDK, additionally set the
+JUCE_ASIO_USE_EXTERNAL_SDK module option. If you're happy to use the bundled
+sources, consider removing the custom header include paths you were previously
+using to locate the ASIO headers.
+
+**Rationale**
+
+The bundled headers should be sufficient for the majority of use-cases, so this
+is now the standard option requiring less configuration. Using custom headers
+is an advanced use-case, so it's reasonable that this requires some additional
+configuration, i.e. setting the JUCE_ASIO_USE_EXTERNAL_SDK flag.
+
+
 # Version 8.0.9
 
 ## Change

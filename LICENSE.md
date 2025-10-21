@@ -52,6 +52,7 @@ The JUCE modules contain the following dependencies:
 - [zlib](modules/juce_core/zip/zlib/) ([zlib](modules/juce_core/zip/zlib/README))
 - [HarfBuzz](modules/juce_graphics/fonts/harfbuzz/) ([Old MIT](modules/juce_graphics/fonts/harfbuzz/COPYING))
 - [SheenBidi](modules/juce_graphics/unicode/sheenbidi/) ([Apache](modules/juce_graphics/unicode/sheenbidi/LICENSE))
+- [ASIO](modules/juce_audio_devices/native/asio/) ([Proprietary Steinberg ASIO License/GPLv3](modules/juce_audio_devices/native/asio/LICENSE.txt))
 
 The JUCE examples are licensed under the terms of the
 [ISC license](http://www.isc.org/downloads/software-support-policy/isc-license/).
