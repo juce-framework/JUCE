@@ -1762,6 +1762,8 @@ public:
         if (touchesDown == 0)
             ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
 
+        WeakReference self { this };
+
         handleMouseEvent (MouseInputSource::InputSourceType::touch,
                           pos,
                           ModifierKeys::currentModifiers.withoutMouseButtons(),
@@ -1770,6 +1772,9 @@ public:
                           time,
                           {},
                           index);
+
+        if (self == nullptr)
+            return;
 
         handleMouseEvent (MouseInputSource::InputSourceType::touch,
                           MouseInputSource::offscreenMousePos,
@@ -2541,6 +2546,7 @@ private:
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidComponentPeer)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (AndroidComponentPeer)
 };
 
 //==============================================================================
