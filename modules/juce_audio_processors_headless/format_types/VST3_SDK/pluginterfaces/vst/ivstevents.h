@@ -166,6 +166,7 @@ struct Event
 		kNoteExpressionTextEvent  = 5,	///< is \ref NoteExpressionTextEvent
 		kChordEvent        = 6,			///< is \ref ChordEvent
 		kScaleEvent        = 7,			///< is \ref ScaleEvent
+		kNoteExpressionIntValueEvent = 8,///< is \ref NoteExpressionIntValueEvent
 		kLegacyMIDICCOutEvent = 65535	///< is \ref LegacyMIDICCOutEvent
 	};
 
@@ -178,6 +179,7 @@ struct Event
 		PolyPressureEvent polyPressure;					///< type == kPolyPressureEvent
 		NoteExpressionValueEvent noteExpressionValue;	///< type == kNoteExpressionValueEvent
 		NoteExpressionTextEvent noteExpressionText;		///< type == kNoteExpressionTextEvent
+		NoteExpressionIntValueEvent noteExpressionIntValue;	///< type == kNoteExpressionIntValueEvent
 		ChordEvent chord;								///< type == kChordEvent
 		ScaleEvent scale;								///< type == kScaleEvent
 		LegacyMIDICCOutEvent midiCCOut;					///< type == kLegacyMIDICCOutEvent

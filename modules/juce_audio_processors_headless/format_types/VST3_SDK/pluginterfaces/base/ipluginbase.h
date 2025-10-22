@@ -22,7 +22,7 @@
 namespace Steinberg {
 
 //------------------------------------------------------------------------
-/**  Basic interface to a plug-in component: IPluginBase
+/** Basic interface to a plug-in component: IPluginBase
 \ingroup pluginBase
 - [plug imp]
 - initialize/terminate the plug-in component
@@ -118,7 +118,7 @@ struct PFactoryInfo
 };
 
 //------------------------------------------------------------------------
-/**  Basic Information about a class provided by the plug-in.
+/** Basic Information about a class provided by the plug-in.
 \ingroup pluginBase
 */
 struct PClassInfo
@@ -216,7 +216,7 @@ DECLARE_CLASS_IID (IPluginFactory, 0x7A4D811C, 0x52114A1F, 0xAED9D2EE, 0x0B43BF9
 
 
 //------------------------------------------------------------------------
-/**  Version 2 of Basic Information about a class provided by the plug-in.
+/** Version 2 of Basic Information about a class provided by the plug-in.
 \ingroup pluginBase
 */
 struct PClassInfo2
@@ -478,7 +478,7 @@ DECLARE_CLASS_IID (IPluginFactory3, 0x4555A2AB, 0xC1234E57, 0x9B122910, 0x368789
 //------------------------------------------------------------------------
 // GetPluginFactory
 //------------------------------------------------------------------------
-/**  Plug-in entry point.
+/** Plug-in entry point.
 \ingroup pluginBase
 Any plug-in must define and export this function. \n
 A typical implementation of GetPluginFactory looks like this

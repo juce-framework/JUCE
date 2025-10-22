@@ -99,6 +99,20 @@ struct NoteExpressionValueEvent
 };
 
 //------------------------------------------------------------------------
+/** Note Expression Int event. Used in \ref Event (union)
+Same as NoteExpressionValueEvent but use a uint64 instead of a NoteExpressionValue (double)
+\ingroup vstIPlug vst380
+- [released: 3.8.0]
+*/
+struct NoteExpressionIntValueEvent
+{
+	NoteExpressionTypeID typeId;	///< see \ref NoteExpressionTypeID
+	int32 noteId;					///< associated note identifier to apply the change
+
+	uint64 value;
+};
+
+//------------------------------------------------------------------------
 /** Note Expression Text event. Used in Event (union)
 A Expression event affects one single playing note. \sa INoteExpressionController
 

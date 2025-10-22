@@ -7,31 +7,11 @@
 // Description : hosting module classes (win32 implementation)
 //
 //-----------------------------------------------------------------------------
-// LICENSE
-// (c) 2025, Steinberg Media Technologies GmbH, All Rights Reserved
-//-----------------------------------------------------------------------------
-// Redistribution and use in source and binary forms, with or without modification,
-// are permitted provided that the following conditions are met:
-//
-//   * Redistributions of source code must retain the above copyright notice,
-//     this list of conditions and the following disclaimer.
-//   * Redistributions in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
-//     and/or other materials provided with the distribution.
-//   * Neither the name of the Steinberg Media Technologies nor the names of its
-//     contributors may be used to endorse or promote products derived from this
-//     software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-// OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED
-// OF THE POSSIBILITY OF SUCH DAMAGE.
+// This file is part of a Steinberg SDK. It is subject to the license terms
+// in the LICENSE file found in the top-level directory of this distribution
+// and at www.steinberg.net/sdklicenses. 
+// No part of the SDK, including this file, may be copied, modified, propagated,
+// or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
 
 #include "module.h"
@@ -188,7 +168,7 @@ public:
 			instance = loadAsPackage (inPath, errorDescription, architectureArm64XString);
 		if (instance == nullptr)
 			instance = loadAsPackage (inPath, errorDescription, architectureX64String);
-#endif
+#endif // SMTG_CPU_ARM_64EC
 		if (instance == nullptr)
 			getLastError (p.string (), errorDescription);
 		return instance;
@@ -220,8 +200,9 @@ public:
 		const filesystem::path tmp (inPath);
 #else
 		const filesystem::path tmp = filesystem::u8path (inPath);
-#endif
-		if (filesystem::is_directory (tmp))
+#endif // SMTG_CPP20
+		std::error_code ec;
+		if (filesystem::is_directory (tmp, ec))
 		{
 			// try as package (bundle)
 			mModule = loadAsPackage (inPath, errorDescription);
@@ -314,7 +295,7 @@ bool checkVST3Package (const filesystem::path& p, filesystem::path* result = nul
 		return true;
 	if (openVST3Package (p, architectureX64String, result))
 		return true;
-#endif
+#endif // SMTG_CPU_ARM_64EC
 	return false;
 }
 
@@ -322,7 +303,8 @@ bool checkVST3Package (const filesystem::path& p, filesystem::path* result = nul
 bool isFolderSymbolicLink (const filesystem::path& p)
 {
 #if USE_FILESYSTEM
-	if (/*filesystem::exists (p) &&*/ filesystem::is_symlink (p))
+	std::error_code ec;
+	if (filesystem::is_symlink (p, ec))
 		return true;
 #else
 	const std::wstring wString = p.generic_wstring ();
@@ -335,7 +317,7 @@ bool isFolderSymbolicLink (const filesystem::path& p)
 			return true;
 		CloseHandle (hFile);
 	}
-#endif
+#endif // USE_FILESYSTEM
 	return false;
 }
 
@@ -354,7 +336,12 @@ Optional<std::string> getKnownFolder (REFKNOWNFOLDERID folderID)
 VST3::Optional<filesystem::path> resolveShellLink (const filesystem::path& p)
 {
 #if USE_FILESYSTEM
-	return {filesystem::read_symlink (p).lexically_normal ()};
+	std::error_code ec;
+	auto target = filesystem::read_symlink (p, ec);
+	if (ec)
+		return {};
+	else
+		return { target.lexically_normal () };
 #elif USE_OLE
 	Ole::instance ();
 
@@ -392,7 +379,7 @@ VST3::Optional<filesystem::path> resolveShellLink (const filesystem::path& p)
 	return {filesystem::path (longPath)};
 #else
 	return {};
-#endif
+#endif // USE_FILESYSTEM
 }
 
 //------------------------------------------------------------------------
@@ -418,7 +405,8 @@ void findFilesWithExt (const filesystem::path& path, const std::string& ext,
 			if (auto res = resolveShellLink (p))
 			{
 				finalPath = *res;
-				if (!filesystem::exists (finalPath))
+				std::error_code ec;
+				if (!filesystem::exists (finalPath, ec))
 					continue;
 			}
 			else
@@ -437,12 +425,12 @@ void findFilesWithExt (const filesystem::path& path, const std::string& ext,
 				addToPathList (pathList, str);
 #else
 				addToPathList (pathList, result.generic_u8string ());
-#endif
+#endif // SMTG_CPP20
 				continue;
 			}
 		}
-
-		if (filesystem::is_directory (finalPath))
+		std::error_code ec;
+		if (filesystem::is_directory (finalPath, ec))
 		{
 			if (recursive)
 				findFilesWithExt (finalPath, ext, pathList, recursive);
@@ -456,9 +444,9 @@ void findFilesWithExt (const filesystem::path& path, const std::string& ext,
 			addToPathList (pathList, str);
 #else
 			addToPathList (pathList, finalPath.generic_u8string ());
-#endif
+#endif // SMTG_CPP20
 		}
-#else
+#else // !USE_FILESYSTEM
 		const auto& cp = p.path ();
 		const auto& cpExt = cp.extension ();
 		if (cpExt == ext)
@@ -513,14 +501,15 @@ void findFilesWithExt (const filesystem::path& path, const std::string& ext,
 				}
 			}
 		}
-#endif
+#endif // USE_FILESYSTEM
 	}
 }
 
 //------------------------------------------------------------------------
 void findModules (const filesystem::path& path, Module::PathList& pathList)
 {
-	if (filesystem::exists (path))
+	std::error_code ec;
+	if (filesystem::exists (path, ec))
 		findFilesWithExt (path, ".vst3", pathList);
 }
 
@@ -533,7 +522,7 @@ Optional<filesystem::path> getContentsDirectoryFromModuleExecutablePath (
 	filesystem::path path (modulePath);
 #else
 	filesystem::path path = filesystem::u8path (modulePath);
-#endif
+#endif // SMTG_CPP20
 
 	path = path.parent_path ();
 	if (path.filename () != architectureString)
@@ -578,7 +567,7 @@ Module::PathList Module::getModulePaths ()
 		filesystem::path path (*knownFolder);
 #else
 		filesystem::path path = filesystem::u8path (*knownFolder);
-#endif
+#endif // SMTG_CPP20
 		path.append ("VST3");
 #if LOG_ENABLE
 		std::cout << "Check folder: " << path << "\n";
@@ -593,7 +582,7 @@ Module::PathList Module::getModulePaths ()
 		filesystem::path path (*knownFolder);
 #else
 		filesystem::path path = filesystem::u8path (*knownFolder);
-#endif
+#endif // SMTG_CPP20
 		path.append ("VST3");
 #if LOG_ENABLE
 		std::cout << "Check folder: " << path << "\n";
@@ -611,7 +600,7 @@ Module::PathList Module::getModulePaths ()
 	filesystem::path path (appPath);
 #else
 	filesystem::path path = filesystem::u8path (appPath);
-#endif
+#endif // SMTG_CPP20
 	path = path.parent_path ();
 	path = path.append ("VST3");
 #if LOG_ENABLE
@@ -639,7 +628,8 @@ Optional<std::string> Module::getModuleInfoPath (const std::string& modulePath)
 	*path /= "Resources";
 	*path /= "moduleinfo.json";
 
-	if (filesystem::exists (*path))
+	std::error_code ec;
+	if (filesystem::exists (*path, ec))
 	{
 		return {path->generic_string ()};
 	}
@@ -673,7 +663,8 @@ bool Module::validateBundleStructure (const std::string& modulePath, std::string
 		auto bundlePath = path->parent_path ();
 		*path /= architectureString;
 		*path /= bundlePath.filename ();
-		if (std::filesystem::exists (*path) == false)
+		std::error_code ec;
+		if (filesystem::exists (*path, ec) == false)
 		{
 			errorDescription = "Shared library name is not equal to bundle folder name. Must be '" +
 			                   bundlePath.filename ().string () + "'.";
@@ -706,7 +697,8 @@ Module::SnapshotList Module::getSnapshots (const std::string& modulePath)
 	*path /= "Resources";
 	*path /= "Snapshots";
 
-	if (filesystem::exists (*path) == false)
+	std::error_code ec;
+	if (filesystem::exists (*path, ec) == false)
 		return result;
 
 	PathList pngList;
@@ -718,7 +710,7 @@ Module::SnapshotList Module::getSnapshots (const std::string& modulePath)
 		const filesystem::path p (png);
 #else
 		const filesystem::path p = filesystem::u8path (png);
-#endif
+#endif // SMTG_CPP20
 		auto filename = p.filename ().generic_string ();
 		auto uid = Snapshot::decodeUID (filename);
 		if (!uid)

@@ -194,23 +194,16 @@ struct UID
 
 	UID () = delete;
 
-	static const TUID& toTUID ()
-	{
-		// clang-format off
-		static TUID uuid = {
+	static constexpr TUID data = {
 #if COM_COMPATIBLE
-			l1_4, l1_3, l1_2, l1_1,
-			l2_2, l2_1, l2_4, l2_3,
+	    l1_4, l1_3, l1_2, l1_1, l2_2, l2_1, l2_4, l2_3,
 #else
-			l1_1, l1_2, l1_3, l1_4,
-			l2_1, l2_2, l2_3, l2_4,
+	    l1_1, l1_2, l1_3, l1_4, l2_1, l2_2, l2_3, l2_4,
 #endif
-			l3_1, l3_2, l3_3, l3_4,
-			l4_1, l4_2, l4_3, l4_4
-		};
-		// clang-format on
-		return uuid;
-	}
+	    l3_1, l3_2, l3_3, l3_4, l4_1, l4_2, l4_3, l4_4,
+	};
+
+	static const TUID& toTUID () { return data; }
 };
 
 /** @return the TUID for an interface. */
@@ -413,7 +406,7 @@ private:
 	{
 		if (match<Interface> (tuid) || match<Unknown> (tuid))
 		{
-			obj = static_cast<Interface*> (this->unknownCast ());
+			obj = static_cast<Interface*> (this);
 			return true;
 		}
 

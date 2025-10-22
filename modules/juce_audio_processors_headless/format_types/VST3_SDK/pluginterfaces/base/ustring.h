@@ -105,8 +105,12 @@ protected:
 };
 
 //------------------------------------------------------------------------
+/** Predefined UTF-16 string array types.
+ * \ingroup smtgtypedef */
+/**@{*/
 typedef UStringBuffer<128> UString128; ///< 128 character UTF-16 string
 typedef UStringBuffer<256> UString256; ///< 256 character UTF-16 string
+/**@}*/
 } // namespace Steinberg
 
 //------------------------------------------------------------------------

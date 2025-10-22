@@ -24,17 +24,18 @@ namespace Vst {
 //------------------------------------------------------------------------
 /** VST 3 SDK Version */
 #ifndef kVstVersionString
-#define kVstVersionString	"VST 3.7.14"	///< SDK version for PClassInfo2
+#define kVstVersionString	"VST 3.8.0"	///< SDK version for PClassInfo2
 #endif
 
 #define kVstVersionMajor	3
-#define kVstVersionMinor	7
-#define kVstVersionSub		14
+#define kVstVersionMinor	8
+#define kVstVersionSub		0
 
 #define VST_VERSION ((kVstVersionMajor << 16) | (kVstVersionMinor << 8) | kVstVersionSub)
 
 // Versions History which allows to write such code:
 // #if VST_VERSION >= VST_3_6_5_VERSION
+#define VST_3_8_0_VERSION	0x030800
 #define VST_3_7_14_VERSION	0x03070E
 #define VST_3_7_13_VERSION	0x03070D
 #define VST_3_7_12_VERSION	0x03070C
@@ -129,6 +130,7 @@ static SMTG_CONSTEXPR const uint32 SDKVersion =
 
 // Versions History which allows to write such code:
 // if constexpr (SDKVersion >= SDKVersion_3_6_5) { ... }
+static SMTG_CONSTEXPR const uint32 SDKVersion_3_8_0     = VST_3_8_0_VERSION;
 static SMTG_CONSTEXPR const uint32 SDKVersion_3_7_14    = VST_3_7_14_VERSION;
 static SMTG_CONSTEXPR const uint32 SDKVersion_3_7_13    = VST_3_7_13_VERSION;
 static SMTG_CONSTEXPR const uint32 SDKVersion_3_7_12    = VST_3_7_12_VERSION;

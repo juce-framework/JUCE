@@ -84,7 +84,7 @@ bool IsApproximateEqual (T t1, T t2, T epsilon)
 
 //----------------------------------------------------------------------------
 template <class T>
-inline T ToNormalized (const T& value, const int32 numSteps)
+inline T ToNormalized (const T value, const int32 numSteps)
 {
 	return value / T (numSteps);
 }

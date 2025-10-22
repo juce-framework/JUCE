@@ -201,6 +201,8 @@ enum
 };
 #endif
 
+/** \ingroup smtgtypedef */
+/**@{*/
 //------------------------------------------------------------------------
 typedef int64 LARGE_INT; // obsolete
 
@@ -208,6 +210,8 @@ typedef int64 LARGE_INT; // obsolete
 //	FUID class declaration
 //------------------------------------------------------------------------
 typedef char TUID[16]; ///< plain UID type
+
+/**@}*/
 
 #if SMTG_CPP14
 //------------------------------------------------------------------------

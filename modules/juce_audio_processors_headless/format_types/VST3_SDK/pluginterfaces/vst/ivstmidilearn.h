@@ -33,7 +33,7 @@ namespace Vst {
 
 If this interface is implemented by the edit controller, the host will call this method whenever
 there is live MIDI-CC input for the plug-in. This way, the plug-in can change its MIDI-CC parameter
-mapping and inform the host via the IComponentHandler::restartComponent with the
+mapping and notify the host using the IComponentHandler::restartComponent with the
 kMidiCCAssignmentChanged flag.
 Use this if you want to implement custom MIDI-Learn functionality in your plug-in.
 

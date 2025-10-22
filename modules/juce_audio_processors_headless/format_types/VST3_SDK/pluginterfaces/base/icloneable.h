@@ -21,7 +21,7 @@
 namespace Steinberg {
 
 //------------------------------------------------------------------------
-/**  Interface allowing an object to be copied.
+/** Interface allowing an object to be copied.
 - [plug & host imp] 
 - [released: N4.12]
 */

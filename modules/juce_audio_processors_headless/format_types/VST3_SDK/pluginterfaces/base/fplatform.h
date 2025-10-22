@@ -50,7 +50,7 @@
 	#else
 		#define SMTG_CPU_X86	0
 	#endif
-	#if defined (_M_AMD64)
+	#if defined (_M_AMD64) // expected: "&& !defined(_M_ARM64EC)", but performance with IPP is better than native ARM code
 		#define SMTG_CPU_X86_64	1
 	#else
 		#define SMTG_CPU_X86_64	0
@@ -108,6 +108,7 @@
 		#define SMTG_CPP14 (__cplusplus >= 201402L || ((_MSC_FULL_VER >= 190024210L) && (_MSVC_LANG >= 201402L)))
 		#define SMTG_CPP17 (__cplusplus >= 201703L || ((_MSC_FULL_VER >= 190024210L) && (_MSVC_LANG >= 201703L)))
 		#define SMTG_CPP20 (__cplusplus >= 202002L)
+		#define SMTG_CPP23 (__cplusplus >= 202302L)
 		#define SMTG_HAS_NOEXCEPT ((_MSC_FULL_VER >= 190023026L) || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER >= 1300))
 		#if ((_MSC_FULL_VER >= 190024210L) || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER >= 1500) || (defined (__MINGW32__) && SMTG_CPP11))
 			#define SMTG_HAS_CPP11_CONSTEXPR 1
@@ -175,6 +176,7 @@
 		#define SMTG_CPP14 (__cplusplus >= 201402L)
 		#define SMTG_CPP17 (__cplusplus >= 201703L)
 		#define SMTG_CPP20 (__cplusplus >= 202002L)
+		#define SMTG_CPP23 (__cplusplus >= 202302L)
 		#if defined (__GNUG__) && __GNUG__ < 8
 			#define SMTG_CPP11_STDLIBSUPPORT 0
 		#else
@@ -255,6 +257,7 @@
 		#define SMTG_CPP14 (__cplusplus >= 201402L)
 		#define SMTG_CPP17 (__cplusplus >= 201703L)
 		#define SMTG_CPP20 (__cplusplus >= 202002L)
+		#define SMTG_CPP23 (__cplusplus >= 202302L)
 		#if defined (_LIBCPP_VERSION) && SMTG_CPP11
 			#define SMTG_CPP11_STDLIBSUPPORT 1
 			#define SMTG_HAS_NOEXCEPT 1

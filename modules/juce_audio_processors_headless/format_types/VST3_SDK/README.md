@@ -1,7 +1,7 @@
 <div style="text-align:center">
 <img src="https://steinbergmedia.github.io/vst3_doc/gfx/vst3_logo.jpg" alt="VST 3 SDK" /></div>
 
-# Welcome to VST SDK 3.7.x
+# Welcome to VST SDK 3.8.x
 
 ## Table Of Contents
 
@@ -33,15 +33,13 @@ The full **VST 3 SDK** is available [here!](https://www.steinberg.net/en/company
 
 Supported Platforms:
 
-| Operating System                |Architecture               |Compiler                 | Notes|
-| :------------------------------ | :-----------------------: | :---------------------: | :--------------------------: |
-|Windows 10/11                    |x86, x86_64, arm64         |MSVC 2022, MSVC 2019     |                              |
-|Windows 8.1                      |x86, x86_64                |MSVC 2019, MSVC 2017     |                              |
-|macOS 10.13 - 14                 |x86, x86_64, Apple Silicon |Xcode 10 - 15            |                              |
-|iOS 13 - iOS 17                  |arm64                      |Xcode 11 - 15            |                              |
-|Linux - Raspberry Pi OS (Buster) |arm32                      |GCC 8.3 and higher       |Visual Studio Code            |
-|Linux - Ubuntu 18.04 LTS         |x86, x86_64                |GCC 8.3 and higher       |Visual Studio Code, Qt Creator|
-|Linux - Ubuntu 20.04 LTS         |x86, x86_64                |GCC 8.3 and higher       |Visual Studio Code, Qt Creator|
+| Operating System                  | Architecture                  | Compiler              | Notes                             |
+| :-------------------------------- | :---------------------------- | :-------------------- | :-------------------------------- |
+| Windows 11                        | x86, x86_64, arm64, arm64EC   | MSVC 2022             |                                   |
+| Windows 8.1/10                    | x86, x86_64                   | MSVC 2019, MSVC 2022  |                                   |
+| macOS 10.13 - 15                  | x86, x86_64, Apple Silicon    | Xcode 10 - 16         |                                   |
+| iOS 13 - 18                       | arm64                         | Xcode 11 - 16         |                                   |
+| Linux - Ubuntu 24.04 LTS          | x86_64                        | GCC 13.3 and higher   | Visual Studio Code, Qt Creator    |
 
 ---
 <div id='300'/>
@@ -138,7 +136,7 @@ Some more features implemented specifically for developers include:
 ---
 <div id='500'/>
 
-## How to build VST3
+## How to build VST 3
 
 ### Get the source code from GitHub
 
@@ -234,16 +232,65 @@ cmake --build . --config Release
 - Press **Configure**
 - Press **Generate** and the project will be created
 
----
 <div id='600'/>
 
 ## Contributing
 
 For bug reports and features requests, please visit the [VST Developer Forum](https://sdk.steinberg.net)
 
----
+
 <div id='700'/>
 
 ## License & Usage guidelines
 
+- **VST 3 SDK** is under [MIT license](https://tlo.mit.edu/understand-ip/exploring-mit-open-source-license-comprehensive-guide).
+
+- Developers can adopt the [MIT license](https://tlo.mit.edu/understand-ip/exploring-mit-open-source-license-comprehensive-guide) for full open-source integration.
+
+- Licensing under **GPLv3** and the **Steinberg proprietary license** is no longer available.
+
+- Code licensed under [MIT license](https://tlo.mit.edu/understand-ip/exploring-mit-open-source-license-comprehensive-guide) can be used, modified, and redistributed freely — including in commercial products — provided [MIT license](https://tlo.mit.edu/understand-ip/exploring-mit-open-source-license-comprehensive-guide) terms are followed. 
+
 More details are found at [www.steinberg.net/sdklicenses_vst3](http://www.steinberg.net/sdklicenses_vst3)
+
+### Trademark and Logo Usage 
+
+#### General Principle 
+
+Trademark usage (e.g. "VST" name or logo) is optional under [MIT license](https://tlo.mit.edu/understand-ip/exploring-mit-open-source-license-comprehensive-guide), but if used, must comply with Steinberg's official trademark rules. 
+
+#### Permitted Use (if selected) 
+
+If you choose to display the **VST Compatible Logo** or refer to the **VST trademark**: 
+
+ - Logos must be used in unaltered form.
+ - Use must follow the official usage guidelines provided in the SDK.
+ - The trademark/logo must appear only in clear product-related contexts, such as: 
+    - Splash screens
+    - About boxes
+    - Product websites
+    - Documentation and manuals 
+
+This ensures legal compliance and brand consistency. 
+
+#### Prohibited Use 
+
+- Using “VST” (or derivatives like “VSTi”) in company or product names.
+- Applying the logo or trademark to non-VST-compatible products.
+- Associating the trademark with offensive, obscene, or inappropriate content.
+ 
+#### VST trademark and/or VST Compatible Logo 
+
+If you choose to display the **VST trademark** and/or **VST Compatible Logo**, you must observe the *Steinberg VST Usage Guidelines*. 
+
+*Purpose*: To assist Steinberg in enforcing and protecting the **VST trademark** in international jurisdictions. 
+
+#### Notes for Developers 
+
+- The *Steinberg VST Usage Guidelines* are included in the SDK.
+- Use of branding is not required under [MIT license](https://tlo.mit.edu/understand-ip/exploring-mit-open-source-license-comprehensive-guide), but if you choose to use it, trademark compliance is mandatory.
+- Non-compliance with logo guidelines does not affect your MIT rights (but may result in trademark violations).
+ 
+#### Best Practice Recommendation 
+
+Although optional, we encourage developers using VST under [MIT license](https://tlo.mit.edu/understand-ip/exploring-mit-open-source-license-comprehensive-guide) to follow the *Steinberg VST Usage Guidelines*.It fosters ecosystem-wide recognition, improves end-user trust, and supports the long-term visibility of the **VST** brand.

@@ -107,10 +107,20 @@ enum ControllerNumbers
 	kCountCtrlNumber,			///< Count of Controller Number
 
 	//---Extra for kLegacyMIDICCOutEvent-
-	kCtrlProgramChange = 130,	///< Program Change (use LegacyMIDICCOutEvent.value only)
-	kCtrlPolyPressure  = 131,	///< Polyphonic Key Pressure (use LegacyMIDICCOutEvent.value for pitch and
-								/// LegacyMIDICCOutEvent.value2 for pressure)
-	kCtrlQuarterFrame  = 132	///< Quarter Frame ((use LegacyMIDICCOutEvent.value only)
+	kCtrlProgramChange       = 130,	///< Program Change (use LegacyMIDICCOutEvent.value only)
+	kCtrlPolyPressure        = 131,	///< Polyphonic Key Pressure (use LegacyMIDICCOutEvent.value for pitch and
+									/// LegacyMIDICCOutEvent.value2 for pressure)
+	kCtrlQuarterFrame        = 132,	///< Quarter Frame ((use LegacyMIDICCOutEvent.value only)
+
+	kSystemSongSelect        = 133,	///< Song Select (use LegacyMIDICCOutEvent.value only)
+	kSystemSongPointer       = 134,	///< Song Pointer (use LegacyMIDICCOutEvent.value for LSB and
+									/// LegacyMIDICCOutEvent.value2 for MSB)
+	kSystemCableSelect       = 135,	///< Cable Select (use LegacyMIDICCOutEvent.value only)
+	kSystemTuneRequest       = 136,	///< Tune Request (use LegacyMIDICCOutEvent.value only)
+	kSystemMidiClockStart    = 137,	///< Midi Clock Start (use LegacyMIDICCOutEvent.value only)
+	kSystemMidiClockContinue = 138,	///< Midi Clock Continue (use LegacyMIDICCOutEvent.value only)
+	kSystemMidiClockStop     = 139,	///< Midi Clock Stop (use LegacyMIDICCOutEvent.value only)
+	kSystemActiveSensing     = 140,	///< Active Sensing (use LegacyMIDICCOutEvent.value only)
 };
 
 //------------------------------------------------------------------------

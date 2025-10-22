@@ -58,6 +58,7 @@ class IPlugViewContentScaleSupport : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
+	/** \ingroup smtgtypedef */
 	typedef float ScaleFactor;
 
 	/** Set the Content Scale Factor

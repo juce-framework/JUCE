@@ -23,7 +23,7 @@ namespace Steinberg {
 class FVariant;
 class IAttributes;
 //------------------------------------------------------------------------
-/**  Persistent Object Interface. 
+/** Persistent Object Interface. 
 [plug imp] \n
 This interface is used to store/restore attributes of an object.
 An IPlugController can implement this interface to handle presets.
@@ -60,10 +60,12 @@ public:
 
 DECLARE_CLASS_IID (IPersistent, 0xBA1A4637, 0x3C9F46D0, 0xA65DBA0E, 0xB85DA829)
 
-
+/** \ingroup smtgtypedef */
+/**@{*/
 typedef FIDString IAttrID;
+/**@}*/
 //------------------------------------------------------------------------
-/**  Object Data Archive Interface. 
+/** Object Data Archive Interface. 
 - [host imp]
 
 - store data/objects/binary/subattributes in the archive
@@ -148,7 +150,7 @@ public:
 DECLARE_CLASS_IID (IAttributes, 0xFA1E32F9, 0xCA6D46F5, 0xA982F956, 0xB1191B58)
 
 //------------------------------------------------------------------------
-/**  Extended access to Attributes; supports Attribute retrieval via iteration. 
+/** Extended access to Attributes; supports Attribute retrieval via iteration. 
 - [host imp]
 - [released] C7/N6
 

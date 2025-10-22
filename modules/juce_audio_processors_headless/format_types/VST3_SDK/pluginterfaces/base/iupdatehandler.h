@@ -65,7 +65,7 @@ public:
 DECLARE_CLASS_IID (IUpdateHandler, 0xF5246D56, 0x86544d60, 0xB026AFB5, 0x7B697B37)
 
 //------------------------------------------------------------------------
-/**  A dependent will get notified about changes of a model.
+/** A dependent will get notified about changes of a model.
 [plug imp]
 - notify changes of a model
 

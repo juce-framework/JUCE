@@ -37,7 +37,11 @@
 namespace Steinberg
 {
 //-----------------------------------------------------------------
-// Integral Types
+/** Integral Types
+ * \defgroup smtgtypedef Steinberg Data Types
+ * Data Types defined by Steinberg SDK
+ * @{ 
+ */
 	typedef char int8;
 	typedef uint8_t uint8;
 	typedef unsigned char uchar;
@@ -117,6 +121,9 @@ namespace Steinberg
 	typedef int32 UCoord;
 	static const UCoord kMaxCoord = ((UCoord)0x7FFFFFFF);
 	static const UCoord kMinCoord = ((UCoord)-0x7FFFFFFF);
+
+/**@}*/
+//----------------------------------------------------------------------------
 } // namespace Steinberg
 
 
