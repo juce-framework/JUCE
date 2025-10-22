@@ -1102,11 +1102,19 @@ public:
         detach();
     }
 
+    static void clearCachedImagesInComponentTree (Component& root)
+    {
+        root.setCachedComponentImage (nullptr);
+
+        for (auto* child : root.getChildren())
+            clearCachedImagesInComponentTree (*child);
+    }
+
     void detach()
     {
         auto& comp = *getComponent();
         stop();
-        comp.setCachedComponentImage (nullptr);
+        clearCachedImagesInComponentTree (comp);
         context.nativeContext = nullptr;
     }
 
