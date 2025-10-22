@@ -213,6 +213,9 @@ public:
 
     Rectangle<int> getDetectedViewBounds() const
     {
+        if (widget == nullptr)
+            return {};
+
        #if JUCE_MAC
         const auto frame = [(NSView*) widget frame];
         return { (int) frame.size.width, (int) frame.size.height };
