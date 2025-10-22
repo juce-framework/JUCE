@@ -3289,6 +3289,7 @@
     <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmessage.h"/>
     <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmidicontrollers.h"/>
     <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmidilearn.h"/>
+    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmidimapping2.h"/>
     <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstnoteexpression.h"/>
     <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstparameterchanges.h"/>
     <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstparameterfunctionname.h"/>
@@ -4242,7 +4243,6 @@
     <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\ReadMe.md"/>
     <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\LICENSE.txt"/>
     <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\README.md"/>
-    <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\JUCE_README.md"/>
     <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\LICENSE.txt"/>
     <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\README.md"/>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt"/>
