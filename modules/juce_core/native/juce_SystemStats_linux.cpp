@@ -43,10 +43,11 @@ static String getCpuInfo (const char* key)
 
 static String getLocaleValue (nl_item key)
 {
-    auto oldLocale = ::setlocale (LC_ALL, "");
-    auto result = String::fromUTF8 (nl_langinfo (key));
-    ::setlocale (LC_ALL, oldLocale);
-    return result;
+    const String oldLocale { ::setlocale (LC_ALL, nullptr) };
+    const ScopeGuard restore { [oldLocale] { ::setlocale (LC_ALL, oldLocale.toRawUTF8()); } };
+
+    ::setlocale (LC_ALL, ""); // restore locale from env
+    return String::fromUTF8 (nl_langinfo (key));
 }
 #endif
 
