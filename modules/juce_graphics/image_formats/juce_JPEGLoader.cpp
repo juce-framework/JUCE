@@ -53,7 +53,8 @@ namespace jpeglibNamespace
                                           "-Wcomma",
                                           "-Wunused-parameter",
                                           "-Wregister",
-                                          "-Wredundant-decls")
+                                          "-Wredundant-decls",
+                                          "-Wformat-nonliteral")
 
     #define DONT_USE_EXTERN_C
     #include "jpglib/jaricom.c"
