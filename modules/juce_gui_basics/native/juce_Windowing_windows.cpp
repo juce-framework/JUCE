@@ -1342,7 +1342,6 @@ public:
         if (dropTarget != nullptr)
         {
             dropTarget->peerIsDeleted = true;
-            dropTarget->Release();
             dropTarget = nullptr;
         }
     }
@@ -2076,7 +2075,7 @@ private:
     bool isDragging = false, isMouseOver = false,
          hasCreatedCaret = false, constrainerIsResizing = false, sizing = false;
     IconConverters::IconPtr currentWindowIcon;
-    FileDropTarget* dropTarget = nullptr;
+    ComSmartPtr<FileDropTarget> dropTarget;
     UWPUIViewSettings uwpViewSettings;
     TransparencyKind transparencyKind = TransparencyKind::opaque;
    #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
@@ -2288,7 +2287,7 @@ private:
                 if (peer == nullptr)
                     peer = this;
 
-                dropTarget = new FileDropTarget (*peer);
+                dropTarget = ComSmartPtr { new FileDropTarget (*peer), IncrementRef::no };
             }
 
             RegisterDragDrop (hwnd, dropTarget);
