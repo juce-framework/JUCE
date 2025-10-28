@@ -115,6 +115,10 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #include "JucePluginDefines.h"
 #endif
 
+#if __has_include ("AppConfig.h")
+ #include "AppConfig.h"
+#endif
+
 #include <juce_core/detail/juce_IncrementRef.h>
 #include <juce_audio_processors_headless/format_types/juce_VST3Utilities.h>
 #include <juce_audio_processors_headless/utilities/juce_VST3Interface.h>
