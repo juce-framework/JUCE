@@ -637,7 +637,7 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     if (isKioskModeView (self))
         return true;
 
-    return [[[NSBundle mainBundle] objectForInfoDictionaryKey: @"UIStatusBarHidden"] boolValue];
+    return [super prefersStatusBarHidden];
 }
 
  - (BOOL) prefersHomeIndicatorAutoHidden
