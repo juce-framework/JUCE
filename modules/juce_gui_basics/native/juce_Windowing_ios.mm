@@ -744,7 +744,7 @@ void Displays::findDisplays (const Desktop& desktop)
     private:
         struct DelegateClass final : public ObjCClass<NSObject>
         {
-            DelegateClass() : ObjCClass<NSObject> ("JUCEOnScreenKeyboardObserver_")
+            DelegateClass() : ObjCClass ("JUCEOnScreenKeyboardObserver_")
             {
                 addIvar<OnScreenKeyboardChangeDetectorImpl*> ("owner");
 
