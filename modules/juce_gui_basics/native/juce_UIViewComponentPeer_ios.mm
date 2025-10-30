@@ -53,8 +53,8 @@ public:
 
     void setWindowScene (UIWindowScene* x) API_AVAILABLE (ios (13.0))
     {
-        windowScene = x;
-        listeners.call ([] (auto& l) { l.windowSceneChanged(); });
+        if (std::exchange (windowScene, x) != x)
+            listeners.call ([] (auto& l) { l.windowSceneChanged(); });
     }
 
     UIWindowScene* getWindowScene() const API_AVAILABLE (ios (13.0))
