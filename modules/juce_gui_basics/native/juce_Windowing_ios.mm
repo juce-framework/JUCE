@@ -346,11 +346,9 @@ API_AVAILABLE (ios (13.0))
     configurationForConnectingSceneSession: (UISceneSession*) connectingSceneSession
                                    options: (UISceneConnectionOptions*) options
 {
-    auto* result = [UISceneConfiguration configurationWithName: juceStringToNS (TRANS ("Default Configuration"))
-                                                   sessionRole: connectingSceneSession.role];
-    result.delegateClass = JuceAppSceneDelegate.class;
-    result.sceneClass = UIWindowScene.class;
-    return result;
+    auto* config = connectingSceneSession.configuration;
+    config.delegateClass = JuceAppSceneDelegate.class;
+    return config;
 }
 
 - (void) setPushNotificationsDelegateToUse: (NSObject*) delegate
