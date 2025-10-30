@@ -353,10 +353,10 @@ struct CADisplayLinkDeleter
 
 - (JuceUIViewController*) init;
 
-- (NSUInteger) supportedInterfaceOrientations;
 - (BOOL) shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation) interfaceOrientation;
 - (void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) toInterfaceOrientation duration: (NSTimeInterval) duration;
 - (void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) fromInterfaceOrientation;
+- (UIInterfaceOrientationMask) supportedInterfaceOrientations;
 - (void) viewWillTransitionToSize: (CGSize) size withTransitionCoordinator: (id<UIViewControllerTransitionCoordinator>) coordinator;
 - (BOOL) prefersStatusBarHidden;
 - (UIStatusBarStyle) preferredStatusBarStyle;
@@ -621,7 +621,7 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     return self;
 }
 
-- (NSUInteger) supportedInterfaceOrientations
+- (UIInterfaceOrientationMask) supportedInterfaceOrientations
 {
     return Orientations::getSupportedOrientations();
 }
