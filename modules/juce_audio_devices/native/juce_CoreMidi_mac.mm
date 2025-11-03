@@ -1232,6 +1232,23 @@ struct CoreMidiHelpers
         Endpoints endpoints;
     };
 
+    struct TimeConverter
+    {
+        CoreAudioTimeConversions timeConversions;
+       #if JUCE_IOS
+        const MIDITimeStamp startTimeNative = mach_absolute_time();
+       #else
+        const MIDITimeStamp startTimeNative = AudioGetCurrentHostTime();
+       #endif
+        uint32_t startTimeMillis = Time::getMillisecondCounter();
+
+        double convertToMillis (uint64_t packetTimeNative) const
+        {
+            const auto elapsedTime = packetTimeNative - startTimeNative;
+            return startTimeMillis + (1e-6 * (double) timeConversions.hostTimeToNanos (elapsedTime));
+        }
+    };
+
     //==============================================================================
     template <ImplementationStrategy>
     struct Receiver;
@@ -1254,8 +1271,7 @@ struct CoreMidiHelpers
 
             for (uint32_t i = 0; i < list->numPackets; ++i)
             {
-                const auto elapsedTime = packet->timeStamp - startTimeNative;
-                const auto juceTimeMillis = startTimeMillis + (1e6 * (double) timeConversions.hostTimeToNanos (elapsedTime));
+                const auto juceTimeMillis = converter.convertToMillis (packet->timeStamp);
 
                 static_assert (sizeof (uint32_t) == sizeof (UInt32)
                                && alignof (uint32_t) == alignof (UInt32),
@@ -1271,14 +1287,7 @@ struct CoreMidiHelpers
 
     private:
         ump::Consumer& callback;
-
-       #if JUCE_IOS
-        const MIDITimeStamp startTimeNative = mach_absolute_time();
-       #else
-        const MIDITimeStamp startTimeNative = AudioGetCurrentHostTime();
-       #endif
-        const uint32_t startTimeMillis = Time::getMillisecondCounter();
-        CoreAudioTimeConversions timeConversions;
+        TimeConverter converter;
     };
 
     template <>
@@ -1347,9 +1356,7 @@ struct CoreMidiHelpers
 
             for (unsigned int i = 0; i < list->numPackets; ++i)
             {
-                const auto elapsedTime = packet->timeStamp - startTimeNative;
-                const auto juceTimeMillis = startTimeMillis + (1e6 * (double) timeConversions.hostTimeToNanos (elapsedTime));
-
+                const auto juceTimeMillis = converter.convertToMillis (packet->timeStamp);
                 const auto* bytes = unalignedPointerCast<const std::byte*> (packet->data);
                 const auto len = readUnaligned<decltype (packet->length)> (&(packet->length));
 
@@ -1367,14 +1374,7 @@ struct CoreMidiHelpers
     private:
         ump::BytestreamToUMPDispatcher dispatcher;
         ump::Consumer& callback;
-
-       #if JUCE_IOS
-        const MIDITimeStamp startTimeNative = mach_absolute_time();
-       #else
-        const MIDITimeStamp startTimeNative = AudioGetCurrentHostTime();
-       #endif
-        const uint32_t startTimeMillis = Time::getMillisecondCounter();
-        CoreAudioTimeConversions timeConversions;
+        TimeConverter converter;
     };
 
     template <>
