@@ -4006,7 +4006,7 @@ private:
                 // so that the client area exactly fills the available space.
                 if (isFullScreen())
                 {
-                    const auto monitor = MonitorFromWindow (hwnd, MONITOR_DEFAULTTONULL);
+                    const auto monitor = MonitorFromRect (param, MONITOR_DEFAULTTONULL);
 
                     if (monitor == nullptr)
                         return 0;
