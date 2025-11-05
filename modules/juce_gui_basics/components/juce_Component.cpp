@@ -1986,7 +1986,7 @@ Image Component::createComponentSnapshot (Rectangle<int> areaToGrab,
     auto w = roundToInt (scaleFactor * (float) r.getWidth());
     auto h = roundToInt (scaleFactor * (float) r.getHeight());
 
-    Image image (flags.opaqueFlag ? Image::RGB : Image::ARGB, w, h, true, imageType);
+    Image image (flags.opaqueFlag ? Image::RGB : Image::ARGB, w, h, ! flags.opaqueFlag, imageType);
 
     Graphics g (image);
 
