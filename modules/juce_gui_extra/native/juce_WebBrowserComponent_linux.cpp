@@ -264,6 +264,44 @@ public:
     JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (WebKitSymbols)
 
 private:
+    struct DylibHandle
+    {
+        DylibHandle() = default;
+
+        explicit DylibHandle (const char* str)
+            : DylibHandle (str, RTLD_NOW | RTLD_LOCAL) {}
+
+        DylibHandle (const char* str, int flags)
+            : handle (dlopen (str, flags)) {}
+
+        ~DylibHandle()
+        {
+            if (handle != nullptr)
+                dlclose (handle);
+        }
+
+        DylibHandle (DylibHandle&& other) noexcept
+            : handle (std::exchange (other.handle, nullptr)) {}
+
+        DylibHandle& operator= (DylibHandle&& other) noexcept
+        {
+            auto local = std::move (other);
+            std::swap (local.handle, handle);
+            return *this;
+        }
+
+        void* getFunction (const char* name) const
+        {
+            jassert (handle != nullptr);
+            return dlsym (handle, name);
+        }
+
+        explicit operator bool() const { return handle != nullptr; }
+
+    private:
+        void* handle = nullptr;
+    };
+
     WebKitSymbols() = default;
 
     ~WebKitSymbols()
@@ -285,7 +323,7 @@ private:
     }
 
     template <typename FuncPtr>
-    bool loadSymbols (DynamicLibrary& lib, SymbolBinding<FuncPtr> binding)
+    bool loadSymbols (DylibHandle& lib, SymbolBinding<FuncPtr> binding)
     {
         if (auto* func = lib.getFunction (binding.name))
         {
@@ -297,7 +335,7 @@ private:
     }
 
     template <typename FuncPtr, typename... Args>
-    bool loadSymbols (DynamicLibrary& lib, SymbolBinding<FuncPtr> binding, Args... args)
+    bool loadSymbols (DylibHandle& lib, SymbolBinding<FuncPtr> binding, Args... args)
     {
         return loadSymbols (lib, binding) && loadSymbols (lib, args...);
     }
@@ -395,20 +433,24 @@ private:
 
     bool openWebKitAndDependencyLibraries (const WebKitAndDependencyLibraryNames& names)
     {
-        if (webkitLib.open (names.webkitLib) && jsLib.open (names.jsLib) && soupLib.open (names.soupLib))
+        if (   (webkitLib = DylibHandle (names.webkitLib, RTLD_NOW | RTLD_LOCAL | RTLD_NODELETE))
+            && (jsLib = DylibHandle (names.jsLib))
+            && (soupLib = DylibHandle (names.soupLib)))
+        {
             return true;
+        }
 
         for (auto* l : { &webkitLib, &jsLib, &soupLib })
-            l->close();
+            *l = {};
 
         return false;
     }
 
     //==============================================================================
-    DynamicLibrary webkitLib, jsLib, soupLib;
+    DylibHandle webkitLib, jsLib, soupLib;
 
-    DynamicLibrary gtkLib    { "libgtk-3.so" },
-                   glib      { "libglib-2.0.so" };
+    DylibHandle gtkLib    { "libgtk-3.so" },
+                glib      { "libglib-2.0.so" };
 
     const bool webKitIsAvailable =    (   openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.1.so",
                                                                               "libjavascriptcoregtk-4.1.so",
