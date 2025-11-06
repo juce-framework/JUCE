@@ -650,18 +650,18 @@ private:
 
         void operator() (float platformScale) const
         {
-            MessageManager::callAsync ([ref = Component::SafePointer<VSTPluginWindow> (&window), platformScale]
+            MessageManager::callAsync ([ref = SafePointer (&window), platformScale]
             {
                 if (auto* r = ref.getComponent())
                 {
                     r->nativeScaleFactor = platformScale;
                     r->setContentScaleFactor();
 
-                   #if JUCE_WINDOWS
-                    r->resizeToFit();
-                    r->embeddedComponent.updateHWNDBounds();
-                   #endif
-                    r->componentMovedOrResized (true, true);
+                    Vst2::ERect* rect = nullptr;
+                    r->dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
+
+                    if (rect != nullptr)
+                        r->updateSizeFromEditor (rect->right - rect->left, rect->bottom - rect->top);
                 }
             });
         }
@@ -809,7 +809,6 @@ private:
         updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true)
                                                                   .withParameterInfoChanged (true));
     }
-
 };
 
 //==============================================================================
