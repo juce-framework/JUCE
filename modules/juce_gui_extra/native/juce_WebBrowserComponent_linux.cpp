@@ -1486,7 +1486,7 @@ private:
                     kill (childProcess, SIGTERM);
                     waitpid (childProcess, &status, 0);
 
-                    if (WIFEXITED (status))
+                    if (WIFEXITED (status) || WIFSIGNALED (status) || WIFSTOPPED (status))
                         break;
                 }
             }
