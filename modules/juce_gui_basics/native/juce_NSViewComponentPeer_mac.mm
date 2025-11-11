@@ -1420,7 +1420,7 @@ public:
 
     static int64 getMouseTime (NSEvent* e) noexcept
     {
-        return (Time::currentTimeMillis() - Time::getMillisecondCounter())
+        return (Time::currentTimeMillis() - (int64) Time::getMillisecondCounterHiRes())
                  + (int64) ([e timestamp] * 1000.0);
     }
 
