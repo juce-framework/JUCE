@@ -363,6 +363,11 @@ private:
     ComponentPeer* lastPeer = nullptr;
     SharedKeyWindow::Ptr keyWindow;
 
+    NativeScaleFactorNotifier notifier { &owner, [this] (auto)
+    {
+        componentMovedOrResized (owner, true, true);
+    } };
+
     //==============================================================================
     void componentParentHierarchyChanged (Component&) override   { peerChanged (owner.getPeer()); }
     void componentMovedOrResized (Component&, bool, bool) override
