@@ -978,6 +978,20 @@ struct StateHelpers
     {
         BlendingMode() noexcept {}
 
+        ~BlendingMode()
+        {
+            glBlendFuncSeparate (prevSrcRGB, prevDstRGB, prevSrcAlpha, prevDstAlpha);
+
+            if ((bool) glIsEnabled (GL_BLEND) == prevBlendEnabled)
+                return;
+
+            if (prevBlendEnabled)
+                glEnable (GL_BLEND);
+            else
+                glDisable (GL_BLEND);
+
+        }
+
         void resync() noexcept
         {
             glDisable (GL_BLEND);
@@ -1030,8 +1044,20 @@ struct StateHelpers
         }
 
     private:
-        bool blendingEnabled = false;
+        static GLenum getBlendEnum (GLenum kind)
+        {
+            GLint result{};
+            glGetIntegerv (kind, &result);
+            return static_cast<GLenum> (result);
+        }
+
         GLenum srcFunction = 0, dstFunction = 0;
+        GLenum prevSrcAlpha = getBlendEnum (GL_BLEND_SRC_ALPHA);
+        GLenum prevSrcRGB   = getBlendEnum (GL_BLEND_SRC_RGB);
+        GLenum prevDstAlpha = getBlendEnum (GL_BLEND_DST_ALPHA);
+        GLenum prevDstRGB   = getBlendEnum (GL_BLEND_DST_RGB);
+        bool blendingEnabled = false;
+        bool prevBlendEnabled = glIsEnabled (GL_BLEND);
     };
 
     //==============================================================================
@@ -1786,7 +1812,7 @@ private:
 //==============================================================================
 struct SavedState final : public RenderingHelpers::SavedStateBase<SavedState>
 {
-    using BaseClass = RenderingHelpers::SavedStateBase<SavedState>;
+    using BaseClass = SavedStateBase;
 
     SavedState (GLState* s)  : BaseClass (s->target.bounds), state (s)
     {}
