@@ -1239,7 +1239,7 @@ private:
                 bool isOutput = (ioid != "Input");
                 bool isInput  = (ioid != "Output");
 
-                // alsa is stupid here, it advertises dmix and dsnoop as input/output devices, but
+                // ALSA advertises dmix and dsnoop as input/output devices, but
                 // opening dmix as input, or dsnoop as output will trigger errors
                 isInput  = isInput  && ! id.startsWith ("dmix");
                 isOutput = isOutput && ! id.startsWith ("dsnoop");

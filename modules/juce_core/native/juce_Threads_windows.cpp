@@ -295,7 +295,7 @@ void JUCE_CALLTYPE Process::terminate()
     _CrtDumpMemoryLeaks();
    #endif
 
-    // bullet in the head in case there's a problem shutting down
+    // force exit in case there's a problem shutting down
     ExitProcess (1);
 }
 

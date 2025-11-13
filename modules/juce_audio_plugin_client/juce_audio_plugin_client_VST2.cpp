@@ -398,8 +398,8 @@ public:
             // if this fails, the host hasn't called resume() before processing
             jassert (isProcessing);
 
-            // (tragically, some hosts actually need this, although it's stupid to have
-            //  to do it here.)
+            // (tragically, some hosts actually need this, although it's unfortunate to have
+            //  to do it here)
             if (! isProcessing)
                 resume();
 
