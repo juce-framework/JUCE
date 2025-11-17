@@ -52,7 +52,7 @@ namespace juce
 
         ...do some stuff...
 
-        // myLock gets unlocked here.
+        // myLock gets unlocked here
     }
     @endcode
 
@@ -117,10 +117,10 @@ private:
         }
         else
         {
-            ..our attempt at locking failed because some other thread has already locked the object..
+            ...our attempt at locking failed because some other thread has already locked the object...
         }
 
-        // myLock gets unlocked here (if it was locked).
+        // myLock gets unlocked here (if it was locked)
     }
     @endcode
 

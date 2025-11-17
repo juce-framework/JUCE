@@ -140,7 +140,7 @@ public:
                       && ! JuceWindowIdentifier::isJUCEWindow (m.hwnd))
                 {
                     // if it's someone else's window being clicked on, and the focus is
-                    // currently on a juce window, pass the kb focus over..
+                    // currently on a juce window, pass the kb focus over
                     auto currentFocus = GetFocus();
 
                     if (currentFocus == nullptr || JuceWindowIdentifier::isJUCEWindow (currentFocus))

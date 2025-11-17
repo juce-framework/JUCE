@@ -1892,7 +1892,7 @@ public:
             if (activePlugins.size() + activeUIs.size() == 0)
             {
                 // there's some kind of component currently modal, but the host
-                // is trying to delete our plugin..
+                // is trying to delete our plugin
                 jassert (ModalComponentManager::getInstanceWithoutCreating() == nullptr
                          || Component::getCurrentlyModalComponent() == nullptr);
             }

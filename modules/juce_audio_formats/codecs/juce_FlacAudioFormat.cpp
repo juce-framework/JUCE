@@ -222,7 +222,7 @@ public:
             if (lengthInSamples == 0 && sampleRate > 0)
             {
                 // the length hasn't been stored in the metadata, so we'll need to
-                // work it out the length the hard way, by scanning the whole file..
+                // work it out the length the hard way, by scanning the whole file
                 scanningForLength = true;
                 FLAC__stream_decoder_process_until_end_of_stream (decoder);
                 scanningForLength = false;

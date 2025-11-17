@@ -75,11 +75,11 @@ namespace juce
 
         if (m.runThread())
         {
-            // thread finished normally..
+            // thread finished normally
         }
         else
         {
-            // user pressed the cancel button..
+            // user pressed the cancel button
         }
     }
 

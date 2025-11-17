@@ -95,10 +95,10 @@ struct SHA256Processor
         finalBlocks[numBytes++] = 128; // append a '1' bit
 
         while (numBytes != 56 && numBytes < 64 + 56)
-            finalBlocks[numBytes++] = 0; // pad with zeros..
+            finalBlocks[numBytes++] = 0; // pad with zeros
 
         for (int i = 8; --i >= 0;)
-            finalBlocks[numBytes++] = (uint8_t) (length >> (i * 8)); // append the length.
+            finalBlocks[numBytes++] = (uint8_t) (length >> (i * 8)); // append the length
 
         jassert (numBytes == 64 || numBytes == 128);
 

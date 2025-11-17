@@ -1281,7 +1281,7 @@ private:
 
         // In the event that the plugin decides to send all of its parameters in one go,
         // we should ensure that the output buffer is large enough to accommodate, with some
-        // extra room for the sequence header, MIDI messages etc..
+        // extra room for the sequence header, MIDI messages etc.
         const auto patchSetSizeBytes = 72;
         const auto additionalSize = 8192;
         const auto atomPortMinSize = proc.getParameters().size() * patchSetSizeBytes + additionalSize;

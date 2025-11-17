@@ -454,10 +454,10 @@ public:
                             }
                         }
 
-                        // if some output channels are disabled, some hosts supply the same buffer
+                        // If some output channels are disabled, some hosts supply the same buffer
                         // for multiple channels or supply a nullptr - this buggers up our method
                         // of copying the inputs over the outputs, so we need to create unique temp
-                        // buffers in this case..
+                        // buffers in this case.
                         if (bufferPointerReusedForOtherChannels || chan == nullptr)
                         {
                             chan = new FloatType [(size_t) blockSize * 2];
@@ -491,7 +491,7 @@ public:
                         processor->processBlock (chans, midiEvents);
                 }
 
-                // copy back any temp channels that may have been used..
+                // copy back any temp channels that may have been used
                 for (i = 0; i < numOut; ++i)
                     if (auto* chan = tmpBuffers.tempChannels.getUnchecked (i))
                         if (auto* dest = outputs[i])
@@ -863,8 +863,8 @@ public:
 
                 editorComp = nullptr;
 
-                // there's some kind of component currently modal, but the host
-                // is trying to delete our plugin. You should try to avoid this happening..
+                // There's some kind of component currently modal, but the host
+                // is trying to delete our plugin. You should try to avoid this happening.
                 jassert (Component::getCurrentlyModalComponent() == nullptr);
             }
         }
@@ -1084,7 +1084,7 @@ public:
                 }
             }
 
-            // some hosts don't support the sizeWindow call, so do it manually..
+            // some hosts don't support the sizeWindow call, so do it manually
             if (! sizeWasSuccessful)
             {
                 const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
@@ -1354,7 +1354,7 @@ private:
 
     //==============================================================================
    #if JUCE_WINDOWS
-    // Workarounds for hosts which attempt to open editor windows on a non-GUI thread.. (Grrrr...)
+    // Workarounds for hosts which attempt to open editor windows on a non-GUI thread. (Grrrr...)
     static void checkWhetherMessageThreadIsCorrect()
     {
         auto host = detail::PluginUtilities::getHostType();
@@ -1498,7 +1498,7 @@ private:
     {
         if (auto* param = juceParameters.getParamForIndex (args.index))
         {
-            // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+            // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more
             param->getLabel().copyToUTF8 ((char*) args.ptr, 24 + 1);
         }
 
@@ -1509,7 +1509,7 @@ private:
     {
         if (auto* param = juceParameters.getParamForIndex (args.index))
         {
-            // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+            // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more
             param->getCurrentValueAsText().copyToUTF8 ((char*) args.ptr, 24 + 1);
         }
 
@@ -1520,7 +1520,7 @@ private:
     {
         if (auto* param = juceParameters.getParamForIndex (args.index))
         {
-            // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+            // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more
             param->getName (32).copyToUTF8 ((char*) args.ptr, 32 + 1);
         }
 
@@ -2189,7 +2189,7 @@ namespace
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
 
 //==============================================================================
-// Mac startup code..
+// Mac startup code
 #if JUCE_MAC
 
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster);
@@ -2205,7 +2205,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
     }
 
 //==============================================================================
-// Linux startup code..
+// Linux startup code
 #elif JUCE_LINUX || JUCE_BSD
 
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster);
@@ -2225,7 +2225,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
     __attribute__ ((destructor))  void myPluginFini() {}
 
 //==============================================================================
-// Win32 startup code..
+// Win32 startup code
 #else
 
     extern "C" __declspec (dllexport) Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster)

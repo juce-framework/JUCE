@@ -48,7 +48,7 @@ struct DanglingStreamChecker
             It's always a bad idea to leak any object, but if you're leaking output
             streams, then there's a good chance that you're failing to flush a file
             to disk properly, which could result in corrupted data and other similar
-            nastiness..
+            nastiness.
         */
         jassert (activeStreams.size() == 0);
 

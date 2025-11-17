@@ -278,7 +278,7 @@ public:
         {
             tempBuffer.setSize (jmax (1, outputs.size()), samplesPerBlockExpected);
 
-            // dodgy hack to force some plugins to initialise the sample rate..
+            // dodgy hack to force some plugins to initialise the sample rate
             if (auto* firstParam = getParameters()[0])
             {
                 const auto old = firstParam->getValue();

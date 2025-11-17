@@ -88,7 +88,7 @@ namespace ComponentBuilderHelpers
 
             if (type == nullptr || uid.isEmpty())
             {
-                // ..handle the case where a child of the actual state node has changed.
+                // handle the case where a child of the actual state node has changed
                 if (state.getParent().isValid())
                     updateComponent (builder, state.getParent());
             }
@@ -282,7 +282,7 @@ void ComponentBuilder::updateChildComponents (Component& parent, const ValueTree
         // (remaining unused items in existingComponents get deleted here as it goes out of scope)
     }
 
-    // Make sure the z-order is correct..
+    // make sure the z-order is correct
     if (componentsInOrder.size() > 0)
     {
         componentsInOrder.getLast()->toFront (false);

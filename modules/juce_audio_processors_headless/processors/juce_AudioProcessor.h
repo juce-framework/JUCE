@@ -912,7 +912,7 @@ public:
         {
             suspendProcessing (true);
 
-            ..do something that takes ages..
+            ...do something that takes ages...
 
             suspendProcessing (false);
         }

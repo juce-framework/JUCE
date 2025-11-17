@@ -149,13 +149,13 @@ public:
 
     bool setSwapInterval (int numFramesPerSwap)
     {
-        jassert (isActive()); // this can only be called when the context is active..
+        jassert (isActive()); // this can only be called when the context is active
         return wglSwapIntervalEXT != nullptr && wglSwapIntervalEXT (numFramesPerSwap) != FALSE;
     }
 
     int getSwapInterval() const
     {
-        jassert (isActive()); // this can only be called when the context is active..
+        jassert (isActive()); // this can only be called when the context is active
         return wglGetSwapIntervalEXT != nullptr ? wglGetSwapIntervalEXT() : 0;
     }
 

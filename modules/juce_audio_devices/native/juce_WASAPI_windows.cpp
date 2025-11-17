@@ -1474,7 +1474,7 @@ public:
 
             if (! isThreadRunning())
             {
-                // something's gone wrong and the thread's stopped..
+                // something's gone wrong and the thread's stopped
                 flags &= ~flagOpen;
                 return;
             }

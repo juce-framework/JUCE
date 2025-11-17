@@ -2033,7 +2033,7 @@ void UIViewComponentPeer::toBehind (ComponentPeer* other)
 
 void UIViewComponentPeer::setIcon (const Image& /*newIcon*/)
 {
-    // to do..
+    // todo
 }
 
 //==============================================================================
@@ -2094,7 +2094,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEv
             ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
             modsToSend = ModifierKeys::getCurrentModifiers();
 
-            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before
             handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(),
                               MouseInputSource::defaultPressure, MouseInputSource::defaultOrientation, time, {}, touchIndex);
 

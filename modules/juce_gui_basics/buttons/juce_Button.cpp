@@ -707,7 +707,7 @@ void Button::repeatTimerCallback()
 
         auto now = Time::getMillisecondCounter();
 
-        // if we've been blocked from repeating often enough, speed up the repeat timer to compensate..
+        // if we've been blocked from repeating often enough, speed up the repeat timer to compensate
         if (lastRepeatTime != 0 && (int) (now - lastRepeatTime) > repeatSpeed * 2)
             repeatSpeed = jmax (1, repeatSpeed / 2);
 

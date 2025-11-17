@@ -1350,7 +1350,7 @@ double AudioDeviceManager::LevelMeter::getCurrentLevel() const noexcept
 
 void AudioDeviceManager::playTestSound()
 {
-    { // cunningly nested to swap, unlock and delete in that order.
+    { // cunningly nested to swap, unlock and delete in that order
         std::unique_ptr<AudioBuffer<float>> oldSound;
 
         {

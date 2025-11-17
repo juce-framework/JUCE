@@ -358,7 +358,7 @@ namespace PNGHelpers
     {
         if (setjmp (errorJumpBuf) == 0)
         {
-            // read the header..
+            // read the header
             png_set_read_fn (pngReadStruct, &in, readCallback);
 
             png_read_info (pngReadStruct, pngInfoStruct);
@@ -407,7 +407,7 @@ namespace PNGHelpers
 
     static Image createImageFromData (bool hasAlphaChan, int width, int height, png_bytepp rows)
     {
-        // now convert the data to a juce image format..
+        // now convert the data to a juce image format
         Image image (hasAlphaChan ? Image::ARGB : Image::RGB, width, height, hasAlphaChan);
 
         image.getProperties()->set ("originalImageHadAlpha", image.hasAlphaChannel());
@@ -455,7 +455,7 @@ namespace PNGHelpers
         if (readHeader (in, pngReadStruct, pngInfoStruct, errorJumpBuf,
                         width, height, bitDepth, colorType, interlaceType))
         {
-            // Load the image into a temp buffer..
+            // load the image into a temp buffer
             const size_t lineStride = width * 4;
             HeapBlock<uint8> tempBuffer (height * lineStride);
             HeapBlock<png_bytep> rows (height);

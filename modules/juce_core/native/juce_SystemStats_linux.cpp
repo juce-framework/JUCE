@@ -73,7 +73,6 @@ bool SystemStats::isOperatingSystem64Bit()
    #if JUCE_64BIT
     return true;
    #else
-    //xxx not sure how to find this out?..
     return false;
    #endif
 }

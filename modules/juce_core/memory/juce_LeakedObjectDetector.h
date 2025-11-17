@@ -67,7 +67,7 @@ public:
             DBG ("*** Dangling pointer deletion! Class: " << getLeakedObjectClassName());
 
             /** If you hit this, then you've managed to delete more instances of this class than you've
-                created.. That indicates that you're deleting some dangling pointers.
+                created. That indicates that you're deleting some dangling pointers.
 
                 Note that although this assertion will have been triggered during a destructor, it might
                 not be this particular deletion that's at fault - the incorrect one may have happened

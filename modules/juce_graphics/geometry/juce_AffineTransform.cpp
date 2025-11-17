@@ -211,7 +211,7 @@ AffineTransform AffineTransform::inverted() const noexcept
                  dst10, dst11, -mat02 * dst10 - mat12 * dst11 };
     }
 
-    // singularity..
+    // singularity
     return *this;
 }
 

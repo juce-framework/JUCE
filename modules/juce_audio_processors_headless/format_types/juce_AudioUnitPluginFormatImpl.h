@@ -1428,7 +1428,7 @@ public:
         }
         else
         {
-            // Plugin not working correctly, so just bypass..
+            // Plugin not working correctly, so just bypass.
             for (int i = getTotalNumOutputChannels(); --i >= 0;)
                 buffer.clear (i, 0, buffer.getNumSamples());
         }

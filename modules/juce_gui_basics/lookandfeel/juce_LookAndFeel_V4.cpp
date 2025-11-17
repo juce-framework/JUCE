@@ -536,7 +536,7 @@ void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, const ProgressBar& prog
     }
     else
     {
-        // spinning bar..
+        // spinning bar
         g.setColour (background);
 
         auto stripeWidth = height * 2;

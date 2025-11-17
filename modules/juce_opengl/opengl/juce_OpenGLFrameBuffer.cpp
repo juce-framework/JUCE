@@ -466,7 +466,7 @@ private:
         }
 
         // trying to use a framebuffer after saving it with saveAndRelease()! Be sure to call
-        // reloadSavedCopy() to put it back into GPU memory before using it..
+        // reloadSavedCopy() to put it back into GPU memory before using it
         jassertfalse;
 
         return nullptr;

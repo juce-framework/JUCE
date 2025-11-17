@@ -314,7 +314,7 @@ String::String (const char* const t)
 
         To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
         string to the String class - so for example if your source data is actually UTF-8,
-        you'd call String (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
+        you'd call String (CharPointer_UTF8 ("my utf8 string.")), and it would be able to
         correctly convert the multi-byte characters to unicode. It's *highly* recommended that
         you use UTF-8 with escape characters in your source code to represent extended characters,
         because there's no other way to represent these strings in a way that isn't dependent on
@@ -337,7 +337,7 @@ String::String (const char* const t, const size_t maxChars)
 
         To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
         string to the String class - so for example if your source data is actually UTF-8,
-        you'd call String (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
+        you'd call String (CharPointer_UTF8 ("my utf8 string.")), and it would be able to
         correctly convert the multi-byte characters to unicode. It's *highly* recommended that
         you use UTF-8 with escape characters in your source code to represent extended characters,
         because there's no other way to represent these strings in a way that isn't dependent on
@@ -419,7 +419,7 @@ namespace NumberToStringConverters
         return t;
     }
 
-    // pass in a pointer to the END of a buffer..
+    // pass in a pointer to the END of a buffer
     static char* numberToString (char* t, int64 n) noexcept
     {
         if (n >= 0)
@@ -2058,7 +2058,7 @@ struct StringEncodingConverter
         void* const newSpace = addBytesToPointer (text.getAddress(), (int) endOffset);
         const CharPointerType_Dest extraSpace (static_cast<DestChar*> (newSpace));
 
-       #if JUCE_DEBUG // (This just avoids spurious warnings from valgrind about the uninitialised bytes at the end of the buffer..)
+       #if JUCE_DEBUG // This just avoids spurious warnings from valgrind about the uninitialised bytes at the end of the buffer.
         auto bytesToClear = (size_t) jmin ((int) extraBytesNeeded, 4);
         zeromem (addBytesToPointer (newSpace, extraBytesNeeded - bytesToClear), bytesToClear);
        #endif
@@ -2191,7 +2191,7 @@ StringRef::StringRef (const char* stringLiteral) noexcept
 
         To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
         string to the StringRef class - so for example if your source data is actually UTF-8,
-        you'd call StringRef (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
+        you'd call StringRef (CharPointer_UTF8 ("my utf8 string.")), and it would be able to
         correctly convert the multi-byte characters to unicode. It's *highly* recommended that
         you use UTF-8 with escape characters in your source code to represent extended characters,
         because there's no other way to represent these strings in a way that isn't dependent on

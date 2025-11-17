@@ -228,7 +228,7 @@ struct Target
         : context (c), frameBufferID (fb.getFrameBufferID()),
           bounds (origin.x, origin.y, fb.getWidth(), fb.getHeight())
     {
-        jassert (frameBufferID != 0); // trying to render into an uninitialised framebuffer object.
+        jassert (frameBufferID != 0); // trying to render into an uninitialised framebuffer object
     }
 
     Target (const Target& other) noexcept
@@ -1471,7 +1471,7 @@ struct StateHelpers
         {
             context.extensions.glBufferSubData (GL_ARRAY_BUFFER, 0, (GLsizeiptr) ((size_t) numVertices * sizeof (VertexInfo)), vertexData);
             // NB: If you get a random crash in here and are running in a Parallels VM, it seems to be a bug in
-            // their driver.. Can't find a workaround unfortunately.
+            // their driver. Can't find a workaround unfortunately.
             glDrawElements (GL_TRIANGLES, (numVertices * 3) / 2, GL_UNSIGNED_SHORT, nullptr);
             JUCE_CHECK_OPENGL_ERROR
             numVertices = 0;

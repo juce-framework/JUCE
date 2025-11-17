@@ -76,7 +76,7 @@ void DeletedAtShutdown::deleteAll()
         {
             auto* deletee = localCopy.getUnchecked (i);
 
-            // double-check that it's not already been deleted during another object's destructor.
+            // double-check that it's not already been deleted during another object's destructor
             {
                 const SpinLock::ScopedLockType sl (deletedAtShutdownLock);
 

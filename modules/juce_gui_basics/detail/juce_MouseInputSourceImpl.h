@@ -221,7 +221,7 @@ public:
                 sendMouseUp (*current, pointerState.withPositionOffset (unboundedMouseOffset), time, oldMods);
 
                 if (lastCounter != mouseEventCounter)
-                    return true; // if a modal loop happened, then newButtonState is no longer valid.
+                    return true; // if a modal loop happened, then newButtonState is no longer valid
             }
 
             enableUnboundedMouseMovement (false, false);

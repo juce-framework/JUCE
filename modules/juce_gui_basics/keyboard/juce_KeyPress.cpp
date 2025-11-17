@@ -204,7 +204,7 @@ KeyPress KeyPress::createFromDescription (const String& desc)
 
     if (key == 0)
     {
-        // see if it's a function key..
+        // see if it's a function key
         if (! desc.containsChar ('#')) // avoid mistaking hex-codes like "#f1"
         {
             for (int i = 1; i <= 35; ++i)
@@ -220,7 +220,7 @@ KeyPress KeyPress::createFromDescription (const String& desc)
 
         if (key == 0)
         {
-            // give up and use the hex code..
+            // give up and use the hex code
             auto hexCode = desc.fromFirstOccurrenceOf ("#", false, false)
                                .retainCharacters ("0123456789abcdefABCDEF")
                                .getHexValue32();

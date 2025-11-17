@@ -105,7 +105,7 @@ void BubbleComponent::setPosition (Rectangle<int> rectangleToPointTo,
     int spaceLeft  = ((allowablePlacements & left)  != 0) ? jmax (0, rectangleToPointTo.getX()  - availableSpace.getX()) : -1;
     int spaceRight = ((allowablePlacements & right) != 0) ? jmax (0, availableSpace.getRight()  - rectangleToPointTo.getRight()) : -1;
 
-    // look at whether the component is elongated, and if so, try to position next to its longer dimension.
+    // look at whether the component is elongated, and if so, try to position next to its longer dimension
     if (rectangleToPointTo.getWidth() > rectangleToPointTo.getHeight() * 2
          && (spaceAbove > totalH + 20 || spaceBelow > totalH + 20))
     {

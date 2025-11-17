@@ -142,7 +142,7 @@ namespace TimeHelpers
     }
 
     // There's no posix function that does a UTC version of mktime,
-    // so annoyingly we need to implement this manually..
+    // so annoyingly we need to implement this manually.
     static int64 mktime_utc (const std::tm& t) noexcept
     {
         return 24 * 3600 * (daysFrom1970 (t.tm_year + 1900, t.tm_mon) + (t.tm_mday - 1))
@@ -244,9 +244,9 @@ uint32 Time::getMillisecondCounter() noexcept
 
     if (now < TimeHelpers::lastMSCounterValue.get())
     {
-        // in multi-threaded apps this might be called concurrently, so
+        // In multi-threaded apps this might be called concurrently, so
         // make sure that our last counter value only increases and doesn't
-        // go backwards..
+        // go backwards.
         if (now < TimeHelpers::lastMSCounterValue.get() - (uint32) 1000)
             TimeHelpers::lastMSCounterValue = now;
     }

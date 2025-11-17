@@ -162,7 +162,7 @@ public:
             }
         }
 
-        // keep the current values inside the new range..
+        // keep the current values inside the new range
         if (style != TwoValueHorizontal && style != TwoValueVertical)
         {
             setValue (getValue(), dontSendNotification);
@@ -452,7 +452,7 @@ public:
             setValue (newValue, sendNotificationSync);
         }
 
-        updateText(); // force a clean-up of the text, needed in case setValue() hasn't done this.
+        updateText(); // force a clean-up of the text, needed in case setValue() hasn't done this
     }
 
     void updateText()
@@ -553,7 +553,7 @@ public:
 
     void showTextBox()
     {
-        jassert (editableText); // this should probably be avoided in read-only sliders.
+        jassert (editableText); // this should probably be avoided in read-only sliders
 
         if (valueBox != nullptr)
             valueBox->showEditor();
@@ -1143,7 +1143,7 @@ public:
              && style != TwoValueVertical)
         {
             // sometimes duplicate wheel events seem to be sent, so since we're going to
-            // bump the value by a minimum of the interval, avoid doing this twice..
+            // bump the value by a minimum of the interval, avoid doing this twice
             if (e.eventTime != lastMouseWheelTime)
             {
                 lastMouseWheelTime = e.eventTime;
@@ -1481,7 +1481,7 @@ void Slider::setSliderStyle (SliderStyle newStyle)              { pimpl->setSlid
 
 void Slider::setRotaryParameters (RotaryParameters p) noexcept
 {
-    // make sure the values are sensible..
+    // make sure the values are sensible
     jassert (p.startAngleRadians >= 0 && p.endAngleRadians >= 0);
     jassert (p.startAngleRadians < MathConstants<float>::pi * 4.0f
               && p.endAngleRadians < MathConstants<float>::pi * 4.0f);

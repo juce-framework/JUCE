@@ -44,7 +44,7 @@ public:
         : ComponentPeer (comp, windowStyleFlags),
           isAlwaysOnTop (comp.isAlwaysOnTop())
     {
-        // it's dangerous to create a window on a thread other than the message thread.
+        // it's dangerous to create a window on a thread other than the message thread
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
         const auto* instance = XWindowSystem::getInstance();
@@ -72,7 +72,7 @@ public:
 
     ~LinuxComponentPeer() override
     {
-        // it's dangerous to delete a window on a thread other than the message thread.
+        // it's dangerous to delete a window on a thread other than the message thread
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
         auto* instance = XWindowSystem::getInstance();

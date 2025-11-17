@@ -479,7 +479,7 @@ private:
             if ((rw > 50 && rh > 50 && rw < 2000 && rh < 2000 && (! isWithin (w, rw, 2) || ! isWithin (h, rh, 2)))
                 || ((w == 0 && rw > 0) || (h == 0 && rh > 0)))
             {
-                // very dodgy logic to decide which size is right.
+                // very dodgy logic to decide which size is right
                 if (std::abs (rw - w) > 350 || std::abs (rh - h) > 350)
                 {
                     ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHWND };
@@ -604,7 +604,7 @@ private:
             resizeToFit();
     }
 
-    // hooks to get keyboard events from VST windows.
+    // hooks to get keyboard events from VST windows
     static LRESULT CALLBACK vstHookWndProc (HWND hW, UINT message, WPARAM wParam, LPARAM lParam)
     {
         for (int i = activeVSTWindows.size(); --i >= 0;)

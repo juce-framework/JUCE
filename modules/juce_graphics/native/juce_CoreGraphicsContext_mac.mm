@@ -1140,7 +1140,7 @@ Image juce_loadWithCoreImage (InputStream& input)
 
                 if (context == nullptr)
                 {
-                    // if USE_COREGRAPHICS_RENDERING is set, the CoreGraphicsPixelData class should have been used.
+                    // if USE_COREGRAPHICS_RENDERING is set, the CoreGraphicsPixelData class should have been used
                     jassertfalse;
                     return {};
                 }

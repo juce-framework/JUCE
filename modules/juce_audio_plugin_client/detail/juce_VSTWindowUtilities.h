@@ -58,7 +58,7 @@ struct VSTWindowUtilities
                                     : ComponentPeer::windowIgnoresKeyPresses;
             comp->addToDesktop (desktopFlags | defaultFlags, parentView);
 
-            // (this workaround is because Wavelab provides a zero-size parent view..)
+            // this workaround is because Wavelab provides a zero-size parent view
             if (approximatelyEqual ([parentView frame].size.height, 0.0))
                 [((NSView*) comp->getWindowHandle()) setFrameOrigin: NSZeroPoint];
 
