@@ -432,24 +432,22 @@ void Direct2DGraphicsContext::excludeClipRectangle (const Rectangle<int>& userSp
     if (transform.isOnlyTranslated)
     {
         // Just a translation; pre-translate the exclusion area
-        auto translatedR = transform.translated (userSpaceExcludedRectangle.toFloat()).getLargestIntegerWithin().toFloat();
+        const auto translatedR = transform.translated (userSpaceExcludedRectangle.toFloat())
+                                          .getLargestIntegerWithin()
+                                          .toFloat();
 
-        if (! translatedR.contains (frameSize))
-        {
-            deviceSpaceClipList.subtract (translatedR);
-            pendingClipList.subtract (translatedR);
-        }
+        deviceSpaceClipList.subtract (translatedR);
+        pendingClipList.subtract (translatedR);
     }
     else if (currentState->isCurrentTransformAxisAligned())
     {
         // Just a scale + translation; pre-transform the exclusion area
-        auto transformedR = transform.boundsAfterTransform (userSpaceExcludedRectangle.toFloat()).getLargestIntegerWithin().toFloat();
+        const auto transformedR = transform.boundsAfterTransform (userSpaceExcludedRectangle.toFloat())
+                                           .getLargestIntegerWithin()
+                                           .toFloat();
 
-        if (! transformedR.contains (frameSize))
-        {
-            deviceSpaceClipList.subtract (transformedR);
-            pendingClipList.subtract (transformedR);
-        }
+        deviceSpaceClipList.subtract (transformedR);
+        pendingClipList.subtract (transformedR);
     }
     else
     {
