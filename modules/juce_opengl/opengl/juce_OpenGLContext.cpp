@@ -32,6 +32,8 @@
   ==============================================================================
 */
 
+#include <juce_gui_basics/detail/juce_ComponentHelpers.h>
+
 #if JUCE_MAC
  #include <juce_gui_basics/native/juce_PerScreenDisplayLinks_mac.h>
 #endif
@@ -1102,19 +1104,12 @@ public:
         detach();
     }
 
-    static void clearCachedImagesInComponentTree (Component& root)
-    {
-        root.setCachedComponentImage (nullptr);
-
-        for (auto* child : root.getChildren())
-            clearCachedImagesInComponentTree (*child);
-    }
-
     void detach()
     {
         auto& comp = *getComponent();
         stop();
-        clearCachedImagesInComponentTree (comp);
+        detail::ComponentHelpers::releaseAllCachedImageResources (comp);
+        comp.setCachedComponentImage (nullptr);
         context.nativeContext = nullptr;
     }
 
