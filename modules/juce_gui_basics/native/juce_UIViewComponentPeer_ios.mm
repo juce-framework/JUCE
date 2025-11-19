@@ -577,6 +577,7 @@ private:
             if (@available (iOS 13, *))
                 window.windowScene = nil;
 
+            window.rootViewController = nil;
             [window release];
             window = nil;
         }
