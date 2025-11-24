@@ -583,9 +583,10 @@ attributes directly to these creation functions, rather than adding them later.
 `VST3_CATEGORIES`
 - Should be one or more, separated by spaces, of the following: `Fx`, `Instrument`, `Analyzer`,
   `Delay`, `Distortion`, `Drum`, `Dynamics`, `EQ`, `External`, `Filter`, `Generator`, `Mastering`,
-  `Modulation`, `Mono`, `Network`, `NoOfflineProcess`, `OnlyOfflineProcess`, `OnlyRT`,
-  `Pitch Shift`, `Restoration`, `Reverb`, `Sampler`, `Spatial`, `Stereo`, `Surround`, `Synth`,
-  `Tools`, `Up-Downmix`. Defaults to `Synth` if `IS_SYNTH` is `TRUE`. Otherwise defaults to `Fx`.
+  `Modulation`, `Mono`, `Network`, `NoOfflineProcess`, `OnlyOfflineProcess`, `OnlyRT`, `Pitch
+  Shift`, `Restoration`, `Reverb`, `Sampler`, `Spatial`, `Stereo`, `Surround`, `Synth`, `Tools`,
+  `Up-Downmix`. Defaults to `Instrument Synth` if `IS_SYNTH` is `TRUE`. Otherwise defaults to
+  `Fx`.
 
 `AU_MAIN_TYPE`
 - Should be one of: `kAudioUnitType_Effect`, `kAudioUnitType_FormatConverter`,
