@@ -531,6 +531,9 @@ static void comboBoxPopupMenuFinishedCallback (int result, ComboBox* combo)
 
 void ComboBox::showPopup()
 {
+    if (! isEnabled())
+        return;
+
     if (! menuActive)
         menuActive = true;
 
