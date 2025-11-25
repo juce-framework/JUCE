@@ -193,42 +193,6 @@ struct ComponentHelpers
         return convertFromDistantParentSpace (topLevelComp, *target, p);
     }
 
-    static bool clipChildComponent (const Component& child,
-                                    Graphics& g,
-                                    const Rectangle<int> clipRect,
-                                    Point<int> delta)
-    {
-        if (! child.isVisible() || child.isTransformed())
-            return false;
-
-        const auto newClip = clipRect.getIntersection (child.boundsRelativeToParent);
-
-        if (newClip.isEmpty())
-            return false;
-
-        if (child.isOpaque() && child.componentTransparency == 0)
-        {
-            g.excludeClipRegion (newClip + delta);
-            return true;
-        }
-
-        const auto childPos = child.getPosition();
-        return clipObscuredRegions (child, g, newClip - childPos, childPos + delta);
-    }
-
-    static bool clipObscuredRegions (const Component& comp,
-                                     Graphics& g,
-                                     const Rectangle<int> clipRect,
-                                     Point<int> delta)
-    {
-        auto wasClipped = false;
-
-        for (int i = comp.childComponentList.size(); --i >= 0;)
-            wasClipped |= clipChildComponent (*comp.childComponentList.getUnchecked (i), g, clipRect, delta);
-
-        return wasClipped;
-    }
-
     static Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
     {
         if (auto* p = comp.getParentComponent())
@@ -261,6 +225,13 @@ struct ComponentHelpers
             if (auto* c = ms.getComponentUnderMouse())
                 if (modalWouldBlockComponent (*c, &modal))
                     function (c, ms, SH::screenPosToLocalPos (*c, ms.getScreenPosition()), Time::getCurrentTime());
+    }
+
+    static bool isVisibleWithNonZeroArea (const Component& component)
+    {
+        return component.isVisible()
+            && component.getWidth() > 0
+            && component.getHeight() > 0;
     }
 
     class ModalComponentManagerChangeNotifier
