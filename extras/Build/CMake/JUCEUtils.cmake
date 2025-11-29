@@ -257,7 +257,7 @@ endfunction()
 # updates the target's compile defs, which results in a recursion/circular-dependency.
 # Instead, we ask the user to explicitly request curl/webkit/StoreKit linking if they
 # know they need it. Otherwise, we won't link anything.
-# See the NEEDS_CURL, NEEDS_WEB_BROWSER, and NEEDS_STORE_KIT options in the CMake/readme.md.
+# See the NEEDS_CURL, NEEDS_WEB_BROWSER, and NEEDS_STORE_KIT options in the `docs/CMake API.md`.
 function(_juce_link_optional_libraries target)
     if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
         get_target_property(needs_curl ${target} JUCE_NEEDS_CURL)
