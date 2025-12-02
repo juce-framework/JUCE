@@ -46,6 +46,8 @@ namespace detail
 
     template <typename T>
     constexpr auto equalityComparableToNullptr<T, Void<decltype (std::declval<T>() != nullptr)>> = true;
+
+    template <typename> struct Tag {};
 } // namespace detail
 /** @endcond */
 

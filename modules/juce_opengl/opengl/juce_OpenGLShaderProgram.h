@@ -55,7 +55,7 @@ public:
         @code
         if (OpenGLShaderProgram::getLanguageVersion() > 1.199)
         {
-            // ..do something that requires GLSL 1.2 or above..
+            // ...do something that requires GLSL 1.2 or above...
         }
         @endcode
     */

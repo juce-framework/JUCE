@@ -909,7 +909,7 @@ struct Expression::Helpers
                     return *new DotOperator (new SymbolTerm (identifier), rhs);
                 }
 
-                // just a symbol..
+                // just a symbol
                 jassert (identifier.trim() == identifier);
                 return *new SymbolTerm (identifier);
             }

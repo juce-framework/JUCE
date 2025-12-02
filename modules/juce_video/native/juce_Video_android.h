@@ -754,7 +754,7 @@ private:
                 CALLBACK (generatedCallback<&Controller::playbackStateChanged>, "mediaControllerPlaybackStateChanged",  "(JLandroid/media/session/PlaybackState;)V") \
                 CALLBACK (generatedCallback<&Controller::sessionDestroyed>,     "mediaControllerSessionDestroyed",      "(J)V")
 
-            DECLARE_JNI_CLASS_WITH_BYTECODE (AndroidMediaControllerCallback, "com/rmsl/juce/MediaControllerCallback", 21, MediaSessionByteCode)
+            DECLARE_JNI_CLASS_WITH_BYTECODE (AndroidMediaControllerCallback, "com/rmsl/juce/MediaControllerCallback", 24, MediaSessionByteCode)
            #undef JNI_CLASS_MEMBERS
 
             LocalRef<jobject> createControllerCallbacks()
@@ -1484,7 +1484,7 @@ private:
 
             auto* env = getEnv();
 
-            auto requestBuilderClass = LocalRef<jclass> (env->FindClass ("android/media/AudioFocusRequest$Builder"));
+            LocalRef<jclass> requestBuilderClass { env->FindClass ("android/media/AudioFocusRequest$Builder") };
 
             static jmethodID constructor = env->GetMethodID (requestBuilderClass, "<init>", "(I)V");
             static jmethodID buildMethod = env->GetMethodID (requestBuilderClass, "build", "()Landroid/media/AudioFocusRequest;");

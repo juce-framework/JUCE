@@ -800,11 +800,11 @@ public:
     OpenSLAudioIODevice (const String& deviceName)  : AudioIODevice (deviceName, openSLTypeName)
     {
         // OpenSL has piss-poor support for determining latency, so the only way I can find to
-        // get a number for this is by asking the AudioTrack/AudioRecord classes..
+        // get a number for this is by asking the AudioTrack/AudioRecord classes.
         AndroidAudioIODevice javaDevice (deviceName);
 
         // this is a total guess about how to calculate the latency, but seems to vaguely agree
-        // with the devices I've tested.. YMMV
+        // with the devices I've tested. YMMV
         inputLatency  = (javaDevice.minBufferSizeIn  * 2) / 3;
         outputLatency = (javaDevice.minBufferSizeOut * 2) / 3;
 

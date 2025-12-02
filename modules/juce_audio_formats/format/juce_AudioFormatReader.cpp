@@ -188,7 +188,7 @@ bool AudioFormatReader::read (AudioBuffer<float>* buffer,
         if (! read (chans, 2, readerStartSample, numSamples, true))
             return false;
 
-        // if the target's stereo and the source is mono, dupe the first channel..
+        // if the target's stereo and the source is mono, dupe the first channel
         if (numTargetChannels > 1
             && (chans[0] == nullptr || chans[1] == nullptr)
             && (dests[0] != nullptr && dests[1] != nullptr))
@@ -439,7 +439,7 @@ void MemoryMappedAudioFormatReader::touchSample (int64 sample) const noexcept
     if (map != nullptr && mappedSection.contains (sample))
         memoryReadDummyVariable += *(char*) sampleToPointer (sample);
     else
-        jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
+        jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read
 }
 
 } // namespace juce

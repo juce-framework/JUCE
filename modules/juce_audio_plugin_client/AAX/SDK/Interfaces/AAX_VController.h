@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -77,6 +77,8 @@ public:
 	AAX_Result	GetHybridSignalLatency(int32_t* outSamples) const AAX_OVERRIDE; ///< \copydoc AAX_IController::GetHybridSignalLatency()
 	AAX_Result	GetPlugInTargetPlatform(AAX_CTargetPlatform* outTargetPlatform) const AAX_OVERRIDE; ///< \copydoc AAX_IController::GetPlugInTargetPlatform()
 	AAX_Result	GetIsAudioSuite(AAX_CBoolean* outIsAudioSuite) const AAX_OVERRIDE; ///< \copydoc AAX_IController::GetIsAudioSuite()
+	AAX_Result	GetInstanceGroupID(AAX_CInstanceGroupID* outInstanceGroupID) const AAX_OVERRIDE; ///< \copydoc AAX_IController::GetInstanceGroupID()
+	AAX_Result	GetInstanceID(AAX_CInstanceID* outInstanceID) const AAX_OVERRIDE; ///< \copydoc AAX_IController::GetInstanceID()
 	AAX_Result	GetCycleCount( AAX_EProperty inWhichCycleCount, AAX_CPropertyValue* outNumCycles) const AAX_OVERRIDE; ///< \copydoc AAX_IController::GetCycleCount()
 	AAX_Result	GetTODLocation ( AAX_CTimeOfDay* outTODLocation ) const AAX_OVERRIDE; ///< \copydoc AAX_IController::GetTODLocation()
 	AAX_Result	GetCurrentAutomationTimestamp(AAX_CTransportCounter* outTimestamp) const AAX_OVERRIDE; ///< \copydoc AAX_IController::GetCurrentAutomationTimestamp()
@@ -92,6 +94,7 @@ public:
 	// Notification functions
 	AAX_Result	SendNotification ( AAX_CTypeID inNotificationType, const void* inNotificationData, uint32_t inNotificationDataSize ) AAX_OVERRIDE; ///< \copydoc AAX_IController::SendNotification(AAX_CTypeID, const void*, uint32_t)
 	AAX_Result	SendNotification ( AAX_CTypeID inNotificationType) AAX_OVERRIDE; ///< \copydoc AAX_IController::SendNotification(AAX_CTypeID) \note Not an AAX interface method
+	AAX_Result	RegisterForNotification(/* AAX_ENotificationEvent */ AAX_CTypeID inNotificationType, IACFUnknown const * inSubscriberObject) AAX_OVERRIDE; ///< \copydoc AAX_IController::RegisterForNotification()
 	
 	//Metering functions
 	AAX_Result	GetCurrentMeterValue ( AAX_CTypeID inMeterID, float * outMeterValue ) const AAX_OVERRIDE; ///< \copydoc AAX_IController::GetCurrentMeterValue()
@@ -155,6 +158,8 @@ private:
 	ACFPtr<AAX_IACFController>		mIController;
 	ACFPtr<AAX_IACFController_V2>	mIControllerV2;
 	ACFPtr<AAX_IACFController_V3>	mIControllerV3;
+	ACFPtr<AAX_IACFController_V4>	mIControllerV4;
+	ACFPtr<AAX_IACFController_V5>	mIControllerV5;
 	
 	// AAX_IACFPageTableController interface methods are aggregated into AAX_IController
 	ACFPtr<AAX_IACFPageTableController>		mIPageTableController;

@@ -213,7 +213,7 @@ public:
         getLookAndFeel().drawLasso (g, *this);
 
         // this suggests that you've left a lasso comp lying around after the
-        // mouse drag has finished.. Be careful to call endLasso() when you get a
+        // mouse drag has finished. Be careful to call endLasso() when you get a
         // mouse-up event.
         jassert (isMouseButtonDownAnywhere());
     }

@@ -86,7 +86,7 @@ public:
         assertion.
 
         To create strings with extended characters from UTF-8, you should explicitly call
-        String (CharPointer_UTF8 ("my utf8 string..")). It's *highly* recommended that you
+        String (CharPointer_UTF8 ("my utf8 string.")). It's *highly* recommended that you
         use UTF-8 with escape characters in your source code to represent extended characters,
         because there's no other way to represent unicode strings in a way that isn't dependent
         on the compiler, source code editor and platform.
@@ -101,7 +101,7 @@ public:
         assertion.
 
         To create strings with extended characters from UTF-8, you should explicitly call
-        String (CharPointer_UTF8 ("my utf8 string..")). In C++20 or later, you may alternatively
+        String (CharPointer_UTF8 ("my utf8 string.")). In C++20 or later, you may alternatively
         pass a char8_t string to indicate a UTF-8 encoding. It's *highly* recommended that you
         use UTF-8 with escape characters in your source code to represent extended characters,
         because there's no other way to represent unicode strings in a way that isn't dependent
@@ -217,7 +217,7 @@ public:
     int length() const noexcept;
 
     //==============================================================================
-    // Assignment and concatenation operators..
+    // Assignment and concatenation operators
 
     /** Replaces this string's contents with another string. */
     String& operator= (const String& other) noexcept;
@@ -328,7 +328,7 @@ public:
     }
 
     //==============================================================================
-    // Comparison methods..
+    // Comparison methods
 
     /** Returns true if the string contains no characters.
         Note that there's also an isNotEmpty() method to help write readable code.
@@ -513,7 +513,7 @@ public:
     bool matchesWildcard (StringRef wildcard, bool ignoreCase) const noexcept;
 
     //==============================================================================
-    // Substring location methods..
+    // Substring location methods
 
     /** Searches for a character inside this string.
         Uses a case-sensitive comparison.
@@ -616,7 +616,7 @@ public:
 
 
     //==============================================================================
-    // Substring extraction and manipulation methods..
+    // Substring extraction and manipulation methods
 
     /** Returns the character at this index in the string.
         In a release build, no checks are made to see if the index is within a valid range, so be
@@ -976,7 +976,7 @@ public:
     CharPointerType end() const                                          { return begin().findTerminatingNull(); }
 
     //==============================================================================
-    // Numeric conversions..
+    // Numeric conversions
 
     /** Creates a string containing this signed 32-bit integer as a decimal number.
         @see getIntValue, getFloatValue, getDoubleValue, toHexString

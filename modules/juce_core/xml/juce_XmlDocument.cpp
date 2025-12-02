@@ -146,7 +146,7 @@ std::unique_ptr<XmlElement> XmlDocument::getDocumentElement (const bool onlyRead
                     if (CharPointer_UTF8::isByteOrderMark (text))
                         text += 3;
 
-                    // parse the input buffer directly to avoid copying it all to a string..
+                    // parse the input buffer directly to avoid copying it all to a string
                     return parseDocumentElement (String::CharPointerType (text), onlyReadOuterDocumentElement);
                 }
             }
@@ -257,7 +257,7 @@ bool XmlDocument::parseHeader()
                           .trim();
 
         /* If you load an XML document with a non-UTF encoding type, it may have been
-           loaded wrongly.. Since all the files are read via the normal juce file streams,
+           loaded wrongly. Since all the files are read via the normal juce file streams,
            they're treated as UTF-8, so by the time it gets to the parser, the encoding will
            have been lost. Best plan is to stick to utf-8 or if you have specific files to
            read, use your own code to convert them to a unicode String, and pass that to the
@@ -437,14 +437,14 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
             skipNextWhiteSpace();
             auto c = *input;
 
-            // empty tag..
+            // empty tag
             if (c == '/' && input[1] == '>')
             {
                 input += 2;
                 break;
             }
 
-            // parse the guts of the element..
+            // parse the guts of the element
             if (c == '>')
             {
                 ++input;
@@ -455,7 +455,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
                 break;
             }
 
-            // get an attribute..
+            // get an attribute
             if (XmlIdentifierChars::isIdentifierChar (c))
             {
                 auto attNameEnd = XmlIdentifierChars::findEndOfToken (input);
@@ -521,7 +521,7 @@ void XmlDocument::readChildElements (XmlElement& parent)
 
             if (c1 == '/')
             {
-                // our close tag..
+                // our close tag
                 auto closeTag = input.indexOf ((juce_wchar) '>');
 
                 if (closeTag >= 0)
@@ -558,7 +558,7 @@ void XmlDocument::readChildElements (XmlElement& parent)
             }
             else
             {
-                // this is some other element, so parse and add it..
+                // this is some other element, so parse and add it
                 if (auto* n = readNextElement (true))
                     childAppender.append (n);
                 else
@@ -861,7 +861,7 @@ String XmlDocument::expandExternalEntity (const String& entity)
             {
                 auto ent = tokenisedDTD [i + 1].trimCharactersAtEnd (">").trim().unquoted();
 
-                // check for sub-entities..
+                // check for sub-entities
                 auto ampersand = ent.indexOfChar ('&');
 
                 while (ampersand >= 0)

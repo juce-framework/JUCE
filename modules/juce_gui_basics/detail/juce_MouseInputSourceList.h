@@ -139,7 +139,7 @@ public:
         for (auto* s : sources)
         {
             // NB: when doing auto-repeat, we need to force an update of the current position and button state,
-            // because on some OSes the queue can get overloaded with messages so that mouse-events don't get through..
+            // because on some OSes the queue can get overloaded with messages so that mouse-events don't get through.
             if (s->isDragging() && ComponentPeer::getCurrentModifiersRealtime().isAnyMouseButtonDown())
             {
                 s->lastPointerState.position = s->getRawScreenPosition();

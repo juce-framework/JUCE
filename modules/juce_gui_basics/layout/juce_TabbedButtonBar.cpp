@@ -254,7 +254,7 @@ void TabbedButtonBar::addTab (const String& tabName,
                               Colour tabBackgroundColour,
                               int insertIndex)
 {
-    jassert (tabName.isNotEmpty()); // you have to give them all a name..
+    jassert (tabName.isNotEmpty()); // you have to give them all a name
 
     if (tabName.isNotEmpty())
     {

@@ -73,12 +73,12 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
 #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
 #include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
-#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
-#include <juce_audio_processors/format_types/juce_AU_Shared.h>
+#include <juce_audio_processors_headless/format_types/juce_LegacyAudioParameter.h>
+#include <juce_audio_processors_headless/format_types/juce_AU_Shared.h>
 #include <juce_gui_basics/detail/juce_ComponentPeerHelpers.h>
 
 #if JucePlugin_Enable_ARA
- #include <juce_audio_processors/utilities/ARA/juce_AudioProcessor_ARAExtensions.h>
+ #include <juce_audio_processors_headless/utilities/ARA/juce_AudioProcessor_ARAExtensions.h>
  #include <ARA_API/ARAAudioUnit.h>
  #if ARA_SUPPORT_VERSION_1
   #error "Unsupported ARA version - only ARA version 2 and onward are supported by the current JUCE ARA implementation"
@@ -746,7 +746,7 @@ public:
                         if (inDataSize != sizeof (AUMIDIEventListBlock))
                             return kAudioUnitErr_InvalidPropertyValue;
 
-                        if (@available (macos 12, *))
+                        if (@available (macOS 12, *))
                             eventListOutput.setBlock (*static_cast<const AUMIDIEventListBlock*> (inData));
 
                         return noErr;
@@ -1593,12 +1593,12 @@ public:
 
         for (uint32_t i = 0; i < list->numPackets; ++i)
         {
-            toBytestreamDispatcher.dispatch (reinterpret_cast<const uint32_t*> (packet->words),
-                                             reinterpret_cast<const uint32_t*> (packet->words + packet->wordCount),
+            toBytestreamDispatcher.dispatch ({ reinterpret_cast<const uint32_t*> (packet->words),
+                                               (size_t) packet->wordCount },
                                              static_cast<double> (packet->timeStamp + inOffsetSampleFrame),
-                                             [this] (const ump::BytestreamMidiView& message)
+                                             [this] (const ump::BytesOnGroup& x, double t)
                                              {
-                                                 incomingEvents.addEvent (message.getMessage(), (int) message.timestamp);
+                                                 incomingEvents.addEvent ({ x.bytes.data(), (int) x.bytes.size(), t }, (int) t);
                                              });
 
             packet = MIDIEventPacketNext (packet);
@@ -1892,7 +1892,7 @@ public:
             if (activePlugins.size() + activeUIs.size() == 0)
             {
                 // there's some kind of component currently modal, but the host
-                // is trying to delete our plugin..
+                // is trying to delete our plugin
                 jassert (ModalComponentManager::getInstanceWithoutCreating() == nullptr
                          || Component::getCurrentlyModalComponent() == nullptr);
             }

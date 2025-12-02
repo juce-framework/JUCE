@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,14 @@
 #ifndef _SB_INTERNAL_MIRROR_LOCATOR_H
 #define _SB_INTERNAL_MIRROR_LOCATOR_H
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBBase.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SBMirrorLocator.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SBLine.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBLine.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBMirrorLocator.h>
+
+#include "Object.h"
 
 typedef struct _SBMirrorLocator {
+    Object _object;
     SBLineRef _line;
     SBUInteger _runIndex;
     SBUInteger _stringIndex;

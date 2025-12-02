@@ -63,6 +63,46 @@ namespace juce
         }
     };
 
+    /*  Each successful call to beginBackgroundTask must be balanced
+        by a call to endBackgroundTask.
+    */
+    class TaskHandle
+    {
+    public:
+        TaskHandle() = default;
+
+        explicit TaskHandle (UIBackgroundTaskIdentifier t)
+            : task (t) {}
+
+        ~TaskHandle()
+        {
+            if (task != UIBackgroundTaskInvalid)
+                [[UIApplication sharedApplication] endBackgroundTask:task];
+        }
+
+        TaskHandle (TaskHandle&& other) noexcept
+        {
+            swap (other);
+        }
+
+        TaskHandle& operator= (TaskHandle&& other) noexcept
+        {
+            TaskHandle { std::move (other) }.swap (*this);
+            return *this;
+        }
+
+        TaskHandle (const TaskHandle&) = delete;
+        TaskHandle& operator= (const TaskHandle&) = delete;
+
+    private:
+        void swap (TaskHandle& other) noexcept
+        {
+            std::swap (other.task, task);
+        }
+
+        UIBackgroundTaskIdentifier task = UIBackgroundTaskInvalid;
+    };
+
     struct SceneUtils
     {
         // This will need to become more sophisticated to enable support for multiple scenes
@@ -80,20 +120,20 @@ namespace juce
                 appBecomingInactiveCallbacks.getReference (i)->appBecomingInactive();
         }
 
-        static void sceneDidEnterBackground()
+        template <typename Self>
+        static void sceneDidEnterBackground ([[maybe_unused]] Self* s)
         {
             if (auto* app = JUCEApplicationBase::getInstance())
             {
                #if JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK
-                appSuspendTask = [application beginBackgroundTaskWithName:@"JUCE Suspend Task" expirationHandler:^{
-                    if (appSuspendTask != UIBackgroundTaskInvalid)
-                    {
-                        [application endBackgroundTask:appSuspendTask];
-                        appSuspendTask = UIBackgroundTaskInvalid;
-                    }
-                }];
+                s->appSuspendTask = TaskHandle { [[UIApplication sharedApplication] beginBackgroundTaskWithName:@"JUCE Suspend Task"
+                                                                                              expirationHandler:^{ s->appSuspendTask = {}; }] };
 
-                MessageManager::callAsync ([app] { app->suspended(); });
+                MessageManager::callAsync ([app, s]
+                {
+                    app->suspended();
+                    s->appSuspendTask = {};
+                });
                #else
                 app->suspended();
                #endif
@@ -112,10 +152,17 @@ namespace juce
 
 API_AVAILABLE (ios (13.0))
 @interface JuceAppSceneDelegate : NSObject<UIWindowSceneDelegate>
+{
+    @public
+    TaskHandle appSuspendTask;
+}
 @end
 
 @implementation JuceAppSceneDelegate
-SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
+{
+    SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
+}
+
 - (void)           scene: (UIScene*) scene
     willConnectToSession: (UISceneSession*) session
                  options: (UISceneConnectionOptions*) connectionOptions
@@ -144,7 +191,7 @@ SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 
 - (void) sceneDidEnterBackground: (UIScene*) scene
 {
-    SceneUtils::sceneDidEnterBackground();
+    SceneUtils::sceneDidEnterBackground (self);
 }
 
 - (void) sceneWillEnterForeground: (UIScene*) scene
@@ -167,7 +214,8 @@ SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
 #endif
 {
-    UIBackgroundTaskIdentifier appSuspendTask;
+    @public
+    TaskHandle appSuspendTask;
     std::optional<ScopedJuceInitialiser_GUI> initialiser;
 }
 
@@ -216,13 +264,13 @@ SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 @end
 
 @implementation JuceAppStartupDelegate
-
+{
     NSObject* _pushNotificationsDelegate;
+}
 
 - (id) init
 {
     self = [super init];
-    appSuspendTask = UIBackgroundTaskInvalid;
 
    #if JUCE_PUSH_NOTIFICATIONS
     [UNUserNotificationCenter currentNotificationCenter].delegate = self;
@@ -260,7 +308,7 @@ SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 
 - (void) applicationDidEnterBackground: (UIApplication*) application
 {
-    SceneUtils::sceneDidEnterBackground();
+    SceneUtils::sceneDidEnterBackground (self);
 }
 
 - (void) applicationWillEnterForeground: (UIApplication*) application
@@ -298,11 +346,9 @@ SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
     configurationForConnectingSceneSession: (UISceneSession*) connectingSceneSession
                                    options: (UISceneConnectionOptions*) options
 {
-    auto* result = [UISceneConfiguration configurationWithName: juceStringToNS (TRANS ("Default Configuration"))
-                                                   sessionRole: connectingSceneSession.role];
-    result.delegateClass = JuceAppSceneDelegate.class;
-    result.sceneClass = UIWindowScene.class;
-    return result;
+    auto* config = connectingSceneSession.configuration;
+    config.delegateClass = JuceAppSceneDelegate.class;
+    return config;
 }
 
 - (void) setPushNotificationsDelegateToUse: (NSObject*) delegate
@@ -603,42 +649,78 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return Orientations::convertToJuce (orientation);
 }
 
-// The most straightforward way of retrieving the screen area available to an iOS app
-// seems to be to create a new window (which will take up all available space) and to
-// query its frame.
-struct TemporaryWindow
+struct WindowInfo
 {
-    UIWindow* window = std::invoke ([&]
+    explicit WindowInfo (const UIWindow* window)
+        : bounds (convertToRectInt (window.frame)),
+          safeInsets (window.safeAreaInsets.top,
+                      window.safeAreaInsets.left,
+                      window.safeAreaInsets.bottom,
+                      window.safeAreaInsets.right)
+    {}
+
+    Rectangle<int> bounds;
+    BorderSize<double> safeInsets;
+};
+
+static const UIWindow* findWindow (const UIView* view)
+{
+    if (view == nullptr)
+        return nullptr;
+
+    if (view.window != nullptr)
+        return view.window;
+
+    return findWindow (view.superview);
+}
+
+static const UIWindow* findWindow (const Desktop& desktop)
+{
+    if (auto* c = desktop.getComponent (0))
+        if (auto* p = static_cast<UIViewComponentPeer*> (c->getPeer()))
+            if (auto* w = findWindow (p->view))
+                return w;
+
+    return {};
+}
+
+static WindowInfo getWindowInfo (const Desktop& desktop)
+{
+    if (! JUCEApplication::isStandaloneApp())
+        if (const auto* window = findWindow (desktop))
+            return WindowInfo { window };
+
+    const auto createTemporaryWindow = []()
     {
-        if (@available (ios 13, *))
+        if (@available (iOS 13, *))
         {
             SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 
             if (auto* scene = windowSceneTracker->getWindowScene())
-                return [[UIWindow alloc] initWithWindowScene: scene];
+                return NSUniquePtr<UIWindow> { [[UIWindow alloc] initWithWindowScene: scene] };
         }
 
-        return [[UIWindow alloc] init];
-    });
-    ~TemporaryWindow() noexcept { [window release]; }
-};
+        return NSUniquePtr<UIWindow> { [[UIWindow alloc] init] };
+    };
 
-static Rectangle<int> getRecommendedWindowBounds()
-{
-    return convertToRectInt (TemporaryWindow().window.frame);
+    auto window (createTemporaryWindow());
+    return WindowInfo { window.get() };
 }
 
-static BorderSize<int> getSafeAreaInsets (float masterScale)
+static Rectangle<int> getRecommendedWindowBounds (const Desktop& desktop)
 {
-    UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
-    return detail::WindowingHelpers::roundToInt (BorderSize<double> { safeInsets.top,
-                                                                      safeInsets.left,
-                                                                      safeInsets.bottom,
-                                                                      safeInsets.right }.multipliedBy (1.0 / (double) masterScale));
+    return getWindowInfo (desktop).bounds;
+}
+
+static BorderSize<int> getSafeAreaInsets (const Desktop& desktop)
+{
+    const auto masterScale = (double) desktop.getGlobalScaleFactor();
+    const auto safeInsets = getWindowInfo (desktop).safeInsets;
+    return detail::WindowingHelpers::roundToInt (safeInsets.multipliedBy (1.0 / masterScale));
 }
 
 //==============================================================================
-void Displays::findDisplays (float masterScale)
+void Displays::findDisplays (const Desktop& desktop)
 {
     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
     static const auto keyboardShownSelector  = @selector (juceKeyboardShown:);
@@ -662,13 +744,13 @@ void Displays::findDisplays (float masterScale)
     private:
         struct DelegateClass final : public ObjCClass<NSObject>
         {
-            DelegateClass() : ObjCClass<NSObject> ("JUCEOnScreenKeyboardObserver_")
+            DelegateClass() : ObjCClass ("JUCEOnScreenKeyboardObserver_")
             {
                 addIvar<OnScreenKeyboardChangeDetectorImpl*> ("owner");
 
                 addMethod (keyboardShownSelector, [] (id self, SEL, NSNotification* notification)
                 {
-                    setKeyboardScreenBounds (self, [&]() -> BorderSize<double>
+                    setKeyboardScreenBounds (self, std::invoke ([&]() -> BorderSize<double>
                     {
                         auto* info = [notification userInfo];
 
@@ -696,7 +778,7 @@ void Displays::findDisplays (float masterScale)
                             result.setBottom (rect.getHeight());
 
                         return result;
-                    }());
+                    }));
                 });
 
                 addMethod (keyboardHiddenSelector, [] (id self, SEL, NSNotification*)
@@ -729,9 +811,10 @@ void Displays::findDisplays (float masterScale)
         UIScreen* s = [UIScreen mainScreen];
 
         Display d;
+        const auto masterScale = desktop.getGlobalScaleFactor();
         d.totalArea = convertToRectInt ([s bounds]) / masterScale;
-        d.userArea = getRecommendedWindowBounds() / masterScale;
-        d.safeAreaInsets = getSafeAreaInsets (masterScale);
+        d.userArea = getRecommendedWindowBounds (desktop) / masterScale;
+        d.safeAreaInsets = getSafeAreaInsets (desktop);
         const auto scaledInsets = keyboardChangeDetector.getInsets().multipliedBy (1.0 / (double) masterScale);
         d.keyboardInsets = detail::WindowingHelpers::roundToInt (scaledInsets);
         d.isMain = true;

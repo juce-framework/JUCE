@@ -37,69 +37,6 @@ namespace juce
 
 //==============================================================================
 /*
-    Forwards NSNotificationCenter callbacks to a std::function<void()>.
-*/
-class FunctionNotificationCenterObserver
-{
-public:
-    FunctionNotificationCenterObserver (NSNotificationName notificationName,
-                                        id objectToObserve,
-                                        std::function<void()> callback)
-        : onNotification (std::move (callback)),
-          observer (observerObject.get(), getSelector(), notificationName, objectToObserve)
-    {}
-
-private:
-    struct ObserverClass
-    {
-        ObserverClass()
-        {
-            klass.addIvar<FunctionNotificationCenterObserver*> ("owner");
-
-            klass.addMethod (getSelector(), [] (id self, SEL, NSNotification*)
-            {
-                getIvar<FunctionNotificationCenterObserver*> (self, "owner")->onNotification();
-            });
-
-            klass.registerClass();
-        }
-
-        NSObject* createInstance() const { return klass.createInstance(); }
-
-    private:
-        ObjCClass<NSObject> klass { "JUCEObserverClass_" };
-    };
-
-    static SEL getSelector()
-    {
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-        return @selector (notificationFired:);
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-    }
-
-    std::function<void()> onNotification;
-
-    NSUniquePtr<NSObject> observerObject
-    {
-        [this]
-        {
-            static ObserverClass observerClass;
-            auto* result = observerClass.createInstance();
-            object_setInstanceVariable (result, "owner", this);
-            return result;
-        }()
-    };
-
-    ScopedNotificationCenterObserver observer;
-
-    // Instances can't be copied or moved, because 'this' is stored as a member of the ObserverClass
-    // object.
-    JUCE_DECLARE_NON_COPYABLE (FunctionNotificationCenterObserver)
-    JUCE_DECLARE_NON_MOVEABLE (FunctionNotificationCenterObserver)
-};
-
-//==============================================================================
-/*
     Manages the lifetime of a CVDisplayLinkRef for a single display, and automatically starts and
     stops it.
 */

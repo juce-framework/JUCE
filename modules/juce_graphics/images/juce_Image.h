@@ -48,12 +48,12 @@ class ImagePixelData;
     To draw into an image, create a Graphics object for it.
     e.g. @code
 
-    // create a transparent 500x500 image..
+    // create a transparent 500x500 image
     Image myImage (Image::RGB, 500, 500, true);
 
     Graphics g (myImage);
     g.setColour (Colours::red);
-    g.fillEllipse (20, 20, 300, 200);  // draws a red ellipse in our image.
+    g.fillEllipse (20, 20, 300, 200);  // draws a red ellipse in our image
     @endcode
 
     Other useful ways to create an image are with the ImageCache class, or the

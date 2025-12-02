@@ -164,7 +164,7 @@ void TopLevelWindow::addToDesktop()
 {
     shadower = nullptr;
     Component::addToDesktop (getDesktopWindowStyleFlags());
-    setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary.
+    setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary
 }
 
 void TopLevelWindow::addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo)

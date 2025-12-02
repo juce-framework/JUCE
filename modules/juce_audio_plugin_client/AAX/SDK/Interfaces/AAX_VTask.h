@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- * Copyright 2023-2024 Avid Technology, Inc.
+ * Copyright 2023-2025 Avid Technology, Inc.
  * All rights reserved.
  * 
  * This file is part of the Avid AAX SDK.
@@ -39,6 +39,8 @@
 #include "ACFPtr.h"
 
 class IACFUnknown;
+class AAX_IACFTask;
+class AAX_IACFTask_V2;
 
 /*!
  \brief Version-managed concrete \ref AAX_ITask
@@ -56,8 +58,11 @@ public:
 	float GetProgress() const AAX_OVERRIDE; ///< \copydoc AAX_ITask::GetProgress()
 	AAX_Result AddResult(AAX_IACFDataBuffer const * iResult) AAX_OVERRIDE; ///< \copydoc AAX_ITask::AddResult()
 	AAX_ITask * SetDone(AAX_TaskCompletionStatus iStatus) AAX_OVERRIDE; ///< \copydoc AAX_ITask::SetDone()
+	AAX_Result GetID(AAX_CTaskID * outID) const AAX_OVERRIDE; ///< \copydoc AAX_ITask::GetID()
+	AAX_Result SetProgressLabel(const char * iLabel) AAX_OVERRIDE; ///< \copydoc AAX_ITask::SetProgressLabel()
 private:
 	ACFPtr<AAX_IACFTask> mTaskV1;
+	ACFPtr<AAX_IACFTask_V2> mTaskV2;
 };
 
 #endif

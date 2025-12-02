@@ -63,7 +63,7 @@
 	
 	Rounding will be disabled if RealPrecision is set to a value less than 1.  This is the default.
 
-	\ingroup TaperDelegates
+	\ingroup AAXLibraryFeatures_ParameterManager_TaperDelegates
 
  */
 template <typename T, int32_t RealPrecision=0>

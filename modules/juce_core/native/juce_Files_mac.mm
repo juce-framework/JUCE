@@ -477,7 +477,7 @@ OSType File::getMacOSType() const
 bool File::isBundle() const
 {
    #if JUCE_IOS
-    return false; // xxx can't find a sensible way to do this without trying to open the bundle..
+    return false; // xxx can't find a sensible way to do this without trying to open the bundle
    #else
     JUCE_AUTORELEASEPOOL
     {

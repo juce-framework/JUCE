@@ -2320,22 +2320,22 @@ int Project::getARATransformationFlags() const noexcept
 //==============================================================================
 bool Project::isAUPluginHost() const
 {
-    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU", false);
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors_headless") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU", false);
 }
 
 bool Project::isVSTPluginHost() const
 {
-    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false);
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors_headless") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false);
 }
 
 bool Project::isVST3PluginHost() const
 {
-    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false);
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors_headless") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false);
 }
 
 bool Project::isLV2PluginHost() const
 {
-    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_LV2", false);
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors_headless") && isConfigFlagEnabled ("JUCE_PLUGINHOST_LV2", false);
 }
 
 bool Project::isARAPluginHost() const

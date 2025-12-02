@@ -276,7 +276,7 @@
  #include <cpu-features.h>
 #endif
 
-// Need to clear various moronic redefinitions made by system headers..
+// Need to clear various redefinitions made by system headers.
 #undef max
 #undef min
 #undef direct

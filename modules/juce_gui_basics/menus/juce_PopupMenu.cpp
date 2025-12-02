@@ -373,13 +373,13 @@ struct MenuWindow final : public Component
         }
         else
         {
-            const auto shouldDisableAccessibility = [this]
+            const auto shouldDisableAccessibility = std::invoke ([this]
             {
                 const auto* compToCheck = parent != nullptr ? parent
                                                             : options.getTargetComponent();
 
                 return compToCheck != nullptr && ! compToCheck->isAccessible();
-            }();
+            });
 
             if (shouldDisableAccessibility)
                 setAccessible (false);
@@ -874,7 +874,7 @@ struct MenuWindow final : public Component
         auto parentArea = getParentArea (target.getCentre()) / scaleFactor;
 
         if (auto* pc = options.getParentComponent())
-            target = pc->getLocalArea (nullptr, target).getIntersection (parentArea);
+            target = pc->getLocalArea (nullptr, target).constrainedWithin (parentArea);
 
         auto maxMenuHeight = parentArea.getHeight() - 24;
 
@@ -1585,7 +1585,7 @@ private:
 
         // try to intelligently guess whether the user is moving the mouse towards a currently-open
         // submenu. To do this, look at whether the mouse stays inside a triangular region that
-        // extends from the last mouse pos to the submenu's rectangle..
+        // extends from the last mouse pos to the submenu's rectangle
 
         auto itemScreenBounds = window.activeSubMenu->getScreenBounds();
         auto subX = (float) itemScreenBounds.getX();
@@ -2225,7 +2225,7 @@ int PopupMenu::showWithOptionalCallback (const Options& options,
         ModalComponentManager::getInstance()->attachCallback (window, callback.release());
 
         window->toFront (false);  // need to do this after making it modal, or it could
-                                  // be stuck behind other comps that are already modal..
+                                  // be stuck behind other comps that are already modal
 
        #if JUCE_MODAL_LOOPS_PERMITTED
         if (userCallback == nullptr && canBeModal)
@@ -2400,7 +2400,7 @@ void PopupMenu::CustomComponent::triggerMenuItem()
         }
         else
         {
-            // something must have gone wrong with the component hierarchy if this happens..
+            // something must have gone wrong with the component hierarchy if this happens
             jassertfalse;
         }
     }

@@ -671,7 +671,7 @@ public:
         // Annoyingly, after changing the rate and buffer size, some devices fail to
         // correctly report their new settings until some random time in the future, so
         // after calling updateDetailsFromDevice, we need to manually bodge these values
-        // to make sure we're using the correct numbers..
+        // to make sure we're using the correct numbers.
         updateDetailsFromDevice (ins, outs);
         sampleRate = newSampleRate;
         bufferSize = bufferSizeSamples;
@@ -2298,7 +2298,7 @@ public:
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         // if they're asking for any input channels at all, use the default input, so we
-        // get the built-in mic rather than the built-in output with no inputs..
+        // get the built-in mic rather than the built-in output with no inputs
 
         AudioObjectPropertyAddress pa;
         auto selector = forInput ? kAudioHardwarePropertyDefaultInputDevice

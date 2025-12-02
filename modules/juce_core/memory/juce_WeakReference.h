@@ -71,7 +71,7 @@ namespace juce
 
     OR: just use the handy JUCE_DECLARE_WEAK_REFERENCEABLE macro to do all this for you.
 
-    // Here's an example of using a pointer..
+    // Here's an example of using a pointer.
 
     auto* n = new MyObject();
     WeakReference<MyObject> myObjectRef = n;

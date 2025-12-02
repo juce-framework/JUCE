@@ -142,7 +142,7 @@ namespace TimeHelpers
     }
 
     // There's no posix function that does a UTC version of mktime,
-    // so annoyingly we need to implement this manually..
+    // so annoyingly we need to implement this manually.
     static int64 mktime_utc (const std::tm& t) noexcept
     {
         return 24 * 3600 * (daysFrom1970 (t.tm_year + 1900, t.tm_mon) + (t.tm_mday - 1))
@@ -244,9 +244,9 @@ uint32 Time::getMillisecondCounter() noexcept
 
     if (now < TimeHelpers::lastMSCounterValue.get())
     {
-        // in multi-threaded apps this might be called concurrently, so
+        // In multi-threaded apps this might be called concurrently, so
         // make sure that our last counter value only increases and doesn't
-        // go backwards..
+        // go backwards.
         if (now < TimeHelpers::lastMSCounterValue.get() - (uint32) 1000)
             TimeHelpers::lastMSCounterValue = now;
     }
@@ -435,19 +435,27 @@ String Time::toISO8601 (bool includeDividerCharacters) const
             + getUTCOffsetString (includeDividerCharacters);
 }
 
-static int parseFixedSizeIntAndSkip (String::CharPointerType& t, int numChars, char charToSkip) noexcept
+static int parseVariableSizeIntAndSkip (String::CharPointerType& t,
+                                        int minNumChars,
+                                        int targetNumChars,
+                                        char charToSkip) noexcept
 {
     int n = 0;
 
-    for (int i = numChars; --i >= 0;)
+    for (int i = 0; i < targetNumChars; ++i)
     {
-        auto digit = (int) (*t - '0');
+        n *= 10;
+        const auto digit = (int) (*t - '0');
 
-        if (! isPositiveAndBelow (digit, 10))
+        if (isPositiveAndBelow (digit, 10))
+        {
+            n += digit;
+            ++t;
+        }
+        else if (i < minNumChars)
+        {
             return -1;
-
-        ++t;
-        n = n * 10 + digit;
+        }
     }
 
     if (charToSkip != 0 && *t == (juce_wchar) charToSkip)
@@ -456,23 +464,37 @@ static int parseFixedSizeIntAndSkip (String::CharPointerType& t, int numChars, c
     return n;
 }
 
+static int parseFixedSizeIntAndSkip (String::CharPointerType& t, int numChars, char charToSkip) noexcept
+{
+    return parseVariableSizeIntAndSkip (t, numChars, numChars, charToSkip);
+}
+
 Time Time::fromISO8601 (StringRef iso)
 {
     auto t = iso.text;
     auto year = parseFixedSizeIntAndSkip (t, 4, '-');
 
     if (year < 0)
+    {
+        jassertfalse;
         return {};
+    }
 
     auto month = parseFixedSizeIntAndSkip (t, 2, '-');
 
     if (month < 0)
+    {
+        jassertfalse;
         return {};
+    }
 
     auto day = parseFixedSizeIntAndSkip (t, 2, 0);
 
     if (day < 0)
+    {
+        jassertfalse;
         return {};
+    }
 
     int hours = 0, minutes = 0, milliseconds = 0;
 
@@ -482,25 +504,40 @@ Time Time::fromISO8601 (StringRef iso)
         hours = parseFixedSizeIntAndSkip (t, 2, ':');
 
         if (hours < 0)
+        {
+            jassertfalse;
             return {};
+        }
 
         minutes = parseFixedSizeIntAndSkip (t, 2, ':');
 
         if (minutes < 0)
+        {
+            jassertfalse;
             return {};
+        }
 
         auto seconds = parseFixedSizeIntAndSkip (t, 2, 0);
 
         if (seconds < 0)
-             return {};
+        {
+            jassertfalse;
+            return {};
+        }
 
         if (*t == '.' || *t == ',')
         {
             ++t;
-            milliseconds = parseFixedSizeIntAndSkip (t, 3, 0);
+            milliseconds = parseVariableSizeIntAndSkip (t, 1, 3, 0);
 
             if (milliseconds < 0)
+            {
+                jassertfalse;
                 return {};
+            }
+
+            // skip to the next non-digit character
+            while (t.isDigit()) { ++t; }
         }
 
         milliseconds += 1000 * seconds;
@@ -513,18 +550,25 @@ Time Time::fromISO8601 (StringRef iso)
         auto offsetHours = parseFixedSizeIntAndSkip (t, 2, ':');
 
         if (offsetHours < 0)
+        {
+            jassertfalse;
             return {};
+        }
 
         auto offsetMinutes = parseFixedSizeIntAndSkip (t, 2, 0);
 
         if (offsetMinutes < 0)
+        {
+            jassertfalse;
             return {};
+        }
 
         auto offsetMs = (offsetHours * 60 + offsetMinutes) * 60 * 1000;
         milliseconds += nextChar == '-' ? offsetMs : -offsetMs; // NB: this seems backwards but is correct!
     }
     else if (nextChar != 0 && nextChar != 'Z')
     {
+        jassertfalse;
         return {};
     }
 
@@ -672,6 +716,46 @@ public:
         expect (Time::fromISO8601 ("2016-02-16T15:03:57,999-02:30") == Time (2016, 1, 16, 17, 33, 57, 999, false));
         expect (Time::fromISO8601 ("20160216T150357.999-0230")      == Time (2016, 1, 16, 17, 33, 57, 999, false));
         expect (Time::fromISO8601 ("20160216T150357,999-0230")      == Time (2016, 1, 16, 17, 33, 57, 999, false));
+
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.9+00:00") == Time (2016, 1, 16, 15, 3, 57, 900, false));
+        expect (Time::fromISO8601 ("20160216T150357.9+0000")      == Time (2016, 1, 16, 15, 3, 57, 900, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.9Z")      == Time (2016, 1, 16, 15, 3, 57, 900, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57,9Z")      == Time (2016, 1, 16, 15, 3, 57, 900, false));
+        expect (Time::fromISO8601 ("20160216T150357.9Z")          == Time (2016, 1, 16, 15, 3, 57, 900, false));
+        expect (Time::fromISO8601 ("20160216T150357,9Z")          == Time (2016, 1, 16, 15, 3, 57, 900, false));
+
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.9-02:30") == Time (2016, 1, 16, 17, 33, 57, 900, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57,9-02:30") == Time (2016, 1, 16, 17, 33, 57, 900, false));
+        expect (Time::fromISO8601 ("20160216T150357.9-0230")      == Time (2016, 1, 16, 17, 33, 57, 900, false));
+        expect (Time::fromISO8601 ("20160216T150357,9-0230")      == Time (2016, 1, 16, 17, 33, 57, 900, false));
+
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.99+00:00") == Time (2016, 1, 16, 15, 3, 57, 990, false));
+        expect (Time::fromISO8601 ("20160216T150357.99+0000")      == Time (2016, 1, 16, 15, 3, 57, 990, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.99Z")      == Time (2016, 1, 16, 15, 3, 57, 990, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57,99Z")      == Time (2016, 1, 16, 15, 3, 57, 990, false));
+        expect (Time::fromISO8601 ("20160216T150357.99Z")          == Time (2016, 1, 16, 15, 3, 57, 990, false));
+        expect (Time::fromISO8601 ("20160216T150357,99Z")          == Time (2016, 1, 16, 15, 3, 57, 990, false));
+
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.99-02:30") == Time (2016, 1, 16, 17, 33, 57, 990, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57,99-02:30") == Time (2016, 1, 16, 17, 33, 57, 990, false));
+        expect (Time::fromISO8601 ("20160216T150357.99-0230")      == Time (2016, 1, 16, 17, 33, 57, 990, false));
+        expect (Time::fromISO8601 ("20160216T150357,99-0230")      == Time (2016, 1, 16, 17, 33, 57, 990, false));
+
+        // The 8601 standard appears to support any number of fractional digits.
+        // The fractional part should either be rounded or truncated.
+        // The Time class stores time with millisecond precision.
+        // Most implementations appear to truncate so that's what we test for too.
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.9999+00:00") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.999999999+0000") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.999999999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57,999999999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.9999999999999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357,9999999999999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.9999-02:30") == Time (2016, 1, 16, 17, 33, 57, 999, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57,9999-02:30") == Time (2016, 1, 16, 17, 33, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.999999999-0230") == Time (2016, 1, 16, 17, 33, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357,999999999-0230") == Time (2016, 1, 16, 17, 33, 57, 999, false));
 
         expect (Time (1970,  0,  1,  0,  0,  0, 0, false) == Time (0));
         expect (Time (2106,  1,  7,  6, 28, 15, 0, false) == Time (4294967295000));

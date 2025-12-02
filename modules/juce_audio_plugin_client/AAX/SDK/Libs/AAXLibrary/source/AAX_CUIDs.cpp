@@ -1,6 +1,6 @@
 /*================================================================================================*/
 /*
- *	Copyright 2013-2015, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2015, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.

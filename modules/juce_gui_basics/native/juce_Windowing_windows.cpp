@@ -41,9 +41,9 @@ namespace juce
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type")
 
-#undef GetSystemMetrics // multimon overrides this for some reason and causes a mess..
+#undef GetSystemMetrics // multimon overrides this for some reason and causes a mess
 
-// these are in the windows SDK, but need to be repeated here for GCC..
+// these are in the windows SDK, but need to be repeated here for GCC
 #ifndef GET_APPCOMMAND_LPARAM
  #define GET_APPCOMMAND_LPARAM(lParam)     ((short) (HIWORD (lParam) & ~FAPPCOMMAND_MASK))
 
@@ -1822,7 +1822,7 @@ public:
 
         if (! makeActive)
         {
-            // in this case a broughttofront call won't have occurred, so do it now..
+            // in this case a broughttofront call won't have occurred, so do it now
             handleBroughtToFront();
         }
     }
@@ -2711,7 +2711,7 @@ private:
 
             // This avoids a rare stuck-button problem when focus is lost unexpectedly, but must
             // not be called as part of a move, in case it's actually a mouse-drag from another
-            // app which ends up here when we get focus before the mouse is released..
+            // app which ends up here when we get focus before the mouse is released.
             if (isMouseDownEvent)
                 NullCheckedInvocation::invoke (getNativeRealtimeModifiers);
 
@@ -3038,7 +3038,7 @@ private:
             ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
             modsToSend = ModifierKeys::getCurrentModifiers();
 
-            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before
             handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(),
                               pressure, orientation, time, {}, touchIndex);
 
@@ -3159,7 +3159,7 @@ private:
         {
             modsToSend = ModifierKeys::currentModifiers;
 
-            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before
             handleMouseEvent (MouseInputSource::InputSourceType::pen, pos, modsToSend.withoutMouseButtons(),
                               pressure, MouseInputSource::defaultOrientation, time, penDetails);
 
@@ -3349,7 +3349,7 @@ private:
         }
         else
         {
-            // convert the scan code to an unmodified character code..
+            // convert the scan code to an unmodified character code
             const UINT virtualKey = MapVirtualKey ((UINT) virtualScanCode, 1);
             UINT keyChar = MapVirtualKey (virtualKey, 2);
 
@@ -3577,7 +3577,7 @@ private:
         handleMovedOrResized();
         updateCurrentMonitorAndRefreshVBlankDispatcher();
 
-        return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly.
+        return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly
     }
 
     //==============================================================================
@@ -3980,7 +3980,7 @@ private:
                 return 0;
 
             case WM_NCPAINT:
-                // this must be done, even with native titlebars, or there are rendering artifacts.
+                // This must be done, even with native titlebars, or there are rendering artifacts.
                 handlePaintMessage();
                 // Even if we're *not* using a native titlebar (i.e. extending into the nonclient area)
                 // the system needs to handle the NCPAINT to draw rounded corners and shadows.
@@ -4006,7 +4006,7 @@ private:
                 // so that the client area exactly fills the available space.
                 if (isFullScreen())
                 {
-                    const auto monitor = MonitorFromWindow (hwnd, MONITOR_DEFAULTTONULL);
+                    const auto monitor = MonitorFromRect (param, MONITOR_DEFAULTTONULL);
 
                     if (monitor == nullptr)
                         return 0;
@@ -4218,7 +4218,7 @@ private:
                 // while a temporary window is being shown, prevent Windows from deactivating the
                 // title bars of our main windows.
                 if (wParam == 0 && ! shouldDeactivateTitleBar)
-                    wParam = TRUE; // change this and let it get passed to the DefWindowProc.
+                    wParam = TRUE; // change this and let it get passed to the DefWindowProc
 
                 break;
 
@@ -4494,7 +4494,7 @@ private:
         {
             if (compositionInProgress)
             {
-                // If this occurs, the user has cancelled the composition, so clear their changes..
+                // If this occurs, the user has cancelled the composition, so clear their changes.
                 if (auto* target = owner.findCurrentTextInputTarget())
                 {
                     target->setHighlightedRegion (compositionRange);
@@ -6038,7 +6038,7 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT, LPARAM userInfo
     return TRUE;
 }
 
-void Displays::findDisplays (float masterScale)
+void Displays::findDisplays (const Desktop& desktop)
 {
     setDPIAwareness();
 
@@ -6057,6 +6057,8 @@ void Displays::findDisplays (float masterScale)
     for (int i = 1; i < monitors.size(); ++i)
         if (monitors.getReference (i).isMain)
             monitors.swap (i, 0);
+
+    const auto masterScale = desktop.getGlobalScaleFactor();
 
     for (auto& monitor : monitors)
     {

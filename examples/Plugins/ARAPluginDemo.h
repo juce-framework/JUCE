@@ -36,8 +36,9 @@
  dependencies:             juce_audio_basics, juce_audio_devices, juce_audio_formats,
                            juce_audio_plugin_client, juce_audio_processors,
                            juce_audio_utils, juce_core, juce_data_structures,
-                           juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:                xcode_mac, vs2022
+                           juce_events, juce_graphics, juce_gui_basics, juce_gui_extra,
+                           juce_audio_processors_headless
+ exporters:                xcode_mac, vs2022, vs2026
 
  moduleFlags:              JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -1439,7 +1440,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (convertOptionalARAColour (playbackRegion.getEffectiveColor(), Colours::black));
+        g.fillAll (Colour { convertOptionalARAColour (playbackRegion.getEffectiveColor()) });
 
         const auto* audioModification = playbackRegion.getAudioModification<ARADemoPluginAudioModification>();
         g.setColour (audioModification->isDimmed() ? Colours::darkgrey.darker() : Colours::darkgrey.brighter());
@@ -1826,7 +1827,7 @@ public:
 
         if (auto colour = regionSequence.getColor())
         {
-            g.setColour (convertARAColour (colour));
+            g.setColour (Colour { convertARAColourARGB (colour) });
             g.fillRect (getLocalBounds().removeFromTop (16).reduced (6));
             g.fillRect (getLocalBounds().removeFromBottom (16).reduced (6));
         }

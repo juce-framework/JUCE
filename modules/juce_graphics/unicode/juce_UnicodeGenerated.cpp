@@ -85,7 +85,7 @@ public:
 
     static UnicodeEntry getDataForCodepoint (uint32_t codepoint)
     {
-        static const auto data = []
+        static const auto data = std::invoke ([]
         {
             jassert (computeHash() == 0x58aac9b4);
 
@@ -98,7 +98,7 @@ public:
             jassert (r == uncompressedSize);
 
             return arr;
-        }();
+        });
 
         jassert (isPositiveAndBelow (codepoint, data.size()));
         return data[(int) codepoint];

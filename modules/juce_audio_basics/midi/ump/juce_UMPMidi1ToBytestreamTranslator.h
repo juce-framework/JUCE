@@ -37,54 +37,51 @@ namespace juce::universal_midi_packets
 {
 
 /**
-    Parses a raw stream of uint32_t holding a series of Universal MIDI Packets using
-    the MIDI 1.0 Protocol, converting to plain (non-UMP) MidiMessages.
-
-    @tags{Audio}
+    Extracts from a series of Universal MIDI Packets the bytes that are also meaningful in the
+    bytestream MIDI 1.0 format.
 */
-class Midi1ToBytestreamTranslator
+class SingleGroupMidi1ToBytestreamExtractor
 {
 public:
-    /** Ensures that there is room in the internal buffer for a sysex message of at least
-        `initialBufferSize` bytes.
-    */
-    explicit Midi1ToBytestreamTranslator (int initialBufferSize)
-    {
-        pendingSysExData.reserve (size_t (initialBufferSize));
-    }
-
-    /** Clears the concatenator. */
     void reset()
     {
-        pendingSysExData.clear();
-        pendingSysExTime = 0.0;
+        sysexInProgress = false;
     }
 
     /** Converts a Universal MIDI Packet using the MIDI 1.0 Protocol to
-        an equivalent MidiMessage. Accumulates SysEx packets into a single
-        MidiMessage, as appropriate.
+        an equivalent MidiMessage. If the packet doesn't convert to a single bytestream message
+        (as may be the case for long sysex7 data), then the the callback will be passed just the
+        sysex bytes in the current packet. To reconstruct the entire sysex message, the caller
+        can bytes that are marked as ongoingSysex, and process the full message once the callback
+        receives bytes that are marked as lastSysex.
 
         @param packet       a packet which is using the MIDI 1.0 Protocol.
         @param time         the timestamp to be applied to these messages.
-        @param callback     a callback which will be called with each converted MidiMessage.
+        @param callback     a callback that will be called with each converted MidiMessage.
     */
     template <typename MessageCallback>
     void dispatch (const View& packet, double time, MessageCallback&& callback)
     {
         const auto firstWord = *packet.data();
 
-        if (! pendingSysExData.empty() && shouldPacketTerminateSysExEarly (firstWord))
-            pendingSysExData.clear();
+        if (sysexInProgress && shouldPacketTerminateSysExEarly (firstWord))
+        {
+            // unexpected end of last sysex
+            callback (SysexExtractorCallbackKind::lastSysex, Span<const std::byte>());
+            sysexInProgress = false;
+        }
 
         switch (packet.size())
         {
             case 1:
             {
                 // Utility messages don't translate to bytestream format
-                if (Utils::getMessageType (firstWord) != 0x00)
+                if (Utils::getMessageType (firstWord) != Utils::MessageKind::utility)
                 {
-                    const auto message = fromUmp (PacketX1 { firstWord }, time);
-                    callback (BytestreamMidiView (&message));
+                    const auto converted = fromUmp (PacketX1 { firstWord }, time);
+                    callback (SysexExtractorCallbackKind::notSysex,
+                              Span (unalignedPointerCast<const std::byte*> (converted.getRawData()),
+                                    (size_t) converted.getRawDataSize()));
                 }
 
                 break;
@@ -92,8 +89,8 @@ public:
 
             case 2:
             {
-                if (Utils::getMessageType (firstWord) == 0x3)
-                    processSysEx (PacketX2 { packet[0], packet[1] }, time, callback);
+                if (Utils::getMessageType (firstWord) == Utils::MessageKind::sysex7)
+                    processSysEx (PacketX2 { packet[0], packet[1] }, callback);
 
                 break;
             }
@@ -120,69 +117,72 @@ public:
         const auto word = m.front();
         jassert (Utils::getNumWordsForMessageType (word) == 1);
 
-        const std::array<uint8_t, 3> bytes { { uint8_t ((word >> 0x10) & 0xff),
-                                               uint8_t ((word >> 0x08) & 0xff),
-                                               uint8_t ((word >> 0x00) & 0xff) } };
-        const auto numBytes = MidiMessage::getMessageLengthFromFirstByte (bytes.front());
+        const std::array<std::byte, 3> bytes { { std::byte ((word >> 0x10) & 0xff),
+                                                 std::byte ((word >> 0x08) & 0xff),
+                                                 std::byte ((word >> 0x00) & 0xff) } };
+        const auto numBytes = MidiMessage::getMessageLengthFromFirstByte ((uint8_t) bytes.front());
         return MidiMessage (bytes.data(), numBytes, time);
     }
 
 private:
     template <typename MessageCallback>
-    void processSysEx (const PacketX2& packet,
-                       double time,
-                       MessageCallback&& callback)
+    void processSysEx (const PacketX2& packet, MessageCallback&& callback)
     {
-        switch (getSysEx7Kind (packet[0]))
+        const std::array<std::byte, 1> initial { std::byte { 0xf0 } }, final { std::byte { 0xf7 } };
+        std::array<std::byte, 8> storage{};
+        size_t validBytes = 0;
+
+        const auto pushBytes = [&] (const Span<const std::byte> b)
+        {
+            std::copy (b.begin(), b.end(), storage.data() + validBytes);
+            validBytes += b.size();
+        };
+
+        const auto pushPacket = [&] (const PacketX2& p)
+        {
+            const auto newBytes = SysEx7::getDataBytes (p);
+            pushBytes (Span<const std::byte> (newBytes.data.data(), newBytes.size));
+        };
+
+        const auto kind = getSysEx7Kind (packet[0]);
+
+        if (   (  sysexInProgress && (kind == SysEx7::Kind::begin || kind == SysEx7::Kind::complete))
+            || (! sysexInProgress && (kind == SysEx7::Kind::continuation || kind == SysEx7::Kind::end)))
+        {
+            // Malformed SysEx, drop progress and return
+            callback (SysexExtractorCallbackKind::lastSysex, Span<const std::byte>());
+            sysexInProgress = false;
+            return;
+        }
+
+        switch (kind)
         {
             case SysEx7::Kind::complete:
-                startSysExMessage (time);
-                pushBytes (packet);
-                terminateSysExMessage (callback);
+                pushBytes (Span (initial));
+                pushPacket (packet);
+                pushBytes (Span (final));
                 break;
 
             case SysEx7::Kind::begin:
-                startSysExMessage (time);
-                pushBytes (packet);
+                pushBytes (Span (initial));
+                pushPacket (packet);
                 break;
 
             case SysEx7::Kind::continuation:
-                if (pendingSysExData.empty())
-                    break;
-
-                pushBytes (packet);
+                pushPacket (packet);
                 break;
 
             case SysEx7::Kind::end:
-                if (pendingSysExData.empty())
-                    break;
-
-                pushBytes (packet);
-                terminateSysExMessage (callback);
+                pushPacket (packet);
+                pushBytes (Span (final));
                 break;
         }
-    }
 
-    void pushBytes (const PacketX2& packet)
-    {
-        const auto bytes = SysEx7::getDataBytes (packet);
-        pendingSysExData.insert (pendingSysExData.end(),
-                                 bytes.data.begin(),
-                                 bytes.data.begin() + bytes.size);
-    }
-
-    void startSysExMessage (double time)
-    {
-        pendingSysExTime = time;
-        pendingSysExData.push_back (std::byte { 0xf0 });
-    }
-
-    template <typename MessageCallback>
-    void terminateSysExMessage (MessageCallback&& callback)
-    {
-        pendingSysExData.push_back (std::byte { 0xf7 });
-        callback (BytestreamMidiView (pendingSysExData, pendingSysExTime));
-        pendingSysExData.clear();
+        sysexInProgress = sysexInProgress ? (kind == SysEx7::Kind::continuation)
+                                          : (kind == SysEx7::Kind::begin);
+        const auto callbackKind = sysexInProgress ? SysexExtractorCallbackKind::ongoingSysex
+                                                  : SysexExtractorCallbackKind::lastSysex;
+        callback (callbackKind, Span (storage.data(), validBytes));
     }
 
     static bool shouldPacketTerminateSysExEarly (uint32_t firstWord)
@@ -199,12 +199,12 @@ private:
 
     static bool isJROrNOP (uint32_t word)
     {
-        return Utils::getMessageType (word) == 0x0;
+        return Utils::getMessageType (word) == Utils::MessageKind::utility;
     }
 
     static bool isSysExContinuation (uint32_t word)
     {
-        if (Utils::getMessageType (word) != 0x3)
+        if (Utils::getMessageType (word) != Utils::MessageKind::sysex7)
             return false;
 
         const auto kind = getSysEx7Kind (word);
@@ -213,11 +213,88 @@ private:
 
     static bool isSystemRealTime (uint32_t word)
     {
-        return Utils::getMessageType (word) == 0x1 && ((word >> 0x10) & 0xff) >= 0xf8;
+        return Utils::getMessageType (word) == Utils::MessageKind::commonRealtime && ((word >> 0x10) & 0xff) >= 0xf8;
     }
 
-    std::vector<std::byte> pendingSysExData;
+    bool sysexInProgress = false;
+};
 
+/**
+    Parses a raw stream of uint32_t holding a series of Universal MIDI Packets using
+    the MIDI 1.0 Protocol, converting to plain (non-UMP) MidiMessages.
+
+    @tags{Audio}
+*/
+class SingleGroupMidi1ToBytestreamTranslator
+{
+public:
+    /** Ensures that there is room in the internal buffer for a sysex message of at least
+        initialBufferSize bytes.
+    */
+    explicit SingleGroupMidi1ToBytestreamTranslator (int initialBufferSize)
+    {
+        pendingSysExData.reserve (size_t (initialBufferSize));
+    }
+
+    /** Clears the concatenator. */
+    void reset()
+    {
+        extractor.reset();
+        pendingSysExData.clear();
+        pendingSysExTime = 0.0;
+    }
+
+    /** Converts a Universal MIDI Packet using the MIDI 1.0 Protocol to
+        an equivalent MidiMessage. Accumulates SysEx packets into a single
+        MidiMessage, as appropriate.
+
+        @param packet       a packet which is using the MIDI 1.0 Protocol.
+        @param time         the timestamp to be applied to these messages.
+        @param callback     a callback which will be called with each converted MidiMessage.
+    */
+    template <typename MessageCallback>
+    void dispatch (const View& packet, double time, MessageCallback&& callback)
+    {
+        extractor.dispatch (packet, time, [&] (SysexExtractorCallbackKind kind, Span<const std::byte> bytes)
+        {
+            switch (kind)
+            {
+                case SysexExtractorCallbackKind::notSysex:
+                    callback (BytesOnGroup { 0, bytes }, time);
+                    return;
+
+                case SysexExtractorCallbackKind::ongoingSysex:
+                {
+                    if (pendingSysExData.empty())
+                        pendingSysExTime = time;
+
+                    pendingSysExData.insert (pendingSysExData.end(), bytes.begin(), bytes.end());
+                    return;
+                }
+
+                case SysexExtractorCallbackKind::lastSysex:
+                {
+                    pendingSysExData.insert (pendingSysExData.end(), bytes.begin(), bytes.end());
+
+                    if (pendingSysExData.empty())
+                        return;
+
+                    // If this is not true, then the sysex message was truncated somehow and we
+                    // probably shouldn't allow it to propagate
+                    if (pendingSysExData.back() == std::byte { 0xf7 })
+                        callback (BytesOnGroup { 0, Span<const std::byte> (pendingSysExData) }, pendingSysExTime);
+
+                    pendingSysExData.clear();
+
+                    return;
+                }
+            }
+        });
+    }
+
+private:
+    SingleGroupMidi1ToBytestreamExtractor extractor;
+    std::vector<std::byte> pendingSysExData;
     double pendingSysExTime = 0.0;
 };
 

@@ -42,7 +42,7 @@ void StretchableObjectResizer::addItem (const double size,
                                         const double minSize, const double maxSize,
                                         const int order)
 {
-    // the order must be >= 0 but less than the maximum integer value.
+    // the order must be >= 0 but less than the maximum integer value
     jassert (order >= 0 && order < std::numeric_limits<int>::max());
     jassert (maxSize >= minSize);
 

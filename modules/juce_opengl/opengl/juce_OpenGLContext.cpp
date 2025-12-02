@@ -32,6 +32,8 @@
   ==============================================================================
 */
 
+#include <juce_gui_basics/detail/juce_ComponentHelpers.h>
+
 #if JUCE_MAC
  #include <juce_gui_basics/native/juce_PerScreenDisplayLinks_mac.h>
 #endif
@@ -552,7 +554,7 @@ public:
             glEnable (GL_TEXTURE_2D);
 
        #if JUCE_WINDOWS
-        // some stupidly old drivers are missing this function, so try to at least avoid a crash here,
+        // some old drivers are missing this function, so try to at least avoid a crash here,
         // but if you hit this assertion you may want to have your own version check before using the
         // component rendering stuff on such old drivers.
         jassert (context.extensions.glActiveTexture != nullptr);
@@ -1106,6 +1108,7 @@ public:
     {
         auto& comp = *getComponent();
         stop();
+        detail::ComponentHelpers::releaseAllCachedImageResources (comp);
         comp.setCachedComponentImage (nullptr);
         context.nativeContext = nullptr;
     }

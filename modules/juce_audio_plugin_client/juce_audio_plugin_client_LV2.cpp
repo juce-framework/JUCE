@@ -51,11 +51,11 @@
 #include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
 #include <juce_audio_plugin_client/detail/juce_LinuxMessageThread.h>
 
-#include <juce_audio_processors/utilities/juce_FlagCache.h>
-#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors_headless/utilities/juce_FlagCache.h>
+#include <juce_audio_processors_headless/format_types/juce_LegacyAudioParameter.h>
 
 #include "JuceLV2Defines.h"
-#include <juce_audio_processors/format_types/juce_LV2Common.h>
+#include <juce_audio_processors_headless/format_types/juce_LV2Common.h>
 
 #include <fstream>
 
@@ -1281,7 +1281,7 @@ private:
 
         // In the event that the plugin decides to send all of its parameters in one go,
         // we should ensure that the output buffer is large enough to accommodate, with some
-        // extra room for the sequence header, MIDI messages etc..
+        // extra room for the sequence header, MIDI messages etc.
         const auto patchSetSizeBytes = 72;
         const auto additionalSize = 8192;
         const auto atomPortMinSize = proc.getParameters().size() * patchSetSizeBytes + additionalSize;

@@ -290,7 +290,14 @@ public:
         This is the maximum height, from the top of the ascent to the bottom of the
         descenders.
 
-        @see withHeight, setHeightWithoutChangingWidth, getAscent
+        There can be a notable exception to this rule however, if you use the
+        ascent/descent override feature. This feature follows CSS semantics and acts
+        on the point height of the Font. So if you specified the font's height using
+        setHeight() and also specified an ascent or descent override, then the visually
+        rendered height of the Font can be different from the value returned by
+        getHeight().
+
+        @see withHeight, setHeightWithoutChangingWidth, getAscent, setAscentOverride
     */
     float getHeight() const noexcept;
 
@@ -652,12 +659,19 @@ public:
     */
     Native getNativeDetails() const;
 
+    /*  @internal
+        The factor by which a JUCE font height should be multiplied in order to convert to a font
+        size in points.
+
+        May be inf if the font ascent and descent overrides have both been set to 0!
+    */
+    float getHeightToPointsFactor() const;
+
 private:
     //==============================================================================
     static bool compare (const Font&, const Font&) noexcept;
 
     void dupeInternalIfShared();
-    float getHeightToPointsFactor() const;
 
     friend struct GraphicsFontHelpers;
 

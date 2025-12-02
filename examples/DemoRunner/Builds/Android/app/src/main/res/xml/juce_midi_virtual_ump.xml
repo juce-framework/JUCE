@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<devices>
+  <device manufacturer="Raw Material Software Limited" product="DemoRunner" name="Raw Material Software Limited DemoRunner">
+    <port name="MIDI 2.0"/>
+  </device>
+</devices>

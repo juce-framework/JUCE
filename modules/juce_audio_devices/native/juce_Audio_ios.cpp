@@ -393,7 +393,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setActive: enabled
                                                                  error: &error]);
 
-        if (@available (ios 18, *))
+        if (@available (iOS 18, *))
         {
             if (enabled)
             {
@@ -419,7 +419,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
             // Older iOS versions (iOS 12) seem to require that the requested buffer size is a bit
             // larger than the desired buffer size.
             // This breaks on iOS 18, which needs the buffer duration to be as precise as possible.
-            if (@available (ios 18, *))
+            if (@available (iOS 18, *))
                 return 0;
 
             return 1;
@@ -434,7 +434,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         // iOS requires additional effort to observe the actual buffer size
         // change however, it seems the buffer size change will always work
         // so instead we just assume the change will apply eventually
-        if (@available (ios 18, *))
+        if (@available (iOS 18, *))
             return newBufferSize;
 
         return getBufferSize (currentSampleRate);
@@ -449,7 +449,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
             constexpr auto suggestedMin = 64;
             constexpr auto suggestedMax = 4096;
 
-            if (@available (ios 18, *))
+            if (@available (iOS 18, *))
                 return std::tuple (suggestedMin, suggestedMax);
 
             const auto min = tryBufferSize (sampleRate, suggestedMin);
@@ -541,8 +541,15 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
         // On iOS 18 the AVAudioSession sample rate is not always accurate but
         // probing the sample rate via an AudioQueue seems to work reliably
-        if (@available (ios 18, *))
+        if (@available (iOS 18, *))
+        {
+            // On iOS 26, things seem to work as expected again,
+            // so avoid creating an AudioQueue
+            if (@available (iOS 26, *))
+                return session.sampleRate;
+
             return getSampleRateFromAudioQueue().value_or (session.sampleRate);
+        }
 
         return session.sampleRate;
     }

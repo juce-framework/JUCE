@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2010-2017, 2019-2021, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2010-2017, 2019-2021, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -37,7 +37,7 @@
 #define AAX_ERRORS_H
 /// @endcond
 
-#include "AAX_Enums.h"
+#include "AAX_EnumSizeCheck.h"
 
 /** AAX result codes
  
@@ -86,7 +86,7 @@ enum AAX_EError
 	AAX_ERROR_DUPLICATE_TYPE_ID								= -20036,
 	AAX_ERROR_EMPTY_EFFECT_NAME								= -20037,
 	AAX_ERROR_UNKNOWN_PLUGIN								= -20038,
-	AAX_ERROR_PROPERTY_UNDEFINED							= -20039,
+	AAX_ERROR_PROPERTY_UNDEFINED							= -20039, ///< The plugin does not explicitly define a value for a queried property
 	AAX_ERROR_INVALID_PATH									= -20040,
 	AAX_ERROR_UNKNOWN_ID									= -20041,
 	AAX_ERROR_UNKNOWN_EXCEPTION								= -20042, ///< An AAX plug-in should return this to the host if an unknown exception is caught. Exceptions should never be passed to the host.
@@ -99,6 +99,7 @@ enum AAX_EError
 	AAX_ERROR_NO_ABBREVIATED_PARAMETER_NAME					= -20049, ///< No parameter name abbreviation with the requested properties has been defined
 	AAX_ERROR_ARGUMENT_OUT_OF_RANGE							= -20050, ///< One or more input parameters are out of the expected range, e.g. an index argument that is negative or exceeds the number of elements
 	AAX_ERROR_PRINT_FAILURE									= -20051, ///< A failure occurred in a "print" library call such as @c printf
+	AAX_ERROR_NOTIFICATION_REGISTRATION_FAILED				= -20052, 
 	
 	
 	AAX_ERROR_PLUGIN_BEGIN									= -20600, ///< Custom plug-in error codes may be placed in the range ( \ref AAX_ERROR_PLUGIN_END, \ref AAX_ERROR_PLUGIN_BEGIN ]

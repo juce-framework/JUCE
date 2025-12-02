@@ -310,7 +310,7 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
 {
     if (newPos < currentPos)
     {
-        // to go backwards, reset the stream and start again..
+        // to go backwards, reset the stream and start again
         isEof = false;
         activeBufferSize = 0;
         currentPos = 0;

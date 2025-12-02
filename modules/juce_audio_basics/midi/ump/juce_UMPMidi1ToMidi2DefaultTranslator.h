@@ -62,7 +62,7 @@ public:
         const auto firstWord = v[0];
         const auto messageType = Utils::getMessageType (firstWord);
 
-        if (messageType != 0x2)
+        if (messageType != Utils::MessageKind::channelVoice1)
         {
             callback (v);
             return;
@@ -70,13 +70,13 @@ public:
 
         const HelperValues helperValues
         {
-            std::byte ((0x4 << 0x4) | Utils::getGroup (firstWord)),
+            std::byte (0x40 | Utils::getGroup (firstWord)),
             std::byte ((firstWord >> 0x10) & 0xff),
             std::byte ((firstWord >> 0x08) & 0x7f),
             std::byte ((firstWord >> 0x00) & 0x7f),
         };
 
-        switch (Utils::getStatus (firstWord))
+        switch ((uint8_t) Utils::getStatus (firstWord))
         {
             case 0x8:
             case 0x9:
@@ -170,21 +170,21 @@ private:
     class Bank
     {
     public:
-        bool isValid() const noexcept { return ! (msb & 0x80); }
+        bool isValid() const noexcept { return (msb & std::byte { 0x80 }) == std::byte { 0 }; }
 
-        uint8_t getMsb() const noexcept { return msb & 0x7f; }
-        uint8_t getLsb() const noexcept { return lsb & 0x7f; }
+        std::byte getMsb() const noexcept { return msb & std::byte (0x7f); }
+        std::byte getLsb() const noexcept { return lsb & std::byte (0x7f); }
 
-        void setMsb (uint8_t i) noexcept { msb = i & 0x7f; }
-        void setLsb (uint8_t i) noexcept { msb &= 0x7f; lsb = i & 0x7f; }
+        void setMsb (std::byte i) noexcept { msb = i & std::byte (0x7f); }
+        void setLsb (std::byte i) noexcept { msb &= std::byte (0x7f); lsb = i & std::byte (0x7f); }
 
     private:
         // We use the top bit to indicate whether this bank is valid.
         // After reading the spec, it's not clear how we should determine whether
         // there are valid values, so we'll just assume that the bank is valid
         // once either the lsb or msb have been written.
-        uint8_t msb = 0x80;
-        uint8_t lsb = 0x00;
+        std::byte msb { 0x80 };
+        std::byte lsb { 0x00 };
     };
 
     using ChannelAccumulators = std::array<PnAccumulator, 16>;

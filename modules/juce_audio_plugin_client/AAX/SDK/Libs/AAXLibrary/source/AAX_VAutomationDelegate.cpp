@@ -1,6 +1,6 @@
 /*================================================================================================*/
 /*
- *	Copyright 2013-2015, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2015, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -26,6 +26,7 @@
 #include "AAX_VAutomationDelegate.h"
 #include "AAX_IACFController.h"
 #include "AAX_UIDs.h"
+#include "AAX_Errors.h"
 #include <algorithm>
 #include <iterator>
 

@@ -211,7 +211,7 @@ MPESynthesiserVoice* MPESynthesiser::findVoiceToSteal (MPENote noteToStealVoiceF
         usableVoicesToStealArray.add (voice);
 
         // NB: Using a functor rather than a lambda here due to scare-stories about
-        // compilers generating code containing heap allocations..
+        // compilers generating code containing heap allocations.
         struct Sorter
         {
             bool operator() (const MPESynthesiserVoice* a, const MPESynthesiserVoice* b) const noexcept { return a->noteOnTime < b->noteOnTime; }
@@ -334,7 +334,7 @@ void MPESynthesiser::turnOffAllVoices (bool allowTailOff)
         }
     }
 
-    // finally make sure the MPE Instrument also doesn't have any notes anymore.
+    // finally make sure the MPE Instrument also doesn't have any notes anymore
     instrument.releaseAllNotes();
 }
 

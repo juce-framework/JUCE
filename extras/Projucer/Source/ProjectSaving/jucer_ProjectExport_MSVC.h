@@ -925,6 +925,15 @@ public:
                 imports->setAttribute ("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
             }
 
+            if (owner.shouldAddMidiPackage())
+            {
+                const auto path = "packages\\" + cppwinrtPackage.name + "." + cppwinrtPackage.version + "\\build\\native\\Microsoft.Windows.CppWinRT.props";
+
+                auto* imports = projectXml.createNewChildElement ("Import");
+                imports->setAttribute ("Project", path);
+                imports->setAttribute ("Condition", "Exists('" + path + "')");
+            }
+
             for (ConstConfigIterator i (owner); i.next();)
             {
                 auto& config = *static_cast<const MSVCBuildConfiguration*> (&*i);
@@ -1298,31 +1307,45 @@ public:
                 e->setAttribute ("Include", prependDot (getOwner().rcFile.getFileName()));
             }
 
+            if (owner.shouldAddMidiPackage())
+            {
+                auto* group = projectXml.createNewChildElement ("ItemGroup");
+                auto* reference = group->createNewChildElement ("Reference");
+                reference->setAttribute ("Include", midiPackage.name);
+
+                auto* hintPath = reference->createNewChildElement ("HintPath");
+                hintPath->addTextElement ("packages\\" + midiPackage.name + "." + midiPackage.version + "\\ref\\native\\" + midiPackage.name + ".winmd");
+
+                auto* isWinmd = reference->createNewChildElement ("IsWinMDFile");
+                isWinmd->addTextElement ("true");
+            }
+
             {
                 auto* e = projectXml.createNewChildElement ("Import");
                 e->setAttribute ("Project", "$(VCTargetsPath)\\Microsoft.Cpp.targets");
             }
 
+            std::vector<NuGetPackage> packagesToInclude;
+            owner.getPackagesToInclude (packagesToInclude);
+
+            for (const auto& package : packagesToInclude)
             {
-                if (owner.shouldAddWebView2Package())
-                {
-                    auto* importGroup = projectXml.createNewChildElement ("ImportGroup");
-                    importGroup->setAttribute ("Label", "ExtensionTargets");
+                auto* importGroup = projectXml.createNewChildElement ("ImportGroup");
+                importGroup->setAttribute ("Label", "ExtensionTargets");
 
-                    auto packageTargetsPath = "packages\\" + getWebView2PackageName() + "." + getWebView2PackageVersion()
-                                            + "\\build\\native\\" + getWebView2PackageName() + ".targets";
+                const auto packageTargetsPath = "packages\\" + package.name + "." + package.version
+                                              + "\\build\\native\\" + package.name + ".targets";
 
-                    auto* e = importGroup->createNewChildElement ("Import");
-                    e->setAttribute ("Project", packageTargetsPath);
-                    e->setAttribute ("Condition", "Exists('" + packageTargetsPath + "')");
-                }
+                auto* e = importGroup->createNewChildElement ("Import");
+                e->setAttribute ("Project", packageTargetsPath);
+                e->setAttribute ("Condition", "Exists('" + packageTargetsPath + "')");
+            }
 
-                if (owner.shouldLinkWebView2Statically())
-                {
-                    auto* propertyGroup = projectXml.createNewChildElement ("PropertyGroup");
-                    auto* loaderPref = propertyGroup->createNewChildElement ("WebView2LoaderPreference");
-                    loaderPref->addTextElement ("Static");
-                }
+            if (owner.shouldLinkWebView2Statically())
+            {
+                auto* propertyGroup = projectXml.createNewChildElement ("PropertyGroup");
+                auto* loaderPref = propertyGroup->createNewChildElement ("WebView2LoaderPreference");
+                loaderPref->addTextElement ("Static");
             }
         }
 
@@ -2661,27 +2684,64 @@ protected:
                && project.isConfigFlagEnabled ("JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING", false);
     }
 
-    static String getWebView2PackageName()     { return "Microsoft.Web.WebView2"; }
-    static String getWebView2PackageVersion()  { return "1.0.1901.177"; }
+    bool shouldAddMidiPackage() const
+    {
+        return project.getEnabledModules().isModuleEnabled ("juce_audio_devices")
+              && project.isConfigFlagEnabled ("JUCE_USE_WINDOWS_MIDI_SERVICES", false);
+    }
+
+    struct NuGetPackage
+    {
+        String name;
+        String version;
+        bool targetFrameworkNative = false;
+    };
+
+    inline static const NuGetPackage webviewPackage { "Microsoft.Web.WebView2", "1.0.3485.44", false };
+    inline static const NuGetPackage cppwinrtPackage { "Microsoft.Windows.CppWinRT", "2.0.240405.15", true };
+    inline static const NuGetPackage midiPackage { "Microsoft.Windows.Devices.Midi2", "1.0.3-preview-11.250228-237", false };
+
+    void getPackagesToInclude (std::vector<NuGetPackage>& result) const
+    {
+        if (shouldAddWebView2Package())
+            result.push_back (webviewPackage);
+
+        if (shouldAddMidiPackage())
+        {
+            result.push_back (cppwinrtPackage);
+            result.push_back (midiPackage);
+        }
+    }
 
     void createPackagesConfigFile() const
     {
-        if (shouldAddWebView2Package())
+        std::vector<NuGetPackage> packagesToInclude;
+        getPackagesToInclude (packagesToInclude);
+
+        if (packagesToInclude.empty())
+            return;
+
+        packagesConfigFile = getTargetFolder().getChildFile ("packages.config");
+
+        build_tools::writeStreamToFile (packagesConfigFile, [&packagesToInclude] (MemoryOutputStream& mo)
         {
-            packagesConfigFile = getTargetFolder().getChildFile ("packages.config");
+            mo.setNewLineString ("\r\n");
 
-            build_tools::writeStreamToFile (packagesConfigFile, [] (MemoryOutputStream& mo)
+            mo << "<?xml version=\"1.0\" encoding=\"utf-8\"?>"                   << newLine
+               << "<packages>"                                                   << newLine;
+
+            for (const auto& p : packagesToInclude)
             {
-                mo.setNewLineString ("\r\n");
+                mo << "  <package id=" << p.name.quoted() << " version=" << p.version.quoted();
 
-                mo << "<?xml version=\"1.0\" encoding=\"utf-8\"?>"                   << newLine
-                   << "<packages>"                                                   << newLine
-                   << "\t" << "<package id=" << getWebView2PackageName().quoted()
-                           << " version="    << getWebView2PackageVersion().quoted()
-                           << " />"                                                  << newLine
-                   << "</packages>"                                                  << newLine;
-            });
-        }
+                if (p.targetFrameworkNative)
+                    mo << " targetFramework=\"native\"";
+
+                mo << " />"                                                       << newLine;
+            }
+
+            mo << "</packages>"                                                  << newLine;
+        });
     }
 
     static String prependDot (const String& filename)
@@ -2696,6 +2756,7 @@ protected:
 
         return name.equalsIgnoreCase ("include_juce_gui_basics")
             || name.equalsIgnoreCase ("include_juce_audio_processors")
+            || name.equalsIgnoreCase ("include_juce_audio_processors_headless")
             || name.equalsIgnoreCase ("include_juce_core")
             || name.equalsIgnoreCase ("include_juce_graphics");
     }
@@ -2801,4 +2862,49 @@ private:
     const String defaultToolset { "v143" }, defaultTargetPlatform { "10.0" };
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2022)
+};
+
+//==============================================================================
+class MSVCProjectExporterVC2026 final : public MSVCProjectExporterBase
+{
+public:
+    MSVCProjectExporterVC2026 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterBase (p, t, getTargetFolderName())
+    {
+        name = getDisplayName();
+
+        targetPlatformVersion.setDefault (defaultTargetPlatform);
+        platformToolsetValue.setDefault (defaultToolset);
+    }
+
+    static String getDisplayName()        { return "Visual Studio 2026"; }
+    static String getValueTreeTypeName()  { return "VS2026"; }
+    static String getTargetFolderName()   { return "VisualStudio2026"; }
+
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
+
+    int getVisualStudioVersion() const override                      { return 18; }
+    String getSolutionComment() const override                       { return "# Visual Studio Version 18"; }
+    String getToolsVersion() const override                          { return "18.0"; }
+    String getDefaultToolset() const override                        { return defaultToolset; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
+
+    static MSVCProjectExporterVC2026* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
+    {
+        if (settingsToUse.hasType (getValueTreeTypeName()))
+            return new MSVCProjectExporterVC2026 (projectToUse, settingsToUse);
+
+        return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        addToolsetProperty (props, { "v140", "v140_xp", "v141", "v141_xp", "v142", "v143", "v145", "ClangCL" });
+        MSVCProjectExporterBase::createExporterProperties (props);
+    }
+
+private:
+    const String defaultToolset { "v145" }, defaultTargetPlatform { "10.0" };
+
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2026)
 };

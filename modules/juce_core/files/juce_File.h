@@ -756,7 +756,7 @@ public:
         the file first and then re-writing it, it creates a new temporary file,
         writes the data to that, and then moves the new file to replace the existing
         file. This means that if the power gets pulled out or something crashes,
-        you're a lot less likely to end up with a corrupted or unfinished file..
+        you're a lot less likely to end up with a corrupted or unfinished file.
 
         Returns true if the operation succeeds, or false if it fails.
 
@@ -791,7 +791,7 @@ public:
         the file first and then re-writing it, it creates a new temporary file,
         writes the text to that, and then moves the new file to replace the existing
         file. This means that if the power gets pulled out or something crashes,
-        you're a lot less likely to end up with an empty file..
+        you're a lot less likely to end up with an empty file.
 
         For an explanation of the parameters here, see the appendText() method.
 

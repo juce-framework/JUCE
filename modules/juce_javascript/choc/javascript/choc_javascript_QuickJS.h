@@ -9428,9 +9428,8 @@ int JS_SetModuleExportList(JSContext *ctx, JSModuleDef *m,
 //#define CONFIG_ATOMICS
 #endif
 
-#if ! (defined(EMSCRIPTEN) || _MSC_VER)
-/* enable stack limitation */
-#define CONFIG_STACK_CHECK
+#if ! (defined(EMSCRIPTEN) || CHOC_QUICKJS_NO_STACK_CHECK || _MSC_VER)
+ #define CONFIG_STACK_CHECK
 #endif
 
 // Avoid enabling the stack check if the sanitiser is active, as it causes all

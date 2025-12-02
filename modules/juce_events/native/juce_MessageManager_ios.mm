@@ -54,7 +54,7 @@ void MessageManager::stopDispatchLoop()
     if (! SystemStats::isRunningInAppExtensionSandbox())
        [[[UIApplication sharedApplication] delegate] applicationWillTerminate: [UIApplication sharedApplication]];
 
-    exit (0); // iOS apps get no mercy..
+    exit (0); // iOS apps get no mercy
 }
 
 #if JUCE_MODAL_LOOPS_PERMITTED

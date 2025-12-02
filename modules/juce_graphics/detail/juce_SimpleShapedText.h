@@ -53,7 +53,6 @@ private:
                          alignmentWidth,
                          height,
                          fontsForRange,
-                         language,
                          firstLineIndent,
                          leading,
                          additiveLineSpacing,
@@ -132,11 +131,6 @@ public:
         return withMember (*this, &ShapedTextOptions::fontsForRange, x);
     }
 
-    [[nodiscard]] ShapedTextOptions withLanguage (StringRef x) const
-    {
-        return withMember (*this, &ShapedTextOptions::language, x);
-    }
-
     [[nodiscard]] ShapedTextOptions withFirstLineIndent (float x) const
     {
         return withMember (*this, &ShapedTextOptions::firstLineIndent, x);
@@ -206,7 +200,6 @@ public:
     const auto& getAlignmentWidth() const               { return alignmentWidth; }
     const auto& getHeight() const                       { return height; }
     const auto& getFontsForRange() const                { return fontsForRange; }
-    const auto& getLanguage() const                     { return language; }
     const auto& getFirstLineIndent() const              { return firstLineIndent; }
     const auto& getLeading() const                      { return leading; }
     const auto& getAdditiveLineSpacing() const          { return additiveLineSpacing; }
@@ -232,7 +225,6 @@ private:
         return result;
     });
 
-    String language = SystemStats::getDisplayLanguage();
     float firstLineIndent = 0.0f;
     float leading = 1.0f;
     float additiveLineSpacing = 0.0f;

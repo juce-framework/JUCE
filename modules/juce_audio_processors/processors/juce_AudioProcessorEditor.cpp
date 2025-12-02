@@ -42,7 +42,7 @@ AudioProcessorEditor::AudioProcessorEditor (AudioProcessor& p) noexcept  : proce
 
 AudioProcessorEditor::AudioProcessorEditor (AudioProcessor* p) noexcept  : processor (*p)
 {
-    // the filter must be valid..
+    // the filter must be valid
     jassert (p != nullptr);
     initialise();
 }
@@ -50,7 +50,7 @@ AudioProcessorEditor::AudioProcessorEditor (AudioProcessor* p) noexcept  : proce
 AudioProcessorEditor::~AudioProcessorEditor()
 {
     // if this fails, then the wrapper hasn't called editorBeingDeleted() on the
-    // filter for some reason..
+    // filter for some reason
     jassert (processor.getActiveEditor() != this);
     removeComponentListener (resizeListener.get());
 }
@@ -91,7 +91,7 @@ void AudioProcessorEditor::setResizeLimits (int newMinimumWidth,
 {
     if (constrainer != nullptr && constrainer != &defaultConstrainer)
     {
-        // if you've set up a custom constrainer then these settings won't have any effect..
+        // if you've set up a custom constrainer then these settings won't have any effect
         jassertfalse;
         return;
     }

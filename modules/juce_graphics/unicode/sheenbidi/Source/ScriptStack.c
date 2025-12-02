@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2018-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "SBAssert.h"
 #include "SBBase.h"
+#include "SBCodepoint.h"
 #include "ScriptStack.h"
 
 SB_INTERNAL void ScriptStackReset(ScriptStackRef stack)

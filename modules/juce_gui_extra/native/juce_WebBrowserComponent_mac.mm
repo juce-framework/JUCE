@@ -383,10 +383,12 @@ public:
     DelegateConnector (WebBrowserComponent& browserIn,
                        std::function<void (const var&)> handleNativeEventFnIn,
                        std::function<std::optional<WebBrowserComponent::Resource> (const String&)> handleResourceRequestFnIn,
+                       std::function<void (const String&)> didFinishNavigationCallbackIn,
                        const WebBrowserComponent::Options& optionsIn)
         : browser (browserIn),
           handleNativeEventFn (std::move (handleNativeEventFnIn)),
           handleResourceRequestFn (std::move (handleResourceRequestFnIn)),
+          didFinishNavigationCallback (std::move (didFinishNavigationCallbackIn)),
           options (optionsIn)
     {
     }
@@ -408,10 +410,16 @@ public:
         return options;
     }
 
+    void didFinishNavigation (const String& url)
+    {
+        didFinishNavigationCallback (url);
+    }
+
 private:
     WebBrowserComponent& browser;
     std::function<void (const var&)> handleNativeEventFn;
     std::function<std::optional<WebBrowserComponent::Resource> (const String&)> handleResourceRequestFn;
+    std::function<void (const String&)> didFinishNavigationCallback;
     WebBrowserComponent::Options options;
 };
 
@@ -437,7 +445,7 @@ struct WebViewDelegateClass final : public ObjCClass<NSObject>
                    [] (id self, SEL, WKWebView* webview, WKNavigation*)
                    {
                        if (auto* connector = getConnector (self))
-                           connector->getBrowser().pageFinishedLoading (nsStringToJuce ([[webview URL] absoluteString]));
+                           connector->didFinishNavigation (nsStringToJuce ([[webview URL] absoluteString]));
                    });
 
         addMethod (@selector (webView:didFailNavigation:withError:),
@@ -789,7 +797,7 @@ public:
     {
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         // WebKit doesn't capture mouse-moves itself, so it seems the only way to make
-        // them work is to push them via this non-public method..
+        // them work is to push them via this non-public method.
         if ([webView.get() respondsToSelector: @selector (_updateMouseoverWithFakeEvent)])
             [webView.get() performSelector:    @selector (_updateMouseoverWithFakeEvent)];
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
@@ -811,6 +819,7 @@ JUCE_END_IGNORE_DEPRECATION_WARNINGS
 #endif
 
 class WebBrowserComponent::Impl::Platform::WKWebViewImpl : public WebBrowserComponent::Impl::PlatformInterface,
+                                                           private AsyncUpdater,
                                                           #if JUCE_MAC
                                                            public NSViewComponent
                                                           #else
@@ -825,6 +834,10 @@ public:
           delegateConnector (implIn.owner,
                              [this] (const auto& m) { owner.handleNativeEvent (m); },
                              [this] (const auto& r) { return owner.handleResourceRequest (r); },
+                             [this] (const auto& url) {
+                                                          lastLoadedUrl = url;
+                                                          owner.owner.pageFinishedLoading (url);
+                                                      },
                              browserOptions),
           allowAccessToEnclosingDirectory (browserOptions.getAppleWkWebViewOptions()
                                                          .getAllowAccessToEnclosingDirectory())
@@ -917,6 +930,39 @@ public:
         setSize (width, height);
     }
 
+    void handleAsyncUpdate() override
+    {
+        auto& browser = owner.owner;
+
+        if (! browser.blankPageShown)
+            return;
+
+        if (lastRequestedUrl != blankPageUrl)
+            return;
+
+        // According to our logic, a blank page was shown, and now we are trying to go back to the
+        // page before that.
+        //
+        // But WkWebView seems to be doing some asynchronous batching, and if you send loadRequest:
+        // and goBack in quick succession, loadRequest: will be ignored entirely and goBack will be
+        // executed on the backForwardList as if it never happened.
+        //
+        // Although none of this is documented, it seems we can reliably query the current contents
+        // of the backForwardList to see, if we would be navigating away from the URL with the
+        // actual contents if we executed goBack now, and we can wait until loadRequest: has taken
+        // effect.
+        //
+        // This behaviour initially caused a bug in FL Studio, where the plugin window can become
+        // invisible and visible again in very rapid succession, when using the TAB button.
+        if (lastLoadedUrl != blankPageUrl)
+        {
+            triggerAsyncUpdate();
+            return;
+        }
+
+        browser.goBack();
+    }
+
     void checkWindowAssociation() override
     {
         auto& browser = owner.owner;
@@ -924,20 +970,21 @@ public:
         if (browser.isShowing())
         {
             browser.reloadLastURL();
-
-            if (browser.blankPageShown)
-                browser.goBack();
+            handleAsyncUpdate();
         }
         else
         {
-            if (browser.unloadPageWhenHidden && ! browser.blankPageShown)
+            if (   browser.unloadPageWhenHidden
+                && ! browser.blankPageShown
+                && lastLoadedUrl.isNotEmpty()
+                && lastLoadedUrl != blankPageUrl)
             {
                 // when the component becomes invisible, some stuff like flash
                 // carries on playing audio, so we need to force it onto a blank
                 // page to avoid this, (and send it back when it's made visible again).
 
                 browser.blankPageShown = true;
-                goToURL ("about:blank", nullptr, nullptr);
+                goToURL (blankPageUrl, nullptr, nullptr);
             }
         }
     }
@@ -1030,6 +1077,7 @@ public:
         }
         else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
         {
+            lastRequestedUrl = url;
             [webView.get() loadRequest: request];
         }
     }
@@ -1097,12 +1145,15 @@ public:
     }
 
 private:
+    static inline auto blankPageUrl = "about:blank";
+
     WebBrowserComponent::Impl& owner;
     DelegateConnector delegateConnector;
     bool allowAccessToEnclosingDirectory = false;
     LastFocusChange lastFocusChange;
     ObjCObjectHandle<WKWebView*> webView;
     ObjCObjectHandle<id> webViewDelegate;
+    String lastRequestedUrl, lastLoadedUrl;
 };
 
 //==============================================================================

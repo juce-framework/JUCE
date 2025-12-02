@@ -103,15 +103,15 @@ struct XmlAttribute
     structure.
 
     Here's an example of parsing some elements: @code
-    // check we're looking at the right kind of document..
+    // check we're looking at the right kind of document
     if (myElement->hasTagName ("ANIMALS"))
     {
-        // now we'll iterate its sub-elements looking for 'giraffe' elements..
+        // now we'll iterate its sub-elements looking for 'giraffe' elements
         for (auto* e : myElement->getChildIterator())
         {
             if (e->hasTagName ("GIRAFFE"))
             {
-                // found a giraffe, so use some of its attributes..
+                // found a giraffe, so use some of its attributes
 
                 String giraffeName  = e->getStringAttribute ("name");
                 int giraffeAge      = e->getIntAttribute ("age");
@@ -127,14 +127,14 @@ struct XmlAttribute
 
     for (int i = 0; i < numAnimals; ++i)
     {
-        // create an inner element..
+        // create an inner element...
         XmlElement* giraffe = new XmlElement ("GIRAFFE");
 
         giraffe->setAttribute ("name", "nigel");
         giraffe->setAttribute ("age", 10);
         giraffe->setAttribute ("friendly", true);
 
-        // ..and add our new element to the parent node
+        // ...and add our new element to the parent node
         animalsList.addChildElement (giraffe);
     }
 
@@ -289,7 +289,7 @@ public:
     const String& getAttributeValue (int attributeIndex) const noexcept;
 
     //==============================================================================
-    // Attribute-handling methods..
+    // Attribute-handling methods
 
     /** Checks whether the element contains an attribute with a certain name. */
     bool hasAttribute (StringRef attributeName) const noexcept;
@@ -417,7 +417,7 @@ public:
     void removeAllAttributes() noexcept;
 
     //==============================================================================
-    // Child element methods..
+    // Child element methods
 
     /** Returns the first of this element's sub-elements.
         see getNextElement() for an example of how to iterate the sub-elements.
@@ -434,7 +434,7 @@ public:
 
         while (child != nullptr)
         {
-            ...do stuff with this child..
+            ...do stuff with this child
 
             child = child->getNextElement();
         }
@@ -550,7 +550,7 @@ public:
         myParentElement->addChildElement (newElement);
         @endcode
 
-        ..you could just write this:
+        ...you could just write this:
         @code
         XmlElement* newElement = myParentElement->createNewChildElement ("foobar");
         @endcode
@@ -610,7 +610,7 @@ public:
         int compareElements (const XmlElement* first, const XmlElement* second);
         @endcode
 
-        ..and this method must return:
+        ...and this method must return:
           - a value of < 0 if the first comes before the second
           - a value of 0 if the two objects are equivalent
           - a value of > 0 if the second comes before the first
@@ -968,7 +968,7 @@ private:
 
     forEachXmlChildElementWithTagName (*myParentXml, child, "MYTAG")
     {
-        // the child object is now guaranteed to be a <MYTAG> element..
+        // the child object is now guaranteed to be a <MYTAG> element
         doSomethingWithMYTAGElement (child);
     }
 

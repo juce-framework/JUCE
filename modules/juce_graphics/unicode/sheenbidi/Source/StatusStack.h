@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2022 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 #ifndef _SB_INTERNAL_STATUS_STACK_H
 #define _SB_INTERNAL_STATUS_STACK_H
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
+
+#include "Object.h"
 #include "SBBase.h"
 
 #define _StatusStackList_Length         16
@@ -37,6 +39,7 @@ typedef struct _StatusStackList {
 } _StatusStackList, *_StatusStackListRef;
 
 typedef struct _StatusStack {
+    Object _object;
     _StatusStackList _firstList;
     _StatusStackListRef _peekList;
     SBUInteger _peekTop;

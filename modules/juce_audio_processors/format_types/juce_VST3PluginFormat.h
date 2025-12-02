@@ -35,61 +35,18 @@
 namespace juce
 {
 
-#if (JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)) || DOXYGEN
+#if JUCE_INTERNAL_HAS_VST3
 
 /**
     Implements a plugin format for VST3s.
 
     @tags{Audio}
 */
-class JUCE_API VST3PluginFormat   : public AudioPluginFormat
+class JUCE_API VST3PluginFormat : public VST3PluginFormatHeadless
 {
-public:
-    /** Constructor */
-    VST3PluginFormat();
-
-    /** Destructor */
-    ~VST3PluginFormat() override;
-
-    //==============================================================================
-    /** @cond */
-    /** Attempts to reload a VST3 plugin's state from some preset file data.
-
-        @see VSTPluginFormat::loadFromFXBFile
-    */
-    [[deprecated ("Instead of using this function, use AudioPluginInstance::getExtensions() "
-                 "to visit the ExtensionsVisitor::VST3 struct for the instance, if it exists. "
-                 "Then, call ExtensionsVisitor::VST3::setPreset() to set the state using the "
-                 "contents of a vstpreset file.")]]
-    static bool setStateFromVSTPresetFile (AudioPluginInstance*, const MemoryBlock&);
-    /** @endcond */
-
-    //==============================================================================
-    static String getFormatName()                   { return "VST3"; }
-    String getName() const override                 { return getFormatName(); }
-    bool canScanForPlugins() const override         { return true; }
-    bool isTrivialToScan() const override           { return false; }
-
-    void findAllTypesForFile (OwnedArray<PluginDescription>&, const String& fileOrIdentifier) override;
-    bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
-    String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;
-    bool pluginNeedsRescanning (const PluginDescription&) override;
-    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive, bool) override;
-    bool doesPluginStillExist (const PluginDescription&) override;
-    FileSearchPath getDefaultLocationsToSearch() override;
-    void createARAFactoryAsync (const PluginDescription&, ARAFactoryCreationCallback callback) override;
-
-private:
-    //==============================================================================
-    void createPluginInstance (const PluginDescription&, double initialSampleRate,
-                               int initialBufferSize, PluginCreationCallback) override;
-    bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const override;
-    void recursiveFileSearch (StringArray&, const File&, bool recursive);
-    StringArray getLibraryPaths (const String&);
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginFormat)
+    void createPluginInstance (const PluginDescription&, double, int, PluginCreationCallback) override;
 };
 
-#endif // JUCE_PLUGINHOST_VST3
+#endif
 
 } // namespace juce

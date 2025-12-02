@@ -106,9 +106,16 @@ public:
     ComSmartPtr() noexcept = default;
     ComSmartPtr (std::nullptr_t) noexcept {}
 
+    ComSmartPtr (ComClass* object, IncrementRef incrementRef) noexcept
+        : p (object)
+    {
+        if (p != nullptr && incrementRef == IncrementRef::yes)
+            p->AddRef();
+    }
+
     template <typename U>
-    ComSmartPtr (const ComSmartPtr<U>& other) : ComSmartPtr (other, true) {}
-    ComSmartPtr (const ComSmartPtr&    other) : ComSmartPtr (other, true) {}
+    ComSmartPtr (const ComSmartPtr<U>& other) : ComSmartPtr (other, IncrementRef::yes) {}
+    ComSmartPtr (const ComSmartPtr&    other) : ComSmartPtr (other, IncrementRef::yes) {}
 
     ~ComSmartPtr() noexcept { release(); }
 
@@ -162,28 +169,9 @@ public:
         return destObject;
     }
 
-    /** Increments refcount. */
-    static auto addOwner (ComClass* t)
-    {
-        return ComSmartPtr (t, true);
-    }
-
-    /** Does not initially increment refcount; assumes t has a positive refcount. */
-    static auto becomeOwner (ComClass* t)
-    {
-        return ComSmartPtr (t, false);
-    }
-
 private:
     template <typename U>
     friend class ComSmartPtr;
-
-    ComSmartPtr (ComClass* object, bool autoAddRef) noexcept
-        : p (object)
-    {
-        if (p != nullptr && autoAddRef)
-            p->AddRef();
-    }
 
     void release()
     {
@@ -195,20 +183,6 @@ private:
 
     ComClass* p = nullptr;
 };
-
-/** Increments refcount. */
-template <class ObjectType>
-auto addComSmartPtrOwner (ObjectType* t)
-{
-    return ComSmartPtr<ObjectType>::addOwner (t);
-}
-
-/** Does not initially increment refcount; assumes t has a positive refcount. */
-template <class ObjectType>
-auto becomeComSmartPtrOwner (ObjectType* t)
-{
-    return ComSmartPtr<ObjectType>::becomeOwner (t);
-}
 
 //==============================================================================
 template <class First, class... ComClasses>

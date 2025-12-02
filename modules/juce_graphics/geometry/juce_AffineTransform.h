@@ -215,6 +215,10 @@ public:
     */
     static AffineTransform verticalFlip (float height) noexcept;
 
+    /** Returns a transform that will flip coordinates horizontally within a window of the given width.
+    */
+    static AffineTransform horizontalFlip (float width) noexcept;
+
     /** Returns a matrix which is the inverse operation of this one.
 
         Some matrices don't have an inverse - in this case, the method will just return

@@ -317,12 +317,22 @@ struct ObjCClass
         jassert (cls != nil);
     }
 
-    virtual ~ObjCClass()
+    ~ObjCClass()
     {
         auto kvoSubclassName = String ("NSKVONotifying_") + class_getName (cls);
 
         if (objc_getClass (kvoSubclassName.toUTF8()) == nullptr)
             objc_disposeClassPair (cls);
+    }
+
+    ObjCClass (ObjCClass&& other) noexcept
+        : cls (std::exchange (other.cls, {})) {}
+
+    ObjCClass& operator= (ObjCClass&& other) noexcept
+    {
+        auto tmp = std::move (other);
+        std::swap (tmp.cls, cls);
+        return *this;
     }
 
     void registerClass()
@@ -575,6 +585,63 @@ private:
     Class klass = nullptr;
 };
 
+//==============================================================================
+/*
+    Forwards NSNotificationCenter callbacks to a std::function<void()>.
+*/
+class FunctionNotificationCenterObserver
+{
+public:
+    FunctionNotificationCenterObserver (NSNotificationName notificationName,
+                                        id objectToObserve,
+                                        std::function<void()> callback)
+        : onNotification (std::move (callback)),
+          observer (observerObject.get(), getSelector(), notificationName, objectToObserve)
+    {}
+
+private:
+    static SEL getSelector()
+    {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+        return @selector (notificationFired:);
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    }
+
+    std::function<void()> onNotification;
+
+    NSUniquePtr<NSObject> observerObject
+    {
+        [this]
+        {
+            static auto observerClass = std::invoke ([]
+            {
+                ObjCClass<NSObject> k { "JUCEObserverClass_" };
+
+                k.addIvar<FunctionNotificationCenterObserver*> ("owner");
+
+                k.addMethod (getSelector(), [] (id self, SEL, NSNotification*)
+                {
+                    getIvar<FunctionNotificationCenterObserver*> (self, "owner")->onNotification();
+                });
+
+                k.registerClass();
+
+                return k;
+            });
+            auto* result = observerClass.createInstance();
+            object_setInstanceVariable (result, "owner", this);
+            return result;
+        }()
+    };
+
+    ScopedNotificationCenterObserver observer;
+
+    // Instances can't be copied or moved, because 'this' is stored as a member of the ObserverClass
+    // object.
+    JUCE_DECLARE_NON_COPYABLE (FunctionNotificationCenterObserver)
+    JUCE_DECLARE_NON_MOVEABLE (FunctionNotificationCenterObserver)
+};
+
 #if JUCE_IOS
 
 // Defines a function that will check the requested version both at
@@ -597,7 +664,7 @@ private:
             return Trait::newFn (std::forward<Args> (args)...);             \
         else if constexpr (__IPHONE_OS_VERSION_MAX_ALLOWED < fullVersion)   \
             return Trait::oldFn (std::forward<Args> (args)...);             \
-        else if (@available (ios major ## . ## minor, *))                   \
+        else if (@available (iOS major ## . ## minor, *))                   \
             return Trait::newFn (std::forward<Args> (args)...);             \
         else                                                                \
             return Trait::oldFn (std::forward<Args> (args)...);             \

@@ -1,6 +1,73 @@
 # JUCE breaking changes
 
+# Version 8.0.11
+
+## Change
+
+Enabling JUCE_ASIO will now default to using bundled ASIO sources.
+
+**Possible Issues**
+
+Programs that depend on specific versions of the ASIO SDK (perhaps with custom
+modifications) may be broken.
+
+**Workaround**
+
+To use a different version of the ASIO SDK, additionally set the
+JUCE_ASIO_USE_EXTERNAL_SDK module option. If you're happy to use the bundled
+sources, consider removing the custom header include paths you were previously
+using to locate the ASIO headers.
+
+**Rationale**
+
+The bundled headers should be sufficient for the majority of use-cases, so this
+is now the standard option requiring less configuration. Using custom headers
+is an advanced use-case, so it's reasonable that this requires some additional
+configuration, i.e. setting the JUCE_ASIO_USE_EXTERNAL_SDK flag.
+
+
 # Version 8.0.9
+
+## Change
+
+AudioProcessor::TrackProperties::colour has been removed. It is replaced by a
+new data member, colourARGB.
+
+**Possible Issues**
+
+Code that references this data member will fail to compile.
+
+**Workaround**
+
+Use the new colourARGB field, which holds the raw ARGB values packed in a
+uint32, instead. In order to convert to a Colour instance, pass the value held
+by colourARGB to the constructor of Colour.
+
+**Rationale**
+
+This change removes the dependency between the juce_audio_processors_headless
+and juce_graphics. It is now possible to build programs that work with headless
+AudioProcessors without needing to include juce_graphics.
+
+
+## Change
+
+The function AudioPluginFormatManager::addDefaultFormats() has been removed.
+
+**Possible Issues**
+
+Code that calls this function will fail to compile.
+
+**Workaround**
+
+Use the new non-member function "addDefaultFormatsToManager()" instead.
+
+**Rationale**
+
+This change removes the dependency between the AudioPluginFormatManager and the
+concrete plugin format types, allowing the AudioPluginFormatManager to be built
+in isolation.
+
 
 ## Change
 

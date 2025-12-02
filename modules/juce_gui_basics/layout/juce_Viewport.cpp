@@ -186,7 +186,7 @@ void Viewport::deleteOrRemoveContentComp()
         if (deleteContent)
         {
             // This sets the content comp to a null pointer before deleting the old one, in case
-            // anything tries to use the old one while it's in mid-deletion..
+            // anything tries to use the old one while it's in mid-deletion.
             std::unique_ptr<Component> oldCompDeleter (contentComp.get());
             contentComp = nullptr;
         }
@@ -409,7 +409,7 @@ void Viewport::updateVisibleArea()
         auto oldContentBounds = contentComp->getBounds();
         contentHolder.setBounds (contentArea);
 
-        // If the content has changed its size, that might affect our scrollbars, so go round again and re-calculate..
+        // If the content has changed its size, that might affect our scrollbars, so go round again and re-calculate.
         if (oldContentBounds == contentComp->getBounds())
             break;
     }

@@ -119,7 +119,7 @@ struct ASIOSampleFormat
             case ASIOSTDSDInt8NER8: break; // (unhandled)
 
             default:
-                jassertfalse;  // (not a valid format code..)
+                jassertfalse;  // (not a valid format code)
                 break;
         }
     }
@@ -357,7 +357,7 @@ public:
 
     void updateSampleRates()
     {
-        // find a list of sample rates..
+        // find a list of sample rates
         Array<double> newRates;
 
         if (asioObject != nullptr)
@@ -586,7 +586,7 @@ public:
                 if (! calledback)
                 {
                     error = "Device didn't start correctly";
-                    JUCE_ASIO_LOG ("no callbacks - stopping..");
+                    JUCE_ASIO_LOG ("no callbacks - stopping");
                     asioObject->stop();
                 }
             }
@@ -862,7 +862,7 @@ private:
 
         if (shouldUsePreferredSize)
         {
-            JUCE_ASIO_LOG ("Using preferred size for buffer..");
+            JUCE_ASIO_LOG ("using preferred size for buffer");
             auto err = refreshBufferSizes();
 
             if (err == ASE_OK)
@@ -919,7 +919,7 @@ private:
 
     void addBufferSizes (long minSize, long maxSize, long preferredSize, long granularity)
     {
-        // find a list of buffer sizes..
+        // find a list of buffer sizes
         JUCE_ASIO_LOG (String ((int) minSize) + "->" + String ((int) maxSize) + ", "
                         + String ((int) preferredSize) + ", " + String ((int) granularity));
 
@@ -964,7 +964,7 @@ private:
 
             if (err == ASE_NoClock && numClockSources > 0)
             {
-                JUCE_ASIO_LOG ("trying to set a clock source..");
+                JUCE_ASIO_LOG ("trying to set a clock source");
                 err = asioObject->setClockSource (clocks[0].index);
                 JUCE_ASIO_LOG_ERROR ("setClockSource2", err);
                 Thread::sleep (10);
@@ -976,7 +976,7 @@ private:
             if (err == 0)
                 currentSampleRate = newRate;
 
-            // on fail, ignore the attempt to change rate, and run with the current one..
+            // on fail, ignore the attempt to change rate, and run with the current one
         }
     }
 
@@ -1170,7 +1170,7 @@ private:
         if (driverError.isEmpty())
         {
             char buffer[512] = {};
-            asioObject->getDriverName (buffer); // just in case any flimsy drivers expect this to be called..
+            asioObject->getDriverName (buffer); // just in case any flimsy drivers expect this to be called
         }
 
         return driverError;
@@ -1178,7 +1178,7 @@ private:
 
     String openDevice()
     {
-        // open the device and get its info..
+        // open the device and get its info
         JUCE_ASIO_LOG ("opening device: " + getName());
 
         needToReset = false;
@@ -1241,11 +1241,11 @@ private:
                             JUCE_ASIO_LOG ("outputReady true");
 
                         updateSampleRates();
-                        readLatencies();                          // ..doing these steps because cubase does so at this stage
-                        createDummyBuffers (preferredBufferSize); // in initialisation, and some devices fail if we don't.
+                        readLatencies();                          // doing these steps because cubase does so at this stage
+                        createDummyBuffers (preferredBufferSize); // in initialisation, and some devices fail if we don't
                         readLatencies();
 
-                        // start and stop because cubase does it..
+                        // start and stop because cubase does it
                         err = asioObject->start();
                         // ignore an error here, as it might start later after setting other stuff up
                         JUCE_ASIO_LOG_ERROR ("start", err);
@@ -1485,7 +1485,7 @@ public:
 
         for (int i = deviceNames.size(); --i >= 0;)
             if (deviceNames[i].containsIgnoreCase ("asio4all"))
-                return i; // asio4all is a safe choice for a default..
+                return i; // asio4all is a safe choice for a default
 
        #if JUCE_DEBUG
         if (deviceNames.size() > 1 && deviceNames[0].containsIgnoreCase ("digidesign"))
@@ -1503,7 +1503,7 @@ public:
                 return i;
 
         jassertfalse;  // unfortunately you can only have a finite number
-                       // of ASIO devices open at the same time..
+                       // of ASIO devices open at the same time
         return -1;
     }
 
@@ -1579,7 +1579,7 @@ private:
 
                             if (RegQueryValueEx (pathKey, 0, 0, &dtype, (LPBYTE) pathName, &dsize) == ERROR_SUCCESS)
                                 // In older code, this used to check for the existence of the file, but there are situations
-                                // where our process doesn't have access to it, but where the driver still loads ok..
+                                // where our process doesn't have access to it, but where the driver still loads ok.
                                 ok = (pathName[0] != 0);
 
                             RegCloseKey (pathKey);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2022 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "BidiChain.h"
 #include "BracketQueue.h"
@@ -23,6 +23,7 @@
 #include "PairingLookup.h"
 #include "SBAssert.h"
 #include "SBBase.h"
+#include "SBCodepoint.h"
 #include "SBLog.h"
 #include "IsolatingRun.h"
 
@@ -129,7 +130,7 @@ static BidiLink ResolveWeakTypes(IsolatingRunRef isolatingRun)
         }
 
         if ((type != SBBidiTypeON && BidiChainGetType(chain, priorLink) == type) || forceMerge) {
-            BidiChainAbandonNext(chain, priorLink);
+            BidiChainAbsorbNext(chain, priorLink);
         } else {
             priorLink = link;
         }
@@ -200,7 +201,7 @@ static BidiLink ResolveWeakTypes(IsolatingRunRef isolatingRun)
         }
 
         if (type != SBBidiTypeON && BidiChainGetType(chain, priorLink) == type) {
-            BidiChainAbandonNext(chain, priorLink);
+            BidiChainAbsorbNext(chain, priorLink);
         } else {
             priorLink = link;
         }

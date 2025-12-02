@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SheenBidi.h>
 
 #ifdef SB_CONFIG_UNITY
 
@@ -25,10 +25,12 @@
 #include "GeneralCategoryLookup.c"
 #include "IsolatingRun.c"
 #include "LevelRun.c"
+#include "Object.c"
 #include "PairingLookup.c"
 #include "RunQueue.c"
 #include "SBAlgorithm.c"
 #include "SBBase.c"
+#include "SBCodepoint.c"
 #include "SBCodepointSequence.c"
 #include "SBLine.c"
 #include "SBLog.c"

@@ -164,7 +164,7 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
   #endif
 
     /** If this fails, it's probably be because your CPU floating-point precision mode has
-        been set to low.. This setting is sometimes changed by things like Direct3D, and can
+        been set to low. This setting is sometimes changed by things like Direct3D, and can
         mess up a lot of the calculations that the library needs to do.
     */
     jassert (roundToInt (10.1f) == 10);
@@ -562,7 +562,7 @@ bool ComponentPeer::handleDragDrop (const ComponentPeer::DragInfo& info)
             infoCopy.position = targetComp->getLocalPoint (&component, info.position);
 
             // We'll use an async message to deliver the drop, because if the target decides
-            // to run a modal loop, it can gum-up the operating system..
+            // to run a modal loop, it can gum-up the operating system.
             MessageManager::callAsync ([=]
             {
                 if (auto* c = targetComp.get())

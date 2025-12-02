@@ -126,7 +126,7 @@ void VideoComponent::resized()
         if (nativeSize.isEmpty())
         {
             // if we've just opened the file and are still waiting for it to
-            // figure out the size, start our timer..
+            // figure out the size, start our timer
             if (! isTimerRunning())
                 startTimer (50);
         }

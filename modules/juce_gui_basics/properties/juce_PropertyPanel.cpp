@@ -296,7 +296,7 @@ void PropertyPanel::updatePropHolderLayout() const
     auto newMaxWidth = viewport.getMaximumVisibleWidth();
     if (maxWidth != newMaxWidth)
     {
-        // need to do this twice because of scrollbars changing the size, etc.
+        // need to do this twice because of scrollbars changing the size, etc
         propertyHolderComponent->updateLayout (newMaxWidth);
     }
 }

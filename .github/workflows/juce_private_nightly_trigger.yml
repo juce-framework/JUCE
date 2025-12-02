@@ -17,7 +17,7 @@ jobs:
           sparse-checkout: ./.github/workflows
       - env:
           TRIGGER_WORKFLOW_INPUTS: |
-            {"triggerer":"Nightly Build","nightly-targets":${{ vars.NIGHTLY_BUILD_TARGETS }}}
+            {"triggerer":"Nightly Build Targets","nightly-targets":${{ vars.NIGHTLY_BUILD_TARGETS }}}
         run: python3 ./.github/workflows/trigger_workflow.py
       - if: ${{ contains(fromJSON(vars.NIGHTLY_BUILD_TARGETS), 'cpp20') }}
         env:

@@ -17,7 +17,7 @@
 #ifndef _SB_INTERNAL_ISOLATING_RUN_H
 #define _SB_INTERNAL_ISOLATING_RUN_H
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "BidiChain.h"
 #include "BracketQueue.h"

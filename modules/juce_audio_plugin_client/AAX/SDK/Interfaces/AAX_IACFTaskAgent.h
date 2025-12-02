@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- * Copyright 2023-2024 Avid Technology, Inc.
+ * Copyright 2023-2025 Avid Technology, Inc.
  * All rights reserved.
  * 
  * This file is part of the Avid AAX SDK.
@@ -97,6 +97,27 @@ public:
 	 * Request that the agent cancel all outstanding tasks
 	 */
 	virtual AAX_Result CancelAllTasks() = 0;
+	//@} Task management
+};
+
+class AAX_IACFTaskAgent_V2 : public AAX_IACFTaskAgent
+{
+public:
+	
+	/** @name Task management
+	 */
+	//@{
+	/**
+	 * Request that the agent cancel a task
+	 * 
+	 * If the task is already complete, or if it was not previously
+	 * added to the task agent using \ref AddTask(), then this
+	 * method should do nothing and should return \ref AAX_SUCCESS.
+	 *
+	 * \param[in] iTaskID
+	 * The ID of the task to cancel. \sa \ref AAX_IACFTask_V2::GetID()
+	 */
+	virtual AAX_Result CancelTask(AAX_CTaskID iTaskID) = 0;
 	//@} Task management
 };
 

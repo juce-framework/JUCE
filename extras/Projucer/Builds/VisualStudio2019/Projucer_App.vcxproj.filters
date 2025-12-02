@@ -260,6 +260,9 @@
     <Filter Include="JUCE Modules\juce_graphics\placement">
       <UniqueIdentifier>{160D9882-0F68-278D-C5F9-8960FD7421D2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi">
+      <UniqueIdentifier>{4DAA3E14-A980-35E5-E1C1-5EA3CCE977BE}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_graphics\unicode\sheenbidi\Headers">
       <UniqueIdentifier>{0CB19E25-4E0F-3B63-F005-249DA1602485}</UniqueIdentifier>
     </Filter>
@@ -1381,6 +1384,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\geometry\juce_Rectangle_test.cpp">
       <Filter>JUCE Modules\juce_graphics\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\geometry\juce_RectangleList_test.cpp">
+      <Filter>JUCE Modules\juce_graphics\geometry</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jaricom.c">
       <Filter>JUCE Modules\juce_graphics\image_formats\jpglib</Filter>
     </ClCompile>
@@ -1657,6 +1663,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\LevelRun.c">
       <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\Object.c">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\PairingLookup.c">
       <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
     </ClCompile>
@@ -1667,6 +1676,9 @@
       <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBBase.c">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBCodepoint.c">
       <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBCodepointSequence.c">
@@ -2775,6 +2787,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_CallbackListenerList.h">
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_IncrementRef.h">
+      <Filter>JUCE Modules\juce_core\detail</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_LruCache.h">
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
@@ -3362,6 +3377,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.h">
       <Filter>JUCE Modules\juce_graphics\contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\detail\juce_FontRendering.h">
+      <Filter>JUCE Modules\juce_graphics\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\detail\juce_JustifiedText.h">
       <Filter>JUCE Modules\juce_graphics\detail</Filter>
@@ -4386,47 +4404,50 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\placement\juce_RectanglePlacement.h">
       <Filter>JUCE Modules\juce_graphics\placement</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBAlgorithm.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBAlgorithm.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBBase.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBBase.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBBidiType.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBBidiType.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBCodepoint.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBCodepoint.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBCodepointSequence.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBCodepointSequence.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBConfig.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBConfig.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBGeneralCategory.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBGeneralCategory.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBLine.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBLine.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBMirrorLocator.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBMirrorLocator.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBParagraph.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBParagraph.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBRun.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBRun.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBScript.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBScript.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SBScriptLocator.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBScriptLocator.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi.h">
-      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SBVersion.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi\SheenBidi.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Headers\SheenBidi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\BidiChain.h">
       <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
@@ -4449,6 +4470,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\LevelRun.h">
       <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\Object.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\PairingLookup.h">
       <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
     </ClInclude>
@@ -4468,6 +4492,9 @@
       <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBBase.h">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBCodepoint.h">
       <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\Source\SBCodepointSequence.h">

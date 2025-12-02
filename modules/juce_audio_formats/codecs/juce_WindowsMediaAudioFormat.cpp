@@ -153,7 +153,10 @@ public:
             HRESULT hr = wmCreateSyncReader (nullptr, WMT_RIGHT_PLAYBACK, wmSyncReader.resetAndGetPointerAddress());
 
             if (SUCCEEDED (hr))
-                hr = wmSyncReader->OpenStream (becomeComSmartPtrOwner (new JuceIStream (*input)));
+            {
+                hr = wmSyncReader->OpenStream (ComSmartPtr { new JuceIStream (*input),
+                                                             IncrementRef::no });
+            }
 
             if (SUCCEEDED (hr))
             {

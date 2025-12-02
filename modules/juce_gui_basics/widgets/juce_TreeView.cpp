@@ -454,7 +454,7 @@ private:
             }
             else
             {
-                // mouse-down inside the body of the item..
+                // mouse-down inside the body of the item
                 if (! owner.isMultiSelectEnabled())
                     item.setSelected (true, true);
                 else if (item.isSelected())
@@ -847,7 +847,7 @@ struct TreeView::InsertPoint
                 if (files.size() > 0 ? item->isInterestedInFileDrag (files)
                                      : item->isInterestedInDragSource (dragSourceDetails))
                 {
-                    // Check if we're trying to drag into an empty group item..
+                    // Check if we're trying to drag into an empty group item.
                     if (oldY > itemPos.getY() + itemPos.getHeight() / 4
                          && oldY < itemPos.getBottom() - itemPos.getHeight() / 4)
                     {
@@ -882,7 +882,7 @@ struct TreeView::InsertPoint
         }
         else if (auto* root = view.getRootItem())
         {
-            // If they're dragging beyond the bottom of the list, then insert at the end of the root item..
+            // If they're dragging beyond the bottom of the list, then insert at the end of the root item.
             item = root;
             insertIndex = root->getNumSubItems();
             pos = root->getItemPosition (true).getBottomLeft();
@@ -983,7 +983,7 @@ void TreeView::setRootItem (TreeViewItem* const newRootItem)
     {
         if (newRootItem != nullptr)
         {
-            // can't use a tree item in more than one tree at once..
+            // can't use a tree item in more than one tree at once
             jassert (newRootItem->ownerView == nullptr);
 
             if (newRootItem->ownerView != nullptr)
@@ -1220,7 +1220,7 @@ void TreeView::moveSelectedRow (int delta)
                 if (! item->canBeSelected())
                 {
                     // if the row we want to highlight doesn't allow it, try skipping
-                    // to the next item..
+                    // to the next item
                     auto nextRowToTry = jlimit (0, numRowsInTree - 1, rowSelected + (delta < 0 ? -1 : 1));
 
                     if (rowSelected != nextRowToTry)

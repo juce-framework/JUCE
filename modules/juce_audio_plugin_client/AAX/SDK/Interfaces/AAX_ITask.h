@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- * Copyright 2023-2024 Avid Technology, Inc.
+ * Copyright 2023-2025 Avid Technology, Inc.
  * All rights reserved.
  * 
  * This file is part of the Avid AAX SDK.
@@ -35,6 +35,7 @@
 
 #include "AAX_IACFTask.h"
 #include "AAX.h"
+#include <memory>
 
 class AAX_IACFDataBuffer;
 
@@ -123,20 +124,53 @@ public:
 	 * 
 	 * \details
 	 * If successful, returns a null pointer. Otherwise, returns
-	 * a pointer back to the same object. This is the expected
-	 * usage pattern:
-	 * 
-	 *   \code{.cpp}
-	 *     // release the task on success, retain it on failure
-	 *     myTask = myTask->SetDone(status);
-	 *   \endcode
+	 * a pointer back to the same object. See
+	 * \ref SetDone(std::unique_ptr<AAX_ITask>&, AAX_TaskCompletionStatus)
+	 * for an example usage pattern.
 	 * 
 	 * \param[in] iStatus
 	 * The final status of the task. This indicates to the host
 	 * whether or not the task was performed as requested.
 	 */
 	virtual AAX_ITask * SetDone(AAX_TaskCompletionStatus iStatus) = 0;
-};
 
+	/**
+	 * \brief The identifier for this task
+	 */
+	virtual AAX_Result GetID(AAX_CTaskID * outID) const = 0;
+
+	/**
+	 * \brief Set a description of the current progress state
+	 *
+	 * \details
+	 * This label may be shown by the host in a progress dialog or
+	 * other progress reporting UI. If possible, use a localized
+	 * string based on \ref AAX_eNotificationEvent_HostLocale .
+	 *
+	 * \param[in] iDescription
+	 * A UTF-8 string describing the current progress state.
+	 */
+	virtual AAX_Result SetProgressLabel(const char * iLabel) = 0;
+
+	/// Helper for \ref SetDone() when using a unique_ptr
+	static void SetDone(std::unique_ptr<AAX_ITask> & iTask, AAX_TaskCompletionStatus iStatus) {
+		if (iTask) {
+			AAX_ITask* const pt = iTask->SetDone(iStatus);
+			if (pt != iTask.get()) {
+				iTask.reset(pt);
+			}
+		}
+	}
+
+	/// Helper for \ref SetDone() when using a shared_ptr
+	static void SetDone(std::shared_ptr<AAX_ITask> & iTask, AAX_TaskCompletionStatus iStatus) {
+		if (iTask) {
+			AAX_ITask* const pt = iTask->SetDone(iStatus);
+			if (pt != iTask.get()) {
+				iTask.reset(pt);
+			}
+		}
+	}
+};
 
 #endif

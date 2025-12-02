@@ -114,7 +114,7 @@ bool DirectoryIterator::next (bool* isDirResult, bool* isHiddenResult, int64* fi
                     matches = (whatToLookFor & File::findFiles) != 0;
                 }
 
-                // if we're not relying on the OS iterator to do the wildcard match, do it now..
+                // if we're not relying on the OS iterator to do the wildcard match, do it now
                 if (matches && (isRecursive || wildCards.size() > 1))
                     matches = fileMatches (wildCards, filename);
 

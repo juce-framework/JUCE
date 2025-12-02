@@ -490,7 +490,7 @@ public:
             if ((key.getModifiers().getRawFlags() & ~allowableMods) == 0)
             {
                 // we want to avoid these keypresses going to the viewport, and instead allow
-                // them to pass up to our listbox..
+                // them to pass up to our listbox
                 return false;
             }
         }

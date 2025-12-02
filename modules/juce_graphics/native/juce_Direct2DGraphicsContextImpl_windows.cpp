@@ -216,8 +216,8 @@ private:
         explicit OwningLayer (const D2D1_LAYER_PARAMETERS1& p) : params (p) {}
 
         D2D1_LAYER_PARAMETERS1 params;
-        ComSmartPtr<ID2D1Geometry> geometry = params.geometricMask != nullptr ? addComSmartPtrOwner (params.geometricMask) : nullptr;
-        ComSmartPtr<ID2D1Brush> brush = params.opacityBrush != nullptr ? addComSmartPtrOwner (params.opacityBrush) : nullptr;
+        ComSmartPtr<ID2D1Geometry> geometry { params.geometricMask, IncrementRef::yes };
+        ComSmartPtr<ID2D1Brush> brush { params.opacityBrush, IncrementRef::yes };
     };
 
     struct Layer

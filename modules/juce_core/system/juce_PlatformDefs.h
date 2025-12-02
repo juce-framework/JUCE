@@ -187,7 +187,7 @@ namespace juce
 
 #else
   //==============================================================================
-  // If debugging is disabled, these dummy debug and assertion macros are used..
+  // If debugging is disabled, these dummy debug and assertion macros are used.
 
   #define DBG(textToWrite)
   #define jassertfalse                  JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION;)
@@ -228,19 +228,19 @@ namespace juce
     @code
     class MyClass
     {
-        etc..
+        etc.
 
     private:
         MyClass (const MyClass&);
         MyClass& operator= (const MyClass&);
     };@endcode
 
-    ..you can just write:
+    ...you can just write:
 
     @code
     class MyClass
     {
-        etc..
+        etc.
 
     private:
         JUCE_DECLARE_NON_COPYABLE (MyClass)

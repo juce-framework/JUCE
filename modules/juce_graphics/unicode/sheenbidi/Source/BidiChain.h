@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,32 @@
 #ifndef _SB_INTERNAL_BIDI_CHAIN_H
 #define _SB_INTERNAL_BIDI_CHAIN_H
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
+
 #include "SBBase.h"
 
 typedef SBUInt32 BidiLink;
 
 #define BidiLinkNone    (SBUInt32)(-1)
 
+enum {
+    BidiFlagNone   = 0x00,
+    BidiFlagSingle = 0x01
+};
+typedef SBUInt8 BidiFlag;
+
 typedef struct _BidiChain {
     SBBidiType *types;
     SBLevel *levels;
+    BidiFlag *flags;
     BidiLink *links;
     BidiLink roller;
     BidiLink last;
 } BidiChain, *BidiChainRef;
 
 SB_INTERNAL void BidiChainInitialize(BidiChainRef chain,
-    SBBidiType *types, SBLevel *levels, BidiLink *links);
-SB_INTERNAL void BidiChainAdd(BidiChainRef chain, SBBidiType type, SBUInteger length);
+    SBBidiType *types, SBLevel *levels, BidiFlag *flags, BidiLink *links);
+SB_INTERNAL void BidiChainAdd(BidiChainRef chain, SBBidiType type, SBUInteger lastLinkLength);
 
 #define BidiChainGetOffset(chain, link)         \
 (                                               \
@@ -52,7 +60,8 @@ SB_INTERNAL void BidiChainSetLevel(BidiChainRef chain, BidiLink link, SBLevel le
 SB_INTERNAL BidiLink BidiChainGetNext(BidiChainRef chain, BidiLink link);
 SB_INTERNAL void BidiChainSetNext(BidiChainRef chain, BidiLink link, BidiLink next);
 SB_INTERNAL void BidiChainAbandonNext(BidiChainRef chain, BidiLink link);
-SB_INTERNAL SBBoolean BidiChainMergeIfEqual(BidiChainRef chain, BidiLink first, BidiLink second);
+SB_INTERNAL void BidiChainAbsorbNext(BidiChainRef chain, BidiLink link);
+SB_INTERNAL SBBoolean BidiChainMergeNext(BidiChainRef chain, BidiLink link);
 
 #define BidiChainForEach(chain, roller, link) \
     for (link = chain->links[roller]; link != roller; link = chain->links[link])

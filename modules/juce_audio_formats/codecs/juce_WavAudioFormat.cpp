@@ -1651,9 +1651,9 @@ public:
 
         if (! output->write (tempBlock.getData(), bytes))
         {
-            // failed to write to disk, so let's try writing the header.
+            // Failed to write to disk, so let's try writing the header.
             // If it's just run out of disk space, then if it does manage
-            // to write the header, we'll still have a usable file..
+            // to write the header, we'll still have a usable file.
             writeHeader();
             writeFailed = true;
             return false;
@@ -1890,7 +1890,7 @@ public:
 
         if (map == nullptr || ! mappedSection.contains (sample))
         {
-            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
+            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read
 
             zeromem (result, (size_t) num * sizeof (float));
             return;
@@ -1917,7 +1917,7 @@ public:
 
         if (map == nullptr || numSamples <= 0 || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
         {
-            jassert (numSamples <= 0); // you must make sure that the window contains all the samples you're going to attempt to read.
+            jassert (numSamples <= 0); // you must make sure that the window contains all the samples you're going to attempt to read
 
             for (int i = 0; i < numChannelsToRead; ++i)
                 results[i] = {};
@@ -2090,7 +2090,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 
             if (chunk.getSize() <= (size_t) bwavSize)
             {
-                // the new one will fit in the space available, so write it directly..
+                // the new one will fit in the space available, so write it directly
                 auto oldSize = wavFile.getSize();
 
                 {

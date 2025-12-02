@@ -248,7 +248,7 @@ void ComponentBoundsConstrainer::checkBounds (Rectangle<int>& bounds,
         }
     }
 
-    // constrain the aspect ratio if one has been specified..
+    // constrain the aspect ratio if one has been specified
     if (aspectRatio > 0.0)
     {
         bool adjustWidth;

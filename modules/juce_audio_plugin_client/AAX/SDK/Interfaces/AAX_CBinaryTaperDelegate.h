@@ -47,7 +47,7 @@
 	When this taper is constructed with a bool template type, its normalized values are
 	automatically typecast to the proper boolean value.
 
-	\ingroup TaperDelegates
+	\ingroup AAXLibraryFeatures_ParameterManager_TaperDelegates
 	
 */
 template <typename T>

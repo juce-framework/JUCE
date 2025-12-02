@@ -41,7 +41,7 @@
 #include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
 #include <juce_gui_basics/native/juce_WindowsHooks_windows.h>
 
-#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors_headless/format_types/juce_LegacyAudioParameter.h>
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4512 4996 5272)
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
@@ -931,7 +931,7 @@ namespace AAXClasses
                     auto numObjects = dataSize / sizeof (PluginInstanceInfo);
                     auto* objects = static_cast<PluginInstanceInfo*> (data);
 
-                    jassert (numObjects == 1); // not sure how to handle more than one..
+                    jassert (numObjects == 1); // not sure how to handle more than one
 
                     for (size_t i = 0; i < numObjects; ++i)
                         new (objects + i) PluginInstanceInfo (const_cast<JuceAAX_Processor&> (*this));

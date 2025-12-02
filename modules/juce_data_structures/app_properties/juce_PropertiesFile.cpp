@@ -59,7 +59,7 @@ PropertiesFile::Options::Options()
 
 File PropertiesFile::Options::getDefaultFile() const
 {
-    // mustn't have illegal characters in this name..
+    // mustn't have illegal characters in this name
     jassert (applicationName == File::createLegalFileName (applicationName));
 
    #if JUCE_MAC || JUCE_IOS
@@ -82,7 +82,7 @@ File PropertiesFile::Options::getDefaultFile() const
 
            If your app needs to load settings files that were created by older versions of juce and
            you want to maintain backwards-compatibility, then you can set this to "Preferences".
-           But.. for better Apple-compliance, the recommended approach would be to write some code that
+           But, for better Apple-compliance, the recommended approach would be to write some code that
            finds your old settings files in ~/Library/Preferences, moves them to ~/Library/Application Support,
            and then uses the new path.
         */
@@ -140,7 +140,7 @@ bool PropertiesFile::reload()
     ProcessScopedLock pl (createProcessLock());
 
     if (pl != nullptr && ! pl->isLocked())
-        return false; // locking failure..
+        return false; // locking failure
 
     loadedOk = (! file.exists()) || loadAsBinary() || loadAsXml();
     return loadedOk;
@@ -223,7 +223,7 @@ bool PropertiesFile::saveAsXml()
         auto* e = doc.createNewChildElement (PropertyFileConstants::valueTag);
         e->setAttribute (PropertyFileConstants::nameAttribute, props.getAllKeys() [i]);
 
-        // if the value seems to contain xml, store it as such..
+        // if the value seems to contain xml, store it as such
         if (auto childElement = parseXML (props.getAllValues() [i]))
             e->addChildElement (childElement.release());
         else
@@ -233,7 +233,7 @@ bool PropertiesFile::saveAsXml()
     ProcessScopedLock pl (createProcessLock());
 
     if (pl != nullptr && ! pl->isLocked())
-        return false; // locking failure..
+        return false; // locking failure
 
     if (doc.writeTo (file, {}))
     {
@@ -290,7 +290,7 @@ bool PropertiesFile::saveAsBinary()
     ProcessScopedLock pl (createProcessLock());
 
     if (pl != nullptr && ! pl->isLocked())
-        return false; // locking failure..
+        return false; // locking failure
 
     TemporaryFile tempFile (file);
 

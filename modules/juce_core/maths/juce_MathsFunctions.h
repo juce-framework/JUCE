@@ -521,7 +521,7 @@ Type jlimit (Type lowerLimit,
              Type upperLimit,
              Type valueToConstrain) noexcept
 {
-    jassert (lowerLimit <= upperLimit); // if these are in the wrong order, results are unpredictable..
+    jassert (lowerLimit <= upperLimit); // if these are in the wrong order, results are unpredictable
 
     return valueToConstrain < lowerLimit ? lowerLimit
                                          : (upperLimit < valueToConstrain ? upperLimit
@@ -536,14 +536,14 @@ Type jlimit (Type lowerLimit,
 template <typename Type1, typename Type2>
 bool isPositiveAndBelow (Type1 valueToTest, Type2 upperLimit) noexcept
 {
-    jassert (Type1() <= static_cast<Type1> (upperLimit)); // makes no sense to call this if the upper limit is itself below zero..
+    jassert (Type1() <= static_cast<Type1> (upperLimit)); // makes no sense to call this if the upper limit is itself below zero
     return Type1() <= valueToTest && valueToTest < static_cast<Type1> (upperLimit);
 }
 
 template <typename Type>
 bool isPositiveAndBelow (int valueToTest, Type upperLimit) noexcept
 {
-    jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
+    jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero
     return static_cast<unsigned int> (valueToTest) < static_cast<unsigned int> (upperLimit);
 }
 
@@ -555,14 +555,14 @@ bool isPositiveAndBelow (int valueToTest, Type upperLimit) noexcept
 template <typename Type1, typename Type2>
 bool isPositiveAndNotGreaterThan (Type1 valueToTest, Type2 upperLimit) noexcept
 {
-    jassert (Type1() <= static_cast<Type1> (upperLimit)); // makes no sense to call this if the upper limit is itself below zero..
+    jassert (Type1() <= static_cast<Type1> (upperLimit)); // makes no sense to call this if the upper limit is itself below zero
     return Type1() <= valueToTest && valueToTest <= static_cast<Type1> (upperLimit);
 }
 
 template <typename Type>
 bool isPositiveAndNotGreaterThan (int valueToTest, Type upperLimit) noexcept
 {
-    jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
+    jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero
     return static_cast<unsigned int> (valueToTest) <= static_cast<unsigned int> (upperLimit);
 }
 

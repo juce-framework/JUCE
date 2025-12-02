@@ -314,7 +314,7 @@ String::String (const char* const t)
 
         To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
         string to the String class - so for example if your source data is actually UTF-8,
-        you'd call String (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
+        you'd call String (CharPointer_UTF8 ("my utf8 string.")), and it would be able to
         correctly convert the multi-byte characters to unicode. It's *highly* recommended that
         you use UTF-8 with escape characters in your source code to represent extended characters,
         because there's no other way to represent these strings in a way that isn't dependent on
@@ -337,7 +337,7 @@ String::String (const char* const t, const size_t maxChars)
 
         To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
         string to the String class - so for example if your source data is actually UTF-8,
-        you'd call String (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
+        you'd call String (CharPointer_UTF8 ("my utf8 string.")), and it would be able to
         correctly convert the multi-byte characters to unicode. It's *highly* recommended that
         you use UTF-8 with escape characters in your source code to represent extended characters,
         because there's no other way to represent these strings in a way that isn't dependent on
@@ -419,7 +419,7 @@ namespace NumberToStringConverters
         return t;
     }
 
-    // pass in a pointer to the END of a buffer..
+    // pass in a pointer to the END of a buffer
     static char* numberToString (char* t, int64 n) noexcept
     {
         if (n >= 0)
@@ -1994,24 +1994,25 @@ String String::createStringFromData (const void* const unknownData, int size)
     if (size == 1)
         return charToString ((juce_wchar) data[0]);
 
-    if (CharPointer_UTF16::isByteOrderMarkBigEndian (data)
-         || CharPointer_UTF16::isByteOrderMarkLittleEndian (data))
+    const auto bigEndianData = CharPointer_UTF16::isByteOrderMarkBigEndian (data);
+
+    if (bigEndianData || CharPointer_UTF16::isByteOrderMarkLittleEndian (data))
     {
-        const int numChars = size / 2 - 1;
+        const auto numUnits = size / 2 - 1;
+        const auto src = unalignedPointerCast<const uint16*> (data + 2);
+        const auto swapBytes = bigEndianData ? ByteOrder::swapIfLittleEndian<uint16>
+                                             : ByteOrder::swapIfBigEndian<uint16>;
 
-        StringCreationHelper builder ((size_t) numChars);
+        StringCreationHelper builder ((size_t) numUnits);
 
-        auto src = unalignedPointerCast<const uint16*> (data + 2);
-
-        if (CharPointer_UTF16::isByteOrderMarkBigEndian (data))
+        for (int i = 0; i < numUnits;)
         {
-            for (int i = 0; i < numChars; ++i)
-                builder.write ((juce_wchar) ByteOrder::swapIfLittleEndian (src[i]));
-        }
-        else
-        {
-            for (int i = 0; i < numChars; ++i)
-                builder.write ((juce_wchar) ByteOrder::swapIfBigEndian (src[i]));
+            const uint16 wideBuffer[] { swapBytes (src[i]),
+                                        swapBytes ((i + 1 == numUnits) ? (uint16) 0 : src[i + 1]) };
+            const CharPointer_UTF16 ptr { reinterpret_cast<const CharPointer_UTF16::CharType*> (wideBuffer) };
+
+            builder.write (*ptr);
+            i += (int) ((ptr + 1).getAddress() - ptr.getAddress());
         }
 
         builder.write (0);
@@ -2058,7 +2059,7 @@ struct StringEncodingConverter
         void* const newSpace = addBytesToPointer (text.getAddress(), (int) endOffset);
         const CharPointerType_Dest extraSpace (static_cast<DestChar*> (newSpace));
 
-       #if JUCE_DEBUG // (This just avoids spurious warnings from valgrind about the uninitialised bytes at the end of the buffer..)
+       #if JUCE_DEBUG // This just avoids spurious warnings from valgrind about the uninitialised bytes at the end of the buffer.
         auto bytesToClear = (size_t) jmin ((int) extraBytesNeeded, 4);
         zeromem (addBytesToPointer (newSpace, extraBytesNeeded - bytesToClear), bytesToClear);
        #endif
@@ -2191,7 +2192,7 @@ StringRef::StringRef (const char* stringLiteral) noexcept
 
         To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
         string to the StringRef class - so for example if your source data is actually UTF-8,
-        you'd call StringRef (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
+        you'd call StringRef (CharPointer_UTF8 ("my utf8 string.")), and it would be able to
         correctly convert the multi-byte characters to unicode. It's *highly* recommended that
         you use UTF-8 with escape characters in your source code to represent extended characters,
         because there's no other way to represent these strings in a way that isn't dependent on
@@ -3010,6 +3011,45 @@ public:
 
             for (auto c : str)
                 expectEquals (c, parts[index++]);
+        }
+
+        const CharPointer_UTF8 expectedString { "glass \xc2\xbd full" };
+        const CharPointer_UTF8 emojiExpectedString { "hello JUCE \xf0\x9f\xa7\x83" };
+
+        beginTest ("createStringFromData reads LE UTF-16");
+        {
+            constexpr char buffer[] = "\xff\xfe\x67\x00\x6c\x00\x61\x00\x73\x00\x73\x00\x20\x00\xbd\x00\x20\x00\x66\x00\x75\x00\x6c\x00\x6c\x00";
+            expect (expectedString == String::createStringFromData (buffer, sizeof (buffer)));
+
+            constexpr char emojiBuffer[] = "\xff\xfe\x68\x00\x65\x00\x6c\x00\x6c\x00\x6f\x00\x20\x00\x4a\x00\x55\x00\x43\x00\x45\x00\x20\x00\x3e\xd8\xc3\xdd";
+            const auto emojiActualString = String::createStringFromData (emojiBuffer, sizeof (emojiBuffer));
+            expect (emojiExpectedString == emojiActualString);
+        }
+
+        beginTest ("createStringFromData reads BE UTF-16");
+        {
+            constexpr char buffer[] = "\xfe\xff\x00\x67\x00\x6c\x00\x61\x00\x73\x00\x73\x00\x20\x00\xbd\x00\x20\x00\x66\x00\x75\x00\x6c\x00\x6c";
+            expect (expectedString == String::createStringFromData (buffer, sizeof (buffer)));
+
+            constexpr char emojiBuffer[] = "\xfe\xff\x00\x68\x00\x65\x00\x6c\x00\x6c\x00\x6f\x00\x20\x00\x4a\x00\x55\x00\x43\x00\x45\x00\x20\xd8\x3e\xdd\xc3";
+            const auto emojiActualString = String::createStringFromData (emojiBuffer, sizeof (emojiBuffer));
+            expect (emojiExpectedString == emojiActualString);
+        }
+
+        beginTest ("createStringFromData reads UTF-8");
+        {
+            constexpr char buffer[] = "glass \xc2\xbd full";
+            expect (expectedString == String::createStringFromData (buffer, sizeof (buffer)));
+
+            constexpr char emojiBuffer[] = "hello JUCE \xf0\x9f\xa7\x83";
+            const auto emojiActualString = String::createStringFromData (emojiBuffer, sizeof (emojiBuffer));
+            expect (emojiExpectedString == emojiActualString);
+        }
+
+        beginTest ("createStringFromData reads Windows 1252");
+        {
+            constexpr char buffer[] = "glass \xBD full";
+            expect (expectedString == String::createStringFromData (buffer, sizeof (buffer)));
         }
     }
 };

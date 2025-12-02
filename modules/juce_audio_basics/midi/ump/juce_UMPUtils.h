@@ -75,7 +75,7 @@ struct Utils
 
         static constexpr uint8_t get (uint32_t word)
         {
-            return (uint8_t) ((word >> shift) & 0xf);
+            return (word >> shift) & 0xf;
         }
     };
 
@@ -94,7 +94,7 @@ struct Utils
 
         static constexpr uint8_t get (uint32_t word)
         {
-            return (uint8_t) ((word >> shift) & 0xff);
+            return (word >> shift) & 0xff;
         }
     };
 
@@ -117,10 +117,31 @@ struct Utils
         }
     };
 
-    static constexpr uint8_t getMessageType (uint32_t w) noexcept { return U4<0>::get (w); }
-    static constexpr uint8_t getGroup       (uint32_t w) noexcept { return U4<1>::get (w); }
-    static constexpr uint8_t getStatus      (uint32_t w) noexcept { return U4<2>::get (w); }
-    static constexpr uint8_t getChannel     (uint32_t w) noexcept { return U4<3>::get (w); }
+    enum class MessageKind : uint8_t
+    {
+        utility             = 0x0,
+        commonRealtime      = 0x1,
+        channelVoice1       = 0x2,
+        sysex7              = 0x3,
+        channelVoice2       = 0x4,
+        sysex8              = 0x5,
+        stream              = 0xf,
+    };
+
+    static constexpr bool hasGroup (MessageKind k)
+    {
+        return ! isGroupless (k);
+    }
+
+    static constexpr bool isGroupless (MessageKind k)
+    {
+        return k == MessageKind::utility || k == MessageKind::stream;
+    }
+
+    static constexpr MessageKind getMessageType (uint32_t w) noexcept { return MessageKind { U4<0>::get (w) }; }
+    static constexpr std::byte   getStatus      (uint32_t w) noexcept { return std::byte { U4<2>::get (w) }; }
+    static constexpr uint8_t     getChannel     (uint32_t w) noexcept { return U4<3>::get (w); }
+    static constexpr uint8_t     getGroup       (uint32_t w) noexcept { return U4<1>::get (w); }
 };
 
 } // namespace juce::universal_midi_packets

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2022 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
 #include <stddef.h>
-#include <stdlib.h>
+
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "LevelRun.h"
+#include "Object.h"
 #include "SBAssert.h"
-#include "SBBase.h"
 #include "RunQueue.h"
 
 static SBBoolean RunQueueInsertElement(RunQueueRef queue)
@@ -32,7 +33,7 @@ static SBBoolean RunQueueInsertElement(RunQueueRef queue)
         RunQueueListRef rearList = previousList->next;
 
         if (!rearList) {
-            rearList = malloc(sizeof(RunQueueList));
+            rearList = ObjectAddMemory(&queue->_object, sizeof(RunQueueList));
             if (!rearList) {
                 return SBFalse;
             }
@@ -79,6 +80,8 @@ static void FindPreviousPartialRun(RunQueueRef queue)
 
 SB_INTERNAL void RunQueueInitialize(RunQueueRef queue)
 {
+    ObjectInitialize(&queue->_object);
+
     /* Initialize first list. */
     queue->_firstList.previous = NULL;
     queue->_firstList.next = NULL;
@@ -95,7 +98,6 @@ SB_INTERNAL void RunQueueInitialize(RunQueueRef queue)
 
     /* Initialize rest of the elements. */
     queue->count = 0;
-    queue->peek = &queue->_frontList->elements[queue->_frontTop];
     queue->shouldDequeue = SBFalse;
 }
 
@@ -146,16 +148,17 @@ SB_INTERNAL void RunQueueDequeue(RunQueueRef queue)
     }
 
     queue->count -= 1;
-    queue->peek = &queue->_frontList->elements[queue->_frontTop];
+}
+
+SB_INTERNAL LevelRunRef RunQueueGetFront(RunQueueRef queue)
+{
+    /* The queue should not be empty. */
+    SBAssert(queue->count != 0);
+
+    return &queue->_frontList->elements[queue->_frontTop];
 }
 
 SB_INTERNAL void RunQueueFinalize(RunQueueRef queue)
 {
-    RunQueueListRef list = queue->_firstList.next;
-
-    while (list) {
-        RunQueueListRef next = list->next;
-        free(list);
-        list = next;
-    };
+    ObjectFinalize(&queue->_object);
 }

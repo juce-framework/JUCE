@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -97,6 +97,10 @@ public: ////////////////////////////////////////////////////////////////////////
 	//@{
 	AAX_Result SetViewContainer (IACFUnknown * iViewContainer ) AAX_OVERRIDE;
 	AAX_Result GetViewSize (AAX_Point * /* oViewSize */ ) const AAX_OVERRIDE
+	{
+		return AAX_SUCCESS;
+	}
+	AAX_Result GetMinimumViewSize (AAX_Point * /* oMinimumViewSize */ ) const AAX_OVERRIDE
 	{
 		return AAX_SUCCESS;
 	}

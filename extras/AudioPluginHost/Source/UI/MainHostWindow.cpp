@@ -314,8 +314,8 @@ MainHostWindow::MainHostWindow()
                       LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
                       DocumentWindow::allButtons)
 {
-    formatManager.addDefaultFormats();
-    formatManager.addFormat (new InternalPluginFormat());
+    addDefaultFormatsToManager (formatManager);
+    formatManager.addFormat (std::make_unique<InternalPluginFormat>());
 
     auto safeThis = SafePointer<MainHostWindow> (this);
     RuntimePermissions::request (RuntimePermissions::recordAudio,

@@ -55,12 +55,11 @@ public:
         continue from that point in the packet (unless `reset` is called first).
     */
     template <typename PacketCallbackFunction>
-    void dispatch (const uint32_t* begin,
-                   const uint32_t* end,
+    void dispatch (Span<const uint32_t> words,
                    double timeStamp,
                    PacketCallbackFunction&& callback)
     {
-        std::for_each (begin, end, [&] (uint32_t word)
+        for (const auto word : words)
         {
             nextPacket[currentPacketLen++] = word;
 
@@ -69,7 +68,7 @@ public:
                 callback (View (nextPacket.data()), timeStamp);
                 currentPacketLen = 0;
             }
-        });
+        }
     }
 
 private:
@@ -93,9 +92,10 @@ public:
         Channel messages will be converted to the requested protocol format `pp`.
         `storageSize` bytes will be allocated to store incomplete messages.
     */
-    explicit BytestreamToUMPDispatcher (PacketProtocol pp, int storageSize)
+    BytestreamToUMPDispatcher (uint8_t targetGroup, PacketProtocol pp, int storageSize)
         : concatenator (storageSize),
-          converter (pp)
+          converter (pp),
+          group (targetGroup)
     {}
 
     void reset()
@@ -106,14 +106,12 @@ public:
 
     /** Calls `callback` with a View of each converted packet as it becomes ready.
 
-        @param begin        the first byte in a range of bytes representing bytestream-encoded MIDI messages.
-        @param end          one-past the last byte in a range of bytes representing bytestream-encoded MIDI messages.
+        @param bytes        range of bytes representing bytestream-encoded MIDI messages.
         @param timestamp    a timestamp to apply to the created packets.
         @param callback     a callback which will be passed a View pointing to each new packet as it becomes ready.
     */
     template <typename PacketCallbackFunction>
-    void dispatch (const uint8_t* begin,
-                   const uint8_t* end,
+    void dispatch (Span<const std::byte> bytes,
                    double timestamp,
                    PacketCallbackFunction&& callback)
     {
@@ -126,25 +124,34 @@ public:
 
             void handleIncomingMidiMessage (void*, const MidiMessage& msg) const
             {
-                Conversion::toMidi1 (BytestreamMidiView (&msg), [&] (const View& view)
+                Conversion::toMidi1 ({ dispatch.group, msg.asSpan() }, [&] (const View& view)
                 {
-                    dispatch.converter.convert (view, *callbackPtr);
+                    dispatch.converter.convert (view, [&] (const View& v)
+                    {
+                        (*callbackPtr) (v, msg.getTimeStamp());
+                    });
                 });
             }
 
-            void handlePartialSysexMessage (void*, const uint8_t*, int, double) const {}
+            void handlePartialSysexMessage (void*, const uint8*, int, double) const {}
 
             BytestreamToUMPDispatcher& dispatch;
             CallbackPtr callbackPtr = nullptr;
         };
 
         Callback inputCallback { *this, &callback };
-        concatenator.pushMidiData (begin, int (end - begin), timestamp, (void*) nullptr, inputCallback);
+        concatenator.pushMidiData (bytes, timestamp, (void*) nullptr, inputCallback);
+    }
+
+    PacketProtocol getProtocol() const
+    {
+        return converter.getProtocol();
     }
 
 private:
     MidiDataConcatenator concatenator;
     GenericUMPConverter converter;
+    uint8_t group{};
 };
 
 //==============================================================================
@@ -181,12 +188,11 @@ public:
         @param callback     a callback which will be passed a MidiMessage each time a new message becomes ready.
     */
     template <typename BytestreamMessageCallback>
-    void dispatch (const uint32_t* begin,
-                   const uint32_t* end,
+    void dispatch (Span<const uint32_t> words,
                    double timestamp,
                    BytestreamMessageCallback&& callback)
     {
-        dispatcher.dispatch (begin, end, timestamp, [&] (const View& view, double time)
+        dispatcher.dispatch (words, timestamp, [&] (const View& view, double time)
         {
             converter.convert (view, time, callback);
         });

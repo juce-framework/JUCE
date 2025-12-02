@@ -63,7 +63,7 @@ namespace AndroidStatsHelpers
     {
         auto* env = getEnv();
 
-        if (auto settings = (jclass) env->FindClass ("android/provider/Settings$Secure"))
+        if (LocalRef<jclass> settings { env->FindClass ("android/provider/Settings$Secure") })
         {
             if (auto fId = env->GetStaticFieldID (settings, "ANDROID_ID", "Ljava/lang/String;"))
             {

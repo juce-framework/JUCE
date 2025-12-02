@@ -65,9 +65,9 @@ namespace juce
 
     void MyApp::myInitialisationWorkFinished()
     {
-        // ..assuming this is some kind of callback method that is triggered when
+        // ...assuming this is some kind of callback method that is triggered when
         // your background initialisation threads have finished, and it's time to open
-        // your main window, etc..
+        // your main window, etc.
 
         splash->deleteAfterDelay (RelativeTime::seconds (4), false);
 

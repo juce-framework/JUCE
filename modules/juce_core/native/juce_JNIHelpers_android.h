@@ -49,7 +49,20 @@ public:
         JNI, i.e. for native function callback parameters.
     */
     explicit LocalRef (JavaType o) noexcept
-        : LocalRef (o, false)
+        : LocalRef (o, IncrementRef::no)
+    {}
+
+    /*  We cannot delete local references that were not created by JNI, e.g. references that were
+        created by the VM and passed into the native function.
+
+        For these references we should use createNewLocalRef = true, which will create a new
+        local reference that this wrapper is allowed to delete.
+
+        Doing otherwise will result in an "Attempt to remove non-JNI local reference" warning in the
+        VM, which could even cause crashes in future VM implementations.
+    */
+    LocalRef (JavaType o, IncrementRef incrementRefCount) noexcept
+        : obj (incrementRefCount == IncrementRef::yes ? retain (o) : o)
     {}
 
     LocalRef (const LocalRef& other) noexcept    : obj (retain (other.obj)) {}
@@ -91,58 +104,14 @@ public:
         return std::exchange (obj, nullptr);
     }
 
-    /** Creates a new internal local reference. */
-    static auto addOwner (JavaType o)
-    {
-        return LocalRef { o, true };
-    }
-
-    /** Takes ownership of the passed in local reference, and deletes it when the LocalRef goes out
-        of scope.
-    */
-    static auto becomeOwner (JavaType o)
-    {
-        return LocalRef { o, false };
-    }
-
 private:
     static JavaType retain (JavaType obj)
     {
         return obj == nullptr ? nullptr : (JavaType) getEnv()->NewLocalRef (obj);
     }
 
-    /*  We cannot delete local references that were not created by JNI, e.g. references that were
-        created by the VM and passed into the native function.
-
-        For these references we should use createNewLocalRef = true, which will create a new
-        local reference that this wrapper is allowed to delete.
-
-        Doing otherwise will result in an "Attempt to remove non-JNI local reference" warning in the
-        VM, which could even cause crashes in future VM implementations.
-    */
-    LocalRef (JavaType o, bool createNewLocalRef) noexcept
-        : obj (createNewLocalRef ? retain (o) : o)
-    {}
-
     JavaType obj = nullptr;
 };
-
-/*  Creates a new local reference that shares ownership with the passed in pointer.
-
-    Can be used for wrapping function parameters that were created outside the JNI.
-*/
-template <class JavaType>
-auto addLocalRefOwner (JavaType t)
-{
-    return LocalRef<JavaType>::addOwner (t);
-}
-
-/*   Wraps a local reference and destroys it when it goes out of scope. */
-template <class JavaType>
-auto becomeLocalRefOwner (JavaType t)
-{
-    return LocalRef<JavaType>::becomeOwner (t);
-}
 
 //==============================================================================
 template <typename JavaType>
@@ -246,7 +215,8 @@ public:
     JNIClassBase (const char* classPath, int minSDK, const uint8* byteCode, size_t byteCodeSize);
     virtual ~JNIClassBase();
 
-    operator jclass() const noexcept  { return classRef; }
+    jclass getJclass() const { return classRef; }
+    operator jclass() const noexcept  { return getJclass(); }
 
     static void initialiseAllClasses (JNIEnv*, jobject context);
     static void releaseAllClasses (JNIEnv*);
@@ -270,7 +240,7 @@ private:
     size_t byteCodeSize;
 
     int minSDK;
-    jclass classRef = nullptr;
+    GlobalRefImpl<jclass> classRef;
 
     static Array<JNIClassBase*>& getClasses();
     void initialise (JNIEnv*, jobject context);
@@ -293,7 +263,8 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
 #define DECLARE_JNI_FIELD(fieldID, stringName, signature)        jfieldID  fieldID;
 #define DECLARE_JNI_CALLBACK(fieldID, stringName, signature)
 
-#define DECLARE_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData)                                                       \
+#define DECLARE_OPTIONAL_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData, allowFailure)                                \
+    static_assert (minSDK >= 24, "There's no need to supply a min SDK lower than JUCE's minimum requirement");                              \
     class CppClassName ## _Class   : public JNIClassBase                                                                                    \
     {                                                                                                                                       \
     public:                                                                                                                                 \
@@ -301,6 +272,19 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
                                                                                                                                             \
         void initialiseFields (JNIEnv* env)                                                                                                 \
         {                                                                                                                                   \
+            if constexpr (allowFailure)                                                                                                     \
+            {                                                                                                                               \
+                if (getJclass() == nullptr)                                                                                                 \
+                {                                                                                                                           \
+                    env->ExceptionClear();                                                                                                  \
+                    return;                                                                                                                 \
+                }                                                                                                                           \
+            }                                                                                                                               \
+            else                                                                                                                            \
+            {                                                                                                                               \
+                jassert (getJclass() != nullptr);                                                                                           \
+            }                                                                                                                               \
+                                                                                                                                            \
             Array<JNINativeMethod> callbacks;                                                                                               \
             JNI_CLASS_MEMBERS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD, CREATE_JNI_FIELD, CREATE_JNI_STATICFIELD, CREATE_JNI_CALLBACK);  \
             resolveCallbacks (env, callbacks);                                                                                              \
@@ -310,9 +294,11 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
     };                                                                                                                                      \
     static inline const CppClassName ## _Class CppClassName;
 
+#define DECLARE_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData)              \
+    DECLARE_OPTIONAL_JNI_CLASS_WITH_BYTECODE (CppClassName, javaPath, minSDK, byteCodeData, false) \
+
 //==============================================================================
 #define DECLARE_JNI_CLASS_WITH_MIN_SDK(CppClassName, javaPath, minSDK) \
-    static_assert (minSDK >= 24, "There's no need to supply a min SDK lower than JUCE's minimum requirement"); \
     DECLARE_JNI_CLASS_WITH_BYTECODE (CppClassName, javaPath, minSDK, nullptr)
 
 //==============================================================================

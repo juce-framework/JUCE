@@ -144,7 +144,7 @@ public:
             // in the raw time tag, the most significant 32 bits are seconds,
             // so let's verify that the difference is right:
             uint64 diff = laterTimeTagRaw - currentTimeTagRaw;
-            double acceptableErrorInSeconds = 0.000001; // definitely not audible anymore.
+            double acceptableErrorInSeconds = 0.000001; // definitely not audible anymore
 
             expect ((float) diff / float (1ULL << 32) < deltaInSeconds + acceptableErrorInSeconds );
             expect ((float) diff / float (1ULL << 32) > deltaInSeconds - acceptableErrorInSeconds );

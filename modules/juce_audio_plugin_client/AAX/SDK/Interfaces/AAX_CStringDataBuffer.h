@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- * Copyright 2023-2024 Avid Technology, Inc.
+ * Copyright 2023-2025 Avid Technology, Inc.
  * All rights reserved.
  * 
  * This file is part of the Avid AAX SDK.
@@ -34,6 +34,7 @@
 #define AAX_CStringDataBuffer_H
 
 #include "AAX_IDataBuffer.h"
+#include "AAX_Errors.h"
 #include "AAX.h"
 
 #include <string>

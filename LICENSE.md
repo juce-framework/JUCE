@@ -43,15 +43,16 @@ The JUCE modules contain the following dependencies:
 - [Ogg Vorbis](modules/juce_audio_formats/codecs/oggvorbis/) ([BSD](modules/juce_audio_formats/codecs/oggvorbis/Ogg%20Vorbis%20Licence.txt))
 - [jpeglib](modules/juce_graphics/image_formats/jpglib/) ([Independent JPEG Group License](modules/juce_graphics/image_formats/jpglib/README))
 - [CHOC](modules/juce_javascript/choc/) ([ISC](modules/juce_javascript/choc/LICENSE.md)), including [QuickJS](modules/juce_javascript/choc/javascript/choc_javascript_QuickJS.h) ([MIT](modules/juce_javascript/choc/javascript/choc_javascript_QuickJS.h))
-- [LV2](modules/juce_audio_processors/format_types/LV2_SDK/) ([ISC](modules/juce_audio_processors/format_types/LV2_SDK/lv2/COPYING))
-- [pslextensions](modules/juce_audio_processors/format_types/pslextensions/ipslcontextinfo.h) ([Public domain](modules/juce_audio_processors/format_types/pslextensions/ipslcontextinfo.h))
+- [LV2](modules/juce_audio_processors_headless/format_types/LV2_SDK/) ([ISC](modules/juce_audio_processors_headless/format_types/LV2_SDK/lv2/COPYING))
+- [pslextensions](modules/juce_audio_processors_headless/format_types/pslextensions/ipslcontextinfo.h) ([Public domain](modules/juce_audio_processors_headless/format_types/pslextensions/ipslcontextinfo.h))
 - [AAX](modules/juce_audio_plugin_client/AAX/SDK/) ([Proprietary Avid AAX License/GPLv3](modules/juce_audio_plugin_client/AAX/SDK/LICENSE.txt))
-- [VST3](modules/juce_audio_processors/format_types/VST3_SDK/) ([Proprietary Steinberg VST3 License/GPLv3](modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt))
+- [VST3](modules/juce_audio_processors_headless/format_types/VST3_SDK/) ([MIT](modules/juce_audio_processors_headless/format_types/VST3_SDK/LICENSE.txt))
 - [Box2D](modules/juce_box2d/box2d/) ([zlib](modules/juce_box2d/box2d/Box2D.h))
 - [pnglib](modules/juce_graphics/image_formats/pnglib/) ([zlib](modules/juce_graphics/image_formats/pnglib/LICENSE))
 - [zlib](modules/juce_core/zip/zlib/) ([zlib](modules/juce_core/zip/zlib/README))
 - [HarfBuzz](modules/juce_graphics/fonts/harfbuzz/) ([Old MIT](modules/juce_graphics/fonts/harfbuzz/COPYING))
 - [SheenBidi](modules/juce_graphics/unicode/sheenbidi/) ([Apache](modules/juce_graphics/unicode/sheenbidi/LICENSE))
+- [ASIO](modules/juce_audio_devices/native/asio/) ([Proprietary Steinberg ASIO License/GPLv3](modules/juce_audio_devices/native/asio/LICENSE.txt))
 
 The JUCE examples are licensed under the terms of the
 [ISC license](http://www.isc.org/downloads/software-support-policy/isc-license/).

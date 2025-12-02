@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -93,6 +93,13 @@ public:
 				
 	*/
 	virtual AAX_Result							AddCategory ( uint32_t inCategory ) = 0;
+	/** @brief	Set the plug-in role. See \ref AAX_EPlugInRole.
+			
+			@param[in]	inRole
+						The plug-in role
+				
+	*/
+	virtual AAX_Result							SetRole ( uint32_t inRole ) = 0;
 	/** @brief	Add a category to your plug-in. See \ref AAX_EPlugInCategory.
 	 
 			@param[in]	inCategory

@@ -53,7 +53,7 @@
 	This display delegate converts a parameter value to one of two provided strings (e.g.
 	"True" and "False".)
 
-	\ingroup DisplayDelegates
+	\ingroup AAXLibraryFeatures_ParameterManager_DisplayDelegates
 
  */
 template <typename T>

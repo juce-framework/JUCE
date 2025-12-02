@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019-2021, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019-2021, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -110,6 +110,10 @@ DEFINE_ACFUID(acfIID, IID_IAAXControllerV1, 0x9d5e3e3d, 0x52dc, 0x5efb, 0x20, 0x
 DEFINE_ACFUID(acfIID, IID_IAAXControllerV2, 0x4c59aa0e, 0xd7c0, 0x4205, 0x8b, 0x6c, 0x32, 0x46, 0x8d, 0x42, 0xd2, 0x02);
 /// ACF interface ID for \ref AAX_IACFController_V3
 DEFINE_ACFUID(acfIID, IID_IAAXControllerV3, 0xdd6f168c, 0xda86, 0x44f8, 0xb8, 0x64, 0xd6, 0xcd, 0x22, 0x19, 0x26, 0xe7);
+/// ACF interface ID for \ref AAX_IACFController_V4
+DEFINE_ACFUID(acfIID, IID_IAAXControllerV4, 0xf19c815c, 0xd885, 0x4677, 0x9e, 0x1f, 0x08, 0x37, 0xc7, 0xa6, 0x9e, 0xb3);
+/// ACF interface ID for \ref AAX_IACFController_V5
+DEFINE_ACFUID(acfIID, IID_IAAXControllerV5, 0xff310dbf, 0x04e8, 0x45b1, 0xb3, 0x6a, 0xb8, 0xf4, 0xd9, 0xb8, 0xd4, 0x82);
 
 /// ACF component ID for %AAX page table controller components
 DEFINE_ACFUID(acfIID, AAXCompID_PageTableController, 0x63355d80, 0xbfe1, 0x4291, 0xa6, 0x27, 0xc6, 0x5c, 0xb9, 0x58, 0x91, 0x40);
@@ -172,6 +176,8 @@ DEFINE_ACFUID(acfIID, IID_IAAXFeatureInfoV1, 0x24545609, 0xa7c4, 0x44d4, 0xab, 0
 DEFINE_ACFUID(acfIID, AAXCompID_Task, 0xa5237386, 0xd1a7, 0x490d, 0x5, 0x8, 0x3, 0x2, 0xd, 0x0, 0x2, 0x1);
 /// ACF interface ID for \ref AAX_IACFTask
 DEFINE_ACFUID(acfIID, IID_IAAXTaskV1, 0x9733f64b, 0x45d6, 0x47ba, 0x8, 0xb, 0x9, 0xd, 0xd, 0x7, 0x8, 0xa);
+/// ACF interface ID for \ref AAX_IACFTask_V2
+DEFINE_ACFUID(acfIID, IID_IAAXTaskV2, 0x1cb60cfa, 0xbd54, 0x4132, 0x9f, 0xd7, 0xea, 0x69, 0xf5, 0x54, 0x12, 0x97);
 
 /// ACF component ID for \ref AAX_ISessionDocument components
 DEFINE_ACFUID(acfIID, AAXCompID_SessionDocument, 0x65fd4d4a, 0xf85e, 0x46fd, 0x8b, 0x7c, 0xa0, 0x31, 0x5c, 0x93, 0x2a, 0xd1);
@@ -210,6 +216,8 @@ DEFINE_ACFUID(acfIID, IID_IAAXHostProcessorV2, 0x457546c0, 0xf6bc, 0x4af9, 0xbf,
 DEFINE_ACFUID(acfIID, AAXCompID_EffectGUI, 0xab94339d, 0x3b34, 0x35dc, 0x29, 0x32, 0x19, 0x23, 0x1d, 0x1d, 0x48, 0x2a);
 /// ACF interface ID for \ref AAX_IACFEffectGUI
 DEFINE_ACFUID(acfIID, IID_IAAXEffectGUIV1, 0x964e323d, 0x424c, 0x5e1a, 0x22, 0x27, 0x28, 0x24, 0x23, 0x22, 0x2e, 0x1e);
+/// ACF interface ID for \ref AAX_IACFEffectGUI_V2
+DEFINE_ACFUID(acfIID, IID_IAAXEffectGUIV2, 0xa0a8fb30, 0x7e5d, 0x4b4a, 0xaa, 0x00, 0xbc, 0x33, 0x4a, 0x42, 0x0d, 0xbb);
 
 /// ACF component ID for \ref AAX_IEffectDirectData components
 DEFINE_ACFUID(acfIID, AAXCompID_EffectDirectData, 0xaafe80ab, 0x5b34, 0x4522, 0x49, 0x3b, 0x29, 0x53, 0xcd, 0xdd, 0x48, 0x4b);
@@ -222,6 +230,8 @@ DEFINE_ACFUID(acfIID, IID_IAAXEffectDirectDataV2, 0x156ea622, 0xbd2e, 0x11e9, 0x
 DEFINE_ACFUID(acfIID, AAXCompID_TaskAgent, 0xb0753064, 0xc37e, 0x11ed, 0xaf, 0xa1, 0x02, 0x42, 0xac, 0xe2, 0x00, 0x12);
 /// ACF interface ID for \ref AAX_IACFTaskAgent
 DEFINE_ACFUID(acfIID, IID_IAAXTaskAgentV1, 0xc096be3e, 0xbc3e, 0x4c38, 0x86, 0x1d, 0x06, 0xa4, 0xba, 0xa4, 0x10, 0x05);
+/// ACF interface ID for \ref AAX_IACFTaskAgent_V2
+DEFINE_ACFUID(acfIID, IID_IAAXTaskAgentV2, 0xa734a715, 0xd590, 0x4402, 0xbc, 0xff, 0x85, 0x64, 0x78, 0x52, 0x60, 0x1b);
 
 /// ACF component ID for \ref AAX_ISessionDocumentClient components
 DEFINE_ACFUID(acfIID, AAXCompID_SessionDocumentClient, 0x2280c3d5, 0x38f9, 0x43c5, 0x90, 0x1d, 0x8d, 0x1a, 0xfe, 0xb4, 0x2f, 0xa5);
@@ -264,11 +274,22 @@ using AAX_Feature_UID = acfUID;
  \brief Client stem format feature support
  
  \details
- To determine the client's support for specific stem formats, use the property map
+ The host provides \ref AAX_eSupportLevel_ByProperty . To determine the client's support for
+ specific stem formats, use the property map
  
  <b>Property map contents</b>
- Key: \ref AAX_EStemFormat values
- Value: \ref AAX_ESupportLevel value; if undefined then no information is available
+ - Key: \ref AAX_EStemFormat values
+ - Value: \ref AAX_ESupportLevel value; if undefined then no information is available
+
+ Plugins that require support for a particular stem format in order for one or more of the
+ included effects to function properly should return an empty \ref AAX_ICollection from the
+ plugin's Describe routine if the host does not support this feature.
+
+ Note that feature queries should never be used to alter plugin description information that
+ is included in the host's %AAX plugin cache. For example, the list of included Components
+ should never be changed based on the host's stem format support.
+ 
+ \details
  */
 DEFINE_ACFUID(AAX_Feature_UID, AAXATTR_ClientFeature_StemFormat, 0x729dd3e6, 0xd3dc, 0x484c, 0x91, 0x69, 0xf0, 0x64, 0xa0, 0x12, 0x60, 0x1d);
 
@@ -276,23 +297,65 @@ DEFINE_ACFUID(AAX_Feature_UID, AAXATTR_ClientFeature_StemFormat, 0x729dd3e6, 0xd
  
  \brief Client \ref additionalFeatures_AOS "Auxiliary Output Stem" feature support
  
- Plug-ins must detect when a host does not support AOS in order to avoid running off the end of the output audio buffer list in the
- audio algorithm.
+ \details
+ The host provides \ref AAX_eSupportLevel_Supported if it supports Auxiliary Output Stems for
+ %AAX effects.
  
- \ref AAX_IComponentDescriptor::AddAuxOutputStem() "AddAuxOutputStem()" will return an error for hosts that do not support this feature, so typically
- a feature support query using this \ref AAX_Feature_UID is not required.
+ Plug-ins must detect when a host does not support AOS in order to avoid running off the end
+ of the output audio buffer list in the audio algorithm.
+ 
+ \ref AAX_IComponentDescriptor::AddAuxOutputStem() "AddAuxOutputStem()" will return an error
+ for hosts that do not support this feature, so typically a feature support query using this
+ \ref AAX_Feature_UID is not required.
+
+ Plugins that require Auxiliary Output Stem support for one or more of the included effects to
+ function properly should return an empty \ref AAX_ICollection from the plugin's Describe
+ routine if the host does not support this feature.
+
+ This feature query can also be used to dynamically change the behavior of the plugin, for
+ example to reconfigure the Algorithm component data structure for hosts that do not support
+ Auxiliary Output Stems.
+
+ Note that feature queries should never be used to alter plugin description information that
+ is included in the host's %AAX plugin cache.
  */
 DEFINE_ACFUID(AAX_Feature_UID, AAXATTR_ClientFeature_AuxOutputStem, 0x5bea3f7a, 0x2be8, 0x4fe1, 0x83, 0xb2, 0x94, 0xec, 0x91, 0x31, 0xb8, 0x52);
 
 /** \var AAXATTR_ClientFeature_AuxOutputStem
  
  \brief Client \ref additionalFeatures_Sidechain "Side Chain" feature support
+ 
+ \details
+ The host provides \ref AAX_eSupportLevel_Supported if it supports MIDI for %AAX effects.
+
+ Plugins that require side chain support for one or more of the included effects to function
+ properly should return an empty \ref AAX_ICollection from the plugin's Describe routine if the
+ host does not support this feature.
+
+ This feature query can also be used to dynamically change the behavior of the plugin, for example
+ to select a different Effect GUI factory function for hosts that do not support side chains.
+
+ Note that feature queries should never be used to alter plugin description information that
+ is included in the host's %AAX plugin cache.
  */
 DEFINE_ACFUID(AAX_Feature_UID, AAXATTR_ClientFeature_SideChainInput, 0x98b0a514, 0x2b96, 0x4e1f, 0x87, 0x81, 0x99, 0x08, 0xc9, 0xe3, 0xe6, 0x8b);
 
 /** \var AAXATTR_ClientFeature_MIDI
  
  \brief Client \ref additionalFeatures_MIDI "MIDI" feature support
+ 
+ \details
+ The host provides \ref AAX_eSupportLevel_Supported if it supports MIDI for %AAX effects.
+
+ Plugins that require MIDI support for one or more of the included effects to function properly
+ should return an empty \ref AAX_ICollection from the plugin's Describe routine if the host does
+ not support this feature.
+
+ This feature query can also be used to dynamically change the behavior of the plugin, for example
+ to select a different Effect Parameters factory function for hosts that do not support MIDI.
+
+ Note that feature queries should never be used to alter plugin description information that
+ is included in the host's %AAX plugin cache.
  */
 DEFINE_ACFUID(AAX_Feature_UID, AAXATTR_ClientFeature_MIDI, 0xf5b0816c, 0x5768, 0x49c2, 0xae, 0x3e, 0x85, 0x0d, 0xe3, 0x42, 0xeb, 0x07);
 
@@ -314,6 +377,12 @@ DEFINE_ACFUID(AAX_Feature_UID, AAXATTR_ClientFeature_MIDI, 0xf5b0816c, 0x5768, 0
  Value: one of \ref AAX_EHostLevel
  
  Query using the host's \ref IACFDefinition
+
+ Plugins that require a certain host level should return an empty \ref AAX_ICollection from
+ the plugin's Describe routine if the host does not provide the required level or higher.
+
+ Note that host support queries should never be used to alter plugin description information
+ that is included in the host's %AAX plugin cache.
  */
 DEFINE_ACFUID(acfUID, AAXATTR_Client_Level, 0xe550868e, 0x1e6a, 0x482b, 0xb5, 0x86, 0x73, 0xf1, 0x24, 0x6e, 0x12, 0x6b);
 
@@ -340,6 +409,15 @@ DEFINE_ACFUID(acfUID, AAXATTR_Client_Level, 0xe550868e, 0x1e6a, 0x482b, 0xb5, 0x
  <TT>00000111111001110000001100000001</TT>, or in decimal: 132580097
  
  Query using the host's \ref IACFDefinition
+
+ Plugins that require a certain host version should return an empty \ref AAX_ICollection from
+ the plugin's Describe routine if the host does not provide the required level or higher.
+
+ That said, this check should only be used as a last resort. In nearly all cases a plugin
+ should use other available queries, such as feature queries, to determine host capabilities.
+
+ Note that a host version query should never be used to alter plugin description information
+ that is included in the host's %AAX plugin cache.
  */
 DEFINE_ACFUID(acfUID, AAXATTR_Client_Version, 0x950cf999, 0x37aa, 0x49de, 0x8d, 0xcc, 0xbe, 0x7f, 0xa7, 0x3e, 0x6a, 0xee);
 

@@ -35,44 +35,16 @@
 namespace juce
 {
 
-#if (JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)) || DOXYGEN
+#if JUCE_INTERNAL_HAS_LADSPA || DOXYGEN
 
 //==============================================================================
-/**
-    Implements a plugin format manager for LADSPA plugins.
+/** Provided for backwards compatibility; LADSPA plugins are always headless.
 
     @tags{Audio}
 */
-class JUCE_API  LADSPAPluginFormat   : public AudioPluginFormat
+class JUCE_API LADSPAPluginFormat : public LADSPAPluginFormatHeadless
 {
-public:
-    LADSPAPluginFormat();
-    ~LADSPAPluginFormat() override;
-
-    //==============================================================================
-    static String getFormatName()                   { return "LADSPA"; }
-    String getName() const override                 { return getFormatName(); }
-    bool canScanForPlugins() const override         { return true; }
-    bool isTrivialToScan() const override           { return false; }
-
-    void findAllTypesForFile (OwnedArray<PluginDescription>&, const String& fileOrIdentifier) override;
-    bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
-    String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;
-    bool pluginNeedsRescanning (const PluginDescription&) override;
-    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive, bool) override;
-    bool doesPluginStillExist (const PluginDescription&) override;
-    FileSearchPath getDefaultLocationsToSearch() override;
-
-private:
-    //==============================================================================
-    void createPluginInstance (const PluginDescription&, double initialSampleRate,
-                               int initialBufferSize, PluginCreationCallback) override;
-    bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const override;
-    void recursiveFileSearch (StringArray&, const File&, bool recursive);
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LADSPAPluginFormat)
 };
-
 
 #endif
 

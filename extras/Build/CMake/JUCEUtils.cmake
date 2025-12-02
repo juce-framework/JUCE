@@ -300,6 +300,20 @@ function(_juce_link_optional_libraries target)
             find_package(WebView2 REQUIRED)
             target_link_libraries(${target} PRIVATE juce::juce_webview2)
         endif()
+
+        get_target_property(needs_windows_midi_services ${target} JUCE_NEEDS_WINDOWS_MIDI_SERVICES)
+
+        if(needs_windows_midi_services)
+            if(NOT ("${JUCE_CMAKE_UTILS_DIR}" IN_LIST CMAKE_MODULE_PATH))
+                list(APPEND CMAKE_MODULE_PATH "${JUCE_CMAKE_UTILS_DIR}")
+            endif()
+
+            find_package(CppWinRT REQUIRED)
+            target_link_libraries(${target} PRIVATE juce::juce_winrt_headers)
+
+            find_package(WindowsMIDIServices REQUIRED)
+            target_link_libraries(${target} PRIVATE juce::juce_windows_midi_services)
+        endif()
     endif()
 endfunction()
 
@@ -1999,6 +2013,7 @@ function(_juce_initialise_target target)
         NEEDS_WEB_BROWSER               # Set this true if you want to link webkit on Linux
         NEEDS_WEBVIEW2                  # Set this true if you want to link WebView2 statically on Windows
         NEEDS_STORE_KIT                 # Set this true if you want in-app-purchases on Mac
+        NEEDS_WINDOWS_MIDI_SERVICES     # Set this true If you want to support the newest Windows MIDI backend
         PUSH_NOTIFICATIONS_ENABLED
         NETWORK_MULTICAST_ENABLED
         HARDENED_RUNTIME_ENABLED

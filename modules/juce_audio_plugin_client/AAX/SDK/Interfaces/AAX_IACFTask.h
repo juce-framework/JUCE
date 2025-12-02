@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- * Copyright 2023-2024 Avid Technology, Inc.
+ * Copyright 2023-2025 Avid Technology, Inc.
  * All rights reserved.
  * 
  * This file is part of the Avid AAX SDK.
@@ -89,6 +89,13 @@ public:
 	 * whether or not the task was performed as requested.
 	 */
 	virtual AAX_Result SetDone(AAX_TaskCompletionStatus iStatus) = 0;
+};
+
+class AAX_IACFTask_V2 : public AAX_IACFTask
+{
+public:
+	virtual AAX_Result GetID(AAX_CTaskID * outID) const = 0; ///< \copydoc AAX_ITask::GetID()
+	virtual AAX_Result SetProgressLabel(const char * iLabel) = 0; ///< \copydoc AAX_ITask::SetProgressLabel()
 };
 
 #ifdef __clang__

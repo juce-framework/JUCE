@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "SBBase.h"
 #include "BidiChain.h"
 
 SB_INTERNAL void BidiChainInitialize(BidiChainRef chain,
-    SBBidiType *types, SBLevel *levels, BidiLink *links)
+    SBBidiType *types, SBLevel *levels, BidiFlag *flags, BidiLink *links)
 {
     chain->types = types;
     chain->levels = levels;
+    chain->flags = flags;
     chain->links = links;
     chain->roller = 0;
     chain->last = 0;
@@ -31,16 +32,22 @@ SB_INTERNAL void BidiChainInitialize(BidiChainRef chain,
     /* Make first link empty. */
     chain->types[0] = SBBidiTypeNil;
     chain->levels[0] = SBLevelInvalid;
+    chain->flags[0] = BidiFlagNone;
     chain->links[0] = BidiLinkNone;
 }
 
-SB_INTERNAL void BidiChainAdd(BidiChainRef chain, SBBidiType type, SBUInteger length)
+SB_INTERNAL void BidiChainAdd(BidiChainRef chain, SBBidiType type, SBUInteger lastLinkLength)
 {
     BidiLink last = chain->last;
-    BidiLink current = last + (SBUInt32)length;
+    BidiLink current = last + (SBUInt32)lastLinkLength;
 
     chain->types[current] = type;
+    chain->flags[current] = BidiFlagNone;
     chain->links[current] = chain->roller;
+
+    if (lastLinkLength == 1) {
+        chain->flags[last] |= BidiFlagSingle;
+    }
 
     chain->links[last] = current;
     chain->last = current;
@@ -48,16 +55,7 @@ SB_INTERNAL void BidiChainAdd(BidiChainRef chain, SBBidiType type, SBUInteger le
 
 SB_INTERNAL SBBoolean BidiChainIsSingle(BidiChainRef chain, BidiLink link)
 {
-    BidiLink next = chain->links[link];
-
-    /* Check the type of in between code units. */
-    while (++link != next) {
-        if (chain->types[link] != SBBidiTypeBN) {
-            return SBFalse;
-        }
-    }
-
-    return SBTrue;
+    return chain->flags[link] & BidiFlagSingle;
 }
 
 SB_INTERNAL SBBidiType BidiChainGetType(BidiChainRef chain, BidiLink link)
@@ -98,11 +96,21 @@ SB_INTERNAL void BidiChainAbandonNext(BidiChainRef chain, BidiLink link)
     chain->links[link] = limit;
 }
 
-SB_INTERNAL SBBoolean BidiChainMergeIfEqual(BidiChainRef chain, BidiLink first, BidiLink second)
+SB_INTERNAL void BidiChainAbsorbNext(BidiChainRef chain, BidiLink link)
 {
-    if (chain->types[first] == chain->types[second]
-        && chain->levels[first] == chain->levels[second]) {
-        chain->links[first] = chain->links[second];
+    BidiLink next = chain->links[link];
+
+    chain->links[link] = chain->links[next];
+    chain->flags[link] &= ~BidiFlagSingle;
+}
+
+SB_INTERNAL SBBoolean BidiChainMergeNext(BidiChainRef chain, BidiLink link)
+{
+    BidiLink next = chain->links[link];
+
+    if (chain->types[link] == chain->types[next]
+        && chain->levels[link] == chain->levels[next]) {
+        BidiChainAbsorbNext(chain, link);
         return SBTrue;
     }
 

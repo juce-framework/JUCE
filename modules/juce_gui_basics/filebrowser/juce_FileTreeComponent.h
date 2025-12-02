@@ -54,7 +54,7 @@ class JUCE_API  FileTreeComponent  : public TreeView,
 {
 public:
     //==============================================================================
-    /** Creates a listbox to show the contents of a specified directory.
+    /** Creates a FileTreeComponent to show the contents of a specified directory.
     */
     FileTreeComponent (DirectoryContentsList& listToShow);
 

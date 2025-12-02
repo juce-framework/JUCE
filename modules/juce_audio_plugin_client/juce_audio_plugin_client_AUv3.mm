@@ -54,8 +54,8 @@
 #include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
 #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
 #include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
-#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
-#include <juce_audio_processors/format_types/juce_AU_Shared.h>
+#include <juce_audio_processors_headless/format_types/juce_LegacyAudioParameter.h>
+#include <juce_audio_processors_headless/format_types/juce_AU_Shared.h>
 
 #define JUCE_VIEWCONTROLLER_OBJC_NAME(x) JUCE_JOIN_MACRO (x, FactoryAUv3)
 
@@ -910,33 +910,47 @@ private:
                     auto supportedViewIndices = [[NSMutableIndexSet alloc] init];
                     auto n = [configs count];
 
-                    if (auto* editor = _this (self)->getAudioProcessor().createEditorIfNeeded())
+                    const auto getEditor = [&]
                     {
-                        // If you hit this assertion then your plug-in's editor is reporting that it doesn't support
-                        // any host MIDI controller configurations!
-                        jassert (editor->supportsHostMIDIControllerPresence (true) || editor->supportsHostMIDIControllerPresence (false));
+                        if (auto* editor = _this (self)->getAudioProcessor().getActiveEditor())
+                            return editor;
 
-                        for (auto i = 0u; i < n; ++i)
+                        return _this (self)->getAudioProcessor().createEditorIfNeeded();
+                    };
+
+                    MessageManager::callSync ([&]
+                    {
+                        if (auto* editor = getEditor())
                         {
-                            if (auto viewConfiguration = [configs objectAtIndex: i])
+                            // If you hit this assertion then your plug-in's editor is reporting that it doesn't support
+                            // any host MIDI controller configurations!
+                            jassert (   editor->supportsHostMIDIControllerPresence (true)
+                                     || editor->supportsHostMIDIControllerPresence (false));
+
+                            for (auto i = 0u; i < n; ++i)
                             {
-                                if (editor->supportsHostMIDIControllerPresence ([viewConfiguration hostHasController] == YES))
+                                if (auto viewConfiguration = [configs objectAtIndex: i])
                                 {
-                                    auto* constrainer = editor->getConstrainer();
-                                    auto height = (int) [viewConfiguration height];
-                                    auto width  = (int) [viewConfiguration width];
+                                    if (editor->supportsHostMIDIControllerPresence ([viewConfiguration hostHasController] == YES))
+                                    {
+                                        auto* constrainer = editor->getConstrainer();
+                                        auto height = (int) [viewConfiguration height];
+                                        auto width  = (int) [viewConfiguration width];
 
-                                    const auto maxLimits = std::numeric_limits<int>::max() / 2;
-                                    const Rectangle<int> requestedBounds { width, height };
-                                    auto modifiedBounds = requestedBounds;
-                                    constrainer->checkBounds (modifiedBounds, editor->getBounds().withZeroOrigin(), { maxLimits, maxLimits }, false, false, false, false);
+                                        const auto maxLimits = std::numeric_limits<int>::max() / 2;
+                                        const Rectangle<int> requestedBounds { width, height };
+                                        auto modifiedBounds = requestedBounds;
+                                        constrainer->checkBounds (modifiedBounds,
+                                                                  editor->getBounds().withZeroOrigin(),
+                                                                  { maxLimits, maxLimits }, false, false, false, false);
 
-                                    if (modifiedBounds == requestedBounds)
-                                        [supportedViewIndices addIndex: i];
+                                        if (modifiedBounds == requestedBounds)
+                                            [supportedViewIndices addIndex: i];
+                                    }
                                 }
                             }
                         }
-                    }
+                    });
 
                     return [supportedViewIndices autorelease];
                 });
@@ -1486,12 +1500,12 @@ private:
 
                     for (uint32_t i = 0; i < list.numPackets; ++i)
                     {
-                        converter.dispatch (reinterpret_cast<const uint32_t*> (packet->words),
-                                            reinterpret_cast<const uint32_t*> (packet->words + packet->wordCount),
+                        converter.dispatch ({ reinterpret_cast<const uint32_t*> (packet->words),
+                                              (size_t) packet->wordCount },
                                             static_cast<int> (packet->timeStamp - (MIDITimeStamp) startTime),
-                                            [this] (const ump::BytestreamMidiView& message)
+                                            [this] (const ump::BytesOnGroup& x, double t)
                                             {
-                                                midiMessages.addEvent (message.getMessage(), (int) message.timestamp);
+                                                midiMessages.addEvent ({ x.bytes.data(), (int) x.bytes.size(), t }, (int) t);
                                             });
 
                         packet = MIDIEventPacketNext (packet);
@@ -1882,6 +1896,8 @@ public:
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
+        refreshDisplays();
+
         if (auto p = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnitv3))
         {
             processorHolder = new AudioProcessorHolder (std::move (p));
@@ -1918,6 +1934,8 @@ public:
 
     void viewDidLayoutSubviews()
     {
+        refreshDisplays();
+
         if (auto holder = processorHolder.get())
         {
             if ([myself view] != nullptr)
@@ -1972,14 +1990,14 @@ public:
     //==============================================================================
     AUAudioUnit* createAudioUnit (const AudioComponentDescription& descr, NSError** error)
     {
-        const auto holder = [&]
+        const auto holder = std::invoke ([&]
         {
             if (auto initialisedHolder = processorHolder.get())
                 return initialisedHolder;
 
-            waitForExecutionOnMainThread ([this] { [myself view]; });
+            MessageManager::callSync ([this] { [myself view]; });
             return processorHolder.get();
-        }();
+        });
 
         if (holder == nullptr)
             return nullptr;
@@ -1988,25 +2006,7 @@ public:
     }
 
 private:
-    template <typename Callback>
-    static void waitForExecutionOnMainThread (Callback&& callback)
-    {
-        if (MessageManager::getInstance()->isThisTheMessageThread())
-        {
-            callback();
-            return;
-        }
-
-        std::promise<void> promise;
-
-        MessageManager::callAsync ([&]
-        {
-            callback();
-            promise.set_value();
-        });
-
-        promise.get_future().get();
-    }
+    static void refreshDisplays() { const_cast<Displays&> (Desktop::getInstance().getDisplays()).refresh(); }
 
     // There's a chance that createAudioUnit will be called from a background
     // thread while the processorHolder is being updated on the main thread.

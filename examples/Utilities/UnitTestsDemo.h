@@ -38,8 +38,9 @@
                    juce_core, juce_cryptography, juce_data_structures, juce_dsp,
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra,
                    juce_opengl, juce_osc, juce_product_unlocking, juce_video,
-                   juce_midi_ci
- exporters:        xcode_mac, vs2022, linux_make, androidstudio, xcode_iphone
+                   juce_midi_ci, juce_audio_processors_headless
+ exporters:        xcode_mac, vs2022, vs2026, linux_make, androidstudio,
+                   xcode_iphone
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1,JUCE_PLUGINHOST_VST3=1,JUCE_PLUGINHOST_LV2=1
  defines:          JUCE_UNIT_TESTS=1

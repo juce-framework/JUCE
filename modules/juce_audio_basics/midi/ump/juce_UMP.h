@@ -45,7 +45,7 @@
 #include "juce_UMPMidi1ToMidi2DefaultTranslator.h"
 #include "juce_UMPConverters.h"
 #include "juce_UMPDispatcher.h"
-#include "juce_UMPReceiver.h"
+#include "juce_UMPStringUtils.h"
 
 /** @cond */
 namespace juce

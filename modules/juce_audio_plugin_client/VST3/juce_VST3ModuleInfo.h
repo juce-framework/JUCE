@@ -241,7 +241,7 @@ public:
         {
             if (doUIDsMatch (entry.infoW.cid, cid))
             {
-                if (auto instance = becomeVSTComSmartPtrOwner (createInstance (entry)))
+                if (VSTComSmartPtr instance { createInstance (entry), IncrementRef::no })
                 {
                     if (instance->queryInterface (iidToQuery, obj) == Steinberg::kResultOk)
                         return Steinberg::kResultOk;

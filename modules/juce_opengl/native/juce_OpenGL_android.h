@@ -291,7 +291,7 @@ private:
      METHOD (layout,      "layout",    "(IIII)V" ) \
      CALLBACK (generatedCallback<&NativeContext::dispatchDraw>,       "onDrawNative",               "(JLandroid/graphics/Canvas;)V")
 
-     DECLARE_JNI_CLASS_WITH_BYTECODE (JuceOpenGLViewSurface, "com/rmsl/juce/JuceOpenGLView", 16, javaJuceOpenGLView)
+     DECLARE_JNI_CLASS_WITH_BYTECODE (JuceOpenGLViewSurface, "com/rmsl/juce/JuceOpenGLView", 24, javaJuceOpenGLView)
     #undef JNI_CLASS_MEMBERS
 
     //==============================================================================

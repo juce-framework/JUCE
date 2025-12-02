@@ -41,7 +41,7 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& stateToUse, Ori
 {
     state.addListener (this);
 
-    // initialise with a default set of qwerty key-mappings.
+    // initialise with a default set of qwerty key-mappings
     const std::string_view keys { "awsedftgyhujkolp;" };
 
     for (const char& c : keys)

@@ -73,7 +73,7 @@ namespace HeapBlockHelper
         free (temp);
     @endcode
 
-    ..you could just write this:
+    ...you could just write this:
     @code
         HeapBlock<int> temp (1024);
         memcpy (temp, xyz, 1024 * sizeof (int));
@@ -343,7 +343,7 @@ private:
         auto* memory = static_cast<ElementType*> (f());
 
        #if JUCE_EXCEPTIONS_DISABLED
-        jassert (memory != nullptr); // without exceptions, you'll need to find a better way to handle this failure case.
+        jassert (memory != nullptr); // without exceptions, you'll need to find a better way to handle this failure case
        #else
         HeapBlockHelper::ThrowOnFail<throwOnFailure>::checkPointer (memory);
        #endif

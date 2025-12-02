@@ -434,6 +434,15 @@ attributes directly to these creation functions, rather than adding them later.
   are set on a JUCE target. By default, we don't link StoreKit because you might not need it, but
   if you get linker or include errors that reference StoreKit, just set this argument to `TRUE`.
 
+`NEEDS_WINDOWS_MIDI_SERVICES`
+- On Windows, JUCE can use the Windows MIDI Services library to support MIDI 2.0 protocol
+  communications with hardware and other applications. By default this is not enabled because the
+  MIDI services require additional packages to be installed in order to function, both at build-time
+  and at run-time. If you enable this flag but don't have the correct dependencies installed, CMake
+  will emit an error message during configuration explaining how to get everything set up. This
+  option will automatically set the JUCE_USE_WINDOWS_MIDI_SERVICES=1 preprocessor definition on the
+  new target.
+
 `PUSH_NOTIFICATIONS_ENABLED`
 - Sets app entitlements to allow push notifications. May be either `TRUE`
   or `FALSE`. Defaults to `FALSE`.
@@ -489,10 +498,10 @@ attributes directly to these creation functions, rather than adding them later.
 - A string to insert into an app/plugin's Info.plist.
 
 `FORMATS`
-- For plugin targets, specifies the plugin targets to build. Should be provided as a
-  space-separated list. Valid values are `Standalone Unity VST3 AU AUv3 AAX VST LV2`. `AU` and
-  `AUv3` plugins will only be enabled when building on macOS. It is an error to pass `AAX` or `VST`
-  without first calling `juce_set_aax_sdk_path` or `juce_set_vst2_sdk_path` respectively.
+- For plugin targets, specifies the plugin targets to build. Should be provided as a space-separated
+  list. Valid values are `Standalone Unity VST3 AU AUv3 AAX VST LV2`. `AU` and `AUv3` plugins will
+  only be enabled when building on macOS; `AUv3` plugins will only be enabled when using the Xcode
+  generator. It is an error to pass `VST` without first calling `juce_set_vst2_sdk_path`.
 
 `PLUGIN_NAME`
 - The name of the plugin. In a DAW environment, this is the name that will be displayed to the
@@ -574,9 +583,10 @@ attributes directly to these creation functions, rather than adding them later.
 `VST3_CATEGORIES`
 - Should be one or more, separated by spaces, of the following: `Fx`, `Instrument`, `Analyzer`,
   `Delay`, `Distortion`, `Drum`, `Dynamics`, `EQ`, `External`, `Filter`, `Generator`, `Mastering`,
-  `Modulation`, `Mono`, `Network`, `NoOfflineProcess`, `OnlyOfflineProcess`, `OnlyRT`,
-  `Pitch Shift`, `Restoration`, `Reverb`, `Sampler`, `Spatial`, `Stereo`, `Surround`, `Synth`,
-  `Tools`, `Up-Downmix`. Defaults to `Synth` if `IS_SYNTH` is `TRUE`. Otherwise defaults to `Fx`.
+  `Modulation`, `Mono`, `Network`, `NoOfflineProcess`, `OnlyOfflineProcess`, `OnlyRT`, `Pitch
+  Shift`, `Restoration`, `Reverb`, `Sampler`, `Spatial`, `Stereo`, `Surround`, `Synth`, `Tools`,
+  `Up-Downmix`. Defaults to `Instrument Synth` if `IS_SYNTH` is `TRUE`. Otherwise defaults to
+  `Fx`.
 
 `AU_MAIN_TYPE`
 - Should be one of: `kAudioUnitType_Effect`, `kAudioUnitType_FormatConverter`,

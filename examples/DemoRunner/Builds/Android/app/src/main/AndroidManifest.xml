@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="8.0.10">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="8.0.11">
   <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:anyDensity="true"
                     android:xlargeScreens="true"/>
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
@@ -30,6 +30,20 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
+    <service android:name="com.rmsl.juce.VirtualMidiServices$VirtualUmpService" android:enabled="false" android:exported="true"
+             android:permission="android.permission.BIND_MIDI_DEVICE_SERVICE">
+      <intent-filter>
+        <action android:name="android.media.midi.MidiUmpDeviceService"/>
+      </intent-filter>
+      <property android:name="android.media.midi.MidiUmpDeviceService" android:resource="@xml/juce_midi_virtual_ump"/>
+    </service>
+    <service android:name="com.rmsl.juce.VirtualMidiServices$VirtualBytestreamService" android:enabled="false" android:exported="true"
+             android:permission="android.permission.BIND_MIDI_DEVICE_SERVICE">
+      <intent-filter>
+        <action android:name="android.media.midi.MidiDeviceService"/>
+      </intent-filter>
+      <meta-data android:name="android.media.midi.MidiDeviceService" android:resource="@xml/juce_midi_virtual_bytestream"/>
+    </service>
     <provider android:name="com.rmsl.juce.JuceSharingContentProvider" android:authorities="com.rmsl.jucedemorunner.sharingcontentprovider"
               android:grantUriPermissions="true" android:exported="true"/>
   </application>

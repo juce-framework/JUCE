@@ -130,8 +130,6 @@ struct TypefaceMetrics
 class JUCE_API  Typeface  : public ReferenceCountedObject
 {
 public:
-    Typeface (const String& name, const String& newStyle) noexcept;
-
     //==============================================================================
     /** A handy typedef for a pointer to a typeface. */
     using Ptr = ReferenceCountedObjectPtr<Typeface>;
@@ -315,17 +313,6 @@ public:
     */
     std::optional<uint32_t> getNominalGlyphForCodepoint (juce_wchar) const;
 
-    /** @internal */
-    class Native;
-
-    /** @internal
-
-        At the moment, this is a way to get at the hb_font_t that backs this typeface.
-        The typeface's hb_font_t has a size of 1 pt (i.e. 1 pt per em).
-        This is only for internal use!
-    */
-    virtual Native getNativeDetails() const = 0;
-
     /** Attempts to locate a font with a similar style that is capable of displaying the requested
         string.
 
@@ -393,6 +380,16 @@ public:
         @see FontFeatureTag, FontFeatureSetting, FontOptions, Font
      */
     std::vector<FontFeatureTag> getSupportedFeatures() const;
+
+    /** @internal */
+    class Native;
+
+    /** @internal */
+    virtual const Native* getNativeDetails() const = 0;
+
+protected:
+    /** @internal */
+    Typeface (const String&, const String&);
 
 private:
     //==============================================================================

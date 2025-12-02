@@ -1,6 +1,6 @@
 /*================================================================================================*/
 /*
- *	Copyright 2015, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2015, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -94,7 +94,9 @@ namespace AAX
 		,eSpecialData_UnaccentedClick = 0x01 ///< For use when the high status nibble is \ref eStatusNibble_NoteOn and the low status nibble is zero
 	};
 	
-	
+	AAX_CONSTEXPR int32_t kMIDIClocksPerQuarter = 24;
+	AAX_CONSTEXPR int32_t kMIDIClocksPerSPPBeat = 6;
+
 	//
 	// Basic MIDI utility functions
 	//
@@ -166,6 +168,49 @@ namespace AAX
 	inline bool IsClick(const AAX_CMidiPacket* inPacket)
 	{
 		return (IsAccentedClick(inPacket) || IsUnaccentedClick(inPacket));
+	}
+
+	/// Returns true if \c inPacket is a MIDI Beat Clock clock message
+	inline bool IsMBCClock(const AAX_CMidiPacket* inPacket)
+	{
+		return ((inPacket) &&
+				(eStatusByte_TimingClock == inPacket->mData[0]));
+	}
+
+	/// Returns true if \c inPacket is a MIDI Beat Clock start message
+	inline bool IsMBCStart(const AAX_CMidiPacket* inPacket)
+	{
+		return ((inPacket) &&
+				(eStatusByte_Start == inPacket->mData[0]));
+	}
+
+	/// Returns true if \c inPacket is a MIDI Beat Clock continue message
+	inline bool IsMBCContinue(const AAX_CMidiPacket* inPacket)
+	{
+		return ((inPacket) &&
+				(eStatusByte_Continue == inPacket->mData[0]));
+	}
+
+	/// Returns true if \c inPacket is a MIDI Beat Clock stop message
+	inline bool IsMBCStop(const AAX_CMidiPacket* inPacket)
+	{
+		return ((inPacket) &&
+				(eStatusByte_Stop == inPacket->mData[0]));
+	}
+
+	/// Returns true if \c inPacket is a Song Position Pointer message
+	inline bool IsSongPositionPointer(const AAX_CMidiPacket* inPacket, int16_t* outPosition)
+	{
+		bool const isSongPostion = (
+			(inPacket) &&
+			(eStatusByte_SongPosition == inPacket->mData[0]));
+
+		if (isSongPostion && outPosition)
+		{
+			*outPosition = (static_cast<int16_t>(0x7F & inPacket->mData[2]) << 7) | static_cast<int16_t>(0x7F & inPacket->mData[1]);
+		}
+
+		return isSongPostion;
 	}
 } // namespace AAX
 

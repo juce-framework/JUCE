@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2023-2024 Avid Technology, Inc.
+ *	Copyright 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -33,6 +33,7 @@
 #define AAX_CSessionDocumentClient_H
 
 #include "AAX_ISessionDocumentClient.h"
+#include "AAX_Errors.h"
 #include <memory>
 
 #ifdef __clang__
@@ -85,7 +86,7 @@ public: ////////////////////////////////////////////////////////////////////////
 	/**
 	 * \copydoc AAX_IACFSessionDocumentClient::NotificationReceived()
 	 */
-	AAX_Result NotificationReceived(/* AAX_ENotificationEvent */ AAX_CTypeID /*inNotificationType*/, const void * /*inNotificationData*/, uint32_t /*inNotificationDataSize*/) AAX_OVERRIDE { return AAX_SUCCESS; }
+	AAX_Result NotificationReceived(/* AAX_ENotificationEvent */ AAX_CTypeID inNotificationType, const void * inNotificationData, uint32_t inNotificationDataSize) AAX_OVERRIDE { return AAX_SUCCESS; }
 	//@}end %AAX host and plug-in event notification
 
 protected: ///////////////////////////////////////////////////////////////////////////// AAX_CSessionDocumentClient

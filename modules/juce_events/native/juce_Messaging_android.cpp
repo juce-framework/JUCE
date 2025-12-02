@@ -62,7 +62,7 @@ namespace Android
 
     struct Handler
     {
-        Handler() : nativeHandler (LocalRef<jobject> (getEnv()->NewObject (AndroidHandler, AndroidHandler.constructor))) {}
+        Handler() = default;
         ~Handler() { clearSingletonInstance(); }
 
         JUCE_DECLARE_SINGLETON_INLINE (Handler, false)
@@ -72,7 +72,7 @@ namespace Android
             return (getEnv()->CallBooleanMethod (nativeHandler.get(), AndroidHandler.post, runnable) != 0);
         }
 
-        GlobalRef nativeHandler;
+        GlobalRef nativeHandler { LocalRef<jobject> { getEnv()->NewObject (AndroidHandler, AndroidHandler.constructor) } };
     };
 }
 
@@ -81,10 +81,7 @@ struct AndroidMessageQueue final : private Android::Runnable
 {
     JUCE_DECLARE_SINGLETON_SINGLETHREADED_INLINE (AndroidMessageQueue, true)
 
-    AndroidMessageQueue()
-        : self (CreateJavaInterface (this, "java/lang/Runnable"))
-    {
-    }
+    AndroidMessageQueue() = default;
 
     ~AndroidMessageQueue() override
     {
@@ -115,11 +112,11 @@ private:
         }
     }
 
-    // the this pointer to this class in Java land
-    GlobalRef self;
-
     ReferenceCountedArray<MessageManager::MessageBase, CriticalSection> queue;
     Android::Handler handler;
+
+    // the this pointer to this class in Java land
+    GlobalRef self { CreateJavaInterface (this, "java/lang/Runnable") };
 };
 
 //==============================================================================
@@ -149,7 +146,7 @@ void MessageManager::stopDispatchLoop()
         void messageCallback() override
         {
             auto* env = getEnv();
-            LocalRef<jobject> activity (getCurrentActivity());
+            auto activity = getCurrentActivity();
 
             if (activity != nullptr)
             {
@@ -180,7 +177,9 @@ void MessageManager::stopDispatchLoop()
 class JuceAppLifecycle final : public ActivityLifecycleCallbacks
 {
 public:
-    JuceAppLifecycle (juce::JUCEApplicationBase* (*initSymbolAddr)())
+    using CreateApp = juce::JUCEApplicationBase* (*)();
+
+    explicit JuceAppLifecycle (CreateApp initSymbolAddr)
         : createApplicationSymbol (initSymbolAddr)
     {
     }
@@ -200,8 +199,8 @@ public:
             JUCEApplicationBase::appWillTerminateByForce();
             JNIClassBase::releaseAllClasses (env);
 
-            jclass systemClass = (jclass) env->FindClass ("java/lang/System");
-            jmethodID exitMethod = env->GetStaticMethodID (systemClass, "exit", "(I)V");
+            LocalRef<jclass> systemClass { env->FindClass ("java/lang/System") };
+            jmethodID exitMethod = env->GetStaticMethodID (systemClass.get(), "exit", "(I)V");
             env->CallStaticVoidMethod (systemClass, exitMethod, 0);
         }
     }
@@ -225,7 +224,7 @@ public:
             app->resumed();
     }
 
-    static JuceAppLifecycle& getInstance (juce::JUCEApplicationBase* (*initSymbolAddr)())
+    static JuceAppLifecycle& getInstance (CreateApp initSymbolAddr)
     {
         static JuceAppLifecycle juceAppLifecycle (initSymbolAddr);
         return juceAppLifecycle;
@@ -267,7 +266,7 @@ private:
 
     std::optional<ScopedJuceInitialiser_GUI> initialiser;
     GlobalRef myself;
-    juce::JUCEApplicationBase* (*createApplicationSymbol)();
+    CreateApp createApplicationSymbol{};
     bool hasBeenInitialised = false;
     ActivityLifecycleCallbackForwarder forwarder { GlobalRef { getAppContext() }, this };
 };
@@ -279,8 +278,8 @@ void juce_juceEventsAndroidStartApp();
 void juce_juceEventsAndroidStartApp()
 {
     auto dllPath = juce_getExecutableFile().getFullPathName();
-    auto addr = reinterpret_cast<juce::JUCEApplicationBase*(*)()> (DynamicLibrary (dllPath)
-                                                                    .getFunction ("juce_CreateApplication"));
+    auto addr = reinterpret_cast<juce::JUCEApplicationBase* (*)()> (DynamicLibrary (dllPath)
+                                                                     .getFunction ("juce_CreateApplication"));
 
     if (addr != nullptr)
         JuceAppLifecycle::getInstance (addr);

@@ -322,7 +322,7 @@ public:
 //==============================================================================
 void MessageManager::runDispatchLoop()
 {
-    if (quitMessagePosted.get() == 0) // check that the quit message wasn't already posted..
+    if (quitMessagePosted.get() == 0) // check that the quit message wasn't already posted
     {
         JUCE_AUTORELEASEPOOL
         {

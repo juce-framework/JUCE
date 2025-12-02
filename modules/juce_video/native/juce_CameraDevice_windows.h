@@ -134,7 +134,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             sampleGrabber->SetMediaType (&mt);
         }
 
-        callback = becomeComSmartPtrOwner (new GrabberCallback (*this));
+        callback = ComSmartPtr (new GrabberCallback (*this), IncrementRef::no);
         hr = sampleGrabber->SetCallback (callback, 1);
 
         hr = graphBuilder->AddFilter (sampleGrabberBase, _T ("Sample Grabber"));

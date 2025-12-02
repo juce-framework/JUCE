@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -35,6 +35,7 @@
 #ifndef AAX_IACFPROPERTYMAP_H
 #define AAX_IACFPROPERTYMAP_H
 
+#include "AAX_Properties.h"
 #include "AAX.h"
 
 #ifdef __clang__

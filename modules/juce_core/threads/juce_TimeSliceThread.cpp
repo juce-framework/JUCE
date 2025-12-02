@@ -61,10 +61,10 @@ void TimeSliceThread::removeTimeSliceClient (TimeSliceClient* const client)
     const ScopedLock sl1 (listLock);
 
     // if there's a chance we're in the middle of calling this client, we need to
-    // also lock the outer lock..
+    // also lock the outer lock
     if (clientBeingCalled == client)
     {
-        const ScopedUnlock ul (listLock); // unlock first to get the order right..
+        const ScopedUnlock ul (listLock); // unlock first to get the order right
 
         const ScopedLock sl2 (callbackLock);
         const ScopedLock sl3 (listLock);
