@@ -2661,7 +2661,8 @@ void Project::addNewExporter (const Identifier& exporterIdentifier)
 
 void Project::createExporterForCurrentPlatform()
 {
-    addNewExporter (ProjectExporter::getCurrentPlatformExporterTypeInfo().identifier);
+    if (const auto identifier = ProjectExporter::getBestPlatformExporterIdentifier(); identifier.isNotEmpty())
+        addNewExporter (identifier);
 }
 
 String Project::getUniqueTargetFolderSuffixForExporter (const Identifier& exporterIdentifier, const String& base)
