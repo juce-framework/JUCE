@@ -736,7 +736,7 @@ private:
 
     DECLARE_JNI_CLASS_WITH_BYTECODE (JuceBillingClient,
                                      "com/rmsl/juce/JuceBillingClient",
-                                     16,
+                                     24,
                                      juceBillingClientCompiled)
     #undef JNI_CLASS_MEMBERS
 
