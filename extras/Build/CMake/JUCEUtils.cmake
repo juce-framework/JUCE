@@ -734,13 +734,6 @@ function(_juce_configure_bundle source_target dest_target)
         return()
     endif()
 
-    get_target_property(generated_icon ${source_target} JUCE_ICON_FILE)
-    set(icon_dependency)
-
-    if(generated_icon)
-        set(icon_dependency "${generated_icon}")
-    endif()
-
     get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
     get_target_property(input_info_file ${source_target} JUCE_INFO_FILE)
 
