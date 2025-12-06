@@ -170,7 +170,7 @@ protected:
     AudioPluginInstance() = default;
     AudioPluginInstance (const BusesProperties& ioLayouts) : AudioProcessor (ioLayouts) {}
     template <size_t numLayouts>
-    AudioPluginInstance (const short channelLayoutList[numLayouts][2]) : AudioProcessor (channelLayoutList) {}
+    AudioPluginInstance (const short (&channelLayoutList)[numLayouts][2]) : AudioProcessor (channelLayoutList) {}
 
 private:
     // It's not safe to add a plain AudioProcessorParameter to an AudioPluginInstance.
