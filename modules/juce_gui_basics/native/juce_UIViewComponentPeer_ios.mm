@@ -53,8 +53,8 @@ public:
 
     void setWindowScene (UIWindowScene* x) API_AVAILABLE (ios (13.0))
     {
-        if (std::exchange (windowScene, x) != x)
-            listeners.call ([] (auto& l) { l.windowSceneChanged(); });
+        windowScene = x;
+        listeners.call ([] (auto& l) { l.windowSceneChanged(); });
     }
 
     UIWindowScene* getWindowScene() const API_AVAILABLE (ios (13.0))
@@ -548,6 +548,23 @@ private:
     {
         if (isSharedWindow)
             return;
+
+        const auto sceneDidChange = std::invoke ([&]
+        {
+            if (@available (iOS 13, *))
+            {
+                auto* currentScene = window != nil ? [window windowScene] : nil;
+                return windowSceneTracker->getWindowScene() != currentScene;
+            }
+
+            return false;
+        });
+
+        if (! sceneDidChange)
+        {
+            updateScreenBounds();
+            return;
+        }
 
         auto* newWindow = std::invoke ([&]() -> JuceUIWindow*
         {
