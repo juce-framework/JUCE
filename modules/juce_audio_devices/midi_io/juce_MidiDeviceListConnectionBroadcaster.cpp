@@ -182,7 +182,7 @@ class MidiDeviceListConnectionBroadcaster : private AsyncUpdater,
                     if (! blockName.has_value())
                         continue;
 
-                    const auto separator = endpoint->getName().isEmpty() || blockName->isEmpty() ? "" : " : ";
+                    const auto separator = endpoint->getName().isEmpty() || blockName->isEmpty() ? "" : " ";
                     const auto name = endpoint->getName() + separator + *blockName;
 
                     result.add (MidiDeviceInfo { name, groupId });
