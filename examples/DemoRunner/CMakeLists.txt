@@ -52,6 +52,7 @@ target_sources(DemoRunner PRIVATE
 
 target_compile_definitions(DemoRunner PRIVATE
     PIP_JUCE_EXAMPLES_DIRECTORY_STRING="${JUCE_SOURCE_DIR}/examples"
+    JUCE_ASIO=1
     JUCE_ALLOW_STATIC_NULL_VARIABLES=0
     JUCE_CONTENT_SHARING=1
     JUCE_DEMO_RUNNER=1
