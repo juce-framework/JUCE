@@ -1268,7 +1268,6 @@ struct RenderContext
     virtual void updateConstantAlpha() = 0;
     virtual void handlePaintMessage() = 0;
     virtual void repaint (const Rectangle<int>& area) = 0;
-    virtual void dispatchDeferredRepaints() = 0;
     virtual void performAnyPendingRepaintsNow() = 0;
     virtual void onVBlank() = 0;
     virtual void handleShowWindow() = 0;
@@ -1724,12 +1723,6 @@ public:
             renderContext->repaint ((area.toDouble() * getPlatformScaleFactor()).getSmallestIntegerContainer());
     }
 
-    void dispatchDeferredRepaints()
-    {
-        if (renderContext != nullptr)
-            renderContext->dispatchDeferredRepaints();
-    }
-
     void performAnyPendingRepaintsNow() override
     {
         if (renderContext != nullptr)
@@ -1748,7 +1741,6 @@ public:
     void onVBlank (double timestampSec) override
     {
         callVBlankListeners (timestampSec);
-        dispatchDeferredRepaints();
 
         if (renderContext != nullptr)
             renderContext->onVBlank();
@@ -4779,23 +4771,12 @@ public:
         deferredRepaints.add (area);
     }
 
-    void dispatchDeferredRepaints() override
-    {
-        for (auto deferredRect : deferredRepaints)
-        {
-            auto r = D2DUtilities::toRECT (deferredRect);
-            InvalidateRect (peer.getHWND(), &r, FALSE);
-        }
-
-        deferredRepaints.clear();
-    }
-
     void performAnyPendingRepaintsNow() override
     {
         if (! peer.getComponent().isVisible())
             return;
 
-        dispatchDeferredRepaints();
+        onVBlank();
 
         WeakReference localRef (&peer.getComponent());
         MSG m;
@@ -4815,7 +4796,16 @@ public:
              : createSnapshotOfNormalWindow();
     }
 
-    void onVBlank() override {}
+    void onVBlank() override
+    {
+        for (auto deferredRect : deferredRepaints)
+        {
+            auto r = D2DUtilities::toRECT (deferredRect);
+            InvalidateRect (peer.getHWND(), &r, FALSE);
+        }
+
+        deferredRepaints.clear();
+    }
 
     void handleShowWindow() override {}
 
@@ -5104,8 +5094,6 @@ public:
     {
         direct2DContext->addDeferredRepaint (area);
     }
-
-    void dispatchDeferredRepaints() override {}
 
     void performAnyPendingRepaintsNow() override {}
 
