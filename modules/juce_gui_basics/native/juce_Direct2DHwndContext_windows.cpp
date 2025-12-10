@@ -297,12 +297,12 @@ private:
 };
 
 //==============================================================================
-struct Direct2DHwndContext::HwndPimpl : public Direct2DGraphicsContext::Pimpl
+struct Direct2DHwndContext::HwndPimpl : public Pimpl
 {
 private:
     struct SwapChainThread
     {
-        SwapChainThread (Direct2DHwndContext::HwndPimpl& ownerIn, HANDLE swapHandle)
+        SwapChainThread (HwndPimpl& ownerIn, HANDLE swapHandle)
             : owner (ownerIn),
               swapChainEventHandle (swapHandle)
         {
@@ -319,7 +319,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SwapChainThread)
 
     private:
-        Direct2DHwndContext::HwndPimpl& owner;
+        HwndPimpl& owner;
         HANDLE swapChainEventHandle = nullptr;
 
         WindowsScopedEvent quitEvent;
