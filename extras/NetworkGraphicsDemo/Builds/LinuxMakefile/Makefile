@@ -91,6 +91,10 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/include_juce_graphics_Harfbuzz_60c52ba2.o \
   $(JUCE_OBJDIR)/include_juce_graphics_Sheenbidi_c310974d.o \
   $(JUCE_OBJDIR)/include_juce_gui_basics_e3f79785.o \
+  $(JUCE_OBJDIR)/include_juce_gui_basics_2_153c9db8.o \
+  $(JUCE_OBJDIR)/include_juce_gui_basics_3_154ab539.o \
+  $(JUCE_OBJDIR)/include_juce_gui_basics_4_1558ccba.o \
+  $(JUCE_OBJDIR)/include_juce_gui_basics_5_1566e43b.o \
   $(JUCE_OBJDIR)/include_juce_gui_extra_6dee1c1a.o \
   $(JUCE_OBJDIR)/include_juce_opengl_a8a032b.o \
   $(JUCE_OBJDIR)/include_juce_osc_f3df604d.o \
@@ -201,6 +205,26 @@ $(JUCE_OBJDIR)/include_juce_graphics_Sheenbidi_c310974d.o: ../../JuceLibraryCode
 $(JUCE_OBJDIR)/include_juce_gui_basics_e3f79785.o: ../../JuceLibraryCode/include_juce_gui_basics.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling include_juce_gui_basics.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_gui_basics_2_153c9db8.o: ../../JuceLibraryCode/include_juce_gui_basics_2.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_gui_basics_2.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_gui_basics_3_154ab539.o: ../../JuceLibraryCode/include_juce_gui_basics_3.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_gui_basics_3.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_gui_basics_4_1558ccba.o: ../../JuceLibraryCode/include_juce_gui_basics_4.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_gui_basics_4.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_gui_basics_5_1566e43b.o: ../../JuceLibraryCode/include_juce_gui_basics_5.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_gui_basics_5.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_gui_extra_6dee1c1a.o: ../../JuceLibraryCode/include_juce_gui_extra.cpp
