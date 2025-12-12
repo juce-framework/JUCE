@@ -149,6 +149,7 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_midi_ci" path="../../modules"/>
         <MODULEPATH id="juce_javascript" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
       </MODULEPATHS>
     </VS2026>
   </EXPORTFORMATS>
