@@ -129,11 +129,7 @@ struct MidiDeviceInfo
     [[nodiscard]] MidiDeviceInfo withIdentifier (String x) const { return withMember (*this, &MidiDeviceInfo::identifier, x); }
 
     //==============================================================================
-    bool operator== (const MidiDeviceInfo& other) const noexcept
-    {
-        const auto tie = [] (auto& x) { return std::tuple (x.name, x.identifier); };
-        return tie (*this) == tie (other);
-    }
+    bool operator== (const MidiDeviceInfo& other) const noexcept;
 
     bool operator!= (const MidiDeviceInfo& other) const noexcept   { return ! operator== (other); }
 };

@@ -35,36 +35,15 @@
 namespace juce::universal_midi_packets
 {
 
-/**
-    Holds MIDI device info that may be required by certain UMP messages and
-    MIDI-CI messages.
-
-    @tags{Audio}
-*/
-struct DeviceInfo
+bool Block::operator== (const Block& other) const
 {
-    std::array<std::byte, 3> manufacturer;
-    std::array<std::byte, 2> family;        ///< LSB first
-    std::array<std::byte, 2> modelNumber;   ///< LSB first
-    std::array<std::byte, 4> revision;
+    const auto tie = [] (auto& x) { return std::tuple (x.info, x.name); };
+    return tie (*this) == tie (other);
+}
 
-private:
-    auto tie() const;
+bool Block::operator!= (const Block& other) const
+{
+    return ! operator== (other);
+}
 
-public:
-    bool operator== (const DeviceInfo& other) const;
-    bool operator!= (const DeviceInfo& other) const;
-
-    static constexpr auto marshallingVersion = std::nullopt;
-
-    template <typename Archive, typename This>
-    static auto serialise (Archive& archive, This& t)
-    {
-        return archive (named ("manufacturer", t.manufacturer),
-                        named ("family", t.family),
-                        named ("modelNumber", t.modelNumber),
-                        named ("revision", t.revision));
-    }
-};
-
-} // namespace juce::universal_midi_packets
+}

@@ -84,23 +84,8 @@ struct MPEZone
         return isUsingChannelAsMemberChannel (channel) || channel == getMasterChannel();
     }
 
-    static auto tie (const MPEZone& z)
-    {
-        return std::tie (z.zoneType,
-                         z.numMemberChannels,
-                         z.perNotePitchbendRange,
-                         z.masterPitchbendRange);
-    }
-
-    bool operator== (const MPEZone& other) const
-    {
-        return tie (*this) == tie (other);
-    }
-
-    bool operator!= (const MPEZone& other) const
-    {
-        return tie (*this) != tie (other);
-    }
+    bool operator== (const MPEZone& other) const;
+    bool operator!= (const MPEZone& other) const;
 
     //==============================================================================
     static constexpr int lowerZoneMasterChannel = 1,

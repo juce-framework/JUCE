@@ -399,4 +399,10 @@ MidiDeviceInfo MidiOutput::getDeviceInfo() const noexcept
     return customName.has_value() ? storedInfo.withName (*customName) : storedInfo;
 }
 
+bool MidiDeviceInfo::operator== (const MidiDeviceInfo& other) const noexcept
+{
+    const auto tie = [] (auto& x) { return std::tuple (x.name, x.identifier); };
+    return tie (*this) == tie (other);
+}
+
 } // namespace juce

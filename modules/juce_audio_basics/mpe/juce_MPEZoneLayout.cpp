@@ -220,6 +220,25 @@ void MPEZoneLayout::checkAndLimitZoneParameters (int minValue, int maxValue,
     }
 }
 
+//==============================================================================
+bool MPEZone::operator== (const MPEZone& other) const
+{
+    const auto tie = [] (auto& x)
+    {
+        return std::tie (x.zoneType,
+                         x.numMemberChannels,
+                         x.perNotePitchbendRange,
+                         x.masterPitchbendRange);
+    };
+
+    return tie (*this) == tie (other);
+}
+
+bool MPEZone::operator!= (const MPEZone& other) const
+{
+    return ! operator== (other);
+}
+
 
 //==============================================================================
 //==============================================================================

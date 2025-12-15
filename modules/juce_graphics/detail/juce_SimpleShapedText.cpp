@@ -35,6 +35,34 @@
 namespace juce::detail
 {
 
+auto ShapedTextOptions::tie() const
+{
+    return std::tie (justification,
+                     readingDir,
+                     wordWrapWidth,
+                     alignmentWidth,
+                     height,
+                     fontsForRange,
+                     firstLineIndent,
+                     leading,
+                     additiveLineSpacing,
+                     baselineAtZero,
+                     allowBreakingInsideWord,
+                     trailingWhitespacesShouldFit,
+                     maxNumLines,
+                     ellipsis);
+}
+
+bool ShapedTextOptions::operator== (const ShapedTextOptions& other) const
+{
+    return tie() == other.tie();
+}
+
+bool ShapedTextOptions::operator!= (const ShapedTextOptions& other) const
+{
+    return tie() != other.tie();
+}
+
 //==============================================================================
 constexpr hb_script_t getScriptTag (TextScript type)
 {

@@ -131,13 +131,10 @@ namespace Message
         MUID source = MUID::makeUnchecked (0);
         MUID destination = MUID::makeUnchecked (0);
 
-        auto tie() const
-        {
-            return std::tuple (deviceID, category, version, source, destination);
-        }
+        auto tie() const;
 
-        bool operator== (const Header& x) const { return tie() == x.tie(); }
-        bool operator!= (const Header& x) const { return ! operator== (x); }
+        bool operator== (const Header& x) const;
+        bool operator!= (const Header& x) const;
     };
 
     /**
@@ -164,13 +161,10 @@ namespace Message
         std::byte outputPathID{};       /**< Only valid if the message header specifies version 0x02 or greater. */
         std::byte functionBlock{};      /**< Only valid if the message header specifies version 0x02 or greater. */
 
-        auto tie() const
-        {
-            return std::tuple (device, capabilities, maximumSysexSize, outputPathID, functionBlock);
-        }
+        auto tie() const;
 
-        bool operator== (const DiscoveryResponse& x) const { return tie() == x.tie(); }
-        bool operator!= (const DiscoveryResponse& x) const { return ! operator== (x); }
+        bool operator== (const DiscoveryResponse& x) const;
+        bool operator!= (const DiscoveryResponse& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -184,13 +178,10 @@ namespace Message
         uint32_t maximumSysexSize{};
         std::byte outputPathID{};       /**< Only valid if the message header specifies version 0x02 or greater. */
 
-        auto tie() const
-        {
-            return std::tuple (device, capabilities, maximumSysexSize, outputPathID);
-        }
+        auto tie() const;
 
-        bool operator== (const Discovery& x) const { return tie() == x.tie(); }
-        bool operator!= (const Discovery& x) const { return ! operator== (x); }
+        bool operator== (const Discovery& x) const;
+        bool operator!= (const Discovery& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -202,13 +193,10 @@ namespace Message
         std::byte status;
         Span<const std::byte> data;
 
-        auto tie() const
-        {
-            return std::tuple (status, makeComparableRange (data));
-        }
+        auto tie() const;
 
-        bool operator== (const EndpointInquiryResponse& x) const { return tie() == x.tie(); }
-        bool operator!= (const EndpointInquiryResponse& x) const { return ! operator== (x); }
+        bool operator== (const EndpointInquiryResponse& x) const;
+        bool operator!= (const EndpointInquiryResponse& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -219,13 +207,10 @@ namespace Message
     {
         std::byte status;
 
-        auto tie() const
-        {
-            return std::tuple (status);
-        }
+        auto tie() const;
 
-        bool operator== (const EndpointInquiry& x) const { return tie() == x.tie(); }
-        bool operator!= (const EndpointInquiry& x) const { return ! operator== (x); }
+        bool operator== (const EndpointInquiry& x) const;
+        bool operator!= (const EndpointInquiry& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -236,13 +221,10 @@ namespace Message
     {
         MUID target = MUID::makeUnchecked (0);
 
-        auto tie() const
-        {
-            return std::tuple (target);
-        }
+        auto tie() const;
 
-        bool operator== (const InvalidateMUID& x) const { return tie() == x.tie(); }
-        bool operator!= (const InvalidateMUID& x) const { return ! operator== (x); }
+        bool operator== (const InvalidateMUID& x) const;
+        bool operator!= (const InvalidateMUID& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -263,13 +245,10 @@ namespace Message
             return Encodings::stringFrom7BitText (messageText);
         }
 
-        auto tie() const
-        {
-            return std::tuple (originalCategory, statusCode, statusData, details, makeComparableRange (messageText));
-        }
+        auto tie() const;
 
-        bool operator== (const ACK& x) const { return tie() == x.tie(); }
-        bool operator!= (const ACK& x) const { return ! operator== (x); }
+        bool operator== (const ACK& x) const;
+        bool operator!= (const ACK& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -290,13 +269,10 @@ namespace Message
             return Encodings::stringFrom7BitText (messageText);
         }
 
-        auto tie() const
-        {
-            return std::tuple (originalCategory, statusCode, statusData, details, makeComparableRange (messageText));
-        }
+        auto tie() const;
 
-        bool operator== (const NAK& x) const { return tie() == x.tie(); }
-        bool operator!= (const NAK& x) const { return ! operator== (x); }
+        bool operator== (const NAK& x) const;
+        bool operator!= (const NAK& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -308,13 +284,10 @@ namespace Message
         Span<const Profile> enabledProfiles;
         Span<const Profile> disabledProfiles;
 
-        auto tie() const
-        {
-            return std::tuple (makeComparableRange (enabledProfiles), makeComparableRange (disabledProfiles));
-        }
+        auto tie() const;
 
-        bool operator== (const ProfileInquiryResponse& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProfileInquiryResponse& x) const { return ! operator== (x); }
+        bool operator== (const ProfileInquiryResponse& x) const;
+        bool operator!= (const ProfileInquiryResponse& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -323,13 +296,10 @@ namespace Message
     */
     struct ProfileInquiry
     {
-        auto tie() const
-        {
-            return std::tuple<>();
-        }
+        auto tie() const;
 
-        bool operator== (const ProfileInquiry& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProfileInquiry& x) const { return ! operator== (x); }
+        bool operator== (const ProfileInquiry& x) const;
+        bool operator!= (const ProfileInquiry& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -340,13 +310,10 @@ namespace Message
     {
         Profile profile{};
 
-        auto tie() const
-        {
-            return std::tuple (profile);
-        }
+        auto tie() const;
 
-        bool operator== (const ProfileAdded& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProfileAdded& x) const { return ! operator== (x); }
+        bool operator== (const ProfileAdded& x) const;
+        bool operator!= (const ProfileAdded& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -357,13 +324,10 @@ namespace Message
     {
         Profile profile{};
 
-        auto tie() const
-        {
-            return std::tuple (profile);
-        }
+        auto tie() const;
 
-        bool operator== (const ProfileRemoved& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProfileRemoved& x) const { return ! operator== (x); }
+        bool operator== (const ProfileRemoved& x) const;
+        bool operator!= (const ProfileRemoved& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -376,13 +340,10 @@ namespace Message
         std::byte target{};
         Span<const std::byte> data;
 
-        auto tie() const
-        {
-            return std::tuple (profile, target, makeComparableRange (data));
-        }
+        auto tie() const;
 
-        bool operator== (const ProfileDetailsResponse& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProfileDetailsResponse& x) const { return ! operator== (x); }
+        bool operator== (const ProfileDetailsResponse& x) const;
+        bool operator!= (const ProfileDetailsResponse& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -394,13 +355,10 @@ namespace Message
         Profile profile{};
         std::byte target{};
 
-        auto tie() const
-        {
-            return std::tuple (profile, target);
-        }
+        auto tie() const;
 
-        bool operator== (const ProfileDetails& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProfileDetails& x) const { return ! operator== (x); }
+        bool operator== (const ProfileDetails& x) const;
+        bool operator!= (const ProfileDetails& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -412,13 +370,10 @@ namespace Message
         Profile profile{};
         uint16_t numChannels{}; /**< Only valid if the message header specifies version 0x02 or greater. */
 
-        auto tie() const
-        {
-            return std::tuple (profile, numChannels);
-        }
+        auto tie() const;
 
-        bool operator== (const ProfileOn& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProfileOn& x) const { return ! operator== (x); }
+        bool operator== (const ProfileOn& x) const;
+        bool operator!= (const ProfileOn& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -429,13 +384,10 @@ namespace Message
     {
         Profile profile{};
 
-        auto tie() const
-        {
-            return std::tuple (profile);
-        }
+        auto tie() const;
 
-        bool operator== (const ProfileOff& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProfileOff& x) const { return ! operator== (x); }
+        bool operator== (const ProfileOff& x) const;
+        bool operator!= (const ProfileOff& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -447,13 +399,10 @@ namespace Message
         Profile profile{};
         uint16_t numChannels{}; /**< Only valid if the message header specifies version 0x02 or greater. */
 
-        auto tie() const
-        {
-            return std::tuple (profile, numChannels);
-        }
+        auto tie() const;
 
-        bool operator== (const ProfileEnabledReport& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProfileEnabledReport& x) const { return ! operator== (x); }
+        bool operator== (const ProfileEnabledReport& x) const;
+        bool operator!= (const ProfileEnabledReport& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -465,13 +414,10 @@ namespace Message
         Profile profile{};
         uint16_t numChannels{}; /**< Only valid if the message header specifies version 0x02 or greater. */
 
-        auto tie() const
-        {
-            return std::tuple (profile, numChannels);
-        }
+        auto tie() const;
 
-        bool operator== (const ProfileDisabledReport& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProfileDisabledReport& x) const { return ! operator== (x); }
+        bool operator== (const ProfileDisabledReport& x) const;
+        bool operator!= (const ProfileDisabledReport& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -483,13 +429,10 @@ namespace Message
         Profile profile{};
         Span<const std::byte> data;
 
-        auto tie() const
-        {
-            return std::tuple (profile, makeComparableRange (data));
-        }
+        auto tie() const;
 
-        bool operator== (const ProfileSpecificData& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProfileSpecificData& x) const { return ! operator== (x); }
+        bool operator== (const ProfileSpecificData& x) const;
+        bool operator!= (const ProfileSpecificData& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -502,13 +445,10 @@ namespace Message
         std::byte majorVersion{}; /**< Only valid if the message header specifies version 0x02 or greater. */
         std::byte minorVersion{}; /**< Only valid if the message header specifies version 0x02 or greater. */
 
-        auto tie() const
-        {
-            return std::tuple (numSimultaneousRequestsSupported, majorVersion, minorVersion);
-        }
+        auto tie() const;
 
-        bool operator== (const PropertyExchangeCapabilitiesResponse& x) const { return tie() == x.tie(); }
-        bool operator!= (const PropertyExchangeCapabilitiesResponse& x) const { return ! operator== (x); }
+        bool operator== (const PropertyExchangeCapabilitiesResponse& x) const;
+        bool operator!= (const PropertyExchangeCapabilitiesResponse& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -521,13 +461,10 @@ namespace Message
         std::byte majorVersion{}; /**< Only valid if the message header specifies version 0x02 or greater. */
         std::byte minorVersion{}; /**< Only valid if the message header specifies version 0x02 or greater. */
 
-        auto tie() const
-        {
-            return std::tuple (numSimultaneousRequestsSupported, majorVersion, minorVersion);
-        }
+        auto tie() const;
 
-        bool operator== (const PropertyExchangeCapabilities& x) const { return tie() == x.tie(); }
-        bool operator!= (const PropertyExchangeCapabilities& x) const { return ! operator== (x); }
+        bool operator== (const PropertyExchangeCapabilities& x) const;
+        bool operator!= (const PropertyExchangeCapabilities& x) const;
     };
 
     /** A property-exchange message that has no payload, and must therefore
@@ -540,10 +477,7 @@ namespace Message
         std::byte requestID{};
         Span<const std::byte> header;
 
-        auto tie() const
-        {
-            return std::tuple (requestID, makeComparableRange (header));
-        }
+        auto tie() const;
     };
 
     /** A property-exchange message that may form part of a multi-chunk
@@ -559,14 +493,7 @@ namespace Message
         uint16_t thisChunkNum{};
         Span<const std::byte> data;
 
-        auto tie() const
-        {
-            return std::tuple (requestID,
-                               makeComparableRange (header),
-                               totalNumChunks,
-                               thisChunkNum,
-                               makeComparableRange (data));
-        }
+        auto tie() const;
     };
 
     /** See the MIDI-CI specification.
@@ -575,8 +502,8 @@ namespace Message
     */
     struct PropertyGetDataResponse : public DynamicSizePropertyExchange
     {
-        bool operator== (const PropertyGetDataResponse& x) const { return tie() == x.tie(); }
-        bool operator!= (const PropertyGetDataResponse& x) const { return ! operator== (x); }
+        bool operator== (const PropertyGetDataResponse& x) const;
+        bool operator!= (const PropertyGetDataResponse& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -585,8 +512,8 @@ namespace Message
     */
     struct PropertyGetData : public StaticSizePropertyExchange
     {
-        bool operator== (const PropertyGetData& x) const { return tie() == x.tie(); }
-        bool operator!= (const PropertyGetData& x) const { return ! operator== (x); }
+        bool operator== (const PropertyGetData& x) const;
+        bool operator!= (const PropertyGetData& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -595,8 +522,8 @@ namespace Message
     */
     struct PropertySetDataResponse : public StaticSizePropertyExchange
     {
-        bool operator== (const PropertySetDataResponse& x) const { return tie() == x.tie(); }
-        bool operator!= (const PropertySetDataResponse& x) const { return ! operator== (x); }
+        bool operator== (const PropertySetDataResponse& x) const;
+        bool operator!= (const PropertySetDataResponse& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -605,8 +532,8 @@ namespace Message
     */
     struct PropertySetData : public DynamicSizePropertyExchange
     {
-        bool operator== (const PropertySetData& x) const { return tie() == x.tie(); }
-        bool operator!= (const PropertySetData& x) const { return ! operator== (x); }
+        bool operator== (const PropertySetData& x) const;
+        bool operator!= (const PropertySetData& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -615,8 +542,8 @@ namespace Message
     */
     struct PropertySubscribeResponse : public DynamicSizePropertyExchange
     {
-        bool operator== (const PropertySubscribeResponse& x) const { return tie() == x.tie(); }
-        bool operator!= (const PropertySubscribeResponse& x) const { return ! operator== (x); }
+        bool operator== (const PropertySubscribeResponse& x) const;
+        bool operator!= (const PropertySubscribeResponse& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -625,8 +552,8 @@ namespace Message
     */
     struct PropertySubscribe : public DynamicSizePropertyExchange
     {
-        bool operator== (const PropertySubscribe& x) const { return tie() == x.tie(); }
-        bool operator!= (const PropertySubscribe& x) const { return ! operator== (x); }
+        bool operator== (const PropertySubscribe& x) const;
+        bool operator!= (const PropertySubscribe& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -635,8 +562,8 @@ namespace Message
     */
     struct PropertyNotify : public DynamicSizePropertyExchange
     {
-        bool operator== (const PropertyNotify& x) const { return tie() == x.tie(); }
-        bool operator!= (const PropertyNotify& x) const { return ! operator== (x); }
+        bool operator== (const PropertyNotify& x) const;
+        bool operator!= (const PropertyNotify& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -647,13 +574,10 @@ namespace Message
     {
         std::byte supportedFeatures{};
 
-        auto tie() const
-        {
-            return std::tuple (supportedFeatures);
-        }
+        auto tie() const;
 
-        bool operator== (const ProcessInquiryResponse& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProcessInquiryResponse& x) const { return ! operator== (x); }
+        bool operator== (const ProcessInquiryResponse& x) const;
+        bool operator!= (const ProcessInquiryResponse& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -662,13 +586,10 @@ namespace Message
     */
     struct ProcessInquiry
     {
-        auto tie() const
-        {
-            return std::tuple<>();
-        }
+        auto tie() const;
 
-        bool operator== (const ProcessInquiry& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProcessInquiry& x) const { return ! operator== (x); }
+        bool operator== (const ProcessInquiry& x) const;
+        bool operator!= (const ProcessInquiry& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -682,13 +603,10 @@ namespace Message
         std::byte channelControllerMessages{};
         std::byte noteDataMessages{};
 
-        auto tie() const
-        {
-            return std::tuple (messageDataControl, requestedMessages, channelControllerMessages, noteDataMessages);
-        }
+        auto tie() const;
 
-        bool operator== (const ProcessMidiMessageReportResponse& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProcessMidiMessageReportResponse& x) const { return ! operator== (x); }
+        bool operator== (const ProcessMidiMessageReportResponse& x) const;
+        bool operator!= (const ProcessMidiMessageReportResponse& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -702,13 +620,10 @@ namespace Message
         std::byte channelControllerMessages{};
         std::byte noteDataMessages{};
 
-        auto tie() const
-        {
-            return std::tuple (messageDataControl, requestedMessages, channelControllerMessages, noteDataMessages);
-        }
+        auto tie() const;
 
-        bool operator== (const ProcessMidiMessageReport& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProcessMidiMessageReport& x) const { return ! operator== (x); }
+        bool operator== (const ProcessMidiMessageReport& x) const;
+        bool operator!= (const ProcessMidiMessageReport& x) const;
     };
 
     /** See the MIDI-CI specification.
@@ -717,13 +632,10 @@ namespace Message
     */
     struct ProcessEndMidiMessageReport
     {
-        auto tie() const
-        {
-            return std::tuple<>();
-        }
+        auto tie() const;
 
-        bool operator== (const ProcessEndMidiMessageReport& x) const { return tie() == x.tie(); }
-        bool operator!= (const ProcessEndMidiMessageReport& x) const { return ! operator== (x); }
+        bool operator== (const ProcessEndMidiMessageReport& x) const;
+        bool operator!= (const ProcessEndMidiMessageReport& x) const;
     };
 
     /**
@@ -773,13 +685,8 @@ namespace Message
         Header header;
         Body body;
 
-        bool operator== (const Parsed& other) const
-        {
-            const auto tie = [] (const auto& x) { return std::tie (x.header, x.body); };
-            return tie (*this) == tie (other);
-        }
-
-        bool operator!= (const Parsed& other) const { return ! operator== (other); }
+        bool operator== (const Parsed& other) const;
+        bool operator!= (const Parsed& other) const;
     };
 }
 
