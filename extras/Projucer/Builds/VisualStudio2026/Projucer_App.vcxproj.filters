@@ -11,6 +11,15 @@
     <Filter Include="Projucer\Application">
       <UniqueIdentifier>{4F8BCD36-CE20-D951-FB82-2CCEDD0C5898}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Projucer\Assets\AppIcon.icon\Assets">
+      <UniqueIdentifier>{B2D403C0-2D43-F167-C19F-47D66D35F066}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\Assets\AppIcon.icon">
+      <UniqueIdentifier>{64127AE2-0F4C-1DEE-6C29-626091A3A9CB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\Assets">
+      <UniqueIdentifier>{D247D8BA-48E6-6F87-156E-E999D3678EB6}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Projucer\BinaryData\gradle">
       <UniqueIdentifier>{661FA330-2192-FAA3-E7B2-FAF8EBB783C6}</UniqueIdentifier>
     </Filter>
@@ -5243,6 +5252,12 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\Assets\AppIcon.icon\Assets\juceicon.svg">
+      <Filter>Projucer\Assets\AppIcon.icon\Assets</Filter>
+    </None>
+    <None Include="..\..\Source\Assets\AppIcon.icon\icon.json">
+      <Filter>Projucer\Assets\AppIcon.icon</Filter>
+    </None>
     <None Include="..\..\..\Build\CMake\JuceLV2Defines.h.in">
       <Filter>Projucer\BinaryData</Filter>
     </None>

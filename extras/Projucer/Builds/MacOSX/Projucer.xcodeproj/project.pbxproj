@@ -38,6 +38,7 @@
 		6DD9DA1677A6CF789CDAB478 /* jucer_AutoUpdater.cpp */ = {isa = PBXBuildFile; fileRef = 0D4D508C638BC74943B9976D; };
 		6ECB2F11D2F593FACCCF99DB /* jucer_ProjucerLookAndFeel.cpp */ = {isa = PBXBuildFile; fileRef = 0F8C000E5FF4A2DAC1FEF8EB; };
 		71713DE4716DCEDB45A206E2 /* jucer_OpenDocumentManager.cpp */ = {isa = PBXBuildFile; fileRef = F9111E150CFF155329D44853; };
+		7E43279B5881EA0FFDA49647 /* AppIcon.icon */ = {isa = PBXBuildFile; fileRef = E09429B88DD8ADA381D4BF61; };
 		7F1928D425D075E93DC254A8 /* Metal.framework */ = {isa = PBXBuildFile; fileRef = E419F3AED6A220EDCB179A8C; settings = { ATTRIBUTES = (Weak, ); }; };
 		8BE478303CDF061B72F219E2 /* jucer_CodeHelpers.cpp */ = {isa = PBXBuildFile; fileRef = F2E4998FB2C7221587A79F8B; };
 		908B7D4FB180F53405DA8EF9 /* jucer_StartPageComponent.cpp */ = {isa = PBXBuildFile; fileRef = 82C18723A3D0E39BBD8F0F6E; };
@@ -150,6 +151,7 @@
 		6FD8DBC0FF42C87D8BEE2452 /* jucer_TranslationHelpers.h */ /* jucer_TranslationHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_TranslationHelpers.h; path = ../../Source/Utility/Helpers/jucer_TranslationHelpers.h; sourceTree = SOURCE_ROOT; };
 		70D3399C01D1EF2CD059B2A4 /* jucer_Sidebar.h */ /* jucer_Sidebar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Sidebar.h; path = ../../Source/Project/UI/Sidebar/jucer_Sidebar.h; sourceTree = SOURCE_ROOT; };
 		7AB7640968FAAC73072FBD10 /* juce_gui_basics */ /* juce_gui_basics */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_gui_basics; path = ../../../../modules/juce_gui_basics; sourceTree = SOURCE_ROOT; };
+		7C2F4A961A17B2E2ADD1B407 /* icon.json */ /* icon.json */ = {isa = PBXFileReference; lastKnownFileType = file.json; name = icon.json; path = ../../Source/Assets/AppIcon.icon/icon.json; sourceTree = SOURCE_ROOT; };
 		7CA44FF0BA319517C6E39651 /* jucer_Application.cpp */ /* jucer_Application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_Application.cpp; path = ../../Source/Application/jucer_Application.cpp; sourceTree = SOURCE_ROOT; };
 		807049CA2D5B6DE18EA078F2 /* export_android.svg */ /* export_android.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = export_android.svg; path = ../../Source/BinaryData/Icons/export_android.svg; sourceTree = SOURCE_ROOT; };
 		82C18723A3D0E39BBD8F0F6E /* jucer_StartPageComponent.cpp */ /* jucer_StartPageComponent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_StartPageComponent.cpp; path = ../../Source/Application/StartPage/jucer_StartPageComponent.cpp; sourceTree = SOURCE_ROOT; };
@@ -223,6 +225,7 @@
 		DE4A987B2D5529990A6AA9D4 /* jucer_AboutWindowComponent.h */ /* jucer_AboutWindowComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AboutWindowComponent.h; path = ../../Source/Application/Windows/jucer_AboutWindowComponent.h; sourceTree = SOURCE_ROOT; };
 		DF40404150A5A3D6F5AAC856 /* MetalKit.framework */ /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		DFBEB8E086832AEB0FBEADF0 /* jucer_StoredSettings.h */ /* jucer_StoredSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_StoredSettings.h; path = ../../Source/Settings/jucer_StoredSettings.h; sourceTree = SOURCE_ROOT; };
+		E09429B88DD8ADA381D4BF61 /* AppIcon.icon */ /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = file.icon; name = AppIcon.icon; path = ../../Source/Assets/AppIcon.icon; sourceTree = SOURCE_ROOT; };
 		E111A336FE13C033EAA0A1D1 /* jucer_NewCppFileTemplate.h */ /* jucer_NewCppFileTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_NewCppFileTemplate.h; path = ../../Source/BinaryData/Templates/jucer_NewCppFileTemplate.h; sourceTree = SOURCE_ROOT; };
 		E13A54A6D3A1895EACE53E51 /* jucer_ResourceFile.cpp */ /* jucer_ResourceFile.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_ResourceFile.cpp; path = ../../Source/ProjectSaving/jucer_ResourceFile.cpp; sourceTree = SOURCE_ROOT; };
 		E186BC01A1B1529937A46485 /* jucer_FileHelpers.h */ /* jucer_FileHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_FileHelpers.h; path = ../../Source/Utility/Helpers/jucer_FileHelpers.h; sourceTree = SOURCE_ROOT; };
@@ -249,6 +252,7 @@
 		F58B23995765C9FDBE28F871 /* jucer_Modules.cpp */ /* jucer_Modules.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_Modules.cpp; path = ../../Source/Project/Modules/jucer_Modules.cpp; sourceTree = SOURCE_ROOT; };
 		F5DD97B45B8EA60C1ED0DD80 /* jucer_StoredSettings.cpp */ /* jucer_StoredSettings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_StoredSettings.cpp; path = ../../Source/Settings/jucer_StoredSettings.cpp; sourceTree = SOURCE_ROOT; };
 		F63F46CA0A51C679867855A7 /* jucer_ProjectMessagesComponent.h */ /* jucer_ProjectMessagesComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectMessagesComponent.h; path = ../../Source/Project/UI/jucer_ProjectMessagesComponent.h; sourceTree = SOURCE_ROOT; };
+		F6410ADB98961EC4A6304A21 /* juceicon.svg */ /* juceicon.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = juceicon.svg; path = ../../Source/Assets/AppIcon.icon/Assets/juceicon.svg; sourceTree = SOURCE_ROOT; };
 		F7C74E934C954F6F1A3BE4F9 /* jucer_TranslationToolWindowComponent.h */ /* jucer_TranslationToolWindowComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_TranslationToolWindowComponent.h; path = ../../Source/Application/Windows/jucer_TranslationToolWindowComponent.h; sourceTree = SOURCE_ROOT; };
 		F84D031B2A6BB1EE6A316C71 /* PIPConsole.cpp.in */ /* PIPConsole.cpp.in */ = {isa = PBXFileReference; lastKnownFileType = file.in; name = PIPConsole.cpp.in; path = ../../../Build/CMake/PIPConsole.cpp.in; sourceTree = SOURCE_ROOT; };
 		F8A38C0C7C45F2DB6A5FB812 /* wizard_Highlight.svg */ /* wizard_Highlight.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = wizard_Highlight.svg; path = ../../Source/BinaryData/Icons/wizard_Highlight.svg; sourceTree = SOURCE_ROOT; };
@@ -365,6 +369,14 @@
 			name = Source;
 			sourceTree = "<group>";
 		};
+		4BCEED1C2E8D6C62E3DA4231 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				F6410ADB98961EC4A6304A21,
+			);
+			name = Assets;
+			sourceTree = "<group>";
+		};
 		4DCC5D64BBE8DE85360A3D57 /* ProjectSaving */ = {
 			isa = PBXGroup;
 			children = (
@@ -405,12 +417,21 @@
 			name = gradle;
 			sourceTree = "<group>";
 		};
+		7CEEEE4F800F5DB9728F9271 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				F05A70E37CDE3CF34503940F,
+			);
+			name = Assets;
+			sourceTree = "<group>";
+		};
 		8180B5894A78501084B8F133 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				E266DE67FF319D56F63193A6,
 				6678E9B3EEACAD47F438B264,
 				F3FE62637ACC2263A7594E8A,
+				E09429B88DD8ADA381D4BF61,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -584,6 +605,7 @@
 			isa = PBXGroup;
 			children = (
 				BC67FD952A6F210A11A1ECB8,
+				7CEEEE4F800F5DB9728F9271,
 				DC3A4B0AD79334BA8A7E0661,
 				F1B44F007A02A0FAE4DC8D79,
 				89E9055A179B4C2019B4E1AE,
@@ -674,6 +696,15 @@
 				DFBEB8E086832AEB0FBEADF0,
 			);
 			name = Settings;
+			sourceTree = "<group>";
+		};
+		F05A70E37CDE3CF34503940F /* AppIcon.icon */ = {
+			isa = PBXGroup;
+			children = (
+				4BCEED1C2E8D6C62E3DA4231,
+				7C2F4A961A17B2E2ADD1B407,
+			);
+			name = AppIcon.icon;
 			sourceTree = "<group>";
 		};
 		F1B44F007A02A0FAE4DC8D79 /* CodeEditor */ = {
@@ -767,6 +798,7 @@
 			files = (
 				2610F357881240ACBF612F48,
 				DBE437EE41F174A6F27FC0E2,
+				7E43279B5881EA0FFDA49647,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -825,6 +857,7 @@
 		0BC15DC2E5FE5ECFFB398D49 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_LINK_OBJC_RUNTIME = NO;
@@ -892,6 +925,7 @@
 		0CC6C439D038EDA0D7F10DF0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_LINK_OBJC_RUNTIME = NO;

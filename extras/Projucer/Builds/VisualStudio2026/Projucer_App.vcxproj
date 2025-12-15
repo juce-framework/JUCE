@@ -2944,6 +2944,8 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\Assets\AppIcon.icon\Assets\juceicon.svg"/>
+    <None Include="..\..\Source\Assets\AppIcon.icon\icon.json"/>
     <None Include="..\..\..\Build\CMake\JuceLV2Defines.h.in"/>
     <None Include="..\..\..\Build\CMake\LaunchScreen.storyboard"/>
     <None Include="..\..\..\Build\CMake\PIPAudioProcessor.cpp.in"/>
