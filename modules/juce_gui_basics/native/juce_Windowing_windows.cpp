@@ -5082,16 +5082,18 @@ public:
         updateRegion.findRECTAndValidate (peer.getHWND());
 
         for (const auto& rect : updateRegion.getRects())
-            repaint (D2DUtilities::toRectangle (rect));
+            direct2DContext->addDeferredRepaint (D2DUtilities::toRectangle (rect));
 
        #if JUCE_DIRECT2D_METRICS
         lastPaintStartTicks = paintStartTicks;
        #endif
+
+        handleDirect2DPaint();
     }
 
     void repaint (const Rectangle<int>& area) override
     {
-        direct2DContext->addDeferredRepaint (area);
+        deferredRepaints.add (area);
     }
 
     void performAnyPendingRepaintsNow() override {}
@@ -5103,7 +5105,13 @@ public:
 
     void onVBlank() override
     {
-        handleDirect2DPaint();
+        for (auto deferredRect : deferredRepaints)
+        {
+            auto r = D2DUtilities::toRECT (deferredRect);
+            InvalidateRect (peer.getHWND(), &r, FALSE);
+        }
+
+        deferredRepaints.clear();
     }
 
     void handleShowWindow() override
@@ -5472,6 +5480,7 @@ private:
 
     std::unique_ptr<WrappedD2DHwndContextBase> direct2DContext = getContextForPeer (peer);
     UpdateRegion updateRegion;
+    RectangleList<int> deferredRepaints;
 
    #if JUCE_ETW_TRACELOGGING
     struct ETWEventProvider
