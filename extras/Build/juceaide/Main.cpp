@@ -117,12 +117,26 @@ struct IconParseResults
 {
     juce::build_tools::Icons icons;
     juce::File output;
+    juce::String iconName;
 };
 
-IconParseResults parseIconArguments (juce::ArgumentList&& args)
+enum class IconNameSpecified
 {
-    args.checkMinNumArguments (2);
+    no,
+    yes
+};
+
+IconParseResults parseIconArguments (juce::ArgumentList&& args, IconNameSpecified iconNameSpecified)
+{
+    args.checkMinNumArguments (iconNameSpecified == IconNameSpecified::yes ? 3 : 2);
     const auto output = args.arguments.removeAndReturn (0);
+    const auto iconName = std::invoke ([&]
+    {
+        if (iconNameSpecified == IconNameSpecified::yes)
+            return args.arguments.removeAndReturn (0).text;
+
+        return juce::String{};
+    });
 
     const auto popFile = [&args]() -> juce::File
     {
@@ -135,28 +149,29 @@ IconParseResults parseIconArguments (juce::ArgumentList&& args)
     const auto smallIcon = popFile();
     const auto bigIcon   = popFile();
 
-    return { juce::build_tools::Icons::fromFilesSmallAndBig (smallIcon, bigIcon), output.text };
+    return { juce::build_tools::Icons::fromFilesSmallAndBig (smallIcon, bigIcon), output.text, iconName };
 }
 
 int writeMacIcon (juce::ArgumentList&& argumentList)
 {
-    const auto parsed = parseIconArguments (std::move (argumentList));
+    const auto parsed = parseIconArguments (std::move (argumentList), IconNameSpecified::yes);
     juce::build_tools::writeMacIcon (parsed.icons, parsed.output);
     return 0;
 }
 
 int writeiOSAssets (juce::ArgumentList&& argumentList)
 {
-    const auto parsed = parseIconArguments (std::move (argumentList));
+    const auto parsed = parseIconArguments (std::move (argumentList), IconNameSpecified::yes);
     juce::build_tools::createXcassetsFolderFromIcons (parsed.icons,
                                                       parsed.output.getParentDirectory(),
-                                                      parsed.output.getFileName());
+                                                      parsed.output.getFileName(),
+                                                      parsed.iconName);
     return 0;
 }
 
 int writeWinIcon (juce::ArgumentList&& argumentList)
 {
-    const auto parsed = parseIconArguments (std::move (argumentList));
+    const auto parsed = parseIconArguments (std::move (argumentList), IconNameSpecified::no);
     juce::build_tools::writeWinIcon (parsed.icons, parsed.output);
     return 0;
 }
@@ -284,6 +299,7 @@ juce::build_tools::PlistOptions parsePlistOptions (const juce::File& file,
     updateField ("SUPPRESS_AU_PLIST_RESOURCE_USAGE",     result.suppressResourceUsage);
     updateField ("BUNDLE_ID",                            result.bundleIdentifier);
     updateField ("ICON_FILE",                            result.iconFile);
+    updateField ("ICON_COMPOSER_BUNDLE",                 result.iconComposerIcon);
 
     result.type = type;
 

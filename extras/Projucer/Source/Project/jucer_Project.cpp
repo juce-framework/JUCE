@@ -1616,6 +1616,30 @@ void Project::findAllImageItems (OwnedArray<Project::Item>& items)
     findImages (getMainGroup(), items);
 }
 
+static void findIconComposerIcons (const Project::Item& item, std::vector<Project::IconComposerNameAndItem>& found)
+{
+    if (item.isFile())
+    {
+        const auto f = item.getFile();
+        const auto parent = f.getParentDirectory();
+
+        if (f.getFileName() == "icon.json" && parent.hasFileExtension ("icon"))
+            found.push_back ({ parent.getFileName(), item });
+    }
+    else if (item.isGroup())
+    {
+        for (int i = 0; i < item.getNumChildren(); ++i)
+            findIconComposerIcons (item.getChild (i), found);
+    }
+}
+
+std::vector<Project::IconComposerNameAndItem> Project::findAllIconComposerItems()
+{
+    std::vector<Project::IconComposerNameAndItem> items;
+    findIconComposerIcons (getMainGroup(), items);
+    return items;
+}
+
 //==============================================================================
 Project::Item::Item (Project& p, const ValueTree& s, bool isModuleCode)
     : project (p), state (s), belongsToModule (isModuleCode)
@@ -1997,13 +2021,27 @@ bool Project::Item::addFileRetainingSortOrder (const File& file, bool shouldComp
     return true;
 }
 
+static bool isPartOfIconComposerBundle (const File& file)
+{
+    const auto parent = file.getParentDirectory();
+
+    if (parent.isRoot())
+        return false;
+
+    if (parent.getFileName().endsWith (".icon") && parent.getChildFile ("icon.json").existsAsFile())
+        return true;
+
+    return isPartOfIconComposerBundle (parent);
+}
+
 void Project::Item::addFileUnchecked (const File& file, int insertIndex, const bool shouldCompile)
 {
     Item item (project, ValueTree (Ids::FILE), belongsToModule);
     item.initialiseMissingProperties();
     item.getNameValue() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile && file.hasFileExtension (fileTypesToCompileByDefault);
-    item.getShouldAddToBinaryResourcesValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
+    item.getShouldAddToBinaryResourcesValue() = project.shouldBeAddedToBinaryResourcesByDefault (file)
+                                                && ! isPartOfIconComposerBundle (file);
 
     if (canContain (item))
     {
