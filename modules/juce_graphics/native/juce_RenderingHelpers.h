@@ -2527,8 +2527,8 @@ template <class StateObjectType>
 class SavedStateStack
 {
 public:
-    SavedStateStack (StateObjectType* initialState) noexcept
-        : currentState (initialState)
+    explicit SavedStateStack (std::unique_ptr<StateObjectType> initialState) noexcept
+        : currentState (std::move (initialState))
     {}
 
     SavedStateStack() = default;
@@ -2588,6 +2588,13 @@ public:
         : frame (frameIn)
     {
     }
+
+    explicit StackBasedLowLevelGraphicsContext (std::unique_ptr<SavedStateType> initialState)
+        : stack (std::move (initialState))
+    {
+    }
+
+    StackBasedLowLevelGraphicsContext() = default;
 
     bool isVectorDevice()                                              const override { return false; }
     Rectangle<int> getClipBounds()                                     const override { return stack->getClipBounds(); }
@@ -2693,9 +2700,6 @@ protected:
             }
         }
     }
-
-    explicit StackBasedLowLevelGraphicsContext (SavedStateType* initialState) : stack (initialState) {}
-    StackBasedLowLevelGraphicsContext() = default;
 
     RenderingHelpers::SavedStateStack<SavedStateType> stack;
     uint64_t frame = 0;
