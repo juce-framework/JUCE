@@ -372,34 +372,34 @@ private:
     void componentParentHierarchyChanged (Component&) override   { peerChanged (owner.getPeer()); }
     void componentMovedOrResized (Component&, bool, bool) override
     {
-        if (host != 0 && lastPeer != nullptr)
+        if (host == 0 || lastPeer == nullptr)
+            return;
+
+        auto dpy = getDisplay();
+        auto newBounds = getX11BoundsFromJuce();
+        XWindowAttributes attr;
+
+        if (X11Symbols::getInstance()->xGetWindowAttributes (dpy, host, &attr))
         {
-            auto dpy = getDisplay();
-            auto newBounds = getX11BoundsFromJuce();
-            XWindowAttributes attr;
-
-            if (X11Symbols::getInstance()->xGetWindowAttributes (dpy, host, &attr))
+            Rectangle currentBounds (attr.x, attr.y, attr.width, attr.height);
+            if (currentBounds != newBounds)
             {
-                Rectangle<int> currentBounds (attr.x, attr.y, attr.width, attr.height);
-                if (currentBounds != newBounds)
-                {
-                    X11Symbols::getInstance()->xMoveResizeWindow (dpy, host, newBounds.getX(), newBounds.getY(),
-                                                                  static_cast<unsigned int> (newBounds.getWidth()),
-                                                                  static_cast<unsigned int> (newBounds.getHeight()));
-                }
+                X11Symbols::getInstance()->xMoveResizeWindow (dpy, host, newBounds.getX(), newBounds.getY(),
+                                                              static_cast<unsigned int> (newBounds.getWidth()),
+                                                              static_cast<unsigned int> (newBounds.getHeight()));
             }
+        }
 
-            if (client != 0 && X11Symbols::getInstance()->xGetWindowAttributes (dpy, client, &attr))
+        if (client != 0 && X11Symbols::getInstance()->xGetWindowAttributes (dpy, client, &attr))
+        {
+            Rectangle currentBounds (attr.x, attr.y, attr.width, attr.height);
+
+            if (std::tuple (currentBounds.getWidth(), currentBounds.getHeight())
+                != std::tuple (newBounds.getWidth(), newBounds.getHeight()))
             {
-                Rectangle<int> currentBounds (attr.x, attr.y, attr.width, attr.height);
-
-                if ((currentBounds.getWidth() != newBounds.getWidth()
-                     || currentBounds.getHeight() != newBounds.getHeight()))
-                {
-                    X11Symbols::getInstance()->xMoveResizeWindow (dpy, client, 0, 0,
-                                                                  static_cast<unsigned int> (newBounds.getWidth()),
-                                                                  static_cast<unsigned int> (newBounds.getHeight()));
-                }
+                X11Symbols::getInstance()->xMoveResizeWindow (dpy, client, 0, 0,
+                                                              static_cast<unsigned int> (newBounds.getWidth()),
+                                                              static_cast<unsigned int> (newBounds.getHeight()));
             }
         }
     }
@@ -517,13 +517,13 @@ private:
             const double scale = (peer != nullptr ? peer->getPlatformScaleFactor()
                                                   : displays.getPrimaryDisplay()->scale);
 
-            Point<int> topLeftInPeer
-                = (peer != nullptr ? peer->getComponent().getLocalPoint (&owner, Point<int> (0, 0))
+            const auto topLeftInPeer
+                = (peer != nullptr ? peer->getComponent().getLocalPoint (&owner, Point (0, 0))
                    : owner.getBounds().getTopLeft());
 
-            Rectangle<int> newBounds (topLeftInPeer.getX(), topLeftInPeer.getY(),
-                                      static_cast<int> (static_cast<double> (attr.width)  / scale),
-                                      static_cast<int> (static_cast<double> (attr.height) / scale));
+            Rectangle newBounds (topLeftInPeer.getX(), topLeftInPeer.getY(),
+                                 static_cast<int> (static_cast<double> (attr.width)  / scale),
+                                 static_cast<int> (static_cast<double> (attr.height) / scale));
 
 
             if (peer != nullptr)
@@ -545,7 +545,7 @@ private:
 
             auto dpy = getDisplay();
             Window rootWindow = X11Symbols::getInstance()->xRootWindow (dpy, DefaultScreen (dpy));
-            Rectangle<int> newBounds = getX11BoundsFromJuce();
+            const auto newBounds = getX11BoundsFromJuce();
 
             if (newPeer == nullptr)
                 hostMapper.unmap();
@@ -619,7 +619,7 @@ private:
                     if (allowResize)
                         configureNotify();
                     else
-                        MessageManager::callAsync ([this] {componentMovedOrResized (owner, true, true);});
+                        MessageManager::callAsync ([this] { componentMovedOrResized (owner, true, true); });
 
                     return true;
 
