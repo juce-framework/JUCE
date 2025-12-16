@@ -1308,9 +1308,15 @@ public:
     {
         const auto params = FromVar::convert<EvaluateJavascriptCallbackParams> (paramsIn);
 
-        if (! params.has_value() || evaluationCallbacks.size() == 0)
+        if (! params.has_value())
         {
             jassertfalse;
+            return;
+        }
+
+        // do nothing if there are no evaluation callbacks
+        if (evaluationCallbacks.empty()) 
+        {
             return;
         }
 
