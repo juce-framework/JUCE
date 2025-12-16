@@ -957,14 +957,14 @@ public:
         if (response->resource.has_value())
         {
             auto* streamBytes = wk.juce_g_bytes_new (response->resource->data.data(),
-                                                        static_cast<gsize> (response->resource->data.size()));
+                                                     static_cast<gsize> (response->resource->data.size()));
             ScopeGuard bytesScope { [&] { wk.juce_g_bytes_unref (streamBytes); } };
 
             auto* stream = wk.juce_g_memory_input_stream_new_from_bytes (streamBytes);
             ScopeGuard streamScope { [&] { wk.juce_g_object_unref (stream); } };
 
             auto* webkitResponse = wk.juce_webkit_uri_scheme_response_new (stream,
-                                                                              static_cast<gint64> (response->resource->data.size()));
+                                                                           static_cast<gint64> (response->resource->data.size()));
             ScopeGuard webkitResponseScope { [&] { wk.juce_g_object_unref (webkitResponse); } };
 
             wk.juce_soup_message_headers_append (headers, "Content-Type", response->resource->mimeType.toRawUTF8());
@@ -1036,52 +1036,48 @@ public:
                        WebKitNavigationAction* action,
                        WebKitPolicyDecision* decision)
     {
-        if (decision != nullptr && frameName.isEmpty())
-        {
-            WebKitSymbols::getInstance()->juce_g_object_ref (decision);
-            decisions.add (decision);
+        if (decision == nullptr || ! frameName.isEmpty())
+            return false;
 
-            DynamicObject::Ptr params = new DynamicObject;
+        WebKitSymbols::getInstance()->juce_g_object_ref (decision);
+        decisions.add (decision);
 
-            params->setProperty ("url", getURIStringForAction (action));
-            params->setProperty ("decision_id", (int64) decision);
-            CommandReceiver::sendCommand (outChannel, "pageAboutToLoad", var (params.get()));
+        DynamicObject::Ptr params = new DynamicObject;
 
-            return true;
-        }
+        params->setProperty ("url", getURIStringForAction (action));
+        params->setProperty ("decision_id", (int64) decision);
+        CommandReceiver::sendCommand (outChannel, "pageAboutToLoad", var (params.get()));
 
-        return false;
+        return true;
     }
 
     bool onNewWindow (String /*frameName*/,
                       WebKitNavigationAction* action,
                       WebKitPolicyDecision* decision)
     {
-        if (decision != nullptr)
-        {
-            DynamicObject::Ptr params = new DynamicObject;
+        if (decision == nullptr)
+            return false;
 
-            params->setProperty ("url", getURIStringForAction (action));
-            CommandReceiver::sendCommand (outChannel, "newWindowAttemptingToLoad", var (params.get()));
+        DynamicObject::Ptr params = new DynamicObject;
 
-            // never allow new windows
-            WebKitSymbols::getInstance()->juce_webkit_policy_decision_ignore (decision);
+        params->setProperty ("url", getURIStringForAction (action));
+        CommandReceiver::sendCommand (outChannel, "newWindowAttemptingToLoad", var (params.get()));
 
-            return true;
-        }
+        // never allow new windows
+        WebKitSymbols::getInstance()->juce_webkit_policy_decision_ignore (decision);
 
-        return false;
+        return true;
     }
 
     void onLoadChanged (WebKitLoadEvent loadEvent)
     {
-        if (loadEvent == WEBKIT_LOAD_FINISHED)
-        {
-            DynamicObject::Ptr params = new DynamicObject;
+        if (loadEvent != WEBKIT_LOAD_FINISHED)
+            return;
 
-            params->setProperty ("url", String (WebKitSymbols::getInstance()->juce_webkit_web_view_get_uri (webview)));
-            CommandReceiver::sendCommand (outChannel, "pageFinishedLoading", var (params.get()));
-        }
+        DynamicObject::Ptr params = new DynamicObject;
+
+        params->setProperty ("url", String (WebKitSymbols::getInstance()->juce_webkit_web_view_get_uri (webview)));
+        CommandReceiver::sendCommand (outChannel, "pageFinishedLoading", var (params.get()));
     }
 
     bool onDecidePolicy (WebKitPolicyDecision*    decision,
@@ -1244,7 +1240,7 @@ private:
             return;
         }
 
-        const auto jsValueResult = [&]() -> std::tuple<std::optional<var>, String>
+        const auto jsValueResult = std::invoke ([&]() -> std::tuple<std::optional<var>, String>
         {
             auto* jsValue = wk.juce_webkit_javascript_result_get_js_value (jsResult.get());
 
@@ -1252,7 +1248,7 @@ private:
                 return { std::nullopt, String{} };
 
             return { fromJSCValue (jsValue), String{} };
-        }();
+        });
 
         owner->handleEvaluationCallback (std::get<0> (jsValueResult), std::get<1> (jsValueResult));
     }
@@ -1356,7 +1352,7 @@ public:
             return;
         }
 
-        const auto result = [&]
+        const auto result = std::invoke ([&]
         {
             using Error = EvaluationResult::Error;
 
@@ -1369,7 +1365,7 @@ public:
             }
 
             return EvaluationResult { params->hasPayload ? params->payload : var::undefined() };
-        }();
+        });
 
         auto& cb = evaluationCallbacks.front();
         cb (result);
@@ -1430,14 +1426,14 @@ public:
             return;
         }
 
-        receiver.reset (new CommandReceiver (this, inChannel));
+        receiver = std::make_unique<CommandReceiver> (static_cast<Responder*> (this), inChannel);
 
         pfds.push_back ({ threadControl[0],  POLLIN, 0 });
         pfds.push_back ({ receiver->getFd(), POLLIN, 0 });
 
         startThread();
 
-        xembed.reset (new XEmbedComponent (windowHandle));
+        xembed = std::make_unique<XEmbedComponent> (windowHandle);
         browser.addAndMakeVisible (xembed.get());
     }
 
