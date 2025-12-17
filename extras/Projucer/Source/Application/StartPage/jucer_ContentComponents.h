@@ -179,7 +179,7 @@ private:
 
     ValueTreePropertyWithDefault projectNameValue { settingsTree, Ids::name,          nullptr, "NewProject" },
                                  modulesValue     { settingsTree, Ids::dependencies_, nullptr, projectTemplate.requiredModules, "," },
-                                 exportersValue   { settingsTree, Ids::exporters,     nullptr, StringArray (ProjectExporter::getCurrentPlatformExporterTypeInfo().identifier.toString()), "," },
+                                 exportersValue   { settingsTree, Ids::exporters,     nullptr, StringArray { ProjectExporter::getBestPlatformExporterIdentifier() }, "," },
                                  fileOptionsValue { settingsTree, Ids::file,          nullptr, NewProjectTemplates::getVarForFileOption (projectTemplate.defaultFileOption) };
 
     ValueTreePropertyWithDefaultWrapper modulePathValue;

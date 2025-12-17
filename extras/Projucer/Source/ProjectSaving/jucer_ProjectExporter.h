@@ -110,7 +110,20 @@ public:
 
     static std::vector<ExporterTypeInfo> getExporterTypeInfos();
     static ExporterTypeInfo getTypeInfoForExporter (const Identifier& exporterIdentifier);
-    static ExporterTypeInfo getCurrentPlatformExporterTypeInfo();
+
+    /** Sorted by suitability, with the 'best' exporter for the current platform first. */
+    static void getCurrentPlatformExporterTypeInfos (std::vector<ExporterTypeInfo>&);
+
+    static String getBestPlatformExporterIdentifier()
+    {
+        std::vector<ExporterTypeInfo> infos;
+        getCurrentPlatformExporterTypeInfos (infos);
+
+        if (infos.empty())
+            return {};
+
+        return infos.front().identifier.toString();
+    }
 
     static std::unique_ptr<ProjectExporter> createNewExporter (Project&, const Identifier& exporterIdentifier);
     static std::unique_ptr<ProjectExporter> createExporterFromSettings (Project&, const ValueTree& settings);

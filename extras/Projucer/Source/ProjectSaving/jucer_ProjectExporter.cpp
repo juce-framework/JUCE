@@ -116,17 +116,24 @@ ProjectExporter::ExporterTypeInfo ProjectExporter::getTypeInfoForExporter (const
     return {};
 }
 
-ProjectExporter::ExporterTypeInfo ProjectExporter::getCurrentPlatformExporterTypeInfo()
+void ProjectExporter::getCurrentPlatformExporterTypeInfos (std::vector<ExporterTypeInfo>& result)
 {
-    #if JUCE_MAC
-     return ProjectExporter::getTypeInfoForExporter (XcodeProjectExporter::getValueTreeTypeNameMac());
-    #elif JUCE_WINDOWS
-     return ProjectExporter::getTypeInfoForExporter (MSVCProjectExporterVC2022::getValueTreeTypeName());
-    #elif JUCE_LINUX || JUCE_BSD
-     return ProjectExporter::getTypeInfoForExporter (MakefileProjectExporter::getValueTreeTypeName());
-    #else
-     #error "unknown platform!"
-    #endif
+    const auto typeNames =
+       #if JUCE_MAC
+        { XcodeProjectExporter::getValueTreeTypeNameMac(),
+          XcodeProjectExporter::getValueTreeTypeNameiOS() };
+       #elif JUCE_WINDOWS
+        { MSVCProjectExporterVC2026::getValueTreeTypeName(),
+          MSVCProjectExporterVC2022::getValueTreeTypeName(),
+          MSVCProjectExporterVC2019::getValueTreeTypeName() };
+       #elif JUCE_LINUX || JUCE_BSD
+        { MakefileProjectExporter::getValueTreeTypeName() };
+       #else
+        #error "unknown platform!"
+       #endif
+
+    for (const auto& typeName : typeNames)
+        result.push_back (getTypeInfoForExporter (typeName));
 }
 
 std::unique_ptr<ProjectExporter> ProjectExporter::createNewExporter (Project& project, const Identifier& exporterIdentifier)

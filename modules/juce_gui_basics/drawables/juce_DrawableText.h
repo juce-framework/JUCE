@@ -120,7 +120,7 @@ public:
 private:
     //==============================================================================
     Parallelogram<float> bounds;
-    float fontHeight, fontHScale;
+    float fontHeight{}, fontHScale{};
     Font font { withDefaultMetrics (FontOptions{}) }, scaledFont { withDefaultMetrics (FontOptions{}) };
     String text;
     bool preserveWhitespace = false;
