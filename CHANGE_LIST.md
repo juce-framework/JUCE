@@ -3,6 +3,12 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.12
+
+  - Made Visual Studio 2026 the default in the Projucer
+  - Fixed a compilation error in Android In-App Purchases
+  - Fixed some MIDI device names
+
 ## Version 8.0.11
 
   - Added a new MIDI 2.0 Universal MIDI Packet demo

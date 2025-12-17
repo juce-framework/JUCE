@@ -161,6 +161,7 @@ bool X11Symbols::loadAllSymbols()
                        makeSymbolBinding (xMapWindow,                  "XMapWindow"),
                        makeSymbolBinding (xMoveResizeWindow,           "XMoveResizeWindow"),
                        makeSymbolBinding (xNextEvent,                  "XNextEvent"),
+                       makeSymbolBinding (xNextRequest,                "XNextRequest"),
                        makeSymbolBinding (xOpenDisplay,                "XOpenDisplay"),
                        makeSymbolBinding (xPeekEvent,                  "XPeekEvent"),
                        makeSymbolBinding (xPending,                    "XPending"),

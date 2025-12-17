@@ -80,10 +80,6 @@ private:
 
 #endif
 
-#if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
- extern JUCE_API double getScaleFactorForWindow (HWND);
-#endif
-
 static bool contextHasTextureNpotFeature()
 {
     if (getOpenGLVersion() >= Version (2))
