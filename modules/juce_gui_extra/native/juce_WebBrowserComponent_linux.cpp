@@ -1332,10 +1332,9 @@ public:
         g.fillAll (Colours::white);
     }
 
-    void evaluateJavascript (const String& script, WebBrowserComponent::EvaluationCallback callback) override
+    void evaluateJavascript (const String& script, EvaluationCallback callback) override
     {
-        if (callback != nullptr)
-            evaluationCallbacks.push_back (std::move (callback));
+        evaluationCallbacks.push_back (std::move (callback));
 
         CommandReceiver::sendCommand (outChannel,
                                       "evaluateJavascript",
@@ -1374,7 +1373,7 @@ public:
         });
 
         auto& cb = evaluationCallbacks.front();
-        cb (result);
+        NullCheckedInvocation::invoke (cb, result);
         evaluationCallbacks.pop_front();
     }
 

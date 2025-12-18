@@ -1268,7 +1268,6 @@ struct RenderContext
     virtual void updateConstantAlpha() = 0;
     virtual void handlePaintMessage() = 0;
     virtual void repaint (const Rectangle<int>& area) = 0;
-    virtual void dispatchDeferredRepaints() = 0;
     virtual void performAnyPendingRepaintsNow() = 0;
     virtual void onVBlank() = 0;
     virtual void handleShowWindow() = 0;
@@ -1724,12 +1723,6 @@ public:
             renderContext->repaint ((area.toDouble() * getPlatformScaleFactor()).getSmallestIntegerContainer());
     }
 
-    void dispatchDeferredRepaints()
-    {
-        if (renderContext != nullptr)
-            renderContext->dispatchDeferredRepaints();
-    }
-
     void performAnyPendingRepaintsNow() override
     {
         if (renderContext != nullptr)
@@ -1748,7 +1741,6 @@ public:
     void onVBlank (double timestampSec) override
     {
         callVBlankListeners (timestampSec);
-        dispatchDeferredRepaints();
 
         if (renderContext != nullptr)
             renderContext->onVBlank();
@@ -4779,23 +4771,12 @@ public:
         deferredRepaints.add (area);
     }
 
-    void dispatchDeferredRepaints() override
-    {
-        for (auto deferredRect : deferredRepaints)
-        {
-            auto r = D2DUtilities::toRECT (deferredRect);
-            InvalidateRect (peer.getHWND(), &r, FALSE);
-        }
-
-        deferredRepaints.clear();
-    }
-
     void performAnyPendingRepaintsNow() override
     {
         if (! peer.getComponent().isVisible())
             return;
 
-        dispatchDeferredRepaints();
+        onVBlank();
 
         WeakReference localRef (&peer.getComponent());
         MSG m;
@@ -4815,7 +4796,16 @@ public:
              : createSnapshotOfNormalWindow();
     }
 
-    void onVBlank() override {}
+    void onVBlank() override
+    {
+        for (auto deferredRect : deferredRepaints)
+        {
+            auto r = D2DUtilities::toRECT (deferredRect);
+            InvalidateRect (peer.getHWND(), &r, FALSE);
+        }
+
+        deferredRepaints.clear();
+    }
 
     void handleShowWindow() override {}
 
@@ -5057,8 +5047,7 @@ private:
     RectangleList<int> deferredRepaints;
 };
 
-class D2DRenderContext : public RenderContext,
-                         private Direct2DHwndContext::SwapchainDelegate
+class D2DRenderContext : public RenderContext
 {
 public:
     static constexpr auto name = "Direct2D";
@@ -5077,7 +5066,7 @@ public:
         if (transparent != direct2DContext->supportsTransparency())
         {
             direct2DContext.reset();
-            direct2DContext = getContextForPeer (peer, *this);
+            direct2DContext = getContextForPeer (peer);
         }
 
         if (direct2DContext->supportsTransparency())
@@ -5093,19 +5082,19 @@ public:
         updateRegion.findRECTAndValidate (peer.getHWND());
 
         for (const auto& rect : updateRegion.getRects())
-            repaint (D2DUtilities::toRectangle (rect));
+            direct2DContext->addDeferredRepaint (D2DUtilities::toRectangle (rect));
 
        #if JUCE_DIRECT2D_METRICS
         lastPaintStartTicks = paintStartTicks;
        #endif
+
+        handleDirect2DPaint();
     }
 
     void repaint (const Rectangle<int>& area) override
     {
-        direct2DContext->addDeferredRepaint (area);
+        deferredRepaints.add (area);
     }
-
-    void dispatchDeferredRepaints() override {}
 
     void performAnyPendingRepaintsNow() override {}
 
@@ -5116,7 +5105,13 @@ public:
 
     void onVBlank() override
     {
-        handleDirect2DPaint();
+        for (auto deferredRect : deferredRepaints)
+        {
+            auto r = D2DUtilities::toRECT (deferredRect);
+            InvalidateRect (peer.getHWND(), &r, FALSE);
+        }
+
+        deferredRepaints.clear();
     }
 
     void handleShowWindow() override
@@ -5126,11 +5121,6 @@ public:
     }
 
 private:
-    void onSwapchainEvent() override
-    {
-        handleDirect2DPaint();
-    }
-
     struct WrappedD2DHwndContextBase
     {
         virtual ~WrappedD2DHwndContextBase() = default;
@@ -5161,8 +5151,8 @@ private:
     class WrappedD2DHwndContext : public WrappedD2DHwndContextBase
     {
     public:
-        WrappedD2DHwndContext (HWND hwnd, SwapchainDelegate& swapDelegate)
-            : ctx (hwnd, swapDelegate) {}
+        explicit WrappedD2DHwndContext (HWND hwnd)
+            : ctx (hwnd) {}
 
         void addDeferredRepaint (Rectangle<int> area) override
         {
@@ -5478,19 +5468,19 @@ private:
        #endif
     }
 
-    static std::unique_ptr<WrappedD2DHwndContextBase> getContextForPeer (HWNDComponentPeer& peer,
-                                                                         SwapchainDelegate& delegate)
+    static std::unique_ptr<WrappedD2DHwndContextBase> getContextForPeer (HWNDComponentPeer& peer)
     {
         if (peer.getTransparencyKind() != HWNDComponentPeer::TransparencyKind::opaque)
             return std::make_unique<WrappedD2DHwndContextTransparent> (peer);
 
-        return std::make_unique<WrappedD2DHwndContext> (peer.getHWND(), delegate);
+        return std::make_unique<WrappedD2DHwndContext> (peer.getHWND());
     }
 
     HWNDComponentPeer& peer;
 
-    std::unique_ptr<WrappedD2DHwndContextBase> direct2DContext = getContextForPeer (peer, *this);
+    std::unique_ptr<WrappedD2DHwndContextBase> direct2DContext = getContextForPeer (peer);
     UpdateRegion updateRegion;
+    RectangleList<int> deferredRepaints;
 
    #if JUCE_ETW_TRACELOGGING
     struct ETWEventProvider

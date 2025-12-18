@@ -184,7 +184,12 @@ namespace juce::build_tools
         addPlistDictionaryKey (*dict, "CFBundleExecutable",          executableName);
 
         if (! iOS) // (NB: on iOS this causes error ITMS-90032 during publishing)
+        {
             addPlistDictionaryKey (*dict, "CFBundleIconFile", iconFile.exists() ? iconFile.getFileName() : String());
+
+            if (iconComposerIcon.exists())
+                addPlistDictionaryKey (*dict, "CFBundleIconName", iconComposerIcon.getFileNameWithoutExtension());
+        }
 
         addPlistDictionaryKey (*dict, "CFBundleIdentifier",          bundleIdentifier);
         addPlistDictionaryKey (*dict, "CFBundleName",                projectName);

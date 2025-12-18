@@ -8,6 +8,12 @@
     <Filter Include="DemoRunner\Source\UI">
       <UniqueIdentifier>{67AC4BA4-ADB7-61F2-40EB-054BFA2565E9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DemoRunner\Source\AppIcon.icon\Assets">
+      <UniqueIdentifier>{582D7890-88DE-64AF-4B99-546B272ADAC5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DemoRunner\Source\AppIcon.icon">
+      <UniqueIdentifier>{2E0E5C08-9649-C07C-383E-3497456B1834}</UniqueIdentifier>
+    </Filter>
     <Filter Include="DemoRunner\Source">
       <UniqueIdentifier>{8C2BA468-929C-4792-FBD2-3009E3068DD0}</UniqueIdentifier>
     </Filter>
@@ -8939,6 +8945,15 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\AppIcon.icon\Assets\demorunnerbg.svg">
+      <Filter>DemoRunner\Source\AppIcon.icon\Assets</Filter>
+    </None>
+    <None Include="..\..\Source\AppIcon.icon\Assets\demorunnerplay.svg">
+      <Filter>DemoRunner\Source\AppIcon.icon\Assets</Filter>
+    </None>
+    <None Include="..\..\Source\AppIcon.icon\icon.json">
+      <Filter>DemoRunner\Source\AppIcon.icon</Filter>
+    </None>
     <None Include="..\..\Source\JUCEAppIcon.png">
       <Filter>DemoRunner\Source</Filter>
     </None>

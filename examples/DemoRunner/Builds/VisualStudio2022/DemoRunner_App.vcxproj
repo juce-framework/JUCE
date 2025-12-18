@@ -4912,6 +4912,9 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\AppIcon.icon\Assets\demorunnerbg.svg"/>
+    <None Include="..\..\Source\AppIcon.icon\Assets\demorunnerplay.svg"/>
+    <None Include="..\..\Source\AppIcon.icon\icon.json"/>
     <None Include="..\..\Source\JUCEAppIcon.png"/>
     <None Include="..\..\..\..\modules\juce_audio_devices\native\asio\LICENSE.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\common\README.md"/>

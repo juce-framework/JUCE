@@ -4486,6 +4486,9 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\AppIcon.icon\Assets\juceicon.svg"/>
+    <None Include="..\..\Source\AppIcon.icon\Assets\pluginhostfg.svg"/>
+    <None Include="..\..\Source\AppIcon.icon\icon.json"/>
     <None Include="..\..\Source\JUCEAppIcon.png"/>
     <None Include="..\..\..\..\examples\Assets\cassette_recorder.wav"/>
     <None Include="..\..\..\..\examples\Assets\cello.wav"/>

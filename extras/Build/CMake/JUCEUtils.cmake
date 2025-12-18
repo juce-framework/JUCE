@@ -375,6 +375,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content SHOULD_ADD_STORYBOARD                ${target} JUCE_SHOULD_ADD_STORYBOARD)
     _juce_append_target_property(file_content LAUNCH_STORYBOARD_FILE               ${target} JUCE_LAUNCH_STORYBOARD_FILE)
     _juce_append_target_property(file_content ICON_FILE                            ${target} JUCE_ICON_FILE)
+    _juce_append_target_property(file_content ICON_COMPOSER_BUNDLE                 ${target} JUCE_ICON_COMPOSER_BUNDLE)
     _juce_append_target_property(file_content PROJECT_NAME                         ${target} JUCE_PRODUCT_NAME)
     _juce_append_target_property(file_content COMPANY_COPYRIGHT                    ${target} JUCE_COMPANY_COPYRIGHT)
     _juce_append_target_property(file_content COMPANY_NAME                         ${target} JUCE_COMPANY_NAME)
@@ -636,6 +637,7 @@ function(_juce_generate_icon source_target dest_target)
     get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
     get_target_property(juce_property_icon_big ${source_target} JUCE_ICON_BIG)
     get_target_property(juce_property_icon_small ${source_target} JUCE_ICON_SMALL)
+    get_target_property(juce_property_icon_composer_bundle ${source_target} JUCE_ICON_COMPOSER_BUNDLE)
 
     set(icon_args)
 
@@ -647,7 +649,37 @@ function(_juce_generate_icon source_target dest_target)
         list(APPEND icon_args "${juce_property_icon_small}")
     endif()
 
+    get_filename_component(icon_composer_icon_name "${juce_property_icon_composer_bundle}" NAME_WE)
+
+    if(juce_property_icon_composer_bundle AND (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS"))
+        set_source_files_properties("${juce_property_icon_composer_bundle}"
+            PROPERTIES
+                MACOSX_PACKAGE_LOCATION Resources
+                XCODE_EXPLICIT_FILE_TYPE folder.iconcomposer.icon
+        )
+
+        target_sources(${dest_target} PRIVATE "${juce_property_icon_composer_bundle}")
+
+        set_target_properties(${dest_target} PROPERTIES
+            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "${icon_composer_icon_name}")
+
+        if((CMAKE_SYSTEM_NAME STREQUAL "Darwin") AND (NOT CMAKE_GENERATOR STREQUAL "Xcode"))
+            add_custom_command(TARGET ${target} POST_BUILD
+                COMMAND "${CMAKE_COMMAND}"
+                    "-Dbundle_dir='$<TARGET_BUNDLE_DIR:${target}>'"
+                    "-Dicon_path=${juce_property_icon_composer_bundle}"
+                    "-P" "${JUCE_CMAKE_UTILS_DIR}/generateXcassetsFromIcon.cmake"
+                VERBATIM)
+        endif()
+    endif()
+
     set(generated_icon)
+
+    set(apple_app_icon_name "${icon_composer_icon_name}")
+
+    if(NOT apple_app_icon_name)
+        set(apple_app_icon_name "AppIcon")
+    endif()
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         if(NOT icon_args)
@@ -656,9 +688,9 @@ function(_juce_generate_icon source_target dest_target)
 
         _juce_check_icon_files_exist("${icon_args}")
 
-        set(generated_icon "${juce_library_code}/Icon.icns")
+        set(generated_icon "${juce_library_code}/${apple_app_icon_name}.icns")
         # To get compiled properly, we need the icon before the plist is generated!
-        _juce_execute_juceaide(macicon "${generated_icon}" ${icon_args})
+        _juce_execute_juceaide(macicon "${generated_icon}" "${apple_app_icon_name}" ${icon_args})
         set_source_files_properties(${generated_icon} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if(NOT icon_args)
@@ -679,15 +711,19 @@ function(_juce_generate_icon source_target dest_target)
             set(generated_icon "${out_path}/Images.xcassets")
 
             # To get compiled properly, we need iOS assets at configure time!
-            _juce_execute_juceaide(iosassets "${out_path}" ${icon_args})
+            _juce_execute_juceaide(iosassets "${out_path}" "${apple_app_icon_name}" ${icon_args})
         endif()
 
         if(NOT generated_icon)
             return()
         endif()
 
-        set_target_properties(${dest_target} PROPERTIES
-            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
+        get_target_property(existing_appicon ${dest_target} XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME)
+
+        if(NOT existing_appicon)
+            set_target_properties(${dest_target} PROPERTIES
+                XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "${apple_app_icon_name}")
+        endif()
 
         get_target_property(add_storyboard ${source_target} JUCE_SHOULD_ADD_STORYBOARD)
 
@@ -1998,6 +2034,7 @@ function(_juce_initialise_target target)
         REQUIRES_FULL_SCREEN            # iOS only
         ICON_BIG
         ICON_SMALL
+        ICON_COMPOSER_BUNDLE            # MacOS/iOS only
         COMPANY_COPYRIGHT
         COMPANY_NAME
         COMPANY_WEBSITE

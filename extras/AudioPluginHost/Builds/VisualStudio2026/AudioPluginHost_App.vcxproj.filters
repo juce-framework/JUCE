@@ -8,6 +8,12 @@
     <Filter Include="AudioPluginHost\Source\UI">
       <UniqueIdentifier>{8C61EB30-11E6-7029-4CC8-56C52EB1F1C3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AudioPluginHost\Source\AppIcon.icon\Assets">
+      <UniqueIdentifier>{94E5947C-3A5C-01B7-75B0-CA217E2F5AF8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AudioPluginHost\Source\AppIcon.icon">
+      <UniqueIdentifier>{DFD1926B-9FC8-19E6-7DE8-9B50A73FCEA8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="AudioPluginHost\Source">
       <UniqueIdentifier>{57E59C1B-8971-243F-9A1A-8EABFD456232}</UniqueIdentifier>
     </Filter>
@@ -8117,6 +8123,15 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\AppIcon.icon\Assets\juceicon.svg">
+      <Filter>AudioPluginHost\Source\AppIcon.icon\Assets</Filter>
+    </None>
+    <None Include="..\..\Source\AppIcon.icon\Assets\pluginhostfg.svg">
+      <Filter>AudioPluginHost\Source\AppIcon.icon\Assets</Filter>
+    </None>
+    <None Include="..\..\Source\AppIcon.icon\icon.json">
+      <Filter>AudioPluginHost\Source\AppIcon.icon</Filter>
+    </None>
     <None Include="..\..\Source\JUCEAppIcon.png">
       <Filter>AudioPluginHost\Source</Filter>
     </None>

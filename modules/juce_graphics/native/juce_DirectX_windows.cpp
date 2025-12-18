@@ -364,7 +364,7 @@ void UpdateRegion::findRECTAndValidate (HWND windowHandle)
 {
     numRect = 0;
 
-    auto regionHandle = CreateRectRgn (0, 0, 0, 0);
+    auto* regionHandle = CreateRectRgn (0, 0, 0, 0);
 
     if (regionHandle == nullptr)
     {
@@ -372,33 +372,36 @@ void UpdateRegion::findRECTAndValidate (HWND windowHandle)
         return;
     }
 
-    auto regionType = GetUpdateRgn (windowHandle, regionHandle, false);
+    const ScopeGuard regionDeleter { [&] { DeleteObject (regionHandle); } };
+    const auto regionType = GetUpdateRgn (windowHandle, regionHandle, false);
 
-    if (regionType == SIMPLEREGION || regionType == COMPLEXREGION)
+    if (regionType == ERROR || regionType == NULLREGION)
+        return;
+
+    const auto requiredBytes = GetRegionData (regionHandle, 0, nullptr);
+    block.ensureSize (requiredBytes);
+
+    const auto regionDataResult = GetRegionData (regionHandle,
+                                                 (DWORD) block.getSize(),
+                                                 static_cast<RGNDATA*> (block.getData()));
+
+    numRect = std::invoke ([&]() -> decltype (numRect)
     {
-        auto regionDataBytes = GetRegionData (regionHandle, (DWORD) block.getSize(), (RGNDATA*) block.getData());
+        if (regionDataResult < sizeof (RGNDATAHEADER))
+            return 0;
 
-        if (regionDataBytes > block.getSize())
-        {
-            block.ensureSize (regionDataBytes);
-            regionDataBytes = GetRegionData (regionHandle, (DWORD) block.getSize(), (RGNDATA*) block.getData());
-        }
+        const auto* header = static_cast<RGNDATAHEADER const* const> (block.getData());
 
-        if (regionDataBytes > 0)
-        {
-            auto header = (RGNDATAHEADER const* const) block.getData();
+        if (header->iType != RDH_RECTANGLES)
+            return 0;
 
-            if (header->iType == RDH_RECTANGLES)
-                numRect = header->nCount;
-        }
-    }
+        return header->nCount;
+    });
 
     if (numRect > 0)
         ValidateRgn (windowHandle, regionHandle);
     else
         ValidateRect (windowHandle, nullptr);
-
-    DeleteObject (regionHandle);
 }
 
 //==============================================================================

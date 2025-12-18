@@ -377,6 +377,11 @@ attributes directly to these creation functions, rather than adding them later.
   is specified, then that image will be used for all icon resolutions. If both arguments are
   specified, then the appropriate image will be picked for each icon resolution.
 
+`ICON_COMPOSER_BUNDLE`
+- An Icon Composer bundle used for MacOS and iOS builds. This argument takes precedence over the
+  ICON_BIG and ICON_SMALL settings with Xcode versions 26 and later. Older versions of Xcode will
+  continue to use ICON_BIG and ICON_SMALL, even if this argument is specified.
+
 `COMPANY_COPYRIGHT`
 - Copyright text which will be added to the app/plugin's Info.plist. The value of this argument
   will be inherited from the `JUCE_COMPANY_COPYRIGHT` property, so if you want to use the same
