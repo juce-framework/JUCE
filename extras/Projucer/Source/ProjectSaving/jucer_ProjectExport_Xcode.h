@@ -400,7 +400,7 @@ public:
 
     String getDevelopmentTeamIDString() const               { return iosDevelopmentTeamIDValue.get(); }
     String getAppGroupIdString() const                      { return iosAppGroupsIDValue.get(); }
-
+    String getProjectBundlerIdentifierString() const        { return project.getBundleIdentifierString(); }
     String getBuildNumber() const
     {
         const auto buildNumberString = buildNumber.get().toString();
@@ -811,11 +811,12 @@ public:
 
             props.add (new ChoicePropertyComponent (iosAppGroupsValue, "App Groups Capability"),
                        "Enable this to grant your app the capability to share resources between apps using the same app group ID.");
-
-            props.add (new ChoicePropertyComponent (iCloudPermissionsValue, "iCloud Permissions"),
-                       "Enable this to grant your app the capability to use native file load/save browser windows on iOS.");
-
         }
+
+
+        props.add (new ChoicePropertyComponent (iCloudPermissionsValue, "iCloud Permissions"),
+                  iOS ? "Enable this to grant your app the capability to use native file load/save browser windows on iOS." :
+                  "Enable this to grant your app the capability to use iCloud Document Storage");
 
         props.add (new ChoicePropertyComponent (networkingMulticastValue, "Networking Multicast Capability"),
                    "Your app must have this entitlement to send or receive IP multicast or broadcast. "
@@ -1574,7 +1575,7 @@ public:
             capabilities["Sandbox"]               = shouldUseAppSandbox();
             capabilities["HardenedRuntime"]       = shouldUseHardenedRuntime();
 
-            if (owner.iOS && owner.isiCloudPermissionsEnabled())
+            if (owner.isiCloudPermissionsEnabled())
                 capabilities["com.apple.iCloud"] = true;
 
             StringArray capabilitiesStrings;
@@ -3535,6 +3536,7 @@ private:
         options.isAppSandboxInhertianceEnabled  = isAppSandboxInhertianceEnabled();
         options.isNetworkingMulticastEnabled    = isNetworkingMulticastEnabled();
         options.appGroupIdString                = getAppGroupIdString();
+        options.projectBundlerIdentifierString  = getProjectBundlerIdentifierString();
         options.hardenedRuntimeOptions          = getHardenedRuntimeOptions();
         options.appSandboxOptions               = getAppSandboxOptions();
         options.appSandboxTemporaryPaths        = getAppSandboxTemporaryPaths();
