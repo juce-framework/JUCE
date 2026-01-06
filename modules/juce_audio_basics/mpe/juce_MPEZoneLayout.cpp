@@ -169,20 +169,31 @@ void MPEZoneLayout::updatePerNotePitchbendRange (MPEZone& zone, int value)
 
 void MPEZoneLayout::processPitchbendRangeRpnMessage (MidiRPNMessage rpn)
 {
+    // When the range is specified using both MSB and LSB, then MSB corresponds to whole semitones
+    // and LSB corresponds to cents.
+    const auto range = rpn.is14BitValue
+                     ? std::div (rpn.value, 128)
+                     : div_t { rpn.value, 0 };
+
+    // If this is hit, the requested pitchbend range is not a whole number of semitones.
+    // This isn't currently supported by JUCE - adding support would require
+    // public API updates.
+    jassert (range.rem == 0);
+
     if (rpn.channel == 1)
     {
-        updateMasterPitchbend (lowerZone, rpn.value);
+        updateMasterPitchbend (lowerZone, range.quot);
     }
     else if (rpn.channel == 16)
     {
-        updateMasterPitchbend (upperZone, rpn.value);
+        updateMasterPitchbend (upperZone, range.quot);
     }
     else
     {
         if (lowerZone.isUsingChannelAsMemberChannel (rpn.channel))
-            updatePerNotePitchbendRange (lowerZone, rpn.value);
+            updatePerNotePitchbendRange (lowerZone, range.quot);
         else if (upperZone.isUsingChannelAsMemberChannel (rpn.channel))
-            updatePerNotePitchbendRange (upperZone, rpn.value);
+            updatePerNotePitchbendRange (upperZone, range.quot);
     }
 }
 
@@ -423,6 +434,33 @@ public:
             layout.processNextMidiEvent ({ 0xb0, 0x06, newPitchBend });
 
             expectEquals (layout.getLowerZone().masterPitchbendRange, newPitchBend);
+        }
+
+        beginTest ("process 14-bit pitch bend sensitivity");
+        {
+            MPEZoneLayout layout;
+            layout.setLowerZone (15);
+            expect (layout.getLowerZone().isActive());
+
+            constexpr auto masterPitchBendA = 0x60;
+
+            // LSB first
+            layout.processNextMidiEvent ({ 0xb0, 0x64, 0x00 }); // RPN part 1
+            layout.processNextMidiEvent ({ 0xb0, 0x65, 0x00 }); // PRN part 2
+            layout.processNextMidiEvent ({ 0xb0, 0x26, 0x00 }); // pitch bend cents
+            layout.processNextMidiEvent ({ 0xb0, 0x06, masterPitchBendA }); // pitch bend semis
+
+            expectEquals (layout.getLowerZone().masterPitchbendRange, masterPitchBendA);
+
+            constexpr auto masterPitchBendB = 0x50;
+
+            // MSB first
+            layout.processNextMidiEvent ({ 0xb0, 0x64, 0x00 }); // RPN part 1
+            layout.processNextMidiEvent ({ 0xb0, 0x65, 0x00 }); // PRN part 2
+            layout.processNextMidiEvent ({ 0xb0, 0x06, masterPitchBendB }); // pitch bend semis
+            layout.processNextMidiEvent ({ 0xb0, 0x26, 0x00 }); // pitch bend cents
+
+            expectEquals (layout.getLowerZone().masterPitchbendRange, masterPitchBendB);
         }
     }
 };
