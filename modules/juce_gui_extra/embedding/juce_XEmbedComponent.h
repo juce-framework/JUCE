@@ -78,6 +78,19 @@ public:
         return withMember (*this, &XEmbedComponentOptions::allowForeignWidgetToResizeComponent, x);
     }
 
+    /** When this option is enabled the client window will be unconditionally mapped regardless of
+        the value of the XEMBED_MAPPED flag.
+
+        You should generally not use this option. The default value is false.
+
+        It's used internally by JUCE plugin hosting to accommodate some plugins that report
+        XEmbedInfo compatibility, but don't set the flag.
+    */
+    [[nodiscard]] XEmbedComponentOptions withIgnoreXembedMapped (bool x = true) const
+    {
+        return withMember (*this, &XEmbedComponentOptions::ignoreXembedMapped, x);
+    }
+
     /** @see withClientWindow() */
     [[nodiscard]] auto getClientWindow()                        const { return clientWindow; }
 
@@ -87,10 +100,14 @@ public:
     /** @see withAllowForeignWidgetToResizeComponent() */
     [[nodiscard]] bool getAllowForeignWidgetToResizeComponent() const { return allowForeignWidgetToResizeComponent; }
 
+    /** @see withIgnoreXembedMapped() */
+    [[nodiscard]] bool getIgnoreXembedMapped()                  const { return ignoreXembedMapped; }
+
 private:
     unsigned long clientWindow{};
     bool wantsKeyboardFocus = true;
     bool allowForeignWidgetToResizeComponent = false;
+    bool ignoreXembedMapped = false;
 };
 
 //==============================================================================

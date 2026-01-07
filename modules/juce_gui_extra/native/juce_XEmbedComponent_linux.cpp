@@ -317,7 +317,7 @@ private:
             if (window == 0)
                 return;
 
-            const auto shouldBeMapped =    pimpl.getXEmbedMappedFlag()
+            const auto shouldBeMapped =    (pimpl.getXEmbedMappedFlag() || pimpl.options.getIgnoreXembedMapped())
                                         && pimpl.owner.isShowing()
                                         && pimpl.lastPeer != nullptr;
 
