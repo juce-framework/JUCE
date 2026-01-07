@@ -42,6 +42,57 @@ unsigned long juce_getCurrentFocusWindow (ComponentPeer*);
 
 #if JUCE_LINUX || JUCE_BSD || DOXYGEN
 
+/** Options for constructing an XEmbedComponent.
+
+    @see XEmbedComponent
+*/
+class JUCE_API XEmbedComponentOptions
+{
+public:
+    /** Returns a copy of these options with the client window id specified. This corresponds to
+        the client initiated embedding workflow.
+
+        Omitting this option corresponds to the host initiated embedding workflow.
+    */
+    [[nodiscard]] XEmbedComponentOptions withClientWindow (unsigned long x) const
+    {
+        jassert (x != 0);
+        return withMember (*this, &XEmbedComponentOptions::clientWindow, x);
+    }
+
+    /** Specifies that this Component wants to receive and forward keyboard focus.
+
+        The default value is true.
+    */
+    [[nodiscard]] XEmbedComponentOptions withWantsKeyboardFocus (bool x) const
+    {
+        return withMember (*this, &XEmbedComponentOptions::wantsKeyboardFocus, x);
+    }
+
+    /** Specifies that the embedded window is allowed to resize the Component.
+
+        The default value is false.
+    */
+    [[nodiscard]] XEmbedComponentOptions withAllowForeignWidgetToResizeComponent (bool x = true) const
+    {
+        return withMember (*this, &XEmbedComponentOptions::allowForeignWidgetToResizeComponent, x);
+    }
+
+    /** @see withClientWindow() */
+    [[nodiscard]] auto getClientWindow()                        const { return clientWindow; }
+
+    /** @see withWantsKeyboardFocus() */
+    [[nodiscard]] bool getWantsKeyboardFocus()                  const { return wantsKeyboardFocus; }
+
+    /** @see withAllowForeignWidgetToResizeComponent() */
+    [[nodiscard]] bool getAllowForeignWidgetToResizeComponent() const { return allowForeignWidgetToResizeComponent; }
+
+private:
+    unsigned long clientWindow{};
+    bool wantsKeyboardFocus = true;
+    bool allowForeignWidgetToResizeComponent = false;
+};
+
 //==============================================================================
 /**
     A Linux-specific class that can embed a foreign X11 widget.
@@ -75,6 +126,12 @@ class XEmbedComponent : public Component
 {
 public:
     //==============================================================================
+    /** Creates a JUCE component wrapping a foreign widget.
+
+        Depending on the options passed, this constructor can be used for either
+        the host initiated or client initiated version of the XEmbedProtocol.
+    */
+    explicit XEmbedComponent (const XEmbedComponentOptions& options);
 
     /** Creates a JUCE component wrapping a foreign widget
 

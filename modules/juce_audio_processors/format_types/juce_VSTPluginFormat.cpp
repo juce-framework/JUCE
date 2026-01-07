@@ -728,7 +728,9 @@ private:
      ::Display* display = XWindowSystem::getInstance()->getDisplay();
      Window pluginWindow = 0;
      DesktopComponent desktopComponent;
-     XEmbedComponent xembedComponent { reinterpret_cast<Window> (desktopComponent.getPeer()->getNativeHandle()), true, false };
+     XEmbedComponent xembedComponent { XEmbedComponentOptions{}.withClientWindow (reinterpret_cast<Window> (desktopComponent.getPeer()->getNativeHandle()))
+                                                               .withWantsKeyboardFocus (true)
+                                                               .withAllowForeignWidgetToResizeComponent (false) };
     #endif
    #else
      static constexpr auto nativeScaleFactor = 1.0f;

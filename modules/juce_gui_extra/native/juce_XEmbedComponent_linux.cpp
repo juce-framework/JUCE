@@ -143,23 +143,20 @@ public:
 
 public:
     //==============================================================================
-    Pimpl (XEmbedComponent& parent, Window x11Window,
-           bool wantsKeyboardFocus, bool isClientInitiated, bool shouldAllowResize)
+    Pimpl (XEmbedComponent& parent, const XEmbedComponentOptions& optionsIn)
         : owner (parent),
           infoAtom (XWindowSystem::getInstance()->getAtoms().XembedInfo),
           messageTypeAtom (XWindowSystem::getInstance()->getAtoms().XembedMsgType),
-          clientInitiated (isClientInitiated),
-          wantsFocus (wantsKeyboardFocus),
-          allowResize (shouldAllowResize)
+          options (optionsIn)
     {
         getWidgets().add (this);
 
         createHostWindow();
 
-        if (clientInitiated)
+        if (auto x11Window = options.getClientWindow(); x11Window != 0)
             setClient (x11Window, true);
 
-        owner.setWantsKeyboardFocus (wantsFocus);
+        owner.setWantsKeyboardFocus (options.getWantsKeyboardFocus());
         owner.addComponentListener (this);
     }
 
@@ -203,7 +200,7 @@ public:
 
             // if the client has initiated the component then keep the clients size
             // otherwise the client should use the host's window' size
-            if (clientInitiated)
+            if (options.getClientWindow() != 0)
             {
                 configureNotify();
             }
@@ -236,7 +233,7 @@ public:
 
     void focusGained (FocusChangeType changeType, FocusChangeDirection direction)
     {
-        if (client != 0 && supportsXembed && wantsFocus)
+        if (client != 0 && supportsXembed && options.getWantsKeyboardFocus())
         {
             updateKeyFocus();
 
@@ -258,7 +255,7 @@ public:
 
     void focusLost (FocusChangeType)
     {
-        if (client != 0 && supportsXembed && wantsFocus)
+        if (client != 0 && supportsXembed && options.getWantsKeyboardFocus())
         {
             sendXEmbedEvent (CurrentTime, XEMBED_FOCUS_OUT);
             updateKeyFocus();
@@ -276,7 +273,7 @@ public:
         // You are using the client initiated version of the protocol. You cannot
         // retrieve the window id of the host. Please read the documentation for
         // the XEmebedComponent class.
-        jassert (! clientInitiated);
+        jassert (options.getClientWindow() == 0);
 
         return host;
     }
@@ -354,9 +351,8 @@ private:
     WindowMapper clientMapper { *this, client }, hostMapper { *this, host };
     Atom infoAtom, messageTypeAtom;
 
-    bool clientInitiated;
-    bool wantsFocus        = false;
-    bool allowResize       = false;
+    XEmbedComponentOptions options;
+
     bool supportsXembed    = false;
     int xembedVersion      = maxXEmbedVersionToSupport;
 
@@ -557,7 +553,7 @@ private:
 
             if (newPeer != nullptr)
             {
-                if (wantsFocus)
+                if (options.getWantsKeyboardFocus())
                 {
                     keyWindow = SharedKeyWindow::getKeyWindowForPeer (newPeer);
                     updateKeyFocus();
@@ -582,6 +578,8 @@ private:
     {
         if (auto* peer = owner.getPeer())
             peer->getCurrentModifiersRealtime();
+
+        const auto wantsFocus = options.getWantsKeyboardFocus();
 
         switch (opcode)
         {
@@ -616,7 +614,7 @@ private:
                     return true;
 
                 case ConfigureNotify:
-                    if (allowResize)
+                    if (options.getAllowForeignWidgetToResizeComponent())
                         configureNotify();
                     else
                         MessageManager::callAsync ([this] { componentMovedOrResized (owner, true, true); });
@@ -747,16 +745,23 @@ private:
 };
 
 //==============================================================================
-XEmbedComponent::XEmbedComponent (bool wantsKeyboardFocus, bool allowForeignWidgetToResizeComponent)
-    : pimpl (new Pimpl (*this, 0, wantsKeyboardFocus, false, allowForeignWidgetToResizeComponent))
+XEmbedComponent::XEmbedComponent (const XEmbedComponentOptions& options)
+    : pimpl (new Pimpl (*this, options))
 {
     setOpaque (true);
 }
 
-XEmbedComponent::XEmbedComponent (unsigned long wID, bool wantsKeyboardFocus, bool allowForeignWidgetToResizeComponent)
-    : pimpl (new Pimpl (*this, wID, wantsKeyboardFocus, true, allowForeignWidgetToResizeComponent))
+XEmbedComponent::XEmbedComponent (bool wantsKeyboardFocus, bool allowForeignWidgetToResizeComponent)
+    : XEmbedComponent { XEmbedComponentOptions{}.withWantsKeyboardFocus (wantsKeyboardFocus)
+                                                .withAllowForeignWidgetToResizeComponent (allowForeignWidgetToResizeComponent) }
 {
-    setOpaque (true);
+}
+
+XEmbedComponent::XEmbedComponent (unsigned long wID, bool wantsKeyboardFocus, bool allowForeignWidgetToResizeComponent)
+    : XEmbedComponent { XEmbedComponentOptions{}.withClientWindow (wID)
+                                                .withWantsKeyboardFocus (wantsKeyboardFocus)
+                                                .withAllowForeignWidgetToResizeComponent (allowForeignWidgetToResizeComponent) }
+{
 }
 
 XEmbedComponent::~XEmbedComponent() {}

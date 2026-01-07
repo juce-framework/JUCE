@@ -563,7 +563,8 @@ private:
     NSViewComponentWithParent embeddedComponent;
     using HandleFormat = NSView*;
    #elif JUCE_LINUX || JUCE_BSD
-    XEmbedComponent embeddedComponent { true, false };
+    XEmbedComponent embeddedComponent { XEmbedComponentOptions{}.withWantsKeyboardFocus (true)
+                                                                .withAllowForeignWidgetToResizeComponent (false) };
     using HandleFormat = Window;
    #else
     Component embeddedComponent;
