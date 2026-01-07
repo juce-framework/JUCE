@@ -68,11 +68,6 @@ public:
     /** Structure describing properties file options */
     struct JUCE_API  Options
     {
-        /** Creates an empty Options structure.
-            You'll need to fill-in the data members appropriately before using this structure.
-        */
-        Options();
-
         /** The name of your application - this is used to help generate the path and filename
             at which the properties file will be stored. */
         String applicationName;
@@ -113,43 +108,42 @@ public:
         String osxLibrarySubFolder;
 
         /** If true, the file will be created in a location that's shared between users.
-            The default constructor initialises this value to false.
+            Defaults to false.
         */
-        bool commonToAllUsers;
+        bool commonToAllUsers = false;
 
         /** If true, this means that property names are matched in a case-insensitive manner.
             See the PropertySet constructor for more info.
-            The default constructor initialises this value to false.
+            Defaults to false.
         */
-        bool ignoreCaseOfKeyNames;
+        bool ignoreCaseOfKeyNames = false;
 
-        /** If set to true, this prevents the file from being written to disk. */
-        bool doNotSave;
+        /** If set to true, this prevents the file from being written to disk. Defaults to false. */
+        bool doNotSave = false;
 
         /** If this is zero or greater, then after a value is changed, the object will wait
             for this amount of time and then save the file. If this zero, the file will be
             written to disk immediately on being changed (which might be slow, as it'll re-write
             synchronously each time a value-change method is called). If it is less than zero,
             the file won't be saved until save() or saveIfNeeded() are explicitly called.
-            The default constructor sets this to a reasonable value of a few seconds, so you
-            only need to change it if you need a special case.
+            It defaults to a reasonable value of a few seconds, so you only need to change it if
+            you need a special case.
         */
-        int millisecondsBeforeSaving;
+        int millisecondsBeforeSaving = 3000;
 
         /** Specifies whether the file should be written as XML, binary, etc.
-            The default constructor sets this to storeAsXML, so you only need to set it explicitly
+            Defaults to storeAsXML, so you only need to set it explicitly
             if you want to use a different format.
         */
-        StorageFormat storageFormat;
+        StorageFormat storageFormat = PropertiesFile::storeAsXML;
 
         /** An optional InterprocessLock object that will be used to prevent multiple threads or
             processes from writing to the file at the same time. The PropertiesFile will keep a
             pointer to this object but will not take ownership of it - the caller is responsible for
             making sure that the lock doesn't get deleted before the PropertiesFile has been deleted.
-            The default constructor initialises this value to nullptr, so you don't need to touch it
-            unless you want to use a lock.
+            Defaults to nullptr, so you don't need to touch it unless you want to use a lock.
         */
-        InterProcessLock* processLock;
+        InterProcessLock* processLock = nullptr;
 
         /** This can be called to suggest a file that should be used, based on the values
             in this structure.
