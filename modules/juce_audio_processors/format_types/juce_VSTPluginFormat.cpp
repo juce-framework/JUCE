@@ -730,7 +730,8 @@ private:
      DesktopComponent desktopComponent;
      XEmbedComponent xembedComponent { XEmbedComponentOptions{}.withClientWindow (reinterpret_cast<Window> (desktopComponent.getPeer()->getNativeHandle()))
                                                                .withWantsKeyboardFocus (true)
-                                                               .withAllowForeignWidgetToResizeComponent (false) };
+                                                               .withAllowForeignWidgetToResizeComponent (false)
+                                                               .withIgnoreXembedMapped() };
     #endif
    #else
      static constexpr auto nativeScaleFactor = 1.0f;
