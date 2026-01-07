@@ -4745,11 +4745,9 @@ public:
 
         // If something in a paint handler calls, e.g. a message box, this can become reentrant and
         // corrupt the image it's using to paint into, so do a check here.
-        static bool reentrant = false;
-
         if (! reentrant)
         {
-            const ScopedValueSetter<bool> setter (reentrant, true, false);
+            const ScopedValueSetter setter (reentrant, true, false);
 
             if (peer.dontRepaint)
                 peer.getComponent().handleCommandMessage (0); // (this triggers a repaint in the openGL context)
@@ -5045,6 +5043,7 @@ private:
     HWNDComponentPeer& peer;
     TemporaryImage offscreenImageGenerator;
     RectangleList<int> deferredRepaints;
+    bool reentrant = false;
 };
 
 class D2DRenderContext : public RenderContext
