@@ -3818,9 +3818,6 @@ private:
                 break;
 
             case WM_ERASEBKGND:
-                if (hasTitleBar())
-                    break;
-
                 return 1;
 
             case WM_NCCALCSIZE:
