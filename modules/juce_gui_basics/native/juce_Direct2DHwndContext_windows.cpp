@@ -86,7 +86,7 @@ public:
         swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapChainDescription.BufferCount = 2;
         swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-        swapChainDescription.Flags = swapChainFlags;
+        swapChainDescription.Flags = 0;
 
         swapChainDescription.Scaling = DXGI_SCALING_STRETCH;
         swapChainDescription.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
@@ -107,10 +107,6 @@ public:
 
         if (chain2 == nullptr)
             return E_FAIL;
-
-        swapChainEvent.emplace (chain2->GetFrameLatencyWaitableObject());
-        if (swapChainEvent->getHandle() == INVALID_HANDLE_VALUE)
-            return E_NOINTERFACE;
 
         chain2->SetMaximumFrameLatency (1);
 
@@ -136,7 +132,7 @@ public:
 
         buffer = nullptr;
 
-        if (const auto hr = chain->ResizeBuffers (0, (UINT) scaledSize.getWidth(), (UINT) scaledSize.getHeight(), DXGI_FORMAT_B8G8R8A8_UNORM, swapChainFlags); FAILED (hr))
+        if (const auto hr = chain->ResizeBuffers (0, (UINT) scaledSize.getWidth(), (UINT) scaledSize.getHeight(), DXGI_FORMAT_B8G8R8A8_UNORM, 0); FAILED (hr))
             return hr;
 
         ComSmartPtr<IDXGIDevice> device;
@@ -163,14 +159,6 @@ public:
         return { (int) desc.Width, (int) desc.Height };
     }
 
-    WindowsScopedEvent* getEvent()
-    {
-        if (swapChainEvent.has_value())
-            return &*swapChainEvent;
-
-        return nullptr;
-    }
-
     auto getChain() const
     {
         return chain;
@@ -181,7 +169,6 @@ public:
         return buffer;
     }
 
-    static constexpr uint32 swapChainFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
     static constexpr uint32 presentSyncInterval = 1;
     static constexpr uint32 presentFlags = 0;
 
@@ -241,7 +228,6 @@ private:
     AssignableDirectX directX;
     ComSmartPtr<IDXGISwapChain1> chain;
     ComSmartPtr<ID2D1Bitmap1> buffer;
-    std::optional<WindowsScopedEvent> swapChainEvent;
 };
 
 //==============================================================================
