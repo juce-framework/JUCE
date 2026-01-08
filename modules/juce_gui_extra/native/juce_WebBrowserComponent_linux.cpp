@@ -477,7 +477,7 @@ public:
     {
         virtual ~Responder() = default;
 
-        virtual void handleCommand (const String& cmd, const var& param) = 0;
+        virtual void handleCommand (const String& cmd, const var& param, Span<const std::byte> rawData) = 0;
         virtual void receiverHadError() = 0;
     };
 
@@ -506,12 +506,12 @@ public:
     {
         for (;;)
         {
-            auto len = (receivingLength ? sizeof (size_t) : bufferLength.len);
+            const auto len = (receivingLength ? lengthsBuffer.getSize() : lengthsBuffer.getTotalLength());
 
             if (! receivingLength)
                 buffer.realloc (len);
 
-            auto* dst = (receivingLength ? bufferLength.data : buffer.getData());
+            auto* dst = (receivingLength ? lengthsBuffer.getData() : buffer.getData());
 
             auto actual = read (inChannel, &dst[pos], static_cast<size_t> (len - pos));
 
@@ -533,7 +533,7 @@ public:
 
                 if (! std::exchange (receivingLength, ! receivingLength))
                 {
-                    parseJSON (String (buffer.getData(), bufferLength.len));
+                    sendCommandBufferToResponder();
 
                     if (ret == ReturnAfterMessageReceived::yes)
                         return;
@@ -545,7 +545,10 @@ public:
             responder->receiverHadError();
     }
 
-    static void sendCommand (int outChannel, const String& cmd, const var& params)
+    static void sendCommand (int outChannel,
+                             const String& cmd,
+                             const var& params,
+                             Span<const std::byte> binaryPayload = {})
     {
         DynamicObject::Ptr obj = new DynamicObject;
 
@@ -554,43 +557,86 @@ public:
         if (! params.isVoid())
             obj->setProperty (getParamIdentifier(), params);
 
-        auto json = JSON::toString (var (obj.get()));
+        const auto json = JSON::toString (var (obj.get()));
 
-        auto jsonLength = static_cast<size_t> (json.length());
-        auto len        = sizeof (size_t) + jsonLength;
-
-        HeapBlock<char> buffer (len);
-        auto* dst = buffer.getData();
-
-        memcpy (dst, &jsonLength, sizeof (size_t));
-        dst += sizeof (size_t);
-
-        memcpy (dst, json.toRawUTF8(), jsonLength);
-
-        ssize_t ret;
-
-        for (;;)
         {
-            ret = write (outChannel, buffer.getData(), len);
-
-            if (ret != -1 || errno != EINTR)
-                break;
+            const auto jsonLength = json.getNumBytesAsUTF8();
+            writeToChannel (outChannel, &jsonLength, sizeof (decltype (jsonLength)));
         }
+
+        {
+            const auto binaryPayloadLength = binaryPayload.size();
+            writeToChannel (outChannel, &binaryPayloadLength, sizeof (decltype (binaryPayloadLength)));
+        }
+
+        writeToChannel (outChannel, json.toRawUTF8(), json.getNumBytesAsUTF8());
+        writeToChannel (outChannel, binaryPayload.data(), binaryPayload.size());
     }
 
 private:
-    void parseJSON (StringRef json)
+    class LengthsBuffer
     {
-        auto object = JSON::fromString (json);
+    public:
+        char* getData() { return std::data (data); }
 
-        if (! object.isVoid())
+        size_t getSize() const { return std::size (data); }
+
+        size_t getJsonLength() const
         {
-            auto cmd    = object.getProperty (getCmdIdentifier(),   {}).toString();
-            auto params = object.getProperty (getParamIdentifier(), {});
-
-            if (responder != nullptr)
-                responder->handleCommand (cmd, params);
+            return readUnaligned<size_t> (data);
         }
+
+        size_t getRawLength() const
+        {
+            return readUnaligned<size_t> (data + sizeof (size_t));
+        }
+
+        size_t getTotalLength() const
+        {
+            return getJsonLength() + getRawLength();
+        }
+
+    private:
+        char data[2 * sizeof (size_t)];
+    };
+
+    template <typename PointerType>
+    static void writeToChannel (int channel, const PointerType* dataIn, size_t numBytes)
+    {
+        auto* data = reinterpret_cast<const std::byte*> (dataIn);
+
+        while (true)
+        {
+            const auto bytesWritten = write (channel, data, numBytes);
+
+            if (bytesWritten != -1 || errno != EINTR)
+                break;
+
+            if (bytesWritten >= 0)
+            {
+                data += bytesWritten;
+                numBytes -= (size_t) bytesWritten;
+            }
+        }
+    }
+
+    void sendCommandBufferToResponder()
+    {
+        if (responder == nullptr)
+            return;
+
+        const auto object = JSON::fromString (String (buffer.getData(), lengthsBuffer.getJsonLength()));
+
+        if (object.isVoid())
+            return;
+
+        const auto cmd    = object.getProperty (getCmdIdentifier(),   {}).toString();
+        const auto params = object.getProperty (getParamIdentifier(), {});
+
+        responder->handleCommand (cmd,
+                                  params,
+                                  { reinterpret_cast<const std::byte*> (buffer.getData() + lengthsBuffer.getJsonLength()),
+                                    lengthsBuffer.getRawLength() });
     }
 
     static Identifier getCmdIdentifier()    { static Identifier Id ("cmd");    return Id; }
@@ -600,7 +646,7 @@ private:
     int inChannel = 0;
     size_t pos = 0;
     bool receivingLength = true;
-    union { char data [sizeof (size_t)]; size_t len; } bufferLength;
+    LengthsBuffer lengthsBuffer;
     HeapBlock<char> buffer;
 };
 
@@ -934,11 +980,11 @@ public:
                                                                            this);
     }
 
-    void handleResourceRequestedResponse (const var& params)
+    void handleResourceRequestedResponse (const var& params, Span<const std::byte> rawData)
     {
         auto& wk = *WebKitSymbols::getInstance();
 
-        const auto response = FromVar::convert<ResourceRequestResponse> (params);
+        auto response = FromVar::convert<ResourceRequestResponse> (params);
 
         if (! response.has_value())
         {
@@ -956,6 +1002,16 @@ public:
 
         if (response->resource.has_value())
         {
+            if (response->resource->data.empty() && ! rawData.empty())
+            {
+                response->resource->data = std::vector<std::byte> (rawData.begin(), rawData.end());
+            }
+            else
+            {
+                jassertfalse;
+                std::cerr << "The payload of a ResourceRequestResponse should be sent as raw bytes" << std::endl;
+            }
+
             auto* streamBytes = wk.juce_g_bytes_new (response->resource->data.data(),
                                                      static_cast<gsize> (response->resource->data.size()));
             ScopeGuard bytesScope { [&] { wk.juce_g_bytes_unref (streamBytes); } };
@@ -988,7 +1044,7 @@ public:
     }
 
     //==============================================================================
-    void handleCommand (const String& cmd, const var& params) override
+    void handleCommand (const String& cmd, const var& params, Span<const std::byte> rawData) override
     {
         auto& wk = *WebKitSymbols::getInstance();
 
@@ -1001,7 +1057,7 @@ public:
         else if (cmd == "decision")                   handleDecisionResponse (params);
         else if (cmd == "init")                       initialisationData = FromVar::convert<InitialisationData> (params);
         else if (cmd == "evaluateJavascript")         evaluateJavascript (params);
-        else if (cmd == ResourceRequestResponse::key) handleResourceRequestedResponse (params);
+        else if (cmd == ResourceRequestResponse::key) handleResourceRequestedResponse (params, rawData);
     }
 
     void receiverHadError() override
@@ -1381,11 +1437,19 @@ public:
             return;
         }
 
-        const auto response = browser.impl->handleResourceRequest (params->path);
+        auto response = browser.impl->handleResourceRequest (params->path);
+        std::vector<std::byte> rawData;
+
+        if (response.has_value())
+        {
+            rawData = std::move (response->data);
+            jassert (response->data.empty());
+        }
 
         CommandReceiver::sendCommand (outChannel,
                                       ResourceRequestResponse::key,
-                                      *ToVar::convert (ResourceRequestResponse { params->requestId, response }));
+                                      *ToVar::convert (ResourceRequestResponse { params->requestId, response }),
+                                      rawData);
     }
 
     void setWebViewSize (int, int) override
@@ -1687,7 +1751,7 @@ private:
             goToURL (String ("data:text/plain,") + error, nullptr, nullptr);
     }
 
-    void handleCommand (const String& cmd, const var& params) override
+    void handleCommand (const String& cmd, const var& params, Span<const std::byte>) override
     {
         MessageManager::callAsync ([liveness = std::weak_ptr (livenessProbe), this, cmd, params]
                                    {
