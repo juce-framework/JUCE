@@ -270,7 +270,26 @@ ComSmartPtr<ID2D1DeviceContext1> Direct2DDeviceContext::create (ComSmartPtr<ID2D
         return {};
     }
 
-    result->SetTextAntialiasMode (D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
+#if JUCE_ENABLE_DIRECT2D_CLEARTYPE_FONT_SMOOTHING 
+    const auto textAntialiasing = [&]
+    {
+        BOOL smoothingEnabled{};
+        SystemParametersInfo(SPI_GETFONTSMOOTHING, 0, &smoothingEnabled, 0);
+
+        if (!smoothingEnabled)
+            return D2D1_TEXT_ANTIALIAS_MODE_ALIASED;
+
+        UINT smoothingKind{};
+        SystemParametersInfo(SPI_GETFONTSMOOTHINGTYPE, 0, &smoothingKind, 0);
+        return smoothingKind == FE_FONTSMOOTHINGCLEARTYPE ? D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE
+            : D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE;
+    }();
+
+    result->SetTextAntialiasMode(textAntialiasing);
+#else
+    result->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
+#endif
+
     result->SetAntialiasMode (D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
     result->SetUnitMode (D2D1_UNIT_MODE_PIXELS);
 
