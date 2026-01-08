@@ -1590,15 +1590,15 @@ public:
 
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        const auto localPhysical = localPos.toFloat() / getPlatformScaleFactor();
-        auto r = D2DUtilities::toRectangle (getWindowScreenRect (hwnd)).toFloat();
+        const auto localPhysical = localPos.toFloat() * getPlatformScaleFactor();
+        const auto r = D2DUtilities::toRectangle (getWindowScreenRect (hwnd)).toFloat();
 
         if (! r.withZeroOrigin().contains (localPhysical))
             return false;
 
         const auto screenPos = (localPhysical + getClientRectInScreen().getPosition().toFloat()).roundToInt();
+        const auto w = WindowFromPoint (D2DUtilities::toPOINT (screenPos));
 
-        auto w = WindowFromPoint (D2DUtilities::toPOINT (screenPos));
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 
