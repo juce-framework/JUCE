@@ -69,10 +69,7 @@ class JUCE_API  ComponentDragger
 public:
     //==============================================================================
     /** Creates a ComponentDragger. */
-    ComponentDragger();
-
-    /** Destructor. */
-    virtual ~ComponentDragger();
+    ComponentDragger() = default;
 
     //==============================================================================
     /** Call this from your component's mouseDown() method, to prepare for dragging.

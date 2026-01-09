@@ -35,9 +35,6 @@
 namespace juce
 {
 
-ComponentDragger::ComponentDragger() {}
-ComponentDragger::~ComponentDragger() {}
-
 //==============================================================================
 void ComponentDragger::startDraggingComponent (Component* const componentToDrag, const MouseEvent& e)
 {
