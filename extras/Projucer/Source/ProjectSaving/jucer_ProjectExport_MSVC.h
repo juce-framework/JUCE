@@ -2702,7 +2702,7 @@ protected:
     };
 
     inline static const NuGetPackage webviewPackage { "Microsoft.Web.WebView2", "1.0.3485.44", false };
-    inline static const NuGetPackage cppwinrtPackage { "Microsoft.Windows.CppWinRT", "2.0.240405.15", true };
+    inline static const NuGetPackage cppwinrtPackage { "Microsoft.Windows.CppWinRT", "2.0.250303.1", true };
     inline static const NuGetPackage midiPackage { "Microsoft.Windows.Devices.Midi2", "1.0.14-rc.1.209", false };
 
     void getPackagesToInclude (std::vector<NuGetPackage>& result) const
