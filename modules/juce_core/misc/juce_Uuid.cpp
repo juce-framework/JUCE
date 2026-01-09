@@ -35,10 +35,8 @@
 namespace juce
 {
 
-Uuid::Uuid()
+Uuid::Uuid(Random r)
 {
-    Random r;
-
     for (size_t i = 0; i < sizeof (uuid); ++i)
         uuid[i] = (uint8) (r.nextInt (256));
 
