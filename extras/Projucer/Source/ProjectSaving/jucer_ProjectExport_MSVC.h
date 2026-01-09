@@ -922,6 +922,9 @@ public:
                 auto* globals = projectXml.createNewChildElement ("PropertyGroup");
                 globals->setAttribute ("Label", "Globals");
                 globals->createNewChildElement ("ProjectGuid")->addTextElement (getProjectGuid());
+
+                if (owner.shouldAddMidiPackage())
+                    globals->createNewChildElement ("CppWinRTEnableLegacyCoroutines")->addTextElement ("false");
             }
 
             {
