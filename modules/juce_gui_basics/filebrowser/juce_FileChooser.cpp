@@ -205,7 +205,7 @@ std::shared_ptr<FileChooser::Pimpl> FileChooser::createPimpl (int flags, FilePre
 {
     results.clear();
 
-    // the preview component needs to be the right size before you pass it in here..
+    // the preview component needs to be the right size before you pass it in here
     jassert (previewComp == nullptr || (previewComp->getWidth() > 10
                                          && previewComp->getHeight() > 10));
 

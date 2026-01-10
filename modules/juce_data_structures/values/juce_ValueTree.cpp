@@ -258,8 +258,8 @@ public:
             if (child != this && ! isAChildOf (child))
             {
                 // You should always make sure that a child is removed from its previous parent before
-                // adding it somewhere else - otherwise, it's ambiguous as to whether a different
-                // undomanager should be used when removing it from its current parent..
+                // adding it somewhere else - otherwise, it's ambiguous whether a different
+                // undomanager should be used when removing it from its current parent.
                 jassert (child->parent == nullptr);
 
                 if (child->parent != nullptr)

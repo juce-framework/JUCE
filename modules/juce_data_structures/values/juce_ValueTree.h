@@ -585,7 +585,7 @@ public:
         int compareElements (const ValueTree& first, const ValueTree& second);
         @endcode
 
-        ..and this method must return:
+        ...and this method must return:
           - a value of < 0 if the first comes before the second
           - a value of 0 if the two objects are equivalent
           - a value of > 0 if the second comes before the first

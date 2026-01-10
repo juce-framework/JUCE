@@ -483,7 +483,7 @@ public:
                 auto jry2 = jry1 + r2.getHeight();
 
                 // if the vertical edges of any blocks are touching and their horizontals don't
-                // line up, split them horizontally..
+                // line up, split them horizontally
                 if (jrx1 == rx2 || jrx2 == rx1)
                 {
                     if (jry1 > ry1 && jry1 < ry2)

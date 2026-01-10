@@ -49,6 +49,7 @@
 #include <juce_audio_plugin_client/juce_audio_plugin_client.h>
 #include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
 #include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
+#include <juce_audio_plugin_client/detail/juce_PluginScaleFactorUtilities.h>
 #include <juce_audio_plugin_client/detail/juce_LinuxMessageThread.h>
 
 #include <juce_audio_processors_headless/utilities/juce_FlagCache.h>
@@ -345,12 +346,12 @@ public:
         const auto numerator   = parser.parseNumericAtom<float>   (atomBeatsPerBar);
         const auto denominator = parser.parseNumericAtom<int32_t> (atomBeatUnit);
 
-        if (numerator.hasValue() && denominator.hasValue())
+        if (numerator.has_value() && denominator.has_value())
             info->setTimeSignature (TimeSignature { (int) *numerator, (int) *denominator });
 
         info->setBpm (parser.parseNumericAtom<float> (atomBeatsPerMinute));
         info->setPpqPosition (parser.parseNumericAtom<double> (atomBeat));
-        info->setIsPlaying (! approximatelyEqual (parser.parseNumericAtom<float> (atomSpeed).orFallback (0.0f), 0.0f));
+        info->setIsPlaying (! approximatelyEqual (parser.parseNumericAtom<float> (atomSpeed).value_or (0.0f), 0.0f));
         info->setBarCount (parser.parseNumericAtom<int64_t> (atomBar));
 
         if (const auto parsed = parser.parseNumericAtom<int64_t> (atomFrame))
@@ -769,6 +770,8 @@ public:
         return result;
     }
 
+    detail::PluginScaleFactorManager& getScaleManager() { return scaleManager; }
+
 private:
     void audioProcessorParameterChanged (AudioProcessor*, int, float) override {}
 
@@ -799,6 +802,8 @@ private:
     LV2_URID map (StringRef uri) const { return mapFeature.map (mapFeature.handle, uri); }
 
     ScopedJuceInitialiser_GUI scopedJuceInitialiser;
+
+    detail::PluginScaleFactorManager scaleManager;
 
    #if JUCE_LINUX || JUCE_BSD
     SharedResourcePointer<detail::MessageThread> messageThread;
@@ -1281,7 +1286,7 @@ private:
 
         // In the event that the plugin decides to send all of its parameters in one go,
         // we should ensure that the output buffer is large enough to accommodate, with some
-        // extra room for the sequence header, MIDI messages etc..
+        // extra room for the sequence header, MIDI messages etc.
         const auto patchSetSizeBytes = 72;
         const auto additionalSize = 8192;
         const auto atomPortMinSize = proc.getParameters().size() * patchSetSizeBytes + additionalSize;
@@ -1376,7 +1381,6 @@ private:
               "\t\tui:idleInterface ,\n"
              #endif
               "\t\topts:interface ,\n"
-              "\t\tui:noUserResize ,\n" // resize and noUserResize are always present in the extension data array
               "\t\tui:resize ;\n"
               "\n"
               "\tlv2:requiredFeature\n"
@@ -1446,7 +1450,7 @@ LV2_SYMBOL_EXPORT const LV2_Descriptor* lv2_descriptor (uint32_t index)
             const auto blockLengthUrid = mapFeature->map (mapFeature->handle, LV2_BUF_SIZE__maxBlockLength);
             const auto blockSize = parser.parseNumericOption<int64_t> (findMatchingOption (options, blockLengthUrid));
 
-            if (! blockSize.hasValue())
+            if (! blockSize.has_value())
             {
                 // The host doesn't specify a maximum block size
                 jassertfalse;
@@ -1509,7 +1513,7 @@ LV2_SYMBOL_EXPORT const LV2_Descriptor* lv2_descriptor (uint32_t index)
     return &descriptor;
 }
 
-static Optional<float> findScaleFactor (const LV2_URID_Map* symap, const LV2_Options_Option* options)
+static std::optional<float> findScaleFactor (const LV2_URID_Map* symap, const LV2_Options_Option* options)
 {
     if (options == nullptr || symap == nullptr)
         return {};
@@ -1521,7 +1525,7 @@ static Optional<float> findScaleFactor (const LV2_URID_Map* symap, const LV2_Opt
 }
 
 class LV2UIInstance final : private Component,
-                            private ComponentListener
+                            private detail::PluginScaleFactorManagerListener
 {
 public:
     LV2UIInstance (const char*,
@@ -1533,14 +1537,13 @@ public:
                    LV2UI_Widget parentIn,
                    const LV2_URID_Map* symapIn,
                    const LV2UI_Resize* resizeFeatureIn,
-                   Optional<float> scaleFactorIn)
+                   std::optional<float> scaleFactorIn)
         : writeFunction (writeFunctionIn),
           controller (controllerIn),
           plugin (pluginIn),
           parent (parentIn),
           symap (symapIn),
           resizeFeature (resizeFeatureIn),
-          scaleFactor (scaleFactorIn),
           editor (plugin->createEditor())
     {
         jassert (plugin != nullptr);
@@ -1549,6 +1552,9 @@ public:
 
         if (editor == nullptr)
             return;
+
+        plugin->getScaleManager().addListener (*this);
+        plugin->getScaleManager().startObserving (*this);
 
         const auto bounds = getSizeToContainChild();
         setSize (bounds.getWidth(), bounds.getHeight());
@@ -1560,18 +1566,22 @@ public:
         setVisible (false);
         removeFromDesktop();
         addToDesktop (detail::PluginUtilities::getDesktopFlags (editor.get()), parent);
-        editor->addComponentListener (this);
 
         *widget = getWindowHandle();
 
         setVisible (true);
 
-        editor->setScaleFactor (getScaleFactor());
+        if (scaleFactorIn.has_value())
+            plugin->getScaleManager().setHostScale (*scaleFactorIn);
+
         requestResize();
     }
 
     ~LV2UIInstance() override
     {
+        plugin->getScaleManager().stopObserving (*this);
+        plugin->getScaleManager().removeListener (*this);
+
         plugin->editorBeingDeleted (editor.get());
     }
 
@@ -1582,8 +1592,17 @@ public:
     // Called when the host requests a resize
     int resize (int width, int height)
     {
-        const ScopedValueSetter<bool> scope (hostRequestedResize, true);
-        setSize (width, height);
+        const ScopedValueSetter scope (resizingChild, true);
+
+        if (editor == nullptr)
+            return 0;
+
+        const auto logicalBounds = plugin->getScaleManager().convertFromHostBounds ({ width, height }).toNearestIntEdges();
+        editor->setBoundsConstrained (logicalBounds.withZeroOrigin());
+
+        const auto bounds = getSizeToContainChild();
+        setSize (bounds.getWidth(), bounds.getHeight());
+
         return 0;
     }
 
@@ -1595,34 +1614,34 @@ public:
        #endif
     }
 
-    void resized() override
-    {
-        const ScopedValueSetter<bool> scope (hostRequestedResize, true);
-
-        if (editor != nullptr)
-        {
-            const auto localArea = editor->getLocalArea (this, getLocalBounds());
-            editor->setBoundsConstrained ({ localArea.getWidth(), localArea.getHeight() });
-        }
-    }
-
     void paint (Graphics& g) override { g.fillAll (Colours::black); }
+
+    void parentSizeChanged() override
+    {
+        if (editor == nullptr)
+            return;
+
+        requestResize();
+        editor->repaint();
+    }
 
     uint32_t getOptions (LV2_Options_Option* options)
     {
         const auto scaleFactorUrid = symap->map (symap->handle, LV2_UI__scaleFactor);
-        const auto floatUrid = symap->map (symap->handle, LV2_ATOM__Float);;
+        const auto floatUrid = symap->map (symap->handle, LV2_ATOM__Float);
 
         for (auto* opt = options; opt->key != 0; ++opt)
         {
             if (opt->context != LV2_OPTIONS_INSTANCE || opt->subject != 0 || opt->key != scaleFactorUrid)
                 continue;
 
-            if (scaleFactor.hasValue())
+            if (const auto optionalHostScale = plugin->getScaleManager().getHostScale())
             {
+                hostScale = *optionalHostScale;
+
                 opt->type = floatUrid;
                 opt->size = sizeof (float);
-                opt->value = &(*scaleFactor);
+                opt->value = &hostScale;
             }
         }
 
@@ -1632,7 +1651,7 @@ public:
     uint32_t setOptions (const LV2_Options_Option* options)
     {
         const auto scaleFactorUrid = symap->map (symap->handle, LV2_UI__scaleFactor);
-        const auto floatUrid = symap->map (symap->handle, LV2_ATOM__Float);;
+        const auto floatUrid = symap->map (symap->handle, LV2_ATOM__Float);
 
         for (auto* opt = options; opt->key != 0; ++opt)
         {
@@ -1645,20 +1664,13 @@ public:
                 continue;
             }
 
-            scaleFactor = *static_cast<const float*> (opt->value);
-            updateScale();
+            plugin->getScaleManager().setHostScale (*static_cast<const float*> (opt->value));
         }
 
         return LV2_OPTIONS_SUCCESS;
     }
 
 private:
-    void updateScale()
-    {
-        editor->setScaleFactor (getScaleFactor());
-        requestResize();
-    }
-
     Rectangle<int> getSizeToContainChild() const
     {
         if (editor != nullptr)
@@ -1667,15 +1679,17 @@ private:
         return {};
     }
 
-    float getScaleFactor() const noexcept
+    void peerBoundsDidUpdate() override
     {
-        return scaleFactor.hasValue() ? *scaleFactor : 1.0f;
+        requestResize();
     }
 
-    void componentMovedOrResized (Component&, bool, bool wasResized) override
+    void childBoundsChanged (Component*) override
     {
-        if (! hostRequestedResize && wasResized)
-            requestResize();
+        if (resizingChild)
+            return;
+
+        requestResize();
     }
 
     void write (uint32_t portIndex, uint32_t bufferSize, uint32_t portProtocol, const void* data)
@@ -1688,16 +1702,19 @@ private:
         if (editor == nullptr)
             return;
 
-        const auto bounds = getSizeToContainChild();
-
         if (resizeFeature == nullptr)
             return;
 
-        if (auto* fn = resizeFeature->ui_resize)
-            fn (resizeFeature->handle, bounds.getWidth(), bounds.getHeight());
+        const auto logicalBounds = getSizeToContainChild();
+        const auto physicalBounds = plugin->getScaleManager().convertToHostBounds (logicalBounds.toFloat());
 
-        setSize (bounds.getWidth(), bounds.getHeight());
-        repaint();
+        if (auto* fn = resizeFeature->ui_resize)
+            fn (resizeFeature->handle, physicalBounds.getWidth(), physicalBounds.getHeight());
+
+        setBounds (logicalBounds.withZeroOrigin());
+
+        if (auto* peer = getPeer())
+            peer->updateBounds();
     }
 
    #if JUCE_LINUX || JUCE_BSD
@@ -1710,9 +1727,9 @@ private:
     LV2UI_Widget parent;
     const LV2_URID_Map* symap = nullptr;
     const LV2UI_Resize* resizeFeature = nullptr;
-    Optional<float> scaleFactor;
     std::unique_ptr<AudioProcessorEditor> editor;
-    bool hostRequestedResize = false;
+    float hostScale = 0.0f;
+    bool resizingChild = false;
 
     JUCE_LEAK_DETECTOR (LV2UIInstance)
 };
@@ -1757,7 +1774,7 @@ LV2_SYMBOL_EXPORT const LV2UI_Descriptor* lv2ui_descriptor (uint32_t index)
 
             auto* resizeFeature = findMatchingFeatureData<const LV2UI_Resize*> (features, LV2_UI__resize);
 
-            const auto* symap = findMatchingFeatureData<const LV2_URID_Map*>       (features, LV2_URID__map);
+            const auto* symap = findMatchingFeatureData<const LV2_URID_Map*> (features, LV2_URID__map);
             const auto scaleFactor = findScaleFactor (symap, findMatchingFeatureData<const LV2_Options_Option*> (features, LV2_OPTIONS__options));
 
             return new LV2UIInstance { pluginUri,
@@ -1815,13 +1832,11 @@ LV2_SYMBOL_EXPORT const LV2UI_Descriptor* lv2ui_descriptor (uint32_t index)
                 }
             };
 
-            // We'll always define noUserResize and idle in the extension data array, but we'll
-            // only declare them in the ui.ttl if the UI is actually non-resizable, or requires
-            // idle callbacks.
+            // We'll always define idle in the extension data array, but we'll
+            // only declare it in the ui.ttl if the UI requires idle callbacks.
             // Well-behaved hosts should check the ttl before trying to search the
             // extension-data array.
             static const LV2_Feature features[] { { LV2_UI__resize, &resize },
-                                                  { LV2_UI__noUserResize, nullptr },
                                                   { LV2_UI__idleInterface, &idle },
                                                   { LV2_OPTIONS__interface, &options } };
 

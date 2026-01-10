@@ -282,7 +282,8 @@ std::unique_ptr<MidiInput> MidiInput::createNewDevice (const String& name, MidiI
     if (! connection)
         return {};
 
-    return Impl::make (session, std::move (connection), 0, { name, {} }, callback, std::move (port));
+    const auto portId = port.getId().dst;
+    return Impl::make (session, std::move (connection), 0, { name, portId }, callback, std::move (port));
 }
 
 void MidiInput::start()
@@ -391,12 +392,19 @@ std::unique_ptr<MidiOutput> MidiOutput::createNewDevice (const String& name)
     if (! connection)
         return {};
 
-    return rawToUniquePtr (new MidiOutput (session, std::move (connection), 0, { name, {} }, std::move (port)));
+    const auto portId = port.getId().src;
+    return rawToUniquePtr (new MidiOutput (session, std::move (connection), 0, { name, portId }, std::move (port)));
 }
 
 MidiDeviceInfo MidiOutput::getDeviceInfo() const noexcept
 {
     return customName.has_value() ? storedInfo.withName (*customName) : storedInfo;
+}
+
+bool MidiDeviceInfo::operator== (const MidiDeviceInfo& other) const noexcept
+{
+    const auto tie = [] (auto& x) { return std::tuple (x.name, x.identifier); };
+    return tie (*this) == tie (other);
 }
 
 } // namespace juce

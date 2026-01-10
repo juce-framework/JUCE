@@ -60,7 +60,7 @@ constexpr IOKind ioKinds[] { IOKind::src, IOKind::dst };
 */
 class EndpointId
 {
-    auto tie() const { return std::tuple (src, dst); }
+    auto tie() const;
 
 public:
     /** @internal */
@@ -68,12 +68,12 @@ public:
 
     EndpointId() = default;
 
-    bool operator== (const EndpointId& x) const { return tie() == x.tie(); }
-    bool operator!= (const EndpointId& x) const { return tie() != x.tie(); }
-    bool operator<  (const EndpointId& x) const { return tie() <  x.tie(); }
-    bool operator<= (const EndpointId& x) const { return tie() <= x.tie(); }
-    bool operator>  (const EndpointId& x) const { return tie() >  x.tie(); }
-    bool operator>= (const EndpointId& x) const { return tie() >= x.tie(); }
+    bool operator== (const EndpointId& x) const;
+    bool operator!= (const EndpointId& x) const;
+    bool operator<  (const EndpointId& x) const;
+    bool operator<= (const EndpointId& x) const;
+    bool operator>  (const EndpointId& x) const;
+    bool operator>= (const EndpointId& x) const;
 
     String get (IOKind k) const { return k == IOKind::src ? src : dst; }
 

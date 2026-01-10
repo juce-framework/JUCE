@@ -41,7 +41,7 @@
 */
 #define JUCE_MAJOR_VERSION      8
 #define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        10
+#define JUCE_BUILDNUMBER        12
 
 /** Current JUCE version number.
 
@@ -95,7 +95,7 @@
 #include "juce_PlatformDefs.h"
 
 //==============================================================================
-// Now we'll include some common OS headers..
+// Now we'll include some common OS headers.
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4245 4100)
 
 #if JUCE_MSVC
@@ -134,7 +134,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
  #include <byteswap.h>
 #endif
 
-// undef symbols that are sometimes set by misguided 3rd-party headers..
+// undef symbols that are sometimes set by misguided 3rd-party headers
 #undef TYPE_BOOL
 #undef max
 #undef min

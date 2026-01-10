@@ -38,13 +38,7 @@ namespace juce
 class Direct2DHwndContext : public Direct2DGraphicsContext
 {
 public:
-    struct SwapchainDelegate
-    {
-        virtual ~SwapchainDelegate() = default;
-        virtual void onSwapchainEvent() = 0;
-    };
-
-    Direct2DHwndContext (HWND windowHandle, SwapchainDelegate& swapDelegate);
+    explicit Direct2DHwndContext (HWND windowHandle);
     ~Direct2DHwndContext() override;
 
     void handleShowWindow();

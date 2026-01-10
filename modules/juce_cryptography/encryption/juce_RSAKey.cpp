@@ -48,7 +48,7 @@ RSAKey::RSAKey (const String& s)
     }
     else
     {
-        // the string needs to be two hex numbers, comma-separated..
+        // the string needs to be two hex numbers, comma-separated
         jassertfalse;
     }
 }
@@ -123,7 +123,7 @@ BigInteger RSAKey::findBestCommonDivisor (const BigInteger& p, const BigInteger&
 void RSAKey::createKeyPair (RSAKey& publicKey, RSAKey& privateKey,
                             const int numBits, const int* randomSeeds, const int numRandomSeeds)
 {
-    jassert (numBits > 16); // not much point using less than this..
+    jassert (numBits > 16); // not much point using less than this
     jassert (numRandomSeeds == 0 || numRandomSeeds >= 2); // you need to provide plenty of seeds here!
 
     BigInteger p (Primes::createProbablePrime (numBits / 2, 30, randomSeeds, numRandomSeeds / 2));

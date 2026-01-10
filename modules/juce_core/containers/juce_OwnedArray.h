@@ -44,7 +44,7 @@ namespace juce
 
     Declare it in the form:  OwnedArray<MyObjectClass>
 
-    ..and then add new objects, e.g.   myOwnedArray.add (new MyObjectClass());
+    ...and then add new objects, e.g.   myOwnedArray.add (new MyObjectClass());
 
     After adding objects, they are 'owned' by the array and will be deleted when
     removed or replaced.
@@ -440,7 +440,7 @@ public:
         else
         {
             jassertfalse; // you're trying to set an object at a negative index, which doesn't have
-                          // any effect - but since the object is not being added, it may be leaking..
+                          // any effect - but since the object is not being added, it may be leaking
         }
 
         return newObject;
@@ -775,7 +775,7 @@ public:
         int compareElements (ElementType* first, ElementType* second);
         @endcode
 
-        ..and this method must return:
+        ...and this method must return:
           - a value of < 0 if the first comes before the second
           - a value of 0 if the two objects are equivalent
           - a value of > 0 if the second comes before the first

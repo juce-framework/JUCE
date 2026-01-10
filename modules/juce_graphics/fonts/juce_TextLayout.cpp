@@ -342,7 +342,7 @@ void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& te
             for (const auto& line : lines)
                 for (const auto& run : line->runs)
                     for (const auto& glyph : run->glyphs)
-                        advanceWidth = jmin (*advanceWidth, glyph.width);
+                        advanceWidth = jmin (*advanceWidth, jmax (glyph.width, 1.0f));
         }
 
         maxWidth -= *advanceWidth;

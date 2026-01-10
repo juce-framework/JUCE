@@ -8,6 +8,12 @@
     <Filter Include="DemoRunner\Source\UI">
       <UniqueIdentifier>{67AC4BA4-ADB7-61F2-40EB-054BFA2565E9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DemoRunner\Source\AppIcon.icon\Assets">
+      <UniqueIdentifier>{582D7890-88DE-64AF-4B99-546B272ADAC5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DemoRunner\Source\AppIcon.icon">
+      <UniqueIdentifier>{2E0E5C08-9649-C07C-383E-3497456B1834}</UniqueIdentifier>
+    </Filter>
     <Filter Include="DemoRunner\Source">
       <UniqueIdentifier>{8C2BA468-929C-4792-FBD2-3009E3068DD0}</UniqueIdentifier>
     </Filter>
@@ -913,6 +919,12 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMP_test.cpp">
       <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPDeviceInfo.cpp">
+      <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPFactory.cpp">
+      <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPIterator.cpp">
       <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
     </ClCompile>
@@ -1047,6 +1059,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_SampleRateHelpers.cpp">
       <Filter>JUCE Modules\juce_audio_devices\audio_io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPBlock.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPEndpointId.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPEndpoints.cpp">
       <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
@@ -3919,6 +3937,18 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.mm">
       <Filter>JUCE Modules\juce_gui_basics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_2.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_3.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_4.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_5.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeDocument.cpp">
       <Filter>JUCE Modules\juce_gui_extra\code_editor</Filter>
     </ClCompile>
@@ -4045,13 +4075,22 @@
     <ClCompile Include="..\..\..\..\modules\juce_javascript\juce_javascript.cpp">
       <Filter>JUCE Modules\juce_javascript</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIChannelAddress.cpp">
+      <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIDevice.cpp">
       <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIEncodings.cpp">
       <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIMessages.cpp">
+      <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIParser.cpp">
+      <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIProfileAtAddress.cpp">
       <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIProfileHost.cpp">
@@ -4070,6 +4109,9 @@
       <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIResponderOutput.cpp">
+      <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CISubscription.cpp">
       <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CISubscriptionManager.cpp">
@@ -4247,6 +4289,18 @@
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_2.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_3.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_4.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_5.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp">
@@ -8939,6 +8993,15 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\AppIcon.icon\Assets\demorunnerbg.svg">
+      <Filter>DemoRunner\Source\AppIcon.icon\Assets</Filter>
+    </None>
+    <None Include="..\..\Source\AppIcon.icon\Assets\demorunnerplay.svg">
+      <Filter>DemoRunner\Source\AppIcon.icon\Assets</Filter>
+    </None>
+    <None Include="..\..\Source\AppIcon.icon\icon.json">
+      <Filter>DemoRunner\Source\AppIcon.icon</Filter>
+    </None>
     <None Include="..\..\Source\JUCEAppIcon.png">
       <Filter>DemoRunner\Source</Filter>
     </None>

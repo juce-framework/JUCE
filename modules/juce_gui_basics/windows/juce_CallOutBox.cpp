@@ -144,7 +144,7 @@ void CallOutBox::inputAttemptWhenModal()
     {
         // if you click on the area that originally popped-up the callout, you expect it
         // to get rid of the box, but deleting the box here allows the click to pass through and
-        // probably re-trigger it, so we need to dismiss the box asynchronously to consume the click..
+        // probably re-trigger it, so we need to dismiss the box asynchronously to consume the click
 
         // For touchscreens, we make sure not to dismiss the CallOutBox immediately,
         // as Windows still sends touch events before the CallOutBox had a chance

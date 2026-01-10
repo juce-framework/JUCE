@@ -270,7 +270,7 @@ private:
         if (! filename.isEmpty())
             args.add ("--filename=" + filename);
 
-        // supplying the window ID of the topmost window makes sure that Zenity pops up..
+        // supplying the window ID of the topmost window makes sure that Zenity pops up
         if (uint64 topWindowID = getTopWindowID())
             setenv ("WINDOWID", String (topWindowID).toRawUTF8(), true);
     }

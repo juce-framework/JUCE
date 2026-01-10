@@ -178,7 +178,7 @@ struct SingletonHolder  : private MutexType // (inherited so we can use the empt
             JUCE_DECLARE_SINGLETON (MySingleton, false)
         };
 
-        // ..and this goes in a suitable .cpp file:
+        // ...and this goes in a suitable .cpp file:
         JUCE_IMPLEMENT_SINGLETON (MySingleton)
 
 
@@ -187,7 +187,7 @@ struct SingletonHolder  : private MutexType // (inherited so we can use the empt
 
         ...
 
-        MySingleton::deleteInstance(); // safely deletes the singleton (if it's been created).
+        MySingleton::deleteInstance(); // safely deletes the singleton (if it's been created)
 
     @endcode
 

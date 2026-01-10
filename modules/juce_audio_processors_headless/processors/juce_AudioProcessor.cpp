@@ -62,7 +62,7 @@ AudioProcessor::~AudioProcessor()
     {
         const ScopedLock sl (activeEditorLock);
 
-        // ooh, nasty - the editor should have been deleted before its AudioProcessor.
+        // ooh, nasty - the editor should have been deleted before its AudioProcessor
         jassert (activeEditor == nullptr);
     }
 
@@ -955,7 +955,7 @@ void AudioProcessor::copyXmlToBinary (const XmlElement& xml, juce::MemoryBlock& 
         out.writeByte (0);
     }
 
-    // go back and write the string length..
+    // go back and write the string length
     static_cast<uint32*> (destData.getData())[1]
         = ByteOrder::swapIfBigEndian ((uint32) destData.getSize() - 9);
 }

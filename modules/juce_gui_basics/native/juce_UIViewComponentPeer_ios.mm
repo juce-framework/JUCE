@@ -53,8 +53,8 @@ public:
 
     void setWindowScene (UIWindowScene* x) API_AVAILABLE (ios (13.0))
     {
-        if (std::exchange (windowScene, x) != x)
-            listeners.call ([] (auto& l) { l.windowSceneChanged(); });
+        windowScene = x;
+        listeners.call ([] (auto& l) { l.windowSceneChanged(); });
     }
 
     UIWindowScene* getWindowScene() const API_AVAILABLE (ios (13.0))
@@ -549,6 +549,23 @@ private:
         if (isSharedWindow)
             return;
 
+        const auto sceneDidChange = std::invoke ([&]
+        {
+            if (@available (iOS 13, *))
+            {
+                auto* currentScene = window != nil ? [window windowScene] : nil;
+                return windowSceneTracker->getWindowScene() != currentScene;
+            }
+
+            return false;
+        });
+
+        if (! sceneDidChange)
+        {
+            updateScreenBounds();
+            return;
+        }
+
         auto* newWindow = std::invoke ([&]() -> JuceUIWindow*
         {
             if (@available (iOS 13, *))
@@ -577,6 +594,7 @@ private:
             if (@available (iOS 13, *))
                 window.windowScene = nil;
 
+            window.rootViewController = nil;
             [window release];
             window = nil;
         }
@@ -2033,7 +2051,7 @@ void UIViewComponentPeer::toBehind (ComponentPeer* other)
 
 void UIViewComponentPeer::setIcon (const Image& /*newIcon*/)
 {
-    // to do..
+    // todo
 }
 
 //==============================================================================
@@ -2094,7 +2112,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEv
             ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
             modsToSend = ModifierKeys::getCurrentModifiers();
 
-            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before
             handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(),
                               MouseInputSource::defaultPressure, MouseInputSource::defaultOrientation, time, {}, touchIndex);
 

@@ -86,7 +86,7 @@ private:
 */
 class EndpointInfo
 {
-    auto tie() const { return std::tie (versionMajor, versionMinor, numFunctionBlocks, flags); }
+    auto tie() const;
 
 public:
     [[nodiscard]] EndpointInfo withVersion (uint8_t major, uint8_t minor) const
@@ -122,8 +122,8 @@ public:
     /** True if this endpoint is capable of transmitting JR timestamps. */
     [[nodiscard]] bool hasTransmitJRSupport()     const { return getFlag (supportsTransmitJR); }
 
-    bool operator== (const EndpointInfo& other) const { return tie() == other.tie(); }
-    bool operator!= (const EndpointInfo& other) const { return tie() != other.tie(); }
+    bool operator== (const EndpointInfo& other) const;
+    bool operator!= (const EndpointInfo& other) const;
 
 private:
     enum Flags

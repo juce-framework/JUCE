@@ -1387,7 +1387,7 @@ struct VSTPluginInstanceHeadless : public AudioPluginInstance
             if (! isPowerOn)
                 setPower (true);
 
-            // dodgy hack to force some plugins to initialise the sample rate.
+            // dodgy hack to force some plugins to initialise the sample rate
             if (! hasEditor())
             {
                 if (auto* firstParam = getParameters()[0])
@@ -1670,7 +1670,7 @@ struct VSTPluginInstanceHeadless : public AudioPluginInstance
         return 0;
     }
 
-    // handles non plugin-specific callbacks.
+    // handles non plugin-specific callbacks
     static pointer_sized_int handleGeneralCallback (int32 opcode, int32 /*index*/, pointer_sized_int /*value*/, void* ptr, float /*opt*/)
     {
         switch (opcode)
@@ -2442,7 +2442,7 @@ private:
         }
 
         {
-            // copy any incoming midi.
+            // Copy any incoming midi.
             const ScopedLock sl (midiInLock);
 
             midiMessages.swapWith (incomingMidi);
@@ -2557,7 +2557,7 @@ private:
         {
             char nm[256] = { 0 };
 
-            // only do this if the plugin can't use indexed names.
+            // only do this if the plugin can't use indexed names
             if (dispatch (Vst2::effGetProgramNameIndexed, 0, -1, nm, 0) == 0)
             {
                 auto oldProgram = getCurrentProgram();

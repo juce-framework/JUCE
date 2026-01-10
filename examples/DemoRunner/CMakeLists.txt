@@ -22,6 +22,7 @@
 juce_add_gui_app(DemoRunner
     BUNDLE_ID                       com.juce.demorunner
     ICON_BIG                        ${CMAKE_CURRENT_SOURCE_DIR}/Source/JUCEAppIcon.png
+    ICON_COMPOSER_BUNDLE            "${CMAKE_CURRENT_SOURCE_DIR}/Source/AppIcon.icon"
     NEEDS_CURL                      TRUE
     NEEDS_WEB_BROWSER               TRUE
     MICROPHONE_PERMISSION_ENABLED   TRUE
@@ -51,6 +52,7 @@ target_sources(DemoRunner PRIVATE
 
 target_compile_definitions(DemoRunner PRIVATE
     PIP_JUCE_EXAMPLES_DIRECTORY_STRING="${JUCE_SOURCE_DIR}/examples"
+    JUCE_ASIO=1
     JUCE_ALLOW_STATIC_NULL_VARIABLES=0
     JUCE_CONTENT_SHARING=1
     JUCE_DEMO_RUNNER=1

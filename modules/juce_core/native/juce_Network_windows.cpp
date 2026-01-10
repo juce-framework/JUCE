@@ -292,7 +292,7 @@ private:
 
         if (sessionHandle != nullptr)
         {
-            // break up the url..
+            // break up the url
             const int fileNumChars = 65536;
             const int serverNumChars = 2048;
             const int usernameNumChars = 1024;

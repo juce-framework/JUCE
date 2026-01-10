@@ -527,6 +527,14 @@ public:
 
     void findAllImageItems (OwnedArray<Item>& items);
 
+    struct IconComposerNameAndItem
+    {
+        String name;
+        Item item;
+    };
+
+    std::vector<IconComposerNameAndItem> findAllIconComposerItems();
+
     //==============================================================================
     ValueTree getExporters();
     int getNumExporters();

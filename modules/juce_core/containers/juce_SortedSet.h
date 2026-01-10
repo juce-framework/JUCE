@@ -293,7 +293,7 @@ public:
 
             if (newElement == elem)
             {
-                elem = newElement; // force an update in case operator== permits differences.
+                elem = newElement; // force an update in case operator== permits differences
                 return false;
             }
 

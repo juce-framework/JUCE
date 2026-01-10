@@ -42,8 +42,6 @@ namespace juce
 
 #if JUCE_LINUX || JUCE_BSD
 
-using EventProcPtr = void (*)(XEvent*);
-
 static Window getChildWindow (Window windowToCheck)
 {
     Window rootWindow, parentWindow;
@@ -106,6 +104,8 @@ public:
 
        #if JUCE_WINDOWS
         addAndMakeVisible (embeddedComponent);
+       #elif JUCE_LINUX || JUCE_BSD
+        addAndMakeVisible (xembedComponent);
        #endif
     }
 
@@ -182,23 +182,7 @@ public:
 
     void paint (Graphics& g) override
     {
-       #if JUCE_LINUX || JUCE_BSD
-        if (isOpen)
-        {
-            if (pluginWindow != 0)
-            {
-                auto clip = componentToVstRect (*this, g.getClipBounds().toNearestInt());
-
-                X11Symbols::getInstance()->xClearArea (display, pluginWindow, clip.getX(), clip.getY(),
-                                                       static_cast<unsigned int> (clip.getWidth()),
-                                                       static_cast<unsigned int> (clip.getHeight()), True);
-            }
-        }
-        else
-       #endif
-        {
-            g.fillAll (Colours::black);
-        }
+        g.fillAll (Colours::black);
     }
 
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
@@ -213,17 +197,11 @@ public:
            #if JUCE_WINDOWS
             embeddedComponent.setBounds (getLocalBounds());
            #elif JUCE_LINUX || JUCE_BSD
-            const auto pos = componentToVstRect (*this, getLocalBounds());
+            xembedComponent.setBounds (getLocalBounds());
 
             if (pluginWindow != 0)
             {
                 auto* symbols = X11Symbols::getInstance();
-                symbols->xMoveResizeWindow (display,
-                                            pluginWindow,
-                                            pos.getX(),
-                                            pos.getY(),
-                                            (unsigned int) pos.getWidth(),
-                                            (unsigned int) pos.getHeight());
                 symbols->xMapRaised (display, pluginWindow);
                 symbols->xFlush (display);
             }
@@ -431,6 +409,8 @@ private:
 
        #if JUCE_WINDOWS
         auto* handle = embeddedComponent.getHWND();
+       #elif JUCE_LINUX || JUCE_BSD
+        auto* handle = desktopComponent.getPeer()->getNativeHandle();
        #else
         auto* handle = getWindowHandle();
        #endif
@@ -479,7 +459,7 @@ private:
             if ((rw > 50 && rh > 50 && rw < 2000 && rh < 2000 && (! isWithin (w, rw, 2) || ! isWithin (h, rh, 2)))
                 || ((w == 0 && rw > 0) || (h == 0 && rh > 0)))
             {
-                // very dodgy logic to decide which size is right.
+                // very dodgy logic to decide which size is right
                 if (std::abs (rw - w) > 350 || std::abs (rh - h) > 350)
                 {
                     ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHWND };
@@ -604,7 +584,7 @@ private:
             resizeToFit();
     }
 
-    // hooks to get keyboard events from VST windows.
+    // hooks to get keyboard events from VST windows
     static LRESULT CALLBACK vstHookWndProc (HWND hW, UINT message, WPARAM wParam, LPARAM lParam)
     {
         for (int i = activeVSTWindows.size(); --i >= 0;)
@@ -670,18 +650,18 @@ private:
 
         void operator() (float platformScale) const
         {
-            MessageManager::callAsync ([ref = Component::SafePointer<VSTPluginWindow> (&window), platformScale]
+            MessageManager::callAsync ([ref = SafePointer (&window), platformScale]
             {
                 if (auto* r = ref.getComponent())
                 {
                     r->nativeScaleFactor = platformScale;
                     r->setContentScaleFactor();
 
-                   #if JUCE_WINDOWS
-                    r->resizeToFit();
-                    r->embeddedComponent.updateHWNDBounds();
-                   #endif
-                    r->componentMovedOrResized (true, true);
+                    Vst2::ERect* rect = nullptr;
+                    r->dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
+
+                    if (rect != nullptr)
+                        r->updateSizeFromEditor (rect->right - rect->left, rect->bottom - rect->top);
                 }
             });
         }
@@ -722,8 +702,36 @@ private:
      void* originalWndProc = {};
      int sizeCheckCount = 0;
     #elif JUCE_LINUX || JUCE_BSD
+     // This is to provide a consistent X11 window handle with the same lifetime as the
+     // VSTPluginWindow. Using the VSTPluginWindow's peer directly would mean that the X11 window
+     // handle could change if the same VST window instance is repeatedly added/removed from the
+     // desktop.
+     // We then XEmbed this stable window into the VSTPluginFormat, and also use the stable window
+     // as the parent for the client VST window.
+     // We're not XEmbedding the client VST window directly, because it's not clear that VST
+     // hosts & clients expect to use the XEmbed protocol.
+     class DesktopComponent : public Component
+     {
+     public:
+         DesktopComponent()
+         {
+             setOpaque (true);
+             addToDesktop (0);
+         }
+
+         void paint (Graphics& g) override
+         {
+             g.fillAll (Colours::black);
+         }
+     };
+
      ::Display* display = XWindowSystem::getInstance()->getDisplay();
      Window pluginWindow = 0;
+     DesktopComponent desktopComponent;
+     XEmbedComponent xembedComponent { XEmbedComponentOptions{}.withClientWindow (reinterpret_cast<Window> (desktopComponent.getPeer()->getNativeHandle()))
+                                                               .withWantsKeyboardFocus (true)
+                                                               .withAllowForeignWidgetToResizeComponent (false)
+                                                               .withIgnoreXembedMapped() };
     #endif
    #else
      static constexpr auto nativeScaleFactor = 1.0f;
@@ -804,7 +812,6 @@ private:
         updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true)
                                                                   .withParameterInfoChanged (true));
     }
-
 };
 
 //==============================================================================

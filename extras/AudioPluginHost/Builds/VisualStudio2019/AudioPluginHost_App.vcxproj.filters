@@ -8,6 +8,12 @@
     <Filter Include="AudioPluginHost\Source\UI">
       <UniqueIdentifier>{8C61EB30-11E6-7029-4CC8-56C52EB1F1C3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AudioPluginHost\Source\AppIcon.icon\Assets">
+      <UniqueIdentifier>{94E5947C-3A5C-01B7-75B0-CA217E2F5AF8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AudioPluginHost\Source\AppIcon.icon">
+      <UniqueIdentifier>{DFD1926B-9FC8-19E6-7DE8-9B50A73FCEA8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="AudioPluginHost\Source">
       <UniqueIdentifier>{57E59C1B-8971-243F-9A1A-8EABFD456232}</UniqueIdentifier>
     </Filter>
@@ -769,6 +775,12 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMP_test.cpp">
       <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPDeviceInfo.cpp">
+      <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPFactory.cpp">
+      <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPIterator.cpp">
       <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
     </ClCompile>
@@ -903,6 +915,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_SampleRateHelpers.cpp">
       <Filter>JUCE Modules\juce_audio_devices\audio_io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPBlock.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPEndpointId.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPEndpoints.cpp">
       <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
@@ -3634,6 +3652,18 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.mm">
       <Filter>JUCE Modules\juce_gui_basics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_2.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_3.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_4.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_5.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeDocument.cpp">
       <Filter>JUCE Modules\juce_gui_extra\code_editor</Filter>
     </ClCompile>
@@ -3839,6 +3869,18 @@
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_2.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_3.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_4.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_5.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp">
@@ -8117,6 +8159,15 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\AppIcon.icon\Assets\juceicon.svg">
+      <Filter>AudioPluginHost\Source\AppIcon.icon\Assets</Filter>
+    </None>
+    <None Include="..\..\Source\AppIcon.icon\Assets\pluginhostfg.svg">
+      <Filter>AudioPluginHost\Source\AppIcon.icon\Assets</Filter>
+    </None>
+    <None Include="..\..\Source\AppIcon.icon\icon.json">
+      <Filter>AudioPluginHost\Source\AppIcon.icon</Filter>
+    </None>
     <None Include="..\..\Source\JUCEAppIcon.png">
       <Filter>AudioPluginHost\Source</Filter>
     </None>

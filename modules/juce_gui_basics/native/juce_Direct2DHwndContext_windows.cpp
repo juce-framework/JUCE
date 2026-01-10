@@ -297,101 +297,13 @@ private:
 };
 
 //==============================================================================
-struct Direct2DHwndContext::HwndPimpl : public Direct2DGraphicsContext::Pimpl
+struct Direct2DHwndContext::HwndPimpl : public Pimpl
 {
 private:
-    struct SwapChainThread
-    {
-        SwapChainThread (Direct2DHwndContext::HwndPimpl& ownerIn, HANDLE swapHandle)
-            : owner (ownerIn),
-              swapChainEventHandle (swapHandle)
-        {
-            SetWindowSubclass (owner.hwnd, subclassWindowProc, (UINT_PTR) this, (DWORD_PTR) this);
-        }
-
-        ~SwapChainThread()
-        {
-            RemoveWindowSubclass (owner.hwnd, subclassWindowProc, (UINT_PTR) this);
-            SetEvent (quitEvent.getHandle());
-            thread.join();
-        }
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SwapChainThread)
-
-    private:
-        Direct2DHwndContext::HwndPimpl& owner;
-        HANDLE swapChainEventHandle = nullptr;
-
-        WindowsScopedEvent quitEvent;
-        std::thread thread { [&] { threadLoop(); } };
-
-        static constexpr uint32_t swapchainReadyMessageID = WM_USER + 124;
-
-        bool handleWindowProcMessage (UINT message)
-        {
-            if (message == swapchainReadyMessageID)
-            {
-                owner.onSwapchainEvent();
-                return true;
-            }
-
-            return false;
-        }
-
-        static LRESULT CALLBACK subclassWindowProc (HWND hwnd,
-                                                    UINT message,
-                                                    WPARAM wParam,
-                                                    LPARAM lParam,
-                                                    UINT_PTR,
-                                                    DWORD_PTR referenceData)
-        {
-            auto* that = reinterpret_cast<SwapChainThread*> (referenceData);
-
-            if (that != nullptr && that->handleWindowProcMessage (message))
-                return 0;
-
-            return DefSubclassProc (hwnd, message, wParam, lParam);
-        }
-
-        void threadLoop()
-        {
-            Thread::setCurrentThreadName ("JUCE D2D swap chain thread");
-
-            for (;;)
-            {
-                const HANDLE handles[] { swapChainEventHandle, quitEvent.getHandle() };
-
-                const auto waitResult = WaitForMultipleObjects ((DWORD) std::size (handles),
-                                                                handles,
-                                                                FALSE,
-                                                                INFINITE);
-
-                switch (waitResult)
-                {
-                    case WAIT_OBJECT_0:
-                    {
-                        PostMessage (owner.hwnd, swapchainReadyMessageID, 0, 0);
-                        break;
-                    }
-
-                    case WAIT_OBJECT_0 + 1:
-                        return;
-
-                    case WAIT_FAILED:
-                    default:
-                        jassertfalse;
-                        break;
-                }
-            }
-        }
-    };
-
     HWND hwnd;
     SwapChain swap;
     ComSmartPtr<ID2D1DeviceContext1> deviceContext;
-    std::unique_ptr<SwapChainThread> swapChainThread;
     std::optional<CompositionTree> compositionTree;
-    SwapchainDelegate& delegate;
 
     // Areas that must be repainted during the next paint call, between startFrame/endFrame
     RectangleList<int> deferredRepaints;
@@ -401,16 +313,6 @@ private:
 
     std::vector<RECT> dirtyRectangles;
     int64 lastFinishFrameTicks = 0;
-
-    // Set to true after the swap event is signalled, indicating that we're allowed to try presenting
-    // a new frame.
-    bool swapEventReceived = false;
-
-    void onSwapchainEvent()
-    {
-        swapEventReceived = true;
-        delegate.onSwapchainEvent();
-    }
 
     bool prepare() override
     {
@@ -437,10 +339,6 @@ private:
                 return false;
         }
 
-        if (swapChainThread == nullptr)
-            if (auto* e = swap.getEvent())
-                swapChainThread = std::make_unique<SwapChainThread> (*this, e->getHandle());
-
         if (! compositionTree.has_value())
             compositionTree = CompositionTree::create (adapter->dxgiDevice, hwnd, swap.getChain());
 
@@ -453,7 +351,6 @@ private:
     void teardown() override
     {
         compositionTree.reset();
-        swapChainThread = nullptr;
         deviceContext = nullptr;
         swap = {};
 
@@ -476,7 +373,6 @@ private:
         bool ready = Pimpl::checkPaintReady();
         ready &= swap.canPaint();
         ready &= compositionTree.has_value();
-        ready &= swapEventReceived;
 
         return ready;
     }
@@ -484,10 +380,9 @@ private:
     JUCE_DECLARE_WEAK_REFERENCEABLE (HwndPimpl)
 
 public:
-    HwndPimpl (Direct2DHwndContext& ownerIn, HWND hwndIn, SwapchainDelegate& swapDelegate)
+    HwndPimpl (Direct2DHwndContext& ownerIn, HWND hwndIn)
         : Pimpl (ownerIn),
-          hwnd (hwndIn),
-          delegate (swapDelegate)
+          hwnd (hwndIn)
     {
     }
 
@@ -589,7 +484,7 @@ public:
     {
         JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (getMetrics(), present1Duration);
 
-        if (swap.getBuffer() == nullptr || dirtyRegionsInBackBuffer.isEmpty() || ! swapEventReceived)
+        if (swap.getBuffer() == nullptr || dirtyRegionsInBackBuffer.isEmpty())
             return;
 
         auto const swapChainSize = swap.getSize();
@@ -621,10 +516,6 @@ public:
 
         if (FAILED (hr))
             return;
-
-        // We managed to present a frame, so we should avoid rendering anything or calling
-        // present again until that frame has been shown on-screen.
-        swapEventReceived = false;
 
         // There's nothing waiting to be displayed in the backbuffer.
         dirtyRegionsInBackBuffer.clear();
@@ -687,7 +578,7 @@ public:
 };
 
 //==============================================================================
-Direct2DHwndContext::Direct2DHwndContext (HWND windowHandle, SwapchainDelegate& swapDelegate)
+Direct2DHwndContext::Direct2DHwndContext (HWND windowHandle)
 {
    #if JUCE_DIRECT2D_METRICS
     metrics = new Direct2DMetrics { Direct2DMetricsHub::getInstance()->lock,
@@ -696,7 +587,7 @@ Direct2DHwndContext::Direct2DHwndContext (HWND windowHandle, SwapchainDelegate& 
     Direct2DMetricsHub::getInstance()->add (metrics);
    #endif
 
-    pimpl = std::make_unique<HwndPimpl> (*this, windowHandle, swapDelegate);
+    pimpl = std::make_unique<HwndPimpl> (*this, windowHandle);
 }
 
 Direct2DHwndContext::~Direct2DHwndContext()

@@ -1178,10 +1178,10 @@ private:
             return index;
         }
 
-        // Handle an input from a single source..
+        // Handle an input from a single source.
         if (sources.size() == 1)
         {
-            // channel with a straightforward single input..
+            // channel with a straightforward single input
             auto src = *sources.begin();
 
             int bufIndex = getBufferContaining (src);
@@ -1217,7 +1217,7 @@ private:
             return bufIndex;
         }
 
-        // Handle a mix of several outputs coming into this input..
+        // Handle a mix of several outputs coming into this input.
         int reusableInputIndex = -1;
         int bufIndex = -1;
 
@@ -1229,7 +1229,7 @@ private:
 
                 if (sourceBufIndex >= 0 && ! isBufferNeededLater (reversed, ourRenderingIndex, inputChan, src))
                 {
-                    // we've found one of our input chans that can be re-used..
+                    // we've found one of our input chans that can be re-used
                     reusableInputIndex = i;
                     bufIndex = sourceBufIndex;
 
@@ -1247,7 +1247,7 @@ private:
 
         if (reusableInputIndex < 0)
         {
-            // can't re-use any of our input chans, so get a new one and copy everything into it..
+            // can't re-use any of our input chans, so get a new one and copy everything into it
             bufIndex = getFreeBuffer (audioBuffers);
             jassert (bufIndex != 0);
 
@@ -1315,7 +1315,7 @@ private:
         auto& processor = *node.getProcessor();
         auto sources = c.getSourcesForDestination ({ node.nodeID, midiChannelIndex });
 
-        // No midi inputs..
+        // no midi inputs
         if (sources.empty())
         {
             auto midiBufferToUse = getFreeBuffer (midiBuffers); // need to pick a buffer even if the processor doesn't use midi
@@ -1326,7 +1326,7 @@ private:
             return midiBufferToUse;
         }
 
-        // One midi input..
+        // one midi input
         if (sources.size() == 1)
         {
             auto src = *sources.begin();
@@ -1337,7 +1337,7 @@ private:
                 if (isBufferNeededLater (reversed, ourRenderingIndex, midiChannelIndex, src))
                 {
                     // can't mess up this channel because it's needed later by another node, so we
-                    // need to use a copy of it..
+                    // need to use a copy of it
                     auto newFreeBuffer = getFreeBuffer (midiBuffers);
                     sequence.addCopyMidiBufferOp (midiBufferToUse, newFreeBuffer);
                     midiBufferToUse = newFreeBuffer;
@@ -1345,14 +1345,14 @@ private:
             }
             else
             {
-                // probably a feedback loop, so just use an empty one..
+                // probably a feedback loop, so just use an empty one
                 midiBufferToUse = getFreeBuffer (midiBuffers); // need to pick a buffer even if the processor doesn't use midi
             }
 
             return midiBufferToUse;
         }
 
-        // Multiple midi inputs..
+        // multiple midi inputs
         int midiBufferToUse = -1;
         int reusableInputIndex = -1;
 
@@ -1365,7 +1365,7 @@ private:
                 if (sourceBufIndex >= 0
                     && ! isBufferNeededLater (reversed, ourRenderingIndex, midiChannelIndex, src))
                 {
-                    // we've found one of our input buffers that can be re-used..
+                    // we've found one of our input buffers that can be re-used
                     reusableInputIndex = i;
                     midiBufferToUse = sourceBufIndex;
                     break;
@@ -1377,7 +1377,7 @@ private:
 
         if (reusableInputIndex < 0)
         {
-            // can't re-use any of our input buffers, so get a new one and copy everything into it..
+            // can't re-use any of our input buffers, so get a new one and copy everything into it
             midiBufferToUse = getFreeBuffer (midiBuffers);
             jassert (midiBufferToUse >= 0);
 

@@ -334,6 +334,7 @@ public:
     virtual String getToolsVersion() const = 0;
     virtual String getDefaultToolset() const = 0;
     virtual String getDefaultWindowsTargetPlatformVersion() const = 0;
+    virtual void getSupportedArchitectures (std::vector<Architecture>&) const = 0;
 
     //==============================================================================
     String getIPPLibrary() const                      { return IPPLibraryValue.get(); }
@@ -623,9 +624,12 @@ public:
             if (project.isAudioPluginProject())
                 addVisualStudioPluginInstallPathProperties (props);
 
-            const auto architectureList = exporter.getExporterIdentifier() == Identifier { "VS2022" }
-                                        ? std::vector<Architecture> { Architecture::win32, Architecture::win64, Architecture::arm64, Architecture::arm64ec }
-                                        : std::vector<Architecture> { Architecture::win32, Architecture::win64, Architecture::arm64 };
+            const auto architectureList = std::invoke ([&]
+            {
+                std::vector<Architecture> result;
+                static_cast<const MSVCProjectExporterBase&> (exporter).getSupportedArchitectures (result);
+                return result;
+            });
 
             Array<String> architectureListAsStrings;
             Array<var> architectureListAsVars;
@@ -2799,6 +2803,11 @@ public:
     String getDefaultToolset() const override                        { return defaultToolset; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
 
+    void getSupportedArchitectures (std::vector<Architecture>& result) const override
+    {
+        result.insert (result.end(), { Architecture::win32, Architecture::win64, Architecture::arm64 });
+    }
+
     static MSVCProjectExporterVC2019* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
         if (settingsToUse.hasType (getValueTreeTypeName()))
@@ -2844,6 +2853,11 @@ public:
     String getDefaultToolset() const override                        { return defaultToolset; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
 
+    void getSupportedArchitectures (std::vector<Architecture>& result) const override
+    {
+        result.insert (result.end(), { Architecture::win32, Architecture::win64, Architecture::arm64, Architecture::arm64ec });
+    }
+
     static MSVCProjectExporterVC2022* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
         if (settingsToUse.hasType (getValueTreeTypeName()))
@@ -2888,6 +2902,11 @@ public:
     String getToolsVersion() const override                          { return "18.0"; }
     String getDefaultToolset() const override                        { return defaultToolset; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
+
+    void getSupportedArchitectures (std::vector<Architecture>& result) const override
+    {
+        result.insert (result.end(), { Architecture::win32, Architecture::win64, Architecture::arm64, Architecture::arm64ec });
+    }
 
     static MSVCProjectExporterVC2026* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {

@@ -188,7 +188,7 @@ public:
         {
             --numOpenedHandles;
 
-            // numOpenedHandles may get negative if we don't receive open handle event.
+            // numOpenedHandles may get negative if we don't receive open handle event
             if (fileWasRead && numOpenedHandles <= 0)
             {
                 MessageManager::callAsync ([fo = fileObserver, oc = onClose]

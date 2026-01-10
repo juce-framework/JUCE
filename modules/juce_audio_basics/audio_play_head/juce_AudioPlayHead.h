@@ -123,11 +123,7 @@ public:
         [[nodiscard]] FrameRate withPullDown (bool x = true) const    { return with (&FrameRate::pulldown, x); }
 
         /** Returns true if this instance is equal to other. */
-        bool operator== (const FrameRate& other) const
-        {
-            const auto tie = [] (const FrameRate& x) { return std::tie (x.base, x.drop, x.pulldown); };
-            return tie (*this) == tie (other);
-        }
+        bool operator== (const FrameRate& other) const;
 
         /** Returns true if this instance is not equal to other. */
         bool operator!= (const FrameRate& other) const { return ! (*this == other); }
@@ -176,11 +172,7 @@ public:
         /** Time signature denominator, e.g. the 4 of a 3/4 time sig */
         int denominator = 4;
 
-        bool operator== (const TimeSignature& other) const
-        {
-            const auto tie = [] (auto& x) { return std::tie (x.numerator, x.denominator); };
-            return tie (*this) == tie (other);
-        }
+        bool operator== (const TimeSignature& other) const;
 
         bool operator!= (const TimeSignature& other) const
         {
@@ -200,11 +192,7 @@ public:
         /** The current cycle end position in units of quarter-notes. */
         double ppqEnd = 0;
 
-        bool operator== (const LoopPoints& other) const
-        {
-            const auto tie = [] (auto& x) { return std::tie (x.ppqStart, x.ppqEnd); };
-            return tie (*this) == tie (other);
-        }
+        bool operator== (const LoopPoints& other) const;
 
         bool operator!= (const LoopPoints& other) const
         {
@@ -279,27 +267,7 @@ public:
         bool isLooping = false;
 
         //==============================================================================
-        bool operator== (const CurrentPositionInfo& other) const noexcept
-        {
-            const auto tie = [] (const CurrentPositionInfo& i)
-            {
-                return std::tie (i.timeInSamples,
-                                 i.ppqPosition,
-                                 i.editOriginTime,
-                                 i.ppqPositionOfLastBarStart,
-                                 i.frameRate,
-                                 i.isPlaying,
-                                 i.isRecording,
-                                 i.bpm,
-                                 i.timeSigNumerator,
-                                 i.timeSigDenominator,
-                                 i.ppqLoopStart,
-                                 i.ppqLoopEnd,
-                                 i.isLooping);
-            };
-
-            return tie (*this) == tie (other);
-        }
+        bool operator== (const CurrentPositionInfo& other) const noexcept;
 
         bool operator!= (const CurrentPositionInfo& other) const noexcept
         {
@@ -425,28 +393,7 @@ public:
         /** @see getIsLooping() */
         void setIsLooping (bool isLoopingIn)                            {        setFlag (flagIsLooping, isLoopingIn); }
 
-        bool operator== (const PositionInfo& other) const noexcept
-        {
-            const auto tie = [] (const PositionInfo& i)
-            {
-                return std::make_tuple (i.getTimeInSamples(),
-                                        i.getTimeInSeconds(),
-                                        i.getPpqPosition(),
-                                        i.getEditOriginTime(),
-                                        i.getPpqPositionOfLastBarStart(),
-                                        i.getFrameRate(),
-                                        i.getBarCount(),
-                                        i.getTimeSignature(),
-                                        i.getBpm(),
-                                        i.getLoopPoints(),
-                                        i.getHostTimeNs(),
-                                        i.getIsPlaying(),
-                                        i.getIsRecording(),
-                                        i.getIsLooping());
-            };
-
-            return tie (*this) == tie (other);
-        }
+        bool operator== (const PositionInfo& other) const noexcept;
 
         bool operator!= (const PositionInfo& other) const noexcept
         {

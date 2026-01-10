@@ -494,7 +494,7 @@ void CodeDocument::Position::moveBy (int characterDelta)
     {
         setPosition (getPosition());
 
-        // If moving right, make sure we don't get stuck between the \r and \n characters..
+        // If moving right, make sure we don't get stuck between the \r and \n characters.
         if (line < owner->lines.size())
         {
             auto& l = *owner->lines.getUnchecked (line);
@@ -711,7 +711,7 @@ bool CodeDocument::writeToStream (OutputStream& stream)
 {
     for (auto* l : lines)
     {
-        auto temp = l->line; // use a copy to avoid bloating the memory footprint of the stored string.
+        auto temp = l->line; // use a copy to avoid bloating the memory footprint of the stored string
         const char* utf8 = temp.toUTF8();
 
         if (! stream.write (utf8, strlen (utf8)))
@@ -869,7 +869,7 @@ void CodeDocument::checkLastLineStatus()
             && lines.getLast()->lineLength == 0
             && (lines.size() == 1 || ! lines.getUnchecked (lines.size() - 2)->endsWithLineBreak()))
     {
-        // remove any empty lines at the end if the preceding line doesn't end in a newline.
+        // remove any empty lines at the end if the preceding line doesn't end in a newline
         lines.removeLast();
     }
 
@@ -877,7 +877,7 @@ void CodeDocument::checkLastLineStatus()
 
     if (lastLine != nullptr && lastLine->endsWithLineBreak())
     {
-        // check that there's an empty line at the end if the preceding one ends in a newline..
+        // check that there's an empty line at the end if the preceding one ends in a newline
         lines.add (new CodeDocumentLine (StringRef(), StringRef(), 0, 0,
                                          lastLine->lineStartInFile + lastLine->lineLength));
     }

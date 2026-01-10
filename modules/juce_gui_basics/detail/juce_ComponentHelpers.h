@@ -32,6 +32,8 @@
   ==============================================================================
 */
 
+#include "juce_ScalingHelpers.h"
+
 namespace juce::detail
 {
 
@@ -225,12 +227,11 @@ struct ComponentHelpers
                     function (c, ms, SH::screenPosToLocalPos (*c, ms.getScreenPosition()), Time::getCurrentTime());
     }
 
-    static bool isVisible (const Component& component, bool allowTransparency = true)
+    static bool isVisibleWithNonZeroArea (const Component& component)
     {
         return component.isVisible()
             && component.getWidth() > 0
-            && component.getHeight() > 0
-            && component.componentTransparency < (allowTransparency ? 255 : 1);
+            && component.getHeight() > 0;
     }
 
     class ModalComponentManagerChangeNotifier

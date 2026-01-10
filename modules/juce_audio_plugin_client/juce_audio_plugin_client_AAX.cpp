@@ -931,7 +931,7 @@ namespace AAXClasses
                     auto numObjects = dataSize / sizeof (PluginInstanceInfo);
                     auto* objects = static_cast<PluginInstanceInfo*> (data);
 
-                    jassert (numObjects == 1); // not sure how to handle more than one..
+                    jassert (numObjects == 1); // not sure how to handle more than one
 
                     for (size_t i = 0; i < numObjects; ++i)
                         new (objects + i) PluginInstanceInfo (const_cast<JuceAAX_Processor&> (*this));

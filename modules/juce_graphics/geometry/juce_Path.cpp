@@ -605,7 +605,7 @@ void Path::addArrow (Line<float> line, float lineThickness,
 void Path::addPolygon (Point<float> centre, int numberOfSides,
                        float radius, float startAngle)
 {
-    jassert (numberOfSides > 1); // this would be silly.
+    jassert (numberOfSides > 1); // this would be silly
 
     if (numberOfSides > 1)
     {
@@ -629,7 +629,7 @@ void Path::addPolygon (Point<float> centre, int numberOfSides,
 void Path::addStar (Point<float> centre, int numberOfPoints, float innerRadius,
                     float outerRadius, float startAngle)
 {
-    jassert (numberOfPoints > 1); // this would be silly.
+    jassert (numberOfPoints > 1); // this would be silly
 
     if (numberOfPoints > 1)
     {

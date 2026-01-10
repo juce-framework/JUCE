@@ -510,16 +510,6 @@ String AudioDeviceManager::initialiseFromXML (const XmlElement& xml,
             currentDeviceType = firstType->getTypeName();
     }
 
-    const auto deviceNameMissing = (numInputChansNeeded  > 0 && setup.inputDeviceName .isEmpty())
-                                || (numOutputChansNeeded > 0 && setup.outputDeviceName.isEmpty());
-
-    // If there's no device name, then normally this would prevent a device from opening.
-    // If failing to open a device would conflict with the number of requested channels, then we
-    // pre-emptively treat this as a failure and fall back to using devices that're able to provide
-    // the requested channel counts.
-    if (selectDefaultDeviceOnFailure && deviceNameMissing)
-        insertDefaultDeviceNames (setup);
-
     setup.bufferSize = xml.getIntAttribute ("audioDeviceBufferSize", setup.bufferSize);
     setup.sampleRate = xml.getDoubleAttribute ("audioDeviceRate", setup.sampleRate);
 
@@ -1360,7 +1350,7 @@ double AudioDeviceManager::LevelMeter::getCurrentLevel() const noexcept
 
 void AudioDeviceManager::playTestSound()
 {
-    { // cunningly nested to swap, unlock and delete in that order.
+    { // cunningly nested to swap, unlock and delete in that order
         std::unique_ptr<AudioBuffer<float>> oldSound;
 
         {

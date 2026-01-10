@@ -1717,7 +1717,7 @@ public:
         lastMousePos = Desktop::getInstance().getDisplays().physicalToLogical (sysPos);
         auto pos = globalToLocal (lastMousePos);
 
-        // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+        // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before
         handleMouseEvent (MouseInputSource::InputSourceType::touch,
                           pos,
                           ModifierKeys::currentModifiers.withoutMouseButtons(),

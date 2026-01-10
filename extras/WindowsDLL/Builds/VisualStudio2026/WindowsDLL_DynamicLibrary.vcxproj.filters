@@ -721,6 +721,12 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMP_test.cpp">
       <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPDeviceInfo.cpp">
+      <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPFactory.cpp">
+      <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPIterator.cpp">
       <Filter>JUCE Modules\juce_audio_basics\midi\ump</Filter>
     </ClCompile>
@@ -855,6 +861,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_SampleRateHelpers.cpp">
       <Filter>JUCE Modules\juce_audio_devices\audio_io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPBlock.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPEndpointId.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPEndpoints.cpp">
       <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
@@ -1375,322 +1387,322 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.mm">
       <Filter>JUCE Modules\juce_audio_processors</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format\juce_AudioPluginFormat.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format\juce_AudioPluginFormat.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format\juce_AudioPluginFormatManager.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format\juce_AudioPluginFormatManager.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\zix\tree.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\zix\tree.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\zix</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\collections.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\collections.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\filesystem.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\filesystem.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\instance.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\instance.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\lib.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\lib.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\node.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\node.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\plugin.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\plugin.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\pluginclass.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\pluginclass.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\port.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\port.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\query.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\query.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\scalepoint.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\scalepoint.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\state.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\state.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\ui.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\ui.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\util.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\util.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\world.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\world.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\atom-test-utils.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\atom-test-utils.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\atom-test.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\atom-test.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\forge-overflow-test.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\forge-overflow-test.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\base64.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\base64.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\byte_source.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\byte_source.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\env.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\env.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\n3.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\n3.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\node.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\node.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\reader.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\reader.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\serdi.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\serdi.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\string.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\string.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\system.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\system.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\uri.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\uri.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\writer.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\writer.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\btree.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\btree.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\digest.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\digest.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\hash.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\hash.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sord.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sord.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sord_test.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sord_test.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sord_validate.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sord_validate.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sordi.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sordi.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sordmm_test.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sordmm_test.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\syntax.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\syntax.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sratom\src\sratom.c">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sratom\src\sratom.c">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sratom\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\baseiids.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\baseiids.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fbuffer.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fbuffer.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fdebug.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fdebug.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fobject.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fobject.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fstreamer.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fstreamer.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fstring.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fstring.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\updatehandler.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\updatehandler.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\thread\source\flock.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\thread\source\flock.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\thread\source</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\conststringtable.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\conststringtable.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\coreiids.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\coreiids.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\funknown.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\funknown.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ustring.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ustring.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\commonstringconvert.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\commonstringconvert.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\memorystream.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\memorystream.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\pluginview.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\pluginview.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\readfile.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\readfile.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\hostclasses.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\hostclasses.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\module.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\module.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\module_linux.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\module_linux.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\module_mac.mm">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\module_mac.mm">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\module_win32.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\module_win32.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\pluginterfacesupport.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\pluginterfacesupport.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\moduleinfocreator.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\moduleinfocreator.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\moduleinfoparser.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\moduleinfoparser.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\stringconvert.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\stringconvert.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\vst2persistence.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\vst2persistence.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstbus.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstbus.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstcomponent.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstcomponent.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstcomponentbase.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstcomponentbase.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vsteditcontroller.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vsteditcontroller.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstinitiids.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstinitiids.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstparameters.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstparameters.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstpresetfile.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstpresetfile.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_ARAHosting.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_ARAHosting.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_AudioUnitPluginFormatHeadless.mm">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_AudioUnitPluginFormatHeadless.mm">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_LADSPAPluginFormatHeadless.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_LADSPAPluginFormatHeadless.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_LV2PluginFormatHeadless.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_LV2PluginFormatHeadless.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_LV2SupportLibs.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_LV2SupportLibs.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_VST3PluginFormatHeadless.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_VST3PluginFormatHeadless.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_VSTPluginFormatHeadless.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_VSTPluginFormatHeadless.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioPluginInstance.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioPluginInstance.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioProcessor.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioProcessor.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioProcessorGraph.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioProcessorGraph.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioProcessorListener.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioProcessorListener.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioProcessorParameter.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioProcessorParameter.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioProcessorParameterGroup.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioProcessorParameterGroup.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_PluginDescription.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_PluginDescription.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_ARA_utils.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_ARA_utils.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_ARADocumentController.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_ARADocumentController.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_ARAModelObjects.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_ARAModelObjects.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_ARAPlugInInstanceRoles.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_ARAPlugInInstanceRoles.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_AudioProcessor_ARAExtensions.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_AudioProcessor_ARAExtensions.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AAXClientExtensions.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AAXClientExtensions.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AudioParameterBool.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AudioParameterBool.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AudioParameterChoice.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AudioParameterChoice.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AudioParameterFloat.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AudioParameterFloat.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AudioParameterInt.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AudioParameterInt.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AudioProcessorParameterWithID.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AudioProcessorParameterWithID.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_RangedAudioParameter.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_RangedAudioParameter.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_VST2ClientExtensions.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_VST2ClientExtensions.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_VST3ClientExtensions.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_VST3ClientExtensions.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\juce_audio_processors_headless.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\juce_audio_processors_headless.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\juce_audio_processors_headless.mm">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\juce_audio_processors_headless.mm">
       <Filter>JUCE Modules\juce_audio_processors_headless</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\juce_audio_processors_headless_ara.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\juce_audio_processors_headless_ara.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless</Filter>
     </ClCompile>
-    <ClCompile Include="C:\JUCE\modules\juce_audio_processors_headless\juce_audio_processors_headless_lv2_libs.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors_headless\juce_audio_processors_headless_lv2_libs.cpp">
       <Filter>JUCE Modules\juce_audio_processors_headless</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDReader.cpp">
@@ -3478,6 +3490,18 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.mm">
       <Filter>JUCE Modules\juce_gui_basics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_2.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_3.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_4.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics_5.cpp">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeDocument.cpp">
       <Filter>JUCE Modules\juce_gui_extra\code_editor</Filter>
     </ClCompile>
@@ -3689,6 +3713,18 @@
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_2.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_3.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_4.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics_5.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp">
@@ -4548,619 +4584,619 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h">
       <Filter>JUCE Modules\juce_audio_processors</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format\juce_AudioPluginFormat.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format\juce_AudioPluginFormat.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format\juce_AudioPluginFormatManager.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format\juce_AudioPluginFormatManager.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format\juce_PluginFormatDefs.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format\juce_PluginFormatDefs.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\lilv\lilv.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\lilv\lilv.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\lilv</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\lilv\lilvmm.hpp">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\lilv\lilvmm.hpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\lilv</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\zix\common.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\zix\common.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\zix</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\zix\tree.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\zix\tree.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\zix</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\filesystem.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\filesystem.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\lilv_internal.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src\lilv_internal.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\atom.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\atom.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\forge.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\forge.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\util.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom\util.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\atom</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\buf-size\buf-size.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\buf-size\buf-size.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\buf-size</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\core\attributes.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\core\attributes.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\core\lv2.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\core\lv2.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\core\lv2_util.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\core\lv2_util.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\data-access\data-access.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\data-access\data-access.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\data-access</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\dynmanifest\dynmanifest.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\dynmanifest\dynmanifest.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\dynmanifest</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\event\event-helpers.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\event\event-helpers.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\event</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\event\event.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\event\event.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\event</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\instance-access\instance-access.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\instance-access\instance-access.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\instance-access</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\log\log.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\log\log.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\log</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\log\logger.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\log\logger.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\log</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\midi\midi.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\midi\midi.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\midi</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\morph\morph.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\morph\morph.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\morph</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\options\options.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\options\options.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\options</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\parameters\parameters.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\parameters\parameters.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\parameters</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\patch\patch.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\patch\patch.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\patch</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\port-groups\port-groups.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\port-groups\port-groups.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\port-groups</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\port-props\port-props.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\port-props\port-props.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\port-props</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\presets\presets.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\presets\presets.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\presets</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\resize-port\resize-port.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\resize-port\resize-port.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\resize-port</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\state\state.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\state\state.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\state</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\time\time.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\time\time.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\time</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\ui\ui.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\ui\ui.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\ui</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\units\units.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\units\units.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\units</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\uri-map\uri-map.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\uri-map\uri-map.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\uri-map</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\urid\urid.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\urid\urid.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\urid</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\worker\worker.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\worker\worker.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\lv2\worker</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\serd\serd.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\serd\serd.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\serd</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\attributes.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\attributes.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\base64.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\base64.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\byte_sink.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\byte_sink.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\byte_source.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\byte_source.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\node.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\node.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\reader.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\reader.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\serd_config.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\serd_config.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\serd_internal.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\serd_internal.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\stack.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\stack.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\string_utils.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\string_utils.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\system.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\system.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\uri_utils.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src\uri_utils.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\sord\sord.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\sord\sord.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\sord</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\sord\sordmm.hpp">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\sord\sordmm.hpp">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\sord</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\btree.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\btree.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\common.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\common.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\digest.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\digest.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\hash.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix\hash.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\zix</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sord_config.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sord_config.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sord_internal.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src\sord_internal.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sratom\sratom\sratom.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sratom\sratom\sratom.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sratom\sratom</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\juce_lv2_config.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\juce_lv2_config.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv_config.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv_config.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd_config.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd_config.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord_config.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord_config.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\pslextensions\ipslcontextinfo.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\pslextensions\ipslcontextinfo.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\pslextensions</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\pslextensions\ipsleditcontroller.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\pslextensions\ipsleditcontroller.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\pslextensions</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\pslextensions\ipslgainreduction.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\pslextensions\ipslgainreduction.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\pslextensions</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\pslextensions\ipslhostcommands.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\pslextensions\ipslhostcommands.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\pslextensions</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\pslextensions\ipslviewembedding.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\pslextensions\ipslviewembedding.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\pslextensions</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\pslextensions\ipslviewscaling.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\pslextensions\ipslviewscaling.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\pslextensions</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\pslextensions\pslauextensions.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\pslextensions\pslauextensions.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\pslextensions</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\pslextensions\pslvst2extensions.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\pslextensions\pslvst2extensions.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\pslextensions</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\classfactoryhelpers.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\classfactoryhelpers.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fbuffer.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fbuffer.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fcommandline.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fcommandline.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fdebug.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fdebug.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fobject.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fobject.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fstreamer.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fstreamer.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fstring.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\fstring.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\updatehandler.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source\updatehandler.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\source</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\thread\include\flock.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\thread\include\flock.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base\thread\include</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\conststringtable.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\conststringtable.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\falignpop.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\falignpop.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\falignpush.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\falignpush.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\fplatform.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\fplatform.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\fstrdefs.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\fstrdefs.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ftypes.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ftypes.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\funknown.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\funknown.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\funknownimpl.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\funknownimpl.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\futils.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\futils.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\fvariant.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\fvariant.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ibstream.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ibstream.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\icloneable.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\icloneable.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ipersistent.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ipersistent.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ipluginbase.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ipluginbase.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\iplugincompatibility.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\iplugincompatibility.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\istringresult.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\istringresult.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\iupdatehandler.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\iupdatehandler.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\smartpointer.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\smartpointer.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\typesizecheck.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\typesizecheck.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ustring.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base\ustring.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\gui\iplugview.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\gui\iplugview.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\gui</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\gui\iplugviewcontentscalesupport.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\gui\iplugviewcontentscalesupport.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\gui</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstattributes.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstattributes.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstaudioprocessor.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstaudioprocessor.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstautomationstate.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstautomationstate.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstchannelcontextinfo.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstchannelcontextinfo.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstcomponent.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstcomponent.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstcontextmenu.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstcontextmenu.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstdataexchange.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstdataexchange.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivsteditcontroller.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivsteditcontroller.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstevents.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstevents.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivsthostapplication.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivsthostapplication.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstinterappaudio.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstinterappaudio.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmessage.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmessage.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmidicontrollers.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmidicontrollers.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmidilearn.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmidilearn.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmidimapping2.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstmidimapping2.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstnoteexpression.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstnoteexpression.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstparameterchanges.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstparameterchanges.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstparameterfunctionname.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstparameterfunctionname.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstphysicalui.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstphysicalui.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstpluginterfacesupport.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstpluginterfacesupport.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstplugview.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstplugview.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstprefetchablesupport.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstprefetchablesupport.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstprocesscontext.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstprocesscontext.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstremapparamid.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstremapparamid.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstrepresentation.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstrepresentation.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivsttestplugprovider.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivsttestplugprovider.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstunits.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\ivstunits.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\vstpshpack4.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\vstpshpack4.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\vstspeaker.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\vstspeaker.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\vsttypes.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst\vsttypes.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\commonstringconvert.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\commonstringconvert.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\memorystream.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\memorystream.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\pluginview.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\pluginview.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\readfile.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common\readfile.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\common</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\hostclasses.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\hostclasses.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\module.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\module.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\pluginterfacesupport.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting\pluginterfacesupport.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\hosting</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\json.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\json.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\jsoncxx.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\jsoncxx.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\moduleinfo.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\moduleinfo.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\moduleinfocreator.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\moduleinfocreator.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\moduleinfoparser.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\moduleinfoparser.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\optional.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\optional.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\stringconvert.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\stringconvert.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\uid.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\uid.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\vst2persistence.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility\vst2persistence.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstbus.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstbus.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstcomponent.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstcomponent.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstcomponentbase.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstcomponentbase.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vsteditcontroller.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vsteditcontroller.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstparameters.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstparameters.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstpresetfile.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\vstpresetfile.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_ARACommon.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_ARACommon.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_ARACommonInternal.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_ARACommonInternal.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_ARAHosting.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_ARAHosting.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_AU_Shared.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_AU_Shared.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_AudioUnitPluginFormatHeadless.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_AudioUnitPluginFormatHeadless.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_AudioUnitPluginFormatImpl.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_AudioUnitPluginFormatImpl.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_LADSPAPluginFormatHeadless.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_LADSPAPluginFormatHeadless.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_LegacyAudioParameter.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_LegacyAudioParameter.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_LV2Common.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_LV2Common.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_LV2PluginFormatHeadless.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_LV2PluginFormatHeadless.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_LV2PluginFormatImpl.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_LV2PluginFormatImpl.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_LV2Resources.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_LV2Resources.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_VST3Common.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_VST3Common.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_VST3Headers.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_VST3Headers.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_VST3PluginFormatHeadless.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_VST3PluginFormatHeadless.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_VST3PluginFormatImpl.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_VST3PluginFormatImpl.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_VST3Utilities.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_VST3Utilities.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_VSTCommon.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_VSTCommon.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_VSTMidiEventList.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_VSTMidiEventList.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_VSTPluginFormatHeadless.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_VSTPluginFormatHeadless.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\juce_VSTPluginFormatImpl.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\juce_VSTPluginFormatImpl.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioPluginInstance.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioPluginInstance.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioProcessor.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioProcessor.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioProcessorGraph.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioProcessorGraph.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioProcessorListener.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioProcessorListener.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioProcessorParameter.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioProcessorParameter.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_AudioProcessorParameterGroup.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_AudioProcessorParameterGroup.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_HostedAudioProcessorParameter.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_HostedAudioProcessorParameter.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\processors\juce_PluginDescription.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\processors\juce_PluginDescription.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\processors</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_ARA_utils.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_ARA_utils.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_ARADebug.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_ARADebug.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_ARADocumentController.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_ARADocumentController.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_ARADocumentControllerCommon.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_ARADocumentControllerCommon.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_ARAModelObjects.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_ARAModelObjects.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_ARAPlugInInstanceRoles.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_ARAPlugInInstanceRoles.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\ARA\juce_AudioProcessor_ARAExtensions.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\ARA\juce_AudioProcessor_ARAExtensions.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities\ARA</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AAXClientExtensions.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AAXClientExtensions.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AudioParameterBool.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AudioParameterBool.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AudioParameterChoice.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AudioParameterChoice.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AudioParameterFloat.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AudioParameterFloat.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AudioParameterInt.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AudioParameterInt.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_AudioProcessorParameterWithID.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_AudioProcessorParameterWithID.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_CommonProcessorUtilities.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_CommonProcessorUtilities.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_ExtensionsVisitor.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_ExtensionsVisitor.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_FlagCache.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_FlagCache.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_RangedAudioParameter.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_RangedAudioParameter.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_VST2ClientExtensions.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_VST2ClientExtensions.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_VST3ClientExtensions.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_VST3ClientExtensions.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="C:\JUCE\modules\juce_audio_processors_headless\utilities\juce_VST3Interface.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\utilities\juce_VST3Interface.h">
       <Filter>JUCE Modules\juce_audio_processors_headless\utilities</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors_headless\juce_audio_processors_headless.h">
@@ -7865,34 +7901,34 @@
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt">
       <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
     </None>
-    <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\LV2_SDK\README.md">
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\README.md">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK</Filter>
     </None>
-    <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\LICENSE.txt">
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\LICENSE.txt">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base</Filter>
     </None>
-    <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\README.md">
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\README.md">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base</Filter>
     </None>
-    <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\LICENSE.txt">
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\LICENSE.txt">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces</Filter>
     </None>
-    <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\README.md">
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces\README.md">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\pluginterfaces</Filter>
     </None>
-    <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\ReadMe.md">
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo\ReadMe.md">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\source\vst\moduleinfo</Filter>
     </None>
-    <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\LICENSE.txt">
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\LICENSE.txt">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk</Filter>
     </None>
-    <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\README.md">
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\README.md">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk</Filter>
     </None>
-    <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\LICENSE.txt">
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\LICENSE.txt">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK</Filter>
     </None>
-    <None Include="C:\JUCE\modules\juce_audio_processors_headless\format_types\VST3_SDK\README.md">
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\README.md">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt">

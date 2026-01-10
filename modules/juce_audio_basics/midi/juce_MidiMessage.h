@@ -78,7 +78,7 @@ public:
     template <typename... Data>
     MidiMessage (int byte1, int byte2, int byte3, Data... otherBytes)  : size (3 + sizeof... (otherBytes))
     {
-        // this checks that the length matches the data..
+        // this checks that the length matches the data
         jassert (size > 3 || byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == size);
 
         const uint8 data[] = { (uint8) byte1, (uint8) byte2, (uint8) byte3, static_cast<uint8> (otherBytes)... };

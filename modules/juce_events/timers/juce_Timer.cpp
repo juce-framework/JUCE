@@ -121,7 +121,7 @@ public:
             {
                 if (callbackArrived.wait (0))
                 {
-                    // already a message in flight - do nothing..
+                    // already a message in flight - do nothing
                 }
                 else
                 {

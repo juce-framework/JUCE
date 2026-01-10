@@ -650,7 +650,7 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
                     if (newIndex > 0)
                     {
                         // if the previous column isn't draggable, we can't move our column
-                        // past it, because that'd change the undraggable column's position..
+                        // past it, because that'd change the undraggable column's position
                         auto* previous = columns.getUnchecked (newIndex - 1);
 
                         if ((previous->propertyFlags & draggable) != 0)
@@ -669,7 +669,7 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
                     if (newIndex < columns.size() - 1)
                     {
                         // if the next column isn't draggable, we can't move our column
-                        // past it, because that'd change the undraggable column's position..
+                        // past it, because that'd change the undraggable column's position
                         auto* nextCol = columns.getUnchecked (newIndex + 1);
 
                         if ((nextCol->propertyFlags & draggable) != 0)

@@ -103,6 +103,8 @@
 #include "audio_play_head/juce_AudioPlayHead.cpp"
 #include "utilities/juce_AudioWorkgroup.cpp"
 
+#include "midi/ump/juce_UMPDeviceInfo.cpp"
+#include "midi/ump/juce_UMPFactory.cpp"
 #include "midi/ump/juce_UMPUtils.cpp"
 #include "midi/ump/juce_UMPView.cpp"
 #include "midi/ump/juce_UMPSysEx7.cpp"

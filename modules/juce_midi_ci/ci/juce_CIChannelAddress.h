@@ -46,7 +46,7 @@ private:
     uint8_t group{};              ///< A group within a MIDI endpoint, where 0 <= group && group < 16
     ChannelInGroup channel{};     ///< A set of channels related to specified group
 
-    auto tie() const { return std::tie (group, channel); }
+    auto tie() const;
 
 public:
     /** Returns a copy of this object with the specified group. */
@@ -81,12 +81,12 @@ public:
     /** Returns true if this address refers to a single channel. */
     bool isSingleChannel() const { return ! isBlock() && ! isGroup(); }
 
-    bool operator<  (const ChannelAddress& other) const { return tie() <  other.tie(); }
-    bool operator<= (const ChannelAddress& other) const { return tie() <= other.tie(); }
-    bool operator>  (const ChannelAddress& other) const { return tie() >  other.tie(); }
-    bool operator>= (const ChannelAddress& other) const { return tie() >= other.tie(); }
-    bool operator== (const ChannelAddress& other) const { return tie() == other.tie(); }
-    bool operator!= (const ChannelAddress& other) const { return ! operator== (other); }
+    bool operator<  (const ChannelAddress& other) const;
+    bool operator<= (const ChannelAddress& other) const;
+    bool operator>  (const ChannelAddress& other) const;
+    bool operator>= (const ChannelAddress& other) const;
+    bool operator== (const ChannelAddress& other) const;
+    bool operator!= (const ChannelAddress& other) const;
 };
 
 } // namespace juce::midi_ci

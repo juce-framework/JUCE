@@ -48,6 +48,8 @@
  #undef CONFIG_BIGNUM
 #endif
 
+#define CHOC_QUICKJS_NO_STACK_CHECK 1
+
 #define choc juce::detail::choc
 #include <juce_javascript/choc/javascript/choc_javascript_QuickJS.h>
 #undef choc

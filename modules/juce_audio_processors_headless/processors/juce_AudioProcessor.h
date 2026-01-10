@@ -912,7 +912,7 @@ public:
         {
             suspendProcessing (true);
 
-            ..do something that takes ages..
+            ...do something that takes ages...
 
             suspendProcessing (false);
         }
@@ -1000,7 +1000,7 @@ public:
         the correct size before returning it. If you implement this method, you must
         also implement the hasEditor() method and make it return true.
 
-        Remember not to do anything silly like allowing your processor to keep a pointer to
+        Remember not to do anything like allowing your processor to keep a pointer to
         the component that gets created - it could be deleted later without any warning, which
         would make your pointer into a dangler. Use the getActiveEditor() method instead.
 

@@ -420,4 +420,26 @@ PropertyHost::SubscriptionToken PropertyHost::findUnusedSubscribeId (const std::
     return ! used.empty() ? SubscriptionToken { std::prev (used.end())->first.uid + 1 } : SubscriptionToken { 0 };
 }
 
+auto RequestKey::tie() const
+{
+    return std::tuple (m, v);
+}
+
+bool RequestKey::operator== (const RequestKey& other) const
+{
+    return tie() == other.tie();
+}
+
+/** Inequality operator. */
+bool RequestKey::operator!= (const RequestKey& other) const
+{
+    return tie() != other.tie();
+}
+
+/** Less-than operator. */
+bool RequestKey::operator<  (const RequestKey& other) const
+{
+    return tie() <  other.tie();
+}
+
 } // namespace juce::midi_ci

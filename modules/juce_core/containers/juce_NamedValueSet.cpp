@@ -115,7 +115,7 @@ bool NamedValueSet::operator== (const NamedValueSet& other) const noexcept
         }
         else
         {
-            // if we encounter keys that are in a different order, search remaining items by brute force..
+            // if we encounter keys that are in a different order, search remaining items by brute force
             for (int j = i; j < num; ++j)
             {
                 if (auto* otherVal = other.getVarPointer (values.getReference (j).name))

@@ -121,7 +121,7 @@ public:
         int compareElements (TreeViewItem* first, TreeViewItem* second);
         @endcode
 
-        ..and this method must return:
+        ...and this method must return:
           - a value of < 0 if the first comes before the second
           - a value of 0 if the two objects are equivalent
           - a value of > 0 if the second comes before the first
@@ -588,7 +588,7 @@ public:
         @code
         void MyTreeViewItem::updateChildItems()
         {
-            OpennessRestorer openness (*this);  //  saves the openness state here..
+            OpennessRestorer openness (*this);  //  saves the openness state here
 
             clearSubItems();
 
@@ -596,8 +596,8 @@ public:
             // were previously there
             addSubItem (...
 
-            // ..and at this point, the old openness is restored, so any items that haven't
-            // changed will have their old openness retained.
+            // and at this point, the old openness is restored, so any items that haven't
+            // changed will have their old openness retained
         }
         @endcode
     */

@@ -277,7 +277,7 @@ public:
         E.g. @code
         static void myCallbackFunction (int modalResult, Slider* mySlider)
         {
-            if (modalResult == 1 && mySlider != nullptr) // (must check that mySlider isn't null in case it was deleted..)
+            if (modalResult == 1 && mySlider != nullptr) // must check that mySlider isn't null in case it was deleted
                 mySlider->setValue (0.0);
         }
 
@@ -310,7 +310,7 @@ public:
         E.g. @code
         static void myCallbackFunction (int modalResult, Slider* mySlider, String customParam)
         {
-            if (modalResult == 1 && mySlider != nullptr) // (must check that mySlider isn't null in case it was deleted..)
+            if (modalResult == 1 && mySlider != nullptr) // must check that mySlider isn't null in case it was deleted
                 mySlider->setName (customParam);
         }
 

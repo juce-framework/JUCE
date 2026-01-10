@@ -797,7 +797,7 @@ public:
     {
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         // WebKit doesn't capture mouse-moves itself, so it seems the only way to make
-        // them work is to push them via this non-public method..
+        // them work is to push them via this non-public method.
         if ([webView.get() respondsToSelector: @selector (_updateMouseoverWithFakeEvent)])
             [webView.get() performSelector:    @selector (_updateMouseoverWithFakeEvent)];
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE

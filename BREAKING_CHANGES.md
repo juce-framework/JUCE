@@ -1,6 +1,28 @@
 # JUCE breaking changes
 
-# develop
+# Version 8.0.11
+
+## Change
+
+var::equals(), var::operator==(), and var::operator!=() will now carry out a
+deep equality check when comparing two stored DynamicObjects, as opposed to
+just comparing the objects' addresses, which was the old behaviour.
+
+**Possible Issues**
+
+Program that depend on variants only comparing equal when the object pointers
+are equal will now exhibit unexpected behaviour.
+
+**Workaround**
+
+There is no workaround for this change.
+
+**Rationale**
+
+The previous behaviour was unintuitive, as it meant that two different var
+instances may compare unequal, even when those var instances were both created
+by parsing the same JSON string.
+
 
 ## Change
 

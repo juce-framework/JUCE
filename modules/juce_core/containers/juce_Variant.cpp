@@ -343,7 +343,13 @@ struct var::VariantType
 
     static bool objectEquals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) noexcept
     {
-        return otherType.toObject (otherData) == data.objectValue;
+        const auto* otherObject = otherType.toObject (otherData);
+
+        if (auto* dynamicObjectOther = dynamic_cast<const DynamicObject*> (otherObject))
+            if (auto* dynamicObjectSelf = dynamic_cast<const DynamicObject*> (data.objectValue))
+                return dynamicObjectSelf->equals (*dynamicObjectOther);
+
+        return otherObject == data.objectValue;
     }
 
     static void objectWriteToStream (const ValueUnion&, OutputStream& output)
@@ -901,6 +907,47 @@ JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 const var var::null;
 
 JUCE_END_IGNORE_DEPRECATION_WARNINGS
+
+#endif
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+struct VariantTests : public UnitTest
+{
+public:
+    VariantTests() : UnitTest ("Variant", UnitTestCategories::json) {}
+
+    void runTest() override
+    {
+        beginTest ("object comparisons have value semantics");
+        {
+            DynamicObject::Ptr a = new DynamicObject;
+            a->setProperty ("foo", 1);
+            a->setProperty ("bar", "hello world");
+            a->setProperty ("baz", 2.3);
+
+            const Array<var> nestedArray { var { 5 }, var { 6 }, var { 7 }, var { std::invoke ([]
+            {
+                auto* result = new DynamicObject;
+                result->setProperty ("innerA", 0);
+                result->setProperty ("innerB", "");
+                return result;
+            }) } };
+
+            a->setProperty ("nestedArray", nestedArray);
+
+            var varB = a->clone().release();
+            var varA = a.get();
+
+            expect (varA.equals (varB));
+            expect (varB.equals (varA));
+        }
+    }
+};
+
+static VariantTests variantTests;
 
 #endif
 

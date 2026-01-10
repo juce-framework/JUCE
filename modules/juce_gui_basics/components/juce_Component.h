@@ -1287,8 +1287,9 @@ public:
         it is being obscured by opaque components. This cost should be carefully
         weighed up against the benefits before deciding to enable this.
 
-        By default, components are considered transparent, unless this is used
-        to make it otherwise.
+        The default value of this property is false, which means that a
+        component will be considered transparent unless setOpaque (true) is
+        called on that component.
 
         @see isOpaque
     */

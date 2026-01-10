@@ -42,7 +42,7 @@ namespace juce::midi_ci
 */
 class RequestKey
 {
-    auto tie() const { return std::tuple (m, v); }
+    auto tie() const;
 
 public:
     /** Constructor. */
@@ -55,13 +55,13 @@ public:
     Token64 getKey() const { return v; }
 
     /** Equality operator. */
-    bool operator== (const RequestKey& other) const { return tie() == other.tie(); }
+    bool operator== (const RequestKey& other) const;
 
     /** Inequality operator. */
-    bool operator!= (const RequestKey& other) const { return tie() != other.tie(); }
+    bool operator!= (const RequestKey& other) const;
 
     /** Less-than operator. */
-    bool operator<  (const RequestKey& other) const { return tie() <  other.tie(); }
+    bool operator<  (const RequestKey& other) const;
 
 private:
     MUID m;

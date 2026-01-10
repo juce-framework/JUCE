@@ -69,7 +69,7 @@ bool StringPairArray::operator== (const StringPairArray& other) const
         }
         else
         {
-            // if we encounter keys that are in a different order, search remaining items by brute force..
+            // if we encounter keys that are in a different order, search remaining items by brute force
             for (int j = i; j < num; ++j)
             {
                 auto otherIndex = other.keys.indexOf (keys[j], other.ignoreCase);

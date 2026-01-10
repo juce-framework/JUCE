@@ -925,7 +925,7 @@ static const String& getJuceXmlTextContentAttributeName()
 const String& XmlElement::getText() const noexcept
 {
     jassert (isTextElement());  // you're trying to get the text from an element that
-                                // isn't actually a text element.. If this contains text sub-nodes, you
+                                // isn't actually a text element. If this contains text sub-nodes, you
                                 // probably want to use getAllSubText instead.
 
     return getStringAttribute (getJuceXmlTextContentAttributeName());
@@ -936,7 +936,7 @@ void XmlElement::setText (const String& newText)
     if (isTextElement())
         setAttribute (getJuceXmlTextContentAttributeName(), newText);
     else
-        jassertfalse; // you can only change the text in a text element, not a normal one.
+        jassertfalse; // you can only change the text in a text element, not a normal one
 }
 
 String XmlElement::getAllSubText() const

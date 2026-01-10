@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              version="8.0.10" bundleIdentifier="com.juce.theprojucer" companyName="Raw Material Software Limited"
+              version="8.0.12" bundleIdentifier="com.juce.theprojucer" companyName="Raw Material Software Limited"
               companyCopyright="Raw Material Software Limited" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" documentExtensions=".jucer" bigIcon="Zrx1Gl"
                microphonePermissionNeeded="1" cameraPermissionNeeded="1" smallIcon="Zrx1Gl"
                applicationCategory="public.app-category.developer-tools" extraLinkerFlags="-Wl,-weak_reference_mismatches,weak"
-               extraDefs="JUCE_SILENCE_XCODE_15_LINKER_WARNING=1">
+               extraDefs="JUCE_SILENCE_XCODE_15_LINKER_WARNING=1" iconComposerIcon="NzgaRC">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" cppLibType="libc++"
                        recommendedWarnings="LLVM"/>
@@ -30,7 +30,8 @@
             smallIcon="Zrx1Gl">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" useRuntimeLibDLL="0"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer" useRuntimeLibDLL="0" linkTimeOptimisation="0"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"
+                       useRuntimeLibDLL="0" linkTimeOptimisation="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -47,7 +48,8 @@
             smallIcon="Zrx1Gl">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" useRuntimeLibDLL="0"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer" useRuntimeLibDLL="0" linkTimeOptimisation="0"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"
+                       useRuntimeLibDLL="0" linkTimeOptimisation="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -64,7 +66,8 @@
             smallIcon="Zrx1Gl">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" useRuntimeLibDLL="0"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer" useRuntimeLibDLL="0" linkTimeOptimisation="0"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"
+                       useRuntimeLibDLL="0" linkTimeOptimisation="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -152,6 +155,14 @@
             file="Source/Application/jucer_MainWindow.cpp"/>
       <FILE id="HmkREh" name="jucer_MainWindow.h" compile="0" resource="0"
             file="Source/Application/jucer_MainWindow.h"/>
+    </GROUP>
+    <GROUP id="{D6EDA167-C7F5-88EC-9ABB-F8A6FBD578D4}" name="Assets">
+      <GROUP id="{3919996E-77AB-F182-188C-87501AD9DE7C}" name="AppIcon.icon">
+        <GROUP id="{505EB9E7-A196-65D1-8589-3785B985B85F}" name="Assets">
+          <FILE id="nYspxh" name="juceicon.svg" compile="0" resource="0" file="Source/Assets/AppIcon.icon/Assets/juceicon.svg"/>
+        </GROUP>
+        <FILE id="NzgaRC" name="icon.json" compile="0" resource="0" file="Source/Assets/AppIcon.icon/icon.json"/>
+      </GROUP>
     </GROUP>
     <GROUP id="{BFDB3102-5EB6-41E0-043A-05C0DFF7A34D}" name="BinaryData">
       <FILE id="wkLB4B" name="JuceLV2Defines.h.in" compile="0" resource="1"

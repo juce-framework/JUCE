@@ -364,7 +364,7 @@ void UpdateRegion::findRECTAndValidate (HWND windowHandle)
 {
     numRect = 0;
 
-    auto regionHandle = CreateRectRgn (0, 0, 0, 0);
+    auto* regionHandle = CreateRectRgn (0, 0, 0, 0);
 
     if (regionHandle == nullptr)
     {
@@ -372,33 +372,36 @@ void UpdateRegion::findRECTAndValidate (HWND windowHandle)
         return;
     }
 
-    auto regionType = GetUpdateRgn (windowHandle, regionHandle, false);
+    const ScopeGuard regionDeleter { [&] { DeleteObject (regionHandle); } };
+    const auto regionType = GetUpdateRgn (windowHandle, regionHandle, false);
 
-    if (regionType == SIMPLEREGION || regionType == COMPLEXREGION)
+    if (regionType == ERROR || regionType == NULLREGION)
+        return;
+
+    const auto requiredBytes = GetRegionData (regionHandle, 0, nullptr);
+    block.ensureSize (requiredBytes);
+
+    const auto regionDataResult = GetRegionData (regionHandle,
+                                                 (DWORD) block.getSize(),
+                                                 static_cast<RGNDATA*> (block.getData()));
+
+    numRect = std::invoke ([&]() -> decltype (numRect)
     {
-        auto regionDataBytes = GetRegionData (regionHandle, (DWORD) block.getSize(), (RGNDATA*) block.getData());
+        if (regionDataResult < sizeof (RGNDATAHEADER))
+            return 0;
 
-        if (regionDataBytes > block.getSize())
-        {
-            block.ensureSize (regionDataBytes);
-            regionDataBytes = GetRegionData (regionHandle, (DWORD) block.getSize(), (RGNDATA*) block.getData());
-        }
+        const auto* header = static_cast<RGNDATAHEADER const* const> (block.getData());
 
-        if (regionDataBytes > 0)
-        {
-            auto header = (RGNDATAHEADER const* const) block.getData();
+        if (header->iType != RDH_RECTANGLES)
+            return 0;
 
-            if (header->iType == RDH_RECTANGLES)
-                numRect = header->nCount;
-        }
-    }
+        return header->nCount;
+    });
 
     if (numRect > 0)
         ValidateRgn (windowHandle, regionHandle);
     else
         ValidateRect (windowHandle, nullptr);
-
-    DeleteObject (regionHandle);
 }
 
 //==============================================================================
@@ -1010,6 +1013,12 @@ public:
 
     Uuid getUuid() const { return uuid; }
 
+    Span<const std::byte> asSpan() const&& = delete;
+    Span<const std::byte> asSpan() const&
+    {
+        return { static_cast<const std::byte*> (block->getData()), block->getSize() };
+    }
+
 private:
     std::shared_ptr<const MemoryBlock> block;
     Uuid uuid;
@@ -1061,20 +1070,54 @@ DirectWriteCustomFontCollectionLoader::DirectWriteCustomFontCollectionLoader (ID
 
 DirectWriteCustomFontCollectionLoader::~DirectWriteCustomFontCollectionLoader()
 {
-    for (const auto& loader : fileLoaders)
+    for (auto& loader : loaders)
         factory.UnregisterFontFileLoader (loader);
+}
+
+auto DirectWriteCustomFontCollectionLoader::findLoaderForUuid (const Uuid& uuid) const -> ComSmartPtr<MemoryFontFileLoader>
+{
+    const auto compareUuidAndLoader = [] (ComSmartPtr<MemoryFontFileLoader> loader, const Uuid& comparisonUuid)
+    {
+        return loader->getUuid() < comparisonUuid;
+    };
+
+    const auto iter = std::lower_bound (loaders.begin(), loaders.end(), uuid, compareUuidAndLoader);
+
+    if (iter == loaders.end() || iter->get()->getUuid() != uuid)
+        return {};
+
+    return *iter;
 }
 
 Uuid DirectWriteCustomFontCollectionLoader::addRawFontData (Span<const std::byte> blob)
 {
+    const std::string_view blobAsString (reinterpret_cast<const char*> (blob.data()), blob.size());
+    const auto hashValue = std::hash<std::string_view>{} (blobAsString);
+    auto& uuids = uuidsForHash[hashValue];
+
+    for (const auto& uuid : uuids)
+    {
+        const auto matchingLoader = findLoaderForUuid (uuid);
+
+        if (matchingLoader == nullptr)
+            continue;
+
+        const auto loaderData = matchingLoader->asSpan();
+
+        if (! std::equal (blob.begin(), blob.end(), loaderData.begin(), loaderData.end()))
+            continue;
+
+        return matchingLoader->getUuid();
+    }
+
     ComSmartPtr loader { new MemoryFontFileLoader { { blob.data(), blob.size() } },
                          IncrementRef::no };
-
     factory.RegisterFontFileLoader (loader);
 
-    fileLoaders.push_back (loader);
-
-    return fileLoaders.back()->getUuid();
+    const auto compareUuids = [] (const auto& a, const auto& b) { return a->getUuid() < b->getUuid(); };
+    OrderedContainerHelpers::insertOrAssign (loaders, loader, compareUuids);
+    uuids.push_back (loader->getUuid());
+    return loader->getUuid();
 }
 
 HRESULT WINAPI DirectWriteCustomFontCollectionLoader::CreateEnumeratorFromKey (IDWriteFactory* factoryIn,
@@ -1087,16 +1130,13 @@ HRESULT WINAPI DirectWriteCustomFontCollectionLoader::CreateEnumeratorFromKey (I
 
     const Uuid requestedCollectionKey { static_cast<const uint8*> (collectionKey) };
 
-    for (const auto& loader : fileLoaders)
-    {
-        if (loader->getUuid() != requestedCollectionKey)
-            continue;
+    const auto matchingLoader = findLoaderForUuid (requestedCollectionKey);
 
-        *fontFileEnumerator = new FontFileEnumerator { *factoryIn, loader };
-        return S_OK;
-    }
+    if (matchingLoader == nullptr)
+        return E_INVALIDARG;
 
-    return E_INVALIDARG;
+    *fontFileEnumerator = new FontFileEnumerator { *factoryIn, matchingLoader };
+    return S_OK;
 }
 
 //==============================================================================
@@ -1119,8 +1159,8 @@ Direct2DFactories::Direct2DFactories()
 
           JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
           d2d1CreateFactory (D2D1_FACTORY_TYPE_SINGLE_THREADED,
-                              __uuidof (ID2D1Factory),
-                              &options,
+                             __uuidof (ID2D1Factory),
+                             &options,
                              (void**) result.resetAndGetPointerAddress());
           JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 

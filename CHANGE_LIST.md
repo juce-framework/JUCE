@@ -3,6 +3,24 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.12
+
+  - Made Visual Studio 2026 the default in the Projucer
+  - Fixed a compilation error in Android In-App Purchases
+  - Fixed some MIDI device names
+
+## Version 8.0.11
+
+  - Added a new MIDI 2.0 Universal MIDI Packet demo
+  - Added a Visual Studio 2026 exporter
+  - Improved support for macOS/iOS 26
+  - Updated the VST3 SDK to 3.8.0 (MIT license)
+  - Updated the AAX SDK to 2.9.0
+  - Included the ASIO SDK source files directly (GPLv3 license)
+  - Updated Sheen Bidi to 2.9.0
+  - Improved rendering performance with a font and glyph cache
+  - Added a new juce_audio_processors_headless module
+
 ## Version 8.0.10
 
   - Avoided restarting Android Activities on system theme change

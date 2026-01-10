@@ -58,16 +58,18 @@
 #include "../Assets/DemoUtilities.h"
 
 /*
-    To finish the setup of this demo, do the following in the Projucer project:
+    To finish the setup of this demo, you'll need to
 
-    1. In the project settings, set the "Bundle Identifier" to com.rmsl.juceInAppPurchaseSample
-    2. In the Android exporter settings, change the following settings:
-         - "In-App Billing" - Enabled
-         - "Key Signing: key.store" - path to InAppPurchase.keystore file in examples/Assets/Signing
-         - "Key Signing: key.store.password" - amazingvoices
-         - "Key Signing: key-alias" - InAppPurchase
-         - "Key Signing: key.alias.password" - amazingvoices
-    3. Re-save the project
+    1.  Set the bundle identifier to the registered identifier in App Store
+        connect and/or Google Play Console.
+
+    2.  Enable In-App Purchases capability (iOS/macOS) and/or In-App Billing
+        (Android).
+
+    Note the app registered in App Store connect and/or Google Play Console will
+    need corresponding purchasable items. For more information please refer to
+    the in-app purchases tutorial.
+    https://juce.com/tutorials/tutorial_in_app_purchases/
 */
 
 //==============================================================================

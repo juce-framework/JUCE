@@ -140,7 +140,7 @@ void SamplerVoice::renderNextBlock (AudioBuffer<float>& outputBuffer, int startS
             auto alpha = (float) (sourceSamplePosition - pos);
             auto invAlpha = 1.0f - alpha;
 
-            // just using a very simple linear interpolation here..
+            // just using a very simple linear interpolation here
             float l = (inL[pos] * invAlpha + inL[pos + 1] * alpha);
             float r = (inR != nullptr) ? (inR[pos] * invAlpha + inR[pos + 1] * alpha)
                                        : l;

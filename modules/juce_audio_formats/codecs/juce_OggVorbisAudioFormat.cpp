@@ -327,7 +327,7 @@ public:
     {
         if (ok)
         {
-            // write a zero-length packet to show ogg that we're finished..
+            // write a zero-length packet to show ogg that we're finished
             writeSamples (0);
 
             ogg_stream_clear (&os);

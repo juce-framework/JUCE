@@ -228,7 +228,7 @@ struct Target
         : context (c), frameBufferID (fb.getFrameBufferID()),
           bounds (origin.x, origin.y, fb.getWidth(), fb.getHeight())
     {
-        jassert (frameBufferID != 0); // trying to render into an uninitialised framebuffer object.
+        jassert (frameBufferID != 0); // trying to render into an uninitialised framebuffer object
     }
 
     Target (const Target& other) noexcept
@@ -978,6 +978,20 @@ struct StateHelpers
     {
         BlendingMode() noexcept {}
 
+        ~BlendingMode()
+        {
+            glBlendFuncSeparate (prevSrcRGB, prevDstRGB, prevSrcAlpha, prevDstAlpha);
+
+            if ((bool) glIsEnabled (GL_BLEND) == prevBlendEnabled)
+                return;
+
+            if (prevBlendEnabled)
+                glEnable (GL_BLEND);
+            else
+                glDisable (GL_BLEND);
+
+        }
+
         void resync() noexcept
         {
             glDisable (GL_BLEND);
@@ -1030,8 +1044,20 @@ struct StateHelpers
         }
 
     private:
-        bool blendingEnabled = false;
+        static GLenum getBlendEnum (GLenum kind)
+        {
+            GLint result{};
+            glGetIntegerv (kind, &result);
+            return static_cast<GLenum> (result);
+        }
+
         GLenum srcFunction = 0, dstFunction = 0;
+        GLenum prevSrcAlpha = getBlendEnum (GL_BLEND_SRC_ALPHA);
+        GLenum prevSrcRGB   = getBlendEnum (GL_BLEND_SRC_RGB);
+        GLenum prevDstAlpha = getBlendEnum (GL_BLEND_DST_ALPHA);
+        GLenum prevDstRGB   = getBlendEnum (GL_BLEND_DST_RGB);
+        bool blendingEnabled = false;
+        bool prevBlendEnabled = glIsEnabled (GL_BLEND);
     };
 
     //==============================================================================
@@ -1445,7 +1471,7 @@ struct StateHelpers
         {
             context.extensions.glBufferSubData (GL_ARRAY_BUFFER, 0, (GLsizeiptr) ((size_t) numVertices * sizeof (VertexInfo)), vertexData);
             // NB: If you get a random crash in here and are running in a Parallels VM, it seems to be a bug in
-            // their driver.. Can't find a workaround unfortunately.
+            // their driver. Can't find a workaround unfortunately.
             glDrawElements (GL_TRIANGLES, (numVertices * 3) / 2, GL_UNSIGNED_SHORT, nullptr);
             JUCE_CHECK_OPENGL_ERROR
             numVertices = 0;
@@ -1786,7 +1812,7 @@ private:
 //==============================================================================
 struct SavedState final : public RenderingHelpers::SavedStateBase<SavedState>
 {
-    using BaseClass = RenderingHelpers::SavedStateBase<SavedState>;
+    using BaseClass = SavedStateBase;
 
     SavedState (GLState* s)  : BaseClass (s->target.bounds), state (s)
     {}

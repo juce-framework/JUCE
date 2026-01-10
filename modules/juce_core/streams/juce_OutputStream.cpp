@@ -48,7 +48,7 @@ struct DanglingStreamChecker
             It's always a bad idea to leak any object, but if you're leaking output
             streams, then there's a good chance that you're failing to flush a file
             to disk properly, which could result in corrupted data and other similar
-            nastiness..
+            nastiness.
         */
         jassert (activeStreams.size() == 0);
 
@@ -242,8 +242,14 @@ bool OutputStream::writeText (const String& text, bool asUTF16, bool writeUTF16B
                 continue;
             }
 
-            if (! writeShort ((short) c))
-                return false;
+            CharPointer_UTF16::CharType buffer[2]{};
+            CharPointer_UTF16 begin { buffer };
+            auto end = begin;
+            end.write (c);
+
+            for (const auto unit : makeRange (begin.getAddress(), end.getAddress()))
+                if (! writeShort ((short) unit))
+                    return false;
         }
     }
     else
@@ -402,5 +408,44 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const New
 {
     return stream << stream.getNewLineString();
 }
+
+#if JUCE_UNIT_TESTS
+
+class OutputStreamUTF16Test final : public UnitTest
+{
+public:
+    OutputStreamUTF16Test() : UnitTest { "OutputStream::writeText UTF16", UnitTestCategories::streams } {}
+
+    void runTest() final
+    {
+        beginTest ("writeText UTF16 - Can support full unicode codepoints");
+        {
+            static constexpr juce_wchar stringA[] { 0x1F600, 0x00 }; // Grinning face emoji
+            static constexpr juce_wchar stringB[] { 0xA, 0xB, 0xC, 0x0 }; // ASCII
+            static constexpr juce_wchar stringC[] { 0xAAAA, 0xBBBB, 0xCCCC, 0x0 }; // two-byte characters
+
+            CharPointer_UTF32 pointers[] { CharPointer_UTF32 (stringA),
+                                           CharPointer_UTF32 (stringB),
+                                           CharPointer_UTF32 (stringC) };
+
+            for (auto originalPtr : pointers)
+            {
+                MemoryOutputStream stream;
+                stream.writeText (originalPtr, true, false, "\n");
+
+                expect (stream.getDataSize() != 0);
+
+                CharPointer_UTF16 writtenPtr { reinterpret_cast<const CharPointer_UTF16::CharType*> (stream.getData()) };
+
+                for (; *originalPtr != 0; ++originalPtr, ++writtenPtr)
+                    expect (*originalPtr == *writtenPtr);
+            }
+        }
+    }
+};
+
+static OutputStreamUTF16Test outputStreamUTF16Test;
+
+#endif
 
 } // namespace juce

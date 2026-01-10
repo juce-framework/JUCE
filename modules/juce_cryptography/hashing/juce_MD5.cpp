@@ -132,7 +132,7 @@ struct MD5Generator
         auto index = (count[0] >> 3) & 0x3f;
         auto paddingLength = (index < 56 ? 56 : 120) - index;
 
-        uint8_t paddingBuffer[64] = { 0x80 }; // first byte is 0x80, remaining bytes are zero.
+        uint8_t paddingBuffer[64] = { 0x80 }; // first byte is 0x80, remaining bytes are zero
 
         processBlock (paddingBuffer, (size_t) paddingLength);
         processBlock (encodedLength, 8);

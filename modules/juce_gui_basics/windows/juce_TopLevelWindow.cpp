@@ -164,7 +164,7 @@ void TopLevelWindow::addToDesktop()
 {
     shadower = nullptr;
     Component::addToDesktop (getDesktopWindowStyleFlags());
-    setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary.
+    setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary
 }
 
 void TopLevelWindow::addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo)
@@ -215,9 +215,8 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
             return std::make_pair (globalTargetCentre, c->getParentMonitorArea() / scale);
         }();
 
-        setBounds (Rectangle<int> (targetCentre.x - width / 2,
-                                   targetCentre.y - height / 2,
-                                   width, height)
+        setBounds (Rectangle { width, height }
+                     .withCentre (targetCentre)
                      .constrainedWithin (parentArea.reduced (12, 12)));
     }
 }

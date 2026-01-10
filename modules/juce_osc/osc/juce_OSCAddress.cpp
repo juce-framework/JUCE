@@ -182,7 +182,7 @@ namespace
                             setIsNegated = true;
                             break;
                         }
-                        // else = special case: fall through to default and treat '!' as a non-special character.
+                        // else = special case: fall through to default and treat '!' as a non-special character
                         JUCE_FALLTHROUGH
 
                     default:
@@ -243,7 +243,7 @@ namespace
 
             if (rangeEnd == ']')
             {
-                set.add ('-');  // special case: '-' has no special meaning at the end.
+                set.add ('-');  // special case: '-' has no special meaning at the end
                 return true;
             }
 
@@ -719,7 +719,7 @@ public:
             expect (matchOscPattern ("foo[1-8]bar", "foo8bar"));
             expect (! matchOscPattern ("foo[1-8]bar", "foo9bar"));
 
-            // special case: '-' does not have a special meaning if it is at the end of the set.
+            // special case: '-' does not have a special meaning if it is at the end of the set
 
             expect (matchOscPattern ("foo[abc-]bar", "fooabar"));
             expect (matchOscPattern ("foo[abc-]bar", "foo-bar"));
@@ -769,7 +769,7 @@ public:
             expect (! matchOscPattern ("fooba[!r-z]foo", "foobasfoo"));
             expect (matchOscPattern ("fooba[!r-z]foo", "foobaRfoo"));
 
-            // special case: '!' does not have a special meaning if it is not the first char in the set.
+            // special case: '!' does not have a special meaning if it is not the first char in the set
 
             expect (matchOscPattern ("foo[ab!c]bar", "fooabar"));
             expect (matchOscPattern ("foo[ab!c]bar", "foo!bar"));

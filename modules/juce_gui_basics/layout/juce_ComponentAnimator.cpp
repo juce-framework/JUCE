@@ -170,7 +170,7 @@ public:
             else if (c.isOnDesktop() && c.getPeer() != nullptr)
                 addToDesktop (c.getPeer()->getStyleFlags() | ComponentPeer::windowIgnoresKeyPresses);
             else
-                jassertfalse; // seem to be trying to animate a component that's not visible..
+                jassertfalse; // seem to be trying to animate a component that's not visible
 
             auto scale = (float) Desktop::getInstance().getDisplays().getDisplayForRect (getScreenBounds())->scale
                            * Component::getApproximateScaleFactorForComponent (&c);

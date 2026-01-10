@@ -177,7 +177,7 @@ private:
             }
 
            #if JUCE_MODAL_LOOPS_PERMITTED
-            // Unfortunately, Steinberg's docs explicitly say this should be modal..
+            // Unfortunately, Steinberg's docs explicitly say this should be modal.
             handleResult (topLevelMenu->showMenu (options));
            #else
             topLevelMenu->showMenuAsync (options,
@@ -563,7 +563,9 @@ private:
     NSViewComponentWithParent embeddedComponent;
     using HandleFormat = NSView*;
    #elif JUCE_LINUX || JUCE_BSD
-    XEmbedComponent embeddedComponent { true, false };
+    XEmbedComponent embeddedComponent { XEmbedComponentOptions{}.withWantsKeyboardFocus (true)
+                                                                .withAllowForeignWidgetToResizeComponent (false)
+                                                                .withIgnoreXembedMapped() };
     using HandleFormat = Window;
    #else
     Component embeddedComponent;

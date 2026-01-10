@@ -58,12 +58,12 @@ namespace juce
             out->write ( ...etc )
             out.reset(); // (deletes the stream)
 
-            // ..now we've finished writing, this will rename the temp file to
-            // make it replace the target file we specified above.
+            // ...now we've finished writing, this will rename the temp file to
+            // make it replace the target file we specified above
             bool succeeded = temp.overwriteTargetFileWithTemporary();
         }
 
-        // ..and even if something went wrong and our overwrite failed,
+        // ...and even if something went wrong and our overwrite failed,
         // as the TemporaryFile object goes out of scope here, it'll make sure
         // that the temp file gets deleted.
     }

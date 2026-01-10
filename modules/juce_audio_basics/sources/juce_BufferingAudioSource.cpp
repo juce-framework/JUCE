@@ -50,7 +50,7 @@ BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* s,
     jassert (source != nullptr);
 
     jassert (numberOfSamplesToBuffer > 1024); // not much point using this class if you're
-                                              //  not using a larger buffer..
+                                              //  not using a larger buffer
 }
 
 BufferingAudioSource::~BufferingAudioSource()

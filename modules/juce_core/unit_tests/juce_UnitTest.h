@@ -62,7 +62,7 @@ class UnitTestRunner;
             expect (myOtherFoobar.doesSomething());
             expect (myOtherFoobar.doesSomethingElse());
 
-            ...etc..
+            ...etc...
         }
     };
 

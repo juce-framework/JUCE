@@ -134,7 +134,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
 
         if (localRatio > 1.0001)
         {
-            // for down-sampling, pre-apply the filter..
+            // for down-sampling, pre-apply the filter
 
             for (int i = channelsToProcess; --i >= 0;)
                 applyFilter (buffer.getWritePointer (i, endOfBufferPos), numToDo, filterStates[i]);
@@ -178,7 +178,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
 
     if (localRatio < 0.9999)
     {
-        // for up-sampling, apply the filter after transposing..
+        // for up-sampling, apply the filter after transposing
         for (int i = channelsToProcess; --i >= 0;)
             applyFilter (info.buffer->getWritePointer (i, info.startSample), info.numSamples, filterStates[i]);
     }

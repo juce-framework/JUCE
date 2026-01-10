@@ -209,6 +209,7 @@ public:
           iosDeviceFamilyValue                         (settings, Ids::iosDeviceFamily,                         getUndoManager(), "1,2"),
           iPhoneScreenOrientationValue                 (settings, Ids::iPhoneScreenOrientation,                 getUndoManager(), getDefaultScreenOrientations(), ","),
           iPadScreenOrientationValue                   (settings, Ids::iPadScreenOrientation,                   getUndoManager(), getDefaultScreenOrientations(), ","),
+          iconComposerIconValue                        (settings, Ids::iconComposerIcon,                        getUndoManager()),
           customXcodeResourceFoldersValue              (settings, Ids::customXcodeResourceFolders,              getUndoManager()),
           customXcassetsFolderValue                    (settings, Ids::customXcassetsFolder,                    getUndoManager()),
           appSandboxValue                              (settings, Ids::appSandbox,                              getUndoManager()),
@@ -464,8 +465,35 @@ public:
         return false;
     }
 
+    void createIconComposerProperties (PropertyListBuilder& props)
+    {
+        StringArray choices;
+        Array<var> ids;
+
+        choices.add ("<None>");
+        ids.add (var());
+
+        for (const auto& icon : project.findAllIconComposerItems())
+        {
+            choices.add (icon.name);
+            ids.add (icon.item.getID());
+        }
+
+        String iconComposerTooltip
+        {
+            "Sets an Icon Composer icon to use for the executable. If specified, Xcode versions that "
+            "support this format will use this icon for all platforms, and ignore the Icon (Small) "
+            "and Icon (Large) setting."
+        };
+
+        props.add (new ChoicePropertyComponent (iconComposerIconValue, "Icon (Icon Composer)", choices, ids),
+                   iconComposerTooltip);
+    }
+
     void createExporterProperties (PropertyListBuilder& props) override
     {
+        createIconComposerProperties (props);
+
         if (iOS)
         {
             props.add (new TextPropertyComponent (customXcassetsFolderValue, "Custom Xcassets Folder", 128, false),
@@ -1219,6 +1247,31 @@ public:
         kXPCServicesFolder      = 16
     };
 
+    std::optional<build_tools::RelativePath> getIconComposerIconBundle() const
+    {
+        const auto iconJson = project.getMainGroup().findItemWithID (settings[Ids::iconComposerIcon]);
+
+        if (! iconJson.isValid())
+            return std::nullopt;
+
+        jassert (iconJson.isFile());
+
+        return build_tools::RelativePath { iconJson.getFile().getParentDirectory(),
+                                           project.getProjectFolder(),
+                                           build_tools::RelativePath::projectFolder };
+    }
+
+    String getAppIconNameOrElse (StringRef fallback) const
+    {
+        if (auto composerBundle = getIconComposerIconBundle())
+            return composerBundle->getFileNameWithoutExtension();
+
+        if (iOS)
+            return "AppIcon";
+
+        return fallback;
+    }
+
     //==============================================================================
     struct XcodeTarget final : build_tools::ProjectType::Target
     {
@@ -1864,10 +1917,11 @@ public:
 
             String gccVersion ("com.apple.compilers.llvm.clang.1_0");
 
+            if (auto appIconName = owner.getAppIconNameOrElse (""); appIconName.isNotEmpty())
+                s.set ("ASSETCATALOG_COMPILER_APPICON_NAME", appIconName);
+
             if (owner.iOS)
             {
-                s.set ("ASSETCATALOG_COMPILER_APPICON_NAME", "AppIcon");
-
                 if (! owner.shouldAddStoryboardToProject())
                     s.set ("ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME", "LaunchImage");
             }
@@ -2424,6 +2478,17 @@ private:
             resourceIDs.add (addBuildFile (FileOptions().withRelativePath (iconPath)));
             resourceFileRefs.add (createFileRefID (iconPath));
         }
+
+        if (auto iconComposerBundle = getIconComposerIconBundle())
+        {
+            const auto iconComposerPath = iconComposerBundle->rebased (project.getProjectFolder(),
+                                                                       getTargetFolder(),
+                                                                       build_tools::RelativePath::buildTargetFolder);
+
+            addFileReference (iconComposerPath.toUnixStyle());
+            resourceIDs.add (addBuildFile (FileOptions().withRelativePath (iconComposerPath)));
+            resourceFileRefs.add (createFileRefID (iconComposerPath));
+        }
     }
 
     void addBuildConfigurations() const
@@ -2722,7 +2787,7 @@ private:
 
         if (! build_tools::asArray (icons).isEmpty())
         {
-            iconFile = getTargetFolder().getChildFile ("Icon.icns");
+            iconFile = getTargetFolder().getChildFile (getAppIconNameOrElse ("AppIcon") + ".icns");
             build_tools::writeMacIcon (icons, iconFile);
         }
     }
@@ -3820,7 +3885,8 @@ private:
     {
         const auto assetsPath = build_tools::createXcassetsFolderFromIcons (getIcons(),
                                                                             getTargetFolder(),
-                                                                            project.getProjectFilenameRootString());
+                                                                            project.getProjectFilenameRootString(),
+                                                                            getAppIconNameOrElse ("AppIcon"));
         addFileReference (assetsPath.toUnixStyle());
         resourceIDs.add (addBuildFile (FileOptions().withRelativePath (assetsPath)));
         resourceFileRefs.add (createFileRefID (assetsPath));
@@ -3959,7 +4025,7 @@ private:
                                  extraFrameworksValue, frameworkSearchPathsValue, extraCustomFrameworksValue, embeddedFrameworksValue,
                                  postbuildCommandValue, prebuildCommandValue,
                                  duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
-                                 iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
+                                 iPadScreenOrientationValue, iconComposerIconValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
                                  appSandboxValue, appSandboxInheritanceValue, appSandboxOptionsValue,
                                  appSandboxHomeDirROValue, appSandboxHomeDirRWValue, appSandboxAbsDirROValue, appSandboxAbsDirRWValue,
                                  appSandboxExceptionIOKitValue,

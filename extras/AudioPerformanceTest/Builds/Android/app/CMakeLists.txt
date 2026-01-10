@@ -25,9 +25,9 @@ include_directories( AFTER
 enable_language(ASM)
 
 if(JUCE_BUILD_CONFIGURATION MATCHES "DEBUG")
-    add_definitions([[-DJUCE_PROJUCER_VERSION=0x8000a]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1]] [[-DJUCE_MODULE_AVAILABLE_juce_core=1]] [[-DJUCE_MODULE_AVAILABLE_juce_data_structures=1]] [[-DJUCE_MODULE_AVAILABLE_juce_events=1]] [[-DJUCE_MODULE_AVAILABLE_juce_graphics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1]] [[-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1]] [[-DJUCE_STANDALONE_APPLICATION=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]] [[-DDEBUG=1]] [[-D_DEBUG=1]])
+    add_definitions([[-DJUCE_PROJUCER_VERSION=0x8000c]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1]] [[-DJUCE_MODULE_AVAILABLE_juce_core=1]] [[-DJUCE_MODULE_AVAILABLE_juce_data_structures=1]] [[-DJUCE_MODULE_AVAILABLE_juce_events=1]] [[-DJUCE_MODULE_AVAILABLE_juce_graphics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1]] [[-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1]] [[-DJUCE_STANDALONE_APPLICATION=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]] [[-DDEBUG=1]] [[-D_DEBUG=1]])
 elseif(JUCE_BUILD_CONFIGURATION MATCHES "RELEASE")
-    add_definitions([[-DJUCE_PROJUCER_VERSION=0x8000a]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1]] [[-DJUCE_MODULE_AVAILABLE_juce_core=1]] [[-DJUCE_MODULE_AVAILABLE_juce_data_structures=1]] [[-DJUCE_MODULE_AVAILABLE_juce_events=1]] [[-DJUCE_MODULE_AVAILABLE_juce_graphics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1]] [[-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1]] [[-DJUCE_STANDALONE_APPLICATION=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]] [[-DNDEBUG=1]])
+    add_definitions([[-DJUCE_PROJUCER_VERSION=0x8000c]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1]] [[-DJUCE_MODULE_AVAILABLE_juce_core=1]] [[-DJUCE_MODULE_AVAILABLE_juce_data_structures=1]] [[-DJUCE_MODULE_AVAILABLE_juce_events=1]] [[-DJUCE_MODULE_AVAILABLE_juce_graphics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1]] [[-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1]] [[-DJUCE_STANDALONE_APPLICATION=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]] [[-DNDEBUG=1]])
 else()
     message( FATAL_ERROR "No matching build-configuration found." )
 endif()
@@ -56,8 +56,10 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPBytesOnGroup.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConversion.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConverters.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDeviceInfo.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDeviceInfo.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDispatcher.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPFactory.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPFactory.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPIterator.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPIterator.h"
@@ -155,9 +157,11 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.h"
     "../../../../../modules/juce_audio_devices/audio_io/juce_SampleRateHelpers.cpp"
     "../../../../../modules/juce_audio_devices/audio_io/juce_SystemAudioVolume.h"
+    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPBlock.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPBlock.h"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPDisconnectionListener.h"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPEndpoint.h"
+    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPEndpointId.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPEndpointId.h"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPEndpoints.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPEndpoints.h"
@@ -2282,6 +2286,10 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/windows/juce_WindowUtils.h"
     "../../../../../modules/juce_gui_basics/juce_gui_basics.cpp"
     "../../../../../modules/juce_gui_basics/juce_gui_basics.mm"
+    "../../../../../modules/juce_gui_basics/juce_gui_basics_2.cpp"
+    "../../../../../modules/juce_gui_basics/juce_gui_basics_3.cpp"
+    "../../../../../modules/juce_gui_basics/juce_gui_basics_4.cpp"
+    "../../../../../modules/juce_gui_basics/juce_gui_basics_5.cpp"
     "../../../../../modules/juce_gui_basics/juce_gui_basics.h"
     "../../../../../modules/juce_gui_extra/code_editor/juce_CodeDocument.cpp"
     "../../../../../modules/juce_gui_extra/code_editor/juce_CodeDocument.h"
@@ -2367,6 +2375,10 @@ add_library( ${BINARY_NAME}
     "../../../JuceLibraryCode/include_juce_graphics_Harfbuzz.cpp"
     "../../../JuceLibraryCode/include_juce_graphics_Sheenbidi.c"
     "../../../JuceLibraryCode/include_juce_gui_basics.cpp"
+    "../../../JuceLibraryCode/include_juce_gui_basics_2.cpp"
+    "../../../JuceLibraryCode/include_juce_gui_basics_3.cpp"
+    "../../../JuceLibraryCode/include_juce_gui_basics_4.cpp"
+    "../../../JuceLibraryCode/include_juce_gui_basics_5.cpp"
     "../../../JuceLibraryCode/include_juce_gui_extra.cpp"
     "../../../JuceLibraryCode/JuceHeader.h"
 )
@@ -2391,8 +2403,10 @@ set_source_files_properties(
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPBytesOnGroup.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConversion.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConverters.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDeviceInfo.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDeviceInfo.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDispatcher.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPFactory.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPFactory.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPIterator.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPIterator.h"
@@ -2490,9 +2504,11 @@ set_source_files_properties(
     "../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.h"
     "../../../../../modules/juce_audio_devices/audio_io/juce_SampleRateHelpers.cpp"
     "../../../../../modules/juce_audio_devices/audio_io/juce_SystemAudioVolume.h"
+    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPBlock.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPBlock.h"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPDisconnectionListener.h"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPEndpoint.h"
+    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPEndpointId.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPEndpointId.h"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPEndpoints.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPEndpoints.h"
@@ -4617,6 +4633,10 @@ set_source_files_properties(
     "../../../../../modules/juce_gui_basics/windows/juce_WindowUtils.h"
     "../../../../../modules/juce_gui_basics/juce_gui_basics.cpp"
     "../../../../../modules/juce_gui_basics/juce_gui_basics.mm"
+    "../../../../../modules/juce_gui_basics/juce_gui_basics_2.cpp"
+    "../../../../../modules/juce_gui_basics/juce_gui_basics_3.cpp"
+    "../../../../../modules/juce_gui_basics/juce_gui_basics_4.cpp"
+    "../../../../../modules/juce_gui_basics/juce_gui_basics_5.cpp"
     "../../../../../modules/juce_gui_basics/juce_gui_basics.h"
     "../../../../../modules/juce_gui_extra/code_editor/juce_CodeDocument.cpp"
     "../../../../../modules/juce_gui_extra/code_editor/juce_CodeDocument.h"

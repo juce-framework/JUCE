@@ -169,7 +169,6 @@ static void evaluationHandler (WebBrowserComponent::EvaluationResult r)
         // result that cannot be translated and returned to native code such as a Promise.
         jassert (r.getError()->type == WebBrowserComponent::EvaluationResult::Error::Type::unsupportedReturnType);
         DBG (r.getError()->message);
-        return;
     }
 }
 
