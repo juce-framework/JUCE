@@ -87,6 +87,17 @@
  #define JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING 0
 #endif
 
+/** Config: JUCE_ENABLE_DIRECT2D_CLEARTYPE_FONT_SMOOTHING
+
+    Setting this flag will *enable* Windows ClearType subpixel font antialiasing when using
+    the Direct2D renderer, if preferred by the end user. This is off by default due to
+    issues with transparency, certain compositions and transformations so make sure the 
+    output looks acceptable for your use cases.
+*/
+#ifndef JUCE_ENABLE_DIRECT2D_CLEARTYPE_FONT_SMOOTHING
+#define JUCE_ENABLE_DIRECT2D_CLEARTYPE_FONT_SMOOTHING 0
+#endif
+
 #ifndef JUCE_INCLUDE_PNGLIB_CODE
  #define JUCE_INCLUDE_PNGLIB_CODE 1
 #endif
