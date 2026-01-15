@@ -36,7 +36,7 @@ namespace juce
 {
 
 //==============================================================================
-class ScopedThreadDPIAwarenessSetter
+class [[nodiscard]] ScopedThreadDPIAwarenessSetter
 {
 public:
     explicit ScopedThreadDPIAwarenessSetter (void* nativeWindow);
