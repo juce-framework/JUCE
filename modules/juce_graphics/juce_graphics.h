@@ -153,6 +153,7 @@ namespace juce
 #include "contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
 #include "effects/juce_ImageEffectFilter.h"
 #include "effects/juce_DropShadowEffect.h"
+#include "effects/juce_StackShadowEffect.h"
 #include "effects/juce_GlowEffect.h"
 #include "detail/juce_Unicode.h"
 
