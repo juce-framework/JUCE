@@ -375,8 +375,14 @@ void UpdateRegion::findRECTAndValidate (HWND windowHandle)
     const ScopeGuard regionDeleter { [&] { DeleteObject (regionHandle); } };
     const auto regionType = GetUpdateRgn (windowHandle, regionHandle, false);
 
-    if (regionType == ERROR || regionType == NULLREGION)
+    if (regionType == ERROR)
         return;
+
+    if (regionType == NULLREGION)
+    {
+        ValidateRect (windowHandle, nullptr);
+        return;
+    }
 
     const auto requiredBytes = GetRegionData (regionHandle, 0, nullptr);
     block.ensureSize (requiredBytes);
