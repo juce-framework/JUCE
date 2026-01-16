@@ -77,10 +77,13 @@ void ResizableWindow::initialise (const bool shouldAddToDesktop)
 
 int ResizableWindow::getDesktopWindowStyleFlags() const
 {
-    int styleFlags = TopLevelWindow::getDesktopWindowStyleFlags();
+    const auto styleFlags = TopLevelWindow::getDesktopWindowStyleFlags();
 
-    if (isResizable() && Desktop::getInstance().supportsBorderlessNonClientResize())
-        styleFlags |= ComponentPeer::windowIsResizable;
+    if (isResizable()
+        && (isUsingNativeTitleBar() || Desktop::getInstance().supportsBorderlessNonClientResize()))
+    {
+        return styleFlags | ComponentPeer::windowIsResizable;
+    }
 
     return styleFlags;
 }
