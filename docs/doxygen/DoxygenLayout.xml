@@ -43,6 +43,7 @@
     </tab>
     <tab type="examples" visible="no" title="" intro=""/>
     <tab type="user" visible="yes" title="Tutorials" url="https://juce.com/learn/tutorials"/>
+    <tab type="user" visible="yes" title="Course" url="https://juce.com/learn/course"/>
   </navindex>
 
   <!-- Layout definition for a class page -->
