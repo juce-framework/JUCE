@@ -2036,6 +2036,7 @@ public:
         if (approximatelyEqual (prev, next))
             return;
 
+        InvalidateRect (hwnd, nullptr, FALSE);
         scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (next); });
     }
 
