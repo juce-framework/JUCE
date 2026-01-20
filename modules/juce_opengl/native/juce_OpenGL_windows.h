@@ -166,6 +166,8 @@ public:
             if (! approximatelyEqual (nativeScaleFactor, 1.0))
                 bounds = (bounds.toDouble() * nativeScaleFactor).toNearestInt();
 
+            const ScopedThreadDPIAwarenessSetter scope { nativeWindow->getNativeHandle() };
+
             SetWindowPos ((HWND) nativeWindow->getNativeHandle(), nullptr,
                           bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
                           SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
