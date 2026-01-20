@@ -45,12 +45,12 @@ namespace juce::dsp::FIR
         A processing class that can perform FIR filtering on an audio signal, in the
         time domain.
 
-        Using FIRFilter is fast enough for FIRCoefficients with a size lower than 128
-        samples. For longer filters, it might be more efficient to use the class
+        Using FIR::Filter is fast enough for FIR::Coefficients with a size lower than
+        128 samples. For longer filters, it might be more efficient to use the class
         Convolution instead, which does the same processing in the frequency domain
         thanks to FFT.
 
-        @see FIRFilter::Coefficients, Convolution, FFT
+        @see FIR::Coefficients, Convolution, FFT
 
         @tags{DSP}
     */
@@ -212,9 +212,9 @@ namespace juce::dsp::FIR
 
     //==============================================================================
     /**
-        A set of coefficients for use in an FIRFilter object.
+        A set of coefficients for use in an FIR::Filter object.
 
-        @see FIRFilter
+        @see FIR::Filter
 
         @tags{DSP}
     */
