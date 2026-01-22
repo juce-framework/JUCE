@@ -57,6 +57,7 @@ profile
 **/doxygen/doc
 **/doxygen/xml
 **/.idea
+**/out/build
 extras/Projucer/JUCECompileEngine.dylib
 
 .idea
