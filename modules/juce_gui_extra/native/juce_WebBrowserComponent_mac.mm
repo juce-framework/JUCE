@@ -906,6 +906,10 @@ public:
                                           configuration: config.get()]);
        #endif
 
+       #if JUCE_DEBUG
+        [webView.get() setValue:@(true) forKey:@"inspectable"];
+       #endif
+
         if (const auto userAgent = browserOptions.getUserAgent(); userAgent.isNotEmpty())
             webView.get().customUserAgent = juceStringToNS (userAgent);
 
