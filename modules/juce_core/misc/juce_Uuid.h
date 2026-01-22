@@ -52,7 +52,7 @@ class JUCE_API  Uuid
 public:
     //==============================================================================
     /** Creates a new unique ID, compliant with RFC 4122 version 4. */
-    Uuid();
+    Uuid(Random r = Random());
 
     /** Destructor. */
     ~Uuid() noexcept;
@@ -145,6 +145,8 @@ private:
     uint8 uuid[sizeInBytes];
     String getHexRegion (int, int) const;
     int compare (Uuid) const noexcept;
+    
+    void init(Random& r);
 
     JUCE_LEAK_DETECTOR (Uuid)
 };
