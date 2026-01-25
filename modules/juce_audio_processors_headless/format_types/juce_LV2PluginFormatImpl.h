@@ -4290,25 +4290,33 @@ public:
     FileSearchPath getDefaultLocationsToSearch()
     {
       #if JUCE_MAC
-        return { "~/Library/Audio/Plug-Ins/LV2;"
-                 "~/.lv2;"
-                 "/usr/local/lib/lv2;"
-                 "/usr/lib/lv2;"
-                 "/Library/Audio/Plug-Ins/LV2;" };
+        return FileSearchPath (SystemStats::getEnvironmentVariable ( "LV2_PATH", { "~/Library/Audio/Plug-Ins/LV2;"
+                                                                                   "~/.lv2;"
+                                                                                   "/Library/Audio/Plug-Ins/LV2;"
+                                                                                   "/usr/local/lib/lv2;"
+                                                                                   "/usr/lib/lv2" })
+                                 .replace (":", ";"));
       #elif JUCE_WINDOWS
-        return { "%APPDATA%\\LV2;"
-                 "%COMMONPROGRAMFILES%\\LV2" };
+        return FileSearchPath (SystemStats::getEnvironmentVariable ("LV2_PATH",
+                                                                    { "%APPDATA%\\LV2;"
+                                                                      "%COMMONPROGRAMFILES%\\LV2" }));
       #else
+        char const* fallback_str = { "~/.lv2;"
+                                     "/usr/local/lib/lv2;"
+                                     "/usr/lib/lv2" };
+
        #if JUCE_64BIT
+        // Check for systems like Fedora (in contrast to e.g. debian)
+        // where /usr/lib64 contains all 64-bit native libraries (and /usr/lib doesn't).
+        // On a 64-bit debian /usr/lib64 will only contain a symlink to the
+        // dynmic loader, as required by the ABI for x86_64, but no libraries.
         if (File ("/usr/lib64/lv2").exists() || File ("/usr/local/lib64/lv2").exists())
-            return { "~/.lv2;"
-                     "/usr/lib64/lv2;"
-                     "/usr/local/lib64/lv2" };
+            fallback_str = { "~/.lv2;"
+                             "/usr/local/lib64/lv2;"
+                             "/usr/lib64/lv2" };
        #endif
 
-        return { "~/.lv2;"
-                 "/usr/lib/lv2;"
-                 "/usr/local/lib/lv2" };
+        return FileSearchPath (SystemStats::getEnvironmentVariable ("LV2_PATH", fallback_str).replace (":", ";"));
       #endif
     }
 

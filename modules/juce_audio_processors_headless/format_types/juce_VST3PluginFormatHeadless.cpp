@@ -155,15 +155,37 @@ StringArray VST3PluginFormatHeadless::searchPathsForPlugins (const FileSearchPat
 
 FileSearchPath VST3PluginFormatHeadless::getDefaultLocationsToSearch()
 {
-   #if JUCE_WINDOWS
+  #if JUCE_WINDOWS
     const auto localAppData = File::getSpecialLocation (File::windowsLocalAppData)        .getFullPathName();
     const auto programFiles = File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName();
-    return FileSearchPath (localAppData + "\\Programs\\Common\\VST3;" + programFiles + "\\Common Files\\VST3");
-   #elif JUCE_MAC
-    return FileSearchPath ("~/Library/Audio/Plug-Ins/VST3;/Library/Audio/Plug-Ins/VST3");
-   #else
-    return FileSearchPath ("~/.vst3/;/usr/lib/vst3/;/usr/local/lib/vst3/");
+    return FileSearchPath (SystemStats::getEnvironmentVariable ("VST3_PATH",
+                                                                { localAppData + "\\Programs\\Common\\VST3;"
+                                                                  programFiles + "\\Common Files\\VST3" }));
+  #elif JUCE_MAC
+    return FileSearchPath (SystemStats::getEnvironmentVariable ( "VST3_PATH", { "~/Library/Audio/Plug-Ins/VST3;"
+                                                                                "~/.vst3;"
+                                                                                "/Library/Audio/Plug-Ins/VST3;"
+                                                                                "/usr/local/lib/vst3;"
+                                                                                "/usr/lib/vst3" })
+                             .replace (":", ";"));
+  #else
+    char const* fallback_str = { "~/.vst3;"
+                                 "/usr/local/lib/vst3;"
+                                 "/usr/lib/vst3" };
+
+   #if JUCE_64BIT
+    // Check for systems like Fedora (in contrast to e.g. debian)
+    // where /usr/lib64 contains all 64-bit native libraries (and /usr/lib doesn't).
+    // On a 64-bit debian /usr/lib64 will only contain a symlink to the
+    // dynmic loader, as required by the ABI for x86_64, but no libraries.
+    if (File ("/usr/lib64/vst3").exists() || File ("/usr/local/lib64/vst3").exists())
+        fallback_str = { "~/.vst3;"
+                         "/usr/local/lib64/vst3;"
+                         "/usr/lib64/vst3" };
    #endif
+
+    return FileSearchPath (SystemStats::getEnvironmentVariable ("VST3_PATH", fallback_str).replace (":", ";"));
+  #endif
 }
 
 JUCE_END_NO_SANITIZE
