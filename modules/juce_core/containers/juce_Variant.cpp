@@ -714,6 +714,21 @@ bool var::hasProperty (const Identifier& propertyName) const noexcept
     return false;
 }
 
+Array<Identifier> var::getProperties() const
+{
+    if (auto* o = getDynamicObject())
+    {
+        Array<Identifier> names;
+
+        for (auto itr : o->getProperties())
+            names.add (itr.name);
+
+        return names;
+    }
+
+    return {};
+}
+
 var::NativeFunction var::getNativeFunction() const
 {
     return isMethod() && (value.methodValue != nullptr) ? *value.methodValue : nullptr;
@@ -897,6 +912,75 @@ var var::readFromStream (InputStream& input)
 var::NativeFunctionArgs::NativeFunctionArgs (const var& t, const var* args, int numArgs) noexcept
     : thisObject (t), arguments (args), numArguments (numArgs)
 {
+}
+
+//==============================================================================
+VarIterator::VarIterator (const var& v_, bool isEnd)
+    : v (v_)
+{
+    if (isEnd)
+    {
+        if (v.isArray())
+            index = v.getArray()->size();
+        else if (auto o = v.getDynamicObject())
+            itr = o->getProperties().end();
+    }
+    else
+    {
+        if (v.isArray())
+            index = 0;
+        else if (auto o = v.getDynamicObject())
+            itr = o->getProperties().begin();
+    }
+}
+
+VarIterator& VarIterator::operator++()
+{
+    if (v.isArray())
+    {
+        index++;
+    }
+    else if (v.getDynamicObject())
+    {
+        auto i = (const NamedValueSet::NamedValue*)itr;
+        i++;
+        itr = i;
+    }
+    return *this;
+}
+
+bool VarIterator::operator== (const VarIterator& other) const
+{
+    return index == other.index && itr == other.itr;
+}
+
+bool VarIterator::operator!= (const VarIterator& other) const
+{
+    return ! (*this == other);
+}
+
+VarIterator::NamedValue VarIterator::operator*() const
+{
+    if (v.isArray())
+    {
+        return { index, (*v.getArray())[index] };
+    }
+    else if (v.getDynamicObject())
+    {
+        auto i = (const NamedValueSet::NamedValue*)itr;
+        return { i->name.toString(), i->value };
+    }
+    return {};
+}
+
+VarIterator begin (const var& v)
+{
+    return VarIterator (v, false);
+}
+
+VarIterator end (const var& v)
+{
+    return VarIterator (v, true);
 }
 
 //==============================================================================
