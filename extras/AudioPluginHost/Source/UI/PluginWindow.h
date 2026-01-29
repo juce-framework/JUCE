@@ -215,6 +215,7 @@ public:
 
     ~PluginWindow() override
     {
+        node->getProcessor()->editorBeingDeleted(node->getProcessor()->getActiveEditor());
         clearContentComponent();
     }
 
