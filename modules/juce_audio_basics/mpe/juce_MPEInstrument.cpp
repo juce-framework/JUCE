@@ -680,8 +680,11 @@ bool MPEInstrument::isUsingChannel (int midiChannel) const noexcept
     if (legacyMode.isEnabled)
         return legacyMode.channelRange.contains (midiChannel);
 
-    return zoneLayout.getLowerZone().isUsing (midiChannel)
-            || zoneLayout.getUpperZone().isUsing (midiChannel);
+    const auto lowerZone = zoneLayout.getLowerZone();
+    const auto upperZone = zoneLayout.getUpperZone();
+
+    return (lowerZone.isActive() && lowerZone.isUsing (midiChannel))
+            || (upperZone.isActive() && upperZone.isUsing (midiChannel));
 }
 
 //==============================================================================
