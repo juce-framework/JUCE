@@ -637,10 +637,12 @@ public:
         window.__JUCE__.backend.removeEventListener(removalToken);
         @endcode
 
-        On some platforms, the JUCE Javascript framework that emits these events isn't loaded until
-        triggering the first document load i.e. the first call to goToURL(). In this case a Javascript
-        exception is logged in debug builds and an assertion is triggered on the C++ side.
-        Simply put, you should call goToURL() at least once before this function.
+        The event is emitted by the JUCE Javascript framework, hence this function will fail if the
+        framework isn't loaded yet. If this happens a Javascript exception is logged in debug builds
+        and an assertion is triggered on the C++ side.
+
+        To be safe, you should only call this function after the first page has finished loading,
+        i.e. after the first call to pageFinishedLoading().
     */
     void emitEventIfBrowserIsVisible (const Identifier& eventId, const var& object);
 
