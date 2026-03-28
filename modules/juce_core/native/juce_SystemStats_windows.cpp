@@ -87,11 +87,12 @@ static void callCPUID (int result[4], uint32 type)
          lc = (uint32) result[2], ld = (uint32) result[3];
 
   asm ("mov %%ebx, %%esi \n\t"
+       "xor %%ecx, %%ecx \n\t"
        "cpuid \n\t"
        "xchg %%esi, %%ebx"
        : "=a" (la), "=S" (lb), "=c" (lc), "=d" (ld) : "a" (type)
         #if JUCE_64BIT
-     , "b" (lb), "c" (lc), "d" (ld)
+     , "b" (lb), "d" (ld)
         #endif
        );
 
