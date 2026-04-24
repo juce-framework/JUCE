@@ -36,8 +36,9 @@
  dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
                    juce_audio_processors, juce_audio_utils, juce_core,
                    juce_data_structures, juce_events, juce_graphics,
-                   juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2022, linux_make, androidstudio, xcode_iphone
+                   juce_gui_basics, juce_gui_extra, juce_audio_processors_headless
+ exporters:        xcode_mac, vs2022, vs2026, linux_make, androidstudio,
+                   xcode_iphone
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -83,21 +84,25 @@ public:
             // Create an OutputStream to write to our destination file...
             file.deleteFile();
 
-            if (auto fileStream = std::unique_ptr<FileOutputStream> (file.createOutputStream()))
+            if (std::unique_ptr<OutputStream> fileStream { file.createOutputStream() })
             {
                 // Now create a WAV writer object that writes to our output stream...
                 WavAudioFormat wavFormat;
 
-                if (auto writer = wavFormat.createWriterFor (fileStream.get(), sampleRate, 1, 16, {}, 0))
+                using Opts = AudioFormatWriterOptions;
+
+                if (auto writer = wavFormat.createWriterFor (fileStream, Opts{}.withSampleRate (sampleRate)
+                                                                               .withNumChannels (1)
+                                                                               .withBitsPerSample (16)))
                 {
-                    fileStream.release(); // (passes responsibility for deleting the stream to the writer object that is now using it)
+                    auto* writerPtr = writer.get();
 
                     // Now we'll create one of these helper objects which will act as a FIFO buffer, and will
                     // write the data to disk on our background thread.
-                    threadedWriter.reset (new AudioFormatWriter::ThreadedWriter (writer, backgroundThread, 32768));
+                    threadedWriter.reset (new AudioFormatWriter::ThreadedWriter (writer.release(), backgroundThread, 32768));
 
                     // Reset our recording thumbnail
-                    thumbnail.reset (writer->getNumChannels(), writer->getSampleRate());
+                    thumbnail.reset (writerPtr->getNumChannels(), writerPtr->getSampleRate());
                     nextSampleNum = 0;
 
                     // And now, swap over our active writer pointer so that the audio callback will start using it..

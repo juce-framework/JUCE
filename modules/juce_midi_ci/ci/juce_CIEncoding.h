@@ -88,8 +88,7 @@ struct EncodingUtils
 
 } // namespace juce::midi_ci
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce
 {
     template <>
@@ -113,5 +112,4 @@ namespace juce
     };
 
 } // namespace juce
-
-#endif  // ifndef DOXYGEN
+/** @endcond */

@@ -1,5 +1,247 @@
 # JUCE breaking changes
 
+# Version 8.0.11
+
+## Change
+
+Enabling JUCE_ASIO will now default to using bundled ASIO sources.
+
+**Possible Issues**
+
+Programs that depend on specific versions of the ASIO SDK (perhaps with custom
+modifications) may be broken.
+
+**Workaround**
+
+To use a different version of the ASIO SDK, additionally set the
+JUCE_ASIO_USE_EXTERNAL_SDK module option. If you're happy to use the bundled
+sources, consider removing the custom header include paths you were previously
+using to locate the ASIO headers.
+
+**Rationale**
+
+The bundled headers should be sufficient for the majority of use-cases, so this
+is now the standard option requiring less configuration. Using custom headers
+is an advanced use-case, so it's reasonable that this requires some additional
+configuration, i.e. setting the JUCE_ASIO_USE_EXTERNAL_SDK flag.
+
+
+# Version 8.0.9
+
+## Change
+
+AudioProcessor::TrackProperties::colour has been removed. It is replaced by a
+new data member, colourARGB.
+
+**Possible Issues**
+
+Code that references this data member will fail to compile.
+
+**Workaround**
+
+Use the new colourARGB field, which holds the raw ARGB values packed in a
+uint32, instead. In order to convert to a Colour instance, pass the value held
+by colourARGB to the constructor of Colour.
+
+**Rationale**
+
+This change removes the dependency between the juce_audio_processors_headless
+and juce_graphics. It is now possible to build programs that work with headless
+AudioProcessors without needing to include juce_graphics.
+
+
+## Change
+
+The function AudioPluginFormatManager::addDefaultFormats() has been removed.
+
+**Possible Issues**
+
+Code that calls this function will fail to compile.
+
+**Workaround**
+
+Use the new non-member function "addDefaultFormatsToManager()" instead.
+
+**Rationale**
+
+This change removes the dependency between the AudioPluginFormatManager and the
+concrete plugin format types, allowing the AudioPluginFormatManager to be built
+in isolation.
+
+
+## Change
+
+The signatures of OpenGLFrameBuffer::readPixels() and
+OpenGLFrameBuffer::writePixels() have changed, adding a new RowOrder parameter.
+
+**Possible Issues**
+
+Code that does not specify this parameter will not compile.
+
+**Workaround**
+
+Pass the extra parameter to specify whether the pixel data should be ordered
+with the top-most or bottom-most row first.
+
+**Rationale**
+
+The previous function calls did not allow the pixel order to be configured.
+readPixels() would return pixel data with the bottom-most row first (this is
+convention for the OpenGL API), but writePixels() would expect the top-most row
+first. This meant that reading and then immediately writing the same data would
+have the unexpected effect of flipping the image. Changing readPixels() to
+order pixels from top to bottom would be slightly dangerous, as it would
+introduce a change of behaviour with no accompanying compiler warning.
+Additionally, flipping the pixel storage introduces additional work that can be
+safely skipped when the pixel data is going to be written back to the
+framebuffer later.
+
+
+## Change
+
+The behaviour of the default constructed FocusTraverser objects has changed, and
+they will now navigate onto disabled components. This only affects navigation by
+screen readers and not general keyboard navigation, as the latter depends on the
+KeyboardFocusTraverser class.
+
+**Possible Issues**
+
+Disabled child components of focus containers that used the JUCE default
+FocusTraverser will now be discoverable by screen readers. They will accept
+accessibility focus, their title will be reported as well as their disabled
+state.
+
+Children of components that returned a custom ComponentTraverser object are not
+affected.
+
+**Workaround**
+
+If you wish to hide disabled components from screen readers, you can restore the
+old behaviour by overriding `Component::createFocusTraverser()` for your focus
+containers, and returning a FocusTraverser object created using the
+`FocusTraverser::SkipDisabledComponents::yes` argument.
+
+**Rationale**
+
+Disabled components are typically rendered in a dimmed or inactive state, but 
+are still prominently visible for sighted users. The old behaviour made these
+components entirely missing from the accessibility tree, making them 
+non-discoverable with screen readers. 
+
+This was in contrast to the behaviour of native OS components, that are still
+accessible using screen readers, but their disabled/dimmed state is also
+reported.
+
+
+## Change
+
+The default Visual Studio project settings for "Debug Information Format" have
+changed in the Projucer. By default debug symbols are generated using the /Zi
+flag.
+
+**Possible Issues**
+
+PDB file generation may change depending on the combination of "Debug
+Information Format" settings.
+
+**Workaround**
+
+Change the "Debug Information Format" setting for each Visual Studio
+configuration as required.
+
+**Rationale**
+
+The previous change to "/Z7" for the "Debug Information Format" flag caused
+build artefacts to drastically increase in size in some configurations, which
+could lead to build failures. In particular, when link-time code-generation is
+enabled, .obj files generated with the debug info mode set to "Z7" or "None"
+may be much larger than when using "Zi" instead.
+
+
+## Change
+
+The "Debug Information Format" flag has been changed to "/Zi" from "/Z7" when
+building JUCE on Windows using CMake.
+
+**Possible Issues**
+
+Some CI tooling (e.g., sscache) may experience issues writing debug information.
+Debug information will no longer be stored inside the object files during the
+build process.
+
+**Workaround**
+
+You can override the "Debug Information Format" flag with the
+"CMAKE_MSVC_DEBUG_INFORMATION_FORMAT" which is available under policy "CMP0141".
+
+This can be enabled at configuration time:
+    -DCMAKE_POLICY_DEFAULT_CMP0141=NEW
+    -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded (for "/Z7")
+    or
+    -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=ProgramDatabase (for "/Zi")
+
+**Rationale**
+
+The previous change to "/Z7" for the "Debug Information Format" flag caused
+build artefacts to drastically increase in size in some configurations, which
+could lead to build failures. In particular, when link-time code-generation is
+enabled, .obj files generated with the debug info mode set to "Z7" or "None"
+may be much larger than when using "Zi" instead.
+
+
+## Change
+
+The AudioFormat class now only has one virtual createWriterFor member function:
+`createWriterFor (std::unique_ptr<OutputStream>&, const AudioFormatWriterOptions&)`.
+
+The older createWriterFor overloads are now non-virtual and deprecated.
+
+**Possible Issues**
+
+Classes overriding the old AudioFormat::createWriterFor functions will fail to
+compile.
+
+Additionally, code calling the old functions will emit a deprecation warning.
+
+**Workaround**
+
+Classes inheriting from AudioFormat should override the new createWriterFor
+function that takes an AudioFormatWriterOptions parameter.
+
+**Rationale**
+
+Adding support for writing wav files in 32-bit PCM format required the addition
+of another parameter to the AudioFormat::createWriterFor interface. This
+function already had many parameters, some of them already superfluous for some
+of the formats that share this interface. The introduction of a new options type
+makes it easier to extend this interface now and in the future. The old
+functions are marked deprecated, as allowing to override them would have made
+the implementation more complicated. The new signature better communicates
+resource ownership, helping to avoid bugs due to misuse.
+
+
+## Change
+
+Some functions and types have been moved from the VST3ClientExtentions class
+into a new VST3Interface struct and JUCE_VST3_COMPATIBLE_CLASSES preprocessor
+definition.
+
+**Possible Issues**
+
+Your project may not compile.
+
+**Workaround**
+
+Replace relevant types and function calls with the equivalent in the
+VST3Interface struct, and/or define the JUCE_VST3_COMPATIBLE_CLASSES
+preprocessor definition in your Projucer or CMake project.
+
+**Rationale**
+
+This change allows the VST3 helper executable to be built without needing to
+depend on, and load, the plugin as part of the post build steps.
+
+
 # Version 8.0.7
 
 ## Change

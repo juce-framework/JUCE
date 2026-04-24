@@ -344,8 +344,9 @@ private:
 };
 
 //==============================================================================
-struct VideoComponent::Pimpl
-    : public AndroidViewComponent, private ActivityLifecycleCallbacks, private SurfaceHolderCallback
+struct VideoComponent::Pimpl : public AndroidViewComponent,
+                               private ActivityLifecycleCallbacks,
+                               private SurfaceHolderCallback
 {
     Pimpl (VideoComponent& ownerToUse, bool)
         : owner (ownerToUse),
@@ -359,14 +360,6 @@ struct VideoComponent::Pimpl
         auto* env = getEnv();
 
         LocalRef<jobject> appContext (getAppContext());
-
-        if (appContext != nullptr)
-        {
-            ActivityLifecycleCallbacks* callbacks = dynamic_cast<ActivityLifecycleCallbacks*> (this);
-
-            activityLifeListener = GlobalRef (CreateJavaInterface (callbacks, "android/app/Application$ActivityLifecycleCallbacks"));
-            env->CallVoidMethod (appContext.get(), AndroidApplication.registerActivityLifecycleCallbacks, activityLifeListener.get());
-        }
 
         {
             LocalRef<jobject> surfaceView (env->NewObject (AndroidSurfaceView, AndroidSurfaceView.constructor, getAppContext().get()));
@@ -396,13 +389,6 @@ struct VideoComponent::Pimpl
                 SurfaceHolderCallback::clear();
                 surfaceHolderCallback.clear();
             }
-        }
-
-        if (activityLifeListener != nullptr)
-        {
-            env->CallVoidMethod (getAppContext().get(), AndroidApplication.unregisterActivityLifecycleCallbacks, activityLifeListener.get());
-            ActivityLifecycleCallbacks::clear();
-            activityLifeListener.clear();
         }
     }
 
@@ -768,7 +754,7 @@ private:
                 CALLBACK (generatedCallback<&Controller::playbackStateChanged>, "mediaControllerPlaybackStateChanged",  "(JLandroid/media/session/PlaybackState;)V") \
                 CALLBACK (generatedCallback<&Controller::sessionDestroyed>,     "mediaControllerSessionDestroyed",      "(J)V")
 
-            DECLARE_JNI_CLASS_WITH_BYTECODE (AndroidMediaControllerCallback, "com/rmsl/juce/MediaControllerCallback", 21, MediaSessionByteCode)
+            DECLARE_JNI_CLASS_WITH_BYTECODE (AndroidMediaControllerCallback, "com/rmsl/juce/MediaControllerCallback", 24, MediaSessionByteCode)
            #undef JNI_CLASS_MEMBERS
 
             LocalRef<jobject> createControllerCallbacks()
@@ -1498,7 +1484,7 @@ private:
 
             auto* env = getEnv();
 
-            auto requestBuilderClass = LocalRef<jclass> (env->FindClass ("android/media/AudioFocusRequest$Builder"));
+            LocalRef<jclass> requestBuilderClass { env->FindClass ("android/media/AudioFocusRequest$Builder") };
 
             static jmethodID constructor = env->GetMethodID (requestBuilderClass, "<init>", "(I)V");
             static jmethodID buildMethod = env->GetMethodID (requestBuilderClass, "build", "()Landroid/media/AudioFocusRequest;");
@@ -1696,7 +1682,7 @@ private:
     VideoComponent& owner;
 
     MediaSession mediaSession;
-    GlobalRef activityLifeListener;
+    ActivityLifecycleCallbackForwarder forwarder { GlobalRef { getAppContext() }, this };
    #if JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
     SystemVolumeListener systemVolumeListener;
    #endif

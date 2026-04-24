@@ -62,7 +62,7 @@ void DrawableButton::setImages (const Drawable* normal,
                                 const Drawable* downOn,
                                 const Drawable* disabledOn)
 {
-    jassert (normal != nullptr); // you really need to give it at least a normal image..
+    jassert (normal != nullptr); // you really need to give it at least a normal image
 
     normalImage     = copyDrawableIfNotNull (normal);
     overImage       = copyDrawableIfNotNull (over);

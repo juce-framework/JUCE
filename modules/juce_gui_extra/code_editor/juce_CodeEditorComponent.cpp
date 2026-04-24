@@ -1563,7 +1563,7 @@ void CodeEditorComponent::mouseDown (const MouseEvent& e)
         m.setLookAndFeel (&getLookAndFeel());
         addPopupMenuItems (m, &e);
 
-        m.showMenuAsync (PopupMenu::Options(),
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (this).withMousePosition(),
                          ModalCallbackFunction::forComponent (codeEditorMenuCallback, this));
     }
     else

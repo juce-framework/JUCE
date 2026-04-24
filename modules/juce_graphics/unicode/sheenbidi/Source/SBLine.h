@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,17 @@
 #ifndef _SB_INTERNAL_LINE_H
 #define _SB_INTERNAL_LINE_H
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBBase.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SBCodepointSequence.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SBLine.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SBParagraph.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SBRun.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepointSequence.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBLine.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBParagraph.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBRun.h>
+
+#include "Object.h"
 
 typedef struct _SBLine {
+    Object _object;
     SBCodepointSequence codepointSequence;
     SBRun *fixedRuns;
     SBUInteger runCount;

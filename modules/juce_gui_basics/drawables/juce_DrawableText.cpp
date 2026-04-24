@@ -75,6 +75,12 @@ void DrawableText::setText (const String& newText)
     }
 }
 
+void DrawableText::setPreserveWhitespace (bool shouldPreserveWhitespace)
+{
+    if (std::exchange (preserveWhitespace, shouldPreserveWhitespace) != shouldPreserveWhitespace)
+        refreshBounds();
+}
+
 void DrawableText::setColour (Colour newColour)
 {
     if (colour != newColour)
@@ -173,7 +179,11 @@ void DrawableText::paint (Graphics& g)
     g.setFont (scaledFont);
     g.setColour (colour);
 
-    g.drawFittedText (text, getTextArea (w, h), justification, 0x100000);
+    if (preserveWhitespace)
+        g.drawText (text, getTextArea (w, h), justification, false);
+    else
+        g.drawFittedText (text, getTextArea (w, h), justification, 0x100000);
+
 }
 
 Rectangle<float> DrawableText::getDrawableBounds() const
@@ -188,11 +198,27 @@ Path DrawableText::getOutlineAsPath() const
     auto area = getTextArea (w, h).toFloat();
 
     GlyphArrangement arr;
-    arr.addFittedText (scaledFont, text,
-                       area.getX(), area.getY(),
-                       area.getWidth(), area.getHeight(),
-                       justification,
-                       0x100000);
+
+    if (preserveWhitespace)
+    {
+        arr.addJustifiedText (scaledFont,
+                              text,
+                              area.getX(),
+                              area.getY() + scaledFont.getAscent(),
+                              area.getWidth(),
+                              justification);
+    }
+    else
+    {
+        arr.addFittedText (scaledFont,
+                           text,
+                           area.getX(),
+                           area.getY(),
+                           area.getWidth(),
+                           area.getHeight(),
+                           justification,
+                           0x100000);
+    }
 
     Path pathOfAllGlyphs;
 

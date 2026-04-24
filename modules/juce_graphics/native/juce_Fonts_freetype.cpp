@@ -260,7 +260,7 @@ public:
         {
             for (const auto& iter : RangedDirectoryIterator (File::getCurrentWorkingDirectory().getChildFile (path), true))
             {
-                if (iter.getFile().hasFileExtension ("ttf;pfb;pcf;otf"))
+                if (iter.getFile().hasFileExtension ("ttf;otf"))
                     scanFont (iter.getFile());
             }
         }
@@ -394,10 +394,8 @@ public:
         if (face == nullptr)
             return {};
 
-        auto* hbFace = hb_ft_face_create_referenced (face->face);
-        const ScopeGuard scope { [&] { hb_face_destroy (hbFace); } };
-
-        HbFont hb { hb_font_create (hbFace) };
+        HbFace hbFace { hb_ft_face_create_referenced (face->face), IncrementRef::no };
+        HbFont hb { hb_font_create (hbFace.get()), IncrementRef::no };
 
         if (hb == nullptr)
             return {};
@@ -413,20 +411,13 @@ public:
         if (face == nullptr)
             return {};
 
-        auto* hbFace = hb_ft_face_create_referenced (face->face);
-        const ScopeGuard scope { [&] { hb_face_destroy (hbFace); } };
-
-        HbFont hb { hb_font_create (hbFace) };
+        HbFace hbFace { hb_ft_face_create_referenced (face->face), IncrementRef::no };
+        HbFont hb { hb_font_create (hbFace.get()), IncrementRef::no };
 
         if (hb == nullptr)
             return {};
 
         return new FreeTypeTypeface (DoCache::yes, face, std::move (hb), face->face->family_name, face->face->style_name);
-    }
-
-    Native getNativeDetails() const override
-    {
-        return Native { hb.get(), nonPortableMetrics };
     }
 
     Typeface::Ptr createSystemFallback ([[maybe_unused]] const String& text,
@@ -438,37 +429,52 @@ public:
         if (cache == nullptr)
             return {};
 
-        FcPatternPtr pattern { FcPatternCreate() };
-
+        const auto makeBasicPattern = [&]
         {
+            FcPatternPtr pattern { FcPatternCreate() };
+
+            {
+                FcValue value{};
+                value.type = FcTypeString;
+                value.u.s = unalignedPointerCast<const FcChar8*> (ftFace->face->style_name);
+                FcPatternAdd (pattern.get(), FC_STYLE, value, FcFalse);
+            }
+
+            {
+                const FcCharSetPtr charset { FcCharSetCreate() };
+                for (const auto& character : text)
+                    FcCharSetAddChar (charset.get(), (FcChar32) character);
+                FcPatternAddCharSet (pattern.get(), FC_CHARSET, charset.get());
+            }
+
+            if (language.isNotEmpty())
+            {
+                const FcLangSetPtr langset { FcLangSetCreate() };
+                FcLangSetAdd (langset.get(), unalignedPointerCast<const FcChar8*> (language.toRawUTF8()));
+                FcPatternAddLangSet (pattern.get(), FC_LANG, langset.get());
+            }
+
+            return pattern;
+        };
+
+        const auto fallbackWithFamily = std::invoke ([&]
+        {
+            auto pattern = makeBasicPattern();
+
             FcValue value{};
             value.type = FcTypeString;
             value.u.s = unalignedPointerCast<const FcChar8*> (ftFace->face->family_name);
             FcPatternAddWeak (pattern.get(), FC_FAMILY, value, FcFalse);
-        }
 
-        {
-            FcValue value{};
-            value.type = FcTypeString;
-            value.u.s = unalignedPointerCast<const FcChar8*> (ftFace->face->style_name);
-            FcPatternAddWeak (pattern.get(), FC_STYLE, value, FcFalse);
-        }
+            return fromPattern (pattern.get());
+        });
 
-        {
-            const FcCharSetPtr charset { FcCharSetCreate() };
-            for (const auto& character : text)
-                FcCharSetAddChar (charset.get(), (FcChar32) character);
-            FcPatternAddCharSet (pattern.get(), FC_CHARSET, charset.get());
-        }
+        if (text.isEmpty() || fallbackWithFamily->getNominalGlyphForCodepoint (*text.getCharPointer()).has_value())
+            return fallbackWithFamily;
 
-        if (language.isNotEmpty())
-        {
-            const FcLangSetPtr langset { FcLangSetCreate() };
-            FcLangSetAdd (langset.get(), unalignedPointerCast<const FcChar8*> (language.toRawUTF8()));
-            FcPatternAddLangSet (pattern.get(), FC_LANG, langset.get());
-        }
-
-        return fromPattern (pattern.get());
+        const auto fallbackWithoutFamily = fromPattern (makeBasicPattern().get());
+        jassert (fallbackWithoutFamily->getNominalGlyphForCodepoint (*text.getCharPointer()).has_value());
+        return fallbackWithoutFamily;
        #else
         // Font substitution will not work unless fontconfig is enabled.
         jassertfalse;
@@ -478,9 +484,16 @@ public:
 
     ~FreeTypeTypeface() override
     {
+        native.reset();
+
         if (doCache == DoCache::yes)
             if (auto* list = FTTypefaceList::getInstanceWithoutCreating())
                 list->removeMemoryFace (ftFace);
+    }
+
+    const Native* getNativeDetails() const override
+    {
+        return native.get();
     }
 
     static Typeface::Ptr findSystemTypeface()
@@ -530,8 +543,8 @@ private:
             if (face == nullptr)
                 return {};
 
-            const HbFace hbFace { hb_ft_face_create_referenced (face->face) };
-            HbFont cachedFont { hb_font_create (hbFace.get()) };
+            HbFace hbFace { hb_ft_face_create_referenced (face->face), IncrementRef::no };
+            HbFont cachedFont { hb_font_create (hbFace.get()), IncrementRef::no };
 
             if (cachedFont == nullptr)
                 return {};
@@ -541,6 +554,15 @@ private:
     }
    #endif
 
+    static TypefaceAscentDescent getNativeMetrics (FTFaceWrapper::Ptr ftFace)
+    {
+        const auto upem = (float) ftFace->face->units_per_EM;
+        const auto ascent = (float) std::abs (ftFace->face->ascender) / upem;
+        const auto descent = (float) std::abs (ftFace->face->descender) / upem;
+
+        return { ascent, descent };
+    }
+
     FreeTypeTypeface (DoCache cache,
                       FTFaceWrapper::Ptr ftFaceIn,
                       HbFont hbIn,
@@ -548,8 +570,8 @@ private:
                       const String& styleIn)
         : Typeface (nameIn, styleIn),
           ftFace (ftFaceIn),
-          hb (std::move (hbIn)),
-          doCache (cache)
+          doCache (cache),
+          native (std::make_unique<Native> (TypefaceNativeOptions { std::move (hbIn), getNativeMetrics (ftFaceIn) }))
     {
         if (doCache == DoCache::yes)
             if (auto* list = FTTypefaceList::getInstance())
@@ -557,10 +579,8 @@ private:
     }
 
     FTFaceWrapper::Ptr ftFace;
-    HbFont hb;
     DoCache doCache;
-    TypefaceAscentDescent nonPortableMetrics { (float) std::abs (ftFace->face->ascender)  / (float) ftFace->face->units_per_EM,
-                                               (float) std::abs (ftFace->face->descender) / (float) ftFace->face->units_per_EM };
+    std::unique_ptr<Native> native;
 
     JUCE_DECLARE_NON_COPYABLE (FreeTypeTypeface)
 };

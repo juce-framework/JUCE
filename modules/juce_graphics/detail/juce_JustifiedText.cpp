@@ -499,23 +499,17 @@ int64 JustifiedText::getGlyphIndexToTheRightOf (Point<float> p) const
 
     const auto glyphsInLine = shapedText.getGlyphs (lineIt->range);
 
-    auto glyphIndex = lineIt->range.getStart();
     auto glyphX = lineIt->value.anchor.getX();
 
-    for (const auto& glyph : glyphsInLine)
+    for (const auto [glyphIndex, glyph] : enumerate (glyphsInLine, lineIt->range.getStart()))
     {
-        if (   p.getX() < glyphX + glyph.advance.getX() / 2.0f
-            || glyph.isNewline()
-            || (glyphIndex - lineIt->range.getStart() == (int64) glyphsInLine.size() - 1 && glyph.isWhitespace()))
-        {
-            break;
-        }
+        if (p.getX() < glyphX + glyph.advance.getX() / 2.0f || glyph.isNewline())
+            return glyphIndex;
 
-        ++glyphIndex;
         glyphX += glyph.advance.getX();
     }
 
-    return glyphIndex;
+    return lineIt->range.getEnd();
 }
 
 GlyphAnchorResult JustifiedText::getGlyphAnchor (int64 index) const

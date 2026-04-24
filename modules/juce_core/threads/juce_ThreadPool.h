@@ -82,10 +82,10 @@ public:
     enum JobStatus
     {
         jobHasFinished = 0,     /**< indicates that the job has finished and can be
-                                     removed from the pool. */
+                                     removed from the pool */
 
         jobNeedsRunningAgain    /**< indicates that the job would like to be called
-                                     again when a thread is free. */
+                                     again when a thread is free */
     };
 
     /** Performs the actual work that this job needs to do.

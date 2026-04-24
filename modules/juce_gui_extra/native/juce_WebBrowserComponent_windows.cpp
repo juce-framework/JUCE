@@ -74,7 +74,7 @@ public:
             {
                 // when the component becomes invisible, some stuff like flash
                 // carries on playing audio, so we need to force it onto a blank
-                // page to avoid this..
+                // page to avoid this.
 
                 owner.blankPageShown = true;
                 goToURL ("about:blank", nullptr, nullptr);
@@ -478,7 +478,7 @@ public:
             {
                 // when the component becomes invisible, some stuff like flash
                 // carries on playing audio, so we need to force it onto a blank
-                // page to avoid this..
+                // page to avoid this.
 
                 owner.blankPageShown = true;
                 goToURL ("about:blank", nullptr, nullptr);
@@ -671,7 +671,7 @@ public:
             Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler> (
                 [&result] (HRESULT, ICoreWebView2Environment* env) -> HRESULT
                 {
-                    result.environment = addComSmartPtrOwner (env);
+                    result.environment = ComSmartPtr (env, IncrementRef::yes);
                     return S_OK;
                 }).Get());
 
@@ -857,8 +857,10 @@ private:
                         {
                             method = "POST";
 
-                            auto content = becomeComSmartPtrOwner (SHCreateMemStream ((BYTE*) urlRequest.postData.getData(),
-                                                                                      (UINT) urlRequest.postData.getSize()));
+                            auto content = ComSmartPtr (SHCreateMemStream ((BYTE*) urlRequest.postData.getData(),
+                                                                           (UINT) urlRequest.postData.getSize()),
+                                                        IncrementRef::no);
+
                             request->put_Content (content);
                         }
 
@@ -884,8 +886,9 @@ private:
                     {
                         if (auto responseData = owner.impl->handleResourceRequest (resourceRequestUri))
                         {
-                            auto stream = becomeComSmartPtrOwner (SHCreateMemStream ((BYTE*) responseData->data.data(),
-                                                                                     (UINT) responseData->data.size()));
+                            ComSmartPtr stream { SHCreateMemStream ((BYTE*) responseData->data.data(),
+                                                                    (UINT) responseData->data.size()),
+                                                 IncrementRef::no };
 
                             StringArray headers { "Content-Type: " + responseData->mimeType };
 
@@ -1063,7 +1066,7 @@ private:
 
                             if (controller != nullptr)
                             {
-                                weakThis->webViewController = addComSmartPtrOwner (controller);
+                                weakThis->webViewController = ComSmartPtr (controller, IncrementRef::yes);
                                 controller->get_CoreWebView2 (weakThis->webView.resetAndGetPointerAddress());
 
                                 auto allUserScripts = weakThis->userScripts;

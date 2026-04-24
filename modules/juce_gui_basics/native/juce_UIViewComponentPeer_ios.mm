@@ -40,6 +40,43 @@
 namespace juce
 {
 
+struct WindowSceneTrackerListener
+{
+    virtual ~WindowSceneTrackerListener() = default;
+    virtual void windowSceneChanged() = 0;
+};
+
+struct WindowSceneTracker
+{
+public:
+    WindowSceneTracker() = default;
+
+    void setWindowScene (UIWindowScene* x) API_AVAILABLE (ios (13.0))
+    {
+        windowScene = x;
+        listeners.call ([] (auto& l) { l.windowSceneChanged(); });
+    }
+
+    UIWindowScene* getWindowScene() const API_AVAILABLE (ios (13.0))
+    {
+        return static_cast<UIWindowScene*> (windowScene);
+    }
+
+    void addListener (WindowSceneTrackerListener& l)
+    {
+        listeners.add (&l);
+    }
+
+    void removeListener (WindowSceneTrackerListener& l)
+    {
+        listeners.remove (&l);
+    }
+
+private:
+    ListenerList<WindowSceneTrackerListener> listeners;
+    id windowScene = nil;
+};
+
 //==============================================================================
 static NSArray* getContainerAccessibilityElements (AccessibilityHandler& handler)
 {
@@ -316,10 +353,7 @@ struct CADisplayLinkDeleter
 
 - (JuceUIViewController*) init;
 
-- (NSUInteger) supportedInterfaceOrientations;
-- (BOOL) shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation) interfaceOrientation;
-- (void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) toInterfaceOrientation duration: (NSTimeInterval) duration;
-- (void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) fromInterfaceOrientation;
+- (UIInterfaceOrientationMask) supportedInterfaceOrientations;
 - (void) viewWillTransitionToSize: (CGSize) size withTransitionCoordinator: (id<UIViewControllerTransitionCoordinator>) coordinator;
 - (BOOL) prefersStatusBarHidden;
 - (UIStatusBarStyle) preferredStatusBarStyle;
@@ -355,10 +389,11 @@ struct UIViewPeerControllerReceiver
 
 //==============================================================================
 class UIViewComponentPeer final : public ComponentPeer,
-                                  public UIViewPeerControllerReceiver
+                                  public UIViewPeerControllerReceiver,
+                                  private WindowSceneTrackerListener
 {
 public:
-    UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);
+    UIViewComponentPeer (Component&, int windowStyleFlags, id viewToAttachTo);
     ~UIViewComponentPeer() override;
 
     //==============================================================================
@@ -460,6 +495,7 @@ public:
     bool fullScreen = false, insideDrawRect = false;
     NSUniquePtr<JuceTextView> hiddenTextInput { [[JuceTextView alloc] initWithOwner: this] };
     NSUniquePtr<JuceTextInputTokenizer> tokenizer { [[JuceTextInputTokenizer alloc] initWithPeer: this] };
+    SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 
     static int64 getMouseTime (NSTimeInterval timestamp) noexcept
     {
@@ -506,6 +542,80 @@ private:
     void appStyleChanged() override
     {
         [controller setNeedsStatusBarAppearanceUpdate];
+    }
+
+    void updateSceneForWindow()
+    {
+        if (isSharedWindow)
+            return;
+
+        const auto sceneDidChange = std::invoke ([&]
+        {
+            if (@available (iOS 13, *))
+            {
+                auto* currentScene = window != nil ? [window windowScene] : nil;
+                return windowSceneTracker->getWindowScene() != currentScene;
+            }
+
+            return false;
+        });
+
+        if (! sceneDidChange)
+        {
+            updateScreenBounds();
+            return;
+        }
+
+        auto* newWindow = std::invoke ([&]() -> JuceUIWindow*
+        {
+            if (@available (iOS 13, *))
+            {
+                if (auto* scene = windowSceneTracker->getWindowScene())
+                    return [[JuceUIWindow alloc] initWithWindowScene: scene];
+            }
+            else if (window == nil)
+            {
+                auto r = convertToCGRect (component.getBounds());
+                r.origin.y = [UIScreen mainScreen].bounds.size.height - (r.origin.y + r.size.height);
+
+                return [[JuceUIWindow alloc] initWithFrame: r];
+            }
+
+            return nil;
+        });
+
+        if (newWindow == nil)
+            return;
+
+        if (window != nil)
+        {
+            [(JuceUIWindow*) window setOwner: nullptr];
+
+            if (@available (iOS 13, *))
+                window.windowScene = nil;
+
+            window.rootViewController = nil;
+            [window release];
+            window = nil;
+        }
+
+        [newWindow setOwner: this];
+        newWindow.rootViewController = controller;
+        newWindow.hidden = ! isShowing();
+        newWindow.opaque = component.isOpaque();
+        newWindow.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
+
+        if (component.isAlwaysOnTop())
+            newWindow.windowLevel = UIWindowLevelAlert;
+
+        window = newWindow;
+
+        updateScreenBounds();
+    }
+
+    void windowSceneChanged() override
+    {
+        updateSceneForWindow();
     }
 
     //==============================================================================
@@ -569,29 +679,9 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     return self;
 }
 
-- (NSUInteger) supportedInterfaceOrientations
+- (UIInterfaceOrientationMask) supportedInterfaceOrientations
 {
     return Orientations::getSupportedOrientations();
-}
-
-- (BOOL) shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation) interfaceOrientation
-{
-    return Desktop::getInstance().isOrientationEnabled (Orientations::convertToJuce (interfaceOrientation));
-}
-
-- (void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) toInterfaceOrientation
-                                 duration: (NSTimeInterval) duration
-{
-    ignoreUnused (toInterfaceOrientation, duration);
-
-    [UIView setAnimationsEnabled: NO]; // disable this because it goes the wrong way and looks like crap.
-}
-
-- (void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) fromInterfaceOrientation
-{
-    ignoreUnused (fromInterfaceOrientation);
-    sendScreenBoundsUpdate (self);
-    [UIView setAnimationsEnabled: YES];
 }
 
 - (void) viewWillTransitionToSize: (CGSize) size withTransitionCoordinator: (id<UIViewControllerTransitionCoordinator>) coordinator
@@ -608,7 +698,7 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     if (isKioskModeView (self))
         return true;
 
-    return [[[NSBundle mainBundle] objectForInfoDictionaryKey: @"UIStatusBarHidden"] boolValue];
+    return [super prefersStatusBarHidden];
 }
 
  - (BOOL) prefersHomeIndicatorAutoHidden
@@ -899,7 +989,7 @@ static void updateModifiers (const UIKeyModifierFlags flags)
                          | convert (UIKeyModifierCommand,    ModifierKeys::commandModifier)
                          | convert (UIKeyModifierNumericPad, 0); // numpad modifier currently not implemented
 
-    ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withOnlyMouseButtons().withFlags (juceFlags);
+    ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withOnlyMouseButtons().withFlags (juceFlags);
 }
 
 API_AVAILABLE (ios(13.4))
@@ -1033,7 +1123,7 @@ static void postTraitChangeNotification (UITraitCollection* previousTraitCollect
 {
     [super traitCollectionDidChange: previousTraitCollection];
 
-    if (@available (ios 17, *))
+    if (@available (iOS 17, *))
         {} // do nothing
     else
         postTraitChangeNotification (previousTraitCollection);
@@ -1699,7 +1789,9 @@ struct ChangeRegistrationTrait
 };
 
 //==============================================================================
-UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags, UIView* viewToAttachTo)
+UIViewComponentPeer::UIViewComponentPeer (Component& comp,
+                                          int windowStyleFlags,
+                                          id viewToAttachTo)
     : ComponentPeer (comp, windowStyleFlags),
       isSharedWindow (viewToAttachTo != nil),
       isAppex (SystemStats::isRunningInAppExtensionSandbox())
@@ -1728,37 +1820,33 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
 
     if (isSharedWindow)
     {
-        window = [viewToAttachTo window];
-        [viewToAttachTo addSubview: view];
+        auto* uiViewToAttachTo = static_cast<UIView*> (viewToAttachTo);
+        window = [uiViewToAttachTo window];
+        [uiViewToAttachTo addSubview: view];
     }
     else
     {
         r = convertToCGRect (component.getBounds());
         r.origin.y = [UIScreen mainScreen].bounds.size.height - (r.origin.y + r.size.height);
 
-        window = [[JuceUIWindow alloc] initWithFrame: r];
-        [((JuceUIWindow*) window) setOwner: this];
-
         controller = [[JuceUIViewController alloc] init];
         controller.view = view;
-        window.rootViewController = controller;
-
-        window.hidden = true;
-        window.opaque = component.isOpaque();
-        window.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
-
-        if (component.isAlwaysOnTop())
-            window.windowLevel = UIWindowLevelAlert;
 
         view.frame = CGRectMake (0, 0, r.size.width, r.size.height);
+
+        updateSceneForWindow();
     }
 
     setTitle (component.getName());
     setVisible (component.isVisible());
+
+    windowSceneTracker->addListener (*this);
 }
 
 UIViewComponentPeer::~UIViewComponentPeer()
 {
+    windowSceneTracker->removeListener (*this);
+
     if (iOSGlobals::currentlyFocusedPeer == this)
         iOSGlobals::currentlyFocusedPeer = nullptr;
 
@@ -1769,7 +1857,7 @@ UIViewComponentPeer::~UIViewComponentPeer()
     [view release];
     [controller release];
 
-    if (! isSharedWindow)
+    if (! isSharedWindow && window != nil)
     {
         [((JuceUIWindow*) window) setOwner: nil];
 
@@ -1783,7 +1871,7 @@ UIViewComponentPeer::~UIViewComponentPeer()
 //==============================================================================
 void UIViewComponentPeer::setVisible (bool shouldBeVisible)
 {
-    if (! isSharedWindow)
+    if (! isSharedWindow && window != nil)
         window.hidden = ! shouldBeVisible;
 
     view.hidden = ! shouldBeVisible;
@@ -1812,7 +1900,9 @@ void UIViewComponentPeer::setBounds (const Rectangle<int>& newBounds, const bool
     }
     else
     {
-        window.frame = convertToCGRect (newBounds);
+        if (window != nil)
+            window.frame = convertToCGRect (newBounds);
+
         view.frame = CGRectMake (0, 0, (CGFloat) newBounds.getWidth(), (CGFloat) newBounds.getHeight());
 
         handleMovedOrResized();
@@ -1852,7 +1942,8 @@ Point<float> UIViewComponentPeer::globalToLocal (Point<float> screenPosition)
 
 void UIViewComponentPeer::setAlpha (float newAlpha)
 {
-    [view.window setAlpha: (CGFloat) newAlpha];
+    if (view.window != nil)
+        [view.window setAlpha: (CGFloat) newAlpha];
 }
 
 void UIViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
@@ -1864,6 +1955,12 @@ void UIViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
 
         if ((! shouldBeFullScreen) && r.isEmpty())
             r = getBounds();
+
+        // If we're using the UIScene lifecycle we create our first window before we get assigned
+        // a UIWindowScene, in which case we won't be able to determine the available screen area
+        // and the available bounds may be empty. In this case, we still want to fill the screen
+        // as soon as we find out the available screen area, so set this flag unconditionally.
+        fullScreen = shouldBeFullScreen;
 
         // (can't call the component's setBounds method because that'll reset our fullscreen flag)
         if (! r.isEmpty())
@@ -1924,7 +2021,7 @@ bool UIViewComponentPeer::contains (Point<int> localPos, bool trueIfInAChildWind
 
 bool UIViewComponentPeer::setAlwaysOnTop (bool alwaysOnTop)
 {
-    if (! isSharedWindow)
+    if (! isSharedWindow && window != nil)
         window.windowLevel = alwaysOnTop ? UIWindowLevelAlert : UIWindowLevelNormal;
 
     return true;
@@ -1954,7 +2051,7 @@ void UIViewComponentPeer::toBehind (ComponentPeer* other)
 
 void UIViewComponentPeer::setIcon (const Image& /*newIcon*/)
 {
-    // to do..
+    // todo
 }
 
 //==============================================================================
@@ -2000,7 +2097,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEv
         auto time = getMouseTime (event);
         auto touchIndex = currentTouches.getIndexOfTouch (this, touch);
 
-        auto modsToSend = ModifierKeys::currentModifiers;
+        auto modsToSend = ModifierKeys::getCurrentModifiers();
 
         auto isUp = [] (MouseEventFlags m)
         {
@@ -2012,10 +2109,10 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEv
             if ([touch phase] != UITouchPhaseBegan)
                 continue;
 
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
-            modsToSend = ModifierKeys::currentModifiers;
+            ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+            modsToSend = ModifierKeys::getCurrentModifiers();
 
-            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before
             handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(),
                               MouseInputSource::defaultPressure, MouseInputSource::defaultOrientation, time, {}, touchIndex);
 
@@ -2037,7 +2134,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEv
         if (mouseEventFlags == MouseEventFlags::upAndCancel)
         {
             currentTouches.clearTouch (touchIndex);
-            modsToSend = ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
+            modsToSend = ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons();
         }
 
         // NB: some devices return 0 or 1.0 if pressure is unknown, so we'll clip our value to a believable range:
@@ -2068,7 +2165,7 @@ void UIViewComponentPeer::onHover (UIHoverGestureRecognizer* gesture)
 
     handleMouseEvent (MouseInputSource::InputSourceType::touch,
                       pos,
-                      ModifierKeys::currentModifiers,
+                      ModifierKeys::getCurrentModifiers(),
                       MouseInputSource::defaultPressure, MouseInputSource::defaultOrientation,
                       UIViewComponentPeer::getMouseTime ([[NSProcessInfo processInfo] systemUptime]),
                       {});
@@ -2300,7 +2397,7 @@ void UIViewComponentPeer::performAnyPendingRepaintsNow()
 
 ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 {
-    return new UIViewComponentPeer (*this, styleFlags, (UIView*) windowToAttachTo);
+    return new UIViewComponentPeer (*this, styleFlags, (id) windowToAttachTo);
 }
 
 //==============================================================================

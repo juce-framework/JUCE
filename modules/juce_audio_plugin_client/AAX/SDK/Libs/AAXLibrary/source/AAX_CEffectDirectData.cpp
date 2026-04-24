@@ -1,6 +1,6 @@
 /*================================================================================================*/
 /*
- *	Copyright 2013-2015, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2015, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -29,6 +29,7 @@
 #include "AAX_VPrivateDataAccess.h"
 #include "AAX_VController.h"
 #include "AAX_UIDs.h"
+#include "AAX_Errors.h"
 
 AAX_CEffectDirectData::AAX_CEffectDirectData() :
 	mController(NULL),

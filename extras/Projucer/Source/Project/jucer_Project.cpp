@@ -1632,19 +1632,6 @@ Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.
 String Project::Item::getID() const               { return state [Ids::ID]; }
 void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
-std::unique_ptr<Drawable> Project::Item::loadAsImageFile() const
-{
-    const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
-
-    if (! mml.lockWasGained())
-        return nullptr;
-
-    if (isValid())
-        return Drawable::createFromImageFile (getFile());
-
-    return {};
-}
-
 Project::Item Project::Item::createGroup (Project& project, const String& name, const String& uid, bool isModuleCode)
 {
     Item group (project, ValueTree (Ids::GROUP), isModuleCode);
@@ -2333,22 +2320,22 @@ int Project::getARATransformationFlags() const noexcept
 //==============================================================================
 bool Project::isAUPluginHost() const
 {
-    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU", false);
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors_headless") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU", false);
 }
 
 bool Project::isVSTPluginHost() const
 {
-    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false);
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors_headless") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false);
 }
 
 bool Project::isVST3PluginHost() const
 {
-    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false);
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors_headless") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false);
 }
 
 bool Project::isLV2PluginHost() const
 {
-    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_LV2", false);
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors_headless") && isConfigFlagEnabled ("JUCE_PLUGINHOST_LV2", false);
 }
 
 bool Project::isARAPluginHost() const
@@ -2674,7 +2661,8 @@ void Project::addNewExporter (const Identifier& exporterIdentifier)
 
 void Project::createExporterForCurrentPlatform()
 {
-    addNewExporter (ProjectExporter::getCurrentPlatformExporterTypeInfo().identifier);
+    if (const auto identifier = ProjectExporter::getBestPlatformExporterIdentifier(); identifier.isNotEmpty())
+        addNewExporter (identifier);
 }
 
 String Project::getUniqueTargetFolderSuffixForExporter (const Identifier& exporterIdentifier, const String& base)

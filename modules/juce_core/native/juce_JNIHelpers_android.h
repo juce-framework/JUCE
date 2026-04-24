@@ -49,7 +49,20 @@ public:
         JNI, i.e. for native function callback parameters.
     */
     explicit LocalRef (JavaType o) noexcept
-        : LocalRef (o, false)
+        : LocalRef (o, IncrementRef::no)
+    {}
+
+    /*  We cannot delete local references that were not created by JNI, e.g. references that were
+        created by the VM and passed into the native function.
+
+        For these references we should use createNewLocalRef = true, which will create a new
+        local reference that this wrapper is allowed to delete.
+
+        Doing otherwise will result in an "Attempt to remove non-JNI local reference" warning in the
+        VM, which could even cause crashes in future VM implementations.
+    */
+    LocalRef (JavaType o, IncrementRef incrementRefCount) noexcept
+        : obj (incrementRefCount == IncrementRef::yes ? retain (o) : o)
     {}
 
     LocalRef (const LocalRef& other) noexcept    : obj (retain (other.obj)) {}
@@ -91,58 +104,14 @@ public:
         return std::exchange (obj, nullptr);
     }
 
-    /** Creates a new internal local reference. */
-    static auto addOwner (JavaType o)
-    {
-        return LocalRef { o, true };
-    }
-
-    /** Takes ownership of the passed in local reference, and deletes it when the LocalRef goes out
-        of scope.
-    */
-    static auto becomeOwner (JavaType o)
-    {
-        return LocalRef { o, false };
-    }
-
 private:
     static JavaType retain (JavaType obj)
     {
         return obj == nullptr ? nullptr : (JavaType) getEnv()->NewLocalRef (obj);
     }
 
-    /*  We cannot delete local references that were not created by JNI, e.g. references that were
-        created by the VM and passed into the native function.
-
-        For these references we should use createNewLocalRef = true, which will create a new
-        local reference that this wrapper is allowed to delete.
-
-        Doing otherwise will result in an "Attempt to remove non-JNI local reference" warning in the
-        VM, which could even cause crashes in future VM implementations.
-    */
-    LocalRef (JavaType o, bool createNewLocalRef) noexcept
-        : obj (createNewLocalRef ? retain (o) : o)
-    {}
-
     JavaType obj = nullptr;
 };
-
-/*  Creates a new local reference that shares ownership with the passed in pointer.
-
-    Can be used for wrapping function parameters that were created outside the JNI.
-*/
-template <class JavaType>
-auto addLocalRefOwner (JavaType t)
-{
-    return LocalRef<JavaType>::addOwner (t);
-}
-
-/*   Wraps a local reference and destroys it when it goes out of scope. */
-template <class JavaType>
-auto becomeLocalRefOwner (JavaType t)
-{
-    return LocalRef<JavaType>::becomeOwner (t);
-}
 
 //==============================================================================
 template <typename JavaType>
@@ -246,7 +215,8 @@ public:
     JNIClassBase (const char* classPath, int minSDK, const uint8* byteCode, size_t byteCodeSize);
     virtual ~JNIClassBase();
 
-    operator jclass() const noexcept  { return classRef; }
+    jclass getJclass() const { return classRef; }
+    operator jclass() const noexcept  { return getJclass(); }
 
     static void initialiseAllClasses (JNIEnv*, jobject context);
     static void releaseAllClasses (JNIEnv*);
@@ -270,7 +240,7 @@ private:
     size_t byteCodeSize;
 
     int minSDK;
-    jclass classRef = nullptr;
+    GlobalRefImpl<jclass> classRef;
 
     static Array<JNIClassBase*>& getClasses();
     void initialise (JNIEnv*, jobject context);
@@ -293,7 +263,8 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
 #define DECLARE_JNI_FIELD(fieldID, stringName, signature)        jfieldID  fieldID;
 #define DECLARE_JNI_CALLBACK(fieldID, stringName, signature)
 
-#define DECLARE_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData)                                                       \
+#define DECLARE_OPTIONAL_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData, allowFailure)                                \
+    static_assert (minSDK >= 24, "There's no need to supply a min SDK lower than JUCE's minimum requirement");                              \
     class CppClassName ## _Class   : public JNIClassBase                                                                                    \
     {                                                                                                                                       \
     public:                                                                                                                                 \
@@ -301,6 +272,19 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
                                                                                                                                             \
         void initialiseFields (JNIEnv* env)                                                                                                 \
         {                                                                                                                                   \
+            if constexpr (allowFailure)                                                                                                     \
+            {                                                                                                                               \
+                if (getJclass() == nullptr)                                                                                                 \
+                {                                                                                                                           \
+                    env->ExceptionClear();                                                                                                  \
+                    return;                                                                                                                 \
+                }                                                                                                                           \
+            }                                                                                                                               \
+            else                                                                                                                            \
+            {                                                                                                                               \
+                jassert (getJclass() != nullptr);                                                                                           \
+            }                                                                                                                               \
+                                                                                                                                            \
             Array<JNINativeMethod> callbacks;                                                                                               \
             JNI_CLASS_MEMBERS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD, CREATE_JNI_FIELD, CREATE_JNI_STATICFIELD, CREATE_JNI_CALLBACK);  \
             resolveCallbacks (env, callbacks);                                                                                              \
@@ -310,9 +294,11 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
     };                                                                                                                                      \
     static inline const CppClassName ## _Class CppClassName;
 
+#define DECLARE_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData)              \
+    DECLARE_OPTIONAL_JNI_CLASS_WITH_BYTECODE (CppClassName, javaPath, minSDK, byteCodeData, false) \
+
 //==============================================================================
 #define DECLARE_JNI_CLASS_WITH_MIN_SDK(CppClassName, javaPath, minSDK) \
-    static_assert (minSDK >= 24, "There's no need to supply a min SDK lower than JUCE's minimum requirement"); \
     DECLARE_JNI_CLASS_WITH_BYTECODE (CppClassName, javaPath, minSDK, nullptr)
 
 //==============================================================================
@@ -350,7 +336,10 @@ DECLARE_JNI_CLASS (AndroidContext, "android/content/Context")
  METHOD (startActivityForResult,               "startActivityForResult",          "(Landroid/content/Intent;I)V") \
  METHOD (getFragmentManager,                   "getFragmentManager",              "()Landroid/app/FragmentManager;") \
  METHOD (setContentView,                       "setContentView",                  "(Landroid/view/View;)V") \
- METHOD (getWindow,                            "getWindow",                       "()Landroid/view/Window;")
+ METHOD (addContentView,                       "addContentView",                  "(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V") \
+ METHOD (getActionBar,                         "getActionBar",                    "()Landroid/app/ActionBar;") \
+ METHOD (getWindow,                            "getWindow",                       "()Landroid/view/Window;") \
+ METHOD (isInMultiWindowMode,                  "isInMultiWindowMode",             "()Z") \
 
 DECLARE_JNI_CLASS (AndroidActivity, "android/app/Activity")
 #undef JNI_CLASS_MEMBERS
@@ -538,6 +527,7 @@ DECLARE_JNI_CLASS (AndroidPackageManager, "android/content/pm/PackageManager")
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD (constructor,   "<init>",           "(I)V") \
+ METHOD (defaultConstructor, "<init>",      "()V") \
  METHOD (setColor,      "setColor",         "(I)V") \
  METHOD (setAlpha,      "setAlpha",         "(I)V") \
  METHOD (setTypeface,   "setTypeface",      "(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;") \
@@ -561,6 +551,12 @@ DECLARE_JNI_CLASS (AndroidPaint, "android/graphics/Paint")
  METHOD (getClipBounds,   "getClipBounds",    "()Landroid/graphics/Rect;")
 
  DECLARE_JNI_CLASS (AndroidCanvas, "android/graphics/Canvas")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (drawGlyphs, "drawGlyphs", "([II[FIILandroid/graphics/fonts/Font;Landroid/graphics/Paint;)V")
+
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidCanvas31, "android/graphics/Canvas", 31)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -638,13 +634,16 @@ DECLARE_JNI_CLASS (AndroidUri, "android/net/Uri")
  METHOD (invalidate,                "invalidate",                "(IIII)V") \
  METHOD (setVisibility,             "setVisibility",             "(I)V") \
  METHOD (setLayoutParams,           "setLayoutParams",           "(Landroid/view/ViewGroup$LayoutParams;)V") \
+ METHOD (getLayoutParams,           "getLayoutParams",           "()Landroid/view/ViewGroup$LayoutParams;") \
  METHOD (setSystemUiVisibility,     "setSystemUiVisibility",     "(I)V") \
  METHOD (findViewById,              "findViewById",              "(I)Landroid/view/View;") \
+ METHOD (getWindowToken,            "getWindowToken",            "()Landroid/os/IBinder;") \
  METHOD (getRootView,               "getRootView",               "()Landroid/view/View;") \
  METHOD (addOnLayoutChangeListener, "addOnLayoutChangeListener", "(Landroid/view/View$OnLayoutChangeListener;)V") \
  METHOD (announceForAccessibility,  "announceForAccessibility",  "(Ljava/lang/CharSequence;)V")  \
  METHOD (setOnApplyWindowInsetsListener, "setOnApplyWindowInsetsListener", "(Landroid/view/View$OnApplyWindowInsetsListener;)V") \
- METHOD (getRootWindowInsets, "getRootWindowInsets", "()Landroid/view/WindowInsets;")
+ METHOD (getRootWindowInsets, "getRootWindowInsets", "()Landroid/view/WindowInsets;") \
+ METHOD (getWindowSystemUiVisibility, "getWindowSystemUiVisibility", "()I") \
 
 DECLARE_JNI_CLASS (AndroidView, "android/view/View")
 #undef JNI_CLASS_MEMBERS
@@ -658,17 +657,33 @@ DECLARE_JNI_CLASS (AndroidViewGroup, "android/view/ViewGroup")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (getDecorView, "getDecorView",       "()Landroid/view/View;") \
- METHOD (setFlags,     "setFlags",           "(II)V") \
- METHOD (clearFlags,   "clearFlags",         "(I)V")
+ METHOD (getDecorView,  "getDecorView",       "()Landroid/view/View;") \
+ METHOD (getAttributes, "getAttributes",      "()Landroid/view/WindowManager$LayoutParams;") \
+ METHOD (setFlags,      "setFlags",           "(II)V") \
+ METHOD (clearFlags,    "clearFlags",         "(I)V") \
+ METHOD (setStatusBarColor, "setStatusBarColor", "(I)V") \
+ METHOD (setNavigationBarColor, "setNavigationBarColor", "(I)V") \
 
 DECLARE_JNI_CLASS (AndroidWindow, "android/view/Window")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (getDefaultDisplay, "getDefaultDisplay", "()Landroid/view/Display;")
+ METHOD (setNavigationBarContrastEnforced, "setNavigationBarContrastEnforced", "(Z)V") \
+
+DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidWindow29, "android/view/Window", 29)
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getDefaultDisplay, "getDefaultDisplay", "()Landroid/view/Display;") \
+ METHOD (removeViewImmediate, "removeViewImmediate", "(Landroid/view/View;)V") \
 
 DECLARE_JNI_CLASS (AndroidWindowManager, "android/view/WindowManager")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getCurrentWindowMetrics, "getCurrentWindowMetrics", "()Landroid/view/WindowMetrics;")
+
+DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidWindowManager30, "android/view/WindowManager", 30)
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -694,8 +709,10 @@ DECLARE_JNI_CLASS (JavaBoolean, "java/lang/Boolean")
   METHOD (remaining,  "remaining", "()I") \
   METHOD (hasArray,   "hasArray",  "()Z") \
   METHOD (array,      "array",     "()[B") \
+  METHOD (put,        "put",       "([B)Ljava/nio/ByteBuffer;") \
   METHOD (setOrder,   "order",     "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;") \
-  STATICMETHOD (wrap, "wrap",      "([B)Ljava/nio/ByteBuffer;")
+  STATICMETHOD (wrap, "wrap",      "([B)Ljava/nio/ByteBuffer;") \
+  STATICMETHOD (allocateDirect, "allocateDirect", "(I)Ljava/nio/ByteBuffer;") \
 
 DECLARE_JNI_CLASS (JavaByteBuffer, "java/nio/ByteBuffer")
 #undef JNI_CLASS_MEMBERS
@@ -985,9 +1002,11 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
                                        const String& interfaceName);
 
 //==============================================================================
-class ActivityLifecycleCallbacks     : public AndroidInterfaceImplementer
+class ActivityLifecycleCallbacks
 {
 public:
+    virtual ~ActivityLifecycleCallbacks() = default;
+
     virtual void onActivityPreCreated            (jobject /*activity*/, jobject /*bundle*/)  {}
     virtual void onActivityPreDestroyed          (jobject /*activity*/)                      {}
     virtual void onActivityPrePaused             (jobject /*activity*/)                      {}
@@ -1013,15 +1032,27 @@ public:
     virtual void onActivityPostStopped           (jobject /*activity*/)                      {}
 
     virtual void onActivityConfigurationChanged  (jobject /*activity*/)                      {}
+};
+
+class ActivityLifecycleCallbackForwarder : private AndroidInterfaceImplementer
+{
+public:
+    ActivityLifecycleCallbackForwarder (GlobalRef appContext, ActivityLifecycleCallbacks* callbacks);
+
+    ~ActivityLifecycleCallbackForwarder() override;
 
 private:
     jobject invoke (jobject, jobject, jobjectArray) override;
+
+    GlobalRef appContext;
+    GlobalRef myself;
+    ActivityLifecycleCallbacks* callbacks = nullptr;
 };
 
 //==============================================================================
-struct SurfaceHolderCallback    : AndroidInterfaceImplementer
+struct SurfaceHolderCallback    : public AndroidInterfaceImplementer
 {
-    virtual ~SurfaceHolderCallback() override = default;
+    ~SurfaceHolderCallback() override = default;
 
     virtual void surfaceChanged (LocalRef<jobject> holder, int format, int width, int height) = 0;
     virtual void surfaceCreated (LocalRef<jobject> holder) = 0;

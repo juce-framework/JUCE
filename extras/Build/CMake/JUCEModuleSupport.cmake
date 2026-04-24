@@ -529,19 +529,19 @@ function(juce_add_module module_path)
         endif()
     endif()
 
-    if(${module_name} STREQUAL "juce_audio_processors")
+    if(${module_name} STREQUAL "juce_audio_processors_headless")
         add_library(juce_vst3_headers INTERFACE)
 
         target_compile_definitions(juce_vst3_headers INTERFACE "$<$<TARGET_EXISTS:juce_vst3_sdk>:JUCE_CUSTOM_VST3_SDK=1>")
 
         target_include_directories(juce_vst3_headers INTERFACE
             "$<$<TARGET_EXISTS:juce_vst3_sdk>:$<TARGET_PROPERTY:juce_vst3_sdk,INTERFACE_INCLUDE_DIRECTORIES>>"
-            "$<$<NOT:$<TARGET_EXISTS:juce_vst3_sdk>>:${base_path}/juce_audio_processors/format_types/VST3_SDK>")
+            "$<$<NOT:$<TARGET_EXISTS:juce_vst3_sdk>>:${base_path}/juce_audio_processors_headless/format_types/VST3_SDK>")
 
-        target_link_libraries(juce_audio_processors INTERFACE juce_vst3_headers)
+        target_link_libraries(juce_audio_processors_headless INTERFACE juce_vst3_headers)
 
         add_library(juce_lilv_headers INTERFACE)
-        set(lv2_base_path "${base_path}/juce_audio_processors/format_types/LV2_SDK")
+        set(lv2_base_path "${base_path}/juce_audio_processors_headless/format_types/LV2_SDK")
         target_include_directories(juce_lilv_headers INTERFACE
             "${lv2_base_path}"
             "${lv2_base_path}/lv2"
@@ -551,14 +551,14 @@ function(juce_add_module module_path)
             "${lv2_base_path}/sratom"
             "${lv2_base_path}/lilv"
             "${lv2_base_path}/lilv/src")
-        target_link_libraries(juce_audio_processors INTERFACE juce_lilv_headers)
+        target_link_libraries(juce_audio_processors_headless INTERFACE juce_lilv_headers)
 
         add_library(juce_ara_headers INTERFACE)
 
         target_include_directories(juce_ara_headers INTERFACE
             "$<$<TARGET_EXISTS:juce_ara_sdk>:$<TARGET_PROPERTY:juce_ara_sdk,INTERFACE_INCLUDE_DIRECTORIES>>")
 
-        target_link_libraries(juce_audio_processors INTERFACE juce_ara_headers)
+        target_link_libraries(juce_audio_processors_headless INTERFACE juce_ara_headers)
 
         if(JUCE_ARG_ALIAS_NAMESPACE)
             add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_vst3_headers ALIAS juce_vst3_headers)
@@ -647,7 +647,7 @@ function(juce_add_module module_path)
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" linuxLibs)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
-            if(module_name MATCHES "juce_gui_basics|juce_audio_processors|juce_core|juce_graphics")
+            if(module_name MATCHES "juce_gui_basics|juce_audio_processors|juce_core|juce_graphics|juce_audio_processors_headless")
                 target_compile_options(${module_name} INTERFACE /bigobj)
             endif()
 

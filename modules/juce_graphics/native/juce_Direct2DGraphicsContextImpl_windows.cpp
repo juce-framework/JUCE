@@ -216,8 +216,8 @@ private:
         explicit OwningLayer (const D2D1_LAYER_PARAMETERS1& p) : params (p) {}
 
         D2D1_LAYER_PARAMETERS1 params;
-        ComSmartPtr<ID2D1Geometry> geometry = params.geometricMask != nullptr ? addComSmartPtrOwner (params.geometricMask) : nullptr;
-        ComSmartPtr<ID2D1Brush> brush = params.opacityBrush != nullptr ? addComSmartPtrOwner (params.opacityBrush) : nullptr;
+        ComSmartPtr<ID2D1Geometry> geometry { params.geometricMask, IncrementRef::yes };
+        ComSmartPtr<ID2D1Brush> brush { params.opacityBrush, IncrementRef::yes };
     };
 
     struct Layer
@@ -449,8 +449,7 @@ public:
     {
         noTransforms = 0,
         applyWorldTransform = 1,
-        applyInverseWorldTransform = 2,
-        applyFillTypeTransform = 4,
+        applyFillTypeTransform = 2,
         applyWorldAndFillTypeTransforms = applyFillTypeTransform | applyWorldTransform
     };
 
@@ -462,37 +461,18 @@ public:
         if (! fillType.isGradient() && ! fillType.isTiledImage())
             return currentBrush;
 
-        Point<float> translation{};
         AffineTransform transform{};
+
+        if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
+            transform = currentTransform.getTransform();
+
+        if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
+            transform = fillType.transform.followedBy (transform);
 
         if (fillType.isGradient())
         {
-            if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
-            {
-                if (currentTransform.isOnlyTranslated)
-                    translation = currentTransform.offset.toFloat();
-                else
-                    transform = currentTransform.getTransform();
-            }
-
-            if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
-            {
-                if (fillType.transform.isOnlyTranslation())
-                    translation += Point (fillType.transform.getTranslationX(), fillType.transform.getTranslationY());
-                else
-                    transform = transform.followedBy (fillType.transform);
-            }
-
-            if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
-            {
-                if (currentTransform.isOnlyTranslated)
-                    translation -= currentTransform.offset.toFloat();
-                else
-                    transform = transform.followedBy (currentTransform.getTransform().inverted());
-            }
-
-            const auto p1 = fillType.gradient->point1 + translation;
-            const auto p2 = fillType.gradient->point2 + translation;
+            const auto p1 = fillType.gradient->point1;
+            const auto p2 = fillType.gradient->point2;
 
             if (fillType.gradient->isRadial)
             {
@@ -506,17 +486,6 @@ public:
                 linearGradient->SetStartPoint ({ p1.x, p1.y });
                 linearGradient->SetEndPoint ({ p2.x, p2.y });
             }
-        }
-        else if (fillType.isTiledImage())
-        {
-            if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
-                transform = currentTransform.getTransform();
-
-            if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
-                transform = transform.followedBy (fillType.transform);
-
-            if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
-                transform = transform.followedBy (currentTransform.getTransform().inverted());
         }
 
         currentBrush->SetTransform (D2DUtilities::transformToMatrix (transform));

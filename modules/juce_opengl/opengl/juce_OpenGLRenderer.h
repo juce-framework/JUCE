@@ -89,7 +89,7 @@ public:
         that your implementation is thread-safe.
 
         (Also note that on Android, this callback won't happen, because there's currently
-        no way to implement it..)
+        no way to implement it.)
     */
     virtual void openGLContextClosing() = 0;
 };

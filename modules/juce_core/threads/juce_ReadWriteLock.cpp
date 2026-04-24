@@ -101,7 +101,7 @@ void ReadWriteLock::exitRead() const noexcept
         }
     }
 
-    jassertfalse; // unlocking a lock that wasn't locked..
+    jassertfalse; // unlocking a lock that wasn't locked
 }
 
 //==============================================================================
@@ -144,7 +144,7 @@ void ReadWriteLock::exitWrite() const noexcept
 {
     const SpinLock::ScopedLockType sl (accessLock);
 
-    // check this thread actually had the lock..
+    // check this thread actually had the lock
     jassert (numWriters > 0 && writerThreadId == Thread::getCurrentThreadId());
 
     if (--numWriters == 0)

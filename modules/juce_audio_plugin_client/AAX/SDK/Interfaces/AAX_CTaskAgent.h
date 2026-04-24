@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2023-2024 Avid Technology, Inc.
+ *	Copyright 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -74,11 +74,12 @@ public: ////////////////////////////////////////////////////////////////////////
 	 *
 	 * \details
 	 * Convenience implementation that converts the \ref IACFUnknown
-	 * into an \ref AAX_ITask . Implementations should override the
-	 * version that provides an \ref AAX_ITask object.
+	 * into an \ref AAX_ITask . Implementations should override
+	 * \ref ReceiveTask() instead.
 	 */
 	AAX_Result AddTask(IACFUnknown * iTask) AAX_OVERRIDE;
 	AAX_Result CancelAllTasks() AAX_OVERRIDE;
+	AAX_Result CancelTask(AAX_CTaskID iTaskID) AAX_OVERRIDE;
 	//@} Task management
 	
 protected:

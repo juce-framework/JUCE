@@ -86,7 +86,7 @@ public:
         }
         else
         {
-            assignNewKey();  // + button pressed..
+            assignNewKey();  // + button pressed
         }
     }
 
@@ -118,7 +118,7 @@ public:
             addButton (TRANS ("OK"), 1);
             addButton (TRANS ("Cancel"), 0);
 
-            // (avoid return + escape keys getting processed by the buttons..)
+            // avoid return + escape keys getting processed by the buttons
             for (auto* child : getChildren())
                 child->setWantsKeyboardFocus (false);
 

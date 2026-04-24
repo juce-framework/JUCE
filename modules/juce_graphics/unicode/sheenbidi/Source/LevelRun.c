@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
+
 #include <stddef.h>
 
 #include "BidiChain.h"

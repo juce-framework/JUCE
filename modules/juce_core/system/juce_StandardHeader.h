@@ -41,7 +41,7 @@
 */
 #define JUCE_MAJOR_VERSION      8
 #define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        8
+#define JUCE_BUILDNUMBER        12
 
 /** Current JUCE version number.
 
@@ -53,10 +53,10 @@
 */
 #define JUCE_VERSION   ((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
-#if ! DOXYGEN
+/** @cond */
 #define JUCE_VERSION_ID \
     [[maybe_unused]] volatile auto juceVersionId = "juce_version_" JUCE_STRINGIFY(JUCE_MAJOR_VERSION) "_" JUCE_STRINGIFY(JUCE_MINOR_VERSION) "_" JUCE_STRINGIFY(JUCE_BUILDNUMBER);
-#endif
+/** @endcond */
 
 //==============================================================================
 #include <algorithm>
@@ -95,7 +95,7 @@
 #include "juce_PlatformDefs.h"
 
 //==============================================================================
-// Now we'll include some common OS headers..
+// Now we'll include some common OS headers.
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4245 4100)
 
 #if JUCE_MSVC
@@ -134,7 +134,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
  #include <byteswap.h>
 #endif
 
-// undef symbols that are sometimes set by misguided 3rd-party headers..
+// undef symbols that are sometimes set by misguided 3rd-party headers
 #undef TYPE_BOOL
 #undef max
 #undef min
@@ -161,7 +161,8 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
 #ifndef JUCE_API
- #define JUCE_API   /**< This macro is added to all JUCE public class declarations. */
+ /** This macro is added to all JUCE public class declarations. */
+ #define JUCE_API
 #endif
 
 #if JUCE_MSVC && JUCE_DLL_BUILD
@@ -173,6 +174,6 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 /** This macro is added to all JUCE public function declarations. */
 #define JUCE_PUBLIC_FUNCTION        JUCE_API JUCE_CALLTYPE
 
-#ifndef DOXYGEN
- #define JUCE_NAMESPACE juce  // This old macro is deprecated: you should just use the juce namespace directly.
-#endif
+/** @cond */
+#define JUCE_NAMESPACE juce  // This old macro is deprecated: you should just use the juce namespace directly.
+/** @endcond */

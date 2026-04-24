@@ -74,10 +74,11 @@ public:
     // These types can be used as the Constness template parameter for the AudioData::Pointer class.
 
     class NonConst; /**< Used as a template parameter for AudioData::Pointer. Indicates that the pointer can be used for non-const data. */
-    class Const;    /**< Used as a template parameter for AudioData::Pointer. Indicates that the samples can only be used for const data.. */
+    class Const;    /**< Used as a template parameter for AudioData::Pointer. Indicates that the samples can only be used for const data. */
 
-  #ifndef DOXYGEN
+
     //==============================================================================
+    /** @cond */
     class BigEndian
     {
     public:
@@ -332,7 +333,7 @@ public:
         static void* toVoidPtr (VoidType* v) noexcept { return const_cast<void*> (v); }
         enum { isConst = 1 };
     };
-  #endif
+    /** @endcond */
 
     //==============================================================================
     /**
@@ -341,17 +342,17 @@ public:
         This object can be used to read and write from blocks of encoded audio samples. To create one, you specify
         the audio format as a series of template parameters, e.g.
         @code
-        // this creates a pointer for reading from a const array of 16-bit little-endian packed samples.
+        // this creates a pointer for reading from a const array of 16-bit little-endian packed samples
         AudioData::Pointer <AudioData::Int16,
                             AudioData::LittleEndian,
                             AudioData::NonInterleaved,
                             AudioData::Const> pointer (someRawAudioData);
 
-        // These methods read the sample that is being pointed to
+        // these methods read the sample that is being pointed to
         float firstSampleAsFloat = pointer.getAsFloat();
         int32 firstSampleAsInt = pointer.getAsInt32();
-        ++pointer; // moves the pointer to the next sample.
-        pointer += 3; // skips the next 3 samples.
+        ++pointer; // moves the pointer to the next sample
+        pointer += 3; // skips the next 3 samples
         @endcode
 
         The convertSamples() method lets you copy a range of samples from one format to another, automatically
@@ -487,7 +488,7 @@ public:
                     ++source;
                 }
             }
-            else // copy backwards if we're increasing the sample width..
+            else // copy backwards if we're increasing the sample width
             {
                 dest += numSamples;
                 source += numSamples;
@@ -799,7 +800,7 @@ public:
 };
 
 //==============================================================================
-#ifndef DOXYGEN
+/** @cond */
 /**
     A set of routines to convert buffers of 32-bit floating point data to and from
     various integer formats.
@@ -867,6 +868,6 @@ public:
 private:
     AudioDataConverters();
 };
-#endif
+/** @endcond */
 
 } // namespace juce

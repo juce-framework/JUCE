@@ -35,13 +35,13 @@
 namespace juce
 {
 
-#ifndef DOXYGEN
- namespace AtomicHelpers
- {
-     template <typename T> struct DiffTypeHelper     { using Type = T; };
-     template <typename T> struct DiffTypeHelper<T*> { using Type = std::ptrdiff_t; };
- }
-#endif
+/** @cond */
+namespace AtomicHelpers
+{
+    template <typename T> struct DiffTypeHelper     { using Type = T; };
+    template <typename T> struct DiffTypeHelper<T*> { using Type = std::ptrdiff_t; };
+}
+/** @endcond */
 
 //==============================================================================
 /**
@@ -147,11 +147,11 @@ struct Atomic  final
     std::atomic<Type> value;
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("This method has been deprecated as there is no equivalent method in "
                  "std::atomic. Use compareAndSetBool instead.")]]
     Type compareAndSetValue (Type, Type) noexcept;
-   #endif
+    /** @endcond */
 };
 
 } // namespace juce

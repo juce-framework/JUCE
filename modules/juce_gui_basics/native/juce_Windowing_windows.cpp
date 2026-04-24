@@ -41,9 +41,9 @@ namespace juce
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type")
 
-#undef GetSystemMetrics // multimon overrides this for some reason and causes a mess..
+#undef GetSystemMetrics // multimon overrides this for some reason and causes a mess
 
-// these are in the windows SDK, but need to be repeated here for GCC..
+// these are in the windows SDK, but need to be repeated here for GCC
 #ifndef GET_APPCOMMAND_LPARAM
  #define GET_APPCOMMAND_LPARAM(lParam)     ((short) (HIWORD (lParam) & ~FAPPCOMMAND_MASK))
 
@@ -1822,7 +1822,7 @@ public:
 
         if (! makeActive)
         {
-            // in this case a broughttofront call won't have occurred, so do it now..
+            // in this case a broughttofront call won't have occurred, so do it now
             handleBroughtToFront();
         }
     }
@@ -1855,14 +1855,10 @@ public:
 
     void grabFocus() override
     {
-        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
-
-        const bool oldDeactivate = shouldDeactivateTitleBar;
-        shouldDeactivateTitleBar = ((styleFlags & windowIsTemporary) == 0);
+        const ScopedValueSetter ignoreDismissScope (shouldIgnoreModalDismiss, true);
+        const ScopedValueSetter titlebarScope (shouldDeactivateTitleBar, (styleFlags & windowIsTemporary) == 0);
 
         callFunctionIfNotLocked (&setFocusCallback, hwnd);
-
-        shouldDeactivateTitleBar = oldDeactivate;
     }
 
     void textInputRequired (Point<int>, TextInputTarget&) override
@@ -1968,7 +1964,7 @@ public:
             keyMods = (keyMods & ~ModifierKeys::ctrlModifier) | ModifierKeys::altModifier;
         }
 
-        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
+        ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withOnlyMouseButtons().withFlags (keyMods);
     }
 
     static void updateModifiersFromWParam (const WPARAM wParam)
@@ -1977,14 +1973,16 @@ public:
         if (wParam & MK_LBUTTON)   mouseMods |= ModifierKeys::leftButtonModifier;
         if (wParam & MK_RBUTTON)   mouseMods |= ModifierKeys::rightButtonModifier;
         if (wParam & MK_MBUTTON)   mouseMods |= ModifierKeys::middleButtonModifier;
+        if (wParam & MK_XBUTTON1)  mouseMods |= ModifierKeys::backButtonModifier;
+        if (wParam & MK_XBUTTON2)  mouseMods |= ModifierKeys::forwardButtonModifier;
 
-        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
+        ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (mouseMods);
         updateKeyModifiers();
     }
 
     //==============================================================================
     bool dontRepaint;
-    static ModifierKeys modifiersAtLastCallback;
+    static inline ModifierKeys modifiersAtLastCallback;
 
     //==============================================================================
     struct FileDropTarget final : public ComBaseClassHelper<IDropTarget>
@@ -2225,6 +2223,42 @@ public:
         jassertfalse;
     }
 
+    DWORD computeNativeStyleFlags() const
+    {
+        const auto titled = ! isKioskMode() && (styleFlags & windowHasTitleBar) != 0;
+        const auto usesDropShadow = windowUsesNativeShadow();
+        const auto hasClose = (styleFlags & windowHasCloseButton) != 0;
+        const auto hasMin = (styleFlags & windowHasMinimiseButton) != 0;
+        const auto hasMax = (styleFlags & windowHasMaximiseButton) != 0;
+        const auto resizable = (styleFlags & windowIsResizable) != 0;
+
+        DWORD result = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+
+        if (parentToAddTo != nullptr)
+        {
+            if ((styleFlags & windowHasCloseButton) == 0)
+                result |= WS_CHILD;
+        }
+        else if (titled || usesDropShadow)
+        {
+            result |= usesDropShadow ? WS_CAPTION : 0;
+            result |= titled ? (WS_OVERLAPPED | WS_CAPTION) : WS_POPUP;
+            result |= hasClose ? (WS_SYSMENU | WS_CAPTION) : 0;
+            result |= hasMin ? (WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
+            result |= hasMax ? (WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
+            result |= resizable ? WS_THICKFRAME : 0;
+        }
+        else
+        {
+            // Transparent windows need WS_POPUP and not WS_OVERLAPPED | WS_CAPTION, otherwise
+            // the top corners of the window will get rounded unconditionally.
+            // Unfortunately, this disables nice mouse handling for the caption area.
+            result |= WS_POPUP;
+        }
+
+        return result;
+    }
+
     bool hasTitleBar() const                 { return (styleFlags & windowHasTitleBar) != 0; }
     double getScaleFactor() const            { return scaleFactor; }
 
@@ -2250,7 +2284,7 @@ private:
     bool isAccessibilityActive = false;
 
     //==============================================================================
-    static MultiTouchMapper<DWORD> currentTouches;
+    static inline MultiTouchMapper<DWORD> currentTouches;
 
     //==============================================================================
     class WindowClassHolder final : private DeletedAtShutdown
@@ -2389,47 +2423,23 @@ private:
 
     void createWindowOnMessageThread()
     {
-        DWORD exstyle = 0;
-        DWORD type = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+        const auto type = computeNativeStyleFlags();
 
-        const auto titled = (styleFlags & windowHasTitleBar) != 0;
-        const auto hasClose = (styleFlags & windowHasCloseButton) != 0;
-        const auto hasMin = (styleFlags & windowHasMinimiseButton) != 0;
-        const auto hasMax = (styleFlags & windowHasMaximiseButton) != 0;
-        const auto appearsOnTaskbar = (styleFlags & windowAppearsOnTaskbar) != 0;
-        const auto resizable = (styleFlags & windowIsResizable) != 0;
-        const auto usesDropShadow = windowUsesNativeShadow();
-
-        if (parentToAddTo != nullptr)
+        const auto exstyle = std::invoke ([&]() -> DWORD
         {
-            if (!hasClose)
-                type |= WS_CHILD;
-        }
-        else
-        {
-            if (titled || usesDropShadow)
-            {
-                type |= usesDropShadow ? WS_CAPTION : 0;
-                type |= titled ? (WS_OVERLAPPED | WS_CAPTION) : WS_POPUP;
-                type |= hasClose ? (WS_SYSMENU | WS_CAPTION) : 0;
-                type |= hasMin ? (WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
-                type |= hasMax ? (WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
-                type |= resizable ? WS_THICKFRAME : 0;
-            }
-            else
-            {
-                // Transparent windows need WS_POPUP and not WS_OVERLAPPED | WS_CAPTION, otherwise
-                // the top corners of the window will get rounded unconditionally.
-                // Unfortunately, this disables nice mouse handling for the caption area.
-                type |= WS_POPUP;
-            }
+            if (parentToAddTo != nullptr)
+                return 0;
 
-            exstyle |= appearsOnTaskbar ? WS_EX_APPWINDOW : WS_EX_TOOLWINDOW;
-        }
+            const auto appearsOnTaskbar = (styleFlags & windowAppearsOnTaskbar) != 0;
+            return appearsOnTaskbar ? WS_EX_APPWINDOW : WS_EX_TOOLWINDOW;
+        });
 
         hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->getWindowClassName(),
                                L"", type, 0, 0, 0, 0, parentToAddTo, nullptr,
                                (HINSTANCE) Process::getCurrentModuleInstanceHandle(), nullptr);
+
+        const auto titled = (styleFlags & windowHasTitleBar) != 0;
+        const auto usesDropShadow = windowUsesNativeShadow();
 
         if (! titled && usesDropShadow)
         {
@@ -2556,10 +2566,11 @@ private:
 
     bool windowUsesNativeShadow() const
     {
-        return hasTitleBar()
-            || (   (0 != (styleFlags & windowHasDropShadow))
-                && (0 == (styleFlags & windowIsSemiTransparent))
-                && (0 == (styleFlags & windowIsTemporary)));
+        return ! isKioskMode()
+               && (hasTitleBar()
+                   || (   (0 != (styleFlags & windowHasDropShadow))
+                       && (0 == (styleFlags & windowIsSemiTransparent))
+                       && (0 == (styleFlags & windowIsTemporary))));
     }
 
     void updateShadower()
@@ -2687,40 +2698,13 @@ private:
         client,
     };
 
-    std::optional<LRESULT> doMouseMove (const LPARAM lParam, bool isMouseDownEvent, WindowArea area)
+    std::optional<LRESULT> doMouseMoveAtPoint (bool isMouseDownEvent, WindowArea area, Point<float> position)
     {
-        // Check if the mouse has moved since being pressed in the caption area.
-        // If it has, then we defer to DefWindowProc to handle the mouse movement.
-        // Allowing DefWindowProc to handle WM_NCLBUTTONDOWN directly will pause message
-        // processing (and therefore painting) when the mouse is clicked in the caption area,
-        // which is why we wait until the mouse is *moved* before asking the system to take over.
-        // Letting the system handle the move is important for things like Aero Snap to work.
-        if (area == WindowArea::nonclient && captionMouseDown.has_value() && *captionMouseDown != lParam)
-        {
-            captionMouseDown.reset();
-
-            // When clicking and dragging on the caption area, a new modal loop is started
-            // inside DefWindowProc. This modal loop appears to consume some mouse events,
-            // without forwarding them back to our own window proc. In particular, we never
-            // get to see the WM_NCLBUTTONUP event with the HTCAPTION argument, or any other
-            // kind of mouse-up event to signal that the loop exited, so
-            // ModifierKeys::currentModifiers gets left in the wrong state. As a workaround, we
-            // manually update the modifier keys after DefWindowProc exits, and update the
-            // capture state if necessary.
-            const auto result = DefWindowProc (hwnd, WM_NCLBUTTONDOWN, HTCAPTION, lParam);
-            getMouseModifiers();
-            releaseCaptureIfNecessary();
-            return result;
-        }
-
-        ModifierKeys modsToSend (ModifierKeys::currentModifiers);
+        auto modsToSend = ModifierKeys::getCurrentModifiers();
 
         // this will be handled by WM_TOUCH
         if (isTouchEvent() || areOtherTouchSourcesActive())
             return {};
-
-        const auto position = area == WindowArea::client ? getPointFromLocalLParam (lParam)
-                                                         : getLocalPointFromScreenLParam (lParam);
 
         if (! isMouseOver)
         {
@@ -2728,7 +2712,7 @@ private:
 
             // This avoids a rare stuck-button problem when focus is lost unexpectedly, but must
             // not be called as part of a move, in case it's actually a mouse-drag from another
-            // app which ends up here when we get focus before the mouse is released..
+            // app which ends up here when we get focus before the mouse is released.
             if (isMouseDownEvent)
                 NullCheckedInvocation::invoke (getNativeRealtimeModifiers);
 
@@ -2747,10 +2731,9 @@ private:
             if (area == WindowArea::client)
                 Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
         }
-        else if (! isDragging)
+        else if (! isDragging && ! contains (position.roundToInt(), false))
         {
-            if (! contains (position.roundToInt(), false))
-                return {};
+            return {};
         }
 
         static uint32 lastMouseTime = 0;
@@ -2769,6 +2752,42 @@ private:
         return {};
     }
 
+    std::optional<LRESULT> doMouseMove (const LPARAM lParam, bool isMouseDownEvent, WindowArea area)
+    {
+        // Check if the mouse has moved since being pressed in the caption area.
+        // If it has, then we defer to DefWindowProc to handle the mouse movement.
+        // Allowing DefWindowProc to handle WM_NCLBUTTONDOWN directly will pause message
+        // processing (and therefore painting) when the mouse is clicked in the caption area,
+        // which is why we wait until the mouse is *moved* before asking the system to take over.
+        // Letting the system handle the move is important for things like Aero Snap to work.
+        if (area == WindowArea::nonclient && captionMouseDown.has_value() && *captionMouseDown != lParam)
+        {
+            captionMouseDown.reset();
+            return handleNcMouseEventThenFixModifiers (WM_NCLBUTTONDOWN, HTCAPTION, lParam);
+        }
+
+        const auto position = area == WindowArea::client ? getPointFromLocalLParam (lParam)
+                                                         : getLocalPointFromScreenLParam (lParam);
+
+        return doMouseMoveAtPoint (isMouseDownEvent, area, position);
+    }
+
+    LRESULT handleNcMouseEventThenFixModifiers (UINT msg, WPARAM wParam, LPARAM lParam)
+    {
+        // When clicking and dragging on the caption area (including in the edge resize areas), a
+        // new modal loop is started inside DefWindowProc. This modal loop appears to consume some
+        // mouse events, without forwarding them back to our own window proc. In particular, we
+        // never get to see the WM_NCLBUTTONUP event with the HTCAPTION argument, or any other
+        // kind of mouse-up event to signal that the loop exited, so
+        // ModifierKeys::currentModifiers gets left in the wrong state. As a workaround, we
+        // manually update the modifier keys after DefWindowProc exits, and update the
+        // capture state if necessary.
+        const auto result = DefWindowProc (hwnd, msg, wParam, lParam);
+        getMouseModifiers();
+        releaseCaptureIfNecessary();
+        return result;
+    }
+
     void updateModifiersFromModProvider() const
     {
        #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
@@ -2785,7 +2804,7 @@ private:
 
     void releaseCaptureIfNecessary() const
     {
-        if (! ModifierKeys::currentModifiers.isAnyMouseButtonDown() && hwnd == GetCapture())
+        if (! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown() && hwnd == GetCapture())
             ReleaseCapture();
     }
 
@@ -2808,6 +2827,11 @@ private:
 
             doMouseEvent (getPointFromLocalLParam (lParam), MouseInputSource::defaultPressure);
         }
+
+        // If this is the first event after receiving both a MOUSEACTIVATE and a SETFOCUS, then
+        // process the postponed focus update.
+        if (std::exchange (mouseActivateFlags, (uint8_t) 0) == (gotMouseActivate | gotSetFocus))
+            handleSetFocus();
     }
 
     void doMouseUp (Point<float> position, const WPARAM wParam, bool adjustCapture = true)
@@ -2844,17 +2868,50 @@ private:
             doMouseUp (getCurrentMousePos(), (WPARAM) 0, false);
     }
 
-    void doMouseExit()
+    /*  The parameter specifies the area the cursor just left. */
+    void doMouseExit (WindowArea area)
     {
         isMouseOver = false;
 
-        if (! areOtherTouchSourcesActive())
+        const auto messagePos = GetMessagePos();
+
+        // If the system tells us that the mouse left an area, but the cursor is still over that
+        // area, respect the system's decision and treat this as a mouse-leave event.
+        // Starting a native drag-n-drop or dragging the window caption may cause the system to send
+        // a mouse-leave event while the mouse is still within the window's bounds.
+        const auto shouldRestartTracking = std::invoke ([&]
+        {
+            auto* peer = getOwnerOfWindow (WindowFromPoint (getPOINTFromLParam (messagePos)));
+
+            if (peer != this)
+                return false;
+
+            const auto newAreaNative = peerWindowProc (hwnd, WM_NCHITTEST, 0, messagePos);
+
+            if (newAreaNative == HTNOWHERE || newAreaNative == HTTRANSPARENT)
+                return false;
+
+            if (newAreaNative == HTCLIENT)
+                return area == WindowArea::nonclient;
+
+            return area == WindowArea::client;
+        });
+
+        if (shouldRestartTracking)
+        {
+            doMouseMoveAtPoint (false,
+                                area == WindowArea::client ? WindowArea::nonclient : WindowArea::client,
+                                getLocalPointFromScreenLParam (messagePos));
+        }
+        else if (! areOtherTouchSourcesActive())
+        {
             doMouseEvent (getCurrentMousePos(), MouseInputSource::defaultPressure);
+        }
     }
 
     std::tuple<ComponentPeer*, Point<float>> findPeerUnderMouse()
     {
-        auto currentMousePos = getPOINTFromLParam ((LPARAM) GetMessagePos());
+        auto currentMousePos = getPOINTFromLParam (GetMessagePos());
 
         auto* peer = getOwnerOfWindow (WindowFromPoint (currentMousePos));
 
@@ -2975,14 +3032,14 @@ private:
         const auto pos = globalToLocal (convertPhysicalScreenPointToLogical (D2DUtilities::toPoint ({ roundToInt (touch.x / 100.0f),
                                                                                                       roundToInt (touch.y / 100.0f) }), hwnd).toFloat());
         const auto pressure = touchPressure;
-        auto modsToSend = ModifierKeys::currentModifiers;
+        auto modsToSend = ModifierKeys::getCurrentModifiers();
 
         if (isDown)
         {
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
-            modsToSend = ModifierKeys::currentModifiers;
+            ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+            modsToSend = ModifierKeys::getCurrentModifiers();
 
-            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before
             handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(),
                               pressure, orientation, time, {}, touchIndex);
 
@@ -3000,7 +3057,7 @@ private:
         }
         else
         {
-            modsToSend = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+            modsToSend = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
         }
 
         handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend,
@@ -3011,7 +3068,7 @@ private:
 
         if (isUp)
         {
-            handleMouseEvent (MouseInputSource::InputSourceType::touch, MouseInputSource::offscreenMousePos, ModifierKeys::currentModifiers.withoutMouseButtons(),
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, MouseInputSource::offscreenMousePos, ModifierKeys::getCurrentModifiers().withoutMouseButtons(),
                               pressure, orientation, time, {}, touchIndex);
 
             if (! isValidPeer (this))
@@ -3020,7 +3077,7 @@ private:
             if (isCancel)
             {
                 currentTouches.clear();
-                ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
+                ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons();
             }
         }
 
@@ -3095,15 +3152,15 @@ private:
         auto pInfoFlags = penInfo.pointerInfo.pointerFlags;
 
         if ((pInfoFlags & POINTER_FLAG_FIRSTBUTTON) != 0)
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+            ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
         else if ((pInfoFlags & POINTER_FLAG_SECONDBUTTON) != 0)
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::rightButtonModifier);
+            ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (ModifierKeys::rightButtonModifier);
 
         if (isDown)
         {
             modsToSend = ModifierKeys::currentModifiers;
 
-            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before
             handleMouseEvent (MouseInputSource::InputSourceType::pen, pos, modsToSend.withoutMouseButtons(),
                               pressure, MouseInputSource::defaultOrientation, time, penDetails);
 
@@ -3113,7 +3170,7 @@ private:
         else if (isUp || ! (pInfoFlags & POINTER_FLAG_INCONTACT))
         {
             modsToSend = modsToSend.withoutMouseButtons();
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
+            ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons();
         }
 
         handleMouseEvent (MouseInputSource::InputSourceType::pen, pos, modsToSend, pressure,
@@ -3124,7 +3181,7 @@ private:
 
         if (isUp)
         {
-            handleMouseEvent (MouseInputSource::InputSourceType::pen, MouseInputSource::offscreenMousePos, ModifierKeys::currentModifiers,
+            handleMouseEvent (MouseInputSource::InputSourceType::pen, MouseInputSource::offscreenMousePos, ModifierKeys::getCurrentModifiers(),
                               pressure, MouseInputSource::defaultOrientation, time, penDetails);
 
             if (! isValidPeer (this))
@@ -3293,7 +3350,7 @@ private:
         }
         else
         {
-            // convert the scan code to an unmodified character code..
+            // convert the scan code to an unmodified character code
             const UINT virtualKey = MapVirtualKey ((UINT) virtualScanCode, 1);
             UINT keyChar = MapVirtualKey (virtualKey, 2);
 
@@ -3303,7 +3360,7 @@ private:
                 key = (int) keyChar;
 
             // avoid sending junk text characters for some control-key combinations
-            if (textChar < ' ' && ModifierKeys::currentModifiers.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::altModifier))
+            if (textChar < ' ' && ModifierKeys::getCurrentModifiers().testFlags (ModifierKeys::ctrlModifier | ModifierKeys::altModifier))
                 textChar = 0;
         }
 
@@ -3505,7 +3562,14 @@ private:
             const ScopedValueSetter<bool> scope (inHandlePositionChanged, true);
 
             if (! areOtherTouchSourcesActive())
-                doMouseEvent (pos, MouseInputSource::defaultPressure);
+            {
+                auto modsToSend = ModifierKeys::getCurrentModifiers();
+
+                if (! Desktop::getInstance().getMainMouseSource().isDragging())
+                    modsToSend = modsToSend.withoutMouseButtons();
+
+                doMouseEvent (pos, MouseInputSource::defaultPressure, 0.0f, modsToSend);
+            }
 
             if (! isValidPeer (this))
                 return true;
@@ -3514,7 +3578,7 @@ private:
         handleMovedOrResized();
         updateCurrentMonitorAndRefreshVBlankDispatcher();
 
-        return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly.
+        return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly
     }
 
     //==============================================================================
@@ -3749,9 +3813,9 @@ private:
         if (isKeyDown (VK_RBUTTON))  mouseMods |= ModifierKeys::rightButtonModifier;
         if (isKeyDown (VK_MBUTTON))  mouseMods |= ModifierKeys::middleButtonModifier;
 
-        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
+        ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (mouseMods);
 
-        return ModifierKeys::currentModifiers;
+        return ModifierKeys::getCurrentModifiers();
     }
 
     std::optional<LRESULT> onNcLButtonDown (WPARAM wParam, LPARAM lParam)
@@ -3780,6 +3844,27 @@ private:
         }
 
         return {};
+    }
+
+    void handleSetFocus()
+    {
+        /*  When the HWND receives Focus from the system it sends a
+            UIA_AutomationFocusChangedEventId notification redirecting the focus to the HWND
+            itself. This is a built-in behaviour of the HWND.
+
+            This means that whichever JUCE managed provider was active before the entire
+            window lost and then regained the focus, loses its focused state, and the
+            window's root element will become focused under which all JUCE managed providers
+            can be found.
+
+            This needs to be reflected on currentlyFocusedHandler so that the JUCE
+            accessibility mechanisms can detect that the root window got the focus, and send
+            another FocusChanged event to the system to redirect focus to a JUCE managed
+            provider if necessary.
+        */
+        AccessibilityHandler::clearCurrentlyFocusedHandler();
+        updateKeyModifiers();
+        handleFocusGain();
     }
 
     LRESULT peerWindowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)
@@ -3839,7 +3924,7 @@ private:
                     // and if Microsoft's own VS Code doesn't have perfect mouse handling I don't
                     // think we can be expected to either!
 
-                    if ((styleFlags & windowIsResizable) != 0)
+                    if ((styleFlags & windowIsResizable) != 0 && ! isKioskMode())
                     {
                         const ScopedThreadDPIAwarenessSetter scope { hwnd };
 
@@ -3896,7 +3981,7 @@ private:
                 return 0;
 
             case WM_NCPAINT:
-                // this must be done, even with native titlebars, or there are rendering artifacts.
+                // This must be done, even with native titlebars, or there are rendering artifacts.
                 handlePaintMessage();
                 // Even if we're *not* using a native titlebar (i.e. extending into the nonclient area)
                 // the system needs to handle the NCPAINT to draw rounded corners and shadows.
@@ -3922,7 +4007,7 @@ private:
                 // so that the client area exactly fills the available space.
                 if (isFullScreen())
                 {
-                    const auto monitor = MonitorFromWindow (hwnd, MONITOR_DEFAULTTONULL);
+                    const auto monitor = MonitorFromRect (param, MONITOR_DEFAULTTONULL);
 
                     if (monitor == nullptr)
                         return 0;
@@ -3968,18 +4053,20 @@ private:
             case WM_POINTERLEAVE:
             case WM_NCMOUSELEAVE:
             case WM_MOUSELEAVE:
-                doMouseExit();
+                doMouseExit (message == WM_NCMOUSELEAVE ? WindowArea::nonclient : WindowArea::client);
                 return 0;
 
             case WM_LBUTTONDOWN:
             case WM_MBUTTONDOWN:
             case WM_RBUTTONDOWN:
+            case WM_XBUTTONDOWN:
                 doMouseDown (lParam, wParam);
                 return 0;
 
             case WM_LBUTTONUP:
             case WM_MBUTTONUP:
             case WM_RBUTTONUP:
+            case WM_XBUTTONUP:
                 doMouseUp (getPointFromLocalLParam (lParam), wParam);
                 return 0;
 
@@ -4081,23 +4168,14 @@ private:
 
             //==============================================================================
             case WM_SETFOCUS:
-                /*  When the HWND receives Focus from the system it sends a
-                    UIA_AutomationFocusChangedEventId notification redirecting the focus to the HWND
-                    itself. This is a built-in behaviour of the HWND.
+                mouseActivateFlags |= gotSetFocus;
 
-                    This means that whichever JUCE managed provider was active before the entire
-                    window lost and then regained the focus, loses its focused state, and the
-                    window's root element will become focused under which all JUCE managed providers
-                    can be found.
+                // If we've received a MOUSEACTIVATE, wait until we've seen the relevant mouse event
+                // before updating the focus.
+                if ((mouseActivateFlags & gotMouseActivate) != 0)
+                    break;
 
-                    This needs to be reflected on currentlyFocusedHandler so that the JUCE
-                    accessibility mechanisms can detect that the root window got the focus, and send
-                    another FocusChanged event to the system to redirect focus to a JUCE managed
-                    provider if necessary.
-                */
-                AccessibilityHandler::clearCurrentlyFocusedHandler();
-                updateKeyModifiers();
-                handleFocusGain();
+                handleSetFocus();
                 break;
 
             case WM_KILLFOCUS:
@@ -4141,16 +4219,21 @@ private:
                 // while a temporary window is being shown, prevent Windows from deactivating the
                 // title bars of our main windows.
                 if (wParam == 0 && ! shouldDeactivateTitleBar)
-                    wParam = TRUE; // change this and let it get passed to the DefWindowProc.
+                    wParam = TRUE; // change this and let it get passed to the DefWindowProc
 
                 break;
 
             case WM_POINTERACTIVATE:
             case WM_MOUSEACTIVATE:
+            {
+                mouseActivateFlags = 0;
+
                 if (! component.getMouseClickGrabsKeyboardFocus())
                     return MA_NOACTIVATE;
 
+                mouseActivateFlags |= gotMouseActivate;
                 break;
+            }
 
             case WM_SHOWWINDOW:
                 if (wParam != 0)
@@ -4280,7 +4363,7 @@ private:
                 if (auto result = onNcLButtonDown (wParam, lParam))
                     return *result;
 
-                break;
+                return handleNcMouseEventThenFixModifiers (WM_NCLBUTTONDOWN, wParam, lParam);
             }
 
             case WM_NCLBUTTONUP:
@@ -4412,7 +4495,7 @@ private:
         {
             if (compositionInProgress)
             {
-                // If this occurs, the user has cancelled the composition, so clear their changes..
+                // If this occurs, the user has cancelled the composition, so clear their changes.
                 if (auto* target = owner.findCurrentTextInputTarget())
                 {
                     target->setHighlightedRegion (compositionRange);
@@ -4692,6 +4775,26 @@ private:
     IMEHandler imeHandler;
     bool shouldIgnoreModalDismiss = false;
 
+    /*  When the user clicks on a window, the window gets sent WM_MOUSEACTIVATE, WM_ACTIVATE,
+        and WM_SETFOCUS, before sending a WM_LBUTTONDOWN or other pointer event.
+        However, if the WM_SETFOCUS message immediately calls SetFocus to move the focus to a
+        different window (e.g. a foreground modal window), then no mouse event will be sent to the
+        initially-activated window. This differs from the behaviour on other platforms, where the
+        mouse event always reaches the activated window. Failing to emit a mouse event breaks user
+        interaction: in the Toolbars pane of the WidgetsDemo, we create a foreground modal
+        customisation dialog. The window containing the toolbar is not modal, but still expects to
+        receive mouse events so that the toolbar buttons can be dragged around.
+
+        To avoid the system eating the mouse event sent to the initially-activated window, we
+        postpone processing the WM_SETFOCUS until *after* the activation mouse event.
+    */
+    enum MouseActivateFlags : uint8_t
+    {
+        gotMouseActivate = 1 << 0,
+        gotSetFocus      = 1 << 1,
+    };
+    uint8_t mouseActivateFlags = 0;
+
     ScopedSuspendResumeNotificationRegistration suspendResumeRegistration;
     std::optional<TimedCallback> monitorUpdateTimer;
 
@@ -4701,9 +4804,6 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentPeer)
 };
-
-MultiTouchMapper<DWORD> HWNDComponentPeer::currentTouches;
-ModifierKeys HWNDComponentPeer::modifiersAtLastCallback;
 
 ComponentPeer* Component::createNewPeer (int styleFlags, void* parentHWND)
 {
@@ -5788,8 +5888,34 @@ String SystemClipboard::getTextFromClipboard()
 //==============================================================================
 void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
-    if (auto* tlw = dynamic_cast<TopLevelWindow*> (kioskModeComp))
-        tlw->setUsingNativeTitleBar (! enableOrDisable);
+    if (auto* peer = dynamic_cast<HWNDComponentPeer*> (kioskModeComp->getPeer()))
+    {
+        const auto prevFlags = (DWORD) GetWindowLong (peer->getHWND(), GWL_STYLE);
+        const auto nextVisibility = prevFlags & WS_VISIBLE;
+        const auto nextFlags = peer->computeNativeStyleFlags() | nextVisibility;
+
+        if (nextFlags != prevFlags)
+        {
+            SetWindowLong (peer->getHWND(), GWL_STYLE, nextFlags);
+
+            // After changing the window style flags, the window border visibility may have changed.
+            // Call SetWindowPos with no changes other than SWP_FRAMECHANGED to ensure that
+            // GetWindowInfo returns up-to-date border-size values.
+            static constexpr auto frameChangeOnly = SWP_NOSIZE
+                                                  | SWP_NOMOVE
+                                                  | SWP_NOZORDER
+                                                  | SWP_NOREDRAW
+                                                  | SWP_NOACTIVATE
+                                                  | SWP_FRAMECHANGED
+                                                  | SWP_NOOWNERZORDER
+                                                  | SWP_NOSENDCHANGING;
+            SetWindowPos (peer->getHWND(), nullptr, 0, 0, 0, 0, frameChangeOnly);
+        }
+    }
+    else
+    {
+        jassertfalse;
+    }
 
     if (kioskModeComp != nullptr && enableOrDisable)
         kioskModeComp->setBounds (getDisplays().getDisplayForRect (kioskModeComp->getScreenBounds())->totalArea);
@@ -5913,7 +6039,7 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT, LPARAM userInfo
     return TRUE;
 }
 
-void Displays::findDisplays (float masterScale)
+void Displays::findDisplays (const Desktop& desktop)
 {
     setDPIAwareness();
 
@@ -5932,6 +6058,8 @@ void Displays::findDisplays (float masterScale)
     for (int i = 1; i < monitors.size(); ++i)
         if (monitors.getReference (i).isMain)
             monitors.swap (i, 0);
+
+    const auto masterScale = desktop.getGlobalScaleFactor();
 
     for (auto& monitor : monitors)
     {

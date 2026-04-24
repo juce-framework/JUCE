@@ -38,7 +38,7 @@ namespace juce
 //==============================================================================
 LookAndFeel_V2::LookAndFeel_V2()
 {
-    // initialise the standard set of colours..
+    // initialise the standard set of colours
     const uint32 textButtonColour      = 0xffbbbbff;
     const uint32 textHighlightColour   = 0x401111ee;
     const uint32 standardOutlineColour = 0xb2808080;
@@ -557,7 +557,7 @@ void LookAndFeel_V2::drawProgressBar (Graphics& g, ProgressBar& progressBar,
     }
     else
     {
-        // spinning bar..
+        // spinning bar
         g.setColour (foreground);
 
         const int stripeWidth = height * 2;
@@ -1762,7 +1762,7 @@ void LookAndFeel_V2::drawTooltip (Graphics& g, const String& text, int width, in
 {
     g.fillAll (findColour (TooltipWindow::backgroundColourId));
 
-   #if ! JUCE_MAC // The mac windows already have a non-optional 1 pix outline, so don't double it here..
+   #if ! JUCE_MAC // The mac windows already have a non-optional 1 pix outline, so don't double it here.
     g.setColour (findColour (TooltipWindow::outlineColourId));
     g.drawRect (0, 0, width, height, 1);
    #endif

@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -36,6 +36,8 @@
 #ifndef _AAX_IACFCONTROLLER_H_
 #define _AAX_IACFCONTROLLER_H_
 
+#include "AAX_Properties.h"
+#include "AAX_Enums.h"
 #include "AAX.h"
 
 #ifdef __clang__
@@ -222,6 +224,31 @@ public:
 	virtual
 	AAX_Result
 	GetIsAudioSuite(AAX_CBoolean* outIsAudioSuite) const = 0;
+};
+
+/** @copydoc AAX_IACFController
+ */
+class AAX_IACFController_V4 : public AAX_IACFController_V3
+{
+public:
+	/** \copydoc AAX_IController::GetInstanceGroupID() */
+	virtual
+	AAX_Result
+	GetInstanceGroupID(AAX_CInstanceGroupID* outInstanceGroupID) const = 0;
+};
+
+class AAX_IACFController_V5 : public AAX_IACFController_V4
+{
+public:
+	/** \copydoc AAX_IController::RegisterForNotification() */
+	virtual
+	AAX_Result
+	RegisterForNotification(/* AAX_ENotificationEvent */ AAX_CTypeID inNotificationType, IACFUnknown const * inSubscriberObject) = 0;
+
+	/** \copydoc AAX_IController::GetInstanceID() */
+	virtual
+	AAX_Result
+	GetInstanceID(AAX_CInstanceID* outInstanceID) const = 0;
 };
 
 #ifdef __clang__

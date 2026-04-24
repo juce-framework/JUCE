@@ -54,9 +54,9 @@ namespace juce
 class JUCE_API PushNotifications    : private DeletedAtShutdown
 {
 public:
-   #ifndef DOXYGEN
+    /** @cond */
     JUCE_DECLARE_SINGLETON_INLINE (PushNotifications, false)
-   #endif
+    /** @endcond */
 
     //==============================================================================
     /** Represents a notification that can be sent or received. */

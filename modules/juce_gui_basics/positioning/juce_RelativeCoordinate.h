@@ -48,7 +48,7 @@ namespace juce
        right of the one called "xyz", you could set your left edge to be "xyz.right + 50".
      - Instead of an [id], you can use the name "parent" to refer to this component's parent. Like
        any other component, these values are relative to their component's parent, so "parent.right" won't be
-       very useful for positioning a component because it refers to a position with the parent's parent.. but
+       very useful for positioning a component because it refers to a position with the parent's parent, but
        "parent.width" can be used for setting positions relative to the parent's size. E.g. to make a 10x10
        component which remains 1 pixel away from its parent's bottom-right, you could use
        "right - 10, bottom - 10, parent.width - 1, parent.height - 1".
@@ -62,7 +62,7 @@ namespace juce
     you could express it as:
     @code myComp.setBounds (RelativeBounds ("parent.width / 2 - 50, parent.height / 2 - 50, left + 100, top + 100"));
     @endcode
-    ..or an alternative way to achieve the same thing:
+    or an alternative way to achieve the same thing:
     @code myComp.setBounds (RelativeBounds ("right - 100, bottom - 100, parent.width / 2 + 50, parent.height / 2 + 50"));
     @endcode
 

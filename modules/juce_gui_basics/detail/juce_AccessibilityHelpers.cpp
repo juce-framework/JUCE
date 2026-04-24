@@ -35,6 +35,18 @@
 namespace juce::detail
 {
 
+String AccessibilityHelpers::getApplicationOrPluginName()
+{
+   #if defined (JucePlugin_Name)
+    return JucePlugin_Name;
+   #else
+    if (auto* app = JUCEApplicationBase::getInstance())
+        return app->getApplicationName();
+
+    return "JUCE Application";
+   #endif
+}
+
 #if ! JUCE_NATIVE_ACCESSIBILITY_INCLUDED
  void AccessibilityHelpers::notifyAccessibilityEvent (const AccessibilityHandler&, Event) {}
 #endif

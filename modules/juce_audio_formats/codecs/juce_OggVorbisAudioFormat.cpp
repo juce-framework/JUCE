@@ -327,7 +327,7 @@ public:
     {
         if (ok)
         {
-            // write a zero-length packet to show ogg that we're finished..
+            // write a zero-length packet to show ogg that we're finished
             writeSamples (0);
 
             ogg_stream_clear (&os);
@@ -463,21 +463,26 @@ AudioFormatReader* OggVorbisAudioFormat::createReaderFor (InputStream* in, bool 
     return nullptr;
 }
 
-AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
-                                                          double sampleRate,
-                                                          unsigned int numChannels,
-                                                          int bitsPerSample,
-                                                          const StringPairArray& metadataValues,
-                                                          int qualityOptionIndex)
+std::unique_ptr<AudioFormatWriter> OggVorbisAudioFormat::createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
+                                                                          const AudioFormatWriterOptions& options)
 {
-    if (out == nullptr)
+    if (streamToWriteTo == nullptr)
         return nullptr;
 
-    std::unique_ptr<OggWriter> w (new OggWriter (out, sampleRate, numChannels,
-                                                 (unsigned int) bitsPerSample,
-                                                 qualityOptionIndex, metadataValues));
+    StringPairArray metadata;
+    metadata.addUnorderedMap (options.getMetadataValues());
 
-    return w->ok ? w.release() : nullptr;
+    auto w = std::make_unique<OggWriter> (std::exchange (streamToWriteTo, {}).release(),
+                                          options.getSampleRate(),
+                                          (unsigned int) options.getNumChannels(),
+                                          (unsigned int) options.getBitsPerSample(),
+                                          options.getQualityOptionIndex(),
+                                          metadata);
+
+    if (! w->ok)
+        return nullptr;
+
+    return w;
 }
 
 StringArray OggVorbisAudioFormat::getQualityOptions()

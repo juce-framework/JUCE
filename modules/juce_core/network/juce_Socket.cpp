@@ -153,7 +153,7 @@ namespace SocketHelpers
 
             if (isListener)
             {
-                // need to do this to interrupt the accept() function..
+                // need to do this to interrupt the accept() function
                 StreamingSocket temp;
                 temp.connect (IPAddress::local().toString(), portNumber, 1000);
             }

@@ -35,7 +35,7 @@
 namespace juce
 {
 
-#ifndef DOXYGEN
+/** @cond */
 namespace detail
 {
     template <typename...>
@@ -46,8 +46,10 @@ namespace detail
 
     template <typename T>
     constexpr auto equalityComparableToNullptr<T, Void<decltype (std::declval<T>() != nullptr)>> = true;
+
+    template <typename> struct Tag {};
 } // namespace detail
-#endif
+/** @endcond */
 
 //==============================================================================
 /** Some helper methods for checking a callable object before invoking with
@@ -98,7 +100,7 @@ template <typename Object, typename OtherObject, typename Member, typename Other
     return copy;
 }
 
-#ifndef DOXYGEN
+/** @cond */
 namespace detail
 {
 template <typename Functor, typename Return, typename... Args>
@@ -107,7 +109,7 @@ static constexpr auto toFnPtr (Functor functor, Return (Functor::*) (Args...) co
     return static_cast<Return (*) (Args...)> (functor);
 }
 } // namespace detail
-#endif
+/** @endcond */
 
 /** Converts a captureless lambda to its equivalent function pointer type. */
 template <typename Functor>

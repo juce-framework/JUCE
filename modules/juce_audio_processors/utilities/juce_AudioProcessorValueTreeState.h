@@ -279,7 +279,7 @@ public:
     ~AudioProcessorValueTreeState() override;
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     /** Previous calls to
 
         @code
@@ -326,7 +326,7 @@ public:
                                                  bool isDiscrete = false,
                                                  AudioProcessorParameter::Category parameterCategory = AudioProcessorParameter::genericParameter,
                                                  bool isBoolean = false);
-   #endif
+    /** @endcond */
 
     /** This function adds a parameter to the attached AudioProcessor and that parameter will
         be managed by this AudioProcessorValueTreeState object.

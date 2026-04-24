@@ -77,6 +77,8 @@ public:
 
     MSVCScriptBuilder& deleteFile (const StringOrBuilder& path)
     {
+        jassert (path.value.isQuotedString());
+
         script << "del /s /q " << path.value;
         script << newLine;
         return *this;
@@ -84,6 +86,8 @@ public:
 
     MSVCScriptBuilder& mkdir (const StringOrBuilder& path)
     {
+        jassert (path.value.isQuotedString());
+
         script << "mkdir " << path.value;
         script << newLine;
         return *this;
@@ -175,7 +179,8 @@ public:
 
     MSVCScriptBuilder& append (const StringOrBuilder& string)
     {
-        script << string.value << newLine;
+        if (string.isNotEmpty())
+            script << string.value << newLine;
         return *this;
     }
 
@@ -329,6 +334,7 @@ public:
     virtual String getToolsVersion() const = 0;
     virtual String getDefaultToolset() const = 0;
     virtual String getDefaultWindowsTargetPlatformVersion() const = 0;
+    virtual void getSupportedArchitectures (std::vector<Architecture>&) const = 0;
 
     //==============================================================================
     String getIPPLibrary() const                      { return IPPLibraryValue.get(); }
@@ -476,8 +482,9 @@ public:
               characterSetValue              (config, Ids::characterSet,               getUndoManager()),
               architectureTypeValue          (config, Ids::winArchitecture,            getUndoManager(), Array<var> { getArchitectureValueString (Architecture::win64) }, ","),
               fastMathValue                  (config, Ids::fastMath,                   getUndoManager()),
-              debugInformationFormatValue    (config, Ids::debugInformationFormat,     getUndoManager(), "OldStyle"),
+              debugInformationFormatValue    (config, Ids::debugInformationFormat,     getUndoManager(), "ProgramDatabase"),
               pluginBinaryCopyStepValue      (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false),
+              intrinsicFunctionsEnabledValue (config, Ids::intrinsicFunctions,         getUndoManager(), false),
               vstBinaryLocation              (config, Ids::vstBinaryLocation,          getUndoManager()),
               vst3BinaryLocation             (config, Ids::vst3BinaryLocation,         getUndoManager()),
               aaxBinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
@@ -577,6 +584,7 @@ public:
         bool shouldUseMultiProcessorCompilation() const   { return multiProcessorCompilationValue.get(); }
         bool isFastMathEnabled() const                    { return fastMathValue.get(); }
         bool isPluginBinaryCopyStepEnabled() const        { return pluginBinaryCopyStepValue.get(); }
+        bool isIntrinsicFunctionsEnabled() const          { return intrinsicFunctionsEnabledValue.get(); }
 
         static bool shouldBuildTarget (build_tools::ProjectType::Target::Type targetType, Architecture arch)
         {
@@ -616,9 +624,12 @@ public:
             if (project.isAudioPluginProject())
                 addVisualStudioPluginInstallPathProperties (props);
 
-            const auto architectureList = exporter.getExporterIdentifier() == Identifier { "VS2022" }
-                                        ? std::vector<Architecture> { Architecture::win32, Architecture::win64, Architecture::arm64, Architecture::arm64ec }
-                                        : std::vector<Architecture> { Architecture::win32, Architecture::win64, Architecture::arm64 };
+            const auto architectureList = std::invoke ([&]
+            {
+                std::vector<Architecture> result;
+                static_cast<const MSVCProjectExporterBase&> (exporter).getSupportedArchitectures (result);
+                return result;
+            });
 
             Array<String> architectureListAsStrings;
             Array<var> architectureListAsVars;
@@ -648,6 +659,9 @@ public:
                                                     { "Disabled (/Od)", "Minimise size (/O1)", "Maximise speed (/O2)", "Full optimisation (/Ox)" },
                                                     { optimisationOff,  optimiseMinSize,       optimiseMaxSpeed,       optimiseFull }),
                        "The optimisation level for this configuration");
+
+            props.add (new ChoicePropertyComponent (intrinsicFunctionsEnabledValue, "Intrinsic Functions"),
+                       "Replaces some function calls with intrinsic or otherwise special forms of the function that help your application run faster.");
 
             props.add (new TextPropertyComponent (intermediatesPathValue, "Intermediates Path", 2048, false),
                        "An optional path to a folder to use for the intermediate build files. Note that Visual Studio allows "
@@ -749,7 +763,7 @@ public:
         ValueTreePropertyWithDefault warningLevelValue, warningsAreErrorsValue, prebuildCommandValue, postbuildCommandValue, generateDebugSymbolsValue,
                                      enableIncrementalLinkingValue, useRuntimeLibDLLValue, multiProcessorCompilationValue,
                                      intermediatesPathValue, characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue,
-                                     pluginBinaryCopyStepValue;
+                                     pluginBinaryCopyStepValue, intrinsicFunctionsEnabledValue;
 
         struct LocationProperties
         {
@@ -798,7 +812,8 @@ public:
                 std::pair { Ids::vstBinaryLocation,  &t.vstBinaryLocation },
                 std::pair { Ids::vst3BinaryLocation, &t.vst3BinaryLocation },
                 std::pair { Ids::aaxBinaryLocation,  &t.aaxBinaryLocation },
-                std::pair { Ids::lv2BinaryLocation,  &t.lv2BinaryLocation }
+                std::pair { Ids::lv2BinaryLocation,  &t.lv2BinaryLocation },
+                std::pair { Ids::unityPluginBinaryLocation, &t.unityPluginBinaryLocation }
             };
 
             const auto iter = std::find_if (properties.begin(),
@@ -912,6 +927,15 @@ public:
             {
                 auto* imports = projectXml.createNewChildElement ("Import");
                 imports->setAttribute ("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
+            }
+
+            if (owner.shouldAddMidiPackage())
+            {
+                const auto path = "packages\\" + cppwinrtPackage.name + "." + cppwinrtPackage.version + "\\build\\native\\Microsoft.Windows.CppWinRT.props";
+
+                auto* imports = projectXml.createNewChildElement ("Import");
+                imports->setAttribute ("Project", path);
+                imports->setAttribute ("Condition", "Exists('" + path + "')");
             }
 
             for (ConstConfigIterator i (owner); i.next();)
@@ -1087,7 +1111,7 @@ public:
 
                         const auto debugInfoFormat = isDebug || config.shouldGenerateDebugSymbols()
                                                    ? config.getDebugInformationFormatString()
-                                                   : "OldStyle";
+                                                   : "None";
 
                         cl->createNewChildElement ("DebugInformationFormat")->addTextElement (debugInfoFormat);
 
@@ -1117,6 +1141,9 @@ public:
 
                         auto cppStandard = owner.project.getCppStandardString();
                         cl->createNewChildElement ("LanguageStandard")->addTextElement ("stdcpp" + cppStandard);
+
+                        if (config.isIntrinsicFunctionsEnabled())
+                            cl->createNewChildElement ("IntrinsicFunctions")->addTextElement ("true");
                     }
 
                     {
@@ -1284,31 +1311,45 @@ public:
                 e->setAttribute ("Include", prependDot (getOwner().rcFile.getFileName()));
             }
 
+            if (owner.shouldAddMidiPackage())
+            {
+                auto* group = projectXml.createNewChildElement ("ItemGroup");
+                auto* reference = group->createNewChildElement ("Reference");
+                reference->setAttribute ("Include", midiPackage.name);
+
+                auto* hintPath = reference->createNewChildElement ("HintPath");
+                hintPath->addTextElement ("packages\\" + midiPackage.name + "." + midiPackage.version + "\\ref\\native\\" + midiPackage.name + ".winmd");
+
+                auto* isWinmd = reference->createNewChildElement ("IsWinMDFile");
+                isWinmd->addTextElement ("true");
+            }
+
             {
                 auto* e = projectXml.createNewChildElement ("Import");
                 e->setAttribute ("Project", "$(VCTargetsPath)\\Microsoft.Cpp.targets");
             }
 
+            std::vector<NuGetPackage> packagesToInclude;
+            owner.getPackagesToInclude (packagesToInclude);
+
+            for (const auto& package : packagesToInclude)
             {
-                if (owner.shouldAddWebView2Package())
-                {
-                    auto* importGroup = projectXml.createNewChildElement ("ImportGroup");
-                    importGroup->setAttribute ("Label", "ExtensionTargets");
+                auto* importGroup = projectXml.createNewChildElement ("ImportGroup");
+                importGroup->setAttribute ("Label", "ExtensionTargets");
 
-                    auto packageTargetsPath = "packages\\" + getWebView2PackageName() + "." + getWebView2PackageVersion()
-                                            + "\\build\\native\\" + getWebView2PackageName() + ".targets";
+                const auto packageTargetsPath = "packages\\" + package.name + "." + package.version
+                                              + "\\build\\native\\" + package.name + ".targets";
 
-                    auto* e = importGroup->createNewChildElement ("Import");
-                    e->setAttribute ("Project", packageTargetsPath);
-                    e->setAttribute ("Condition", "Exists('" + packageTargetsPath + "')");
-                }
+                auto* e = importGroup->createNewChildElement ("Import");
+                e->setAttribute ("Project", packageTargetsPath);
+                e->setAttribute ("Condition", "Exists('" + packageTargetsPath + "')");
+            }
 
-                if (owner.shouldLinkWebView2Statically())
-                {
-                    auto* propertyGroup = projectXml.createNewChildElement ("PropertyGroup");
-                    auto* loaderPref = propertyGroup->createNewChildElement ("WebView2LoaderPreference");
-                    loaderPref->addTextElement ("Static");
-                }
+            if (owner.shouldLinkWebView2Statically())
+            {
+                auto* propertyGroup = projectXml.createNewChildElement ("PropertyGroup");
+                auto* loaderPref = propertyGroup->createNewChildElement ("WebView2LoaderPreference");
+                loaderPref->addTextElement ("Static");
             }
         }
 
@@ -1714,6 +1755,17 @@ public:
             return aaxSdk.getChildFile ("Utilities").getChildFile ("PlugIn.ico");
         }
 
+        static bool shouldPerformCopyStepForPlugin (Target::Type pluginType,
+                                                    const MSVCBuildConfiguration& config,
+                                                    Architecture arch)
+        {
+            if (! config.isPluginBinaryCopyStepEnabled())
+                return false;
+
+            const auto binaryLocationId = getPluginTypeInfo (pluginType).second;
+            return binaryLocationId.isValid() && config.getBinaryPath (binaryLocationId, arch).isNotEmpty();
+        }
+
         String getExtraPostBuildSteps (const MSVCBuildConfiguration& config, Architecture arch) const
         {
             using Builder = MSVCScriptBuilder;
@@ -1733,7 +1785,7 @@ public:
                                     + " "
                                     + (directory + "\\" + segments[0] + "\\").quoted();
 
-                return config.isPluginBinaryCopyStepEnabled() ? copyStep : "";
+                return shouldPerformCopyStepForPlugin (type, config, arch) ? copyStep : "";
             };
 
             if (type == AAXPlugIn)
@@ -1769,7 +1821,7 @@ public:
 
                 auto pkgScript = String ("copy /Y ") + scriptPath.toWindowsStyle().quoted() + " \"$(OutDir)\"";
 
-                if (config.isPluginBinaryCopyStepEnabled())
+                if (shouldPerformCopyStepForPlugin (type, config, arch))
                 {
                     auto copyLocation = config.getBinaryPath (Ids::unityPluginBinaryLocation, arch);
 
@@ -1804,7 +1856,9 @@ public:
                                     + ".lv2\"\r\n";
 
                 builder.runAndCheck (writer,
-                                     config.isPluginBinaryCopyStepEnabled() ? copyStep : Builder{}.info ("Sucessfully generated LV2 manifest").build(),
+                                     shouldPerformCopyStepForPlugin (type, config, arch)
+                                        ? copyStep
+                                        : Builder{}.info ("Successfully generated LV2 manifest").build(),
                                      Builder{}.error ("Failed to generate LV2 manifest.")
                                               .exit (-1));
 
@@ -1834,8 +1888,7 @@ public:
                                                     + writerTarget->getBinaryNameWithSuffix (config);
 
                     {
-                        // moduleinfotool doesn't handle Windows-style path separators properly when computing the bundle name
-                        const auto normalisedBundlePath = getOwner().getOutDirFile (config, segments[0]).replace ("\\", "/");
+                        const auto normalisedBundlePath = getOwner().getOutDirFile (config, segments[0]);
                         const auto contentsDir = normalisedBundlePath + "\\Contents";
                         const auto resourceDir = contentsDir + "\\Resources";
                         const auto manifestPath = (resourceDir + "\\moduleinfo.json");
@@ -1845,10 +1898,8 @@ public:
                         const auto manifestInvocationString = StringArray
                         {
                             helperExecutablePath.quoted(),
-                            "-create",
-                            "-version", getOwner().project.getVersionString().quoted(),
-                            "-path",    normalisedBundlePath.quoted(),
-                            "-output",  manifestPath.quoted()
+                            ">",
+                            manifestPath.quoted()
                         }.joinIntoString (" ");
 
                         const auto crossCompilationPairs =
@@ -1917,7 +1968,7 @@ public:
                     .build();
             }
 
-            if (type == VSTPlugIn && config.isPluginBinaryCopyStepEnabled())
+            if (type == VSTPlugIn && shouldPerformCopyStepForPlugin (type, config, arch))
             {
                 const String copyCommand = "copy /Y \"$(OutDir)$(TargetFileName)\" \""
                                          + config.getBinaryPath (Ids::vstBinaryLocation, arch)
@@ -1930,6 +1981,114 @@ public:
             }
 
             return {};
+        }
+
+        static std::pair<String, Identifier> getPluginTypeInfo (Target::Type targetType)
+        {
+            if (targetType == AAXPlugIn)    return { "AAX",          Ids::aaxBinaryLocation };
+            if (targetType == VSTPlugIn)    return { "VST (Legacy)", Ids::vstBinaryLocation };
+            if (targetType == VST3PlugIn)   return { "VST3",         Ids::vst3BinaryLocation };
+            if (targetType == UnityPlugIn)  return { "Unity",        Ids::unityPluginBinaryLocation };
+            if (targetType == LV2PlugIn)    return { "LV2",          Ids::lv2BinaryLocation };
+
+            return {};
+        }
+
+        static String generatePluginCopyStepPathValidatorScript (Target::Type targetType,
+                                                                 const MSVCBuildConfiguration& config,
+                                                                 Architecture arch)
+        {
+            MSVCScriptBuilder builder;
+
+            if (config.isPluginBinaryCopyStepEnabled())
+            {
+                const auto [projectTypeString, binaryLocationId] = getPluginTypeInfo (targetType);
+
+                if (projectTypeString.isNotEmpty())
+                {
+                    const auto binaryPath = config.getBinaryPath (binaryLocationId, arch);
+
+                    if (binaryPath.isEmpty())
+                    {
+                        String warningMessage =
+                            "Plugin Configuration Warning: Plugin copy step is enabled but no target "
+                            "path is specified in the Projucer.";
+
+                        warningMessage << " This can be configured via the \""
+                                       << getArchitectureValueString (arch) << " "
+                                       << projectTypeString << " "
+                                       << "Binary Location\" option in the relevant Exporter configuration panel.";
+
+                        builder.warning (warningMessage.quoted());
+                    }
+                    else
+                    {
+                        constexpr auto errorMessage =
+                            "Plugin Copy Step Failure: Either the install path does not exist or you "
+                            "do not have permission to write to the target directory. Ensure you "
+                            "have the necessary permissions to write to the directory, or choose "
+                            "a different install location (e.g., a folder in your user directory).";
+
+                        MemoryOutputStream script;
+
+                        const auto validProjectName = build_tools::makeValidIdentifier (config.project.getProjectNameString(),
+                                                                                        false,
+                                                                                        true,
+                                                                                        false,
+                                                                                        false);
+                        const auto validPluginName = build_tools::makeValidIdentifier (projectTypeString,
+                                                                                       false,
+                                                                                       true,
+                                                                                       false,
+                                                                                       false);
+                        script << "set TOUCH_NAME=\".touch_\""
+                               << validProjectName << "_"
+                               << validPluginName << "_"
+                               << "\"%RANDOM%\"" << newLine;
+
+                        String tempPath = binaryPath;
+                        tempPath << "\\%TOUCH_NAME%";
+
+                        script << "(" << newLine;
+                        script << "echo \".\" > " << tempPath.quoted() << newLine;
+                        script << ") > nul 2>&1" << newLine;
+
+                        builder.append (script.toString());
+                        builder.ifelse ("exist " + tempPath.quoted(),
+                                        MSVCScriptBuilder{}.deleteFile (tempPath.quoted()),
+                                        MSVCScriptBuilder{}.error (String { errorMessage }.quoted())
+                                                           .exit (1));
+                    }
+                }
+            }
+
+            return builder.build();
+        }
+
+        static String generateToolchainValidatorScript (Architecture arch)
+        {
+            MSVCScriptBuilder builder;
+
+            if (arch == Architecture::win64)
+            {
+                const auto x86ToolchainErrorMessage =
+                    "echo : Warning: Toolchain configuration issue!"
+                    " You are using a 32-bit toolchain to compile a 64-bit target on a 64-bit system."
+                    " This may cause problems with the build system."
+                    " To resolve this, use the x64 version of MSBuild. You can invoke it directly at:"
+                    " \"<VisualStudioPathHere>/MSBuild/Current/Bin/amd64/MSBuild.exe\""
+                    " Or, use the \"x64 Native Tools Command Prompt\" script.";
+
+                builder.ifAllConditionsTrue (
+                {
+                    "\"$(PROCESSOR_ARCHITECTURE)\" == " + getVisualStudioArchitectureId (Architecture::win32).quoted(),
+
+                    // This only exists if the process is x86 but the host is x64.
+                    "defined PROCESSOR_ARCHITEW6432"
+                }, MSVCScriptBuilder{}.append (x86ToolchainErrorMessage));
+            }
+
+            return builder.build();
         }
 
         String getExtraPreBuildSteps (const MSVCBuildConfiguration& config, Architecture arch) const
@@ -1953,24 +2112,8 @@ public:
 
             MSVCScriptBuilder builder;
 
-            if (arch == Architecture::win64)
-            {
-                const auto x86ToolchainErrorMessage =
-                    "echo : Warning: Toolchain configuration issue!"
-                    " You are using a 32-bit toolchain to compile a 64-bit target on a 64-bit system."
-                    " This may cause problems with the build system."
-                    " To resolve this, use the x64 version of MSBuild. You can invoke it directly at:"
-                    " \"<VisualStudioPathHere>/MSBuild/Current/Bin/amd64/MSBuild.exe\""
-                    " Or, use the \"x64 Native Tools Command Prompt\" script.";
-
-                builder.ifAllConditionsTrue (
-                {
-                    "\"$(PROCESSOR_ARCHITECTURE)\" == " + getVisualStudioArchitectureId (Architecture::win32).quoted(),
-
-                    // This only exists if the process is x86 but the host is x64.
-                    "defined PROCESSOR_ARCHITEW6432"
-                }, MSVCScriptBuilder{}.append (x86ToolchainErrorMessage));
-            }
+            builder.append (generatePluginCopyStepPathValidatorScript (type, config, arch));
+            builder.append (generateToolchainValidatorScript (arch));
 
             if (type == LV2PlugIn)
             {
@@ -2004,8 +2147,14 @@ public:
                 return builder.build();
             }
 
+            if (type == UnityPlugIn)
+                return builder.build();
+
             if (type == AAXPlugIn)
-                return createBundleStructure (getAaxBundleStructure (config, arch));
+                return builder.build() + "\r\n" + createBundleStructure (getAaxBundleStructure (config, arch));
+
+            if (type == VSTPlugIn)
+                return builder.build();
 
             if (type == VST3PlugIn)
                 return builder.build() + "\r\n" + createBundleStructure (getVst3BundleStructure (config, arch));
@@ -2539,27 +2688,64 @@ protected:
                && project.isConfigFlagEnabled ("JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING", false);
     }
 
-    static String getWebView2PackageName()     { return "Microsoft.Web.WebView2"; }
-    static String getWebView2PackageVersion()  { return "1.0.1901.177"; }
+    bool shouldAddMidiPackage() const
+    {
+        return project.getEnabledModules().isModuleEnabled ("juce_audio_devices")
+              && project.isConfigFlagEnabled ("JUCE_USE_WINDOWS_MIDI_SERVICES", false);
+    }
+
+    struct NuGetPackage
+    {
+        String name;
+        String version;
+        bool targetFrameworkNative = false;
+    };
+
+    inline static const NuGetPackage webviewPackage { "Microsoft.Web.WebView2", "1.0.3485.44", false };
+    inline static const NuGetPackage cppwinrtPackage { "Microsoft.Windows.CppWinRT", "2.0.240405.15", true };
+    inline static const NuGetPackage midiPackage { "Microsoft.Windows.Devices.Midi2", "1.0.3-preview-11.250228-237", false };
+
+    void getPackagesToInclude (std::vector<NuGetPackage>& result) const
+    {
+        if (shouldAddWebView2Package())
+            result.push_back (webviewPackage);
+
+        if (shouldAddMidiPackage())
+        {
+            result.push_back (cppwinrtPackage);
+            result.push_back (midiPackage);
+        }
+    }
 
     void createPackagesConfigFile() const
     {
-        if (shouldAddWebView2Package())
+        std::vector<NuGetPackage> packagesToInclude;
+        getPackagesToInclude (packagesToInclude);
+
+        if (packagesToInclude.empty())
+            return;
+
+        packagesConfigFile = getTargetFolder().getChildFile ("packages.config");
+
+        build_tools::writeStreamToFile (packagesConfigFile, [&packagesToInclude] (MemoryOutputStream& mo)
         {
-            packagesConfigFile = getTargetFolder().getChildFile ("packages.config");
+            mo.setNewLineString ("\r\n");
 
-            build_tools::writeStreamToFile (packagesConfigFile, [] (MemoryOutputStream& mo)
+            mo << "<?xml version=\"1.0\" encoding=\"utf-8\"?>"                   << newLine
+               << "<packages>"                                                   << newLine;
+
+            for (const auto& p : packagesToInclude)
             {
-                mo.setNewLineString ("\r\n");
+                mo << "  <package id=" << p.name.quoted() << " version=" << p.version.quoted();
 
-                mo << "<?xml version=\"1.0\" encoding=\"utf-8\"?>"                   << newLine
-                   << "<packages>"                                                   << newLine
-                   << "\t" << "<package id=" << getWebView2PackageName().quoted()
-                           << " version="    << getWebView2PackageVersion().quoted()
-                           << " />"                                                  << newLine
-                   << "</packages>"                                                  << newLine;
-            });
-        }
+                if (p.targetFrameworkNative)
+                    mo << " targetFramework=\"native\"";
+
+                mo << " />"                                                       << newLine;
+            }
+
+            mo << "</packages>"                                                  << newLine;
+        });
     }
 
     static String prependDot (const String& filename)
@@ -2574,6 +2760,7 @@ protected:
 
         return name.equalsIgnoreCase ("include_juce_gui_basics")
             || name.equalsIgnoreCase ("include_juce_audio_processors")
+            || name.equalsIgnoreCase ("include_juce_audio_processors_headless")
             || name.equalsIgnoreCase ("include_juce_core")
             || name.equalsIgnoreCase ("include_juce_graphics");
     }
@@ -2615,6 +2802,11 @@ public:
     String getToolsVersion() const override                          { return "16.0"; }
     String getDefaultToolset() const override                        { return defaultToolset; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
+
+    void getSupportedArchitectures (std::vector<Architecture>& result) const override
+    {
+        result.insert (result.end(), { Architecture::win32, Architecture::win64, Architecture::arm64 });
+    }
 
     static MSVCProjectExporterVC2019* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
@@ -2661,6 +2853,11 @@ public:
     String getDefaultToolset() const override                        { return defaultToolset; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
 
+    void getSupportedArchitectures (std::vector<Architecture>& result) const override
+    {
+        result.insert (result.end(), { Architecture::win32, Architecture::win64, Architecture::arm64, Architecture::arm64ec });
+    }
+
     static MSVCProjectExporterVC2022* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
         if (settingsToUse.hasType (getValueTreeTypeName()))
@@ -2679,4 +2876,54 @@ private:
     const String defaultToolset { "v143" }, defaultTargetPlatform { "10.0" };
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2022)
+};
+
+//==============================================================================
+class MSVCProjectExporterVC2026 final : public MSVCProjectExporterBase
+{
+public:
+    MSVCProjectExporterVC2026 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterBase (p, t, getTargetFolderName())
+    {
+        name = getDisplayName();
+
+        targetPlatformVersion.setDefault (defaultTargetPlatform);
+        platformToolsetValue.setDefault (defaultToolset);
+    }
+
+    static String getDisplayName()        { return "Visual Studio 2026"; }
+    static String getValueTreeTypeName()  { return "VS2026"; }
+    static String getTargetFolderName()   { return "VisualStudio2026"; }
+
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
+
+    int getVisualStudioVersion() const override                      { return 18; }
+    String getSolutionComment() const override                       { return "# Visual Studio Version 18"; }
+    String getToolsVersion() const override                          { return "18.0"; }
+    String getDefaultToolset() const override                        { return defaultToolset; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
+
+    void getSupportedArchitectures (std::vector<Architecture>& result) const override
+    {
+        result.insert (result.end(), { Architecture::win32, Architecture::win64, Architecture::arm64, Architecture::arm64ec });
+    }
+
+    static MSVCProjectExporterVC2026* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
+    {
+        if (settingsToUse.hasType (getValueTreeTypeName()))
+            return new MSVCProjectExporterVC2026 (projectToUse, settingsToUse);
+
+        return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        addToolsetProperty (props, { "v140", "v140_xp", "v141", "v141_xp", "v142", "v143", "v145", "ClangCL" });
+        MSVCProjectExporterBase::createExporterProperties (props);
+    }
+
+private:
+    const String defaultToolset { "v145" }, defaultTargetPlatform { "10.0" };
+
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2026)
 };

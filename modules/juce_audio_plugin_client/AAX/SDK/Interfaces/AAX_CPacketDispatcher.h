@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -35,9 +35,10 @@
 #ifndef AAX_CPACKETDISPATCHER_H
 #define AAX_CPACKETDISPATCHER_H
 
-#include "AAX.h"
 #include "AAX_IController.h"
 #include "AAX_CMutex.h"
+#include "AAX_Errors.h"
+#include "AAX.h"
 
 #include <string>
 #include <map>

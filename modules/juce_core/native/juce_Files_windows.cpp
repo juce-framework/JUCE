@@ -342,7 +342,7 @@ bool File::moveToTrash() const
     if (! exists())
         return true;
 
-    // The string we pass in must be double null terminated..
+    // The string we pass in must be double null terminated.
     const size_t numBytes = CharPointer_UTF16::getBytesRequiredFor (fullPath.getCharPointer()) + 8;
     HeapBlock<WCHAR> doubleNullTermPath;
     doubleNullTermPath.calloc (numBytes, 1);

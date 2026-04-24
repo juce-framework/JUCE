@@ -93,6 +93,8 @@ protected:
                        unsigned int bitsPerSample);
 
 public:
+    using Options = AudioFormatWriterOptions;
+
     /** Destructor. */
     virtual ~AudioFormatWriter();
 

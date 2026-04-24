@@ -60,6 +60,13 @@ struct MidiMessageMetadata
     */
     MidiMessage getMessage() const          { return MidiMessage (data, numBytes, samplePosition); }
 
+    Span<const std::byte> asSpan() const&
+    {
+        return { reinterpret_cast<const std::byte*> (data), (size_t) numBytes };
+    }
+
+    Span<const std::byte> asSpan() const&& = delete;
+
     /** Pointer to the first byte of a MIDI message. */
     const uint8* data = nullptr;
 
@@ -285,7 +292,7 @@ public:
     MidiBufferIterator findNextSamplePosition (int samplePosition) const noexcept;
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     /** This class is now deprecated in favour of MidiBufferIterator.
 
         Used to iterate through the events in a MidiBuffer.
@@ -342,7 +349,7 @@ public:
         const MidiBuffer& buffer;
         MidiBufferIterator iterator;
     };
-   #endif
+    /** @endcond */
 
     /** The raw data holding this buffer.
         Obviously access to this data is provided at your own risk. Its internal format could

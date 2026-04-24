@@ -188,6 +188,12 @@ AffineTransform AffineTransform::verticalFlip (float height) noexcept
              0.0f, -1.0f, height };
 }
 
+AffineTransform AffineTransform::horizontalFlip (float width) noexcept
+{
+    return { -1.0f, 0.0f, width,
+              0.0f, 1.0f, 0.0f };
+}
+
 AffineTransform AffineTransform::inverted() const noexcept
 {
     double determinant = getDeterminant();
@@ -205,7 +211,7 @@ AffineTransform AffineTransform::inverted() const noexcept
                  dst10, dst11, -mat02 * dst10 - mat12 * dst11 };
     }
 
-    // singularity..
+    // singularity
     return *this;
 }
 

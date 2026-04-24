@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2014-2017, 2019-2021, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2014-2017, 2019-2021, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -60,7 +60,7 @@
 	
 	\ingroup CommonInterface_GUI
 */
-class AAX_IEffectGUI :	public AAX_IACFEffectGUI,
+class AAX_IEffectGUI :	public AAX_IACFEffectGUI_V2,
 						public CACFUnknown
 {	
 public:

@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
-
- *	Copyright 2013-2017, 2019, 2021-2024 Avid Technology, Inc.
+ *
+ *	Copyright 2013-2017, 2019, 2021-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -53,11 +53,11 @@
  *  - SDK 10.2.1 > \c 0x0A02
  *
  */
-#define AAX_SDK_VERSION ( 0x0208 )
+#define AAX_SDK_VERSION ( 0x0209 )
 
 /** \brief An atomic revision number for the source included in this SDK
  */
-#define AAX_SDK_CURRENT_REVISION ( 20208000 )
+#define AAX_SDK_CURRENT_REVISION ( 20209000 )
 
 
 #define AAX_SDK_1p0p1_REVISION ( 3712639 )
@@ -85,6 +85,8 @@
 #define AAX_SDK_2p6p1_REVISION ( 20206001 )
 #define AAX_SDK_2p7p0_REVISION ( 20207000 )
 #define AAX_SDK_2p8p0_REVISION ( 20208000 )
+#define AAX_SDK_2p8p1_REVISION ( 20208001 )
+#define AAX_SDK_2p9p0_REVISION ( 20209000 )
 //CURREVSTAMP < do not remove this comment
 
 

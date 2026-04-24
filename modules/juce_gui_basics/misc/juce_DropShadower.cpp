@@ -374,7 +374,7 @@ void DropShadower::updateShadows()
         for (int i = 4; --i >= 0;)
         {
             // there seem to be rare situations where the dropshadower may be deleted by
-            // callbacks during this loop, so use a weak ref to watch out for this..
+            // callbacks during this loop, so use a weak ref to watch out for this
             WeakReference<Component> sw (shadowWindows[i]);
 
             if (sw != nullptr)

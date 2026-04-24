@@ -220,7 +220,7 @@ public:
             return false;
         }
 
-        if (snd_pcm_hw_params_set_access (handle, hwParams, SND_PCM_ACCESS_RW_INTERLEAVED) >= 0) // works better for plughw..
+        if (snd_pcm_hw_params_set_access (handle, hwParams, SND_PCM_ACCESS_RW_INTERLEAVED) >= 0) // works better for plughw
             isInterleaved = true;
         else if (snd_pcm_hw_params_set_access (handle, hwParams, SND_PCM_ACCESS_RW_NONINTERLEAVED) >= 0)
             isInterleaved = false;
@@ -286,7 +286,7 @@ public:
              || JUCE_ALSA_FAILED (snd_pcm_hw_params_get_periods (hwParams, &periods, &dir)))
             latency = 0;
         else
-            latency = (int) frames * ((int) periods - 1); // (this is the method JACK uses to guess the latency..)
+            latency = (int) frames * ((int) periods - 1); // (this is the method JACK uses to guess the latency)
 
         JUCE_ALSA_LOG ("frames: " << (int) frames << ", periods: " << (int) periods
                           << ", samplesPerPeriod: " << (int) samplesPerPeriod);
@@ -551,7 +551,7 @@ public:
         currentOutputChans.clear();
 
         // Note that the input device is opened before an output, because we've heard
-        // of drivers where doing it in the reverse order mysteriously fails.. If this
+        // of drivers where doing it in the reverse order mysteriously fails. If this
         // order also causes problems, let us know and we'll see if we can find a compromise!
 
         if (inputChannelDataForCallback.size() > 0 && inputId.isNotEmpty())
@@ -660,7 +660,7 @@ public:
 
             if ((! waitForThreadToExit (400)) && audioIoInProgress && numCallbacks == callbacksToStop)
             {
-                JUCE_ALSA_LOG ("Thread is stuck in i/o.. Is pulseaudio suspended?");
+                JUCE_ALSA_LOG ("Thread is stuck in i/o. Is pulseaudio suspended?");
 
                 if (outputDevice != nullptr) outputDevice->closeNow();
                 if (inputDevice != nullptr) inputDevice->closeNow();
@@ -1239,8 +1239,8 @@ private:
                 bool isOutput = (ioid != "Input");
                 bool isInput  = (ioid != "Output");
 
-                // alsa is stupid here, it advertises dmix and dsnoop as input/output devices, but
-                // opening dmix as input, or dsnoop as output will trigger errors..
+                // ALSA advertises dmix and dsnoop as input/output devices, but
+                // opening dmix as input, or dsnoop as output will trigger errors
                 isInput  = isInput  && ! id.startsWith ("dmix");
                 isOutput = isOutput && ! id.startsWith ("dsnoop");
 

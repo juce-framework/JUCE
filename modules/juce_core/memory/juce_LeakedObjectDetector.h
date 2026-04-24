@@ -67,15 +67,21 @@ public:
             DBG ("*** Dangling pointer deletion! Class: " << getLeakedObjectClassName());
 
             /** If you hit this, then you've managed to delete more instances of this class than you've
-                created.. That indicates that you're deleting some dangling pointers.
+                created. That indicates that you're deleting some dangling pointers.
 
                 Note that although this assertion will have been triggered during a destructor, it might
                 not be this particular deletion that's at fault - the incorrect one may have happened
                 at an earlier point in the program, and simply not been detected until now.
 
-                Most errors like this are caused by using old-fashioned, non-RAII techniques for
-                your object management. Tut, tut. Always, always use std::unique_ptrs, OwnedArrays,
-                ReferenceCountedObjects, etc, and avoid the 'delete' operator at all costs!
+                Many errors like this are caused by using old-fashioned, non-RAII techniques for
+                object management. If you're seeing this, it's a good idea to double-check
+                that you're using std::unique_ptrs, OwnedArrays,
+                ReferenceCountedObjects, etc, and avoiding manual calls to the 'delete'
+                operator at all costs!
+
+                You may also see this error if JUCE's shutdown code is called while an object
+                containing a leak detector is still alive (perhaps declared as a namespace-scope
+                static).
             */
             jassertfalse;
         }
@@ -97,9 +103,15 @@ private:
                 /** If you hit this, then you've leaked one or more objects of the type specified by
                     the 'OwnerClass' template parameter - the name should have been printed by the line above.
 
-                    If you're leaking, it's probably because you're using old-fashioned, non-RAII techniques for
-                    your object management. Tut, tut. Always, always use std::unique_ptrs, OwnedArrays,
-                    ReferenceCountedObjects, etc, and avoid the 'delete' operator at all costs!
+                    Many errors like this are caused by using old-fashioned, non-RAII techniques for
+                    object management. If you're seeing this, it's a good idea to double-check
+                    that you're using std::unique_ptrs, OwnedArrays,
+                    ReferenceCountedObjects, etc, and avoiding manual calls to the 'delete'
+                    operator at all costs!
+
+                    You may also see this error if JUCE's shutdown code is called while an object
+                    containing a leak detector is still alive (perhaps declared as a namespace-scope
+                    static).
                 */
                 jassertfalse;
             }

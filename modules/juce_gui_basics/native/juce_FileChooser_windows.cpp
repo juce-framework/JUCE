@@ -296,7 +296,7 @@ private:
             {
                 HWND hwnd = nullptr;
 
-                if (auto window = addComSmartPtrOwner (d).getInterface<IOleWindow>())
+                if (auto window = ComSmartPtr (d, IncrementRef::yes).getInterface<IOleWindow>())
                     window->GetWindow (&hwnd);
 
                 ScopedLock lock (owner.deletingDialog);

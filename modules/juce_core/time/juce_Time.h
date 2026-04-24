@@ -293,7 +293,7 @@ public:
     static String getMonthName (int monthNumber, bool threeLetterVersion);
 
     //==============================================================================
-    // Static methods for getting system timers directly..
+    // Static methods for getting system timers directly
 
     /** Returns the current system time.
 
@@ -345,7 +345,7 @@ public:
     static uint32 getApproximateMillisecondCounter() noexcept;
 
     //==============================================================================
-    // High-resolution timers..
+    // High-resolution timers
 
     /** Returns the current high-resolution counter's tick-count.
 

@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- * Copyright 2023-2024 Avid Technology, Inc.
+ * Copyright 2023-2025 Avid Technology, Inc.
  * All rights reserved.
  * 
  * This file is part of the Avid AAX SDK.
@@ -36,7 +36,7 @@
 #include "AAX_IDataBuffer.h"
 #include "AAX.h"
 
-#include <string>
+#include <vector>
 #include <limits>
 #include <type_traits>
 

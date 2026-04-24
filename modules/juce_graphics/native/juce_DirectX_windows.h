@@ -399,8 +399,15 @@ private:
     class MemoryFontFileLoader;
     class FontFileEnumerator;
 
+    ComSmartPtr<MemoryFontFileLoader> findLoaderForUuid (const Uuid&) const;
+
     IDWriteFactory& factory;
-    std::vector<ComSmartPtr<MemoryFontFileLoader>> fileLoaders;
+
+    // Allows lookup of Uuids of all loaders with data matching a particular hash
+    std::map<size_t, std::vector<Uuid>> uuidsForHash;
+
+    // Sorted by Uuid
+    std::vector<ComSmartPtr<MemoryFontFileLoader>> loaders;
 };
 
 //==============================================================================

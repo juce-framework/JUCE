@@ -544,6 +544,9 @@ public:
 
             This is useful to ensure that a particular item is shown when the menu
             contains too many items to display on a single screen.
+
+            The specified item will be positioned at the target screen area of the
+            menu if possible.
         */
         [[nodiscard]] Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
 
@@ -1050,10 +1053,10 @@ public:
     };
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("Use the new method.")]]
     int drawPopupMenuItem (Graphics&, int, int, bool, bool, bool, bool, bool, const String&, const String&, Image*, const Colour*) { return 0; }
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

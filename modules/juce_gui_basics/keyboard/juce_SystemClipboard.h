@@ -50,7 +50,7 @@ public:
     /** Gets the current clipboard's contents.
 
         Obviously this might have come from another app, so could contain
-        anything..
+        anything.
     */
     static String getTextFromClipboard();
 };

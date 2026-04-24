@@ -106,7 +106,7 @@ public:
 
             If your app needs to load settings files that were created by older versions of juce and
             you want to maintain backwards-compatibility, then you can set this to "Preferences".
-            But.. for better Apple-compliance, the recommended approach would be to write some code that
+            But, for better Apple-compliance, the recommended approach would be to write some code that
             finds your old settings files in ~/Library/Preferences, moves them to ~/Library/Application Support,
             and then uses the new path.
         */

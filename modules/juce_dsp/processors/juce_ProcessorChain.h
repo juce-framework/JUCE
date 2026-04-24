@@ -35,8 +35,8 @@
 namespace juce::dsp
 {
 
+/** @cond */
 //==============================================================================
-#ifndef DOXYGEN
 /** The contents of this namespace are used to implement ProcessorChain and should
     not be used elsewhere. Their interfaces (and existence) are liable to change!
 */
@@ -60,7 +60,7 @@ namespace detail
     template <typename Context, size_t Ix>
     inline constexpr auto useContextDirectly = ! Context::usesSeparateInputAndOutputBlocks() || Ix == 0;
 }
-#endif
+/** @endcond */
 
 /** This variadically-templated class lets you join together any number of processor
     classes into a single processor which will call process() on them all in sequence.
@@ -168,7 +168,7 @@ inline bool isBypassed (const ProcessorChain<Processors...>& chain) noexcept
 
 } // namespace juce::dsp
 
-#ifndef DOXYGEN
+/** @cond */
 namespace std
 {
 
@@ -185,4 +185,4 @@ struct tuple_element<I, ::juce::dsp::ProcessorChain<Processors...>> : tuple_elem
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace std
-#endif
+/** @endcond */

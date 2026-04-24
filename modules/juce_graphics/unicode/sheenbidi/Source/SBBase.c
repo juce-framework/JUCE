@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2016-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBVersion.h>
 
-#include "BidiTypeLookup.h"
-#include "GeneralCategoryLookup.h"
-#include "PairingLookup.h"
-#include "ScriptLookup.h"
 #include "SBBase.h"
+
+static const char LibraryVersion[] = SHEENBIDI_VERSION_STRING;
 
 #define TAG(a, b, c, d) \
 (SBUInt32)              \
@@ -88,30 +87,10 @@ SB_INTERNAL SBBoolean SBUIntegerVerifyRange(SBUInteger actualLength,
         && possibleLimit <= actualLength;
 }
 
-SBBidiType SBCodepointGetBidiType(SBCodepoint codepoint)
-{
-    return LookupBidiType(codepoint);
-}
-
-SBGeneralCategory SBCodepointGetGeneralCategory(SBCodepoint codepoint)
-{
-    return LookupGeneralCategory(codepoint);
-}
-
-SBCodepoint SBCodepointGetMirror(SBCodepoint codepoint)
-{
-    return LookupMirror(codepoint);
-}
-
-SBScript SBCodepointGetScript(SBCodepoint codepoint)
-{
-    return LookupScript(codepoint);
-}
-
 SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
 {
     /* Reference: https://docs.microsoft.com/en-us/typography/opentype/spec/scripttags */
-    /* Dated: 07/24/2017 */
+    /* Dated: 05/31/2024 */
 
     switch (script) {
     case SBScriptADLM:
@@ -150,7 +129,7 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('b', 'u', 'g', 'i');
     case SBScriptBUHD:
         return TAG('b', 'u', 'h', 'd');
- /* case SBScriptBYZM:
+ /* case SBScript____:
         return TAG('b', 'y', 'z', 'm'); */
     case SBScriptCANS:
         return TAG('c', 'a', 'n', 's');
@@ -164,30 +143,40 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('c', 'h', 'a', 'm');
     case SBScriptCHER:
         return TAG('c', 'h', 'e', 'r');
+    case SBScriptCHRS:
+        return TAG('c', 'h', 'r', 's');
     case SBScriptHANI:
         return TAG('h', 'a', 'n', 'i');
     case SBScriptCOPT:
         return TAG('c', 'o', 'p', 't');
     case SBScriptCPRT:
         return TAG('c', 'p', 'r', 't');
+    case SBScriptCPMN:
+        return TAG('c', 'p', 'm', 'n');
     case SBScriptCYRL:
         return TAG('c', 'y', 'r', 'l');
- /* case SBScriptDFLT:
-        return TAG('D', 'F', 'L', 'T'); */
     case SBScriptDSRT:
         return TAG('d', 's', 'r', 't');
  /* case SBScriptDEVA:
         return TAG('d', 'e', 'v', 'a'); */
     case SBScriptDEVA:
         return TAG('d', 'e', 'v', '2');
+    case SBScriptDIAK:
+        return TAG('d', 'i', 'a', 'k');
+    case SBScriptDOGR:
+        return TAG('d', 'o', 'g', 'r');
     case SBScriptDUPL:
         return TAG('d', 'u', 'p', 'l');
     case SBScriptEGYP:
         return TAG('e', 'g', 'y', 'p');
     case SBScriptELBA:
         return TAG('e', 'l', 'b', 'a');
+    case SBScriptELYM:
+        return TAG('e', 'l', 'y', 'm');
     case SBScriptETHI:
         return TAG('e', 't', 'h', 'i');
+    case SBScriptGARA:
+        return TAG('g', 'a', 'r', 'a');
     case SBScriptGEOR:
         return TAG('g', 'e', 'o', 'r');
     case SBScriptGLAG:
@@ -202,14 +191,20 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('g', 'u', 'j', 'r'); */
     case SBScriptGUJR:
         return TAG('g', 'j', 'r', '2');
+    case SBScriptGONG:
+        return TAG('g', 'o', 'n', 'g');
  /* case SBScriptGURU:
         return TAG('g', 'u', 'r', 'u'); */
     case SBScriptGURU:
         return TAG('g', 'u', 'r', '2');
+    case SBScriptGUKH:
+        return TAG('g', 'u', 'k', 'h');
     case SBScriptHANG:
         return TAG('h', 'a', 'n', 'g');
- /* case SBScriptJAMO:
+ /* case SBScriptHANG:
         return TAG('j', 'a', 'm', 'o'); */
+    case SBScriptROHG:
+        return TAG('r', 'o', 'h', 'g');
     case SBScriptHANO:
         return TAG('h', 'a', 'n', 'o');
     case SBScriptHATR:
@@ -234,16 +229,22 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('k', 'n', 'd', '2');
     case SBScriptKANA:
         return TAG('k', 'a', 'n', 'a');
+    case SBScriptKAWI:
+        return TAG('k', 'a', 'w', 'i');
     case SBScriptKALI:
         return TAG('k', 'a', 'l', 'i');
     case SBScriptKHAR:
         return TAG('k', 'h', 'a', 'r');
+    case SBScriptKITS:
+        return TAG('k', 'i', 't', 's');
     case SBScriptKHMR:
         return TAG('k', 'h', 'm', 'r');
     case SBScriptKHOJ:
         return TAG('k', 'h', 'o', 'j');
     case SBScriptSIND:
         return TAG('s', 'i', 'n', 'd');
+    case SBScriptKRAI:
+        return TAG('k', 'r', 'a', 'i');
     case SBScriptLAOO:
         return TAG('l', 'a', 'o', ' ');
     case SBScriptLATN:
@@ -264,6 +265,8 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('l', 'y', 'd', 'i');
     case SBScriptMAHJ:
         return TAG('m', 'a', 'h', 'j');
+    case SBScriptMAKA:
+        return TAG('m', 'a', 'k', 'a');
  /* case SBScriptMLYM:
         return TAG('m', 'l', 'y', 'm'); */
     case SBScriptMLYM:
@@ -274,8 +277,12 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('m', 'a', 'n', 'i');
     case SBScriptMARC:
         return TAG('m', 'a', 'r', 'c');
- /* case SBScriptMATH:
+    case SBScriptGONM:
+        return TAG('g', 'o', 'n', 'm');
+ /* case SBScript____:
         return TAG('m', 'a', 't', 'h'); */
+    case SBScriptMEDF:
+        return TAG('m', 'e', 'd', 'f');
     case SBScriptMTEI:
         return TAG('m', 't', 'e', 'i');
     case SBScriptMEND:
@@ -294,7 +301,7 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('m', 'r', 'o', 'o');
     case SBScriptMULT:
         return TAG('m', 'u', 'l', 't');
- /* case SBScriptMUSC:
+ /* case SBScript___:
         return TAG('m', 'u', 's', 'c'); */
  /* case SBScriptMYMR:
         return TAG('m', 'y', 'm', 'r'); */
@@ -302,12 +309,20 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('m', 'y', 'm', '2');
     case SBScriptNBAT:
         return TAG('n', 'b', 'a', 't');
+    case SBScriptNAGM:
+        return TAG('n', 'a', 'g', 'm');
+    case SBScriptNAND:
+        return TAG('n', 'a', 'n', 'd');
     case SBScriptNEWA:
         return TAG('n', 'e', 'w', 'a');
     case SBScriptTALU:
         return TAG('t', 'a', 'l', 'u');
     case SBScriptNKOO:
         return TAG('n', 'k', 'o', ' ');
+    case SBScriptNSHU:
+        return TAG('n', 's', 'h', 'u');
+    case SBScriptHMNP:
+        return TAG('h', 'm', 'n', 'p');
  /* case SBScriptORYA:
         return TAG('o', 'r', 'y', 'a'); */
     case SBScriptORYA:
@@ -316,6 +331,8 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('o', 'g', 'a', 'm');
     case SBScriptOLCK:
         return TAG('o', 'l', 'c', 'k');
+    case SBScriptONAO:
+        return TAG('o', 'n', 'a', 'o');
     case SBScriptITAL:
         return TAG('i', 't', 'a', 'l');
     case SBScriptHUNG:
@@ -326,10 +343,14 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('p', 'e', 'r', 'm');
     case SBScriptXPEO:
         return TAG('x', 'p', 'e', 'o');
+    case SBScriptSOGO:
+        return TAG('s', 'o', 'g', 'o');
     case SBScriptSARB:
         return TAG('s', 'a', 'r', 'b');
     case SBScriptORKH:
         return TAG('o', 'r', 'k', 'h');
+    case SBScriptOUGR:
+        return TAG('o', 'u', 'g', 'r');
     case SBScriptOSGE:
         return TAG('o', 's', 'g', 'e');
     case SBScriptOSMA:
@@ -364,12 +385,18 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('s', 'g', 'n', 'w');
     case SBScriptSINH:
         return TAG('s', 'i', 'n', 'h');
+    case SBScriptSOGD:
+        return TAG('s', 'o', 'g', 'd');
     case SBScriptSORA:
         return TAG('s', 'o', 'r', 'a');
+    case SBScriptSOYO:
+        return TAG('s', 'o', 'y', 'o');
     case SBScriptXSUX:
         return TAG('x', 's', 'u', 'x');
     case SBScriptSUND:
         return TAG('s', 'u', 'n', 'd');
+    case SBScriptSUNU:
+        return TAG('s', 'u', 'n', 'u');
     case SBScriptSYLO:
         return TAG('s', 'y', 'l', 'o');
     case SBScriptSYRC:
@@ -390,6 +417,8 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('t', 'a', 'm', 'l'); */
     case SBScriptTAML:
         return TAG('t', 'm', 'l', '2');
+    case SBScriptTNSA:
+        return TAG('t', 'n', 's', 'a');
     case SBScriptTANG:
         return TAG('t', 'a', 'n', 'g');
  /* case SBScriptTELU:
@@ -406,15 +435,384 @@ SBUInt32 SBScriptGetOpenTypeTag(SBScript script)
         return TAG('t', 'f', 'n', 'g');
     case SBScriptTIRH:
         return TAG('t', 'i', 'r', 'h');
+    case SBScriptTODR:
+        return TAG('t', 'o', 'd', 'r');
+    case SBScriptTOTO:
+        return TAG('t', 'o', 't', 'o');
+    case SBScriptTUTG:
+        return TAG('t', 'u', 't', 'g');
     case SBScriptUGAR:
         return TAG('u', 'g', 'a', 'r');
     case SBScriptVAII:
         return TAG('v', 'a', 'i', ' ');
+    case SBScriptVITH:
+        return TAG('v', 'i', 't', 'h');
+    case SBScriptWCHO:
+        return TAG('w', 'c', 'h', 'o');
     case SBScriptWARA:
         return TAG('w', 'a', 'r', 'a');
+    case SBScriptYEZI:
+        return TAG('y', 'e', 'z', 'i');
     case SBScriptYIII:
         return TAG('y', 'i', ' ', ' ');
+    case SBScriptZANB:
+        return TAG('z', 'a', 'n', 'b');
     default:
         return TAG('D', 'F', 'L', 'T');
     }
+}
+
+SBUInt32 SBScriptGetUnicodeTag(SBScript script)
+{
+    switch (script) {
+    case SBScriptADLM:
+        return TAG('A', 'd', 'l', 'm');
+    case SBScriptAGHB:
+        return TAG('A', 'g', 'h', 'b');
+    case SBScriptAHOM:
+        return TAG('A', 'h', 'o', 'm');
+    case SBScriptARAB:
+        return TAG('A', 'r', 'a', 'b');
+    case SBScriptARMI:
+        return TAG('A', 'r', 'm', 'i');
+    case SBScriptARMN:
+        return TAG('A', 'r', 'm', 'n');
+    case SBScriptAVST:
+        return TAG('A', 'v', 's', 't');
+    case SBScriptBALI:
+        return TAG('B', 'a', 'l', 'i');
+    case SBScriptBAMU:
+        return TAG('B', 'a', 'm', 'u');
+    case SBScriptBASS:
+        return TAG('B', 'a', 's', 's');
+    case SBScriptBATK:
+        return TAG('B', 'a', 't', 'k');
+    case SBScriptBENG:
+        return TAG('B', 'e', 'n', 'g');
+    case SBScriptBHKS:
+        return TAG('B', 'h', 'k', 's');
+    case SBScriptBOPO:
+        return TAG('B', 'o', 'p', 'o');
+    case SBScriptBRAH:
+        return TAG('B', 'r', 'a', 'h');
+    case SBScriptBRAI:
+        return TAG('B', 'r', 'a', 'i');
+    case SBScriptBUGI:
+        return TAG('B', 'u', 'g', 'i');
+    case SBScriptBUHD:
+        return TAG('B', 'u', 'h', 'd');
+    case SBScriptCAKM:
+        return TAG('C', 'a', 'k', 'm');
+    case SBScriptCANS:
+        return TAG('C', 'a', 'n', 's');
+    case SBScriptCARI:
+        return TAG('C', 'a', 'r', 'i');
+    case SBScriptCHAM:
+        return TAG('C', 'h', 'a', 'm');
+    case SBScriptCHER:
+        return TAG('C', 'h', 'e', 'r');
+    case SBScriptCHRS:
+        return TAG('C', 'h', 'r', 's');
+    case SBScriptCOPT:
+        return TAG('C', 'o', 'p', 't');
+    case SBScriptCPMN:
+        return TAG('C', 'p', 'm', 'n');
+    case SBScriptCPRT:
+        return TAG('C', 'p', 'r', 't');
+    case SBScriptCYRL:
+        return TAG('C', 'y', 'r', 'l');
+    case SBScriptDEVA:
+        return TAG('D', 'e', 'v', 'a');
+    case SBScriptDIAK:
+        return TAG('D', 'i', 'a', 'k');
+    case SBScriptDOGR:
+        return TAG('D', 'o', 'g', 'r');
+    case SBScriptDSRT:
+        return TAG('D', 's', 'r', 't');
+    case SBScriptDUPL:
+        return TAG('D', 'u', 'p', 'l');
+    case SBScriptEGYP:
+        return TAG('E', 'g', 'y', 'p');
+    case SBScriptELBA:
+        return TAG('E', 'l', 'b', 'a');
+    case SBScriptELYM:
+        return TAG('E', 'l', 'y', 'm');
+    case SBScriptETHI:
+        return TAG('E', 't', 'h', 'i');
+    case SBScriptGARA:
+        return TAG('G', 'a', 'r', 'a');
+    case SBScriptGEOR:
+        return TAG('G', 'e', 'o', 'r');
+    case SBScriptGLAG:
+        return TAG('G', 'l', 'a', 'g');
+    case SBScriptGONG:
+        return TAG('G', 'o', 'n', 'g');
+    case SBScriptGONM:
+        return TAG('G', 'o', 'n', 'm');
+    case SBScriptGOTH:
+        return TAG('G', 'o', 't', 'h');
+    case SBScriptGRAN:
+        return TAG('G', 'r', 'a', 'n');
+    case SBScriptGREK:
+        return TAG('G', 'r', 'e', 'k');
+    case SBScriptGUJR:
+        return TAG('G', 'u', 'j', 'r');
+    case SBScriptGUKH:
+        return TAG('G', 'u', 'k', 'h');
+    case SBScriptGURU:
+        return TAG('G', 'u', 'r', 'u');
+    case SBScriptHANG:
+        return TAG('H', 'a', 'n', 'g');
+    case SBScriptHANI:
+        return TAG('H', 'a', 'n', 'i');
+    case SBScriptHANO:
+        return TAG('H', 'a', 'n', 'o');
+    case SBScriptHATR:
+        return TAG('H', 'a', 't', 'r');
+    case SBScriptHEBR:
+        return TAG('H', 'e', 'b', 'r');
+    case SBScriptHIRA:
+        return TAG('H', 'i', 'r', 'a');
+    case SBScriptHLUW:
+        return TAG('H', 'l', 'u', 'w');
+    case SBScriptHMNG:
+        return TAG('H', 'm', 'n', 'g');
+    case SBScriptHMNP:
+        return TAG('H', 'm', 'n', 'p');
+    case SBScriptHUNG:
+        return TAG('H', 'u', 'n', 'g');
+    case SBScriptITAL:
+        return TAG('I', 't', 'a', 'l');
+    case SBScriptJAVA:
+        return TAG('J', 'a', 'v', 'a');
+    case SBScriptKALI:
+        return TAG('K', 'a', 'l', 'i');
+    case SBScriptKANA:
+        return TAG('K', 'a', 'n', 'a');
+    case SBScriptKAWI:
+        return TAG('K', 'a', 'w', 'i');
+    case SBScriptKHAR:
+        return TAG('K', 'h', 'a', 'r');
+    case SBScriptKHMR:
+        return TAG('K', 'h', 'm', 'r');
+    case SBScriptKHOJ:
+        return TAG('K', 'h', 'o', 'j');
+    case SBScriptKITS:
+        return TAG('K', 'i', 't', 's');
+    case SBScriptKNDA:
+        return TAG('K', 'n', 'd', 'a');
+    case SBScriptKRAI:
+        return TAG('K', 'r', 'a', 'i');
+    case SBScriptKTHI:
+        return TAG('K', 't', 'h', 'i');
+    case SBScriptLANA:
+        return TAG('L', 'a', 'n', 'a');
+    case SBScriptLAOO:
+        return TAG('L', 'a', 'o', 'o');
+    case SBScriptLATN:
+        return TAG('L', 'a', 't', 'n');
+    case SBScriptLEPC:
+        return TAG('L', 'e', 'p', 'c');
+    case SBScriptLIMB:
+        return TAG('L', 'i', 'm', 'b');
+    case SBScriptLINA:
+        return TAG('L', 'i', 'n', 'a');
+    case SBScriptLINB:
+        return TAG('L', 'i', 'n', 'b');
+    case SBScriptLISU:
+        return TAG('L', 'i', 's', 'u');
+    case SBScriptLYCI:
+        return TAG('L', 'y', 'c', 'i');
+    case SBScriptLYDI:
+        return TAG('L', 'y', 'd', 'i');
+    case SBScriptMAHJ:
+        return TAG('M', 'a', 'h', 'j');
+    case SBScriptMAKA:
+        return TAG('M', 'a', 'k', 'a');
+    case SBScriptMAND:
+        return TAG('M', 'a', 'n', 'd');
+    case SBScriptMANI:
+        return TAG('M', 'a', 'n', 'i');
+    case SBScriptMARC:
+        return TAG('M', 'a', 'r', 'c');
+    case SBScriptMEDF:
+        return TAG('M', 'e', 'd', 'f');
+    case SBScriptMEND:
+        return TAG('M', 'e', 'n', 'd');
+    case SBScriptMERC:
+        return TAG('M', 'e', 'r', 'c');
+    case SBScriptMERO:
+        return TAG('M', 'e', 'r', 'o');
+    case SBScriptMLYM:
+        return TAG('M', 'l', 'y', 'm');
+    case SBScriptMODI:
+        return TAG('M', 'o', 'd', 'i');
+    case SBScriptMONG:
+        return TAG('M', 'o', 'n', 'g');
+    case SBScriptMROO:
+        return TAG('M', 'r', 'o', 'o');
+    case SBScriptMTEI:
+        return TAG('M', 't', 'e', 'i');
+    case SBScriptMULT:
+        return TAG('M', 'u', 'l', 't');
+    case SBScriptMYMR:
+        return TAG('M', 'y', 'm', 'r');
+    case SBScriptNAGM:
+        return TAG('N', 'a', 'g', 'm');
+    case SBScriptNAND:
+        return TAG('N', 'a', 'n', 'd');
+    case SBScriptNARB:
+        return TAG('N', 'a', 'r', 'b');
+    case SBScriptNBAT:
+        return TAG('N', 'b', 'a', 't');
+    case SBScriptNEWA:
+        return TAG('N', 'e', 'w', 'a');
+    case SBScriptNKOO:
+        return TAG('N', 'k', 'o', 'o');
+    case SBScriptNSHU:
+        return TAG('N', 's', 'h', 'u');
+    case SBScriptOGAM:
+        return TAG('O', 'g', 'a', 'm');
+    case SBScriptOLCK:
+        return TAG('O', 'l', 'c', 'k');
+    case SBScriptONAO:
+        return TAG('O', 'n', 'a', 'o');
+    case SBScriptORKH:
+        return TAG('O', 'r', 'k', 'h');
+    case SBScriptORYA:
+        return TAG('O', 'r', 'y', 'a');
+    case SBScriptOSGE:
+        return TAG('O', 's', 'g', 'e');
+    case SBScriptOSMA:
+        return TAG('O', 's', 'm', 'a');
+    case SBScriptOUGR:
+        return TAG('O', 'u', 'g', 'r');
+    case SBScriptPALM:
+        return TAG('P', 'a', 'l', 'm');
+    case SBScriptPAUC:
+        return TAG('P', 'a', 'u', 'c');
+    case SBScriptPERM:
+        return TAG('P', 'e', 'r', 'm');
+    case SBScriptPHAG:
+        return TAG('P', 'h', 'a', 'g');
+    case SBScriptPHLI:
+        return TAG('P', 'h', 'l', 'i');
+    case SBScriptPHLP:
+        return TAG('P', 'h', 'l', 'p');
+    case SBScriptPHNX:
+        return TAG('P', 'h', 'n', 'x');
+    case SBScriptPLRD:
+        return TAG('P', 'l', 'r', 'd');
+    case SBScriptPRTI:
+        return TAG('P', 'r', 't', 'i');
+    case SBScriptRJNG:
+        return TAG('R', 'j', 'n', 'g');
+    case SBScriptROHG:
+        return TAG('R', 'o', 'h', 'g');
+    case SBScriptRUNR:
+        return TAG('R', 'u', 'n', 'r');
+    case SBScriptSAMR:
+        return TAG('S', 'a', 'm', 'r');
+    case SBScriptSARB:
+        return TAG('S', 'a', 'r', 'b');
+    case SBScriptSAUR:
+        return TAG('S', 'a', 'u', 'r');
+    case SBScriptSGNW:
+        return TAG('S', 'g', 'n', 'w');
+    case SBScriptSHAW:
+        return TAG('S', 'h', 'a', 'w');
+    case SBScriptSHRD:
+        return TAG('S', 'h', 'r', 'd');
+    case SBScriptSIDD:
+        return TAG('S', 'i', 'd', 'd');
+    case SBScriptSIND:
+        return TAG('S', 'i', 'n', 'd');
+    case SBScriptSINH:
+        return TAG('S', 'i', 'n', 'h');
+    case SBScriptSOGD:
+        return TAG('S', 'o', 'g', 'd');
+    case SBScriptSOGO:
+        return TAG('S', 'o', 'g', 'o');
+    case SBScriptSORA:
+        return TAG('S', 'o', 'r', 'a');
+    case SBScriptSOYO:
+        return TAG('S', 'o', 'y', 'o');
+    case SBScriptSUND:
+        return TAG('S', 'u', 'n', 'd');
+    case SBScriptSUNU:
+        return TAG('S', 'u', 'n', 'u');
+    case SBScriptSYLO:
+        return TAG('S', 'y', 'l', 'o');
+    case SBScriptSYRC:
+        return TAG('S', 'y', 'r', 'c');
+    case SBScriptTAGB:
+        return TAG('T', 'a', 'g', 'b');
+    case SBScriptTAKR:
+        return TAG('T', 'a', 'k', 'r');
+    case SBScriptTALE:
+        return TAG('T', 'a', 'l', 'e');
+    case SBScriptTALU:
+        return TAG('T', 'a', 'l', 'u');
+    case SBScriptTAML:
+        return TAG('T', 'a', 'm', 'l');
+    case SBScriptTANG:
+        return TAG('T', 'a', 'n', 'g');
+    case SBScriptTAVT:
+        return TAG('T', 'a', 'v', 't');
+    case SBScriptTELU:
+        return TAG('T', 'e', 'l', 'u');
+    case SBScriptTFNG:
+        return TAG('T', 'f', 'n', 'g');
+    case SBScriptTGLG:
+        return TAG('T', 'g', 'l', 'g');
+    case SBScriptTHAA:
+        return TAG('T', 'h', 'a', 'a');
+    case SBScriptTHAI:
+        return TAG('T', 'h', 'a', 'i');
+    case SBScriptTIBT:
+        return TAG('T', 'i', 'b', 't');
+    case SBScriptTIRH:
+        return TAG('T', 'i', 'r', 'h');
+    case SBScriptTNSA:
+        return TAG('T', 'n', 's', 'a');
+    case SBScriptTODR:
+        return TAG('T', 'o', 'd', 'r');
+    case SBScriptTOTO:
+        return TAG('T', 'o', 't', 'o');
+    case SBScriptTUTG:
+        return TAG('T', 'u', 't', 'g');
+    case SBScriptUGAR:
+        return TAG('U', 'g', 'a', 'r');
+    case SBScriptVAII:
+        return TAG('V', 'a', 'i', 'i');
+    case SBScriptVITH:
+        return TAG('V', 'i', 't', 'h');
+    case SBScriptWARA:
+        return TAG('W', 'a', 'r', 'a');
+    case SBScriptWCHO:
+        return TAG('W', 'c', 'h', 'o');
+    case SBScriptXPEO:
+        return TAG('X', 'p', 'e', 'o');
+    case SBScriptXSUX:
+        return TAG('X', 's', 'u', 'x');
+    case SBScriptYEZI:
+        return TAG('Y', 'e', 'z', 'i');
+    case SBScriptYIII:
+        return TAG('Y', 'i', 'i', 'i');
+    case SBScriptZANB:
+        return TAG('Z', 'a', 'n', 'b');
+    case SBScriptZINH:
+        return TAG('Z', 'i', 'n', 'h');
+    case SBScriptZYYY:
+        return TAG('Z', 'y', 'y', 'y');
+    case SBScriptZZZZ:
+        return TAG('Z', 'z', 'z', 'z');
+    default:
+        return 0;
+    }
+}
+
+const char *SBVersionGetString(void)
+{
+    return LibraryVersion;
 }

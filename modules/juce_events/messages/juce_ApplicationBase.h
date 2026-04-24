@@ -288,7 +288,7 @@ public:
 
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     // The following methods are for internal use only...
     static int main();
     static int main (int argc, const char* argv[]);
@@ -305,7 +305,7 @@ public:
     int shutdownApp();
     static void JUCE_CALLTYPE sendUnhandledException (const std::exception*, const char* sourceFile, int lineNumber);
     bool sendCommandLineToPreexistingInstance();
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

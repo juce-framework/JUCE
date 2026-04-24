@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -35,9 +35,10 @@
 #ifndef AAX_IACFEFFECTGUI_H
 #define AAX_IACFEFFECTGUI_H
 
-#include "AAX.h"			
 #include "AAX_GUITypes.h"
 #include "AAX_IString.h"
+#include "AAX_Enums.h"
+#include "AAX.h"
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -161,6 +162,9 @@ public:
 	/*!
 	 *  \brief Retrieves the size of the plug-in window
 	 *
+	 *	If this method is inapplicable, return \ref AAX_SUCCESS and do not
+	 *	modify \p oViewSize.
+	 *
 	 *	\sa \ref AAX_IViewContainer::SetViewSize()
 	 *
 	 *  \param[out] oViewSize 
@@ -245,6 +249,31 @@ public:
 	virtual AAX_Result		SetControlHighlightInfo ( AAX_CParamID iParameterID, AAX_CBoolean iIsHighlighted, AAX_EHighlightColor iColor ) = 0;
 	//@}end Host interface methods
 	
+};
+
+
+class AAX_IACFEffectGUI_V2 : public AAX_IACFEffectGUI
+{
+public:
+	/** @name View accessors
+	 */
+	//@{
+	/*!
+	 *  \brief Retrieves the requested minimum size of the plug-in window
+	 *
+	 *	The host is not required to respect this minimum size, and may
+	 *	provide a smaller window.
+	 *
+	 *	If this method is inapplicable, return \ref AAX_SUCCESS and do not
+	 *	modify \p oMinimumViewSize.
+	 *
+	 *	\sa \ref AAX_IViewContainer::GetViewSize()
+	 *
+	 *  \param[out] oMinimumViewSize
+	 *		The size of the plug-in window as a point (width, height)
+	 */
+	virtual AAX_Result		GetMinimumViewSize ( AAX_Point * oMinimumViewSize ) const = 0;
+	//@}end View accessors
 };
 
 #ifdef __clang__

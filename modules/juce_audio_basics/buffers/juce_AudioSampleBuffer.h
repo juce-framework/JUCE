@@ -487,16 +487,33 @@ public:
         jassert (dataToReferTo != nullptr);
         jassert (newNumChannels >= 0 && newNumSamples >= 0);
 
-        if (allocatedBytes != 0)
-        {
-            allocatedBytes = 0;
-            allocatedData.free();
-        }
-
-        numChannels = newNumChannels;
         size = newNumSamples;
 
-        allocateChannels (dataToReferTo, newStartSample);
+        if (newNumChannels <= numChannels)
+        {
+            numChannels = newNumChannels;
+
+            std::transform (dataToReferTo, dataToReferTo + numChannels, channels, [&] (auto* src)
+            {
+                jassert (src != nullptr);
+                return src + newStartSample;
+            });
+
+            channels[numChannels] = nullptr;
+            isClear = false;
+        }
+        else
+        {
+            if (allocatedBytes != 0)
+            {
+                allocatedBytes = 0;
+                allocatedData.free();
+            }
+
+            numChannels = newNumChannels;
+            allocateChannels (dataToReferTo, newStartSample);
+        }
+
         jassert (! isClear);
     }
 

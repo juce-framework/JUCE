@@ -169,7 +169,7 @@ namespace
                 const OSCType type = input.readByte();
 
                 if (type == 0)
-                    break;  // encountered null terminator. list is complete.
+                    break;  // encountered null terminator. list is complete
 
                 if (! OSCTypes::isSupportedType (type))
                     throw OSCFormatError ("OSC input stream format error: encountered unsupported type tag");
@@ -422,7 +422,7 @@ struct OSCReceiver::Pimpl   : private Thread,
     {
         CallbackMessage (OSCBundle::Element oscElement)  : content (oscElement) {}
 
-        // the payload of the message. Can be either an OSCMessage or an OSCBundle.
+        // The payload of the message. Can be either an OSCMessage or an OSCBundle.
         OSCBundle::Element content;
     };
 
@@ -947,7 +947,7 @@ public:
 
         beginTest ("reading OSC messages (contents)");
         {
-            // valid non-empty message.
+            // valid non-empty message
 
             {
                 int32 testInt = -2015;
@@ -1128,7 +1128,7 @@ public:
                 expect (! elements[2].getBundle().getTimeTag().isImmediately());
             }
 
-            // invalid bundles.
+            // invalid bundles
 
             {
                 uint8 data[] = {

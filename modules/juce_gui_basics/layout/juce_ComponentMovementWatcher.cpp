@@ -39,7 +39,7 @@ ComponentMovementWatcher::ComponentMovementWatcher (Component* const comp)
     : component (comp),
       wasShowing (comp->isShowing())
 {
-    jassert (component != nullptr); // can't use this with a null pointer..
+    jassert (component != nullptr); // can't use this with a null pointer
 
     component->addComponentListener (this);
     registerWithParentComps();

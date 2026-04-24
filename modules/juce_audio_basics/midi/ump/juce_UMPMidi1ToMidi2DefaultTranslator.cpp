@@ -98,11 +98,11 @@ bool Midi1ToMidi2DefaultTranslator::processControlChange (const HelperValues hel
 
             const auto value = uint16_t ((uint16_t (msb & std::byte { 0x7f }) << 7) | uint16_t (lsb & std::byte { 0x7f }));
 
-            const auto newStatus = (uint8_t) (accumulator.getKind() == PnKind::nrpn ? 0x3 : 0x2);
+            const auto newStatus = accumulator.getKind() == PnKind::nrpn ? std::byte { 0x3 } : std::byte { 0x2 };
 
             packet = PacketX2
             {
-                Utils::bytesToWord (helpers.typeAndGroup, std::byte ((newStatus << 0x4) | channel), bank, index),
+                Utils::bytesToWord (helpers.typeAndGroup, std::byte ((newStatus << 0x4) | std::byte { channel }), bank, index),
                 Conversion::scaleTo32 (value)
             };
             return true;
@@ -113,13 +113,13 @@ bool Midi1ToMidi2DefaultTranslator::processControlChange (const HelperValues hel
 
     if (cc == 0)
     {
-        groupBanks[group][channel].setMsb (uint8_t (byte));
+        groupBanks[group][channel].setMsb (byte);
         return false;
     }
 
     if (cc == 32)
     {
-        groupBanks[group][channel].setLsb (uint8_t (byte));
+        groupBanks[group][channel].setLsb (byte);
         return false;
     }
 

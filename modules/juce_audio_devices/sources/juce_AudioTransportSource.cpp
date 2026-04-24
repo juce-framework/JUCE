@@ -269,7 +269,7 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 
         if (! playing)
         {
-            // just stopped playing, so fade out the last block..
+            // just stopped playing, so fade out the last block
             for (int i = info.buffer->getNumChannels(); --i >= 0;)
                 info.buffer->applyGainRamp (i, info.startSample, jmin (256, info.numSamples), 1.0f, 0.0f);
 

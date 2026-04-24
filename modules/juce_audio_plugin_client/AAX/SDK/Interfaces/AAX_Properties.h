@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019-2021, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019-2021, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -38,9 +38,7 @@
 #define AAX_PROPERTIES_H
 /// @endcond
 
-#ifndef _AAX_H_
-#include "AAX.h"
-#endif
+#include "AAX_EnumSizeCheck.h"
 
 
 // Add new values only at the end of existing sections!
@@ -204,7 +202,7 @@ enum AAX_EProperty : int32_t
      */
     AAX_eProperty_PlugInID_Deprecated = 18,
     /** \brief \deprecated Use \ref AAX_eProperty_Deprecated_Native_Plugin_List and \ref AAX_eProperty_Deprecated_DSP_Plugin_List
-     *  See AAX_eProperty_PlugInID_RTAS for an example.
+     *  See AAX_eProperty_PlugInID_Native for an example.
      */
     AAX_eProperty_Deprecated_Plugin_List = 21,
 	/** \brief Specify a list of DSP plug-ins that are related to a plug-in type.  
@@ -680,6 +678,7 @@ enum AAX_EProperty : int32_t
 	 *  \note See \ref PTSW-189725
      */
     AAX_eProperty_UsesClientGUI = 151,
+
 	
 	AAX_eProperty_MaxGUIProp, // Intentionally given no explicit value
 	//@}end GUI properties
@@ -756,9 +755,7 @@ enum AAX_EProperty : int32_t
 	 *   cached, so if the plug-in description can change between launches of the host application then the plug-in
 	 *   should apply this constraint to prevent the host from using stale description information.
      *
-     *   This property should be applied at the collection level as it affects the entire bundle.
-     *
-     *  \li Apply this property at the \ref AAX_IEffectDescriptor level
+     *  \li Apply this property at the \ref AAX_ICollection level
      */
     AAX_eProperty_Constraint_NeverCache = 303,
 	/** \brief Indicates whether or not the plug-in supports multi-mono configurations
@@ -812,7 +809,7 @@ enum AAX_EProperty : int32_t
 	 *  page table file. If this property is set to a non-zero value, the plug-in may describe a different
 	 *  \ref AAX_eResourceType_PageTable for each separate Effect.
      *
-	 *  This property needs to be set at the collection level.
+	 *  \li Apply this property at the \ref AAX_ICollection level
      */
 	AAX_eProperty_StoreXMLPageTablesByEffect = 307,
 	/** \brief \deprecated Use \ref AAX_eProperty_StoreXMLPageTablesByEffect
@@ -848,8 +845,10 @@ enum AAX_EProperty : int32_t
 	 */
 	AAX_eProperty_UsesTransportControl = 311,
 
+
 	AAX_eProperty_MaxFeaturesProp, // Intentionally given no explicit value
 	//@} end Plug-in features
+	
 
 //---------------------------------------------------------------------	
 #if 0
@@ -922,9 +921,19 @@ enum AAX_EProperty : int32_t
 	 */
 	AAX_eProperty_EnableHostDebugLogs = 401,
 	//@} end Debug properties
-	
+
+
 	AAX_eProperty_MaxProp,			// ALWAYS LEAVE AS LAST PROPERTY VALUE
-	AAX_eProperty_MaxCap = 10000	// Maximum possible property value over the lifetime of AAX
+	AAX_eProperty_MaxCap = 10000,	// Maximum possible property value over the lifetime of AAX
+
+	/** \brief Property alias to define both input and output stem formats
+	 *
+	 *  This property can be used in place of \ref AAX_eProperty_InputStemFormat and
+	 *  \ref AAX_eProperty_OutputStemFormat . It is not registered directly with the
+	 *  host. Instead, it is intercepted by \ref AAX_VPropertyMap::AddProperty() and
+	 *  replaced with the equivalent input and output stem format properties.
+	 */
+	AAX_eProperty_StemFormat = 10001,
 }; AAX_ENUM_SIZE_CHECK(AAX_EProperty);
 
 /// @cond ignore

@@ -9,6 +9,13 @@
     <true/>
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+      <key>UIApplicationSupportsMultipleScenes</key>
+      <false/>
+      <key>UISceneConfigurations</key>
+      <dict/>
+    </dict>
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIdentifier</key>

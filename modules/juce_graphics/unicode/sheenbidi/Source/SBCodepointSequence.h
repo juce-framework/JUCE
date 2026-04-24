@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Muhammad Tayyab Akram
+ * Copyright (C) 2016-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 #ifndef _SB_INTERNAL_CODEPOINT_SEQUENCE_H
 #define _SB_INTERNAL_CODEPOINT_SEQUENCE_H
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
-#include <juce_graphics/unicode/sheenbidi/Headers/SBCodepointSequence.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepointSequence.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 SB_INTERNAL SBBoolean SBCodepointSequenceIsValid(const SBCodepointSequence *codepointSequence);
 

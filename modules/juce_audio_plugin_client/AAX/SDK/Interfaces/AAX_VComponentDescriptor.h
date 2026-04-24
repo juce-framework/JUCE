@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -38,6 +38,8 @@
 #include "AAX_IComponentDescriptor.h"
 #include "AAX_IDma.h"
 #include "AAX_IACFComponentDescriptor.h"
+#include "AAX_Properties.h"
+#include "AAX_Enums.h"
 
 // ACF Includes
 #include "acfunknown.h"

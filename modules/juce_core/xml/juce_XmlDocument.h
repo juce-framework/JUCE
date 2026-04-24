@@ -48,7 +48,7 @@ namespace juce
 
     if (auto mainElement = myDocument.getDocumentElement())
     {
-        ..use the element
+        use the element
     }
     else
     {
@@ -56,7 +56,7 @@ namespace juce
     }
     @endcode
 
-    Or you can use the helper functions for much less verbose parsing..
+    Or you can use the helper functions for much less verbose parsing.
 
     @code
     if (auto xml = parseXML (myXmlFile))

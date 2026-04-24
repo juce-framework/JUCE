@@ -142,6 +142,10 @@ public: // AAX_IACFCollection
 			\warning Do not use this method to infer host feature support. Instead, use
 			\ref AAX_IDescriptionHost to query the host for specific features.
 
+			\warning %AAX plugin description details are cached and might not be re-scanned
+			even if the host version changes. Be careful to avoid changing any cacheable
+			information based on this data. See \ref describe_host_feature_checks for more information.
+
 			@param[in]	outVersion
 						Host version
 			
@@ -156,6 +160,10 @@ public: // AAX_ICollection
 	 method prototype for the \ref GetEffectDescriptions() method called from the %AAX Library.
 	 
 	 @sa \ref AAX_UIDs.h for available feature UIDs, e.g. \ref AAXATTR_ClientFeature_AuxOutputStem
+	 
+	 \warning %AAX plugin description details are cached and might not be re-scanned even if
+	 attributes of the host description change. Be careful to avoid changing any cacheable
+	 information based on this data. See \ref describe_host_feature_checks for more information.
 	 */
 	virtual AAX_IDescriptionHost* DescriptionHost() = 0;
 	virtual const AAX_IDescriptionHost* DescriptionHost() const = 0; ///< \copydoc AAX_ICollection::DescriptionHost()
@@ -167,6 +175,10 @@ public: // AAX_ICollection
 	 
 	 @sa \ref AAX_UIDs.h for available host attribute UIDs, e.g. \ref AAXATTR_Client_Level
 	 
+	 \warning %AAX plugin description details are cached and might not be re-scanned even if
+	 attributes of the host definition change, for example the host level. Be careful to avoid
+	 changing any cacheable information based on this data. See \ref describe_host_feature_checks for more information.
+
 	 The implementation of \ref AAX_ICollection owns the referenced object. No AddRef occurs.
 	 
 	 \ref IACFDefinition::DefineAttribute() is not supported on this object

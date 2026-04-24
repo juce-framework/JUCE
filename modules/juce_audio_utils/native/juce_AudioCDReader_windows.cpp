@@ -427,7 +427,7 @@ DWORD performScsiPassThroughCommand (SRB_ExecSCSICmd* const srb, const char driv
 
 
 //==============================================================================
-// Controller types..
+// controller types
 
 class ControllerType1 final : public CDController
 {
@@ -1130,7 +1130,7 @@ bool AudioCDReader::readSamples (int* const* destSamples, int numDestChannels, i
                 }
 
                 // sometimes the read fails for just the very last couple of blocks, so
-                // we'll ignore and errors in the last half-second of the disk..
+                // we'll ignore and errors in the last half-second of the disk
                 ok = startSampleInFile > (trackStartSamples [getNumTracks()] - 20000);
                 break;
             }
@@ -1241,7 +1241,7 @@ Array<int> AudioCDReader::findIndexesInTrack (const int trackNumber)
 
             if (index == 0)
             {
-                // lead-out, so skip back a bit if we've not found any indexes yet..
+                // lead-out, so skip back a bit if we've not found any indexes yet
                 if (seenAnIndex)
                     break;
 

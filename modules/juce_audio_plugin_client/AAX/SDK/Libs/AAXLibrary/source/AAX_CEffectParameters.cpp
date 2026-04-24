@@ -1,6 +1,6 @@
 /*================================================================================================*/
 /*
- *	Copyright 2013-2017, 2019, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -941,7 +941,9 @@ AAX_Result AAX_CEffectParameters::UpdatePageTable(uint32_t inTableType, int32_t 
 //----------------------------------------------------------------------------------------------
 AAX_Result	AAX_CEffectParameters::GetCustomData( AAX_CTypeID /*iDataBlockID*/, uint32_t /*inDataSize*/, void* /*oData*/, uint32_t* oDataWritten) const
 {
-	*oDataWritten = 0;
+	if (oDataWritten) {
+		*oDataWritten = 0;
+	}
 	return AAX_SUCCESS;
 }
 

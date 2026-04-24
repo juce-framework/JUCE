@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2014-2017, 2019, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2014-2017, 2019, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -38,10 +38,8 @@
 #include "AAX_IDisplayDelegate.h"
 #include "AAX_CString.h"
 
-#include <vector>
-#if defined(WINDOWS_VERSION) || defined(LINUX_VERSION)
 #include <algorithm>
-#endif
+#include <vector>
 
 
 
@@ -51,7 +49,7 @@
 	This display delegate is similar to AAX_CNumberDisplayDelegate, but does not include
 	precision or spacing templatizations.
 
-	\ingroup DisplayDelegates
+	\ingroup AAXLibraryFeatures_ParameterManager_DisplayDelegates
 
  */
 template <typename T>

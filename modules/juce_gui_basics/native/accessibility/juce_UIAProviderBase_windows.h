@@ -40,7 +40,7 @@ class UIAProviderBase
 {
 public:
     explicit UIAProviderBase (AccessibilityNativeHandle* nativeHandleIn)
-        : nativeHandle (addComSmartPtrOwner (nativeHandleIn))
+        : nativeHandle (nativeHandleIn, IncrementRef::yes)
     {
     }
 

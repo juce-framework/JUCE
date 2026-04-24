@@ -67,7 +67,7 @@ namespace juce
     }
     @endcode
 
-    ..or in Java with something like this:
+    ...or in Java with something like this:
 
     @code
     public class RSAKey

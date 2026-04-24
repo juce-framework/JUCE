@@ -32,6 +32,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /** A base class for building Options.
 
     @tags{Core}
@@ -46,3 +49,5 @@ public:
 
     OptionsType buildOptions() { return buildOptions (OptionsType{}); }
 };
+
+}

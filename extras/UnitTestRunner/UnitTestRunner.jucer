@@ -36,6 +36,7 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_midi_ci" path="../../modules"/>
         <MODULEPATH id="juce_javascript" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
@@ -63,13 +64,13 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_midi_ci" path="../../modules"/>
         <MODULEPATH id="juce_javascript" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
     <VS2019 targetFolder="Builds/VisualStudio2019" extraCompilerFlags="/w44265 /w45038 /w44062">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="UnitTestRunner" warningsAreErrors="1"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner"
-                       warningsAreErrors="1"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner" warningsAreErrors="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
@@ -91,9 +92,38 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_midi_ci" path="../../modules"/>
         <MODULEPATH id="juce_javascript" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
       </MODULEPATHS>
     </VS2019>
     <VS2022 targetFolder="Builds/VisualStudio2022" extraCompilerFlags="/w44265 /w45038 /w44062">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="UnitTestRunner" warningsAreErrors="1"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner" warningsAreErrors="1"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
+        <MODULEPATH id="juce_osc" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_dsp" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_analytics" path="../../modules"/>
+        <MODULEPATH id="juce_midi_ci" path="../../modules"/>
+        <MODULEPATH id="juce_javascript" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2022>
+    <VS2026 targetFolder="Builds/VisualStudio2026" extraCompilerFlags="/w44265 /w45038 /w44062">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="UnitTestRunner" warningsAreErrors="1"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner"
@@ -119,28 +149,30 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_midi_ci" path="../../modules"/>
         <MODULEPATH id="juce_javascript" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
       </MODULEPATHS>
-    </VS2022>
+    </VS2026>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="juce_analytics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
-    <MODULES id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
-    <MODULES id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
-    <MODULES id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
-    <MODULES id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_processors_headless" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
-    <MODULES id="juce_core" showAllCode="1" useLocalCopy="0"/>
-    <MODULES id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>
-    <MODULES id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
-    <MODULES id="juce_events" showAllCode="1" useLocalCopy="0"/>
-    <MODULES id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
-    <MODULES id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
-    <MODULES id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_javascript" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_midi_ci" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
-    <MODULES id="juce_opengl" showAllCode="1" useLocalCopy="0"/>
-    <MODULES id="juce_osc" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_osc" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_product_unlocking" showAllCode="1" useLocalCopy="0"
             useGlobalPath="0"/>
   </MODULES>

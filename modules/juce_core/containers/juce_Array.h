@@ -1074,7 +1074,7 @@ public:
         int compareElements (ElementType first, ElementType second);
         @endcode
 
-        ..and this method must return:
+        ...and this method must return:
           - a value of < 0 if the first comes before the second
           - a value of 0 if the two objects are equivalent
           - a value of > 0 if the second comes before the first
@@ -1107,11 +1107,11 @@ public:
 
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("This method has been replaced by a more flexible templated version and renamed "
                  "to swapWith to be more consistent with the names used in other classes.")]]
     void swapWithArray (Array& other) noexcept { swapWith (other); }
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

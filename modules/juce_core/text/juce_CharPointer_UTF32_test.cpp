@@ -42,10 +42,7 @@ public:
 
     void runTest() final
     {
-        const auto toCharType = [] (const std::vector<char32_t>& str)
-        {
-            return reinterpret_cast<const CharPointer_UTF32::CharType*> (str.data());
-        };
+        using Utf32Vector = std::vector<CharPointer_UTF32::CharType>;
 
         const auto getNumBytes = [] (const auto& str)
         {
@@ -54,50 +51,50 @@ public:
 
         beginTest ("String validation - empty string / null-terminator");
         {
-            const std::vector<CharPointer_UTF32::CharType> string { 0x0 };
+            const Utf32Vector string { 0x0 };
             expect (CharPointer_UTF32::isValidString (string.data(), getNumBytes (string)));
         }
 
         beginTest ("String validation - ascii");
         {
-            const std::vector<char32_t> string { 0x54, 0x65, 0x73, 0x74, 0x21, 0x0 }; // Test!
-            expect (CharPointer_UTF32::isValidString (toCharType (string), getNumBytes (string)));
+            const Utf32Vector string { 0x54, 0x65, 0x73, 0x74, 0x21, 0x0 }; // Test!
+            expect (CharPointer_UTF32::isValidString (string.data(), getNumBytes (string)));
         }
 
         beginTest ("String validation - 2-byte code points");
         {
-            const std::vector<char32_t> string { 0x54, 0x65, 0x73, 0x74, 0x20ac, 0x0 }; // Test€
-            expect (CharPointer_UTF32::isValidString (toCharType (string), getNumBytes (string)));
+            const Utf32Vector string { 0x54, 0x65, 0x73, 0x74, 0x20ac, 0x0 }; // Test€
+            expect (CharPointer_UTF32::isValidString (string.data(), getNumBytes (string)));
         }
 
         beginTest ("String validation - maximum code point");
         {
-            const std::vector<char32_t> string1 { 0x54, 0x65, 0x73, 0x74, 0x10ffff, 0x0 };
-            expect (CharPointer_UTF32::isValidString (toCharType (string1), getNumBytes (string1)));
+            const Utf32Vector string1 { 0x54, 0x65, 0x73, 0x74, 0x10ffff, 0x0 };
+            expect (CharPointer_UTF32::isValidString (string1.data(), getNumBytes (string1)));
 
-            const std::vector<char32_t> string2 { 0x54, 0x65, 0x73, 0x74, 0x110000, 0x0 };
-            expect (! CharPointer_UTF32::isValidString (toCharType (string2), getNumBytes (string2)));
+            const Utf32Vector string2 { 0x54, 0x65, 0x73, 0x74, 0x110000, 0x0 };
+            expect (! CharPointer_UTF32::isValidString (string2.data(), getNumBytes (string2)));
         }
 
         beginTest ("String validation - characters after a null terminator are ignored");
         {
-            const std::vector<char32_t> string { 0x54, 0x65, 0x73, 0x74, 0x0, 0x110000 };
-            expect (CharPointer_UTF32::isValidString (toCharType (string), getNumBytes (string)));
+            const Utf32Vector string { 0x54, 0x65, 0x73, 0x74, 0x0, 0x110000 };
+            expect (CharPointer_UTF32::isValidString (string.data(), getNumBytes (string)));
         }
 
         beginTest ("String validation - characters exceeding max bytes are ignored");
         {
-            const std::vector<char32_t> string { 0x54, 0x65, 0x73, 0x74, 0x110000 };
-            expect (CharPointer_UTF32::isValidString (toCharType (string), 8));
+            const Utf32Vector string { 0x54, 0x65, 0x73, 0x74, 0x110000 };
+            expect (CharPointer_UTF32::isValidString (string.data(), 8));
         }
 
         beginTest ("String validation - surrogate code points are invalid");
         {
-            const std::vector<char32_t> highSurrogate { 0xd800 };
-            expect (! CharPointer_UTF32::isValidString (toCharType (highSurrogate), getNumBytes (highSurrogate)));
+            const Utf32Vector highSurrogate { 0xd800 };
+            expect (! CharPointer_UTF32::isValidString (highSurrogate.data(), getNumBytes (highSurrogate)));
 
-            const std::vector<char32_t> lowSurrogate { 0xdfff };
-            expect (! CharPointer_UTF32::isValidString (toCharType (lowSurrogate), getNumBytes (lowSurrogate)));
+            const Utf32Vector lowSurrogate { 0xdfff };
+            expect (! CharPointer_UTF32::isValidString (lowSurrogate.data(), getNumBytes (lowSurrogate)));
         }
     }
 };

@@ -48,8 +48,10 @@ namespace juce::dsp
 
     Example:
 
-        LookupTable<float> lut ([] (size_t i) { return std::sqrt ((float) i); }, 64);
-        auto outValue = lut[17];
+    @code
+    LookupTable<float> lut ([] (size_t i) { return std::sqrt ((float) i); }, 64);
+    auto outValue = lut[17];
+    @endcode
 
     @see LookupTableTransform
 
@@ -167,8 +169,10 @@ private:
 
     Example:
 
-        LookupTableTransform<float> tanhApprox ([] (float x) { return std::tanh (x); }, -5.0f, 5.0f, 64);
-        auto outValue = tanhApprox (4.2f);
+    @code
+    LookupTableTransform<float> tanhApprox ([] (float x) { return std::tanh (x); }, -5.0f, 5.0f, 64);
+    auto outValue = tanhApprox (4.2f);
+    @endcode
 
     Note: If you try to call the function with an input outside the provided
     range, it will return either the first or the last recorded LookupTable value.

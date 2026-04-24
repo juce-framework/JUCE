@@ -46,6 +46,8 @@ int ModifierKeys::getNumMouseButtonsDown() const noexcept
     if (isLeftButtonDown())     ++num;
     if (isRightButtonDown())    ++num;
     if (isMiddleButtonDown())   ++num;
+    if (isBackButtonDown())     ++num;
+    if (isForwardButtonDown())  ++num;
 
     return num;
 }

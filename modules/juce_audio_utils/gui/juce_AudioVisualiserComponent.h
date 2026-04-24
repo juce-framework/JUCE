@@ -104,7 +104,7 @@ public:
     */
     void pushSample (const float* samplesForEachChannel, int numChannels);
 
-    /** Sets the colours used to paint the */
+    /** Sets the colours used to paint the waveform. */
     void setColours (Colour backgroundColour, Colour waveformColour) noexcept;
 
     /** Sets the frequency at which the component repaints itself. */
@@ -121,7 +121,7 @@ public:
         The path is normalised so that -1 and +1 are its upper and lower bounds, and it
         goes from 0 to numLevels on the X axis.
     */
-    void getChannelAsPath (Path& result, const Range<float>* levels, int numLevels, int nextSample);
+    static void getChannelAsPath (Path& result, const Range<float>* levels, int numLevels, int nextSample);
 
     //==============================================================================
     /** @internal */
@@ -135,6 +135,7 @@ private:
     Colour backgroundColour, waveformColour;
 
     void timerCallback() override;
+    void updateChannelFifoSizes();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioVisualiserComponent)
 };

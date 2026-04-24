@@ -549,6 +549,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_CallbackListenerList.h">
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_IncrementRef.h">
+      <Filter>JUCE Modules\juce_core\detail</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_LruCache.h">
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
@@ -688,6 +691,9 @@
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_OptionsHelpers.h">
+      <Filter>JUCE Modules\juce_core\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_OrderedContainerHelpers.h">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Result.h">

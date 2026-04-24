@@ -199,7 +199,7 @@ int main (int argc, char* argv[])
     {
         const File file (files[i]);
 
-        // (avoid source control files and hidden files..)
+        // avoid source control files and hidden files
         if (! isHiddenFile (file, sourceDirectory))
         {
             if (file.getParentDirectory() != sourceDirectory)

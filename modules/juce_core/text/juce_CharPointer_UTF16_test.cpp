@@ -110,6 +110,103 @@ public:
                 expect (CharPointer_UTF16::isValidString (string.data(), 4) == CharPointer_UTF32::canRepresent ((juce_wchar) c));
             }
         }
+
+        beginTest ("Iterating string starting with unpaired high surrogate produces a wide character with the surrogate value");
+        {
+            const std::vector<char16_t> stringA { 0xd800, 0xa, 0xb };
+            expect (rangesEqual (Span (stringA), Span (stringA)));
+
+            const std::vector<char16_t> stringB { 0xd800, 0xe000, 0xb };
+            expect (rangesEqual (Span (stringB), Span (stringB)));
+        }
+
+        beginTest ("Iterating string ending with unpaired high surrogate produces a wide character with the surrogate value");
+        {
+            const std::vector<char16_t> string { 0xa, 0xb, 0xd800, 0x0 };
+            expect (rangesEqual (Span (string), Span (string)));
+        }
+
+        beginTest ("Iterating string starting with unpaired low surrogate produces a wide character with the surrogate value");
+        {
+            const std::vector<char16_t> stringA { 0xdc00, 0xa, 0xb };
+            expect (rangesEqual (Span (stringA), Span (stringA)));
+
+            const std::vector<char16_t> stringB { 0xdc00, 0xe000, 0xb };
+            expect (rangesEqual (Span (stringB), Span (stringB)));
+        }
+
+        beginTest ("Iterating string ending with unpaired low surrogate produces a wide character with the surrogate value");
+        {
+            const std::vector<char16_t> string { 0xa, 0xb, 0xdc00 };
+            expect (rangesEqual (Span (string), Span (string)));
+        }
+
+        beginTest ("Iterating string with multiple unpaired surrogates produces produces wide characters with those surrogate values");
+        {
+            const std::vector<char16_t> string { 0xd800, 0xd800, 0xdc00, 0xdc00, 0xa, 0xb };
+            const std::vector<juce_wchar> expected { 0xd800, 0x10000, 0xdc00, 0xa, 0xb };
+            expect (rangesEqual (Span (expected), Span (string)));
+        }
+
+        beginTest ("Can decrement to unpaired low surrogate");
+        {
+            const CharPointer_UTF16::CharType chars[] { 0xa, (CharPointer_UTF16::CharType) 0xdc00, 0xb};
+            CharPointer_UTF16 ptr { chars + 2 };
+
+            expect (*ptr == 0xb);
+            --ptr;
+            expect (ptr == CharPointer_UTF16 { chars + 1 });
+            expect (*ptr == 0xdc00);
+        }
+
+        beginTest ("Can decrement to unpaired high surrogate");
+        {
+            const CharPointer_UTF16::CharType chars[] { 0xa, (CharPointer_UTF16::CharType) 0xd800, 0xb };
+            CharPointer_UTF16 ptr { chars + 2 };
+
+            expect (*ptr == 0xb);
+            --ptr;
+            expect (ptr == CharPointer_UTF16 { chars + 1 });
+            expect (*ptr == 0xd800);
+        }
+
+        beginTest ("Can decrement through surrogate pair");
+        {
+            const CharPointer_UTF16::CharType chars[] { 0xa,
+                                                        (CharPointer_UTF16::CharType) 0xd800,
+                                                        (CharPointer_UTF16::CharType) 0xdc00,
+                                                        0xb };
+            CharPointer_UTF16 ptr { chars + 3 };
+
+            expect (*ptr == 0xb);
+
+            --ptr;
+            expect (ptr == CharPointer_UTF16 { chars + 1 });
+            expect (*ptr == 0x10000);
+
+            --ptr;
+            expect (ptr == CharPointer_UTF16 { chars });
+            expect (*ptr == (CharPointer_UTF16::CharType) 0xa);
+        }
+    }
+
+private:
+    template <typename Expected>
+    static bool rangesEqual (Span<const Expected> expected, Span<const char16_t> units)
+    {
+        const auto dataPtr = reinterpret_cast<const CharPointer_UTF16::CharType*> (units.data());
+        std::vector<juce_wchar> converted;
+
+        for (const auto it : makeRange (CharPointer_UTF16 { dataPtr },
+                                        CharPointer_UTF16 { dataPtr + units.size() }))
+        {
+            converted.push_back (it);
+        }
+
+        // Some stdlibs require the arguments to std::equal to have the full complement of iterator
+        // member type aliases, so compare using std::vector iterators instead of CharPointer_UTF16
+        // directly.
+        return std::equal (expected.begin(), expected.end(), converted.begin(), converted.end());
     }
 };
 

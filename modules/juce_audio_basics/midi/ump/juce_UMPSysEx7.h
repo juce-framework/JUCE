@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce::universal_midi_packets
 {
 
@@ -82,5 +81,4 @@ struct SysEx7
 };
 
 } // namespace juce::universal_midi_packets
-
-#endif
+/** @endcond */

@@ -98,7 +98,7 @@ struct DefaultHashFunctions
     DBG (hash [1]); // prints "item1"
     DBG (hash [2]); // prints "item2"
 
-    // This iterates the map, printing all of its key -> value pairs..
+    // This iterates the map, printing all of its key -> value pairs.
     for (HashMap<int, String>::Iterator i (hash); i.next();)
         DBG (i.getKey() << " -> " << i.getValue());
     @endcode

@@ -585,7 +585,7 @@ public:
         int compareElements (const ValueTree& first, const ValueTree& second);
         @endcode
 
-        ..and this method must return:
+        ...and this method must return:
           - a value of < 0 if the first comes before the second
           - a value of 0 if the two objects are equivalent
           - a value of > 0 if the second comes before the first
@@ -617,10 +617,12 @@ public:
     */
     int getReferenceCount() const noexcept;
 
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES && ! defined (DOXYGEN)
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** @cond */
     /* An invalid ValueTree that can be used if you need to return one as an error condition, etc. */
     [[deprecated ("If you need an empty ValueTree object, just use ValueTree() or {}.")]]
     static const ValueTree invalid;
+    /** @endcond */
    #endif
 
 private:

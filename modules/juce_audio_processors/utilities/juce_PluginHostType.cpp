@@ -121,7 +121,7 @@ const char* PluginHostType::getHostDescription() const noexcept
         case DaVinciResolve:           return "DaVinci Resolve";
         case DigitalPerformer:         return "DigitalPerformer";
         case FinalCut:                 return "Final Cut";
-        case FruityLoops:              return "FruityLoops";
+        case FruityLoops:              return "FL Studio";
         case JUCEPluginHost:           return "JUCE AudioPluginHost";
         case MagixSamplitude:          return "Magix Samplitude";
         case MagixSequoia:             return "Magix Sequoia";

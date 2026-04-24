@@ -332,7 +332,6 @@ void AudioDeviceManager::createAudioDeviceTypes (OwnedArray<AudioIODeviceType>& 
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_ASIO());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_CoreAudio());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_iOSAudio());
-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Bela());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_ALSA());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_JACK());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Oboe());
@@ -1352,7 +1351,7 @@ double AudioDeviceManager::LevelMeter::getCurrentLevel() const noexcept
 
 void AudioDeviceManager::playTestSound()
 {
-    { // cunningly nested to swap, unlock and delete in that order.
+    { // cunningly nested to swap, unlock and delete in that order
         std::unique_ptr<AudioBuffer<float>> oldSound;
 
         {

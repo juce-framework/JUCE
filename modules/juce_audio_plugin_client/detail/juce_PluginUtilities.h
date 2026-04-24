@@ -35,6 +35,7 @@
 #pragma once
 
 #include <juce_audio_plugin_client/detail/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_CreatePluginFilter.h>
 
 namespace juce::detail
 {

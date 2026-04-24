@@ -99,7 +99,7 @@ bool TemporaryFile::overwriteTargetFileWithTemporary() const
 
     if (temporaryFile.exists())
     {
-        // Have a few attempts at overwriting the file before giving up..
+        // Have a few attempts at overwriting the file before giving up.
         for (int i = 5; --i >= 0;)
         {
             if (temporaryFile.replaceFileIn (targetFile))
@@ -120,7 +120,7 @@ bool TemporaryFile::overwriteTargetFileWithTemporary() const
 
 bool TemporaryFile::deleteTemporaryFile() const
 {
-    // Have a few attempts at deleting the file before giving up..
+    // Have a few attempts at deleting the file before giving up.
     for (int i = 5; --i >= 0;)
     {
         if (temporaryFile.isDirectory() ? temporaryFile.deleteRecursively() : temporaryFile.deleteFile())

@@ -56,9 +56,9 @@ namespace juce
     class JUCE_API  ChildProcessManager final : private DeletedAtShutdown
     {
     public:
-       #ifndef DOXYGEN
+        /** @cond */
         JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (ChildProcessManager)
-       #endif
+        /** @endcond */
 
         /** Creates a new ChildProcess and starts it with the provided arguments.
 

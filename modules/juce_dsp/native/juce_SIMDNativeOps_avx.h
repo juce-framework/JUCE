@@ -32,10 +32,9 @@
   ==============================================================================
 */
 
+/** @cond */
 namespace juce::dsp
 {
-
-#ifndef DOXYGEN
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wignored-attributes")
 
@@ -660,8 +659,7 @@ struct SIMDNativeOps<uint64_t>
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE truncate (__m256i a) noexcept                            { return a; }
 };
 
-#endif
-
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce::dsp
+/** @endcond */

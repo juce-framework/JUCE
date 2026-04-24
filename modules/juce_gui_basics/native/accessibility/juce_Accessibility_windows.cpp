@@ -122,7 +122,7 @@ class AccessibilityHandler::AccessibilityNativeImpl
 {
 public:
     explicit AccessibilityNativeImpl (AccessibilityHandler& owner)
-        : accessibilityElement (becomeComSmartPtrOwner (new AccessibilityNativeHandle (owner)))
+        : accessibilityElement (new AccessibilityNativeHandle (owner), IncrementRef::no)
     {
         ++providerCount;
     }

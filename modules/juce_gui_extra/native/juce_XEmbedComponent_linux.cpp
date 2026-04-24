@@ -288,15 +288,76 @@ public:
 
 private:
     //==============================================================================
+    class ComponentIsShowingListener : private ComponentMovementWatcher
+    {
+    public:
+        ComponentIsShowingListener (Component& componentIn, std::function<void()> callbackIn)
+            : ComponentMovementWatcher (&componentIn),
+              callback (std::move (callbackIn))
+        {}
+
+    private:
+        void componentMovedOrResized (bool, bool) override {}
+        void componentPeerChanged() override {}
+        void componentVisibilityChanged() override { NullCheckedInvocation::invoke (callback); }
+
+        using ComponentMovementWatcher::componentMovedOrResized;
+        using ComponentMovementWatcher::componentVisibilityChanged;
+
+        std::function<void()> callback;
+    };
+
+    class WindowMapper
+    {
+    public:
+        WindowMapper (Pimpl& pimplIn, Window& windowIn)
+            : pimpl (pimplIn),
+              window (windowIn)
+        {}
+
+        void update()
+        {
+            if (window == 0)
+                return;
+
+            const auto shouldBeMapped =    pimpl.getXEmbedMappedFlag()
+                                        && pimpl.owner.isShowing()
+                                        && pimpl.lastPeer != nullptr;
+
+            if (std::exchange (mapped, shouldBeMapped) != shouldBeMapped)
+            {
+                if (shouldBeMapped)
+                    X11Symbols::getInstance()->xMapWindow (pimpl.getDisplay(), window);
+                else
+                    X11Symbols::getInstance()->xUnmapWindow (pimpl.getDisplay(), window);
+            }
+        }
+
+        void unmap()
+        {
+            if (window == 0)
+                return;
+
+            X11Symbols::getInstance()->xUnmapWindow (pimpl.getDisplay(), window);
+            mapped = false;
+        }
+
+    private:
+        Pimpl& pimpl;
+        Window& window;
+        bool mapped = false;
+    };
+
     XEmbedComponent& owner;
+    ComponentIsShowingListener isShowingListener { owner, [this] { updateMapping(); } };
     Window client = 0, host = 0;
+    WindowMapper clientMapper { *this, client }, hostMapper { *this, host };
     Atom infoAtom, messageTypeAtom;
 
     bool clientInitiated;
     bool wantsFocus        = false;
     bool allowResize       = false;
     bool supportsXembed    = false;
-    bool hasBeenMapped     = false;
     int xembedVersion      = maxXEmbedVersionToSupport;
 
     ComponentPeer* lastPeer = nullptr;
@@ -369,11 +430,8 @@ private:
             int defaultScreen = X11Symbols::getInstance()->xDefaultScreen (dpy);
             Window root = X11Symbols::getInstance()->xRootWindow (dpy, defaultScreen);
 
-            if (hasBeenMapped)
-            {
-                X11Symbols::getInstance()->xUnmapWindow (dpy, client);
-                hasBeenMapped = false;
-            }
+            hostMapper.unmap();
+            clientMapper.unmap();
 
             X11Symbols::getInstance()->xReparentWindow (dpy, client, root, 0, 0);
             client = 0;
@@ -384,20 +442,8 @@ private:
 
     void updateMapping()
     {
-        if (client != 0)
-        {
-            const bool shouldBeMapped = getXEmbedMappedFlag();
-
-            if (shouldBeMapped != hasBeenMapped)
-            {
-                hasBeenMapped = shouldBeMapped;
-
-                if (shouldBeMapped)
-                    X11Symbols::getInstance()->xMapWindow (getDisplay(), client);
-                else
-                    X11Symbols::getInstance()->xUnmapWindow (getDisplay(), client);
-            }
-        }
+        hostMapper.update();
+        clientMapper.update();
     }
 
     Window getParentX11Window()
@@ -413,6 +459,9 @@ private:
     //==============================================================================
     bool getXEmbedMappedFlag()
     {
+        if (client == 0)
+            return false;
+
         XWindowSystemUtilities::GetXProperty embedInfo (getDisplay(), client, infoAtom, 0, 2, false, infoAtom);
 
         if (embedInfo.success && embedInfo.actualFormat == 32
@@ -496,7 +545,7 @@ private:
             Rectangle<int> newBounds = getX11BoundsFromJuce();
 
             if (newPeer == nullptr)
-                X11Symbols::getInstance()->xUnmapWindow (dpy, host);
+                hostMapper.unmap();
 
             Window newParent = (newPeer != nullptr ? getParentX11Window() : rootWindow);
             X11Symbols::getInstance()->xReparentWindow (dpy, host, newParent, newBounds.getX(), newBounds.getY());
@@ -512,7 +561,7 @@ private:
                 }
 
                 componentMovedOrResized (owner, true, true);
-                X11Symbols::getInstance()->xMapWindow (dpy, host);
+                updateMapping();
 
                 broughtToFront();
             }

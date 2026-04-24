@@ -60,21 +60,20 @@ public:
         executable at the location given.
     */
     LAMEEncoderAudioFormat (const File& lameExecutableToUse);
-    ~LAMEEncoderAudioFormat();
 
-    bool canHandleFile (const File&);
-    Array<int> getPossibleSampleRates();
-    Array<int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-    bool isCompressed();
-    StringArray getQualityOptions();
+    bool canHandleFile (const File&) override;
+    Array<int> getPossibleSampleRates() override;
+    Array<int> getPossibleBitDepths() override;
+    bool canDoStereo() override;
+    bool canDoMono() override;
+    bool isCompressed() override;
+    StringArray getQualityOptions() override;
 
-    AudioFormatReader* createReaderFor (InputStream*, bool deleteStreamIfOpeningFails);
+    std::unique_ptr<AudioFormatWriter> createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
+                                                        const AudioFormatWriterOptions& options) override;
 
-    AudioFormatWriter* createWriterFor (OutputStream*, double sampleRateToUse,
-                                        unsigned int numberOfChannels, int bitsPerSample,
-                                        const StringPairArray& metadataValues, int qualityOptionIndex);
+    AudioFormatReader* createReaderFor (InputStream*, bool deleteStreamIfOpeningFails) override;
+
     using AudioFormat::createWriterFor;
 
 private:

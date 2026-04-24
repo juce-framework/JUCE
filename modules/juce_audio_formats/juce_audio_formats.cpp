@@ -78,7 +78,7 @@
 #include "codecs/juce_LAMEEncoderAudioFormat.cpp"
 
 #if JucePlugin_Enable_ARA
- #include "juce_audio_processors/utilities/ARA/juce_ARADocumentControllerCommon.cpp"
+ #include <juce_audio_processors_headless/utilities/ARA/juce_ARADocumentControllerCommon.h>
  #include "format/juce_ARAAudioReaders.cpp"
 #endif
 

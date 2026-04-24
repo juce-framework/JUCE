@@ -153,7 +153,7 @@
 
 extern "C"
 {
-#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SheenBidi.h>
 } // extern "C"
 
 #if JUCE_UNIT_TESTS
@@ -193,6 +193,7 @@ extern "C"
 #include "image_formats/juce_PNGLoader.cpp"
 #include "fonts/juce_AttributedString.cpp"
 #include "fonts/juce_Typeface.cpp"
+#include "fonts/juce_FontFeatures.cpp"
 #include "fonts/juce_FontOptions.cpp"
 #include "fonts/juce_Font.cpp"
 #include "detail/juce_Ranges.cpp"
@@ -208,6 +209,7 @@ extern "C"
 #if JUCE_UNIT_TESTS
  #include "geometry/juce_Parallelogram_test.cpp"
  #include "geometry/juce_Rectangle_test.cpp"
+ #include "geometry/juce_RectangleList_test.cpp"
 #endif
 
 #if JUCE_USE_FREETYPE

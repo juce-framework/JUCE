@@ -21,7 +21,7 @@ namespace BinaryData
     const int            PIPAudioProcessorWithARA_cpp_inSize = 689;
 
     extern const char*   PIPComponent_cpp_in;
-    const int            PIPComponent_cpp_inSize = 2275;
+    const int            PIPComponent_cpp_inSize = 3231;
 
     extern const char*   PIPConsole_cpp_in;
     const int            PIPConsole_cpp_inSize = 299;

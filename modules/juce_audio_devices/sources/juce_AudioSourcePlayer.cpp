@@ -85,7 +85,7 @@ void AudioSourcePlayer::audioDeviceIOCallbackWithContext (const float* const* in
         int numActiveChans = 0, numInputs = 0, numOutputs = 0;
 
         // messy stuff needed to compact the channels down into an array
-        // of non-zero pointers..
+        // of non-zero pointers
         for (int i = 0; i < totalNumInputChannels; ++i)
         {
             if (inputChannelData[i] != nullptr)

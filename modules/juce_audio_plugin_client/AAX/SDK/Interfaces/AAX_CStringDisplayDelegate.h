@@ -49,7 +49,7 @@
 	would then be used as a lookup into this delegate, which would return a string for each
 	valid int value.
 	
-	\ingroup DisplayDelegates
+	\ingroup AAXLibraryFeatures_ParameterManager_DisplayDelegates
 
  */
 template <typename T>

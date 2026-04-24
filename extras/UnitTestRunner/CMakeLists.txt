@@ -37,6 +37,7 @@ juce_generate_juce_header(UnitTestRunner)
 target_sources(UnitTestRunner PRIVATE Source/Main.cpp)
 
 target_compile_definitions(UnitTestRunner PRIVATE
+    JUCE_PLUGINHOST_AU=1
     JUCE_PLUGINHOST_LV2=1
     JUCE_PLUGINHOST_VST3=1
     JUCE_UNIT_TESTS=1
@@ -50,6 +51,7 @@ target_compile_definitions(UnitTestRunner PRIVATE
 target_link_libraries(UnitTestRunner PRIVATE
     juce::juce_analytics
     juce::juce_audio_utils
+    juce::juce_build_tools
     juce::juce_dsp
     juce::juce_midi_ci
     juce::juce_opengl

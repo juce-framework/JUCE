@@ -62,6 +62,25 @@ namespace juce
 class JUCE_API  FocusTraverser  : public ComponentTraverser
 {
 public:
+    /** Controls whether the FocusTraverser will allow navigation to disabled components.
+    */
+    enum class SkipDisabledComponents
+    {
+        no,  ///< Disabled components can receive focus.
+        yes  ///< Disabled components can't receive focus.
+    };
+
+    /** Creates a FocusTraverser that will not skip disabled components. */
+    FocusTraverser() = default;
+
+    /** Creates a FocusTraverser.
+
+        @param skipDisabledComponents  If set to SkipDisabledComponents::yes, the traverser will ignore
+                                       disabled components. This makes such components non-discoverable
+                                       using screen readers.
+    */
+    explicit FocusTraverser (SkipDisabledComponents skipDisabledComponents);
+
     /** Destructor. */
     ~FocusTraverser() override = default;
 
@@ -97,6 +116,9 @@ public:
         The default implementation will return all visible and enabled child components.
     */
     std::vector<Component*> getAllComponents (Component* parentComponent) override;
+
+private:
+    SkipDisabledComponents skipDisabledComponents = SkipDisabledComponents::no;
 };
 
 } // namespace juce

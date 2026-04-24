@@ -35,11 +35,9 @@
 namespace juce
 {
 
-#ifndef DOXYGEN
+/** @cond */
 namespace detail
 {
-
-template <typename> struct Tag {};
 
 inline auto getNumericValue (StringRef s, Tag<int>)    { return s.text.getIntValue32(); }
 inline auto getNumericValue (StringRef s, Tag<double>) { return s.text.getDoubleValue(); }
@@ -61,7 +59,7 @@ inline int ceilAsInt (float n) noexcept    { return n < (float)  std::numeric_li
 inline int ceilAsInt (double n) noexcept   { return n < (double) std::numeric_limits<int>::max() ? (int) std::ceil (n) : std::numeric_limits<int>::max(); }
 
 } // namespace detail
-#endif
+/** @endcond */
 
 //==============================================================================
 /**
@@ -1013,10 +1011,10 @@ public:
                  detail::parseAfterSpace<ValueType> (toks[3]) };
     }
 
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("This has been renamed to transformedBy in order to match the method names used in the Point class.")]]
     Rectangle transformed (const AffineTransform& t) const noexcept { return transformedBy (t); }
-   #endif
+    /** @endcond */
 
 private:
     template <typename OtherType> friend class Rectangle;

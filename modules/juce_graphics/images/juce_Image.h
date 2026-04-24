@@ -48,12 +48,12 @@ class ImagePixelData;
     To draw into an image, create a Graphics object for it.
     e.g. @code
 
-    // create a transparent 500x500 image..
+    // create a transparent 500x500 image
     Image myImage (Image::RGB, 500, 500, true);
 
     Graphics g (myImage);
     g.setColour (Colours::red);
-    g.fillEllipse (20, 20, 300, 200);  // draws a red ellipse in our image.
+    g.fillEllipse (20, 20, 300, 200);  // draws a red ellipse in our image
     @endcode
 
     Other useful ways to create an image are with the ImageCache class, or the
@@ -448,10 +448,12 @@ public:
     explicit Image (ReferenceCountedObjectPtr<ImagePixelData>) noexcept;
 
     //==============================================================================
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES && ! defined (DOXYGEN)
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** @cond */
     /* A null Image object that can be used when you need to return an invalid image. */
     [[deprecated ("If you need a default-constructed var, just use Image() or {}.")]]
     static const Image null;
+    /** @endcond */
    #endif
 
 private:

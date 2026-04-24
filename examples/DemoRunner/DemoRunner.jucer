@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT name="DemoRunner" projectType="guiapp" defines="JUCE_DEMO_RUNNER=1&#10;JUCE_UNIT_TESTS=1&#10;JUCE_PUSH_NOTIFICATIONS=1"
-              bundleIdentifier="com.rmsl.jucedemorunner" version="8.0.8" companyName="Raw Material Software Limited"
+              bundleIdentifier="com.rmsl.jucedemorunner" version="8.0.12" companyName="Raw Material Software Limited"
               companyCopyright="Copyright (c) - Raw Material Software Limited"
               companyWebsite="https://www.juce.com/" companyEmail="info@juce.com"
               id="yj7xMM" useAppConfig="0" addUsingNamespaceToJuceHeader="1"
@@ -48,6 +48,7 @@
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -78,6 +79,7 @@
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -102,7 +104,7 @@
                    cameraPermissionNeeded="1" androidReadMediaAudioPermission="1"
                    androidReadMediaImagesPermission="1" androidReadMediaVideoPermission="1"
                    androidBluetoothScanNeeded="1" androidBluetoothAdvertiseNeeded="1"
-                   androidBluetoothConnectNeeded="1">
+                   androidBluetoothConnectNeeded="1" androidEnableVirtualMidi="1">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" recommendedWarnings="LLVM" androidAdditionalRawValueResources="Source/accessibilitynotificationicon.png"/>
         <CONFIGURATION isDebug="0" name="Release" recommendedWarnings="LLVM" androidAdditionalRawValueResources="Source/accessibilitynotificationicon.png"/>
@@ -114,6 +116,7 @@
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -150,6 +153,7 @@
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -181,6 +185,7 @@
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -212,6 +217,7 @@
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -230,6 +236,38 @@
         <MODULEPATH id="juce_video" path="../../modules"/>
       </MODULEPATHS>
     </VS2022>
+    <VS2026 targetFolder="Builds/VisualStudio2026" smallIcon="YyqWd2" bigIcon="YyqWd2"
+            extraCompilerFlags="/w44265 /w45038 /w44062" bigobj="/bigobj">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="DemoRunner"/>
+        <CONFIGURATION isDebug="0" name="Release" useRuntimeLibDLL="0" targetName="DemoRunner"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_analytics" path="../../modules"/>
+        <MODULEPATH id="juce_animation" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_box2d" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_dsp" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_javascript" path="../../modules"/>
+        <MODULEPATH id="juce_midi_ci" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_osc" path="../../modules"/>
+        <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
+        <MODULEPATH id="juce_video" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2026>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="juce_analytics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
@@ -238,6 +276,8 @@
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors_headless" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="0"/>
     <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_box2d" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
@@ -257,7 +297,8 @@
     <MODULE id="juce_video" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
   </MODULES>
   <JUCEOPTIONS JUCE_USE_CAMERA="1" JUCE_USE_MP3AUDIOFORMAT="1" JUCE_ALLOW_STATIC_NULL_VARIABLES="0"
-               JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_PLUGINHOST_LV2="1" JUCE_PLUGINHOST_VST3="1"/>
+               JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_PLUGINHOST_LV2="1" JUCE_PLUGINHOST_VST3="1"
+               JUCE_PLUGINHOST_AU="1"/>
   <LIVE_SETTINGS>
     <OSX/>
   </LIVE_SETTINGS>

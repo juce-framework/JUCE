@@ -48,7 +48,7 @@ namespace juce
         void foo();
 
         // This is a neat way of declaring a typedef for a pointer class,
-        // rather than typing out the full templated name each time..
+        // rather than typing out the full templated name each time.
         using Ptr = ReferenceCountedObjectPtr<MyClass>;
     };
 
@@ -440,10 +440,10 @@ public:
     operator ReferencedType*() const noexcept               { return referencedObject; }
    #endif
 
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("Use the get method instead.")]]
     ReferencedType* getObject() const { return get(); }
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

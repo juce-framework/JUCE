@@ -537,7 +537,16 @@ private:
         if (userHeaders.isNotEmpty())
             header << "\r\n" << userHeaders;
 
-        header << "\r\n\r\n";
+        const auto headerHasCompleteSuffix = [&header]
+        {
+            const auto actualEnd = static_cast<const char*> (header.getData()) + header.getDataSize();
+            const auto actualBegin = actualEnd - jmin (header.getDataSize(), (size_t) 4);
+            const char expected[] { '\r', '\n', '\r', '\n' };
+            return std::equal (actualBegin, actualEnd, std::begin (expected), std::end (expected));
+        };
+
+        while (! headerHasCompleteSuffix())
+            header << "\r\n";
 
         if (hasPostData)
             header << postData;

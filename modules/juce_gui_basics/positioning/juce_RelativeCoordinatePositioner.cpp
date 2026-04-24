@@ -201,7 +201,7 @@ public:
                     }
                     else
                     {
-                        // The marker we want doesn't exist, so watch all lists in case they change and the marker appears later..
+                        // The marker we want doesn't exist, so watch all lists in case they change and the marker appears later.
                         if (auto* mlh = dynamic_cast<MarkerList::MarkerListHolder*> (parent))
                         {
                             positioner.registerMarkerListListener (mlh->getMarkers (true));
@@ -227,7 +227,7 @@ public:
         }
         else
         {
-            // The named component doesn't exist, so we'll watch the parent for changes in case it appears later..
+            // The named component doesn't exist, so we'll watch the parent for changes in case it appears later.
             if (Component* const parent = component.getParentComponent())
                 positioner.registerComponentListener (*parent);
 

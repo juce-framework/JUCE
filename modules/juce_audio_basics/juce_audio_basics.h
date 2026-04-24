@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_basics
   vendor:             juce
-  version:            8.0.8
+  version:            8.0.12
   name:               JUCE audio and MIDI data classes
   description:        Classes for audio buffer manipulation, midi message handling, synthesis, etc.
   website:            http://www.juce.com/juce
@@ -110,6 +110,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "midi/juce_MidiFile.h"
 #include "midi/juce_MidiKeyboardState.h"
 #include "midi/juce_MidiRPN.h"
+#include "midi/juce_MidiDataConcatenator.h"
 #include "mpe/juce_MPEValue.h"
 #include "mpe/juce_MPENote.h"
 #include "mpe/juce_MPEZoneLayout.h"
@@ -134,6 +135,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "utilities/juce_AudioWorkgroup.h"
 #include "midi/ump/juce_UMPBytesOnGroup.h"
 #include "midi/ump/juce_UMPDeviceInfo.h"
+#include "midi/ump/juce_UMP.h"
 
 namespace juce
 {

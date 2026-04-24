@@ -126,7 +126,10 @@ struct ItemComponent final : public Component
         : item (i), parentWindow (parent), options (o), customComp (i.customComponent)
     {
         if (item.isSectionHeader)
+        {
             customComp = *new HeaderItemComponent (item.text, options);
+            setEnabled (false);
+        }
 
         if (customComp != nullptr)
         {
@@ -247,26 +250,17 @@ private:
         }
 
     private:
-        static AccessibilityActions getAccessibilityActions (ItemAccessibilityHandler& handler,
+        static AccessibilityActions getAccessibilityActions (ItemAccessibilityHandler&,
                                                              ItemComponent& item)
         {
             auto onFocus = [&item]
             {
                 item.parentWindow.disableMouseMovesOnMenuAndAncestors();
-                item.parentWindow.ensureItemComponentIsVisible (item, -1);
+                item.parentWindow.ensureItemComponentIsVisible (item, std::nullopt);
                 item.parentWindow.setCurrentlyHighlightedChild (&item);
             };
 
-            auto onToggle = [&handler, &item, onFocus]
-            {
-                if (handler.getCurrentState().isSelected())
-                    item.parentWindow.setCurrentlyHighlightedChild (nullptr);
-                else
-                    onFocus();
-            };
-
-            auto actions = AccessibilityActions().addAction (AccessibilityActionType::focus,  std::move (onFocus))
-                                                 .addAction (AccessibilityActionType::toggle, std::move (onToggle));
+            auto actions = AccessibilityActions().addAction (AccessibilityActionType::focus, std::move (onFocus));
 
             if (canBeTriggered (item.item))
             {
@@ -379,13 +373,13 @@ struct MenuWindow final : public Component
         }
         else
         {
-            const auto shouldDisableAccessibility = [this]
+            const auto shouldDisableAccessibility = std::invoke ([this]
             {
                 const auto* compToCheck = parent != nullptr ? parent
                                                             : options.getTargetComponent();
 
                 return compToCheck != nullptr && ! compToCheck->isAccessible();
-            }();
+            });
 
             if (shouldDisableAccessibility)
                 setAccessible (false);
@@ -430,23 +424,22 @@ struct MenuWindow final : public Component
 
         if (auto visibleID = options.getItemThatMustBeVisible())
         {
-            for (auto* item : items)
+            const auto iter = std::find_if (items.begin(), items.end(), [&] (auto* item)
             {
-                if (item->item.itemID == visibleID)
+                return item->item.itemID == visibleID;
+            });
+
+            if (iter != items.end())
+            {
+                const auto targetPosition = std::invoke ([&]
                 {
-                    const auto targetPosition = [&]
-                    {
-                        if (auto* pc = options.getParentComponent())
-                            return pc->getLocalPoint (nullptr, targetArea.getTopLeft());
+                    if (auto* pc = options.getParentComponent())
+                        return pc->getLocalPoint (nullptr, targetArea.getTopLeft());
 
-                        return targetArea.getTopLeft();
-                    }();
+                    return targetArea.getTopLeft();
+                });
 
-                    auto y = targetPosition.getY() - windowPos.getY();
-                    ensureItemComponentIsVisible (*item, isPositiveAndBelow (y, windowPos.getHeight()) ? y : -1);
-
-                    break;
-                }
+                ensureItemComponentIsVisible (**iter, targetPosition.getY() - windowPos.getY());
             }
         }
 
@@ -881,7 +874,7 @@ struct MenuWindow final : public Component
         auto parentArea = getParentArea (target.getCentre()) / scaleFactor;
 
         if (auto* pc = options.getParentComponent())
-            target = pc->getLocalArea (nullptr, target).getIntersection (parentArea);
+            target = pc->getLocalArea (nullptr, target).constrainedWithin (parentArea);
 
         auto maxMenuHeight = parentArea.getHeight() - 24;
 
@@ -1097,38 +1090,66 @@ struct MenuWindow final : public Component
         return correctColumnWidths (maxMenuW);
     }
 
-    void ensureItemComponentIsVisible (const ItemComponent& itemComp, int wantedY)
+    void ensureItemComponentIsVisible (const ItemComponent& itemComp, std::optional<int> wantedY)
     {
-        if (windowPos.getHeight() > PopupMenuSettings::scrollZone * 4)
+        const auto parentArea = getParentArea (windowPos.getPosition(), options.getParentComponent()) / scaleFactor;
+
+        if (const auto posAndOffset = computePosAndOffsetToEnsureVisibility (windowPos, parentArea, itemComp.getBounds(), contentHeight, wantedY))
         {
-            auto currentY = itemComp.getY();
-
-            if (wantedY > 0 || currentY < 0 || itemComp.getBottom() > windowPos.getHeight())
-            {
-                if (wantedY < 0)
-                    wantedY = jlimit (PopupMenuSettings::scrollZone,
-                                      jmax (PopupMenuSettings::scrollZone,
-                                            windowPos.getHeight() - (PopupMenuSettings::scrollZone + itemComp.getHeight())),
-                                      currentY);
-
-                auto parentArea = getParentArea (windowPos.getPosition(), options.getParentComponent()) / scaleFactor;
-                auto deltaY = wantedY - currentY;
-
-                windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
-                                   jmin (windowPos.getHeight(), parentArea.getHeight()));
-
-                auto newY = jlimit (parentArea.getY(),
-                                    parentArea.getBottom() - windowPos.getHeight(),
-                                    windowPos.getY() + deltaY);
-
-                deltaY -= newY - windowPos.getY();
-
-                childYOffset -= deltaY;
-                windowPos.setPosition (windowPos.getX(), newY);
-
-                updateYPositions();
-            }
+            std::tie (windowPos, childYOffset) = std::tie (posAndOffset->windowPos, posAndOffset->childYOffset);
+            updateYPositions();
         }
+    }
+
+    struct PosAndOffset
+    {
+        Rectangle<int> windowPos;
+        int childYOffset = 0;
+    };
+
+    static std::optional<PosAndOffset> computePosAndOffsetToEnsureVisibility (Rectangle<int> windowPos,
+                                                                              const Rectangle<int>& parentArea,
+                                                                              const Rectangle<int>& itemCompBounds,
+                                                                              int contentHeight,
+                                                                              std::optional<int> wantedY)
+    {
+        // If there's no specific wantedY, and the item component is already visible, then we don't
+        // need to make any adjustments.
+        if (! wantedY.has_value() && 0 <= itemCompBounds.getY() && itemCompBounds.getBottom() <= windowPos.getHeight())
+            return {};
+
+        const auto spaceNeededAboveItem = jmin (PopupMenuSettings::scrollZone, itemCompBounds.getY());
+        const auto spaceNeededBelowItem = jmin (PopupMenuSettings::scrollZone, contentHeight - itemCompBounds.getBottom());
+        const auto parentSpaceTargetY = windowPos.getY() + wantedY.value_or (itemCompBounds.getY());
+
+        // In order to display the visible item over the target area, we need to make sure that
+        // there's enough space above and below to hold the scroll areas if they're showing.
+        // Ideally, we want to avoid the case where the menu opens with the scroll area over the
+        // target area.
+        const auto isSpaceToOverlay = spaceNeededAboveItem <= (parentSpaceTargetY - parentArea.getY())
+                                   && spaceNeededBelowItem <= (parentArea.getBottom() - (parentSpaceTargetY + itemCompBounds.getHeight()));
+
+        if (wantedY.has_value() && isSpaceToOverlay)
+        {
+            windowPos = windowPos.withY (parentSpaceTargetY - itemCompBounds.getY())
+                                 .withHeight (contentHeight)
+                                 .constrainedWithin (parentArea);
+
+            const auto menuSpaceTargetY = parentSpaceTargetY - windowPos.getY();
+            const auto offset = itemCompBounds.getY() - menuSpaceTargetY;
+
+            return PosAndOffset { windowPos, offset };
+        }
+
+        // If there's not enough space to overlay the menu, then just use the provided menu
+        // bounds but try to position the visible item as close to the target area as possible,
+        // while avoiding the scroll areas.
+        const auto menuSpaceTargetY = jlimit (spaceNeededAboveItem,
+                                              windowPos.getHeight() - spaceNeededBelowItem - itemCompBounds.getHeight(),
+                                              parentSpaceTargetY - windowPos.getY());
+        const auto offset = itemCompBounds.getY() - menuSpaceTargetY;
+
+        return PosAndOffset { windowPos, offset };
     }
 
     void resizeToBestWindowPos()
@@ -1381,7 +1402,7 @@ private:
     }
 
     bool mouseWasOver = false;
-    bool mouseUpCanTrigger = ! ModifierKeys::currentModifiers.isAnyMouseButtonDown();
+    bool mouseUpCanTrigger = ! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuWindow)
 };
@@ -1423,7 +1444,7 @@ public:
 private:
     Point<int> lastMousePos;
     double scrollAcceleration = 0;
-    uint32 lastScrollTime;
+    uint32 lastScrollTime = 0, lastMoveTime = 0;
     bool isDown = false;
 
     // Although most mouse movements can be handled inside mouse event callbacks, scrolling of menus
@@ -1454,7 +1475,7 @@ private:
             window.showSubMenuFor (window.currentChild);
         }
 
-        highlightItemUnderMouse (globalMousePos, localMousePos);
+        highlightItemUnderMouse (globalMousePos, localMousePos, timeNow);
 
         const bool overScrollArea = scrollIfNecessary (localMousePos, timeNow);
         const bool isOverAny = window.isOverAnyMenu();
@@ -1469,7 +1490,7 @@ private:
                            const bool wasDown, const bool overScrollArea, const bool isOverAny)
     {
         isDown = window.mouseHasBeenOver()
-                    && (ModifierKeys::currentModifiers.isAnyMouseButtonDown()
+                    && (ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown()
                          || ComponentPeer::getCurrentModifiersRealtime().isAnyMouseButtonDown());
 
         const auto reallyContained = window.reallyContains (localMousePos, true);
@@ -1498,55 +1519,63 @@ private:
         }
     }
 
-    void highlightItemUnderMouse (Point<int> globalMousePos, Point<int> localMousePos)
+    void highlightItemUnderMouse (Point<int> globalMousePos, Point<int> localMousePos, uint32 timeNow)
     {
+        const auto mouseTimedOut = lastMoveTime != 0 && 350 < (timeNow - lastMoveTime);
         const auto mouseHasMoved = 2 < lastMousePos.getDistanceFrom (globalMousePos);
-
-        if (! mouseHasMoved)
-            return;
-
         const auto isMouseOver = window.reallyContains (localMousePos, true);
 
-        if (isMouseOver)
+        if (mouseHasMoved && isMouseOver)
+        {
             window.disableMouseMoves = false;
+            lastMoveTime = timeNow;
+        }
 
-        if (window.disableMouseMoves || (window.activeSubMenu != nullptr && window.activeSubMenu->isOverChildren()))
+        if (! mouseHasMoved && ! mouseTimedOut)
             return;
 
-        const bool isMovingTowardsMenu = isMouseOver && globalMousePos != lastMousePos
-                                            && isMovingTowardsSubmenu (globalMousePos);
+        if (window.disableMouseMoves)
+            return;
+
+        if (window.activeSubMenu != nullptr && window.activeSubMenu->isOverChildren())
+            return;
+
+        const auto isMovingTowardsMenu = isMouseOver
+                                      && globalMousePos != lastMousePos
+                                      && isMovingTowardsSubmenu (globalMousePos);
 
         lastMousePos = globalMousePos;
 
-        if (! isMovingTowardsMenu)
+        if (isMovingTowardsMenu)
+            return;
+
+        auto* componentUnderMouse = window.getComponentAt (localMousePos);
+        auto* childComponentUnderMouse = componentUnderMouse != &window ? componentUnderMouse : nullptr;
+
+        auto* itemUnderMouse = std::invoke ([&]() -> ItemComponent*
         {
-            auto* c = window.getComponentAt (localMousePos);
+            if (auto* candidate = dynamic_cast<ItemComponent*> (childComponentUnderMouse))
+                return candidate;
 
-            if (c == &window)
-                c = nullptr;
+            if (childComponentUnderMouse != nullptr)
+                return childComponentUnderMouse->findParentComponentOfClass<ItemComponent>();
 
-            auto* itemUnderMouse = dynamic_cast<ItemComponent*> (c);
+            return nullptr;
+        });
 
-            if (itemUnderMouse == nullptr && c != nullptr)
-                itemUnderMouse = c->findParentComponentOfClass<ItemComponent>();
+        if (itemUnderMouse == window.currentChild)
+            return;
 
-            if (itemUnderMouse != window.currentChild
-                  && (isMouseOver || (window.activeSubMenu == nullptr) || ! window.activeSubMenu->isVisible()))
-            {
-                if (isMouseOver && (c != nullptr) && (window.activeSubMenu != nullptr))
-                    window.activeSubMenu->hide (nullptr, true);
+        if (! isMouseOver && window.activeSubMenu != nullptr && window.activeSubMenu->isVisible())
+            return;
 
-                if (! isMouseOver)
-                {
-                    if (! window.mouseHasBeenOver())
-                        return;
+        if (isMouseOver && childComponentUnderMouse != nullptr && window.activeSubMenu != nullptr)
+            window.activeSubMenu->hide (nullptr, true);
 
-                    itemUnderMouse = nullptr;
-                }
+        if (! isMouseOver && ! window.mouseHasBeenOver())
+            return;
 
-                window.setCurrentlyHighlightedChild (itemUnderMouse);
-            }
-        }
+        window.setCurrentlyHighlightedChild (isMouseOver ? itemUnderMouse : nullptr);
     }
 
     bool isMovingTowardsSubmenu (Point<int> newGlobalPos) const
@@ -1556,7 +1585,7 @@ private:
 
         // try to intelligently guess whether the user is moving the mouse towards a currently-open
         // submenu. To do this, look at whether the mouse stays inside a triangular region that
-        // extends from the last mouse pos to the submenu's rectangle..
+        // extends from the last mouse pos to the submenu's rectangle
 
         auto itemScreenBounds = window.activeSubMenu->getScreenBounds();
         auto subX = (float) itemScreenBounds.getX();
@@ -2196,7 +2225,7 @@ int PopupMenu::showWithOptionalCallback (const Options& options,
         ModalComponentManager::getInstance()->attachCallback (window, callback.release());
 
         window->toFront (false);  // need to do this after making it modal, or it could
-                                  // be stuck behind other comps that are already modal..
+                                  // be stuck behind other comps that are already modal
 
        #if JUCE_MODAL_LOOPS_PERMITTED
         if (userCallback == nullptr && canBeModal)
@@ -2371,7 +2400,7 @@ void PopupMenu::CustomComponent::triggerMenuItem()
         }
         else
         {
-            // something must have gone wrong with the component hierarchy if this happens..
+            // something must have gone wrong with the component hierarchy if this happens
             jassertfalse;
         }
     }

@@ -121,7 +121,7 @@ template <typename T> constexpr auto named (std::string_view c, const T& t) { re
 
     @tparam T   the (probably numeric) type of the size value
 
-    @see serialisztionSize()
+    @see serialisationSize()
 
     @tags{Core}
 */
@@ -148,8 +148,7 @@ template <typename T> constexpr auto serialisationSize (const T& t) -> std::enab
     The following are specialisations of SerialisationTraits for commonly-used types.
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 template <typename... Ts>
 struct SerialisationTraits<std::vector<Ts...>>
 {
@@ -583,6 +582,6 @@ namespace detail
     }
 } // namespace detail
 
-#endif
+/** @endcond */
 
 } // namespace juce

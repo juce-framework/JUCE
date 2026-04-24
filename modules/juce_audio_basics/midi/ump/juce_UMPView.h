@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce::universal_midi_packets
 {
 
@@ -66,7 +65,7 @@ public:
     */
     const uint32_t* data() const noexcept { return ptr; }
 
-    /** Get the number of 32-words (between 1 and 4 inclusive) in the Universal
+    /** Get the number of 32 bit words (between 1 and 4 inclusive) in the Universal
         MIDI Packet currently pointed-to by this view.
     */
     uint32_t size() const noexcept;
@@ -97,5 +96,4 @@ private:
 };
 
 } // namespace juce::universal_midi_packets
-
-#endif
+/** @endcond */

@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_plugin_client
   vendor:             juce
-  version:            8.0.8
+  version:            8.0.12
   name:               JUCE audio plugin wrapper classes
   description:        Classes for building VST, VST3, AU, AUv3, LV2 and AAX plugins.
   website:            http://www.juce.com/juce
@@ -60,20 +60,17 @@
 
 #pragma once
 
-#include <juce_gui_basics/juce_gui_basics.h>
-#include <juce_audio_basics/juce_audio_basics.h>
-#include <juce_audio_processors/juce_audio_processors.h>
-
 /** Config: JUCE_VST3_CAN_REPLACE_VST2
 
     Enable this if you want your VST3 plug-in to load and save VST2 compatible
     state. This allows hosts to replace VST2 plug-ins with VST3 plug-ins. If
-    you change this option then your VST3 plug-in will, by default, be incompatible
-    with previous versions.
+    you change this option then your VST3 plug-in will, by default, be
+    incompatible with previous versions.
 
-    If you've already released a VST2 and VST3 with this flag set to 0, you can still enable
-    migration from VST2 to VST3 on newer hosts. See VST3ClientExtensions::getCompatibleClasses()
-    and VST3ClientExtensions::getCompatibleParameterIds() for more details.
+    If you've already released a VST2 and VST3 with this flag set to 0, you can
+    still enable migration from VST2 to VST3 on newer hosts by defining the
+    JUCE_VST3_COMPATIBLE_CLASSES preprocessor and implementing the
+    VST3ClientExtensions::getCompatibleParameterIds() method.
 */
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
  #define JUCE_VST3_CAN_REPLACE_VST2 1
@@ -81,10 +78,12 @@
 
 /** Config: JUCE_FORCE_USE_LEGACY_PARAM_IDS
 
-    Enable this if you want to force JUCE to use a continuous parameter
-    index to identify a parameter in a DAW (this was the default in old
-    versions of JUCE). This is index is usually used by the DAW to save
-    automation data and enabling this may mess up user's DAW projects.
+    Enable this if you want to force JUCE to use a continuous parameter index to
+    identify a parameter in a DAW (this was the default in old versions of JUCE,
+    and is always the default for VST2 plugins). This index is usually used by
+    the DAW to save automation data. Changing this setting may mess up user's
+    DAW projects, see VST3ClientExtensions::getCompatibleParameterIds() for a
+    way to overcome this issue on newer VST3 hosts.
 */
 #ifndef JUCE_FORCE_USE_LEGACY_PARAM_IDS
  #define JUCE_FORCE_USE_LEGACY_PARAM_IDS 0
@@ -135,9 +134,15 @@
     Enable this if you want your standalone plugin window to use kiosk mode.
     By default, kiosk mode is enabled on iOS and Android.
 */
-
 #ifndef JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
  #define JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE (JUCE_IOS || JUCE_ANDROID)
 #endif
 
-#include "detail/juce_CreatePluginFilter.h"
+/** Config: JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING
+
+    Enable this to ignore a warning caused by enabling JUCE_VST3_CAN_REPLACE_VST2
+    and not enabling JUCE_FORCE_USE_LEGACY_PARAM_IDS.
+ */
+#ifndef JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING
+ #define JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING 0
+#endif

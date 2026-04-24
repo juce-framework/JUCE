@@ -115,7 +115,7 @@ bool NamedValueSet::operator== (const NamedValueSet& other) const noexcept
         }
         else
         {
-            // if we encounter keys that are in a different order, search remaining items by brute force..
+            // if we encounter keys that are in a different order, search remaining items by brute force
             for (int j = i; j < num; ++j)
             {
                 if (auto* otherVal = other.getVarPointer (values.getReference (j).name))
@@ -277,20 +277,20 @@ void NamedValueSet::setFromXmlAttributes (const XmlElement& xml)
 {
     values.clearQuick();
 
-    for (auto* att = xml.attributes.get(); att != nullptr; att = att->nextListItem)
+    for (const auto& [name, value] : xml.getAttributeIterator())
     {
-        if (att->name.toString().startsWith ("base64:"))
+        if (name.toString().startsWith ("base64:"))
         {
             MemoryBlock mb;
 
-            if (mb.fromBase64Encoding (att->value))
+            if (mb.fromBase64Encoding (value))
             {
-                values.add ({ att->name.toString().substring (7), var (mb) });
+                values.add ({ name.toString().substring (7), var (mb) });
                 continue;
             }
         }
 
-        values.add ({ att->name, var (att->value) });
+        values.add ({ name, var (value) });
     }
 }
 

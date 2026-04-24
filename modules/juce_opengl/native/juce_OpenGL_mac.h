@@ -295,6 +295,9 @@ public:
         double videoRefreshPeriodS = 1.0 / 60.0;
     };
 
+    void addListener (NativeContextListener&) {}
+    void removeListener (NativeContextListener&) {}
+
     Component& owner;
     NSOpenGLContext* renderContext = nil;
     NSOpenGLView* view = nil;

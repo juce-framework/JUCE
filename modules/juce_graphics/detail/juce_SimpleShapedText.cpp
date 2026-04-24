@@ -119,48 +119,6 @@ SimpleShapedText::SimpleShapedText (const String* data,
     shape (string, options);
 }
 
-struct Utf8Lookup
-{
-    Utf8Lookup (const String& s)
-    {
-        const auto base = s.toUTF8();
-
-        for (auto cursor = base; ! cursor.isEmpty(); ++cursor)
-            indices.push_back ((size_t) std::distance (base.getAddress(), cursor.getAddress()));
-
-        beyondEnd = s.getNumBytesAsUTF8();
-    }
-
-    auto getByteIndex (int64 codepointIndex) const
-    {
-        jassert (codepointIndex <= (int64) indices.size());
-
-        if (codepointIndex == (int64) indices.size())
-            return beyondEnd;
-
-        return indices[(size_t) codepointIndex];
-    }
-
-    auto getCodepointIndex (size_t byteIndex) const
-    {
-        auto it = std::lower_bound (indices.cbegin(), indices.cend(), byteIndex);
-
-        jassert (it != indices.end());
-
-        return (int64) std::distance (indices.begin(), it);
-    }
-
-    auto getByteRange (Range<int64> range)
-    {
-        return Range<size_t> { getByteIndex (range.getStart()),
-                               getByteIndex (range.getEnd()) };
-    }
-
-private:
-    std::vector<size_t> indices;
-    size_t beyondEnd{};
-};
-
 enum class ControlCharacter
 {
     crFollowedByLf,
@@ -169,50 +127,155 @@ enum class ControlCharacter
     tab
 };
 
-static auto findControlCharacters (Span<juce_wchar> text)
+template <typename CharPtr>
+static std::optional<ControlCharacter> findControlCharacter (CharPtr it, CharPtr end)
 {
     constexpr juce_wchar lf = 0x0a;
     constexpr juce_wchar cr = 0x0d;
     constexpr juce_wchar tab = 0x09;
 
-    std::map<size_t, ControlCharacter> result;
-
-    const auto iMax = text.size();
-
-    for (const auto [i, c] : enumerate (text, size_t{}))
+    switch (*it)
     {
-        if (c == lf)
+        case lf:
+            return ControlCharacter::lf;
+
+        case tab:
+            return ControlCharacter::tab;
+
+        case cr:
         {
-            result[i] = ControlCharacter::lf;
-            continue;
+            const auto next = it + 1;
+            return next != end && *next == lf ? ControlCharacter::crFollowedByLf
+                                              : ControlCharacter::cr;
         }
-
-        if (c == cr)
-        {
-            if (iMax - i > 1 && text[i + 1] == lf)
-                result[i] = ControlCharacter::crFollowedByLf;
-            else
-                result[i] = ControlCharacter::cr;
-
-            continue;
-        }
-
-        if (c == tab)
-            result[i] = ControlCharacter::tab;
     }
 
-    return result;
+    return {};
 }
 
+static constexpr hb_feature_t hbFeature (FontFeatureSetting setting)
+{
+    return { setting.tag.getTag(),
+             setting.value,
+             HB_FEATURE_GLOBAL_START,
+             HB_FEATURE_GLOBAL_END };
+}
+
+enum class LigatureEnabledState
+{
+    normal,
+    disabled
+};
+
+static std::vector<hb_feature_t> getHarfbuzzFeatures (Span<const FontFeatureSetting> settings,
+                                                      LigatureEnabledState ligatureEnabledstate)
+{
+    // Font feature settings *should* always be sorted.
+    jassert (std::is_sorted (settings.begin(), settings.end()));
+
+    std::vector<hb_feature_t> features;
+
+    features.reserve (settings.size());
+    std::transform (settings.begin(), settings.end(), std::back_inserter (features), hbFeature);
+
+    if (ligatureEnabledstate == LigatureEnabledState::disabled)
+    {
+        static constexpr FontFeatureTag tagsAffectedByTracking[] { FontFeatureTag { "liga" },
+                                                                   FontFeatureTag { "clig" },
+                                                                   FontFeatureTag { "hlig" },
+                                                                   FontFeatureTag { "dlig" },
+                                                                   FontFeatureTag { "calt" } };
+
+        static constexpr auto less = [] (hb_feature_t a, hb_feature_t b)
+        {
+            return a.tag < b.tag;
+        };
+
+        for (auto tag : tagsAffectedByTracking)
+            OrderedContainerHelpers::insertOrAssign (features, hbFeature ({ tag, 0 }), less);
+    }
+
+    return features;
+}
+
+/*  Increment b by the requested number of steps, or to e, whichever is reached first. */
+template <typename CharPtr>
+static auto incrementCharPtr (CharPtr b, CharPtr e, int64 steps)
+{
+    while (b != e && steps > 0)
+    {
+        ++b;
+        --steps;
+    }
+
+    return b;
+}
+
+class SanitisedString
+{
+public:
+    static SanitisedString sanitise (const String& stringIn, Range<int64> lineRange)
+    {
+        SanitisedString result;
+
+        const auto end = stringIn.end();
+        const auto beginOfRange = incrementCharPtr (stringIn.begin(), end, lineRange.getStart());
+        const auto endOfRange = incrementCharPtr (beginOfRange, end, lineRange.getLength());
+
+        result.characters.reserve (beginOfRange.lengthUpTo (endOfRange));
+
+        for (auto it = beginOfRange; it != endOfRange; ++it)
+        {
+            const auto cc = findControlCharacter (it, end);
+
+            if (cc == ControlCharacter::cr || cc == ControlCharacter::lf)
+                result.newlineIndices.push_back (result.characters.size());
+
+            result.characters.push_back (std::invoke ([&]
+            {
+                if (! cc.has_value())
+                    return *it;
+
+                constexpr juce_wchar wordJoiner       = 0x2060;
+                constexpr juce_wchar nonBreakingSpace = 0x00a0;
+
+                return cc == ControlCharacter::crFollowedByLf ? wordJoiner : nonBreakingSpace;
+            }));
+        }
+
+        return result;
+    }
+
+    bool isNewline (size_t index) const
+    {
+        return std::binary_search (newlineIndices.begin(), newlineIndices.end(), index);
+    }
+
+    const juce_wchar* data() const
+    {
+        return characters.data();
+    }
+
+    size_t size() const
+    {
+        return characters.size();
+    }
+
+private:
+    std::vector<juce_wchar> characters;
+    std::vector<size_t> newlineIndices;
+};
+
 /*  Returns glyphs in logical order as that favours wrapping. */
-static std::vector<ShapedGlyph> lowLevelShape (const String& string,
+static std::vector<ShapedGlyph> lowLevelShape (const SanitisedString& string,
                                                Range<int64> range,
                                                const Font& font,
                                                TextScript script,
-                                               const String& language,
                                                uint8_t embeddingLevel)
 {
-    HbBuffer buffer { hb_buffer_create() };
+    static const auto language = SystemStats::getDisplayLanguage();
+
+    HbBuffer buffer { hb_buffer_create(), IncrementRef::no };
     hb_buffer_clear_contents (buffer.get());
 
     hb_buffer_set_cluster_level (buffer.get(), HB_BUFFER_CLUSTER_LEVEL_MONOTONE_GRAPHEMES);
@@ -222,61 +285,22 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     hb_buffer_set_direction (buffer.get(),
                              (embeddingLevel % 2) == 0 ? HB_DIRECTION_LTR : HB_DIRECTION_RTL);
 
-    Utf8Lookup utf8Lookup { string };
+    hb_buffer_add_utf32 (buffer.get(),
+                         unalignedPointerCast<const uint32_t*> (string.data()),
+                         (int) range.getStart(),
+                         0,
+                         0);
 
-    const auto preContextByteRange = utf8Lookup.getByteRange (Range<int64> { 0, range.getStart() });
+    const Span shapedSpan { string.data() + range.getStart(), (size_t) range.getLength() };
 
-    hb_buffer_add_utf8 (buffer.get(),
-                        string.toRawUTF8() + preContextByteRange.getStart(),
-                        (int) preContextByteRange.getLength(),
-                        0,
-                        0);
+    for (const auto pair : enumerate (shapedSpan, size_t{}))
+        hb_buffer_add (buffer.get(), static_cast<hb_codepoint_t> (pair.value), (unsigned int) pair.index);
 
-    const Span utf32Span { string.toUTF32().getAddress() + (size_t) range.getStart(),
-                           (size_t) range.getLength() };
-
-    const auto controlChars = findControlCharacters (utf32Span);
-    auto nextControlChar = controlChars.begin();
-
-    for (const auto pair : enumerate (utf32Span, size_t{}))
-    {
-        const auto charToAdd = [&]
-        {
-            if (nextControlChar == controlChars.end() || pair.index != nextControlChar->first)
-                return pair.value;
-
-            constexpr juce_wchar wordJoiner       = 0x2060;
-            constexpr juce_wchar nonBreakingSpace = 0x00a0;
-
-            const auto replacement = nextControlChar->second == ControlCharacter::crFollowedByLf
-                                   ? wordJoiner
-                                   : nonBreakingSpace;
-
-            ++nextControlChar;
-
-            return replacement;
-        }();
-
-        hb_buffer_add (buffer.get(), static_cast<hb_codepoint_t> (charToAdd), (unsigned int) pair.index);
-    }
-
-    const auto postContextByteRange = utf8Lookup.getByteRange (Range<int64> { range.getEnd(), (int64) string.length() });
-
-    hb_buffer_add_utf8 (buffer.get(),
-                        string.toRawUTF8() + postContextByteRange.getStart(),
-                        (int) postContextByteRange.getLength(),
-                        0,
-                        0);
-
-    std::vector<hb_feature_t> features;
-
-    // Disable ligatures if we're using non-standard tracking
-    const auto tracking           = font.getExtraKerningFactor();
-    const auto trackingIsDefault  = approximatelyEqual (tracking, 0.0f, absoluteTolerance (0.001f));
-
-    if (! trackingIsDefault)
-        for (const auto key : { hbTag ("liga"), hbTag ("clig"), hbTag ("hlig"), hbTag ("dlig"), hbTag ("calt") })
-            features.push_back (hb_feature_t { key, 0, HB_FEATURE_GLOBAL_START, HB_FEATURE_GLOBAL_END });
+    hb_buffer_add_utf32 (buffer.get(),
+                         unalignedPointerCast<const uint32_t*> (shapedSpan.data() + shapedSpan.size()),
+                         (int) string.size() - (int) range.getEnd(),
+                         0,
+                         0);
 
     hb_buffer_guess_segment_properties (buffer.get());
 
@@ -285,15 +309,22 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     if (nativeFont == nullptr)
         return {};
 
+    const auto tracking = font.getExtraKerningFactor();
+    const auto trackingIsDefault = approximatelyEqual (tracking, 0.0f, absoluteTolerance (0.001f));
+
+    const auto features = getHarfbuzzFeatures (font.getFeatureSettings(),
+                                               trackingIsDefault ? LigatureEnabledState::normal
+                                                                 : LigatureEnabledState::disabled);
+
     hb_shape (nativeFont.get(), buffer.get(), features.data(), (unsigned int) features.size());
 
-    const auto [infos, positions] = [&buffer]
+    const auto [infos, positions] = std::invoke ([&buffer]
     {
         unsigned int count{};
 
         return std::make_pair (Span { hb_buffer_get_glyph_infos     (buffer.get(), &count), (size_t) count },
                                Span { hb_buffer_get_glyph_positions (buffer.get(), &count), (size_t) count });
-    }();
+    });
 
     jassert (infos.size() == positions.size());
 
@@ -340,33 +371,18 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
         const auto xAdvanceBase = HbScale::hbToJuce (positions[visualIndex].x_advance);
         const auto yAdvanceBase = -HbScale::hbToJuce (positions[visualIndex].y_advance);
 
-        // For certain OS, Font and glyph ID combinations harfbuzz will not find extents data and
-        // hb_font_get_glyph_extents will return false. In such cases Typeface::getGlyphBounds
-        // will return an empty rectangle. Here we need to distinguish this situation from the one
-        // where extents information is available and is an empty rectangle, which indicates a
-        // whitespace.
-        const auto extentsDataAvailable = std::invoke ([&]
-        {
-            hb_glyph_extents_t extents{};
-            return hb_font_get_glyph_extents (font.getTypefacePtr()->getNativeDetails().getFont(),
-                                              (hb_codepoint_t) glyphId,
-                                              &extents);
-        });
+        // For certain OS, Font and glyph ID combinations harfbuzz will not find extents data.
+        // In such cases Typeface::getGlyphBounds will return an empty rectangle. Here we need
+        // to distinguish this situation from the one where extents information is available
+        // and is an empty rectangle, which indicates a whitespace.
+        const auto* native = font.getTypefacePtr()->getNativeDetails();
+        const auto extents = native->getGlyphExtents (glyphId);
 
-        const auto whitespace = extentsDataAvailable
+        const auto whitespace = extents.has_value()
                                 && font.getTypefacePtr()->getGlyphBounds (font.getMetricsKind(), (int) glyphId).isEmpty()
                                 && xAdvanceBase > 0;
 
-        const auto newline = std::invoke ([&controlChars, &shapingInfos = infos, visualIndex]
-        {
-           const auto it = controlChars.find ((size_t) shapingInfos[visualIndex].cluster);
-
-           if (it == controlChars.end())
-               return false;
-
-           return it->second == ControlCharacter::cr || it->second == ControlCharacter::lf;
-        });
-
+        const auto newline = string.isNewline (infos[visualIndex].cluster + (size_t) range.getStart());
         const auto cluster = (int64) infos[visualIndex].cluster + range.getStart();
 
         const auto numLigaturePlaceholders = std::max ((int64) 0,
@@ -381,7 +397,7 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
         const auto advanceMultiplier = numLigaturePlaceholders == 0 ? 1.0f
                                                                     : 1.0f / (float) (numLigaturePlaceholders + 1);
 
-        Point<float> advance { xAdvanceBase * advanceMultiplier + appliedTracking, yAdvanceBase * advanceMultiplier };
+        const Point advance { xAdvanceBase * advanceMultiplier + appliedTracking, yAdvanceBase * advanceMultiplier };
 
         const auto ligatureClusterNumber = cluster + (ltr ? 0 : numLigaturePlaceholders);
 
@@ -393,8 +409,8 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
             newline,
             numLigaturePlaceholders == 0 ? (int8_t) 0 : (int8_t) -numLigaturePlaceholders ,
             advance,
-            Point<float> { HbScale::hbToJuce (positions[visualIndex].x_offset),
-                           -HbScale::hbToJuce (positions[visualIndex].y_offset) },
+            Point { HbScale::hbToJuce (positions[visualIndex].x_offset),
+                    -HbScale::hbToJuce (positions[visualIndex].y_offset) },
         });
 
         for (int l = 0; l < numLigaturePlaceholders; ++l)
@@ -409,7 +425,7 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
                 newline,
                 (int8_t) (l + 1),
                 advance,
-                Point<float>{},
+                {},
             });
         }
     }
@@ -540,7 +556,6 @@ private:
 struct ShapingParams
 {
     TextScript script;
-    String language;
     uint8_t embeddingLevel;
     Font resolvedFont;
 };
@@ -553,12 +568,12 @@ static auto makeSpan (T& array)
 }
 
 static detail::RangedValues<Font> findSuitableFontsForText (const Font& font,
-                                                            const String& text,
+                                                            Span<const juce_wchar> string,
                                                             const String& language = {})
 {
     detail::RangedValues<std::optional<Font>> fonts;
     detail::Ranges::Operations ops;
-    fonts.set ({ 0, (int64) text.length() }, font, ops);
+    fonts.set ({ 0, (int64) string.size() }, font, ops);
     ops.clear();
 
     const auto getResult = [&]
@@ -579,17 +594,14 @@ static detail::RangedValues<Font> findSuitableFontsForText (const Font& font,
 
     const auto markMissingGlyphs = [&]
     {
-        auto it = text.begin();
         std::vector<int64> fontNotFound;
 
         for (const auto [r, f] : fonts)
         {
             for (auto i = r.getStart(); i < r.getEnd(); ++i)
             {
-                if (f.has_value() && ! isFontSuitableForCodepoint (*f, *it))
+                if (f.has_value() && ! isFontSuitableForCodepoint (*f, string[(size_t) i]))
                     fontNotFound.push_back (i);
-
-                ++it;
             }
         }
 
@@ -610,12 +622,12 @@ static detail::RangedValues<Font> findSuitableFontsForText (const Font& font,
 
         for (const auto [r, f] : fonts)
         {
-            if (! f.has_value())
-            {
-                changes.emplace_back (r, font.findSuitableFontForText (text.substring ((int) r.getStart(),
-                                                                                       (int) r.getEnd()),
-                                                                       language));
-            }
+            if (f.has_value())
+                continue;
+
+            const CharPointer_UTF32 bPtr { string.data() + (int) r.getStart() };
+            const CharPointer_UTF32 ePtr { string.data() + (int) r.getEnd() };
+            changes.emplace_back (r, font.findSuitableFontForText (String (bPtr, ePtr), language));
         }
 
         for (const auto& c : changes)
@@ -635,15 +647,18 @@ static detail::RangedValues<Font> findSuitableFontsForText (const Font& font,
     return getResult();
 }
 
-static RangedValues<Font> resolveFontsWithFallback (const String& string, const RangedValues<Font>& fonts)
+static RangedValues<Font> resolveFontsWithFallback (Span<const juce_wchar> string,
+                                                    const RangedValues<Font>& fonts)
 {
     RangedValues<Font> resolved;
     detail::Ranges::Operations ops;
 
     for (const auto [r, f] : fonts)
     {
-        auto rf = findSuitableFontsForText (f, string.substring ((int) r.getStart(),
-                                                                 (int) std::min (r.getEnd(), (int64) string.length())));
+        const auto intersected = r.getIntersectionWith ({ 0, (int64) string.size() });
+        auto rf = findSuitableFontsForText (f,
+                                            { string.data() + intersected.getStart(),
+                                              (size_t) intersected.getLength() });
 
         for (const auto [subRange, font] : rf)
         {
@@ -873,20 +888,12 @@ static auto rangedValuesWithOffset (detail::RangedValues<T> rv, int64 offset = 0
 struct Shaper
 {
     Shaper (const String& stringIn, Range<int64> lineRange, const ShapedTextOptions& options)
-        : string { stringIn.substring ((int) lineRange.getStart(), (int) lineRange.getEnd()) }
+        : string (SanitisedString::sanitise (stringIn, lineRange))
     {
-        const auto analysis = Unicode::performAnalysis (string);
+        const auto analysis = Unicode::performAnalysis (stringIn.substring ((int) lineRange.getStart(),
+                                                                            (int) lineRange.getEnd()));
 
-        const auto string32 = std::invoke ([this]
-                                           {
-                                               std::vector<juce_wchar> s32 ((size_t) string.length() + 1);
-                                               string.copyToUTF32 (s32.data(), s32.size() * sizeof (juce_wchar));
-                                               jassert (! s32.empty());
-                                               s32.pop_back();  // dropping the null terminator
-                                               return s32;
-                                           });
-
-        const BidiAlgorithm bidiAlgorithm { string32 };
+        const BidiAlgorithm bidiAlgorithm { string };
         const auto bidiParagraph = bidiAlgorithm.createParagraph (options.getReadingDirection());
         const auto bidiLine = bidiParagraph.createLine (bidiParagraph.getLength());
         bidiLine.computeVisualOrder (visualOrder);
@@ -925,7 +932,6 @@ struct Shaper
                 {
                     shaperRuns.set (range,
                                     { scriptRun->front().script,
-                                      options.getLanguage(),
                                       *it,
                                       font },
                                     ops,
@@ -979,7 +985,6 @@ struct Shaper
                                         shapingRange,
                                         it->value.resolvedFont,
                                         it->value.script,
-                                        it->value.language,
                                         it->value.embeddingLevel);
 
                 shapedGlyphs.set (shapingRange,
@@ -1042,7 +1047,7 @@ struct Shaper
         return result;
     }
 
-    String string;
+    SanitisedString string;
     std::vector<size_t> visualOrder;
     RangedValues<ShapingParams> shaperRuns;
     std::vector<int64> softBreakBeforePoints;
@@ -1584,7 +1589,138 @@ struct SimpleShapedTextTests : public UnitTest
     }
 };
 
+class HarfbuzzFontFeatureTests : public UnitTest
+{
+public:
+    HarfbuzzFontFeatureTests()
+        : UnitTest ("HarfbuzzFontFeatureTests", UnitTestCategories::text)
+    {
+    }
+
+    void runTest() override
+    {
+        static constexpr FontFeatureSetting input[] =
+        {
+            FontFeatureSetting { "calt", 1 },
+            FontFeatureSetting { "clig", 1 },
+            FontFeatureSetting { "dlig", 1 },
+            FontFeatureSetting { "hlig", 1 },
+            FontFeatureSetting { "liga", 1 }
+        };
+
+        static constexpr auto compare = [] (hb_feature_t a, hb_feature_t b)
+        {
+            return a.value == b.value;
+        };
+
+        beginTest ("Disabling ligatures overrides existing ligature feature values in feature set");
+        {
+            static constexpr hb_feature_t expected[] =
+            {
+                hbFeature ({ "calt", 0 }),
+                hbFeature ({ "clig", 0 }),
+                hbFeature ({ "dlig", 0 }),
+                hbFeature ({ "hlig", 0 }),
+                hbFeature ({ "liga", 0 })
+            };
+
+            auto result = getHarfbuzzFeatures (input, LigatureEnabledState::disabled);
+
+            expect (std::equal (result.begin(),
+                                result.end(),
+                                std::begin (expected),
+                                std::end (expected),
+                                compare));
+        }
+
+        beginTest ("Disabling ligatures appends ligature features in a disabled state to an empty feature set");
+        {
+            static constexpr hb_feature_t expected[] =
+            {
+                hbFeature ({ "calt", 0 }),
+                hbFeature ({ "clig", 0 }),
+                hbFeature ({ "dlig", 0 }),
+                hbFeature ({ "hlig", 0 }),
+                hbFeature ({ "liga", 0 })
+            };
+
+            auto result = getHarfbuzzFeatures ({}, LigatureEnabledState::disabled);
+
+            expect (std::equal (result.begin(),
+                                result.end(),
+                                std::begin (expected),
+                                std::end (expected),
+                                compare));
+        }
+
+        beginTest ("Enabling ligatures has no effect on ligature features in feature set");
+        {
+            static constexpr FontFeatureSetting featureSet[] =
+            {
+                FontFeatureSetting { "calt", 1 },
+                FontFeatureSetting { "clig", 0 },
+                FontFeatureSetting { "dlig", 1 },
+                FontFeatureSetting { "hlig", 0 },
+                FontFeatureSetting { "liga", 1 }
+            };
+
+            static constexpr hb_feature_t expected[] =
+            {
+                hbFeature ({ "calt", 1 }),
+                hbFeature ({ "clig", 0 }),
+                hbFeature ({ "dlig", 1 }),
+                hbFeature ({ "hlig", 0 }),
+                hbFeature ({ "liga", 1 })
+            };
+
+            auto result = getHarfbuzzFeatures (featureSet, LigatureEnabledState::normal);
+
+            expect (std::equal (result.begin(),
+                                result.end(),
+                                std::begin (expected),
+                                std::end (expected),
+                                compare));
+        }
+
+        beginTest ("Only ligature features are disabled in an existing feature set");
+        {
+            static constexpr FontFeatureSetting featureSet[] =
+            {
+                FontFeatureSetting { "calt", 1 },
+                FontFeatureSetting { "fak1", 0 },
+                FontFeatureSetting { "fak2", 1 }
+            };
+
+            static constexpr hb_feature_t expected[] =
+            {
+                hbFeature ({ "calt", 0 }),
+                hbFeature ({ "clig", 0 }),
+                hbFeature ({ "dlig", 0 }),
+                hbFeature ({ "fak1", 0 }),
+                hbFeature ({ "fak2", 1 }),
+                hbFeature ({ "hlig", 0 }),
+                hbFeature ({ "liga", 0 })
+            };
+
+            auto result = getHarfbuzzFeatures (featureSet, LigatureEnabledState::disabled);
+
+            expect (std::equal (result.begin(),
+                                result.end(),
+                                std::begin (expected),
+                                std::end (expected),
+                                compare));
+        }
+
+        beginTest ("An empty feature set is not mutated when ligatures are enabled");
+        {
+            auto result = getHarfbuzzFeatures ({}, LigatureEnabledState::normal);
+            expect (result.empty());
+        }
+    }
+};
+
 static SimpleShapedTextTests simpleShapedTextTests;
+static HarfbuzzFontFeatureTests harfbuzzFontFeatureTests;
 
 #endif
 

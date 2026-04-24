@@ -76,7 +76,7 @@ public:
         {
             if ([view superview] != nil)
                 [view removeFromSuperview]; // Must be careful not to call this unless it's required - e.g. some Apple AU views
-                                            // override the call and use it as a sign that they're being deleted, which breaks everything..
+                                            // override the call and use it as a sign that they're being deleted, which breaks everything.
             currentPeer = peer;
 
             if (peer != nullptr)

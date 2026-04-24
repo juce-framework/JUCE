@@ -951,7 +951,8 @@ void TextEditor::updateBaseShapedTextOptions()
                                                 .withLeading (lineSpacing);
 
     if (wordWrap)
-        options = options.withWordWrapWidth ((float) getMaximumTextWidth());
+        options = options.withWordWrapWidth ((float) getMaximumTextWidth())
+                         .withAllowBreakingInsideWord();
     else
         options = options.withAlignmentWidth ((float) getMaximumTextWidth());
 
@@ -1593,8 +1594,8 @@ void TextEditor::mouseDown (const MouseEvent& e)
 
             menuActive = true;
 
-            m.showMenuAsync (PopupMenu::Options(),
-                             [safeThis = SafePointer<TextEditor> { this }] (int menuResult)
+            m.showMenuAsync (PopupMenu::Options().withTargetComponent (this).withMousePosition(),
+                             [safeThis = SafePointer { this }] (int menuResult)
                              {
                                  if (auto* editor = safeThis.getComponent())
                                  {
@@ -1963,7 +1964,7 @@ bool TextEditor::keyStateChanged (const bool isKeyDown)
         return false;
 
     // (overridden to avoid forwarding key events to the parent)
-    return ! ModifierKeys::currentModifiers.isCommandDown();
+    return ! ModifierKeys::getCurrentModifiers().isCommandDown();
 }
 
 //==============================================================================

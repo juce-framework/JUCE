@@ -103,7 +103,7 @@ bool KnownPluginList::addType (const PluginDescription& type)
         {
             if (desc.isDuplicateOf (type))
             {
-                // strange - found a duplicate plugin with different info..
+                // strange - found a duplicate plugin with different info
                 jassert (desc.name == type.name);
                 jassert (desc.isInstrument == type.isInstrument);
 
@@ -489,7 +489,7 @@ struct PluginTreeUtils
     {
        #if JUCE_MAC
         if (path.containsChar (':'))
-            path = path.fromFirstOccurrenceOf (":", false, false); // avoid the special AU formatting nonsense on Mac..
+            path = path.fromFirstOccurrenceOf (":", false, false); // avoid the special AU formatting nonsense on Mac
        #endif
 
         if (path.isEmpty())

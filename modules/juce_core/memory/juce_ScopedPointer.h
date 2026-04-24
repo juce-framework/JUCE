@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce
 {
 
@@ -228,5 +227,4 @@ void deleteAndZero (ScopedPointer<Type>&)  { static_assert (sizeof (Type) == 123
 JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 } // namespace juce
-
-#endif
+/** @endcond */

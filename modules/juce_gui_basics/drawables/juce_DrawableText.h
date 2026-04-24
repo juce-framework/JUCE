@@ -58,6 +58,13 @@ public:
     /** Sets the text to display.*/
     void setText (const String& newText);
 
+    /** Sets whether whitespace should always be preserved when drawing. The default value is false.
+
+        Historically, DrawableText would sometimes trim the provided text during drawing based on
+        its contents. With this value set to true, trimming will never occur.
+    */
+    void setPreserveWhitespace (bool shouldPreserveWhitespace);
+
     /** Returns the currently displayed text */
     const String& getText() const noexcept                              { return text;}
 
@@ -113,9 +120,10 @@ public:
 private:
     //==============================================================================
     Parallelogram<float> bounds;
-    float fontHeight, fontHScale;
+    float fontHeight{}, fontHScale{};
     Font font { withDefaultMetrics (FontOptions{}) }, scaledFont { withDefaultMetrics (FontOptions{}) };
     String text;
+    bool preserveWhitespace = false;
     Colour colour;
     Justification justification;
 

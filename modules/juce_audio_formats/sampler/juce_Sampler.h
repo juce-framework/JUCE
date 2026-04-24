@@ -43,7 +43,7 @@ namespace juce
     into memory.
 
     To use it, create a Synthesiser, add some SamplerVoice objects to it, then
-    give it some SampledSound objects to play.
+    give it some SamplerSound objects to play.
 
     @see SamplerVoice, Synthesiser, SynthesiserSound
 

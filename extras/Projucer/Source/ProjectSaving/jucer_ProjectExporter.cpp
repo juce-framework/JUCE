@@ -90,6 +90,7 @@ std::vector<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypeI
           XcodeProjectExporter::getTargetFolderNameiOS(),
           createIcon (export_xcode_svg, (size_t) export_xcode_svgSize) },
 
+        createExporterTypeInfo<MSVCProjectExporterVC2026> (export_visualStudio_svg, export_visualStudio_svgSize),
         createExporterTypeInfo<MSVCProjectExporterVC2022> (export_visualStudio_svg, export_visualStudio_svgSize),
         createExporterTypeInfo<MSVCProjectExporterVC2019> (export_visualStudio_svg, export_visualStudio_svgSize),
 
@@ -115,17 +116,24 @@ ProjectExporter::ExporterTypeInfo ProjectExporter::getTypeInfoForExporter (const
     return {};
 }
 
-ProjectExporter::ExporterTypeInfo ProjectExporter::getCurrentPlatformExporterTypeInfo()
+void ProjectExporter::getCurrentPlatformExporterTypeInfos (std::vector<ExporterTypeInfo>& result)
 {
-    #if JUCE_MAC
-     return ProjectExporter::getTypeInfoForExporter (XcodeProjectExporter::getValueTreeTypeNameMac());
-    #elif JUCE_WINDOWS
-     return ProjectExporter::getTypeInfoForExporter (MSVCProjectExporterVC2022::getValueTreeTypeName());
-    #elif JUCE_LINUX || JUCE_BSD
-     return ProjectExporter::getTypeInfoForExporter (MakefileProjectExporter::getValueTreeTypeName());
-    #else
-     #error "unknown platform!"
-    #endif
+    const auto typeNames =
+       #if JUCE_MAC
+        { XcodeProjectExporter::getValueTreeTypeNameMac(),
+          XcodeProjectExporter::getValueTreeTypeNameiOS() };
+       #elif JUCE_WINDOWS
+        { MSVCProjectExporterVC2026::getValueTreeTypeName(),
+          MSVCProjectExporterVC2022::getValueTreeTypeName(),
+          MSVCProjectExporterVC2019::getValueTreeTypeName() };
+       #elif JUCE_LINUX || JUCE_BSD
+        { MakefileProjectExporter::getValueTreeTypeName() };
+       #else
+        #error "unknown platform!"
+       #endif
+
+    for (const auto& typeName : typeNames)
+        result.push_back (getTypeInfoForExporter (typeName));
 }
 
 std::unique_ptr<ProjectExporter> ProjectExporter::createNewExporter (Project& project, const Identifier& exporterIdentifier)
@@ -160,6 +168,7 @@ std::unique_ptr<ProjectExporter> ProjectExporter::createExporterFromSettings (Pr
     return tryCreatingExporter (project,
                                 settings,
                                 Tag<XcodeProjectExporter>{},
+                                Tag<MSVCProjectExporterVC2026>{},
                                 Tag<MSVCProjectExporterVC2022>{},
                                 Tag<MSVCProjectExporterVC2019>{},
                                 Tag<MakefileProjectExporter>{},
@@ -176,6 +185,7 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
              XcodeProjectExporter::getValueTreeTypeNameMac(),
              XcodeProjectExporter::getValueTreeTypeNameiOS(),
             #elif JUCE_WINDOWS
+             MSVCProjectExporterVC2026::getValueTreeTypeName(),
              MSVCProjectExporterVC2022::getValueTreeTypeName(),
              MSVCProjectExporterVC2019::getValueTreeTypeName(),
             #endif
@@ -397,8 +407,9 @@ void ProjectExporter::addExtraIncludePathsIfPluginOrHost()
             addToExtraSearchPaths (getInternalVST3SDKPath(), 0);
     }
 
-    const auto lv2BasePath = getModuleFolderRelativeToProject ("juce_audio_processors").getChildFile ("format_types")
-                                                                                       .getChildFile ("LV2_SDK");
+    const auto lv2BasePath = getModuleFolderRelativeToProject ("juce_audio_processors_headless")
+                                .getChildFile ("format_types")
+                                .getChildFile ("LV2_SDK");
 
     if ((shouldBuildTargetType (Target::LV2PlugIn) && project.shouldBuildLV2()) || project.isLV2PluginHost())
     {
@@ -450,7 +461,7 @@ void ProjectExporter::addLegacyVSTFolderToPathIfSpecified()
 
 build_tools::RelativePath ProjectExporter::getInternalVST3SDKPath()
 {
-    return getModuleFolderRelativeToProject ("juce_audio_processors")
+    return getModuleFolderRelativeToProject ("juce_audio_processors_headless")
                            .getChildFile ("format_types")
                            .getChildFile ("VST3_SDK");
 }
@@ -867,14 +878,20 @@ void ProjectExporter::createDefaultConfigs()
     }
 }
 
-std::unique_ptr<Drawable> ProjectExporter::getBigIcon() const
+build_tools::Icons ProjectExporter::getIcons() const
 {
-    return project.getMainGroup().findItemWithID (settings [Ids::bigIcon]).loadAsImageFile();
-}
+    const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
 
-std::unique_ptr<Drawable> ProjectExporter::getSmallIcon() const
-{
-    return project.getMainGroup().findItemWithID (settings [Ids::smallIcon]).loadAsImageFile();
+    if (! mml.lockWasGained())
+        return {};
+
+    const auto getFile = [this] (auto id)
+    {
+        return project.getMainGroup().findItemWithID (settings[id]).getFile();
+    };
+
+    return build_tools::Icons::fromFilesSmallAndBig (getFile (Ids::smallIcon),
+                                                     getFile (Ids::bigIcon));
 }
 
 //==============================================================================

@@ -616,13 +616,13 @@ public:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     [[deprecated ("This method's bool parameter has changed: see the new method signature.")]]
     void setSelectedRows (const SparseSet<int>&, bool);
-   #endif
 
     [[deprecated ("The name of this function is ambiguous if derived classes supply their own models, use getListBoxModel instead")]]
     ListBoxModel* getModel() const noexcept  { return getListBoxModel(); }
+    /** @endcond */
 
 private:
     //==============================================================================

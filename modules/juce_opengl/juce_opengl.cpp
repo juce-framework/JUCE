@@ -229,24 +229,24 @@ static void clearGLError() noexcept
 
 struct OpenGLTargetSaver
 {
-    OpenGLTargetSaver (const OpenGLContext& c) noexcept
-        : context (c), oldFramebuffer (OpenGLFrameBuffer::getCurrentFrameBufferTarget())
+    OpenGLTargetSaver() noexcept
+        : oldFramebuffer (OpenGLFrameBuffer::getCurrentFrameBufferTarget())
     {
         glGetIntegerv (GL_VIEWPORT, oldViewport);
     }
 
     ~OpenGLTargetSaver() noexcept
     {
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, oldFramebuffer);
+        gl::glBindFramebuffer (GL_FRAMEBUFFER, oldFramebuffer);
         glViewport (oldViewport[0], oldViewport[1], oldViewport[2], oldViewport[3]);
     }
 
+    JUCE_DECLARE_NON_COPYABLE (OpenGLTargetSaver)
+    JUCE_DECLARE_NON_MOVEABLE (OpenGLTargetSaver)
+
 private:
-    const OpenGLContext& context;
     GLuint oldFramebuffer;
     GLint oldViewport[4];
-
-    OpenGLTargetSaver& operator= (const OpenGLTargetSaver&);
 };
 
 } // namespace juce

@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -37,11 +37,13 @@
 
 #include "AAX_Properties.h"
 #include "AAX_IString.h"
+#include "AAX_Enums.h"
 #include "AAX.h"
 #include <memory>
 
 // Forward declarations
 class AAX_IPageTable;
+class IACFUnknown;
 
 
 /**
@@ -447,6 +449,72 @@ public:
          */
 		virtual 
 		AAX_Result GetIsAudioSuite(AAX_CBoolean* outIsAudioSuite) const = 0;
+
+		/*!
+         *	\brief CALL: Provides an identifier for the group to which this instance belongs.
+		 *
+		 *	Instances that share the same group ID are considered part of the same instance group.
+		 *
+		 *	Check for \ref kAAX_InstanceGroupID_Undefined to determine if the instance has undefined
+		 *	grouping. Instances sharing this value should not be considered to be part of the same
+		 *	group. This value may be provided by hosts that do not support instance group
+		 *	identification.
+		 *
+		 *	Group ID values are not persistent between host sessions. An instance's Group ID will
+		 *	not change during the lifetime of the instance. The host may re-use Group ID values
+		 *	after all of the instances in a group have been destroyed.
+		 *
+		 *	In Pro Tools:
+		 *		- Instances within a multi-mono set will have the same group ID.
+		 *		- If an instance is made inactive and then made active again, the instance's group
+		 *		  ID will remain the same.
+		 *		- If the instance is moved to a different insert slot or to a different track, a
+		 *		  new group ID will be assigned.
+         *
+         *	\param[out] outInstanceGroupID
+         *		The identifier for the group to which this instance belongs.
+         */
+		virtual
+		AAX_Result GetInstanceGroupID(AAX_CInstanceGroupID* outInstanceGroupID) const = 0;
+		
+		/*!
+		 *	\brief CALL: Provides an identifier for this plugin instance
+		*/
+		virtual
+		AAX_Result GetInstanceID(AAX_CInstanceID* outInstanceID) const = 0;
+		
+		/*!
+		 *	\brief CALL: Subscribe a plugin object to notifications
+		 *
+		 *	The plugin should subscribe its objects to any notification types that they require. The
+		 *	host may automatically subscribe the plugin to some notification types.
+		 *
+		 *	The subscriber object must be one of the plugin objects that can receive notifications via a
+		 *	<tt>NotificationReceived()</tt> method:
+		 *	- \ref AAX_IEffectParameters
+		 *	- \ref AAX_IEffectGUI
+		 *	- \ref AAX_IEffectDirectData
+		 *	- \ref AAX_ISessionDocumentClient
+		 *
+		 *	The plugin should register an object for notifiations as early as possible in the object's
+		 *	lifetime, for example in the object's Initialize() or EffectInit() routine just after the
+		 *	controller has been set on the object.
+		 *
+		 *	\param[in] inNotificationType
+		 *		Type of notification to subscribe to. One of \ref AAX_ENotificationEvent.
+		 *	\param[in] inSubscriberObject
+		 *		Pointer to the object that should receive notifications.
+		 *
+		 *	- \return \ref AAX_ERROR_UNIMPLEMENTED if the host does not support this method
+		 *	- \return \ref AAX_ERROR_NULL_ARGUMENT if \p inSubscriberObject is null
+		 *	- \return \ref AAX_ERROR_INVALID_ARGUMENT if \p inSubscriberObject is not a valid subscriber
+		 *	  object address
+		 *	- \return AAX_ERROR_NOTIFICATION_REGISTRATION_FAILED if the registration failed for another
+		 *	  reason, such as an invalid \p inNotificationType
+		 *	- \return \ref AAX_SUCCESS if the registration was successful
+		 */
+		virtual
+		AAX_Result RegisterForNotification(/* AAX_ENotificationEvent */ AAX_CTypeID inNotificationType, IACFUnknown const * inSubscriberObject) = 0;
 
 		/**
 		 *	\brief Copy the current page table data for a particular plug-in type

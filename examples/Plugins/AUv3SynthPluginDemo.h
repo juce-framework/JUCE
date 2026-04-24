@@ -36,7 +36,8 @@
  dependencies:          juce_audio_basics, juce_audio_devices, juce_audio_formats,
                         juce_audio_plugin_client, juce_audio_processors,
                         juce_audio_utils, juce_core, juce_data_structures,
-                        juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
+                        juce_events, juce_graphics, juce_gui_basics, juce_gui_extra,
+                        juce_audio_processors_headless
  exporters:             xcode_mac, xcode_iphone
 
  moduleFlags:           JUCE_STRICT_REFCOUNTEDPOINTER=1
@@ -443,14 +444,21 @@ private:
     void swapSamples()
     {
         MemoryBlock mb;
-        auto* stream = new MemoryOutputStream (mb, true);
 
         {
-            std::unique_ptr<AudioFormatWriter> writer (formatManager.findFormatForFileExtension ("wav")->createWriterFor (stream, lastSampleRate, 1, 16,
-                                                                                                                          StringPairArray(), 0));
-            writer->writeFromAudioSampleBuffer (currentRecording, 0, currentRecording.getNumSamples());
-            writer->flush();
-            stream->flush();
+            std::unique_ptr<OutputStream> stream = std::make_unique<MemoryOutputStream> (mb, true);
+            auto* ptr = stream.get();
+
+            const auto writerOptions = AudioFormatWriterOptions{}.withSampleRate (lastSampleRate)
+                                                                 .withNumChannels (1)
+                                                                 .withBitsPerSample (16);
+
+            if (auto writer = formatManager.findFormatForFileExtension ("wav")->createWriterFor (stream, writerOptions))
+            {
+                writer->writeFromAudioSampleBuffer (currentRecording, 0, currentRecording.getNumSamples());
+                writer->flush();
+                ptr->flush();
+            }
         }
 
         loadNewSampleBinary (mb.getData(), static_cast<int> (mb.getSize()), "wav");

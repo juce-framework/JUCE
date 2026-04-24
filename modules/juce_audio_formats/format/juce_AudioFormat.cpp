@@ -82,6 +82,53 @@ bool AudioFormat::isChannelLayoutSupported (const AudioChannelSet& channelSet)
     return false;
 }
 
+using StringMap = std::unordered_map<String, String>;
+
+static StringMap toMap (const StringPairArray& array)
+{
+    StringMap result;
+
+    for (auto i = 0; i < array.size(); ++i)
+        result[array.getAllKeys()[i]] = array.getAllValues()[i];
+
+    return result;
+}
+
+AudioFormatWriter* AudioFormat::createWriterForRawPtr (OutputStream* streamToWriteTo,
+                                                       const AudioFormatWriterOptions& opt)
+{
+    auto owned = rawToUniquePtr (streamToWriteTo);
+
+    if (auto writer = createWriterFor (owned, opt))
+    {
+        // Creating the writer succeeded, so it's the writer's responsibility to eventually free
+        // the stream
+        jassert (owned == nullptr);
+        return writer.release();
+    }
+
+    // Creating the writer failed, so the stream should remain alive for re-use
+    jassert (owned != nullptr);
+    owned.release();
+
+    return {};
+}
+
+AudioFormatWriter* AudioFormat::createWriterFor (OutputStream* streamToWriteTo,
+                                                 double sampleRateToUse,
+                                                 unsigned int numberOfChannels,
+                                                 int bitsPerSample,
+                                                 const StringPairArray& metadataValues,
+                                                 int qualityOptionIndex)
+{
+    auto opt = AudioFormatWriter::Options{}.withSampleRate (sampleRateToUse)
+                                           .withNumChannels ((int) numberOfChannels)
+                                           .withBitsPerSample (bitsPerSample)
+                                           .withMetadataValues (toMap (metadataValues))
+                                           .withQualityOptionIndex (qualityOptionIndex);
+    return createWriterForRawPtr (streamToWriteTo, opt);
+}
+
 AudioFormatWriter* AudioFormat::createWriterFor (OutputStream* streamToWriteTo,
                                                  double sampleRateToUse,
                                                  const AudioChannelSet& channelLayout,
@@ -89,12 +136,15 @@ AudioFormatWriter* AudioFormat::createWriterFor (OutputStream* streamToWriteTo,
                                                  const StringPairArray& metadataValues,
                                                  int qualityOptionIndex)
 {
-    if (isChannelLayoutSupported (channelLayout))
-        return createWriterFor (streamToWriteTo, sampleRateToUse,
-                                static_cast<unsigned int> (channelLayout.size()),
-                                bitsPerSample, metadataValues, qualityOptionIndex);
+    if (! isChannelLayoutSupported (channelLayout))
+        return nullptr;
 
-    return nullptr;
+    auto opt = AudioFormatWriter::Options{}.withSampleRate (sampleRateToUse)
+                                           .withChannelLayout (channelLayout)
+                                           .withBitsPerSample (bitsPerSample)
+                                           .withMetadataValues (toMap (metadataValues))
+                                           .withQualityOptionIndex (qualityOptionIndex);
+    return createWriterForRawPtr (streamToWriteTo, opt);
 }
 
 } // namespace juce

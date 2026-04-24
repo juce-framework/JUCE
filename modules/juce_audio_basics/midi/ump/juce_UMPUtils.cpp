@@ -37,7 +37,7 @@ namespace juce::universal_midi_packets
 
 uint32_t Utils::getNumWordsForMessageType (uint32_t mt)
 {
-    switch (Utils::getMessageType (mt))
+    switch ((uint8_t) Utils::getMessageType (mt))
     {
         case 0x0:
         case 0x1:

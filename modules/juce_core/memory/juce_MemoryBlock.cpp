@@ -369,7 +369,7 @@ String MemoryBlock::toBase64Encoding() const
 {
     auto numChars = ((size << 3) + 5) / 6;
 
-    String destString ((unsigned int) size); // store the length, followed by a '.', and then the data.
+    String destString ((unsigned int) size); // store the length, followed by a '.', and then the data
     auto initialLen = destString.length();
     destString.preallocateBytes ((size_t) initialLen * sizeof (String::CharPointerType::CharType) + 2 + numChars);
 

@@ -139,8 +139,8 @@ void* OpenGLHelpers::getExtensionFunction (const char* functionName)
 
 bool OpenGLHelpers::isExtensionSupported (const char* const extensionName)
 {
-    jassert (extensionName != nullptr); // you must supply a genuine string for this.
-    jassert (isContextActive()); // An OpenGL context will need to be active before calling this.
+    jassert (extensionName != nullptr); // you must supply a genuine string for this
+    jassert (isContextActive()); // an OpenGL context will need to be active before calling this
 
     if (getOpenGLVersion().major >= 3)
     {

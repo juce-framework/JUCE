@@ -154,7 +154,8 @@ private:
        #if JUCE_IOS || JUCE_ANDROID
         void parentSizeChanged() override
         {
-            getMainComponent().resized();
+            if (auto* comp = getContentComponent())
+                comp->resized();
         }
        #endif
 

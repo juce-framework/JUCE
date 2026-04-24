@@ -250,7 +250,7 @@ uint32 BigInteger::getBitRangeAsInt (const int startBit, int numBits) const noex
 {
     if (numBits > 32)
     {
-        jassertfalse;  // use getBitRange() if you need more than 32 bits..
+        jassertfalse;  // use getBitRange() if you need more than 32 bits
         numBits = 32;
     }
 
@@ -646,7 +646,7 @@ BigInteger& BigInteger::operator|= (const BigInteger& other)
     if (this == &other)
         return *this;
 
-    // this operation doesn't take into account negative values..
+    // this operation doesn't take into account negative values
     jassert (isNegative() == other.isNegative());
 
     if (other.highestBit >= 0)
@@ -673,7 +673,7 @@ BigInteger& BigInteger::operator&= (const BigInteger& other)
     if (this == &other)
         return *this;
 
-    // this operation doesn't take into account negative values..
+    // this operation doesn't take into account negative values
     jassert (isNegative() == other.isNegative());
 
     auto* values = getValues();

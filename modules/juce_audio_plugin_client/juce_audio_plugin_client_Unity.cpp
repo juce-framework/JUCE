@@ -37,7 +37,7 @@
 #if JucePlugin_Build_Unity
 
 #include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
-#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors_headless/format_types/juce_LegacyAudioParameter.h>
 
 #if JUCE_WINDOWS
  #include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>

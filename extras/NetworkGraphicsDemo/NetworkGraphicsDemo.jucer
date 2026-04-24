@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="gWI5Ir" name="NetworkGraphicsDemo" projectType="guiapp" bundleIdentifier="com.juce.NetworkGraphicsDemo"
-              companyName="Raw Material Software Limited"
-              companyCopyright="Raw Material Software Limited" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
+              companyName="Raw Material Software Limited" companyCopyright="Raw Material Software Limited"
+              useAppConfig="0" addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <MAINGROUP id="OT9rJ2" name="NetworkGraphicsDemo">
     <GROUP id="{48D54E6E-37F4-B20A-E038-C63E4EDFD4D9}" name="Source">
       <FILE id="BfclEZ" name="Demos.h" compile="0" resource="0" file="Source/Demos.h"/>
@@ -37,6 +36,7 @@
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
         <MODULEPATH id="juce_opengl" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2022 targetFolder="Builds/VisualStudio2022">
@@ -59,8 +59,32 @@
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
       </MODULEPATHS>
     </VS2022>
+    <VS2026 targetFolder="Builds/VisualStudio2026">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="JUCE Network Graphics Demo"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_osc" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2026>
     <XCODE_IPHONE targetFolder="Builds/iOS" bigIcon="Ww6bQw">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="JUCE Network Graphics Demo"/>
@@ -81,6 +105,7 @@
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_IPHONE>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" bigIcon="Ww6bQw">
@@ -103,6 +128,7 @@
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
     <ANDROIDSTUDIO androidActivityClass="com.juce.networkgraphicsdemo.JUCENetworkGraphicsDemo"
@@ -128,6 +154,7 @@
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../modules"/>
       </MODULEPATHS>
     </ANDROIDSTUDIO>
   </EXPORTFORMATS>
@@ -136,6 +163,7 @@
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_processors_headless" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>

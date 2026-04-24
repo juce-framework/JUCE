@@ -207,7 +207,7 @@ DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer")
  METHOD (isExhausted, "isExhausted", "()Z") \
  METHOD (setPosition, "setPosition", "(J)Z") \
 
-DECLARE_JNI_CLASS_WITH_BYTECODE (HTTPStream, "com/rmsl/juce/JuceHTTPStream", 16, javaJuceHttpStream)
+DECLARE_JNI_CLASS_WITH_BYTECODE (HTTPStream, "com/rmsl/juce/JuceHTTPStream", 24, javaJuceHttpStream)
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -401,7 +401,7 @@ public:
             LocalRef<jobject> responseHeaderBuffer (env->NewObject (StringBuffer, StringBuffer.constructor));
 
             // Annoyingly, the android HTTP functions will choke on this call if you try to do it on the message
-            // thread. You'll need to move your networking code to a background thread to keep it happy..
+            // thread. You'll need to move your networking code to a background thread to keep it happy.
             jassert (Thread::getCurrentThread() != nullptr);
 
             jintArray statusCodeArray = env->NewIntArray (1);

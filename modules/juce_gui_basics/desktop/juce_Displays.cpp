@@ -35,14 +35,14 @@
 namespace juce
 {
 
-Displays::Displays (Desktop& desktop)
+Displays::Displays (const Desktop& desktop)
 {
     init (desktop);
 }
 
-void Displays::init (Desktop& desktop)
+void Displays::init (const Desktop& desktop)
 {
-    findDisplays (desktop.getGlobalScaleFactor());
+    findDisplays (desktop);
 }
 
 const Displays::Display* Displays::getDisplayForRect (Rectangle<int> rect, bool isPhysical) const noexcept
@@ -383,14 +383,14 @@ void Displays::updateToLogical()
     }
 }
 
-#ifndef DOXYGEN
- // explicit template instantiations
- template Point<int>   Displays::physicalToLogical (Point<int>,   const Display*) const noexcept;
- template Point<float> Displays::physicalToLogical (Point<float>, const Display*) const noexcept;
+/** @cond */
+// explicit template instantiations
+template Point<int>   Displays::physicalToLogical (Point<int>,   const Display*) const noexcept;
+template Point<float> Displays::physicalToLogical (Point<float>, const Display*) const noexcept;
 
- template Point<int>   Displays::logicalToPhysical (Point<int>,   const Display*) const noexcept;
- template Point<float> Displays::logicalToPhysical (Point<float>, const Display*) const noexcept;
-#endif
+template Point<int>   Displays::logicalToPhysical (Point<int>,   const Display*) const noexcept;
+template Point<float> Displays::logicalToPhysical (Point<float>, const Display*) const noexcept;
+/** @endcond */
 
 //==============================================================================
 // Deprecated methods

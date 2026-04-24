@@ -105,7 +105,7 @@ void MidiMessageCollector::removeNextBlockOfMessages (MidiBuffer& destBuffer,
         if (numSourceSamples > numSamples)
         {
             // if our list of events is longer than the buffer we're being
-            // asked for, scale them down to squeeze them all in..
+            // asked for, scale them down to squeeze them all in
             const int maxBlockLengthToUse = numSamples << 5;
 
             auto iter = incomingMessages.cbegin();

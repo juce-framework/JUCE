@@ -132,7 +132,7 @@ private:
     //==============================================================================
     enum { defaultMinusInfinitydB = -100 };
 
-    Decibels() = delete; // This class can't be instantiated, it's just a holder for static methods..
+    Decibels() = delete; // This class can't be instantiated, it's just a holder for static methods.
 };
 
 } // namespace juce

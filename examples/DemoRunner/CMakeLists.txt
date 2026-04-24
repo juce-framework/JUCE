@@ -54,6 +54,7 @@ target_compile_definitions(DemoRunner PRIVATE
     JUCE_ALLOW_STATIC_NULL_VARIABLES=0
     JUCE_CONTENT_SHARING=1
     JUCE_DEMO_RUNNER=1
+    JUCE_PLUGINHOST_AU=1
     JUCE_PLUGINHOST_LV2=1
     JUCE_PLUGINHOST_VST3=1
     JUCE_PUSH_NOTIFICATIONS=1
@@ -73,6 +74,7 @@ target_link_libraries(DemoRunner PRIVATE
     juce::juce_animation
     juce::juce_audio_utils
     juce::juce_box2d
+    juce::juce_build_tools
     juce::juce_dsp
     juce::juce_javascript
     juce::juce_midi_ci

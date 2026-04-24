@@ -150,7 +150,7 @@ struct JUCE_API FloatVectorOperationsBase
     static FloatType JUCE_CALLTYPE findMaximum (const FloatType* src, CountType numValues) noexcept;
 };
 
-#if ! DOXYGEN
+/** @cond */
 namespace detail
 {
 
@@ -177,7 +177,7 @@ struct NameForwarder : public Bases...
 };
 
 } // namespace detail
-#endif
+/** @endcond */
 
 //==============================================================================
 /**

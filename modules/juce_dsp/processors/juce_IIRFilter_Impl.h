@@ -32,10 +32,9 @@
   ==============================================================================
 */
 
+/** @cond */
 namespace juce::dsp::IIR
 {
-
-#ifndef DOXYGEN
 
 template <typename NumericType>
 template <size_t Num>
@@ -244,6 +243,5 @@ void Filter<SampleType>::check()
         reset();
 }
 
-#endif
-
 } // namespace juce::dsp::IIR
+/** @endcond */

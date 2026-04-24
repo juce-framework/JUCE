@@ -481,7 +481,8 @@ public:
                                                            std::function<void (int)> callback);
 
     //==============================================================================
-   #if JUCE_MODAL_LOOPS_PERMITTED && ! defined (DOXYGEN)
+   #if JUCE_MODAL_LOOPS_PERMITTED
+    /** @cond */
     /** Shows an operating-system native dialog box.
 
         @param title        the title to use at the top
@@ -494,6 +495,7 @@ public:
     static bool JUCE_CALLTYPE showNativeDialogBox (const String& title,
                                                    const String& bodyText,
                                                    bool isOkCancel);
+    /** @endcond */
    #endif
 
 
@@ -587,7 +589,7 @@ private:
     OwnedArray<Component> textBlocks;
     Array<Component*> allComps;
     StringArray textboxNames, comboBoxNames;
-    Component* const associatedComponent;
+    SafePointer<Component> associatedComponent;
     bool escapeKeyCancels = true;
     float desktopScale = 1.0f;
 

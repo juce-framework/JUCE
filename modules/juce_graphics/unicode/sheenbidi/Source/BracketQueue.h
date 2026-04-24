@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2022 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 #ifndef _SB_INTERNAL_BRACKET_QUEUE_H
 #define _SB_INTERNAL_BRACKET_QUEUE_H
 
-#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBCodepoint.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi/SBConfig.h>
 
 #include "BidiChain.h"
-#include "SBBase.h"
+#include "Object.h"
 
 #define BracketQueueList_Length         8
 #define BracketQueueList_MaxIndex       (BracketQueueList_Length - 1)
@@ -37,6 +39,7 @@ typedef struct _BracketQueueList {
 } BracketQueueList, *BracketQueueListRef;
 
 typedef struct _BracketQueue {
+    Object _object;
     BracketQueueList _firstList;
     BracketQueueListRef _frontList;
     BracketQueueListRef _rearList;

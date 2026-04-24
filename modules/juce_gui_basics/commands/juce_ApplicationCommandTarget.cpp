@@ -74,7 +74,7 @@ bool ApplicationCommandTarget::tryToInvoke (const InvocationInfo& info, const bo
         if (perform (info))
             return true;
 
-        // Hmm.. your target claimed that it could perform this command, but failed to do so.
+        // Your target claimed that it could perform this command, but failed to do so.
         // If it can't do it at the moment for some reason, it should clear the 'isActive' flag
         // when it returns the command's info.
         jassertfalse;

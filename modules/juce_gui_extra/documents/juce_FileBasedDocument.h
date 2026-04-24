@@ -64,8 +64,8 @@ public:
 
         @param fileExtension            the extension to use when loading/saving files, e.g. ".doc"
         @param fileWildCard             the wildcard to use in file dialogs, e.g. "*.doc"
-        @param openFileDialogTitle      the title to show on an open-file dialog, e.g. "Choose a file to open.."
-        @param saveFileDialogTitle      the title to show on an save-file dialog, e.g. "Choose a file to save as.."
+        @param openFileDialogTitle      the title to show on an open-file dialog, e.g. "Choose a file to open"
+        @param saveFileDialogTitle      the title to show on an save-file dialog, e.g. "Choose a file to save as"
     */
     FileBasedDocument (const String& fileExtension,
                        const String& fileWildCard,

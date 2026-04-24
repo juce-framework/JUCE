@@ -44,7 +44,7 @@ public:
         : ComponentPeer (comp, windowStyleFlags),
           isAlwaysOnTop (comp.isAlwaysOnTop())
     {
-        // it's dangerous to create a window on a thread other than the message thread.
+        // it's dangerous to create a window on a thread other than the message thread
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
         const auto* instance = XWindowSystem::getInstance();
@@ -72,7 +72,7 @@ public:
 
     ~LinuxComponentPeer() override
     {
-        // it's dangerous to delete a window on a thread other than the message thread.
+        // it's dangerous to delete a window on a thread other than the message thread
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
         auto* instance = XWindowSystem::getInstance();
@@ -631,11 +631,11 @@ void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool)
         comp->setBounds (getDisplays().getDisplayForRect (comp->getScreenBounds())->totalArea);
 }
 
-void Displays::findDisplays (float masterScale)
+void Displays::findDisplays (const Desktop& desktop)
 {
     if (XWindowSystem::getInstance()->getDisplay() != nullptr)
     {
-        displays = XWindowSystem::getInstance()->findDisplays (masterScale);
+        displays = XWindowSystem::getInstance()->findDisplays (desktop.getGlobalScaleFactor());
 
         if (! displays.isEmpty())
             updateToLogical();

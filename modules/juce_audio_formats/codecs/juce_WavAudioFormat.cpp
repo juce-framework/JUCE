@@ -35,18 +35,6 @@
 namespace juce
 {
 
-using StringMap = std::unordered_map<String, String>;
-
-static auto toMap (const StringPairArray& array)
-{
-    StringMap result;
-
-    for (auto i = 0; i < array.size(); ++i)
-        result[array.getAllKeys()[i]] = array.getAllValues()[i];
-
-    return result;
-}
-
 static auto getValueWithDefault (const StringMap& m, const String& key, const String& fallback = {})
 {
     const auto iter = m.find (key);
@@ -1599,30 +1587,36 @@ class WavAudioFormatWriter final : public AudioFormatWriter
 public:
     WavAudioFormatWriter (OutputStream* const out, const double rate,
                           const AudioChannelSet& channelLayoutToUse, const unsigned int bits,
-                          const StringPairArray& metadataValues)
+                          const StringMap& metadataValues,
+                          AudioFormatWriterOptions::SampleFormat sampleFormat)
         : AudioFormatWriter (out, wavFormatName, rate, channelLayoutToUse, bits)
     {
         using namespace WavFileHelpers;
+        using SampleFormat = AudioFormatWriterOptions::SampleFormat;
 
-        if (metadataValues.size() > 0)
+        // The floating point format is only supported with a bit depth of 32
+        jassert (sampleFormat != SampleFormat::floatingPoint || bits == 32);
+
+        usesFloatingPointData = bits == 32 && sampleFormat != SampleFormat::integral;
+
+        if (! metadataValues.empty())
         {
             // The meta data should have been sanitised for the WAV format.
             // If it was originally sourced from an AIFF file the MetaDataSource
             // key should be removed (or set to "WAV") once this has been done
-            jassert (metadataValues.getValue ("MetaDataSource", "None") != "AIFF");
+            jassert (metadataValues.count ("MetaDataSource") == 0
+                     || metadataValues.at ("MetaDataSource") != "AIFF");
 
-            const auto map = toMap (metadataValues);
-
-            bwavChunk     = BWAVChunk::createFrom (map);
-            ixmlChunk     = IXMLChunk::createFrom (map);
-            axmlChunk     = AXMLChunk::createFrom (map);
-            smplChunk     = SMPLChunk::createFrom (map);
-            instChunk     = InstChunk::createFrom (map);
-            cueChunk      = CueChunk ::createFrom (map);
-            listChunk     = ListChunk::createFrom (map);
-            listInfoChunk = ListInfoChunk::createFrom (map);
-            acidChunk     = AcidChunk::createFrom (map);
-            trckChunk     = TracktionChunk::createFrom (map);
+            bwavChunk     = BWAVChunk::createFrom (metadataValues);
+            ixmlChunk     = IXMLChunk::createFrom (metadataValues);
+            axmlChunk     = AXMLChunk::createFrom (metadataValues);
+            smplChunk     = SMPLChunk::createFrom (metadataValues);
+            instChunk     = InstChunk::createFrom (metadataValues);
+            cueChunk      = CueChunk ::createFrom (metadataValues);
+            listChunk     = ListChunk::createFrom (metadataValues);
+            listInfoChunk = ListInfoChunk::createFrom (metadataValues);
+            acidChunk     = AcidChunk::createFrom (metadataValues);
+            trckChunk     = TracktionChunk::createFrom (metadataValues);
         }
 
         headerPosition = out->getPosition();
@@ -1657,9 +1651,9 @@ public:
 
         if (! output->write (tempBlock.getData(), bytes))
         {
-            // failed to write to disk, so let's try writing the header.
+            // Failed to write to disk, so let's try writing the header.
             // If it's just run out of disk space, then if it does manage
-            // to write the header, we'll still have a usable file..
+            // to write the header, we'll still have a usable file.
             writeHeader();
             writeFailed = true;
             return false;
@@ -1773,8 +1767,12 @@ private:
         else
         {
             writeChunkHeader (chunkName ("fmt "), 16);
-            output->writeShort (bitsPerSample < 32 ? (short) 1 /*WAVE_FORMAT_PCM*/
-                                                   : (short) 3 /*WAVE_FORMAT_IEEE_FLOAT*/);
+
+            constexpr short waveFormatIeeeFloat = 3;
+            constexpr short waveFormatPcm = 1;
+
+            output->writeShort (usesFloatingPointData ? waveFormatIeeeFloat
+                                                      : waveFormatPcm);
         }
 
         output->writeShort ((short) numChannels);
@@ -1789,7 +1787,7 @@ private:
             output->writeShort ((short) bitsPerSample); // wValidBitsPerSample
             output->writeInt (channelMask);
 
-            const ExtensibleWavSubFormat& subFormat = bitsPerSample < 32 ? pcmFormat : IEEEFloatFormat;
+            const ExtensibleWavSubFormat& subFormat = usesFloatingPointData ? IEEEFloatFormat : pcmFormat;
 
             output->writeInt ((int) subFormat.data1);
             output->writeShort ((short) subFormat.data2);
@@ -1809,8 +1807,6 @@ private:
         writeChunk (trckChunk,     chunkName ("Trkn"));
 
         writeChunkHeader (chunkName ("data"), isRF64 ? -1 : (int) (lengthInSamples * bytesPerFrame));
-
-        usesFloatingPointData = (bitsPerSample == 32);
     }
 
     static size_t chunkSize (const MemoryBlock& data) noexcept     { return data.isEmpty() ? 0 : (8 + data.getSize()); }
@@ -1894,7 +1890,7 @@ public:
 
         if (map == nullptr || ! mappedSection.contains (sample))
         {
-            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
+            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read
 
             zeromem (result, (size_t) num * sizeof (float));
             return;
@@ -1921,7 +1917,7 @@ public:
 
         if (map == nullptr || numSamples <= 0 || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
         {
-            jassert (numSamples <= 0); // you must make sure that the window contains all the samples you're going to attempt to read.
+            jassert (numSamples <= 0); // you must make sure that the window contains all the samples you're going to attempt to read
 
             for (int i = 0; i < numChannelsToRead; ++i)
                 results[i] = {};
@@ -2027,61 +2023,52 @@ MemoryMappedAudioFormatReader* WavAudioFormat::createMemoryMappedReader (FileInp
     return nullptr;
 }
 
-AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out, double sampleRate,
-                                                    unsigned int numChannels, int bitsPerSample,
-                                                    const StringPairArray& metadataValues, int qualityOptionIndex)
+std::unique_ptr<AudioFormatWriter> WavAudioFormat::createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
+                                                                    const AudioFormatWriterOptions& options)
 {
-    return createWriterFor (out, sampleRate, WavFileHelpers::canonicalWavChannelSet (static_cast<int> (numChannels)),
-                            bitsPerSample, metadataValues, qualityOptionIndex);
-}
+    if (streamToWriteTo == nullptr || ! getPossibleBitDepths().contains (options.getBitsPerSample()))
+        return nullptr;
 
-AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out,
-                                                    double sampleRate,
-                                                    const AudioChannelSet& channelLayout,
-                                                    int bitsPerSample,
-                                                    const StringPairArray& metadataValues,
-                                                    int /*qualityOptionIndex*/)
-{
-    if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample) && isChannelLayoutSupported (channelLayout))
-        return new WavAudioFormatWriter (out, sampleRate, channelLayout,
-                                         (unsigned int) bitsPerSample, metadataValues);
+    const auto layout = options.getChannelLayout().value_or (WavFileHelpers::canonicalWavChannelSet (options.getNumChannels()));
 
-    return nullptr;
+    if (! isChannelLayoutSupported (layout))
+        return nullptr;
+
+    return std::make_unique<WavAudioFormatWriter> (std::exchange (streamToWriteTo, {}).release(),
+                                                   options.getSampleRate(),
+                                                   layout,
+                                                   (unsigned int) options.getBitsPerSample(),
+                                                   options.getMetadataValues(),
+                                                   options.getSampleFormat());
 }
 
 namespace WavFileHelpers
 {
-    static bool slowCopyWavFileWithNewMetadata (const File& file, const StringPairArray& metadata)
+    static bool slowCopyWavFileWithNewMetadata (const File& file, const StringMap& metadata)
     {
         TemporaryFile tempFile (file);
         WavAudioFormat wav;
 
         std::unique_ptr<AudioFormatReader> reader (wav.createReaderFor (file.createInputStream().release(), true));
 
-        if (reader != nullptr)
-        {
-            std::unique_ptr<OutputStream> outStream (tempFile.getFile().createOutputStream());
+        if (reader == nullptr)
+            return false;
 
-            if (outStream != nullptr)
-            {
-                std::unique_ptr<AudioFormatWriter> writer (wav.createWriterFor (outStream.get(), reader->sampleRate,
-                                                                                reader->numChannels, (int) reader->bitsPerSample,
-                                                                                metadata, 0));
+        std::unique_ptr<OutputStream> stream = tempFile.getFile().createOutputStream();
+        auto writer = wav.createWriterFor (stream,
+                                           AudioFormatWriter::Options{}.withSampleRate (reader->sampleRate)
+                                                                       .withNumChannels ((int) reader->numChannels)
+                                                                       .withBitsPerSample ((int) reader->bitsPerSample)
+                                                                       .withMetadataValues (metadata));
 
-                if (writer != nullptr)
-                {
-                    outStream.release();
+        if (writer == nullptr)
+            return false;
 
-                    bool ok = writer->writeFromAudioReader (*reader, 0, -1);
-                    writer.reset();
-                    reader.reset();
+        bool ok = writer->writeFromAudioReader (*reader, 0, -1);
+        writer.reset();
+        reader.reset();
 
-                    return ok && tempFile.overwriteTargetFileWithTemporary();
-                }
-            }
-        }
-
-        return false;
+        return ok && tempFile.overwriteTargetFileWithTemporary();
     }
 }
 
@@ -2103,7 +2090,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 
             if (chunk.getSize() <= (size_t) bwavSize)
             {
-                // the new one will fit in the space available, so write it directly..
+                // the new one will fit in the space available, so write it directly
                 auto oldSize = wavFile.getSize();
 
                 {
@@ -2123,7 +2110,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
         }
     }
 
-    return slowCopyWavFileWithNewMetadata (wavFile, newMetadata);
+    return slowCopyWavFileWithNewMetadata (wavFile, toMap (newMetadata));
 }
 
 
@@ -2172,15 +2159,14 @@ struct WaveAudioFormatTests final : public UnitTest
         {
             beginTest ("Metadata can be written and read");
 
-            const auto newMetadata = getMetadataAfterReading (format, writeToBlock (format, metadataArray));
+            const auto newMetadata = getMetadataAfterReading (format, writeToBlock (format, metadataValues));
             expect (newMetadata == metadataArray, "Somehow, the metadata is different!");
         }
 
         {
             beginTest ("Files containing a riff info source and an empty ISRC associate the source with the riffInfoSource key");
-            StringPairArray meta;
-            meta.addMap ({ { WavAudioFormat::riffInfoSource, "customsource" },
-                           { WavAudioFormat::internationalStandardRecordingCode, "" } });
+            StringMap meta { { WavAudioFormat::riffInfoSource, "customsource" },
+                             { WavAudioFormat::internationalStandardRecordingCode, "" } };
             const auto mb = writeToBlock (format, meta);
             checkPatternsPresent (mb, { "INFOISRC" });
             checkPatternsNotPresent (mb, { "ISRC:", "<ebucore" });
@@ -2192,8 +2178,7 @@ struct WaveAudioFormatTests final : public UnitTest
         {
             beginTest ("Files containing a riff info source and no ISRC associate the source with both keys "
                        "for backwards compatibility");
-            StringPairArray meta;
-            meta.addMap ({ { WavAudioFormat::riffInfoSource, "customsource" } });
+            StringMap meta { { WavAudioFormat::riffInfoSource, "customsource" } };
             const auto mb = writeToBlock (format, meta);
             checkPatternsPresent (mb, { "INFOISRC", "ISRC:customsource", "<ebucore" });
             const auto a = getMetadataAfterReading (format, mb);
@@ -2204,8 +2189,7 @@ struct WaveAudioFormatTests final : public UnitTest
         {
             beginTest ("Files containing an ISRC associate the value with the internationalStandardRecordingCode key "
                        "and the riffInfoSource key for backwards compatibility");
-            StringPairArray meta;
-            meta.addMap ({ { WavAudioFormat::internationalStandardRecordingCode, "AABBBCCDDDDD" } });
+            StringMap meta { { WavAudioFormat::internationalStandardRecordingCode, "AABBBCCDDDDD" } };
             const auto mb = writeToBlock (format, meta);
             checkPatternsPresent (mb, { "ISRC:AABBBCCDDDDD", "<ebucore" });
             checkPatternsNotPresent (mb, { "INFOISRC" });
@@ -2216,9 +2200,8 @@ struct WaveAudioFormatTests final : public UnitTest
 
         {
             beginTest ("Files containing an ISRC and a riff info source associate the values with the appropriate keys");
-            StringPairArray meta;
-            meta.addMap ({ { WavAudioFormat::riffInfoSource, "source" } });
-            meta.addMap ({ { WavAudioFormat::internationalStandardRecordingCode, "UUVVVXXYYYYY" } });
+            StringMap meta { { WavAudioFormat::riffInfoSource, "source" },
+                             { WavAudioFormat::internationalStandardRecordingCode, "UUVVVXXYYYYY" } };
             const auto mb = writeToBlock (format, meta);
             checkPatternsPresent (mb, { "INFOISRC", "ISRC:UUVVVXXYYYYY", "<ebucore" });
             const auto a = getMetadataAfterReading (format, mb);
@@ -2229,13 +2212,19 @@ struct WaveAudioFormatTests final : public UnitTest
         {
             beginTest ("Files containing ASWG metadata read and write correctly");
             MemoryBlock block;
-            StringPairArray meta;
+            StringMap meta;
 
             for (const auto& key : WavFileHelpers::IXMLChunk::aswgMetadataKeys)
-                meta.set (key, "Test123&<>");
+                meta[key] = "Test123&<>";
 
             {
-                auto writer = rawToUniquePtr (WavAudioFormat().createWriterFor (new MemoryOutputStream (block, false), 48000, 1, 32, meta, 0));
+                const auto writerOptions = AudioFormatWriterOptions{}.withSampleRate (48000.0)
+                                                                     .withNumChannels (1)
+                                                                     .withBitsPerSample (32)
+                                                                     .withMetadataValues (meta);
+
+                std::unique_ptr<OutputStream> stream = std::make_unique<MemoryOutputStream> (block, false);
+                auto writer = format.createWriterFor (stream, writerOptions);
                 expect (writer != nullptr);
             }
 
@@ -2270,9 +2259,8 @@ struct WaveAudioFormatTests final : public UnitTest
                 auto reader = rawToUniquePtr (WavAudioFormat().createReaderFor (new MemoryInputStream (block, false), true));
                 expect (reader != nullptr);
 
-                for (const auto& key : meta.getAllKeys())
+                for (const auto& [key, oldValue] : meta)
                 {
-                    const auto oldValue = meta.getValue (key, "!");
                     const auto newValue = reader->metadataValues.getValue (key, "");
                     expectEquals (oldValue, newValue);
                 }
@@ -2280,22 +2268,128 @@ struct WaveAudioFormatTests final : public UnitTest
                 expect (reader->metadataValues.getValue (WavAudioFormat::aswgVersion, "") == "3.01");
             }
         }
+
+        {
+            beginTest ("Writing 32-bit integer samples should work");
+
+            const auto minimum = std::numeric_limits<int>::min();
+            const auto maximum = std::numeric_limits<int>::max();
+
+            std::vector<int> dataIn { minimum,
+                                      minimum + 1,
+                                      minimum + 999,
+                                      0,
+                                      1,
+                                      maximum - 1001,
+                                      maximum - 1,
+                                      maximum };
+
+            const int* ptr = dataIn.data();
+
+            WavFormatWriterTestData integralTestData { &ptr,
+                                                       dataIn.size(),
+                                                       AudioFormatWriterOptions::SampleFormat::integral };
+
+            auto* reader = integralTestData.getReader();
+
+            if (reader == nullptr)
+            {
+                expect (false, "WavFormatReader should be non-null");
+                return;
+            }
+
+            std::vector<int> dataOut ((size_t) reader->lengthInSamples);
+            int* const outPtr = dataOut.data();
+            reader->read (&outPtr, 1, 0, (int) dataOut.size(), false);
+
+            expect (reader->usesFloatingPointData == false);
+            expect (dataIn == dataOut);
+        }
+
+        {
+            beginTest ("Writing 32-bit float samples should work");
+
+            std::vector<float> dataIn { -1.0f,
+                                        -0.8f,
+                                        0.0f,
+                                        0.8f,
+                                        1.0f };
+
+            const int* ptr = (int*) dataIn.data();
+
+            WavFormatWriterTestData floatingPointTestData { &ptr,
+                                                            dataIn.size(),
+                                                            AudioFormatWriterOptions::SampleFormat::floatingPoint };
+
+            auto* reader = floatingPointTestData.getReader();
+
+            if (reader == nullptr)
+            {
+                expect (false, "WavFormatReader should be non-null");
+                return;
+            }
+
+            std::vector<float> dataOut ((size_t) reader->lengthInSamples);
+            float* const outPtr = dataOut.data();
+            reader->read (&outPtr, 1, 0, (int) dataOut.size());
+
+            expect (reader->usesFloatingPointData == true);
+            expect (dataIn.size() == dataOut.size());
+
+            for (auto [index, value] : enumerate (dataOut, size_t{}))
+                expect (approximatelyEqual (value, dataIn[index]));
+        }
     }
 
 private:
-    MemoryBlock writeToBlock (WavAudioFormat& format, StringPairArray meta)
+    struct WavFormatWriterTestData
+    {
+        WavFormatWriterTestData (const int** ptr,
+                                 size_t numSamples,
+                                 AudioFormatWriterOptions::SampleFormat sampleFormat)
+        {
+            const auto writerOptions = AudioFormatWriterOptions{}.withSampleRate (48000.0)
+                                                                 .withNumChannels (1)
+                                                                 .withBitsPerSample (32)
+                                                                 .withSampleFormat (sampleFormat);
+
+            WavAudioFormat format;
+
+            {
+                std::unique_ptr<OutputStream> stream = std::make_unique<MemoryOutputStream> (block, false);
+                auto writer = format.createWriterFor (stream, writerOptions);
+
+                writer->write (ptr, (int) numSamples);
+            }
+
+            reader = rawToUniquePtr (format.createReaderFor (new MemoryInputStream (block, false), true));
+        }
+
+        AudioFormatReader* getReader()
+        {
+            return reader.get();
+        }
+
+    private:
+        MemoryBlock block;
+        std::unique_ptr<AudioFormatReader> reader;
+    };
+
+    MemoryBlock writeToBlock (WavAudioFormat& format, const StringMap& meta)
     {
         MemoryBlock mb;
 
         {
+            const auto writerOptions = AudioFormatWriterOptions{}.withSampleRate (44100.0)
+                                                                 .withNumChannels ((int) numTestAudioBufferChannels)
+                                                                 .withBitsPerSample (16)
+                                                                 .withMetadataValues (meta);
+
             // The destructor of the writer will modify the block, so make sure that we've
             // destroyed the writer before returning the block!
-            auto writer = rawToUniquePtr (format.createWriterFor (new MemoryOutputStream (mb, false),
-                                                                  44100.0,
-                                                                  numTestAudioBufferChannels,
-                                                                  16,
-                                                                  meta,
-                                                                  0));
+            std::unique_ptr<OutputStream> stream = std::make_unique<MemoryOutputStream> (mb, false);
+            auto writer = format.createWriterFor (stream, writerOptions);
+
             expect (writer != nullptr);
             AudioBuffer<float> buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
             expect (writer->writeFromAudioSampleBuffer (buffer, 0, numTestAudioBufferSamples));

@@ -60,7 +60,7 @@ namespace juce
             myCommandManager = new ApplicationCommandManager();
 
             // first, make sure the command manager has registered all the commands that its
-            // targets can perform..
+            // targets can perform
             myCommandManager->registerAllCommandsForTarget (myCommandTarget1);
             myCommandManager->registerAllCommandsForTarget (myCommandTarget2);
 

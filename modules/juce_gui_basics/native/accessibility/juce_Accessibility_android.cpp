@@ -230,7 +230,7 @@ static jobject makeAndroidRect (Rectangle<int> r)
                                 r.getBottom());
 }
 
-static jobject makeAndroidPoint (Point<int> p)
+static inline jobject makeAndroidPoint (Point<int> p)
 {
     return getEnv()->NewObject (AndroidPoint,
                                 AndroidPoint.create,
@@ -333,7 +333,7 @@ public:
 
         env->CallVoidMethod (info,
                              AndroidAccessibilityNodeInfo.setEnabled,
-                             ! state.isIgnored());
+                             ! state.isIgnored() && accessibilityHandler.getComponent().isEnabled());
         env->CallVoidMethod (info,
                              AndroidAccessibilityNodeInfo.setVisibleToUser,
                              true);

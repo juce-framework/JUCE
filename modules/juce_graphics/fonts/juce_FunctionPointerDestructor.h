@@ -32,8 +32,7 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce
 {
 
@@ -49,5 +48,4 @@ struct FunctionPointerDestructor
 };
 
 } // namespace juce
-
-#endif
+/** @endcond */

@@ -335,11 +335,11 @@ private:
 };
 
 //==============================================================================
-#ifndef DOXYGEN
+/** @cond */
 using ValueWithDefault  [[deprecated ("This class has been renamed to better describe what is does. "
                                       "This declaration is here for backwards compatibility and new "
                                       "code should use the new class name.")]]
     = ValueTreePropertyWithDefault;
-#endif
+/** @endcond */
 
 } // namespace juce

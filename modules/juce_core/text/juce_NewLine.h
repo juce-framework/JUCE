@@ -85,10 +85,12 @@ extern NewLine newLine;
     @endcode
 */
 inline String& operator<< (String& string1, const NewLine&) { return string1 += NewLine::getDefault(); }
-inline String& operator+= (String& s1, const NewLine&)      { return s1 += NewLine::getDefault(); }
+inline String& operator+= (String& s, const NewLine&)       { return s += NewLine::getDefault(); }
 
 inline String operator+ (const NewLine&, const NewLine&)    { return String (NewLine::getDefault()) + NewLine::getDefault(); }
-inline String operator+ (String s1, const NewLine&)         { return s1 += NewLine::getDefault(); }
-inline String operator+ (const NewLine&, const char* s2)    { return String (NewLine::getDefault()) + s2; }
+inline String operator+ (String s, const NewLine&)          { return s += NewLine::getDefault(); }
+inline String operator+ (const NewLine&, String s)          { return NewLine::getDefault() + s; }
+inline String operator+ (const NewLine&, const char* s)     { return String (NewLine::getDefault()) + s; }
+inline String operator+ (const char* s, const NewLine&)     { return s + String (NewLine::getDefault()); }
 
 } // namespace juce

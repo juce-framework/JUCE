@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2023-2025 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -35,6 +35,7 @@
 #ifndef AAX_IPARAMETER_H
 #define AAX_IPARAMETER_H
 
+#include "AAX_Enums.h"
 #include "AAX.h"	//for types
 
 //Forward Declarations
@@ -257,7 +258,7 @@ public:
 	 *
 	 */
 	//@{
-	/** \brief Sets a parameter value using it's normalized representation
+	/** \brief Sets a parameter value using its normalized representation
 	 *
 	 *	For more information regarding normalized values, see
 	 *	\ref AAXLibraryFeatures_ParameterManager

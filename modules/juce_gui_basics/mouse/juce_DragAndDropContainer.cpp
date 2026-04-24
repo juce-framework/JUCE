@@ -126,7 +126,7 @@ public:
                 finalTarget->itemDropped (details);
             }
 
-            // careful - this object could now be deleted..
+            // careful - this object could now be deleted
         }
     }
 
@@ -543,7 +543,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
 
    #if JUCE_WINDOWS
     // Under heavy load, the layered window's paint callback can often be lost by the OS,
-    // so forcing a repaint at least once makes sure that the window becomes visible..
+    // so forcing a repaint at least once makes sure that the window becomes visible.
     if (auto* peer = dragImageComponent->getPeer())
         peer->performAnyPendingRepaintsNow();
    #endif

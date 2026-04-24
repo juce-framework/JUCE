@@ -233,7 +233,7 @@ static int lastProcessPriority = -1;
 void juce_repeatLastProcessPriority();
 void juce_repeatLastProcessPriority()
 {
-    if (lastProcessPriority >= 0) // (avoid changing this if it's not been explicitly set by the app..)
+    if (lastProcessPriority >= 0) // avoid changing this if it's not been explicitly set by the app
     {
         DWORD p;
 
@@ -295,7 +295,7 @@ void JUCE_CALLTYPE Process::terminate()
     _CrtDumpMemoryLeaks();
    #endif
 
-    // bullet in the head in case there's a problem shutting down..
+    // force exit in case there's a problem shutting down
     ExitProcess (1);
 }
 

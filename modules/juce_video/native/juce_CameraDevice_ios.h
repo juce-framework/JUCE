@@ -1202,7 +1202,7 @@ struct CameraDevice::ViewerComponent  : public UIViewComponent
 
         static void updateOrientation (id self)
         {
-            if (@available (ios 17, *))
+            if (@available (iOS 17, *))
                 return;
 
             if (auto* previewLayer = getPreviewLayer (self))

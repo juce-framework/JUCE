@@ -220,7 +220,7 @@ public:
         const ScopedLock lock (mutex);
 
         if (auto ptr = getTypefacePtr (f))
-            return ptr->getNativeDetails().getFontAtPointSizeAndScale (f.getHeightInPoints(), f.getHorizontalScale());
+            return ptr->getNativeDetails()->getFontAtPointSizeAndScale (f.getHeightInPoints(), f.getHorizontalScale());
 
         return {};
     }
@@ -231,7 +231,7 @@ public:
 
         if (auto ptr = getTypefacePtr (f))
         {
-            const auto ascentDescent = ptr->getNativeDetails().getAscentDescent (f.getMetricsKind());
+            const auto ascentDescent = ptr->getNativeDetails()->getAscentDescent (f.getMetricsKind());
 
             auto adjusted = ascentDescent;
             adjusted.ascent = getAscentOverride().value_or (adjusted.ascent);
@@ -259,15 +259,28 @@ public:
         return StringArray (fallbacks.data(), (int) fallbacks.size());
     }
 
-    String getTypefaceName() const             { return options.getName(); }
-    String getTypefaceStyle() const            { return options.getStyle(); }
-    float getHeight() const                    { return options.getHeight(); }
-    float getPointHeight() const               { return options.getPointHeight(); }
-    float getHorizontalScale() const           { return options.getHorizontalScale(); }
-    float getKerning() const                   { return options.getKerningFactor(); }
-    bool getUnderline() const                  { return options.getUnderline(); }
-    bool getFallbackEnabled() const            { return options.getFallbackEnabled(); }
-    TypefaceMetricsKind getMetricsKind() const { return options.getMetricsKind(); }
+    String getTypefaceName() const               { return options.getName(); }
+    String getTypefaceStyle() const              { return options.getStyle(); }
+    float getHeight() const                      { return options.getHeight(); }
+    float getPointHeight() const                 { return options.getPointHeight(); }
+    float getHorizontalScale() const             { return options.getHorizontalScale(); }
+    float getKerning() const                     { return options.getKerningFactor(); }
+    bool getUnderline() const                    { return options.getUnderline(); }
+    bool getFallbackEnabled() const              { return options.getFallbackEnabled(); }
+    TypefaceMetricsKind getMetricsKind() const   { return options.getMetricsKind(); }
+    auto getFeatureSettings() const              { return options.getFeatureSettings(); }
+
+    void setFeatureSetting (const FontFeatureSetting& feature)
+    {
+        jassert (getReferenceCount() == 1);
+        options = options.withFeatureSetting (feature);
+    }
+
+    void removeFeatureSetting (FontFeatureTag feature)
+    {
+        jassert (getReferenceCount() == 1);
+        options = options.withFeatureRemoved (feature);
+    }
 
     std::optional<float> getAscentOverride() const  { return options.getAscentOverride(); }
     std::optional<float> getDescentOverride() const { return options.getDescentOverride(); }
@@ -728,6 +741,7 @@ std::optional<float> Font::getAscentOverride() const noexcept
 
 void Font::setAscentOverride (std::optional<float> x)
 {
+    dupeInternalIfShared();
     font->setAscentOverride (x);
 }
 
@@ -738,6 +752,7 @@ std::optional<float> Font::getDescentOverride() const noexcept
 
 void Font::setDescentOverride (std::optional<float> x)
 {
+    dupeInternalIfShared();
     font->setDescentOverride (x);
 }
 
@@ -749,6 +764,23 @@ bool Font::isItalic() const noexcept        { return FontStyleHelpers::isItalic 
 bool Font::isUnderlined() const noexcept    { return font->getUnderline(); }
 
 TypefaceMetricsKind Font::getMetricsKind() const noexcept { return font->getMetricsKind(); }
+
+Span<const FontFeatureSetting> Font::getFeatureSettings() const&
+{
+    return font->getFeatureSettings();
+}
+
+void Font::setFeatureSetting (FontFeatureSetting featureSetting)
+{
+    dupeInternalIfShared();
+    font->setFeatureSetting (featureSetting);
+}
+
+void Font::removeFeatureSetting (FontFeatureTag featureToRemove)
+{
+    dupeInternalIfShared();
+    font->removeFeatureSetting (featureToRemove);
+}
 
 void Font::setBold (const bool shouldBeBold)
 {
@@ -854,7 +886,7 @@ static bool characterNotRendered (uint32_t c)
 
 static bool isFontSuitableForCodepoint (const Font& font, juce_wchar c)
 {
-    const auto& hbFont = font.getNativeDetails().font;
+    const auto hbFont = font.getNativeDetails().font;
 
     if (hbFont == nullptr)
         return false;
@@ -962,7 +994,7 @@ Font::Native Font::getNativeDetails() const
 
 Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 {
-    const auto resolvedTypeface = [&]() -> Typeface::Ptr
+    const auto resolvedTypeface = std::invoke ([&]() -> Typeface::Ptr
     {
         if (font.getTypefaceName() != getSystemUIFontName())
             return {};
@@ -978,7 +1010,7 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
         auto copy = font;
         copy.setTypefaceName (systemTypeface->getName());
         return getDefaultTypefaceForFont (copy);
-    }();
+    });
 
     if (resolvedTypeface != nullptr)
         return resolvedTypeface;

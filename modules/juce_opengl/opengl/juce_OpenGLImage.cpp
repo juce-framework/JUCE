@@ -116,13 +116,13 @@ private:
               mode (modeIn)
         {
             if (mode != Image::BitmapData::writeOnly)
-                self->frameBuffer.readPixels (data.get(), getArea());
+                self->frameBuffer.readPixels (data.get(), getArea(), order);
         }
 
         ~DataReleaser() override
         {
             if (mode != Image::BitmapData::readOnly)
-                self->frameBuffer.writePixels (data, getArea());
+                self->frameBuffer.writePixels (data, getArea(), order);
         }
 
         Rectangle<int> getArea() const
@@ -134,6 +134,8 @@ private:
         HeapBlock<PixelARGB> data;
         Rectangle<int> area;
         Image::BitmapData::ReadWriteMode mode;
+
+        static constexpr auto order = OpenGLFrameBuffer::RowOrder::fromBottomUp;
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLFrameBufferImage)

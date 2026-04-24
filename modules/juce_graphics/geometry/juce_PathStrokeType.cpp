@@ -222,7 +222,7 @@ namespace PathStrokeHelpers
         {
             const auto intersection = lineIntersection (x1, y1, x2, y2, x3, y3, x4, y4);
 
-            // if they intersect, use this point..
+            // if they intersect, use this point
             if (intersection.intersects)
             {
                 destPath.lineTo (intersection.point);

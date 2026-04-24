@@ -198,9 +198,9 @@ public:
     size_t factorOversampling = 1;
     size_t numChannels = 1;
 
-   #ifndef DOXYGEN
+    /** @cond */
     struct OversamplingStage;
-   #endif
+    /** @endcond */
 
 private:
     //==============================================================================

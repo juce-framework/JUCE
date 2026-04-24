@@ -33,7 +33,7 @@
 */
 
 // The following checks should cause a compile error if you've forgotten to
-// define all your plugin settings properly..
+// define all your plugin settings properly.
 
 #if ! (JucePlugin_Build_VST || JucePlugin_Build_VST3 \
         || JucePlugin_Build_AU  || JucePlugin_Build_AUv3 \

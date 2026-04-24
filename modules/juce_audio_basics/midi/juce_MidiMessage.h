@@ -78,7 +78,7 @@ public:
     template <typename... Data>
     MidiMessage (int byte1, int byte2, int byte3, Data... otherBytes)  : size (3 + sizeof... (otherBytes))
     {
-        // this checks that the length matches the data..
+        // this checks that the length matches the data
         jassert (size > 3 || byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == size);
 
         const uint8 data[] = { (uint8) byte1, (uint8) byte2, (uint8) byte3, static_cast<uint8> (otherBytes)... };
@@ -880,7 +880,7 @@ public:
     static MidiMessage createSysExMessage (Span<const std::byte> data);
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     /** Reads a midi variable-length integer.
 
         The `data` argument indicates the data to read the number from,
@@ -889,7 +889,7 @@ public:
     */
     [[deprecated ("This signature has been deprecated in favour of the safer readVariableLengthValue.")]]
     static int readVariableLengthVal (const uint8* data, int& numBytesUsed) noexcept;
-   #endif
+    /** @endcond */
 
     /** Holds information about a variable-length value which was parsed
         from a stream of bytes.
@@ -987,19 +987,26 @@ public:
     static uint16 pitchbendToPitchwheelPos (float pitchbendInSemitones,
                                             float pitchbendRangeInSemitones) noexcept;
 
+    Span<const std::byte> asSpan() const&
+    {
+        return { reinterpret_cast<const std::byte*> (getRawData()), (size_t) getRawDataSize() };
+    }
+
+    Span<const std::byte> asSpan() const&& = delete;
+
 private:
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     union PackedData
     {
         uint8* allocatedData;
         uint8 asBytes[sizeof (uint8*)];
     };
+    /** @endcond */
 
     PackedData packedData;
     double timeStamp = 0;
     int size;
-   #endif
 
     inline bool isHeapAllocated() const noexcept  { return size > (int) sizeof (packedData); }
     inline uint8* getData() const noexcept        { return isHeapAllocated() ? packedData.allocatedData : (uint8*) packedData.asBytes; }

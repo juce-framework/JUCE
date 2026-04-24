@@ -93,7 +93,7 @@ struct ImageCache::Pimpl     : private Timer,
             }
             else
             {
-                item.lastUseTime = now; // multiply-referenced, so this image is still in use.
+                item.lastUseTime = now; // multiply-referenced, so this image is still in use
             }
         }
 

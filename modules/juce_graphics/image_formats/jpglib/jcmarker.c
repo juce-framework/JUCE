@@ -2,6 +2,7 @@
  * jcmarker.c
  *
  * Copyright (C) 1991-1998, Thomas G. Lane.
+ * Modified 2003-2019 by Guido Vollbeding.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -12,6 +13,74 @@
 #include "jinclude.h"
 #include "jpeglib.h"
 
+
+typedef enum {			/* JPEG marker codes */
+  M_SOF0  = 0xc0,
+  M_SOF1  = 0xc1,
+  M_SOF2  = 0xc2,
+  M_SOF3  = 0xc3,
+
+  M_SOF5  = 0xc5,
+  M_SOF6  = 0xc6,
+  M_SOF7  = 0xc7,
+
+  M_JPG   = 0xc8,
+  M_SOF9  = 0xc9,
+  M_SOF10 = 0xca,
+  M_SOF11 = 0xcb,
+
+  M_SOF13 = 0xcd,
+  M_SOF14 = 0xce,
+  M_SOF15 = 0xcf,
+
+  M_DHT   = 0xc4,
+
+  M_DAC   = 0xcc,
+
+  M_RST0  = 0xd0,
+  M_RST1  = 0xd1,
+  M_RST2  = 0xd2,
+  M_RST3  = 0xd3,
+  M_RST4  = 0xd4,
+  M_RST5  = 0xd5,
+  M_RST6  = 0xd6,
+  M_RST7  = 0xd7,
+
+  M_SOI   = 0xd8,
+  M_EOI   = 0xd9,
+  M_SOS   = 0xda,
+  M_DQT   = 0xdb,
+  M_DNL   = 0xdc,
+  M_DRI   = 0xdd,
+  M_DHP   = 0xde,
+  M_EXP   = 0xdf,
+
+  M_APP0  = 0xe0,
+  M_APP1  = 0xe1,
+  M_APP2  = 0xe2,
+  M_APP3  = 0xe3,
+  M_APP4  = 0xe4,
+  M_APP5  = 0xe5,
+  M_APP6  = 0xe6,
+  M_APP7  = 0xe7,
+  M_APP8  = 0xe8,
+  M_APP9  = 0xe9,
+  M_APP10 = 0xea,
+  M_APP11 = 0xeb,
+  M_APP12 = 0xec,
+  M_APP13 = 0xed,
+  M_APP14 = 0xee,
+  M_APP15 = 0xef,
+
+  M_JPG0  = 0xf0,
+  M_JPG8  = 0xf8,
+  M_JPG13 = 0xfd,
+  M_COM   = 0xfe,
+
+  M_TEM   = 0x01,
+
+  M_ERROR = 0x100
+} JPEG_MARKER;
 
 
 /* Private state */
@@ -86,21 +155,22 @@ emit_dqt (j_compress_ptr cinfo, int index)
     ERREXIT1(cinfo, JERR_NO_QUANT_TABLE, index);
 
   prec = 0;
-  for (i = 0; i < DCTSIZE2; i++) {
-    if (qtbl->quantval[i] > 255)
+  for (i = 0; i <= cinfo->lim_Se; i++) {
+    if (qtbl->quantval[cinfo->natural_order[i]] > 255)
       prec = 1;
   }
 
   if (! qtbl->sent_table) {
     emit_marker(cinfo, M_DQT);
 
-    emit_2bytes(cinfo, prec ? DCTSIZE2*2 + 1 + 2 : DCTSIZE2 + 1 + 2);
+    emit_2bytes(cinfo,
+      prec ? cinfo->lim_Se * 2 + 2 + 1 + 2 : cinfo->lim_Se + 1 + 1 + 2);
 
     emit_byte(cinfo, index + (prec<<4));
 
-    for (i = 0; i < DCTSIZE2; i++) {
+    for (i = 0; i <= cinfo->lim_Se; i++) {
       /* The table entries must be emitted in zigzag order. */
-      unsigned int qval = qtbl->quantval[jpeg_natural_order[i]];
+      unsigned int qval = qtbl->quantval[cinfo->natural_order[i]];
       if (prec)
 	emit_byte(cinfo, (int) (qval >> 8));
       emit_byte(cinfo, (int) (qval & 0xFF));
@@ -119,7 +189,7 @@ emit_dht (j_compress_ptr cinfo, int index, boolean is_ac)
 {
   JHUFF_TBL * htbl;
   int length, i;
-
+  
   if (is_ac) {
     htbl = cinfo->ac_huff_tbl_ptrs[index];
     index += 0x10;		/* output index has AC bit set */
@@ -129,30 +199,30 @@ emit_dht (j_compress_ptr cinfo, int index, boolean is_ac)
 
   if (htbl == NULL)
     ERREXIT1(cinfo, JERR_NO_HUFF_TABLE, index);
-
+  
   if (! htbl->sent_table) {
     emit_marker(cinfo, M_DHT);
-
+    
     length = 0;
     for (i = 1; i <= 16; i++)
       length += htbl->bits[i];
-
+    
     emit_2bytes(cinfo, length + 2 + 1 + 16);
     emit_byte(cinfo, index);
-
+    
     for (i = 1; i <= 16; i++)
       emit_byte(cinfo, htbl->bits[i]);
-
+    
     for (i = 0; i < length; i++)
       emit_byte(cinfo, htbl->huffval[i]);
-
+    
     htbl->sent_table = TRUE;
   }
 }
 
 
 LOCAL(void)
-emit_dac (j_compress_ptr)
+emit_dac (j_compress_ptr cinfo)
 /* Emit a DAC marker */
 /* Since the useful info is so small, we want to emit all the tables in */
 /* one DAC marker.  Therefore this routine does its own scan of the table. */
@@ -168,26 +238,32 @@ emit_dac (j_compress_ptr)
 
   for (i = 0; i < cinfo->comps_in_scan; i++) {
     compptr = cinfo->cur_comp_info[i];
-    dc_in_use[compptr->dc_tbl_no] = 1;
-    ac_in_use[compptr->ac_tbl_no] = 1;
+    /* DC needs no table for refinement scan */
+    if (cinfo->Ss == 0 && cinfo->Ah == 0)
+      dc_in_use[compptr->dc_tbl_no] = 1;
+    /* AC needs no table when not present */
+    if (cinfo->Se)
+      ac_in_use[compptr->ac_tbl_no] = 1;
   }
 
   length = 0;
   for (i = 0; i < NUM_ARITH_TBLS; i++)
     length += dc_in_use[i] + ac_in_use[i];
 
-  emit_marker(cinfo, M_DAC);
+  if (length) {
+    emit_marker(cinfo, M_DAC);
 
-  emit_2bytes(cinfo, length*2 + 2);
+    emit_2bytes(cinfo, length*2 + 2);
 
-  for (i = 0; i < NUM_ARITH_TBLS; i++) {
-    if (dc_in_use[i]) {
-      emit_byte(cinfo, i);
-      emit_byte(cinfo, cinfo->arith_dc_L[i] + (cinfo->arith_dc_U[i]<<4));
-    }
-    if (ac_in_use[i]) {
-      emit_byte(cinfo, i + 0x10);
-      emit_byte(cinfo, cinfo->arith_ac_K[i]);
+    for (i = 0; i < NUM_ARITH_TBLS; i++) {
+      if (dc_in_use[i]) {
+	emit_byte(cinfo, i);
+	emit_byte(cinfo, cinfo->arith_dc_L[i] + (cinfo->arith_dc_U[i]<<4));
+      }
+      if (ac_in_use[i]) {
+	emit_byte(cinfo, i + 0x10);
+	emit_byte(cinfo, cinfo->arith_ac_K[i]);
+      }
     }
   }
 #endif /* C_ARITH_CODING_SUPPORTED */
@@ -199,10 +275,41 @@ emit_dri (j_compress_ptr cinfo)
 /* Emit a DRI marker */
 {
   emit_marker(cinfo, M_DRI);
-
+  
   emit_2bytes(cinfo, 4);	/* fixed length */
 
   emit_2bytes(cinfo, (int) cinfo->restart_interval);
+}
+
+
+LOCAL(void)
+emit_lse_ict (j_compress_ptr cinfo)
+/* Emit an LSE inverse color transform specification marker */
+{
+  /* Support only 1 transform */
+  if (cinfo->color_transform != JCT_SUBTRACT_GREEN ||
+      cinfo->num_components < 3)
+    ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
+
+  emit_marker(cinfo, M_JPG8);
+  
+  emit_2bytes(cinfo, 24);	/* fixed length */
+
+  emit_byte(cinfo, 0x0D);	/* ID inverse transform specification */
+  emit_2bytes(cinfo, MAXJSAMPLE);	/* MAXTRANS */
+  emit_byte(cinfo, 3);		/* Nt=3 */
+  emit_byte(cinfo, cinfo->comp_info[1].component_id);
+  emit_byte(cinfo, cinfo->comp_info[0].component_id);
+  emit_byte(cinfo, cinfo->comp_info[2].component_id);
+  emit_byte(cinfo, 0x80);	/* F1: CENTER1=1, NORM1=0 */
+  emit_2bytes(cinfo, 0);	/* A(1,1)=0 */
+  emit_2bytes(cinfo, 0);	/* A(1,2)=0 */
+  emit_byte(cinfo, 0);		/* F2: CENTER2=0, NORM2=0 */
+  emit_2bytes(cinfo, 1);	/* A(2,1)=1 */
+  emit_2bytes(cinfo, 0);	/* A(2,2)=0 */
+  emit_byte(cinfo, 0);		/* F3: CENTER3=0, NORM3=0 */
+  emit_2bytes(cinfo, 1);	/* A(3,1)=1 */
+  emit_2bytes(cinfo, 0);	/* A(3,2)=0 */
 }
 
 
@@ -212,19 +319,19 @@ emit_sof (j_compress_ptr cinfo, JPEG_MARKER code)
 {
   int ci;
   jpeg_component_info *compptr;
-
+  
   emit_marker(cinfo, code);
-
+  
   emit_2bytes(cinfo, 3 * cinfo->num_components + 2 + 5 + 1); /* length */
 
   /* Make sure image isn't bigger than SOF field can handle */
-  if ((long) cinfo->image_height > 65535L ||
-      (long) cinfo->image_width > 65535L)
+  if ((long) cinfo->jpeg_height > 65535L ||
+      (long) cinfo->jpeg_width > 65535L)
     ERREXIT1(cinfo, JERR_IMAGE_TOO_BIG, (unsigned int) 65535);
 
   emit_byte(cinfo, cinfo->data_precision);
-  emit_2bytes(cinfo, (int) cinfo->image_height);
-  emit_2bytes(cinfo, (int) cinfo->image_width);
+  emit_2bytes(cinfo, (int) cinfo->jpeg_height);
+  emit_2bytes(cinfo, (int) cinfo->jpeg_width);
 
   emit_byte(cinfo, cinfo->num_components);
 
@@ -243,38 +350,48 @@ emit_sos (j_compress_ptr cinfo)
 {
   int i, td, ta;
   jpeg_component_info *compptr;
-
+  
   emit_marker(cinfo, M_SOS);
-
+  
   emit_2bytes(cinfo, 2 * cinfo->comps_in_scan + 2 + 1 + 3); /* length */
-
+  
   emit_byte(cinfo, cinfo->comps_in_scan);
-
+  
   for (i = 0; i < cinfo->comps_in_scan; i++) {
     compptr = cinfo->cur_comp_info[i];
     emit_byte(cinfo, compptr->component_id);
-    td = compptr->dc_tbl_no;
-    ta = compptr->ac_tbl_no;
-    if (cinfo->progressive_mode) {
-      /* Progressive mode: only DC or only AC tables are used in one scan;
-       * furthermore, Huffman coding of DC refinement uses no table at all.
-       * We emit 0 for unused field(s); this is recommended by the P&M text
-       * but does not seem to be specified in the standard.
-       */
-      if (cinfo->Ss == 0) {
-	ta = 0;			/* DC scan */
-	if (cinfo->Ah != 0 && !cinfo->arith_code)
-	  td = 0;		/* no DC table either */
-      } else {
-	td = 0;			/* AC scan */
-      }
-    }
+
+    /* We emit 0 for unused field(s); this is recommended by the P&M text
+     * but does not seem to be specified in the standard.
+     */
+
+    /* DC needs no table for refinement scan */
+    td = cinfo->Ss == 0 && cinfo->Ah == 0 ? compptr->dc_tbl_no : 0;
+    /* AC needs no table when not present */
+    ta = cinfo->Se ? compptr->ac_tbl_no : 0;
+
     emit_byte(cinfo, (td << 4) + ta);
   }
 
   emit_byte(cinfo, cinfo->Ss);
   emit_byte(cinfo, cinfo->Se);
   emit_byte(cinfo, (cinfo->Ah << 4) + cinfo->Al);
+}
+
+
+LOCAL(void)
+emit_pseudo_sos (j_compress_ptr cinfo)
+/* Emit a pseudo SOS marker */
+{
+  emit_marker(cinfo, M_SOS);
+  
+  emit_2bytes(cinfo, 2 + 1 + 3); /* length */
+  
+  emit_byte(cinfo, 0); /* Ns */
+
+  emit_byte(cinfo, 0); /* Ss */
+  emit_byte(cinfo, cinfo->block_size * cinfo->block_size - 1); /* Se */
+  emit_byte(cinfo, 0); /* Ah/Al */
 }
 
 
@@ -293,9 +410,9 @@ emit_jfif_app0 (j_compress_ptr cinfo)
    * Thumbnail X size		(1 byte)
    * Thumbnail Y size		(1 byte)
    */
-
+  
   emit_marker(cinfo, M_APP0);
-
+  
   emit_2bytes(cinfo, 2 + 4 + 1 + 2 + 1 + 2 + 2 + 1 + 1); /* length */
 
   emit_byte(cinfo, 0x4A);	/* Identifier: ASCII "JFIF" */
@@ -332,9 +449,9 @@ emit_adobe_app14 (j_compress_ptr cinfo)
    * YCbCr, 2 if it's YCCK, 0 otherwise.  Adobe's definition has to do with
    * whether the encoder performed a transformation, which is pretty useless.
    */
-
+  
   emit_marker(cinfo, M_APP14);
-
+  
   emit_2bytes(cinfo, 2 + 5 + 2 + 2 + 2 + 1); /* length */
 
   emit_byte(cinfo, 0x41);	/* Identifier: ASCII "Adobe" */
@@ -354,7 +471,6 @@ emit_adobe_app14 (j_compress_ptr cinfo)
     break;
   default:
     emit_byte(cinfo, 0);	/* Color transform = 0 */
-    break;
   }
 }
 
@@ -391,8 +507,8 @@ write_marker_byte (j_compress_ptr cinfo, int val)
  * Write datastream header.
  * This consists of an SOI and optional APPn markers.
  * We recommend use of the JFIF marker, but not the Adobe marker,
- * when using YCbCr or grayscale data.  The JFIF marker should NOT
- * be used for any other JPEG colorspace.  The Adobe marker is helpful
+ * when using YCbCr or grayscale data.  The JFIF marker is also used
+ * for other standard JPEG colorspaces.  The Adobe marker is helpful
  * to distinguish RGB, CMYK, and YCCK colorspaces.
  * Note that an application can write additional header markers after
  * jpeg_start_compress returns.
@@ -417,7 +533,8 @@ write_file_header (j_compress_ptr cinfo)
 
 /*
  * Write frame header.
- * This consists of DQT and SOFn markers.
+ * This consists of DQT and SOFn markers,
+ * a conditional LSE marker and a conditional pseudo SOS marker.
  * Note that we do not emit the SOF until we have emitted the DQT(s).
  * This avoids compatibility problems with incorrect implementations that
  * try to error-check the quant table numbers as soon as they see the SOF.
@@ -429,7 +546,7 @@ write_frame_header (j_compress_ptr cinfo)
   int ci, prec;
   boolean is_baseline;
   jpeg_component_info *compptr;
-
+  
   /* Emit DQT for each quantization table.
    * Note that emit_dqt() suppresses any duplicate tables.
    */
@@ -444,7 +561,7 @@ write_frame_header (j_compress_ptr cinfo)
    * Note we assume that Huffman table numbers won't be changed later.
    */
   if (cinfo->arith_code || cinfo->progressive_mode ||
-      cinfo->data_precision != 8) {
+      cinfo->data_precision != 8 || cinfo->block_size != DCTSIZE) {
     is_baseline = FALSE;
   } else {
     is_baseline = TRUE;
@@ -462,7 +579,10 @@ write_frame_header (j_compress_ptr cinfo)
 
   /* Emit the proper SOF marker */
   if (cinfo->arith_code) {
-    emit_sof(cinfo, M_SOF9);	/* SOF code for arithmetic coding */
+    if (cinfo->progressive_mode)
+      emit_sof(cinfo, M_SOF10); /* SOF code for progressive arithmetic */
+    else
+      emit_sof(cinfo, M_SOF9);  /* SOF code for sequential arithmetic */
   } else {
     if (cinfo->progressive_mode)
       emit_sof(cinfo, M_SOF2);	/* SOF code for progressive Huffman */
@@ -471,6 +591,14 @@ write_frame_header (j_compress_ptr cinfo)
     else
       emit_sof(cinfo, M_SOF1);	/* SOF code for non-baseline Huffman file */
   }
+
+  /* Check to emit LSE inverse color transform specification marker */
+  if (cinfo->color_transform)
+    emit_lse_ict(cinfo);
+
+  /* Check to emit pseudo SOS marker */
+  if (cinfo->progressive_mode && cinfo->block_size != DCTSIZE)
+    emit_pseudo_sos(cinfo);
 }
 
 
@@ -499,19 +627,12 @@ write_scan_header (j_compress_ptr cinfo)
      */
     for (i = 0; i < cinfo->comps_in_scan; i++) {
       compptr = cinfo->cur_comp_info[i];
-      if (cinfo->progressive_mode) {
-	/* Progressive mode: only DC or only AC tables are used in one scan */
-	if (cinfo->Ss == 0) {
-	  if (cinfo->Ah == 0)	/* DC needs no table for refinement scan */
-	    emit_dht(cinfo, compptr->dc_tbl_no, FALSE);
-	} else {
-	  emit_dht(cinfo, compptr->ac_tbl_no, TRUE);
-	}
-      } else {
-	/* Sequential mode: need both DC and AC tables */
+      /* DC needs no table for refinement scan */
+      if (cinfo->Ss == 0 && cinfo->Ah == 0)
 	emit_dht(cinfo, compptr->dc_tbl_no, FALSE);
+      /* AC needs no table when not present */
+      if (cinfo->Se)
 	emit_dht(cinfo, compptr->ac_tbl_no, TRUE);
-      }
     }
   }
 
@@ -580,10 +701,9 @@ jinit_marker_writer (j_compress_ptr cinfo)
   my_marker_ptr marker;
 
   /* Create the subobject */
-  marker = (my_marker_ptr)
-    (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
-				SIZEOF(my_marker_writer));
-  cinfo->marker = (struct jpeg_marker_writer *) marker;
+  marker = (my_marker_ptr) (*cinfo->mem->alloc_small)
+    ((j_common_ptr) cinfo, JPOOL_IMAGE, SIZEOF(my_marker_writer));
+  cinfo->marker = &marker->pub;
   /* Initialize method pointers */
   marker->pub.write_file_header = write_file_header;
   marker->pub.write_frame_header = write_frame_header;
