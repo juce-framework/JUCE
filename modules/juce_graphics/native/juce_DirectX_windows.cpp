@@ -906,7 +906,9 @@ auto AggregateFontCollection::mapCharacters (IDWriteFontFallback* fallback,
     // For reasons I don't understand, the system may pick better substitutions when passing
     // nullptr, instead of the system collection, as the "default collection to use".
     auto collectionsToCheck = collections;
-    collectionsToCheck.insert (collectionsToCheck.begin(), nullptr);
+
+    // Acon Digital: Commented out the below due to spurious crashes on Windows 10 that might be related to the nullptr
+    // collectionsToCheck.insert (collectionsToCheck.begin(), nullptr);
 
     MapResult bestMatch;
     for (const auto& collection : collectionsToCheck)

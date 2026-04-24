@@ -206,14 +206,18 @@ private:
 
         ~AnalysisSource() override = default;
 
-        JUCE_COMCALL GetLocaleName (UINT32, UINT32*, const WCHAR** localeName) noexcept override
+        JUCE_COMCALL GetLocaleName (UINT32 textPosition, UINT32* textLength, const WCHAR** localeName) noexcept override
         {
+            const auto total = numUtf16Words (character.toUTF16());
+            *textLength = textPosition < total ? total - textPosition : 0;
             *localeName = language.isNotEmpty() ? language.toWideCharPointer() : nullptr;
             return S_OK;
         }
 
-        JUCE_COMCALL GetNumberSubstitution (UINT32, UINT32*, IDWriteNumberSubstitution** substitution) noexcept override
+        JUCE_COMCALL GetNumberSubstitution (UINT32 textPosition, UINT32* textLength, IDWriteNumberSubstitution** substitution) noexcept override
         {
+            const auto total = numUtf16Words (character.toUTF16());
+            *textLength = textPosition < total ? total - textPosition : 0;
             *substitution = nullptr;
             return S_OK;
         }
