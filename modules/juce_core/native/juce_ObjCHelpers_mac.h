@@ -319,10 +319,18 @@ struct ObjCClass
 
     ~ObjCClass()
     {
-        auto kvoSubclassName = String ("NSKVONotifying_") + class_getName (cls);
-
-        if (objc_getClass (kvoSubclassName.toUTF8()) == nullptr)
-            objc_disposeClassPair (cls);
+        // Intentionally NOT calling objc_disposeClassPair(cls).
+        //
+        // ObjCClass instances are almost always function-local statics, so this
+        // destructor only fires during static destruction at process exit.
+        //
+        // At that time, if the runtime still holds *any* reference to cls, such
+        // as KVO shadows, accessibility subclasses, AppKit shadow classes, etc,
+        // it may cause a crash.
+        //
+        // Given that the OS will reclaim everything at process exit, it is not
+        // worth the risk of crashing just to "properly" dispose of the class.
+        // There is no benefit, and crashing at exit can cause grief for users.
     }
 
     ObjCClass (ObjCClass&& other) noexcept
