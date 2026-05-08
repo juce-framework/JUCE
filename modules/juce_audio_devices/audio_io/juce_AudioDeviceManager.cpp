@@ -525,22 +525,23 @@ String AudioDeviceManager::initialiseFromXML (const XmlElement& xml,
     if (error.isNotEmpty() && selectDefaultDeviceOnFailure)
         error = initialise (numInputChansNeeded, numOutputChansNeeded, nullptr, false, preferredDefaultDeviceName);
 
-    enabledMidiInputs.clear();
+    // Disabled to avoid assert due to initialisation in background thread
+    //enabledMidiInputs.clear();
 
-    const auto midiInputs = [&]
-    {
-        Array<MidiDeviceInfo> result;
+    //const auto midiInputs = [&]
+    //{
+    //    Array<MidiDeviceInfo> result;
 
-        for (auto* c : xml.getChildWithTagNameIterator ("MIDIINPUT"))
-            result.add ({ c->getStringAttribute ("name"), c->getStringAttribute ("identifier") });
+    //    for (auto* c : xml.getChildWithTagNameIterator ("MIDIINPUT"))
+    //        result.add ({ c->getStringAttribute ("name"), c->getStringAttribute ("identifier") });
 
-        return result;
-    }();
+    //    return result;
+    //}();
 
-    const MidiDeviceInfo defaultOutputDeviceInfo (xml.getStringAttribute ("defaultMidiOutput"),
-                                                  xml.getStringAttribute ("defaultMidiOutputDevice"));
+    //const MidiDeviceInfo defaultOutputDeviceInfo (xml.getStringAttribute ("defaultMidiOutput"),
+    //                                              xml.getStringAttribute ("defaultMidiOutputDevice"));
 
-    openLastRequestedMidiDevices (midiInputs, defaultOutputDeviceInfo);
+    //openLastRequestedMidiDevices (midiInputs, defaultOutputDeviceInfo);
 
     return error;
 }
