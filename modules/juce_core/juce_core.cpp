@@ -108,9 +108,10 @@
  #include <net/if.h>
  #include <sys/ioctl.h>
 
- #if ! (JUCE_ANDROID || JUCE_WASM)
-  #include <execinfo.h>
- #endif
+#if defined(__has_include) && __has_include(<execinfo.h>)
+ #define JUCE_HAS_EXECINFO 1
+ #include <execinfo.h>
+#endif
 #endif
 
 #if JUCE_MAC || JUCE_IOS

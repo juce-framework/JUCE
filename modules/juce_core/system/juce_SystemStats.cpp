@@ -190,10 +190,7 @@ String SystemStats::getStackBacktrace()
 {
     String result;
 
-   #if JUCE_ANDROID || JUCE_WASM
-    jassertfalse; // sorry, not implemented yet!
-
-   #elif JUCE_WINDOWS
+   #if JUCE_WINDOWS
     HANDLE process = GetCurrentProcess();
     SymInitialize (process, nullptr, TRUE);
 
@@ -224,7 +221,7 @@ String SystemStats::getStackBacktrace()
         }
     }
 
-   #else
+   #elif JUCE_HAS_EXECINFO
     void* stack[128];
     auto frames = backtrace (stack, numElementsInArray (stack));
     char** frameStrings = backtrace_symbols (stack, frames);
@@ -233,6 +230,8 @@ String SystemStats::getStackBacktrace()
         result << frameStrings[i] << newLine;
 
     ::free (frameStrings);
+   #else
+    jassertfalse; // sorry, not implemented yet!
    #endif
 
     return result;
