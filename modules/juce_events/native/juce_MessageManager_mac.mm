@@ -360,6 +360,11 @@ void MessageManager::stopDispatchLoop()
 {
     if (isThisTheMessageThread())
     {
+        if (quitMessagePosted.get())
+        {
+            return;
+        }
+        
         quitMessagePosted = true;
         shutdownNSApp();
     }
