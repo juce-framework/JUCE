@@ -198,7 +198,8 @@ File File::getSpecialLocation (const SpecialLocationType type)
 
             case tempDirectory:
             {
-                File tmp ("~/Library/Caches/" + juce_getExecutableFile().getFileNameWithoutExtension());
+                const File outer { SystemStats::getEnvironmentVariable ("TMPDIR", "~/Library/Caches") };
+                const auto tmp = outer.getChildFile (juce_getExecutableFile().getFileNameWithoutExtension());
                 tmp.createDirectory();
                 return File (tmp.getFullPathName());
             }

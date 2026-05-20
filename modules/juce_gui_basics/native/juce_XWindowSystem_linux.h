@@ -187,7 +187,7 @@ public:
     void setTitle (::Window, const String&) const;
     void setIcon (::Window , const Image&) const;
     void setVisible (::Window, bool shouldBeVisible) const;
-    void setBounds (::Window, Rectangle<int>, bool fullScreen) const;
+    [[nodiscard]] std::optional<unsigned long> setBounds (::Window, Rectangle<int>, bool fullScreen) const;
     void updateConstraints (::Window) const;
 
     ComponentPeer::OptionalBorderSize getBorderSize (::Window) const;

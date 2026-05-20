@@ -694,7 +694,7 @@ public:
     {
         PositionInfo info;
         info.setTimeInSamples ((int64) (lastTimeStamp.mSampleTime + 0.5));
-        info.setTimeInSeconds (*info.getTimeInSamples() / getAudioProcessor().getSampleRate());
+        info.setTimeInSeconds ((double) *info.getTimeInSamples() / getAudioProcessor().getSampleRate());
 
         info.setFrameRate ([this]
         {
@@ -747,7 +747,7 @@ public:
             if (transportStateCallback (&flags, &outCurrentSampleInTimeLine, &outCycleStartBeat, &outCycleEndBeat))
             {
                 info.setTimeInSamples  ((int64) (outCurrentSampleInTimeLine + 0.5));
-                info.setTimeInSeconds  (*info.getTimeInSamples() / getAudioProcessor().getSampleRate());
+                info.setTimeInSeconds  ((double) *info.getTimeInSamples() / getAudioProcessor().getSampleRate());
                 info.setIsPlaying      ((flags & AUHostTransportStateMoving) != 0);
                 info.setIsLooping      ((flags & AUHostTransportStateCycling) != 0);
                 info.setIsRecording    ((flags & AUHostTransportStateRecording) != 0);
@@ -915,7 +915,7 @@ private:
                         if (auto* editor = _this (self)->getAudioProcessor().getActiveEditor())
                             return editor;
 
-                        return _this (self)->getAudioProcessor().createEditorIfNeeded();
+                        return _this (self)->getAudioProcessor().createEditorAndMakeActive();
                     };
 
                     MessageManager::callSync ([&]
@@ -1905,7 +1905,7 @@ public:
 
             if (processor.hasEditor())
             {
-                if (AudioProcessorEditor* editor = processor.createEditorIfNeeded())
+                if (auto* editor = processor.createEditorAndMakeActive())
                 {
                     preferredSize = editor->getBounds();
 

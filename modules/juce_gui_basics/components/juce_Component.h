@@ -1194,7 +1194,7 @@ public:
 
         If you enable this mode, you'll need to make sure your paint method doesn't call anything like
         Graphics::fillAll(), and doesn't draw beyond the component's bounds, because that'll produce
-        artifacts. This option will have no effect on components that contain any child components.
+        artifacts.
     */
     void setPaintingIsUnclipped (bool shouldPaintWithoutClipping) noexcept;
 
@@ -1276,14 +1276,20 @@ public:
     /** Indicates whether any parts of the component might be transparent.
 
         Components that always paint all of their contents with solid colour and
-        thus completely cover any components behind them should use this method
+        thus completely cover any components behind them, can use this method to
         to tell the repaint system that they are opaque.
 
         This information is used to optimise drawing, because it means that
-        objects underneath opaque windows don't need to be painted.
+        objects underneath opaque components or windows don't need to be painted
+        or can have their clip bounds reduced to a smaller size.
 
-        By default, components are considered transparent, unless this is used to
-        make it otherwise.
+        Note however that there is a cost for every other component to check if
+        it is being obscured by opaque components. This cost should be carefully
+        weighed up against the benefits before deciding to enable this.
+
+        The default value of this property is false, which means that a
+        component will be considered transparent unless setOpaque (true) is
+        called on that component.
 
         @see isOpaque
     */
@@ -2502,7 +2508,7 @@ public:
     /** Returns the object that was set by setCachedComponentImage().
         @see setCachedComponentImage
     */
-    CachedComponentImage* getCachedComponentImage() const noexcept      { return cachedImage.get(); }
+    CachedComponentImage* getCachedComponentImage() const noexcept;
 
     /** Invalidates cached images, both in the CachedComponentImage (if any) and the image effect state. */
     void invalidateCachedImageResources();
@@ -2652,26 +2658,20 @@ private:
     String componentName, componentID, componentTitle, componentDescription, componentHelpText;
     Component* parentComponent = nullptr;
     Rectangle<int> boundsRelativeToParent;
-    std::unique_ptr<Positioner> positioner;
-    std::unique_ptr<AffineTransform> affineTransform;
     Array<Component*> childComponentList;
     WeakReference<LookAndFeel> lookAndFeel;
     MouseCursor cursor;
 
-    class EffectState;
-    std::unique_ptr<EffectState> effectState;
-    std::unique_ptr<CachedComponentImage> cachedImage;
-
-    class MouseListenerList;
-    std::unique_ptr<MouseListenerList> mouseListeners;
-    std::unique_ptr<Array<KeyListener*>> keyListeners;
     ListenerList<ComponentListener> componentListeners;
     NamedValueSet properties;
 
     friend class WeakReference<Component>;
     WeakReference<Component>::Master masterReference;
 
-    std::unique_ptr<AccessibilityHandler> accessibilityHandler;
+    class EffectState;
+    class MouseListenerList;
+    class Data;
+    std::unique_ptr<Data> componentData;
 
     struct ComponentFlags
     {
@@ -2712,6 +2712,8 @@ private:
     uint8 componentTransparency = 0;
 
     //==============================================================================
+    class OpaqueLayer;
+
     static void internalMouseEnter (SafePointer<Component>, MouseInputSource, Point<float>, Time);
     static void internalMouseExit  (SafePointer<Component>, MouseInputSource, Point<float>, Time);
     static void internalMouseDown  (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time);
@@ -2733,8 +2735,9 @@ private:
     void internalRepaintUnchecked (Rectangle<int>, bool);
     Component* removeChildComponent (int index, bool sendParentEvents, bool sendChildEvents);
     void reorderChildInternal (int sourceIndex, int destIndex);
-    void paintComponentAndChildren (Graphics&);
-    void paintWithinParentContext (Graphics&);
+    void paintEntireComponent (Graphics&, bool, OpaqueLayer&, ComponentPaintDiagnostics&);
+    void paintComponentAndChildren (Graphics&, OpaqueLayer&, ComponentPaintDiagnostics&);
+    void paintWithinParentContext (Graphics&, OpaqueLayer&, ComponentPaintDiagnostics&);
     void sendMovedResizedMessages (bool wasMoved, bool wasResized);
     void sendMovedResizedMessagesIfPending();
     void repaintParent();
@@ -2744,8 +2747,8 @@ private:
     void giveAwayKeyboardFocusInternal (bool sendFocusLossEvent);
     void sendEnablementChangeMessage();
     void sendVisibilityChangeMessage();
-
-    friend struct detail::ComponentHelpers;
+    Data& createDataIfNeeded();
+    const Array<KeyListener*>* getKeyListeners() const;
 
     /* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
        You might need to give your subclasses a private dummy constructor to avoid compiler warnings.

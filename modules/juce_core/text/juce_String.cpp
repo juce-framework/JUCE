@@ -1257,8 +1257,8 @@ String String::replaceSection (int index, int numCharsToReplace, StringRef strin
     if (numCharsToReplace < 0)
     {
         // replacing a negative number of characters?
-        numCharsToReplace = 0;
         jassertfalse;
+        numCharsToReplace = 0;
     }
 
     auto insertPoint = text;

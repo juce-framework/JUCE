@@ -140,16 +140,8 @@ public:
         return info == other.info;
     }
 
-    bool operator== (const Block& other) const
-    {
-        const auto tie = [] (auto& x) { return std::tuple (x.info, x.name); };
-        return tie (*this) == tie (other);
-    }
-
-    bool operator!= (const Block& other) const
-    {
-        return ! operator== (other);
-    }
+    bool operator== (const Block& other) const;
+    bool operator!= (const Block& other) const;
 
 private:
     BlockInfo info;

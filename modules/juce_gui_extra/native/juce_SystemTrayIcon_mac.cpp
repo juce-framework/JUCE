@@ -190,7 +190,8 @@ struct ButtonBasedStatusItem  final : public StatusItemContainer
     class ButtonEventForwarderClass final : public ObjCClass<NSObject>
     {
     public:
-        ButtonEventForwarderClass() : ObjCClass<NSObject> ("JUCEButtonEventForwarderClass_")
+        ButtonEventForwarderClass()
+            : ObjCClass ("JUCEButtonEventForwarderClass_")
         {
             addIvar<ButtonBasedStatusItem*> ("owner");
 
@@ -316,7 +317,8 @@ struct ViewBasedStatusItem final : public StatusItemContainer
     //==============================================================================
     struct SystemTrayViewClass final : public ObjCClass<NSControl>
     {
-        SystemTrayViewClass()  : ObjCClass<NSControl> ("JUCESystemTrayView_")
+        SystemTrayViewClass()
+            : ObjCClass ("JUCESystemTrayView_")
         {
             addIvar<ViewBasedStatusItem*> ("owner");
             addIvar<NSImage*> ("image");

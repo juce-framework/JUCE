@@ -486,22 +486,21 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetRuntimeId (SAFEARRAY** pRetVal)
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {
-        if (! isFragmentRoot())
+        if (isFragmentRoot())
+            return S_OK;
+
+        SafeArrayHandle result { SafeArrayCreateVector (VT_I4, 0, 2) };
+
+        if (result == nullptr)
+            return E_FAIL;
+
+        for (LONG i = 0; i < 2; ++i)
         {
-            *pRetVal = SafeArrayCreateVector (VT_I4, 0, 2);
-
-            if (*pRetVal == nullptr)
-                return E_OUTOFMEMORY;
-
-            for (LONG i = 0; i < 2; ++i)
-            {
-                auto hr = SafeArrayPutElement (*pRetVal, &i, &rtid[(size_t) i]);
-
-                if (FAILED (hr))
-                    return E_FAIL;
-            }
+            if (FAILED (SafeArrayPutElement (result.get(), &i, &rtid[(size_t) i])))
+                return E_FAIL;
         }
 
+        *pRetVal = result.release();
         return S_OK;
     });
 }
@@ -575,17 +574,17 @@ JUCE_COMRESULT AccessibilityNativeHandle::ElementProviderFromPoint (double x, do
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {
-        auto* handler = [&]
+        auto* handler = std::invoke ([&]
         {
-            auto logicalScreenPoint = Desktop::getInstance().getDisplays()
-                                        .physicalToLogical (Point<int> (roundToInt (x),
-                                                                        roundToInt (y)));
+            const auto logicalScreenPoint = Desktop::getInstance().getDisplays()
+                                                                  .physicalToLogical (Point { x, y }.toFloat())
+                                                                  .roundToInt();
 
             if (auto* child = accessibilityHandler.getChildAt (logicalScreenPoint))
                 return child;
 
             return &accessibilityHandler;
-        }();
+        });
 
         handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (pRetVal));
 

@@ -141,8 +141,8 @@ public:
     /** Removes the property from the referenced ValueTree. */
     void resetToDefault() noexcept           { targetTree.removeProperty (targetProperty, nullptr); }
 
-    /** You can assign a lambda to this callback and it will called when the default
-        value is changed.
+    /** You can assign a lambda to this callback and it will be called when the
+        default value is changed.
 
         @see setDefault
     */

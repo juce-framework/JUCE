@@ -199,9 +199,9 @@ bool ComponentPeer::handleKeyPress (const KeyPress& keyInfo)
 
     for (auto* target = getTargetForKeyPress(); target != nullptr; target = target->getParentComponent())
     {
-        const WeakReference<Component> deletionChecker (target);
+        const WeakReference deletionChecker (target);
 
-        if (auto* keyListeners = target->keyListeners.get())
+        if (auto* keyListeners = target->getKeyListeners())
         {
             for (int i = keyListeners->size(); --i >= 0;)
             {
@@ -238,14 +238,14 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
 
     for (auto* target = getTargetForKeyPress(); target != nullptr; target = target->getParentComponent())
     {
-        const WeakReference<Component> deletionChecker (target);
+        const WeakReference deletionChecker (target);
 
         keyWasUsed = target->keyStateChanged (isKeyDown);
 
         if (keyWasUsed || deletionChecker == nullptr)
             break;
 
-        if (auto* keyListeners = target->keyListeners.get())
+        if (auto* keyListeners = target->getKeyListeners())
         {
             for (int i = keyListeners->size(); --i >= 0;)
             {

@@ -347,7 +347,8 @@ private:
     template <typename Base>
     struct SafeModalPanel : public ObjCClass<Base>
     {
-        explicit SafeModalPanel (const char* name) : ObjCClass<Base> (name)
+        explicit SafeModalPanel (const char* name)
+            : ObjCClass<Base> (name)
         {
             this->addMethod (@selector (preventsApplicationTerminationWhenModal),
                              preventsApplicationTerminationWhenModal);
@@ -369,7 +370,8 @@ private:
     //==============================================================================
     struct DelegateClass final : public ObjCClass<DelegateType>
     {
-        DelegateClass() : ObjCClass<DelegateType> ("JUCEFileChooser_")
+        DelegateClass()
+            : ObjCClass ("JUCEFileChooser_")
         {
             addIvar<Native*> ("cppObject");
 

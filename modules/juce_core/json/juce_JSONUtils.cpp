@@ -60,68 +60,123 @@ var JSONUtils::makeObjectWithKeyFirst (const std::map<Identifier, var>& source,
     return var (result.release());
 }
 
-std::optional<var> JSONUtils::setPointer (const var& v,
-                                          String pointer,
-                                          const var& newValue)
+static var* locateProperty (const var& v, const Identifier& name)
+{
+    auto* object = v.getDynamicObject();
+
+    if (object == nullptr)
+        return nullptr;
+
+    return object->getProperties().getVarPointer (name);
+}
+
+static var* locateProperty (var& v, const Identifier& name)
+{
+    auto* object = v.getDynamicObject();
+
+    if (object == nullptr)
+        return nullptr;
+
+    if (! object->getProperties().contains (name))
+        object->getProperties().set (name, var());
+
+    return object->getProperties().getVarPointer (name);
+}
+
+static const var* locateIndex (const var& v, int index)
+{
+    auto* array = v.getArray();
+
+    if (array == nullptr)
+        return nullptr;
+
+    if (! isPositiveAndBelow (index, array->size()))
+        return nullptr;
+
+    return array->data() + index;
+}
+
+static var* locateIndex (var& v, int index)
+{
+    auto* array = v.getArray();
+
+    if (array == nullptr)
+        return nullptr;
+
+    const auto correctedIndex = index == -1 ? array->size() : index;
+
+    if (correctedIndex == array->size())
+        array->add (var());
+
+    if (! isPositiveAndBelow (correctedIndex, array->size()))
+        return nullptr;
+
+    return array->data() + correctedIndex;
+}
+
+template <typename Var>
+Var* locate (Var& v, String pointer)
 {
     if (pointer.isEmpty())
-        return newValue;
+        return &v;
 
     if (! pointer.startsWith ("/"))
     {
         // This is not a well-formed JSON pointer
         jassertfalse;
-        return {};
+        return nullptr;
     }
 
     const auto findResult = pointer.indexOfChar (1, '/');
     const auto pos = findResult < 0 ? pointer.length() : findResult;
-    const String head (pointer.begin() + 1, pointer.begin() + pos);
-    const String tail (pointer.begin() + pos, pointer.end());
 
-    const auto unescaped = head.replace ("~1", "/").replace ("~0", "~");
+    const auto head = String { pointer.begin() + 1, pointer.begin() + pos }.replace ("~1", "/").replace ("~0", "~");
+    const String tail { pointer.begin() + pos, pointer.end() };
 
-    if (auto* object = v.getDynamicObject())
+    if (auto* prop = locateProperty (v, head))
+        return locate (*prop, tail);
+
+    const auto index = std::invoke ([&]() -> std::optional<int>
     {
-        if (const auto newProperty = setPointer (object->getProperty (unescaped), tail, newValue))
-        {
-            auto cloned = object->clone();
-            cloned->setProperty (unescaped, *newProperty);
-            return var (cloned.release());
-        }
-    }
-    else if (auto* array = v.getArray())
-    {
-        const auto index = [&]() -> size_t
-        {
-            if (unescaped == "-")
-                return (size_t) array->size();
+        if (head == "0")
+            return 0;
 
-            if (unescaped == "0")
-                return 0;
+        if (head == "-")
+            return -1;
 
-            if (! unescaped.startsWith ("0"))
-                return (size_t) unescaped.getLargeIntValue();
+        if (head.startsWith ("0") || ! head.containsOnly ("0123456789"))
+            return {};
 
-            return std::numeric_limits<size_t>::max();
-        }();
+        return head.getIntValue();
+    });
 
-        if (const auto newIndex = setPointer ((*array)[(int) index], tail, newValue))
-        {
-            auto copied = *array;
+    if (! index.has_value())
+        return nullptr;
 
-            if ((int) index == copied.size())
-                copied.add ({});
+    if (auto* element = locateIndex (v, *index))
+        return locate (*element, tail);
 
-            if (isPositiveAndBelow (index, copied.size()))
-            {
-                copied.getReference ((int) index) = *newIndex;
-                return var (copied);
-            }
-        }
-    }
+    return nullptr;
+}
+
+std::optional<var> JSONUtils::getPointer (const var& v, String pointer)
+{
+    if (auto* result = locate (v, pointer))
+        return *result;
 
     return {};
+}
+
+std::optional<var> JSONUtils::setPointer (const var& v, String pointer, const var& newValue)
+{
+    auto clone = v.clone();
+    auto* leaf = locate (clone, pointer);
+
+    if (leaf == nullptr)
+        return {};
+
+    *leaf = newValue;
+    return clone;
 }
 
 bool JSONUtils::deepEqual (const var& a, const var& b)
@@ -165,13 +220,77 @@ public:
 
     void runTest() override
     {
-        beginTest ("JSON pointers");
+        auto expectEqualsFunc = [] (const std::optional<var>& a, const std::optional<var>& b)
         {
-            const auto obj = JSON::parse (R"({ "name":           "PIANO 4"
-                                             , "lfoSpeed":       30
-                                             , "lfoWaveform":    "triangle"
-                                             , "pitchEnvelope":  { "rates": [94,67,95,60], "levels": [50,50,50,50] }
-                                             })");
+            return a.has_value() && b.has_value() && deepEqual (*a, *b);
+        };
+
+        beginTest ("Specification 6901 tests");
+        {
+            const auto rfc = JSON::parse (R"({
+                "foo": ["bar", "baz"],
+                "a/b": 1,
+                "c%d": 2,
+                "e^f": 3,
+                "g|h": 4,
+                "i\\j": 5,
+                "k\"l": 6,
+                " ": 7,
+                "m~n": 8,
+                "obj":
+                {
+                    "key": "value",
+                    "array": [0, 1, 2]
+                },
+                "nested": { "foo/bar": { "foo/bar": "first" },
+                            "foo~bar": { "foo~bar": "second" } },
+                "01": "foo"
+            })");
+
+            expectEqualsFunc (JSONUtils::getPointer (rfc, ""), rfc);
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/foo"), JSON::parse (R"(["bar", "baz"])"));
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/foo/0"), "bar");
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/a~1b"), 1);
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/c%d"), 2);
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/e^f"), 3);
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/g|h"), 4);
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/i\\j"), 5);
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/k\"l"), 6);
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/ "), 7);
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/m~0n"), 8);
+
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/nested/foo~1bar/foo~1bar"), "first");
+            expectEqualsFunc (JSONUtils::getPointer (rfc, "/nested/foo~0bar/foo~0bar"), "second");
+
+            beginTest ("Zero leading key is valid key");
+            {
+                expectEqualsFunc (JSONUtils::getPointer (JSON::parse (R"({ "01": "foo" })"), "/01"), "foo");
+            }
+
+            beginTest ("Null terminator is not 'End of String'");
+            {
+                const auto nulJson = JSON::parse (String::fromUTF8 ("{ \"foo\0bar\": \"bang\" }", 22));
+                expectEqualsFunc (JSONUtils::getPointer (nulJson, String::fromUTF8 ("/foo\0bar", 9)), "bang");
+            }
+        }
+
+        const auto obj = JSON::parse (R"({ "name":           "PIANO 4"
+                                         , "lfoSpeed":       30
+                                         , "lfoWaveform":    "triangle"
+                                         , "pitchEnvelope":  { "rates": [94,67,95,60], "levels": [50, 51, 52, 53] }
+                                         })");
+
+        beginTest ("getPointer");
+        {
+            expectEqualsFunc (JSONUtils::getPointer (obj, "/name"), "PIANO 4");
+            expectEqualsFunc (JSONUtils::getPointer (obj, "/lfoSpeed"), var (30));
+            expectEqualsFunc (JSONUtils::getPointer (obj, "/pitchEnvelope/rates/1"), var (67));
+            expectEqualsFunc (JSONUtils::getPointer (obj, "/pitchEnvelope/levels/2"), var (50));
+            expectEqualsFunc (JSONUtils::getPointer (obj, "/pitchEnvelope/levels/10"), var());
+        }
+
+        beginTest ("setPointer");
+        {
             expectDeepEqual (JSONUtils::setPointer (obj, "", "hello world"), var ("hello world"));
             expectDeepEqual (JSONUtils::setPointer (obj, "/lfoWaveform/foobar", "str"), std::nullopt);
             expectDeepEqual (JSONUtils::setPointer (JSON::parse (R"({"foo":0,"bar":1})"), "/foo", 2), JSON::parse (R"({"foo":2,"bar":1})"));
@@ -182,7 +301,7 @@ public:
             expectDeepEqual (JSONUtils::setPointer (obj, "/lfoSpeed", 10), JSON::parse (R"({ "name":           "PIANO 4"
                                                                                            , "lfoSpeed":       10
                                                                                            , "lfoWaveform":    "triangle"
-                                                                                           , "pitchEnvelope":  { "rates": [94,67,95,60], "levels": [50,50,50,50] }
+                                                                                           , "pitchEnvelope":  { "rates": [94,67,95,60], "levels": [50,51,52,53] }
                                                                                            })"));
             expectDeepEqual (JSONUtils::setPointer (JSON::parse (R"([0,1,2])"), "/0", "bang"), JSON::parse (R"(["bang",1,2])"));
             expectDeepEqual (JSONUtils::setPointer (JSON::parse (R"([0,1,2])"), "/0", "bang"), JSON::parse (R"(["bang",1,2])"));
@@ -191,17 +310,17 @@ public:
             expectDeepEqual (JSONUtils::setPointer (obj, "/pitchEnvelope/rates/0", 80), JSON::parse (R"({ "name":           "PIANO 4"
                                                                                                         , "lfoSpeed":       30
                                                                                                         , "lfoWaveform":    "triangle"
-                                                                                                        , "pitchEnvelope":  { "rates": [80,67,95,60], "levels": [50,50,50,50] }
+                                                                                                        , "pitchEnvelope":  { "rates": [80,67,95,60], "levels": [50,51,52,53] }
                                                                                                         })"));
             expectDeepEqual (JSONUtils::setPointer (obj, "/pitchEnvelope/levels/0", 80), JSON::parse (R"({ "name":           "PIANO 4"
                                                                                                          , "lfoSpeed":       30
                                                                                                          , "lfoWaveform":    "triangle"
-                                                                                                         , "pitchEnvelope":  { "rates": [94,67,95,60], "levels": [80,50,50,50] }
+                                                                                                         , "pitchEnvelope":  { "rates": [94,67,95,60], "levels": [80,51,52,53] }
                                                                                                          })"));
             expectDeepEqual (JSONUtils::setPointer (obj, "/pitchEnvelope/levels/-", 100), JSON::parse (R"({ "name":           "PIANO 4"
                                                                                                           , "lfoSpeed":       30
                                                                                                           , "lfoWaveform":    "triangle"
-                                                                                                          , "pitchEnvelope":  { "rates": [94,67,95,60], "levels": [50,50,50,50,100] }
+                                                                                                          , "pitchEnvelope":  { "rates": [94,67,95,60], "levels": [50,51,52,53,100] }
                                                                                                           })"));
         }
     }

@@ -156,6 +156,34 @@ public:
     bool isBinaryData() const noexcept;
     bool isMethod() const noexcept;
 
+    //==============================================================================
+    /** Returns a span over the elements of the contained array, or an empty span if
+        the variant currently contains a non-array type.
+    */
+    Span<var> getArrayElements() &;
+
+    /** Returns a span over the elements of the contained array, or an empty span if
+        the variant currently contains a non-array type.
+    */
+    Span<const var> getArrayElements() const &;
+
+    /** Returns a span over the properties of the contained object, or an empty span if
+        the variant currently contains a non-object type.
+    */
+    Span<NamedValue> getObjectElements() &;
+
+    /** Returns a span over the properties of the contained object, or an empty span if
+        the variant currently contains a non-object type.
+    */
+    Span<const NamedValue> getObjectElements() const &;
+
+    /*  These functions are deleted to help avoid accidentally forming a span over a temporary. */
+    Span<var> getArrayElements() && = delete;
+    Span<const var> getArrayElements() const && = delete;
+    Span<NamedValue> getObjectElements() && = delete;
+    Span<const NamedValue> getObjectElements() const && = delete;
+
+    //==============================================================================
     /** Returns true if this var has the same value as the one supplied.
         Note that this ignores the type, so a string var "123" and an integer var with the
         value 123 are considered to be equal.
@@ -325,7 +353,7 @@ private:
     friend bool canCompare (const var&, const var&);
 
     const VariantType* type;
-    ValueUnion value;
+    ValueUnion value{};
 
     Array<var>* convertToArray();
     var (const VariantType&) noexcept;

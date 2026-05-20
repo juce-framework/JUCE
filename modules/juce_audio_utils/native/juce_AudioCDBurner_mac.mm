@@ -39,7 +39,8 @@ const int kilobytesPerSecond1x = 176;
 
 struct AudioTrackProducerClass final : public ObjCClass<NSObject>
 {
-    AudioTrackProducerClass()  : ObjCClass<NSObject> ("JUCEAudioTrackProducer_")
+    AudioTrackProducerClass()
+        : ObjCClass ("JUCEAudioTrackProducer_")
     {
         addIvar<AudioSourceHolder*> ("source");
 

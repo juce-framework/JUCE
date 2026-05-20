@@ -1280,6 +1280,9 @@ public:
             bufferSizes.clear();
             bufferSizes.addUsingDefaultSort (defaultBufferSize);
 
+            if (deviceMode == WASAPIDeviceMode::shared)
+                return true;
+
             if (minBufferSize != defaultBufferSize)
                 bufferSizes.addUsingDefaultSort (minBufferSize);
 
@@ -1375,8 +1378,21 @@ public:
             return lastError;
         }
 
-        currentBufferSizeSamples  = bufferSizeSamples <= 0 ? defaultBufferSize : jmax (bufferSizeSamples, minBufferSize);
-        currentSampleRate         = sampleRate > 0 ? sampleRate : defaultSampleRate;
+        currentSampleRate = sampleRate > 0 ? sampleRate : defaultSampleRate;
+        currentBufferSizeSamples = std::invoke ([&]
+        {
+            if (bufferSizeSamples <= 0)
+                return defaultBufferSize;
+
+            if (deviceMode == WASAPIDeviceMode::shared)
+            {
+                // In shared mode, the wakeup period is decided by the driver, frequently around 10ms
+                return defaultBufferSize;
+            }
+
+            return jmax (bufferSizeSamples, minBufferSize);
+        });
+
         lastKnownInputChannels    = inputChannels;
         lastKnownOutputChannels   = outputChannels;
 

@@ -77,10 +77,13 @@ void ResizableWindow::initialise (const bool shouldAddToDesktop)
 
 int ResizableWindow::getDesktopWindowStyleFlags() const
 {
-    int styleFlags = TopLevelWindow::getDesktopWindowStyleFlags();
+    const auto styleFlags = TopLevelWindow::getDesktopWindowStyleFlags();
 
-    if (isResizable() && Desktop::getInstance().supportsBorderlessNonClientResize())
-        styleFlags |= ComponentPeer::windowIsResizable;
+    if (isResizable()
+        && (isUsingNativeTitleBar() || Desktop::getInstance().supportsBorderlessNonClientResize()))
+    {
+        return styleFlags | ComponentPeer::windowIsResizable;
+    }
 
     return styleFlags;
 }
@@ -583,7 +586,7 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
         if (onScreenArea.getWidth() * onScreenArea.getHeight() < 32 * 32)
         {
-            auto screen = desktop.getDisplays().getDisplayForRect (newPos)->userArea;
+            auto screen = desktop.getDisplays().getDisplayForRect (newPos)->userBounds.getLargestIntegerWithin();
 
             newPos.setSize (jmin (newPos.getWidth(),  screen.getWidth()),
                             jmin (newPos.getHeight(), screen.getHeight()));

@@ -51,12 +51,7 @@ struct Subscription
     bool operator>  (const Subscription& other) const { return subscribeId >  other.subscribeId; }
     bool operator>= (const Subscription& other) const { return subscribeId >= other.subscribeId; }
 
-    bool operator== (const Subscription& other) const
-    {
-        const auto tie = [] (const auto& x) { return std::tie (x.subscribeId, x.resource); };
-        return tie (*this) == tie (other);
-    }
-
+    bool operator== (const Subscription& other) const;
     bool operator!= (const Subscription& other) const { return ! operator== (other); }
 };
 

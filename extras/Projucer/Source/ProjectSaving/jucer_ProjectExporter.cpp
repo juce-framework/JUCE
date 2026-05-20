@@ -207,15 +207,18 @@ ProjectExporter::ProjectExporter (Project& p, const ValueTree& state)
       projectType (p.getProjectType()),
       projectName (p.getProjectNameString()),
       projectFolder (p.getProjectFolder()),
-      targetLocationValue     (settings, Ids::targetFolder,        getUndoManager()),
-      extraCompilerFlagsValue (settings, Ids::extraCompilerFlags,  getUndoManager()),
-      extraLinkerFlagsValue   (settings, Ids::extraLinkerFlags,    getUndoManager()),
-      externalLibrariesValue  (settings, Ids::externalLibraries,   getUndoManager()),
-      userNotesValue          (settings, Ids::userNotes,           getUndoManager()),
-      gnuExtensionsValue      (settings, Ids::enableGNUExtensions, getUndoManager()),
-      bigIconValue            (settings, Ids::bigIcon,             getUndoManager()),
-      smallIconValue          (settings, Ids::smallIcon,           getUndoManager()),
-      extraPPDefsValue        (settings, Ids::extraDefs,           getUndoManager())
+      targetLocationValue        (settings, Ids::targetFolder,              getUndoManager()),
+      extraCompilerFlagsValue    (settings, Ids::extraCompilerFlags,        getUndoManager()),
+      extraLinkerFlagsValue      (settings, Ids::extraLinkerFlags,          getUndoManager()),
+      externalLibrariesValue     (settings, Ids::externalLibraries,         getUndoManager()),
+      userNotesValue             (settings, Ids::userNotes,                 getUndoManager()),
+      gnuExtensionsValue         (settings, Ids::enableGNUExtensions,       getUndoManager()),
+      bigIconValue               (settings, Ids::bigIcon,                   getUndoManager()),
+      smallIconValue             (settings, Ids::smallIcon,                 getUndoManager()),
+      extraPPDefsValue           (settings, Ids::extraDefs,                 getUndoManager()),
+      paceProtectionValue        (settings, Ids::paceProtectionEnabled,     getUndoManager()),
+      paceConfigurationFileValue (settings, Ids::paceConfigurationLocation, getUndoManager(), "pacefusion.toml"),
+      paceBuildSourceRootValue   (settings, Ids::paceBuildSourceRootFolder, getUndoManager(), ".")
 {
     projectCompilerFlagSchemesValue = project.getProjectValue (Ids::compilerFlagSchemes);
     projectCompilerFlagSchemesValue.addListener (this);
@@ -348,6 +351,24 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
     if (! isVisualStudio())
         props.add (new ChoicePropertyComponent (gnuExtensionsValue, "GNU Compiler Extensions"),
                    "Enabling this will use the GNU C++ language standard variant for compilation.");
+
+    if (supportsPaceProtection())
+    {
+        props.add (new ChoicePropertyComponent (paceProtectionValue, "Use PACE Fusion 6 Protection"),
+                   "Enable this to configure the project with PACE Fusion 6 Protection. "
+                   "Requires the PACE Fusion 6 SDK which can be obtained by contacting PACE (https://paceap.com/products/fusion/).");
+
+        props.add (new FilePathPropertyComponent (paceConfigurationFileValue, "PACE Fusion 6 Config File",
+                                                  false, true, "*.toml", project.getProjectFolder()),
+                                                  "Specify the relative path to the PACE Fusion 6 configuration file.");
+
+        props.add (new FilePathPropertyComponent (paceBuildSourceRootValue, "PACE Build Source Root Folder",
+                                                  true, getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
+                                                  "Specify the relative path to the PACE Fusion 6 Build Source Root directory.");
+
+        props.add (new ChoicePropertyComponent (paceUseSharableTargetNames, "PACE Sharable Target Names"),
+                   "Enable this to use target names and sub-project names that allow sharing of analysis data between different exporters.");
+    }
 
     createIconProperties (props);
 

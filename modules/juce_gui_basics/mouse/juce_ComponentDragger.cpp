@@ -35,9 +35,6 @@
 namespace juce
 {
 
-ComponentDragger::ComponentDragger() {}
-ComponentDragger::~ComponentDragger() {}
-
 //==============================================================================
 void ComponentDragger::startDraggingComponent (Component* const componentToDrag, const MouseEvent& e)
 {
@@ -56,20 +53,32 @@ void ComponentDragger::dragComponent (Component* const componentToDrag, const Mo
 
     if (componentToDrag != nullptr)
     {
-        auto bounds = componentToDrag->getBounds();
+        const auto bounds = componentToDrag->getBounds();
 
-        // If the component is a window, multiple mouse events can get queued while it's in the same position,
-        // so their coordinates become wrong after the first one moves the window, so in that case, we'll use
-        // the current mouse position instead of the one that the event contains...
-        if (componentToDrag->isOnDesktop())
-            bounds += componentToDrag->getLocalPoint (nullptr, e.source.getScreenPosition()).roundToInt() - mouseDownWithinTarget;
-        else
-            bounds += e.getEventRelativeTo (componentToDrag).getPosition() - mouseDownWithinTarget;
+        const auto setBounds = [&] (auto b)
+        {
+            if (constrainer != nullptr)
+                constrainer->setBoundsForComponent (componentToDrag, b, false, false, false, false);
+            else
+                componentToDrag->setBounds (b);
+        };
 
-        if (constrainer != nullptr)
-            constrainer->setBoundsForComponent (componentToDrag, bounds, false, false, false, false);
+        if (auto* peer = componentToDrag->isOnDesktop() ? componentToDrag->getPeer() : nullptr)
+        {
+            // If the component is a window, multiple mouse events can get queued while it's in the same position,
+            // so their coordinates become wrong after the first one moves the window, so in that case, we'll use
+            // the current mouse position instead of the one that the event contains...
+
+            const auto globalMouseDown = componentToDrag->localPointToGlobal (mouseDownWithinTarget.toFloat());
+            const auto peerSpaceMouseDown = peer->globalToLocal (detail::ScalingHelpers::scaledScreenPosToUnscaled (globalMouseDown));
+            const auto [multimonitor, logical] = detail::ComponentHelpers::getTopLeftForPeer (*peer, e.source.getScreenPosition(), peerSpaceMouseDown);
+            const auto scope = peer->setMultimonitorPositionOverride (multimonitor.roundToInt());
+            setBounds (bounds.withPosition (logical.roundToInt()));
+        }
         else
-            componentToDrag->setBounds (bounds);
+        {
+            setBounds (bounds + (e.getEventRelativeTo (componentToDrag).getPosition() - mouseDownWithinTarget));
+        }
     }
 }
 

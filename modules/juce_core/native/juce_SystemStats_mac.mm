@@ -317,18 +317,18 @@ public:
         mach_timebase_info_data_t timebase;
         (void) mach_timebase_info (&timebase);
 
-        if (timebase.numer % 1000000 == 0)
+        if (timebase.numer % 1'000'000 == 0)
         {
-            hiResCounterNumerator   = timebase.numer / 1000000;
+            hiResCounterNumerator   = timebase.numer / 1'000'000;
             hiResCounterDenominator = timebase.denom;
         }
         else
         {
             hiResCounterNumerator   = timebase.numer;
-            hiResCounterDenominator = timebase.denom * (uint64) 1000000;
+            hiResCounterDenominator = timebase.denom * (uint64) 1'000'000;
         }
 
-        highResTimerFrequency = (timebase.denom * (uint64) 1000000000) / timebase.numer;
+        highResTimerFrequency = (timebase.denom * (uint64) 1'000'000'000) / timebase.numer;
         highResTimerToMillisecRatio = (double) hiResCounterNumerator / (double) hiResCounterDenominator;
     }
 

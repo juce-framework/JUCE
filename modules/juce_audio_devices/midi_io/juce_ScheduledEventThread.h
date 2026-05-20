@@ -127,8 +127,6 @@ private:
 
             const auto now = Time::getMillisecondCounter();
             const auto event = *pendingMessages.begin();
-            pendingMessages.erase (pendingMessages.begin());
-
             const auto timestamp = event.getTimeStamp();
 
             if (timestamp > now + 20)
@@ -143,6 +141,8 @@ private:
 
             if (timestamp > now - 200)
                 outputCallback (event);
+
+            pendingMessages.erase (pendingMessages.begin());
         }
     }
 

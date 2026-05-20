@@ -43,6 +43,39 @@ class ARAEditorView;
 class ARAInputStream;
 class ARAOutputStream;
 
+/** This class provides customisable configuration options that are available at the ARAFactory
+    construction's time.
+
+    This is used as the ARAConfigurationType type member inside ARADocumentControllerSpecialisation.
+
+    If you wish to override the default configuration values, shadow
+    ARADocumentControllerSpecialisation::ARAConfigurationType with a custom type of your own that
+    has the same member function signatures as this struct.
+
+    @see ARADocumentControllerSpecialisation::ARAConfigurationType
+*/
+struct ARADocumentControllerConfiguration
+{
+    /** In order to report kARAAPIGeneration_2_3_Final or higher, the plugin must notify the host
+        via the ARA::PlugIn::HostModelUpdateController::notifyDocumentDataChanged() function
+        whenever any private, opaque document state is changed, that must be persisted. Likewise,
+        notifyAudioSourceContentChanged() and notifyAudioModificationContentChanged() must be
+        called whenever the persistent state of the respective objects changes.
+
+        Otherwise data loss may occur. Reporting this version signals to the host that the plugin
+        conforms to the ARA 2.3 partial persistence features.
+
+        e.g.
+        @code
+        getDocumentController()->getHostModelUpdateController()->notifyDocumentDataChanged();
+        @endcode
+    */
+    static constexpr ARA::ARAAPIGeneration getHighestSupportedApiGeneration() noexcept
+    {
+        return ARA::kARAAPIGeneration_2_0_Final;
+    }
+};
+
 /** This class contains the customisation points for the JUCE provided ARA document controller
     implementation.
 
@@ -100,6 +133,13 @@ class ARADocumentControllerSpecialisation  : public ARADocument::Listener,
                                              public ARAPlaybackRegion::Listener
 {
 public:
+    /** Used for configuration options that are available during the ARAFactory's construction.
+
+        You can shadow this type member with a custom type that has the same member function
+        signatures.
+    */
+    using ARAConfigurationType = ARADocumentControllerConfiguration;
+
     //==============================================================================
     /** Constructor. Used internally by the ARAFactory implementation.
     */
@@ -134,6 +174,9 @@ public:
     {
         static_assert (std::is_base_of_v<ARADocumentControllerSpecialisation, SpecialisationType>,
                        "DocumentController specialization types must inherit from ARADocumentControllerSpecialisation");
+        static_assert (std::is_same_v<ARA::ARAAPIGeneration, decltype (SpecialisationType::ARAConfigurationType::getHighestSupportedApiGeneration())>,
+                       "The ARAConfigurationType type member must have a static member function "
+                       "`ARAAPIGeneration getHighestSupportedApiGeneration()`.");
         return ARA::PlugIn::PlugInEntry::getPlugInEntry<FactoryConfig<SpecialisationType>>()->getFactory();
     }
 
@@ -382,6 +425,8 @@ private:
     class FactoryConfig  : public ARA::PlugIn::FactoryConfig
     {
     public:
+        using ARAConfigurationType = typename SpecialisationType::ARAConfigurationType;
+
         FactoryConfig() noexcept
         {
             const juce::String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
@@ -428,6 +473,11 @@ private:
                     supportedPlaybackTransformationFlags |= playbackTransformationFlags[i];
 
             JUCE_END_IGNORE_WARNINGS_MSVC
+        }
+
+        ARA::ARAAPIGeneration getHighestSupportedApiGeneration() const noexcept override
+        {
+            return ARAConfigurationType::getHighestSupportedApiGeneration();
         }
 
         const char* getFactoryID() const noexcept override         { return JucePlugin_ARAFactoryID; }

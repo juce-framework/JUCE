@@ -57,6 +57,7 @@ private:
     //==============================================================================
     std::unique_ptr<DemoContentComponent> contentComponent;
     SidePanel demosPanel  { "Demos", 250, true };
+    SharedResourcePointer<TooltipWindow> tooltipWindow;
 
     OpenGLContext openGLContext;
     ComponentPeer* peer = nullptr;

@@ -157,6 +157,9 @@ void MPEKeyboardComponent::colourChanged()
 //==============================================================================
 MPEValue MPEKeyboardComponent::mousePositionToPitchbend (int initialNote, Point<float> mousePos)
 {
+    if (perNotePitchbendRange == 0)
+        return {};
+
     auto constrainedMousePos = [&]
     {
         auto horizontal = isHorizontal();
@@ -230,6 +233,9 @@ MPEValue MPEKeyboardComponent::mousePositionToTimbre (Point<float> mousePos)
 
 void MPEKeyboardComponent::mouseDown (const MouseEvent& e)
 {
+    if (channelAssigner == nullptr)
+        return;
+
     auto newNote = getNoteAndVelocityAtPosition (e.position).note;
 
     if (newNote >= 0)
@@ -249,6 +255,9 @@ void MPEKeyboardComponent::mouseDown (const MouseEvent& e)
 
 void MPEKeyboardComponent::mouseDrag (const MouseEvent& e)
 {
+    if (channelAssigner == nullptr)
+        return;
+
     auto noteID = sourceIDMap[e.source.getIndex()];
     auto note = instrument.getNoteWithID (noteID);
 
@@ -281,6 +290,9 @@ void MPEKeyboardComponent::mouseDrag (const MouseEvent& e)
 
 void MPEKeyboardComponent::mouseUp (const MouseEvent& e)
 {
+    if (channelAssigner == nullptr)
+        return;
+
     auto note = instrument.getNoteWithID (sourceIDMap[e.source.getIndex()]);
 
     if (! note.isValid())

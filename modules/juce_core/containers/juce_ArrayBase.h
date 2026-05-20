@@ -483,15 +483,24 @@ private:
     //==============================================================================
     void removeElementsInternal (int indexToRemoveAt, int numElementsToRemove)
     {
+        jassert (0 <= indexToRemoveAt);
+        jassert (0 <= numElementsToRemove);
+
+        const auto endOfRemovedRange = indexToRemoveAt + numElementsToRemove;
+        jassert (endOfRemovedRange <= numUsed);
+
+        const auto numElementsToShift = numUsed - endOfRemovedRange;
+
         if constexpr (isTriviallyCopyable)
         {
             auto* start = elements + indexToRemoveAt;
-            auto numElementsToShift = numUsed - (indexToRemoveAt + numElementsToRemove);
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wstringop-overflow")
             memmove (start, start + numElementsToRemove, (size_t) numElementsToShift * sizeof (ElementType));
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
         else
         {
-            auto numElementsToShift = numUsed - (indexToRemoveAt + numElementsToRemove);
             auto* destination = elements + indexToRemoveAt;
             auto* source = destination + numElementsToRemove;
 

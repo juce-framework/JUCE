@@ -74,16 +74,30 @@ public:
     */
     PluginDescription getPluginDescription() const;
 
-    /** Allows retrieval of information related to the inner workings of a particular plugin format,
-        such as the AEffect* of a VST, or the handle of an AudioUnit.
-
-        To use this, create a new class derived from ExtensionsVisitor, and override
-        each of the visit member functions. If this AudioPluginInstance wraps a VST3 plugin
-        the visitVST3() member will be called, while if the AudioPluginInstance wraps an
-        unknown format the visitUnknown() member will be called. The argument of the visit function
-        can be queried to extract information related to the AudioPluginInstance's implementation.
+    /** Obsolete: Prefer to use getVSTClient(), getVST3Client(),
+        getAudioUnitClient(), and/or getARAClient().
     */
-    virtual void getExtensions (ExtensionsVisitor&) const;
+    void getExtensions (class ExtensionsVisitor&) const = delete;
+
+    /** Returns ARA-specific extensions, or nullptr if extensions are unavailable. */
+    virtual       AudioPluginExtensions::ARAClient* getARAClient()       { return nullptr; }
+    /** Returns ARA-specific extensions, or nullptr if extensions are unavailable. */
+    virtual const AudioPluginExtensions::ARAClient* getARAClient() const { return nullptr; }
+
+    /** Returns AU-specific extensions, or nullptr if extensions are unavailable. */
+    virtual       AudioPluginExtensions::AudioUnitClient* getAudioUnitClient()       { return nullptr; }
+    /** Returns AU-specific extensions, or nullptr if extensions are unavailable. */
+    virtual const AudioPluginExtensions::AudioUnitClient* getAudioUnitClient() const { return nullptr; }
+
+    /** Returns VST-specific extensions, or nullptr if extensions are unavailable. */
+    virtual       AudioPluginExtensions::VSTClient* getVSTClient()       { return nullptr; }
+    /** Returns VST-specific extensions, or nullptr if extensions are unavailable. */
+    virtual const AudioPluginExtensions::VSTClient* getVSTClient() const { return nullptr; }
+
+    /** Returns VST3-specific extensions, or nullptr if extensions are unavailable. */
+    virtual       AudioPluginExtensions::VST3Client* getVST3Client()       { return nullptr; }
+    /** Returns VST3-specific extensions, or nullptr if extensions are unavailable. */
+    virtual const AudioPluginExtensions::VST3Client* getVST3Client() const { return nullptr; }
 
     using HostedParameter = HostedAudioProcessorParameter;
 
@@ -119,15 +133,6 @@ public:
     HostedParameter* getHostedParameter (int index) const;
 
     /** @cond */
-    /** Use the new typesafe visitor-based interface rather than this function.
-
-        Returns a pointer to some kind of platform-specific data about the plugin.
-        E.g. For a VST, this value can be cast to an AEffect*. For an AudioUnit, it can be
-        cast to an AudioUnit handle.
-    */
-    [[deprecated ("Use the new typesafe visitor-based interface rather than this function.")]]
-    virtual void* getPlatformSpecificData();
-
     // Rather than using these methods you should call the corresponding methods
     // on the AudioProcessorParameter objects returned from getParameters().
     // See the implementations of the methods below for some examples of how to

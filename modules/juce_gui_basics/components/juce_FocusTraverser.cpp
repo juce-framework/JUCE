@@ -107,7 +107,7 @@ struct FocusTraverserTests final : public UnitTest
         ScopedJuceInitialiser_GUI libraryInitialiser;
         const MessageManagerLock mml;
 
-        beginTest ("Basic traversal");
+        testCase ("Basic traversal", [&]
         {
             TestComponent parent;
 
@@ -124,28 +124,28 @@ struct FocusTraverserTests final : public UnitTest
 
             expect (std::equal (allComponents.cbegin(), allComponents.cend(), parent.children.cbegin(),
                                 [] (const Component* c1, const Component& c2) { return c1 == &c2; }));
-        }
+        });
 
-        beginTest ("Disabled components are not ignored by default");
+        testCase ("Disabled components are not ignored by default", [&]
         {
             TestComponent parent;
             parent.children[2].setEnabled (false);
             parent.children[5].setEnabled (false);
             expect (traverser.getAllComponents (&parent).size() == parent.children.size());
-        }
+        });
 
-        beginTest ("Disabled components can be ignored");
+        testCase ("Disabled components can be ignored", [&]
         {
             FocusTraverser ignoringTraverser { FocusTraverser::SkipDisabledComponents::yes };
             checkIgnored ([] (Component& c) { c.setEnabled (false); }, ignoringTraverser);
-        }
+        });
 
-        beginTest ("Invisible components are ignored");
+        testCase ("Invisible components are ignored", [&]
         {
             checkIgnored ([] (Component& c) { c.setVisible (false); }, traverser);
-        }
+        });
 
-        beginTest ("Explicit focus order comes before unspecified");
+        testCase ("Explicit focus order comes before unspecified", [&]
         {
             TestComponent parent;
 
@@ -155,28 +155,28 @@ struct FocusTraverserTests final : public UnitTest
             expect (traverser.getDefaultComponent (&parent) == &explicitFocusComponent);
 
             expect (traverser.getAllComponents (&parent).front() == &explicitFocusComponent);
-        }
+        });
 
-        beginTest ("Explicit focus order comparison");
+        testCase ("Explicit focus order comparison", [&]
         {
             checkComponentProperties ([this] (Component& child) { child.setExplicitFocusOrder (getRandom().nextInt ({ 1, 100 })); },
                                       [] (const Component& c1, const Component& c2) { return c1.getExplicitFocusOrder()
                                                                                                <= c2.getExplicitFocusOrder(); });
-        }
+        });
 
-        beginTest ("Left to right");
+        testCase ("Left to right", [&]
         {
             checkComponentProperties ([this] (Component& child) { child.setTopLeftPosition (getRandom().nextInt ({ 0, 100 }), 0); },
                                       [] (const Component& c1, const Component& c2) { return c1.getX() <= c2.getX(); });
-        }
+        });
 
-        beginTest ("Top to bottom");
+        testCase ("Top to bottom", [&]
         {
             checkComponentProperties ([this] (Component& child) { child.setTopLeftPosition (0, getRandom().nextInt ({ 0, 100 })); },
                                       [] (const Component& c1, const Component& c2) { return c1.getY() <= c2.getY(); });
-        }
+        });
 
-        beginTest ("Focus containers have their own focus");
+        testCase ("Focus containers have their own focus", [&]
         {
             Component root;
 
@@ -205,9 +205,9 @@ struct FocusTraverserTests final : public UnitTest
 
             expect (std::equal (allContainerComponents.cbegin(), allContainerComponents.cend(), container.children.cbegin(),
                                 [] (const Component* c1, const Component& c2) { return c1 == &c2; }));
-        }
+        });
 
-        beginTest ("Non-focus containers pass-through focus");
+        testCase ("Non-focus containers pass-through focus", [&]
         {
             Component root;
 
@@ -231,7 +231,7 @@ struct FocusTraverserTests final : public UnitTest
                                                                                                                     : &(*std::next (iter))));
 
             expect (traverser.getAllComponents (&root).size() == container.children.size() + 1);
-        }
+        });
     }
 
 private:

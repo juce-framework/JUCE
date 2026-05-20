@@ -32,36 +32,22 @@
   ==============================================================================
 */
 
-namespace juce::detail
+namespace juce::universal_midi_packets
 {
 
-struct FontRendering
+auto DeviceInfo::tie() const
 {
-    FontRendering() = delete;
+    return std::tie (manufacturer, family, modelNumber, revision);
+}
 
-    /*
-        Returns the total height of this font, in pixels, subject to the ascent and descent override
-        values.
+bool DeviceInfo::operator== (const DeviceInfo& other) const
+{
+    return tie() == other.tie();
+}
 
-        If no ascent or descent override is set, this will return the same value as getHeight().
-    */
-    static float getEffectiveHeight (const Font& font)
-    {
-        const auto ptr = font.getTypefacePtr();
+bool DeviceInfo::operator!= (const DeviceInfo& other) const
+{
+    return tie() != other.tie();
+}
 
-        if (ptr == nullptr)
-            return font.getHeight();
-
-        const auto original = ptr->getMetrics (font.getMetricsKind()).heightToPoints;
-        const auto actual = font.getHeightToPointsFactor();
-
-        const auto sanity = 1e-6 < original && original < 1e6 && actual < 1e6;
-
-        if (! sanity)
-            return font.getHeight();
-
-        return font.getHeight() * actual / original;
-    }
-};
-
-} // namespace juce::detail
+} // namespace juce::universal_midi_packets

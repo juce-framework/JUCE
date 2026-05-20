@@ -317,6 +317,12 @@ MainHostWindow::MainHostWindow()
     addDefaultFormatsToManager (formatManager);
     formatManager.addFormat (std::make_unique<InternalPluginFormat>());
 
+    for (auto* format : formatManager.getFormats())
+    {
+        if (auto* props = getAppProperties().getUserSettings())
+            format->searchPathsForPlugins (PluginListComponent::getLastSearchPath (*props, *format), false, false);
+    }
+
     auto safeThis = SafePointer<MainHostWindow> (this);
     RuntimePermissions::request (RuntimePermissions::recordAudio,
                                  [safeThis] (bool granted) mutable

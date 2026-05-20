@@ -1800,15 +1800,13 @@ public:
         return lilv_plugins_get_by_uri (plugins, uri.get());
     }
 
-    const LilvPlugin* getByFile (const File& file) const
+    void getByFile (const File& file, std::vector<const LilvPlugin*>& result) const
     {
         for (const auto* plugin : *this)
         {
             if (bundlePathFromUri (lilv_node_as_uri (lilv_plugin_get_bundle_uri (plugin))) == file)
-                return plugin;
+                result.push_back (plugin);
         }
-
-        return nullptr;
     }
 
 private:
@@ -4238,12 +4236,14 @@ public:
         if (File::isAbsolutePath (identifier))
             world->loadBundle (world->newFileUri (nullptr, File::addTrailingSeparator (identifier).toRawUTF8()));
 
-        for (const auto& plugin : { findPluginByUri (identifier), findPluginByFile (identifier) })
+        std::vector<const LilvPlugin*> plugins { findPluginByUri (identifier) };
+        findPluginsByFile (identifier, plugins);
+
+        for (const auto& plugin : plugins)
         {
             if (auto desc = getDescription (plugin); desc.fileOrIdentifier.isNotEmpty())
             {
                 result.add (std::make_unique<PluginDescription> (desc));
-                break;
             }
         }
     }
@@ -4282,34 +4282,41 @@ public:
         StringArray result;
 
         for (const auto* plugin : world->getAllPlugins())
-            result.add (lv2_host::Plugin { plugin }.getUri().getTyped());
+            result.add (URL { lv2_host::Plugin { plugin }.getBundleUri().getTyped() }.getLocalFile().getFullPathName());
 
         return result;
     }
 
     FileSearchPath getDefaultLocationsToSearch()
     {
-      #if JUCE_MAC
-        return { "~/Library/Audio/Plug-Ins/LV2;"
-                 "~/.lv2;"
-                 "/usr/local/lib/lv2;"
-                 "/usr/lib/lv2;"
-                 "/Library/Audio/Plug-Ins/LV2;" };
-      #elif JUCE_WINDOWS
-        return { "%APPDATA%\\LV2;"
-                 "%COMMONPROGRAMFILES%\\LV2" };
-      #else
-       #if JUCE_64BIT
-        if (File ("/usr/lib64/lv2").exists() || File ("/usr/local/lib64/lv2").exists())
-            return { "~/.lv2;"
-                     "/usr/lib64/lv2;"
-                     "/usr/local/lib64/lv2" };
-       #endif
+        auto defaults = std::invoke ([]() -> FileSearchPath
+        {
+          #if JUCE_MAC
+            return { "~/Library/Audio/Plug-Ins/LV2;"
+                     "~/.lv2;"
+                     "/Library/Audio/Plug-Ins/LV2;"
+                     "/usr/local/lib/lv2;"
+                     "/usr/lib/lv2;" };
+          #elif JUCE_WINDOWS
+            return { "%APPDATA%\\LV2;"
+                     "%COMMONPROGRAMFILES%\\LV2" };
+          #else
+           #if JUCE_64BIT
+            if (File ("/usr/lib64/lv2").exists() || File ("/usr/local/lib64/lv2").exists())
+                return { "~/.lv2;"
+                         "/usr/local/lib64/lv2;"
+                         "/usr/lib64/lv2" };
+           #endif
 
-        return { "~/.lv2;"
-                 "/usr/lib/lv2;"
-                 "/usr/local/lib/lv2" };
-      #endif
+            return { "~/.lv2;"
+                     "/usr/local/lib/lv2;"
+                     "/usr/lib/lv2" };
+          #endif
+        });
+
+        FileSearchPath result { SystemStats::getEnvironmentVariable ("LV2_PATH", "").replace (":", ";") };
+        result.addPath (defaults);
+        return result;
     }
 
     const LilvUI* findEmbeddableUi (const lv2_host::Uis* pluginUis, std::true_type)
@@ -4522,9 +4529,9 @@ private:
         return world->getAllPlugins().getByUri (world->newUri (s.toRawUTF8()));
     }
 
-    const LilvPlugin* findPluginByFile (const File& f)
+    void findPluginsByFile (const File& f, std::vector<const LilvPlugin*>& result)
     {
-        return world->getAllPlugins().getByFile (f);
+        return world->getAllPlugins().getByFile (f, result);
     }
 
     template <typename Fn>

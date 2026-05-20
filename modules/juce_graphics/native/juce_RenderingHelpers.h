@@ -203,10 +203,9 @@ public:
     {
         return cache.get (Key { font, glyphNumber }, [] (const auto& key)
         {
-            auto fontHeight = detail::FontRendering::getEffectiveHeight (key.font);
-            auto typeface = key.font.getTypefacePtr();
-            return typeface->getLayersForGlyph (key.font.getMetricsKind(),
-                                                key.glyph,
+            const auto fontHeight = key.font.getHeightInPoints();
+            const auto typeface = key.font.getTypefacePtr();
+            return typeface->getLayersForGlyph (key.glyph,
                                                 AffineTransform::scale (fontHeight * key.font.getHorizontalScale(),
                                                                         fontHeight));
         });
@@ -2527,8 +2526,8 @@ template <class StateObjectType>
 class SavedStateStack
 {
 public:
-    SavedStateStack (StateObjectType* initialState) noexcept
-        : currentState (initialState)
+    explicit SavedStateStack (std::unique_ptr<StateObjectType> initialState) noexcept
+        : currentState (std::move (initialState))
     {}
 
     SavedStateStack() = default;
@@ -2588,6 +2587,13 @@ public:
         : frame (frameIn)
     {
     }
+
+    explicit StackBasedLowLevelGraphicsContext (std::unique_ptr<SavedStateType> initialState)
+        : stack (std::move (initialState))
+    {
+    }
+
+    StackBasedLowLevelGraphicsContext() = default;
 
     bool isVectorDevice()                                              const override { return false; }
     Rectangle<int> getClipBounds()                                     const override { return stack->getClipBounds(); }
@@ -2660,11 +2666,11 @@ protected:
                 return std::tuple (cache.get (f, i), drawPos);
             }
 
-            const auto fontHeight = detail::FontRendering::getEffectiveHeight (stack->font);
+            const auto fontHeight = stack->font.getHeightInPoints();
             const auto fontTransform = AffineTransform::scale (fontHeight * stack->font.getHorizontalScale(),
                                                                fontHeight).followedBy (t);
             const auto fullTransform = stack->transform.getTransformWith (fontTransform);
-            return std::tuple (stack->font.getTypefacePtr()->getLayersForGlyph (stack->font.getMetricsKind(), i, fullTransform), Point<float>{});
+            return std::tuple (stack->font.getTypefacePtr()->getLayersForGlyph (i, fullTransform), Point<float>{});
         }();
 
         const auto initialFill = stack->fillType;
@@ -2693,9 +2699,6 @@ protected:
             }
         }
     }
-
-    explicit StackBasedLowLevelGraphicsContext (SavedStateType* initialState) : stack (initialState) {}
-    StackBasedLowLevelGraphicsContext() = default;
 
     RenderingHelpers::SavedStateStack<SavedStateType> stack;
     uint64_t frame = 0;

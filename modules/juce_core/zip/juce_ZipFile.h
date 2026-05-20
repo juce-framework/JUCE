@@ -50,26 +50,35 @@ public:
     /** Creates a ZipFile to read a specific file. */
     explicit ZipFile (const File& file);
 
+    /** Creates a ZipFile for the given stream. */
+    explicit ZipFile (std::unique_ptr<InputStream> inputStream);
+
+    /** Creates a ZipFile for the given input source. */
+    explicit ZipFile (std::unique_ptr<InputSource> inputSource);
+
+    /** Creates a ZipFile for the given stream.
+
+        The stream will not be owned or deleted by this class - if you want the ZipFile to
+        manage the stream's lifetime, use the constructor that takes a unique_ptr argument.
+    */
+    explicit ZipFile (InputStream& inputStream);
+
     //==============================================================================
-    /** Creates a ZipFile for a given stream.
+    /** @deprecated
 
         @param inputStream                  the stream to read from
         @param deleteStreamWhenDestroyed    if set to true, the object passed-in
                                             will be deleted when this ZipFile object is deleted
     */
+    [[deprecated ("Prefer the overload that takes a unique_ptr, or the overload that takes a reference")]]
     ZipFile (InputStream* inputStream, bool deleteStreamWhenDestroyed);
 
-    /** Creates a ZipFile for a given stream.
-        The stream will not be owned or deleted by this class - if you want the ZipFile to
-        manage the stream's lifetime, use the other constructor.
-    */
-    explicit ZipFile (InputStream& inputStream);
-
-    /** Creates a ZipFile for an input source.
+    /** @deprecated
 
         The inputSource object will be owned by the zip file, which will delete
         it later when not needed.
     */
+    [[deprecated ("Prefer the overload that takes a unique_ptr")]]
     explicit ZipFile (InputSource* inputSource);
 
     /** Destructor. */
@@ -237,6 +246,11 @@ public:
         void addFile (const File& fileToAdd, int compressionLevel,
                       const String& storedPathName = String());
 
+        /** @deprecated */
+        [[deprecated ("Prefer the overload that takes a unique_ptr argument")]]
+        void addEntry (InputStream* streamToRead, int compressionLevel,
+                       const String& storedPathName, Time fileModificationTime);
+
         /** Adds a stream to the list of items which will be added to the archive.
 
             @param streamToRead this stream isn't read immediately - a pointer to the stream is
@@ -249,8 +263,10 @@ public:
             @param fileModificationTime the timestamp that will be stored as the last modification time
                                         of this entry
         */
-        void addEntry (InputStream* streamToRead, int compressionLevel,
-                       const String& storedPathName, Time fileModificationTime);
+        void addEntry (std::unique_ptr<InputStream> streamToRead,
+                       int compressionLevel,
+                       const String& storedPathName,
+                       Time fileModificationTime);
 
         /** Generates the zip file, writing it to the specified stream.
             If the progress parameter is non-null, it will be updated with an approximate
@@ -268,6 +284,8 @@ public:
 
 private:
     //==============================================================================
+    explicit ZipFile (OptionalScopedPointer<InputStream>);
+
     struct ZipInputStream;
     struct ZipEntryHolder;
 

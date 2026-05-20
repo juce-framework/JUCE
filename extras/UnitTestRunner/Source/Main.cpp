@@ -114,12 +114,18 @@ int main (int argc, char **argv)
         return Random::getSystemRandom().nextInt64();
     });
 
-    if (args.containsOption (categoryOption))
-        runner.runTestsInCategory (args.getValueForOption (categoryOption), seed);
-    else if (args.containsOption (nameOption))
-        runner.runTestsWithName (args.getValueForOption (nameOption), seed);
+    if (args.containsOption (categoryOption) || args.containsOption (nameOption))
+    {
+        while (args.containsOption (categoryOption))
+            runner.runTestsInCategory (args.removeValueForOption (categoryOption), seed);
+
+        while (args.containsOption (nameOption))
+            runner.runTestsWithName (args.removeValueForOption (nameOption), seed);
+    }
     else
+    {
         runner.runAllTests (seed);
+    }
 
     std::vector<String> failures;
 

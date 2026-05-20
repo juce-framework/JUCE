@@ -53,7 +53,7 @@ struct TextureInfo
 struct CachedImageList final : public ReferenceCountedObject,
                                private ImagePixelData::Listener
 {
-    CachedImageList (OpenGLContext& c) noexcept
+    explicit CachedImageList (OpenGLContext& c) noexcept
         : context (c), maxCacheSize (c.getImageCacheSize()) {}
 
     static CachedImageList* get (OpenGLContext& c)
@@ -955,7 +955,7 @@ private:
         GLuint current{};
     };
 
-    Values values = []
+    static Values getInitialValues()
     {
         if (! Traits::predicate())
             return Values{};
@@ -968,7 +968,9 @@ private:
         Traits::bind (current);
 
         return Values { previous, current };
-    }();
+    }
+
+    Values values = getInitialValues();
 };
 
 //==============================================================================
@@ -1988,9 +1990,10 @@ struct NonShaderContext final : public LowLevelGraphicsSoftwareRenderer
         texture.bind();
 
         target.makeActive();
-        target.context.copyTexture (target.bounds, Rectangle<int> (texture.getWidth(),
-                                                                   texture.getHeight()),
-                                    target.bounds.getWidth(), target.bounds.getHeight(),
+        target.context.copyTexture (target.bounds,
+                                    Rectangle { texture.getWidth(), texture.getHeight() },
+                                    target.bounds.getWidth(),
+                                    target.bounds.getHeight(),
                                     false);
         glBindTexture (GL_TEXTURE_2D, 0);
 

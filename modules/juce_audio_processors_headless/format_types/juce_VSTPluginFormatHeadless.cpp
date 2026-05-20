@@ -167,71 +167,34 @@ void VSTPluginFormatHeadless::recursiveFileSearch (StringArray& results, const F
 
 FileSearchPath VSTPluginFormatHeadless::getDefaultLocationsToSearch()
 {
-   #if JUCE_MAC
-    return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");
-   #elif JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
-    return FileSearchPath (SystemStats::getEnvironmentVariable ("VST_PATH",
-                                                                "/usr/lib/vst;/usr/local/lib/vst;~/.vst")
-                             .replace (":", ";"));
-   #elif JUCE_WINDOWS
-    auto programFiles = File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName();
+    auto defaults = std::invoke ([]() -> FileSearchPath
+    {
+       #if JUCE_MAC
+        return { "~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST" };
+       #elif JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
+        return { "/usr/lib/vst;/usr/local/lib/vst;~/.vst" };
+       #elif JUCE_WINDOWS
+        auto programFiles = File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName();
 
-    FileSearchPath paths;
-    paths.add (WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\Software\\VST\\VSTPluginsPath"));
-    paths.addIfNotAlreadyThere (programFiles + "\\Steinberg\\VstPlugins");
-    paths.addIfNotAlreadyThere (programFiles + "\\VstPlugins");
-    paths.removeRedundantPaths();
-    return paths;
-   #elif JUCE_IOS
-    // on iOS you can only load plug-ins inside the hosts bundle folder
-    CFUniquePtr<CFURLRef> relativePluginDir (CFBundleCopyBuiltInPlugInsURL (CFBundleGetMainBundle()));
-    CFUniquePtr<CFURLRef> pluginDir (CFURLCopyAbsoluteURL (relativePluginDir.get()));
+        FileSearchPath paths;
+        paths.add (WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\Software\\VST\\VSTPluginsPath"));
+        paths.addIfNotAlreadyThere (programFiles + "\\Steinberg\\VstPlugins");
+        paths.addIfNotAlreadyThere (programFiles + "\\VstPlugins");
+        paths.removeRedundantPaths();
+        return paths;
+       #elif JUCE_IOS
+        // on iOS you can only load plug-ins inside the hosts bundle folder
+        CFUniquePtr<CFURLRef> relativePluginDir (CFBundleCopyBuiltInPlugInsURL (CFBundleGetMainBundle()));
+        CFUniquePtr<CFURLRef> pluginDir (CFURLCopyAbsoluteURL (relativePluginDir.get()));
 
-    CFUniquePtr<CFStringRef> path (CFURLCopyFileSystemPath (pluginDir.get(), kCFURLPOSIXPathStyle));
-    FileSearchPath retval (String (CFStringGetCStringPtr (path.get(), kCFStringEncodingUTF8)));
-    return retval;
-   #endif
-}
+        CFUniquePtr<CFStringRef> path (CFURLCopyFileSystemPath (pluginDir.get(), kCFURLPOSIXPathStyle));
+        return { String (CFStringGetCStringPtr (path.get(), kCFStringEncodingUTF8)) };
+       #endif
+    });
 
-const XmlElement* VSTPluginFormatHeadless::getVSTXML (AudioPluginInstance* plugin)
-{
-    if (auto* vst = dynamic_cast<VSTPluginInstanceHeadless*> (plugin))
-        if (vst->vstModule != nullptr)
-            return vst->vstModule->vstXml.get();
-
-    return nullptr;
-}
-
-bool VSTPluginFormatHeadless::loadFromFXBFile (AudioPluginInstance* plugin, const void* data, size_t dataSize)
-{
-    if (auto* vst = dynamic_cast<VSTPluginInstanceHeadless*> (plugin))
-        return vst->loadFromFXBFile (data, dataSize);
-
-    return false;
-}
-
-bool VSTPluginFormatHeadless::saveToFXBFile (AudioPluginInstance* plugin, MemoryBlock& dest, bool asFXB)
-{
-    if (auto* vst = dynamic_cast<VSTPluginInstanceHeadless*> (plugin))
-        return vst->saveToFXBFile (dest, asFXB);
-
-    return false;
-}
-
-bool VSTPluginFormatHeadless::getChunkData (AudioPluginInstance* plugin, MemoryBlock& result, bool isPreset)
-{
-    if (auto* vst = dynamic_cast<VSTPluginInstanceHeadless*> (plugin))
-        return vst->getChunkData (result, isPreset, 128);
-
-    return false;
-}
-
-bool VSTPluginFormatHeadless::setChunkData (AudioPluginInstance* plugin, const void* data, int size, bool isPreset)
-{
-    if (auto* vst = dynamic_cast<VSTPluginInstanceHeadless*> (plugin))
-        return vst->setChunkData (data, size, isPreset);
-
-    return false;
+    FileSearchPath result { SystemStats::getEnvironmentVariable ("VST_PATH", "").replace (":", ";") };
+    result.addPath (defaults);
+    return result;
 }
 
 AudioPluginInstance* VSTPluginFormatHeadless::createCustomVSTFromMainCall (void* entryPointFunction,
@@ -241,14 +204,6 @@ AudioPluginInstance* VSTPluginFormatHeadless::createCustomVSTFromMainCall (void*
     return createCustomVSTFromMainCallImpl<VSTPluginInstanceHeadless> (entryPointFunction, initialSampleRate, initialBufferSize).release();
 }
 
-void VSTPluginFormatHeadless::setExtraFunctions (AudioPluginInstance* plugin, ExtraFunctions* functions)
-{
-    std::unique_ptr<ExtraFunctions> f (functions);
-
-    if (auto* vst = dynamic_cast<VSTPluginInstanceHeadless*> (plugin))
-        std::swap (vst->extraFunctions, f);
-}
-
 AudioPluginInstance* VSTPluginFormatHeadless::getPluginInstanceFromVstEffectInterface (void* aEffect)
 {
     if (auto* vstAEffect = reinterpret_cast<Vst2::AEffect*> (aEffect))
@@ -256,19 +211,6 @@ AudioPluginInstance* VSTPluginFormatHeadless::getPluginInstanceFromVstEffectInte
             return dynamic_cast<AudioPluginInstance*> (instanceVST);
 
     return nullptr;
-}
-
-pointer_sized_int JUCE_CALLTYPE VSTPluginFormatHeadless::dispatcher (AudioPluginInstance* plugin,
-                                                                     int32 opcode,
-                                                                     int32 index,
-                                                                     pointer_sized_int value,
-                                                                     void* ptr,
-                                                                     float opt)
-{
-    if (auto* vst = dynamic_cast<VSTPluginInstanceHeadless*> (plugin))
-        return vst->dispatch (opcode, index, value, ptr, opt);
-
-    return {};
 }
 
 void VSTPluginFormatHeadless::aboutToScanVSTShellPlugin (const PluginDescription&) {}

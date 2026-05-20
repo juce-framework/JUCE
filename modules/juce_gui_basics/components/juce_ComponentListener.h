@@ -35,6 +35,49 @@
 namespace juce
 {
 
+/** Holds timing and cache usage information for a Component's paint operation.
+
+    @see ComponentListener::componentPainted
+
+    @tags{GUI}
+*/
+struct JUCE_API ComponentPaintDiagnostics
+{
+    /** Total duration of the component's paint cycle. */
+    TimedDiagnostic totalPaintDuration{};
+
+    /** Duration spent executing the component's paint() method.
+
+        @see Component::paint
+    */
+    TimedDiagnostic paintDuration{};
+
+    /** Duration spent executing the component's paintOverChildren() method.
+
+        @see Component::paintOverChildren
+    */
+    TimedDiagnostic paintOverChildrenDuration{};
+
+    /** Duration spent executing ImageEffectFilter::applyEffect() as part of any
+        component effect.
+
+        @see Component::setComponentEffect, ImageEffectFilter::applyEffect
+    */
+    TimedDiagnostic applyEffectDuration{};
+
+    /** True if the component wrote its painted content to a cache.
+
+        @see Component::setBufferedToImage, Component::setCachedComponentImage
+    */
+    bool wroteToCache{};
+
+    /** True if the component read its painted content from a cache.
+
+        @see Component::setBufferedToImage, Component::setCachedComponentImage
+    */
+    bool readFromCache{};
+};
+
 //==============================================================================
 /**
     Gets informed about changes to a component's hierarchy or position.
@@ -48,7 +91,7 @@ namespace juce
 
     @tags{GUI}
 */
-class JUCE_API  ComponentListener
+class JUCE_API ComponentListener
 {
 public:
     /** Destructor. */
@@ -126,6 +169,31 @@ public:
        @see Component::setEnabled, Component::isEnabled, Component::enablementChanged
     */
     virtual void componentEnablementChanged (Component& component);
+
+    /** Called each time the component is painted into a context.
+
+        This will be called once, each time the component is painted into a
+        graphics context. This might be to paint the component directly or to
+        paint a cached image of the component. To get more detailed information
+        regarding user overridable paint methods see componentPaintMethodsCalled().
+
+        This callback may be called while trying to paint components. This means
+        the time taken in this callback may be taken into account as part of
+        any parent components ComponentPaintDiagnostics. Therefore, an effort
+        should be made to keep any work in this callback to a bare minimum in
+        order to prevent distorting any results.
+
+        It's important not to rely on the precise timing of this callback. The
+        only guarantees are that the callback will occur some time after the
+        component is painted (although the contents of that paint call may not
+        have been updated to the screen).
+
+        @param component    the component that was painted
+        @param diagnostics  general diagnostics for painting the component
+
+        @see componentPaintMethodsCalled
+    */
+    virtual void componentPainted (Component& component, const ComponentPaintDiagnostics& diagnostics);
 };
 
 } // namespace juce

@@ -301,7 +301,7 @@ public:
         return from (FontOptions{}.withName ("Roboto"));
     }
 
-    static JUCE_INTRODUCED_IN_29 Typeface::Ptr findGenericTypefaceWithMatcher (const char* name)
+    static JUCE_INTRODUCED_IN_29 Typeface::Ptr findGenericTypefaceWithMatcher (const Font& font)
     {
         using AFontMatcherPtr = std::unique_ptr<AFontMatcher, FunctionPointerDestructor<AFontMatcher_destroy>>;
         using AFontPtr = std::unique_ptr<AFont, FunctionPointerDestructor<AFont_close>>;
@@ -309,8 +309,11 @@ public:
         constexpr uint16_t testString[] { 't', 'e', 's', 't' };
 
         const AFontMatcherPtr matcher { AFontMatcher_create() };
+        const auto weight = font.isBold() ? AFONT_WEIGHT_BOLD : AFONT_WEIGHT_NORMAL;
+        const auto italic = font.isItalic();
+        AFontMatcher_setStyle (matcher.get(), weight, italic);
         const AFontPtr matched { AFontMatcher_match (matcher.get(),
-                                                     name,
+                                                     font.getTypefaceName().toRawUTF8(),
                                                      testString,
                                                      std::size (testString),
                                                      nullptr) };
@@ -348,7 +351,7 @@ private:
 
     static JUCE_INTRODUCED_IN_29 Typeface::Ptr findSystemTypefaceWithMatcher()
     {
-        return findGenericTypefaceWithMatcher ("system-ui");
+        return findGenericTypefaceWithMatcher (FontOptions{}.withName ("system-ui"));
     }
 
     JUCE_INTRODUCED_IN_29 Typeface::Ptr matchWithAFontMatcher (const String& text, const String& language) const
@@ -432,7 +435,7 @@ private:
     */
     static Typeface::Ptr fromMemory (DoCache cache,
                                      Span<const std::byte> blob,
-                                     unsigned int index = 0)
+                                     unsigned int index)
     {
         auto face = FontStyleHelpers::getFaceForBlob ({ reinterpret_cast<const char*> (blob.data()), blob.size() }, index);
 
@@ -469,7 +472,7 @@ private:
         : Typeface (name, style),
           doCache (cache),
           javaFont (std::move (javaFontIn)),
-          native (std::make_unique<Native> (TypefaceNativeOptions { std::move (fontIn), nonPortableMetricsIn, this }))
+          native (std::make_unique<Native> (TypefaceNativeOptions { fontIn, nonPortableMetricsIn, this }))
     {
         if (doCache == DoCache::yes)
             if (auto* c = MemoryFontCache::getInstance())
@@ -794,9 +797,20 @@ Typeface::Ptr Font::Native::getDefaultPlatformTypefaceForFont (const Font& font)
     {
         if (__builtin_available (android 29, *))
         {
-            if (faceName == Font::getDefaultSansSerifFontName())    return AndroidTypeface::findGenericTypefaceWithMatcher ("sans-serif");
-            if (faceName == Font::getDefaultSerifFontName())        return AndroidTypeface::findGenericTypefaceWithMatcher ("serif");
-            if (faceName == Font::getDefaultMonospacedFontName())   return AndroidTypeface::findGenericTypefaceWithMatcher ("monospace");
+            const auto nameToFind = std::invoke ([&]
+            {
+                if (faceName == Font::getDefaultSansSerifFontName())  return "sans-serif";
+                if (faceName == Font::getDefaultSerifFontName())      return "serif";
+                if (faceName == Font::getDefaultMonospacedFontName()) return "monospace";
+                return "";
+            });
+
+            if (strlen (nameToFind) == 0)
+                return nullptr;
+
+            auto copy = font;
+            copy.setTypefaceName (nameToFind);
+            return AndroidTypeface::findGenericTypefaceWithMatcher (copy);
         }
 
         return nullptr;

@@ -68,6 +68,7 @@
 #include "../../../GUI/WebBrowserDemo.h"
 #include "../../../GUI/WidgetsDemo.h"
 #include "../../../GUI/WindowsDemo.h"
+#include "../../../GUI/ComponentDiagnosticsDemo.h"
 
 void registerDemos_Two() noexcept
 {
@@ -85,6 +86,7 @@ void registerDemos_Two() noexcept
     REGISTER_DEMO (CodeEditorDemo,            GUI, false)
    #endif
     REGISTER_DEMO (ComponentDemo,             GUI, false)
+    REGISTER_DEMO (ComponentDiagnosticsDemo,  GUI, false)
     REGISTER_DEMO (ComponentTransformsDemo,   GUI, false)
     REGISTER_DEMO (DialogsDemo,               GUI, false)
     REGISTER_DEMO (FlexBoxDemo,               GUI, false)

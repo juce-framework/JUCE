@@ -1,4 +1,5 @@
 Checks: >
+    clang-analyzer-*,
     -clang-analyzer-cplusplus.NewDeleteLeaks,
     -clang-analyzer-optin.performance.Padding,
     -clang-analyzer-security.FloatLoopCounter,

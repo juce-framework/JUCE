@@ -90,7 +90,6 @@ public:
     double getTailLengthSeconds() const override                                  { return inner->getTailLengthSeconds(); }
     bool acceptsMidi() const override                                             { return inner->acceptsMidi(); }
     bool producesMidi() const override                                            { return inner->producesMidi(); }
-    AudioProcessorEditor* createEditor() override                                 { return inner->createEditor(); }
     bool hasEditor() const override                                               { return inner->hasEditor(); }
     int getNumPrograms() override                                                 { return inner->getNumPrograms(); }
     int getCurrentProgram() override                                              { return inner->getCurrentProgram(); }
@@ -101,6 +100,64 @@ public:
     void setStateInformation (const void* d, int s) override                      { inner->setStateInformation (d, s); }
     void getCurrentProgramStateInformation (juce::MemoryBlock& b) override        { inner->getCurrentProgramStateInformation (b); }
     void setCurrentProgramStateInformation (const void* d, int s) override        { inner->setCurrentProgramStateInformation (d, s); }
+
+    AudioProcessorEditor* createEditor() override
+    {
+        class Decorator : public AudioProcessorEditor
+        {
+        public:
+            explicit Decorator (InternalPlugin& proc)
+                : AudioProcessorEditor (proc), self (proc)
+            {
+                addAndMakeVisible (*wrapped);
+                setOpaque (true);
+                setSize (wrapped->getWidth(), wrapped->getHeight());
+            }
+
+            ~Decorator() override
+            {
+                self.editorBeingDeleted (this);
+            }
+
+            void paint (Graphics&) override {}
+
+            void resized() override
+            {
+                wrapped->setBounds (getLocalBounds());
+            }
+
+            void setControlHighlight (ParameterControlHighlightInfo info) override
+            {
+                wrapped->setControlHighlight (info);
+            }
+
+            int getControlParameterIndex (Component& c) override
+            {
+                return wrapped->getControlParameterIndex (c);
+            }
+
+            bool supportsHostMIDIControllerPresence (bool hostMIDIControllerIsAvailable) override
+            {
+                return wrapped->supportsHostMIDIControllerPresence (hostMIDIControllerIsAvailable);
+            }
+
+            void hostMIDIControllerIsAvailable (bool controllerIsAvailable) override
+            {
+                return wrapped->hostMIDIControllerIsAvailable (controllerIsAvailable);
+            }
+
+            bool wantsLayerBackedView() const override
+            {
+                return wrapped->wantsLayerBackedView();
+            }
+
+        private:
+            InternalPlugin& self;
+            std::unique_ptr<AudioProcessorEditor> wrapped { self.inner->createEditorAndMakeActive() };
+        };
+
+        return new Decorator { *this };
+    }
 
     void prepareToPlay (double sr, int bs) override
     {

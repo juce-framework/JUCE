@@ -1929,9 +1929,9 @@ struct CoreMidiHelpers
     class ConnectionToDst
     {
     public:
-        void send (ump::Iterator b, ump::Iterator e)
+        bool send (ump::Iterator b, ump::Iterator e)
         {
-            output.send (connection.portAndEndpoint, b, e);
+            return output.send (connection.portAndEndpoint, b, e);
         }
 
         void addDisconnectionListener (ump::DisconnectionListener& l)
@@ -2106,8 +2106,7 @@ struct CoreMidiHelpers
 
         bool send (ump::Iterator b, ump::Iterator e) override
         {
-            connection->send (b, e);
-            return true;
+            return connection->send (b, e);
         }
 
         ump::EndpointId getEndpointId() const override

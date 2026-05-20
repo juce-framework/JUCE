@@ -135,6 +135,34 @@ namespace juce::build_tools
                 return "undefined";
             }
 
+            bool supportsPaceProtection() const noexcept
+            {
+                switch (type)
+                {
+                    case GUIApp:            return true;
+                    case VSTPlugIn:         return true;
+                    case VST3PlugIn:        return true;
+                    case AudioUnitPlugIn:   return true;
+                    case StandalonePlugIn:  return true;
+                    case AudioUnitv3PlugIn: return true;
+                    case AAXPlugIn:         return true;
+                    case ConsoleApp:        return true;
+                    case StaticLibrary:     return true;
+                    case DynamicLibrary:    return true;
+                    case SharedCodeTarget:  return true;
+
+                    case UnityPlugIn:       return false;
+                    case LV2PlugIn:         return false;
+                    case AggregateTarget:   return false;
+                    case LV2Helper:         return false;
+                    case VST3Helper:        return false;
+
+                    case unspecified:       return false;
+                }
+
+                return false;
+            }
+
             static Type typeFromName (const String& name)
             {
                 if (name == "App")                  return Type::GUIApp;

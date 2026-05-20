@@ -154,59 +154,28 @@ public:
 };
 
 //==============================================================================
-class PluginListComponent::Scanner final : public std::enable_shared_from_this<Scanner>,
-                                           private Timer
+class PluginListComponent::Scanner final : private Timer
 {
 public:
-    Scanner (PluginListComponent& plc, AudioPluginFormat& format, const StringArray& filesOrIdentifiers,
-             PropertiesFile* properties, bool allowPluginsWhichRequireAsynchronousInstantiation, int threads,
-             const String& title, const String& text)
-        : owner (plc),
-          formatToScan (format),
-          filesOrIdentifiersToScan (filesOrIdentifiers),
-          propertiesToUse (properties),
-          pathChooserWindow (TRANS ("Select folders to scan..."), String(), MessageBoxIconType::NoIcon, &plc),
-          progressWindow (title, text, MessageBoxIconType::NoIcon, &plc),
-          numThreads (threads),
-          allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
+    static std::shared_ptr<Scanner> make (PluginListComponent& plc,
+                                          AudioPluginFormat& format,
+                                          const StringArray& filesOrIdentifiers,
+                                          PropertiesFile* properties,
+                                          bool allowPluginsWhichRequireAsynchronousInstantiation,
+                                          int threads,
+                                          const String& title,
+                                          const String& text)
     {
-        const auto blacklisted = owner.list.getBlacklistedFiles();
-        initiallyBlacklistedFiles = std::set<String> (blacklisted.begin(), blacklisted.end());
-
-        FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
-
-        // You need to use at least one thread when scanning plug-ins asynchronously
-        jassert (! allowAsync || (numThreads > 0));
-
-        // If the filesOrIdentifiersToScan argument isn't empty, we should only scan these
-        // If the path is empty, then paths aren't used for this format.
-        if (filesOrIdentifiersToScan.isEmpty() && path.getNumPaths() > 0)
-        {
-           #if ! JUCE_IOS
-            if (propertiesToUse != nullptr)
-                path = getLastSearchPath (*propertiesToUse, formatToScan);
-           #endif
-
-            pathList.setSize (500, 300);
-            pathList.setPath (path);
-
-            pathChooserWindow.addCustomComponent (&pathList);
-            pathChooserWindow.addButton (TRANS ("Scan"),   1, KeyPress (KeyPress::returnKey));
-            pathChooserWindow.addButton (TRANS ("Cancel"), 0, KeyPress (KeyPress::escapeKey));
-
-            pathChooserWindow.enterModalState (true,
-                                               ModalCallbackFunction::create ([this] (auto result)
-                                               {
-                                                   if (result != 0)
-                                                       warnUserAboutUnsuitablePaths();
-                                                   else
-                                                       finishedScan();
-                                               }));
-        }
-        else
-        {
-            startScan();
-        }
+        std::shared_ptr<Scanner> strong { new Scanner (plc,
+                                                       format,
+                                                       filesOrIdentifiers,
+                                                       properties,
+                                                       allowPluginsWhichRequireAsynchronousInstantiation,
+                                                       threads,
+                                                       title,
+                                                       text) };
+        strong->doScan (strong);
+        return strong;
     }
 
     ~Scanner() override
@@ -238,11 +207,72 @@ private:
     bool allowAsync, timerReentrancyCheck = false;
     std::atomic<int> flags { 0 };
     std::unique_ptr<ThreadPool> pool;
-    std::set<String> initiallyBlacklistedFiles;
+    std::set<String> initiallyBlacklistedFiles = std::invoke ([&]
+    {
+        const auto blacklisted = owner.list.getBlacklistedFiles();
+        return std::set<String> (blacklisted.begin(), blacklisted.end());
+    });
     ScopedMessageBox messageBox;
 
+    Scanner (PluginListComponent& plc,
+             AudioPluginFormat& format,
+             const StringArray& filesOrIdentifiers,
+             PropertiesFile* properties,
+             bool allowPluginsWhichRequireAsynchronousInstantiation,
+             int threads,
+             const String& title,
+             const String& text)
+        : owner (plc),
+          formatToScan (format),
+          filesOrIdentifiersToScan (filesOrIdentifiers),
+          propertiesToUse (properties),
+          pathChooserWindow (TRANS ("Select folders to scan..."), String(), MessageBoxIconType::NoIcon, &plc),
+          progressWindow (title, text, MessageBoxIconType::NoIcon, &plc),
+          numThreads (threads),
+          allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
+    {
+    }
+
+    void doScan (std::weak_ptr<Scanner> weakSelf)
+    {
+        FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
+
+        // You need to use at least one thread when scanning plug-ins asynchronously
+        jassert (! allowAsync || (numThreads > 0));
+
+        // If the filesOrIdentifiersToScan argument isn't empty, we should only scan these
+        // If the path is empty, then paths aren't used for this format.
+        if (filesOrIdentifiersToScan.isEmpty() && path.getNumPaths() > 0)
+        {
+           #if ! JUCE_IOS
+            if (propertiesToUse != nullptr)
+                path = getLastSearchPath (*propertiesToUse, formatToScan);
+           #endif
+
+            pathList.setSize (500, 300);
+            pathList.setPath (path);
+
+            pathChooserWindow.addCustomComponent (&pathList);
+            pathChooserWindow.addButton (TRANS ("Scan"),   1, KeyPress (KeyPress::returnKey));
+            pathChooserWindow.addButton (TRANS ("Cancel"), 0, KeyPress (KeyPress::escapeKey));
+
+            pathChooserWindow.enterModalState (true,
+                                               ModalCallbackFunction::create ([this, weakSelf] (auto result)
+                                               {
+                                                   if (result != 0)
+                                                       warnUserAboutUnsuitablePaths (weakSelf);
+                                                   else
+                                                       finishedScan();
+                                               }));
+        }
+        else
+        {
+            startScan (weakSelf);
+        }
+    }
+
     // Try to dissuade people from to scanning their entire C: drive, or other system folders.
-    void warnUserAboutUnsuitablePaths()
+    void warnUserAboutUnsuitablePaths (std::weak_ptr<Scanner> weakSelf)
     {
         for (int i = 0; i < pathList.getPath().getNumPaths(); ++i)
         {
@@ -259,10 +289,10 @@ private:
                                                                          + TRANS ("Are you sure you want to scan the folder \"XYZ\"?")
                                                                             .replace ("XYZ", f),
                                                                        TRANS ("Scan"));
-                messageBox = AlertWindow::showScopedAsync (options, [this] (int result)
+                messageBox = AlertWindow::showScopedAsync (options, [this, weakSelf] (int result)
                 {
                     if (result != 0)
-                        startScan();
+                        startScan (weakSelf);
                     else
                         finishedScan();
                 });
@@ -271,7 +301,7 @@ private:
             }
         }
 
-        startScan();
+        startScan (weakSelf);
     }
 
     static bool isUnsuitablePath (const File& f)
@@ -303,7 +333,7 @@ private:
         return false;
     }
 
-    void startScan()
+    void startScan (std::weak_ptr<Scanner> weakSelf)
     {
         pathChooserWindow.setVisible (false);
 
@@ -322,9 +352,9 @@ private:
 
         progressWindow.addButton (TRANS ("Cancel"), 0, KeyPress (KeyPress::escapeKey));
         progressWindow.addProgressBarComponent (progress);
-        progressWindow.enterModalState (true, ModalCallbackFunction::create ([weak = weak_from_this()] (auto)
+        progressWindow.enterModalState (true, ModalCallbackFunction::create ([weakSelf] (auto)
         {
-            if (const auto strong = weak.lock())
+            if (const auto strong = weakSelf.lock())
                 strong->flags |= stopRequested;
         }));
 
@@ -652,14 +682,14 @@ void PluginListComponent::scanFor (AudioPluginFormat& format)
 
 void PluginListComponent::scanFor (AudioPluginFormat& format, const StringArray& filesOrIdentifiersToScan)
 {
-    currentScanner = std::make_shared<Scanner> (*this,
-                                                format,
-                                                filesOrIdentifiersToScan,
-                                                propertiesToUse,
-                                                allowAsync,
-                                                numThreads,
-                                                dialogTitle.isNotEmpty() ? dialogTitle : TRANS ("Scanning for plug-ins..."),
-                                                dialogText.isNotEmpty()  ? dialogText  : TRANS ("Searching for all possible plug-in files..."));
+    currentScanner = Scanner::make (*this,
+                                    format,
+                                    filesOrIdentifiersToScan,
+                                    propertiesToUse,
+                                    allowAsync,
+                                    numThreads,
+                                    dialogTitle.isNotEmpty() ? dialogTitle : TRANS ("Scanning for plug-ins..."),
+                                    dialogText.isNotEmpty()  ? dialogText  : TRANS ("Searching for all possible plug-in files..."));
 }
 
 bool PluginListComponent::isScanning() const noexcept

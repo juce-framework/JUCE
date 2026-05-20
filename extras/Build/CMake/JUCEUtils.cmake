@@ -375,6 +375,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content SHOULD_ADD_STORYBOARD                ${target} JUCE_SHOULD_ADD_STORYBOARD)
     _juce_append_target_property(file_content LAUNCH_STORYBOARD_FILE               ${target} JUCE_LAUNCH_STORYBOARD_FILE)
     _juce_append_target_property(file_content ICON_FILE                            ${target} JUCE_ICON_FILE)
+    _juce_append_target_property(file_content ICON_COMPOSER_BUNDLE                 ${target} JUCE_ICON_COMPOSER_BUNDLE)
     _juce_append_target_property(file_content PROJECT_NAME                         ${target} JUCE_PRODUCT_NAME)
     _juce_append_target_property(file_content COMPANY_COPYRIGHT                    ${target} JUCE_COMPANY_COPYRIGHT)
     _juce_append_target_property(file_content COMPANY_NAME                         ${target} JUCE_COMPANY_NAME)
@@ -636,6 +637,7 @@ function(_juce_generate_icon source_target dest_target)
     get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
     get_target_property(juce_property_icon_big ${source_target} JUCE_ICON_BIG)
     get_target_property(juce_property_icon_small ${source_target} JUCE_ICON_SMALL)
+    get_target_property(juce_property_icon_composer_bundle ${source_target} JUCE_ICON_COMPOSER_BUNDLE)
 
     set(icon_args)
 
@@ -647,7 +649,37 @@ function(_juce_generate_icon source_target dest_target)
         list(APPEND icon_args "${juce_property_icon_small}")
     endif()
 
+    get_filename_component(icon_composer_icon_name "${juce_property_icon_composer_bundle}" NAME_WE)
+
+    if(juce_property_icon_composer_bundle AND (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS"))
+        set_source_files_properties("${juce_property_icon_composer_bundle}"
+            PROPERTIES
+                MACOSX_PACKAGE_LOCATION Resources
+                XCODE_EXPLICIT_FILE_TYPE folder.iconcomposer.icon
+        )
+
+        target_sources(${dest_target} PRIVATE "${juce_property_icon_composer_bundle}")
+
+        set_target_properties(${dest_target} PROPERTIES
+            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "${icon_composer_icon_name}")
+
+        if((CMAKE_SYSTEM_NAME STREQUAL "Darwin") AND (NOT CMAKE_GENERATOR STREQUAL "Xcode"))
+            add_custom_command(TARGET ${target} POST_BUILD
+                COMMAND "${CMAKE_COMMAND}"
+                    "-Dbundle_dir='$<TARGET_BUNDLE_DIR:${target}>'"
+                    "-Dicon_path=${juce_property_icon_composer_bundle}"
+                    "-P" "${JUCE_CMAKE_UTILS_DIR}/generateXcassetsFromIcon.cmake"
+                VERBATIM)
+        endif()
+    endif()
+
     set(generated_icon)
+
+    set(apple_app_icon_name "${icon_composer_icon_name}")
+
+    if(NOT apple_app_icon_name)
+        set(apple_app_icon_name "AppIcon")
+    endif()
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         if(NOT icon_args)
@@ -656,9 +688,9 @@ function(_juce_generate_icon source_target dest_target)
 
         _juce_check_icon_files_exist("${icon_args}")
 
-        set(generated_icon "${juce_library_code}/Icon.icns")
+        set(generated_icon "${juce_library_code}/${apple_app_icon_name}.icns")
         # To get compiled properly, we need the icon before the plist is generated!
-        _juce_execute_juceaide(macicon "${generated_icon}" ${icon_args})
+        _juce_execute_juceaide(macicon "${generated_icon}" "${apple_app_icon_name}" ${icon_args})
         set_source_files_properties(${generated_icon} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if(NOT icon_args)
@@ -679,15 +711,19 @@ function(_juce_generate_icon source_target dest_target)
             set(generated_icon "${out_path}/Images.xcassets")
 
             # To get compiled properly, we need iOS assets at configure time!
-            _juce_execute_juceaide(iosassets "${out_path}" ${icon_args})
+            _juce_execute_juceaide(iosassets "${out_path}" "${apple_app_icon_name}" ${icon_args})
         endif()
 
         if(NOT generated_icon)
             return()
         endif()
 
-        set_target_properties(${dest_target} PROPERTIES
-            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
+        get_target_property(existing_appicon ${dest_target} XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME)
+
+        if(NOT existing_appicon)
+            set_target_properties(${dest_target} PROPERTIES
+                XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "${apple_app_icon_name}")
+        endif()
 
         get_target_property(add_storyboard ${source_target} JUCE_SHOULD_ADD_STORYBOARD)
 
@@ -1036,49 +1072,58 @@ endfunction()
 
 # ==================================================================================================
 
-function(_juce_add_vst3_manifest_helper_target shared_code_target)
-    set(vst3_helper_target ${shared_code_target}_vst3_helper)
+function(_juce_add_vst3_manifest_helper_target shared_code_target out_target out_executable_path)
+    set(helper_target ${shared_code_target}_vst3_helper)
 
-    if(TARGET ${vst3_helper_target}
+    if(TARGET ${helper_target}
        OR (CMAKE_SYSTEM_NAME STREQUAL "iOS")
        OR (CMAKE_SYSTEM_NAME STREQUAL "Android")
        OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
         return()
     endif()
 
-    get_target_property(module_path juce::juce_audio_processors INTERFACE_JUCE_MODULE_PATH)
-    set(vst3_dir "${module_path}/juce_audio_processors/format_types/VST3_SDK")
+    get_target_property(juce_library_code "${shared_code_target}" JUCE_GENERATED_SOURCES_DIRECTORY)
+    set(build_dir "${juce_library_code}/vst3_helper")
+    set(helper_name "vst3_helper")
 
-    set(extension "cpp")
+    set(shared_defs_file "${build_dir}/shared_defs_$<CONFIG>.txt")
+    file(GENERATE OUTPUT "${shared_defs_file}" CONTENT "$<TARGET_PROPERTY:${shared_code_target},COMPILE_DEFINITIONS>")
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        set(extension "mm")
+    set(shared_incs_file "${build_dir}/shared_incs_$<CONFIG>.txt")
+    file(GENERATE OUTPUT "${shared_incs_file}" CONTENT "$<TARGET_PROPERTY:${shared_code_target},INCLUDE_DIRECTORIES>")
+
+    set(PASSTHROUGH_ARGS "")
+
+    if(CMAKE_C_COMPILER)
+        list(APPEND PASSTHROUGH_ARGS "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
     endif()
 
-    set(source "${module_path}/juce_audio_plugin_client/VST3/juce_VST3ManifestHelper.${extension}")
-
-    add_executable(${vst3_helper_target} "${source}")
-    add_executable(juce::${vst3_helper_target} ALIAS ${vst3_helper_target})
-
-    target_include_directories(${vst3_helper_target} PRIVATE "${vst3_dir}" "${module_path}")
-
-    target_compile_definitions(${vst3_helper_target} PRIVATE
-        $<TARGET_GENEX_EVAL:${shared_code_target},$<TARGET_PROPERTY:${shared_code_target},COMPILE_DEFINITIONS>>)
-
-    target_include_directories(${vst3_helper_target} PRIVATE
-        $<TARGET_GENEX_EVAL:${shared_code_target},$<TARGET_PROPERTY:${shared_code_target},INCLUDE_DIRECTORIES>>)
-
-    target_compile_features(${vst3_helper_target} PRIVATE cxx_std_17)
-
-    target_link_libraries(${vst3_helper_target} PRIVATE juce_recommended_config_flags)
-
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
-        target_link_libraries(${vst3_helper_target} PRIVATE stdc++fs)
+    if(CMAKE_CXX_COMPILER)
+        list(APPEND PASSTHROUGH_ARGS "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
     endif()
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        _juce_link_frameworks(${vst3_helper_target} PRIVATE Foundation)
+    if(CMAKE_RC_COMPILER)
+        list(APPEND PASSTHROUGH_ARGS "-DCMAKE_RC_COMPILER=${CMAKE_RC_COMPILER}")
     endif()
+
+    add_custom_target(${helper_target}
+        COMMAND "${CMAKE_COMMAND}"
+            "-G${CMAKE_GENERATOR}"
+            "-S${JUCE_CMAKE_UTILS_DIR}/juce_vst3_helper"
+            "-B${build_dir}"
+            "-Dhelper_name=${helper_name}"
+            "-Dsource_file=$<TARGET_PROPERTY:juce_audio_plugin_client,INTERFACE_JUCE_MODULE_PATH>/juce_audio_plugin_client/VST3/juce_VST3ManifestHelper.cpp"
+            "-Dshared_defs_file=${shared_defs_file}"
+            "-Dshared_incs_file=${shared_incs_file}"
+            ${PASSTHROUGH_ARGS}
+
+        COMMAND "${CMAKE_COMMAND}" --build "${build_dir}"
+
+        COMMENT "Building VST3 manifest helper for ${shared_code_target}"
+        VERBATIM)
+
+    set(${out_executable_path} "${build_dir}/${helper_name}${CMAKE_EXECUTABLE_SUFFIX}" PARENT_SCOPE)
+    set(${out_target} ${helper_target} PARENT_SCOPE)
 endfunction()
 
 function(juce_enable_vst3_manifest_step shared_code_target)
@@ -1099,13 +1144,6 @@ function(juce_enable_vst3_manifest_step shared_code_target)
             "juce_enable_copy_plugin_step too.")
     endif()
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT JUCE_WINDOWS_HELPERS_CAN_RUN)
-        message(WARNING "VST3 manifest generation is disabled for ${shared_code_target} because a "
-            "${JUCE_TARGET_ARCHITECTURE} manifest helper cannot run on a host system processor detected to be "
-            "${CMAKE_HOST_SYSTEM_PROCESSOR}.")
-        return()
-    endif()
-
     set(target_name ${shared_code_target}_VST3)
     get_target_property(product ${target_name} JUCE_PLUGIN_ARTEFACT_FILE)
 
@@ -1114,17 +1152,17 @@ function(juce_enable_vst3_manifest_step shared_code_target)
     endif()
 
     # Add a target for the helper tool
-    _juce_add_vst3_manifest_helper_target(${shared_code_target})
+    _juce_add_vst3_manifest_helper_target(${shared_code_target} helper_target helper_path)
 
-    get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
+    set(output_path "${product}/Contents/Resources/moduleinfo.json")
 
-    set(ouput_path "${product}/Contents/Resources/moduleinfo.json")
+    add_dependencies(${target_name} ${helper_target})
 
     # Use the helper tool to write out the moduleinfo.json
     add_custom_command(TARGET ${target_name} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo "creating ${output_path}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${product}/Contents/Resources"
-        COMMAND ${shared_code_target}_vst3_helper > "${ouput_path}")
+        COMMAND "${helper_path}" > "${output_path}")
 
     set_target_properties(${shared_code_target} PROPERTIES _JUCE_VST3_MANIFEST_STEP_ADDED TRUE)
 endfunction()
@@ -1998,6 +2036,7 @@ function(_juce_initialise_target target)
         REQUIRES_FULL_SCREEN            # iOS only
         ICON_BIG
         ICON_SMALL
+        ICON_COMPOSER_BUNDLE            # MacOS/iOS only
         COMPANY_COPYRIGHT
         COMPANY_NAME
         COMPANY_WEBSITE

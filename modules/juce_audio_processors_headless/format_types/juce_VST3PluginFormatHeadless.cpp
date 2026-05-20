@@ -43,14 +43,6 @@ namespace juce
 // it won't recognize the dynamic types of pointers to the plugin's interfaces.
 JUCE_BEGIN_NO_SANITIZE ("vptr")
 
-bool VST3PluginFormatHeadless::setStateFromVSTPresetFile (AudioPluginInstance* api, const MemoryBlock& rawData)
-{
-    if (auto vst3 = dynamic_cast<VST3PluginInstanceHeadless*> (api))
-        return vst3->setStateFromPresetFile (rawData);
-
-    return false;
-}
-
 void VST3PluginFormatHeadless::findAllTypesForFile (OwnedArray<PluginDescription>& results, const String& fileOrIdentifier)
 {
     if (! fileMightContainThisPluginType (fileOrIdentifier))
@@ -155,15 +147,27 @@ StringArray VST3PluginFormatHeadless::searchPathsForPlugins (const FileSearchPat
 
 FileSearchPath VST3PluginFormatHeadless::getDefaultLocationsToSearch()
 {
-   #if JUCE_WINDOWS
-    const auto localAppData = File::getSpecialLocation (File::windowsLocalAppData)        .getFullPathName();
-    const auto programFiles = File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName();
-    return FileSearchPath (localAppData + "\\Programs\\Common\\VST3;" + programFiles + "\\Common Files\\VST3");
-   #elif JUCE_MAC
-    return FileSearchPath ("~/Library/Audio/Plug-Ins/VST3;/Library/Audio/Plug-Ins/VST3");
-   #else
-    return FileSearchPath ("~/.vst3/;/usr/lib/vst3/;/usr/local/lib/vst3/");
-   #endif
+    auto defaults = std::invoke ([]() -> FileSearchPath
+    {
+      #if JUCE_WINDOWS
+        const auto localAppData = File::getSpecialLocation (File::windowsLocalAppData)        .getFullPathName();
+        const auto programFiles = File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName();
+        return { localAppData + "\\Programs\\Common\\VST3;" + programFiles + "\\Common Files\\VST3" };
+      #elif JUCE_MAC
+        return { "~/Library/Audio/Plug-Ins/VST3;/Library/Audio/Plug-Ins/VST3" };
+      #else
+       #if JUCE_64BIT
+        if (File ("/usr/lib64/vst3").exists() || File ("/usr/local/lib64/vst3").exists())
+            return { "~/.vst3/;/usr/local/lib64/vst3/;/usr/lib64/vst3/" };
+       #endif
+
+        return { "~/.vst3/;/usr/local/lib/vst3/;/usr/lib/vst3/" };
+      #endif
+    });
+
+    FileSearchPath result { SystemStats::getEnvironmentVariable ("VST3_PATH", "").replace (":", ";") };
+    result.addPath (defaults);
+    return result;
 }
 
 JUCE_END_NO_SANITIZE

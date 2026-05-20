@@ -117,6 +117,10 @@ void UnitTest::beginTest (const String& testName)
     // This method's only valid while the test is being run!
     jassert (runner != nullptr);
 
+    // Calling beginTest() or testCase() from inside another testCase() is not
+    // supported!
+    jassert (! isRunningTestCase);
+
     runner->beginNewTest (this, testName);
 }
 

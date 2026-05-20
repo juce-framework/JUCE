@@ -730,7 +730,7 @@ private:
 
     //==============================================================================
     template <typename ArgType>
-    static std::optional<String> callMethodWithLpwstrResult (ArgType* args, HRESULT (ArgType::* method) (LPWSTR*))
+    static std::optional<String> callMethodWithLpwstrResult (ArgType* args, HRESULT (__stdcall ArgType::* method) (LPWSTR*))
     {
         // According to the API reference for WebView2, the result of any method with an LPWSTR
         // out-parameter should be freed by the caller using CoTaskMemFree.

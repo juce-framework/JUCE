@@ -658,12 +658,13 @@ public:
         const auto usedChannels = countUsedClientChannels (inputMap, outputMap);
 
         // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
-        const auto vstInputs = countValidBuses<FloatType> (data.inputs, data.numInputs);
+        const auto numVstInputs = data.inputs == nullptr ? 0
+                                                         : countValidBuses<FloatType> (data.inputs, data.numInputs);
 
-        if (! validateLayouts<Direction::input, FloatType> (data.inputs, data.inputs + vstInputs, inputMap))
+        if (! validateLayouts<Direction::input, FloatType> (data.inputs, data.inputs + numVstInputs, inputMap))
             return getBlankBuffer (usedChannels, (int) data.numSamples);
 
-        setUpInputChannels (data, (size_t) vstInputs, scratchBuffer, inputMap, channels);
+        setUpInputChannels (data, (size_t) numVstInputs, scratchBuffer, inputMap, channels);
         setUpOutputChannels (scratchBuffer, outputMap, channels);
 
         const auto channelPtr = channels.empty() ? scratchBuffer.getArrayOfWritePointers()
@@ -674,7 +675,7 @@ public:
 
 private:
     static void setUpInputChannels (Steinberg::Vst::ProcessData& data,
-                                    size_t vstInputs,
+                                    size_t numVstInputs,
                                     ScratchBuffer<FloatType>& scratchBuffer,
                                     const std::vector<DynamicChannelMapping>& map,
                                     std::vector<FloatType*>& channels)
@@ -691,7 +692,7 @@ private:
             for (size_t channelIndex = 0; channelIndex < mapping.size(); ++channelIndex)
                 channels.push_back (scratchBuffer.getNextChannelBuffer());
 
-            if (mapping.isHostActive() && busIndex < vstInputs)
+            if (mapping.isHostActive() && busIndex < numVstInputs)
             {
                 auto& bus = data.inputs[busIndex];
 

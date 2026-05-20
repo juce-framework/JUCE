@@ -108,10 +108,9 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments ([[maybe_unused]] const Str
         script << "end tell\r\n"
                   "end tell\r\n";
 
-        NSAppleScript* s = [[NSAppleScript alloc] initWithSource: juceStringToNS (script)];
+        NSUniquePtr<NSAppleScript> s { [[NSAppleScript alloc] initWithSource: juceStringToNS (script)] };
         NSDictionary* error = nil;
-        const bool ok = [s executeAndReturnError: &error] != nil;
-        [s release];
+        const bool ok = [s.get() executeAndReturnError: &error] != nil;
 
         return ok;
     }
@@ -566,8 +565,8 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
         downloaded = -1;
 
         static DelegateClass cls;
-        delegate = [cls.createInstance() init];
-        DelegateClass::setState (delegate, this);
+        delegate.reset ([cls.createInstance() init]);
+        DelegateClass::setState (delegate.get(), this);
 
         activeSessions.set (uniqueIdentifier, this);
         auto nsUrl = [NSURL URLWithString: juceStringToNS (urlToUse.toString (true))];
@@ -575,11 +574,15 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
         jassert (nsUrl != nullptr);
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
-        NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL: nsUrl];
+        NSUniquePtr<NSMutableURLRequest> request { [[NSMutableURLRequest alloc] initWithURL: nsUrl] };
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         if (options.usePost)
-            [request setHTTPMethod: @"POST"];
+            [request.get() setHTTPMethod: @"POST"];
+
+        if (const auto& postData = urlToUse.getPostDataAsMemoryBlock(); ! postData.isEmpty())
+            [request.get() setHTTPBody: [NSData dataWithBytes: postData.getData()
+                                                       length: postData.getSize()]];
 
         StringArray headerLines;
         headerLines.addLines (options.extraHeaders);
@@ -591,7 +594,7 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
             String value = headerLines[i].fromFirstOccurrenceOf (":", false, false).trim();
 
             if (key.isNotEmpty() && value.isNotEmpty())
-                [request addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
+                [request.get() addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
         }
 
         auto* configuration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier: juceStringToNS (uniqueIdentifier)];
@@ -600,16 +603,14 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
             [configuration setSharedContainerIdentifier: juceStringToNS (options.sharedContainer)];
 
         session = [NSURLSession sessionWithConfiguration: configuration
-                                                delegate: delegate
+                                                delegate: delegate.get()
                                            delegateQueue: nullptr];
 
         if (session != nullptr)
-            downloadTask = [session downloadTaskWithRequest:request];
+            downloadTask = [session downloadTaskWithRequest:request.get()];
 
         // Workaround for an Apple bug. See https://github.com/AFNetworking/AFNetworking/issues/2334
-        [request HTTPBody];
-
-        [request release];
+        [request.get() HTTPBody];
     }
 
     ~BackgroundDownloadTask()
@@ -625,8 +626,6 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
         [session invalidateAndCancel];
         while (! hasBeenDestroyed)
             destroyEvent.wait();
-
-        [delegate release];
     }
 
     bool initOK()
@@ -646,7 +645,7 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
 
     //==============================================================================
     URL::DownloadTask::Listener* listener;
-    NSObject<NSURLSessionDelegate>* delegate = nil;
+    NSUniquePtr<NSObject<NSURLSessionDelegate>> delegate;
     NSURLSession* session = nil;
     NSURLSessionDownloadTask* downloadTask = nil;
     bool connectFinished = false, hasBeenDestroyed = false;
@@ -756,7 +755,8 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
     //==============================================================================
     struct DelegateClass final : public ObjCClass<NSObject<NSURLSessionDelegate>>
     {
-        DelegateClass()  : ObjCClass<NSObject<NSURLSessionDelegate>> ("JUCE_URLDelegate_")
+        DelegateClass()
+            : ObjCClass ("JUCE_URLDelegate_")
         {
             addIvar<BackgroundDownloadTask*> ("state");
 

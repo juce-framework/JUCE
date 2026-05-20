@@ -66,6 +66,12 @@ public:
     */
     explicit Time (int64 millisecondsSinceEpoch) noexcept;
 
+    /** Creates a Time from a std::chrono::time_point. */
+    template <typename Clock>
+    explicit Time (std::chrono::time_point<Clock> timePoint) noexcept
+        : Time (std::chrono::duration_cast<std::chrono::duration<int64, std::milli>> (timePoint.time_since_epoch()).count())
+    {}
+
     /** Creates a time from a set of date components.
 
         @param year             the year, in 4-digit format, e.g. 2004
@@ -108,6 +114,20 @@ public:
         @see getMilliseconds
     */
     int64 toMilliseconds() const noexcept                           { return millisSinceEpoch; }
+
+    /** Returns the time since the Unix epoch expressed in the requested time unit. */
+    template <typename TimeUnit>
+    auto countDurationSinceEpochIn() const noexcept
+    {
+        return std::chrono::duration_cast<TimeUnit> (std::chrono::milliseconds { millisSinceEpoch }).count();
+    }
+
+    /** Converts this Time to a std::chrono::time_point. */
+    template <typename Clock>
+    auto toStdTimePoint() const noexcept
+    {
+        return std::chrono::time_point<Clock> (std::chrono::milliseconds { millisSinceEpoch });
+    }
 
     /** Returns the year (in this machine's local timezone).
         A 4-digit format is used, e.g. 2004.

@@ -171,7 +171,7 @@ void Button::setToggleState (bool shouldBeOn, NotificationType notification)
 
 void Button::setToggleState (bool shouldBeOn, NotificationType clickNotification, NotificationType stateNotification)
 {
-    if (isEnabled() && shouldBeOn != lastToggleState)
+    if (shouldBeOn != lastToggleState)
     {
         WeakReference<Component> deletionWatcher (this);
 

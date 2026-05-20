@@ -87,8 +87,16 @@ class Input
 public:
     /** Creates a disconnected input.
         A default-constructed input will never receive any messages.
+
+        Instances should only be created on the main thread.
     */
     Input();
+
+    /** Destructor.
+
+        Instances should only be destroyed on the main thread in order to avoid potential races
+        with disconnection callbacks, which also happen on the main thread.
+    */
     ~Input();
 
     Input (Input&&) noexcept;
@@ -114,6 +122,11 @@ public:
 
         It is an error to add or remove a consumer from within the consumer callback.
         This will cause deadlocks, so be careful!
+
+        You should only add and remove consumers from the main thread.
+
+        Calls to Consumer::consume() will happen on a separate thread, often with high
+        or even realtime priority.
     */
     void addConsumer (Consumer& r);
 
@@ -122,16 +135,24 @@ public:
 
         It is an error to add or remove a consumer from within the consumer callback.
         This will cause deadlocks, so be careful!
+
+        @see addConsumer()
     */
     void removeConsumer (Consumer& r);
 
     /** Attaches a listener that will be notified when this endpoint is disconnected.
 
+        Disconnection notifications will be sent on the main thread, and listeners should
+        only be added or removed on the main thread in order to avoid potential data races.
+
         Calling this function on an instance for which isAlive() returns false has no effect.
     */
     void addDisconnectionListener (DisconnectionListener& r);
 
-    /** Removes a disconnection listener. */
+    /** Removes a disconnection listener.
+
+        @see addDisconnectionListener()
+    */
     void removeDisconnectionListener (DisconnectionListener& r);
 
     /** True if this connection is currently active.

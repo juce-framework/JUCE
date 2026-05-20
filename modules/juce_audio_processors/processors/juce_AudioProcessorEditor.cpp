@@ -160,6 +160,36 @@ void AudioProcessorEditor::setBoundsConstrained (Rectangle<int> newBounds)
                                         newBounds.getX() == currentBounds.getX() && newBounds.getRight()  != currentBounds.getRight());
 }
 
+AudioProcessorEditorARAExtension* AudioProcessorEditor::getARAClientExtensions()
+{
+   #if JucePlugin_Enable_ARA
+    if (auto* extensions = dynamic_cast<AudioProcessorEditorARAExtension*> (this))
+    {
+        //  To silence this jassert there are two options:
+        //
+        //  1. - Override AudioProcessorEditor::getARAClientExtensions() and
+        //       return the "this" pointer.
+        //
+        //     - This option has the advantage of being quick and easy,
+        //       and avoids the above dynamic_cast.
+        //
+        //  2. - Create a new object that inherits from AudioProcessorEditorARAClientExtension.
+        //
+        //     - Port your existing functionality from the AudioProcessorEditor
+        //       to the new object.
+        //
+        //     - Return a pointer to the object in AudioProcessorEditor::getARAClientExtensions().
+        //
+        //     - This option has the advantage of allowing you to break
+        //       up your AudioProcessorEditor into smaller composable objects.
+        jassertfalse;
+        return extensions;
+    }
+   #endif
+
+    return nullptr;
+}
+
 void AudioProcessorEditor::editorResized (bool wasResized)
 {
     // The host needs to be able to rescale the plug-in editor and applying your own transform will

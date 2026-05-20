@@ -64,8 +64,16 @@ class Output
 public:
     /** Creates a disconnected output.
         Sending messages to a default-constructed output won't do anything.
+
+        Instances should only be created on the main thread.
     */
     Output();
+
+    /** Destructor.
+
+        Instances should only be destroyed on the main thread in order to avoid potential races
+        with disconnection callbacks, which also happen on the main thread.
+    */
     ~Output();
 
     Output (Output&&) noexcept;
@@ -85,16 +93,24 @@ public:
 
         You may send messages using any protocol, and they will be converted automatically
         to the protocol expected by the receiver.
+
+        This function may be called from a background thread (i.e. not the main thread).
     */
     bool send (Iterator beginIterator, Iterator endIterator);
 
     /** Attaches a listener that will be notified when this endpoint is disconnected.
 
+        Disconnection notifications will be sent on the main thread, and listeners should
+        only be added or removed on the main thread in order to avoid potential data races.
+
         Calling this function on an instance for which isAlive() returns false has no effect.
     */
     void addDisconnectionListener (DisconnectionListener& r);
 
-    /** Removes a disconnection listener. */
+    /** Removes a disconnection listener.
+
+        @see addDisconnectionListener()
+    */
     void removeDisconnectionListener (DisconnectionListener& r);
 
     /** True if this connection is currently active.

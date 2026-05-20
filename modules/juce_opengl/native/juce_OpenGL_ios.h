@@ -77,7 +77,7 @@ public:
                 glLayer = (CAEAGLLayer*) [view layer];
                 glLayer.opaque = true;
 
-                updateWindowPosition (bounds);
+                updateWindowPosition();
 
                 [((UIView*) peer->getNativeHandle()) addSubview: view];
 
@@ -159,8 +159,8 @@ public:
 
             if (openGLversion >= openGL3_2)
             {
-                auto w = roundToInt (lastBounds.getWidth()  * glLayer.contentsScale);
-                auto h = roundToInt (lastBounds.getHeight() * glLayer.contentsScale);
+                const auto w = lastBounds.getWidth();
+                const auto h = lastBounds.getHeight();
 
                 glBlitFramebuffer (0, 0, w, h,
                                    0, 0, w, h,
@@ -176,27 +176,28 @@ public:
         glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
         [context.get() presentRenderbuffer: GL_RENDERBUFFER];
 
-        if (needToRebuildBuffers)
-        {
-            needToRebuildBuffers = false;
+        if (! std::exchange (needToRebuildBuffers, false))
+            return;
 
-            freeGLBuffers();
-            createGLBuffers();
-            makeActive();
-        }
+        freeGLBuffers();
+        createGLBuffers();
+        makeActive();
     }
 
-    void updateWindowPosition (Rectangle<int> bounds)
+    void updateWindowPosition()
     {
+        auto* peer = component.getTopLevelComponent()->getPeer();
+
+        if (peer == nullptr)
+            return;
+
+        const auto bounds = peer->getAreaCoveredBy (component);
         view.frame = convertToCGRect (bounds);
         glLayer.contentsScale = (CGFloat) (Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale
                                             / component.getDesktopScaleFactor());
 
-        if (lastBounds != bounds)
-        {
-            lastBounds = bounds;
-            needToRebuildBuffers = true;
-        }
+        const auto msaaBounds = bounds * glLayer.contentsScale;
+        needToRebuildBuffers |= std::exchange (lastBounds, msaaBounds) != msaaBounds;
     }
 
     bool setSwapInterval (int numFramesPerSwap) noexcept

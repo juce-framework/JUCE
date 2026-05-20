@@ -79,10 +79,11 @@ public:
                             const String& textForProgressWindowDescription);
 
     /** Sets how many threads to simultaneously scan for plugins.
-     If this is 0, then all scanning happens on the message thread (this is the default when
-     allowPluginsWhichRequireAsynchronousInstantiation is false). If
-     allowPluginsWhichRequireAsynchronousInstantiation is true then numThreads must not
-     be zero (it is one by default). */
+        If this is 0, then all scanning happens on the message thread (this is the default when
+        allowPluginsWhichRequireAsynchronousInstantiation is false). If
+        allowPluginsWhichRequireAsynchronousInstantiation is true then numThreads must not
+        be zero (it is one by default).
+    */
     void setNumberOfThreadsForScanning (int numThreads);
 
     /** Returns the last search path stored in a given properties file for the specified format. */

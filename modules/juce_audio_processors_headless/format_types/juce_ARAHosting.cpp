@@ -341,68 +341,47 @@ public:
                                                                         ARA::ARAPlugInInstanceRoleFlags knownRoles,
                                                                         ARA::ARAPlugInInstanceRoleFlags assignedRoles)
     {
-
-        const auto makeVisitor = [] (auto vst3Fn, auto auFn)
+        if (auto* vst3Client = instance.getVST3Client())
         {
-            using Vst3Fn = decltype (vst3Fn);
-            using AuFn = decltype (auFn);
+            auto* iComponentPtr = vst3Client->getIComponentPtr();
+            VSTComSmartPtr<ARA::IPlugInEntryPoint2> araEntryPoint;
 
-            struct Visitor final : public ExtensionsVisitor, Vst3Fn, AuFn
+            if (araEntryPoint.loadFrom (iComponentPtr))
+                return ARAHostModel::PlugInExtensionInstance { araEntryPoint->bindToDocumentControllerWithRoles (documentController.getRef(), knownRoles, assignedRoles) };
+        }
+
+       #if JUCE_INTERNAL_HAS_AU
+        if (auto* auClient = instance.getAudioUnitClient())
+        {
+            auto audioUnit = auClient->getAudioUnitHandle();
+            auto propertySize = (UInt32) sizeof (ARA::ARAAudioUnitPlugInExtensionBinding);
+            const auto expectedPropertySize = propertySize;
+            ARA::ARAAudioUnitPlugInExtensionBinding audioUnitBinding { ARA::kARAAudioUnitMagic,
+                                                                       documentController.getRef(),
+                                                                       nullptr,
+                                                                       knownRoles,
+                                                                       assignedRoles };
+
+            auto status = AudioUnitGetProperty (audioUnit,
+                                                ARA::kAudioUnitProperty_ARAPlugInExtensionBindingWithRoles,
+                                                kAudioUnitScope_Global,
+                                                0,
+                                                &audioUnitBinding,
+                                                &propertySize);
+
+            if (status == noErr
+                && propertySize == expectedPropertySize
+                && audioUnitBinding.inOutMagicNumber == ARA::kARAAudioUnitMagic
+                && audioUnitBinding.inDocumentControllerRef == documentController.getRef()
+                && audioUnitBinding.outPlugInExtension != nullptr)
             {
-                explicit Visitor (Vst3Fn vst3Fn, AuFn auFn) : Vst3Fn (std::move (vst3Fn)), AuFn (std::move (auFn)) {}
-                void visitVST3Client (const VST3Client& x) override { Vst3Fn::operator() (x); }
-                void visitAudioUnitClient (const AudioUnitClient& x) override { AuFn::operator() (x); }
-            };
+                return ARAHostModel::PlugInExtensionInstance { audioUnitBinding.outPlugInExtension };
+            }
+        }
+       #endif
 
-            return Visitor { std::move (vst3Fn), std::move (auFn) };
-        };
-
-        const ARA::ARAPlugInExtensionInstance* pei = nullptr;
-        auto visitor = makeVisitor ([this, &pei, knownRoles, assignedRoles] (const ExtensionsVisitor::VST3Client& vst3Client)
-                                    {
-                                        auto* iComponentPtr = vst3Client.getIComponentPtr();
-                                        VSTComSmartPtr<ARA::IPlugInEntryPoint2> araEntryPoint;
-
-                                        if (araEntryPoint.loadFrom (iComponentPtr))
-                                            pei = araEntryPoint->bindToDocumentControllerWithRoles (documentController.getRef(), knownRoles, assignedRoles);
-                                    },
-                                   #if JUCE_INTERNAL_HAS_AU
-                                    [this, &pei, knownRoles, assignedRoles] (const ExtensionsVisitor::AudioUnitClient& auClient)
-                                    {
-                                        auto audioUnit = auClient.getAudioUnitHandle();
-                                        auto propertySize = (UInt32) sizeof (ARA::ARAAudioUnitPlugInExtensionBinding);
-                                        const auto expectedPropertySize = propertySize;
-                                        ARA::ARAAudioUnitPlugInExtensionBinding audioUnitBinding { ARA::kARAAudioUnitMagic,
-                                                                                                   documentController.getRef(),
-                                                                                                   nullptr,
-                                                                                                   knownRoles,
-                                                                                                   assignedRoles };
-
-                                        auto status = AudioUnitGetProperty (audioUnit,
-                                                                            ARA::kAudioUnitProperty_ARAPlugInExtensionBindingWithRoles,
-                                                                            kAudioUnitScope_Global,
-                                                                            0,
-                                                                            &audioUnitBinding,
-                                                                            &propertySize);
-
-                                        if (status == noErr
-                                            && propertySize == expectedPropertySize
-                                            && audioUnitBinding.inOutMagicNumber == ARA::kARAAudioUnitMagic
-                                            && audioUnitBinding.inDocumentControllerRef == documentController.getRef()
-                                            && audioUnitBinding.outPlugInExtension != nullptr)
-                                        {
-                                            pei = audioUnitBinding.outPlugInExtension;
-                                        }
-                                        else
-                                            jassertfalse;
-                                    }
-                                   #else
-                                    [] (const auto&) {}
-                                   #endif
-                                    );
-
-        instance.getExtensions (visitor);
-        return ARAHostModel::PlugInExtensionInstance { pei };
+        jassertfalse;
+        return {};
     }
 
     auto& getDocumentController()       { return documentController; }
@@ -462,25 +441,10 @@ ARAHostModel::PlugInExtensionInstance ARAHostDocumentController::bindDocumentToP
 
 void createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (ARAFactoryWrapper)> cb)
 {
-    if (! instance.getPluginDescription().hasARAExtension)
+    if (auto* araClient = instance.getARAClient())
+        araClient->createARAFactoryAsync (std::move (cb));
+    else
         cb (ARAFactoryWrapper{});
-
-    struct Extensions final : public ExtensionsVisitor
-    {
-        Extensions (std::function<void (ARAFactoryWrapper)> callbackIn)
-            : callback (std::move (callbackIn))
-        {}
-
-        void visitARAClient (const ARAClient& araClient) override
-        {
-            araClient.createARAFactoryAsync (std::move (callback));
-        }
-
-        std::function<void (ARAFactoryWrapper)> callback;
-    };
-
-    Extensions extensions { std::move (cb) };
-    instance.getExtensions (extensions);
 }
 
 } // namespace juce

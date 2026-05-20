@@ -176,73 +176,13 @@ public:
     /** Returns information about the horizontal metrics of this font. */
     [[nodiscard]] TypefaceMetrics getMetrics (TypefaceMetricsKind) const;
 
-    /** @deprecated
-        This function has several shortcomings:
-        - The height parameter is specified in JUCE units rather than in points.
-        - The result is computed assuming that ligatures and other font features will
-          not be used when rendering the string. There's also no way of specifying a
-          language used for the string, which may affect the widths of CJK text.
-        - If the typeface doesn't contain suitable glyphs for all characters in the
-          string, missing characters will be substituted with the notdef/tofu glyph
-          instead of attempting to use a different font that contains suitable
-          glyphs.
-
-        Measures the width of a line of text.
-        You should never need to call this!
-    */
-    float getStringWidth (TypefaceMetricsKind,
-                          const String& text,
-                          float normalisedHeight = 1.0f,
-                          float horizontalScale = 1.0f);
-
-    /** @deprecated
-        This function has several shortcomings:
-        - The height parameter is specified in JUCE units rather than in points.
-        - Ligatures are deliberately ignored, which will lead to ugly results if the
-          positions are used to paint text using latin scripts, and potentially
-          illegible results for other scripts. There's also no way of specifying a
-          language used for the string, which may affect the rendering of CJK text.
-        - If the typeface doesn't contain suitable glyphs for all characters in the
-          string, missing characters will be substituted with the notdef/tofu glyph
-          instead of attempting to use a different font that contains suitable
-          glyphs.
-
-        Converts a line of text into its glyph numbers and their positions.
-        You should never need to call this!
-    */
-    void getGlyphPositions (TypefaceMetricsKind,
-                            const String& text,
-                            Array<int>& glyphs,
-                            Array<float>& xOffsets,
-                            float normalisedHeight = 1.0f,
-                            float horizontalScale = 1.0f);
-
     /** Returns the outline for a glyph.
-        The path returned will be normalised to a font height of 1.0.
+        The path returned will be normalised to a point size of 1.0.
     */
-    void getOutlineForGlyph (TypefaceMetricsKind, int glyphNumber, Path& path) const;
+    void getOutlineForGlyph (int glyphNumber, Path& path) const;
 
-    /** Returns glyph bounds, normalised to a font height of 1.0. */
-    Rectangle<float> getGlyphBounds (TypefaceMetricsKind, int glyphNumber) const;
-
-    /** @deprecated
-
-        Returns a new EdgeTable that contains the path for the given glyph, with the specified transform applied.
-
-        This is only capable of returning monochromatic glyphs. In fonts that contain multiple glyph
-        styles with fallbacks (COLRv1, COLRv0, monochromatic), this will always return the
-        monochromatic variant.
-
-        The height is specified in JUCE font-height units.
-
-        getLayersForGlyph() has better support for multilayer and bitmap glyphs, so it should be
-        preferred in new code.
-    */
-    [[deprecated ("Prefer getLayersForGlyph")]]
-    EdgeTable* getEdgeTableForGlyph (TypefaceMetricsKind,
-                                     int glyphNumber,
-                                     const AffineTransform& transform,
-                                     float normalisedHeight);
+    /** Returns glyph bounds, normalised to a point size of 1.0. */
+    Rectangle<float> getGlyphBounds (int glyphNumber) const;
 
     /** Returns the layers that should be painted in order to display this glyph.
 
@@ -254,8 +194,7 @@ public:
         would require significant additions to JUCE's rendering code, so it has been omitted for
         now.
     */
-    std::vector<GlyphLayer> getLayersForGlyph (TypefaceMetricsKind,
-                                               int glyphNumber,
+    std::vector<GlyphLayer> getLayersForGlyph (int glyphNumber,
                                                const AffineTransform&) const;
 
     /** Kinds of colour glyph format that may be implemented by a particular typeface.
@@ -300,13 +239,6 @@ public:
         On macOS you can load .ttf and .otf files, otherwise this is only available when using FreeType.
     */
     static void scanFolderForFonts (const File& folder);
-
-    /** Makes an attempt at performing a good overall distortion that will scale a font of
-        the given size to align vertically with the pixel grid. The path should be an unscaled
-        (i.e. normalised to height of 1.0) path for a glyph.
-    */
-    [[deprecated]]
-    void applyVerticalHintingTransform (float fontHeight, Path& path);
 
     /** Returns the glyph index corresponding to the provided codepoint, or nullopt if no
         such glyph is found.

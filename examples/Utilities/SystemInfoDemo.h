@@ -112,8 +112,8 @@ static String getDisplayInfo()
         auto display = displays.displays.getReference (i);
 
         displayDesc << "Display " << (i + 1) << (display.isMain ? " (main)" : "") << ":" << newLine
-                    << "  Total area: " << display.totalArea.toString() << newLine
-                    << "  User area:  " << display.userArea .toString() << newLine
+                    << "  Total area: " << display.logicalBounds.toString() << newLine
+                    << "  User area:  " << display.userBounds   .toString() << newLine
                     << "  DPI: "        << display.dpi   << newLine
                     << "  Scale: "      << display.scale << newLine
                     << newLine;

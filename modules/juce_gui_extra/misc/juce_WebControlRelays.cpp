@@ -129,7 +129,6 @@ void WebSliderRelay::handleEvent (const var& event)
         }
     }
 
-    const auto s = JSON::toString (event);
     jassertfalse;
 }
 
@@ -206,7 +205,6 @@ void WebToggleButtonRelay::handleEvent (const var& event)
         }
     }
 
-    const auto s = JSON::toString (event);
     jassertfalse;
 }
 
@@ -283,7 +281,6 @@ void WebComboBoxRelay::handleEvent (const var& event)
         }
     }
 
-    const auto s = JSON::toString (event);
     jassertfalse;
 }
 

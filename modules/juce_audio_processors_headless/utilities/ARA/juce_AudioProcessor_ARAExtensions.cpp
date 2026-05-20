@@ -148,7 +148,7 @@ void AudioProcessorARAExtension::didBindToARA() noexcept
 //==============================================================================
 
 AudioProcessorEditorARAExtension::AudioProcessorEditorARAExtension (AudioProcessor* audioProcessor)
-    : araProcessorExtension (dynamic_cast<AudioProcessorARAExtension*> (audioProcessor))
+    : araProcessorExtension (audioProcessor->getARAClientExtensions())
 {
     if (isARAEditorView())
         getARAEditorView()->setEditorOpen (true);

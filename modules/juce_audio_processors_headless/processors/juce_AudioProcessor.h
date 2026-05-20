@@ -36,6 +36,7 @@ namespace juce
 {
 
 class AudioProcessorEditor;
+class AudioProcessorARAExtension;
 
 //==============================================================================
 /**
@@ -514,8 +515,8 @@ public:
         AudioProcessor& owner;
         String name;
         AudioChannelSet layout, dfltLayout, lastLayout;
-        bool enabledByDefault;
-        int cachedChannelCount;
+        bool enabledByDefault = false;
+        int cachedChannelCount = 0;
 
         JUCE_DECLARE_NON_COPYABLE (Bus)
     };
@@ -1018,7 +1019,9 @@ public:
 
         @see hasEditor
     */
+private:
     virtual AudioProcessorEditor* createEditor() = 0;
+public:
 
     /** Your processor subclass must override this and return true if it can create an
         editor component.
@@ -1039,10 +1042,21 @@ public:
     */
     AudioProcessorEditor* getActiveEditor() const noexcept;
 
-    /** Returns the active editor, or if there isn't one, it will create one.
-        This may call createEditor() internally to create the component.
+    /** If there's no active editor, creates a new editor and stores it as the active editor
+        before returning it. Otherwise, returns nullptr.
+
+        You must use this instead of calling createEditor() directly if you
+        want calls to getActiveEditor() to work as expected.
     */
-    AudioProcessorEditor* createEditorIfNeeded();
+    AudioProcessorEditor* createEditorAndMakeActive();
+
+    /** @internal
+
+        This function is deprecated, as its name is misleading.
+        Prefer createEditorAndMakeActive().
+    */
+    [[deprecated ("Prefer createEditorAndMakeActive()")]]
+    AudioProcessorEditor* createEditorIfNeeded() { return createEditorAndMakeActive(); }
 
     //==============================================================================
     /** Returns the default number of steps for a parameter.
@@ -1258,6 +1272,16 @@ public:
         of the correct type in order to avoid this dynamic cast.
     */
     virtual VST3ClientExtensions* getVST3ClientExtensions();
+
+    /** Returns a non-owning pointer to an object that implements ARA specific information
+        regarding this AudioProcessor.
+
+        By default, for backwards compatibility, this will attempt to dynamic-cast this
+        AudioProcessor to AudioProcessorARAExtension.
+        It is recommended to override this function to return a pointer directly to an object
+        of the correct type in order to avoid this dynamic cast.
+    */
+    virtual AudioProcessorARAExtension* getARAClientExtensions();
 
     //==============================================================================
     /** Some plug-ins support sharing response curve data with the host so that it can

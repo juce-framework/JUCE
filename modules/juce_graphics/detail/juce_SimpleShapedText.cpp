@@ -35,6 +35,34 @@
 namespace juce::detail
 {
 
+auto ShapedTextOptions::tie() const
+{
+    return std::tie (justification,
+                     readingDir,
+                     wordWrapWidth,
+                     alignmentWidth,
+                     height,
+                     fontsForRange,
+                     firstLineIndent,
+                     leading,
+                     additiveLineSpacing,
+                     baselineAtZero,
+                     allowBreakingInsideWord,
+                     trailingWhitespacesShouldFit,
+                     maxNumLines,
+                     ellipsis);
+}
+
+bool ShapedTextOptions::operator== (const ShapedTextOptions& other) const
+{
+    return tie() == other.tie();
+}
+
+bool ShapedTextOptions::operator!= (const ShapedTextOptions& other) const
+{
+    return tie() != other.tie();
+}
+
 //==============================================================================
 constexpr hb_script_t getScriptTag (TextScript type)
 {
@@ -379,7 +407,7 @@ static std::vector<ShapedGlyph> lowLevelShape (const SanitisedString& string,
         const auto extents = native->getGlyphExtents (glyphId);
 
         const auto whitespace = extents.has_value()
-                                && font.getTypefacePtr()->getGlyphBounds (font.getMetricsKind(), (int) glyphId).isEmpty()
+                                && font.getTypefacePtr()->getGlyphBounds ((int) glyphId).isEmpty()
                                 && xAdvanceBase > 0;
 
         const auto newline = string.isNewline (infos[visualIndex].cluster + (size_t) range.getStart());
