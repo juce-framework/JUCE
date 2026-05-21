@@ -2585,7 +2585,7 @@ struct WindowsMidiHelpers
 
             void removeConsumer (ump::Consumer& c)
             {
-                consumers.add (c);
+                consumers.remove (c);
             }
 
             void addDisconnectListener (ump::DisconnectionListener& l)

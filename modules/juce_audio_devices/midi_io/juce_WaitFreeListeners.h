@@ -125,7 +125,12 @@ public:
             if (entryAsPtr != nullptr)
                 callback (*entryAsPtr);
 
-            *entry = entryAsInt;
+            // Only clear the in-use bit if it's still in the state we left it in.
+            // A concurrent call() on the same entry can race with the previous
+            // `*entry = entryAsInt` store and leave the in-use bit permanently
+            // set, which makes remove()'s CAS loop spin forever.
+            auto expected = entryAsInt | (uintptr_t) 1;
+            entry->compare_exchange_strong (expected, entryAsInt);
         }
     }
 
