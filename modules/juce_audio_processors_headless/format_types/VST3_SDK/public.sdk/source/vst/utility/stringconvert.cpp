@@ -97,7 +97,12 @@ bool convert (const std::string& utf8Str, Steinberg::Vst::TChar* str, uint32_t m
 //------------------------------------------------------------------------
 std::string convert (const Steinberg::Vst::TChar* str)
 {
+	// JUCE MODIFICATION
+   #ifdef __clang_analyzer__
+    return {};
+   #else
 	return converter ().to_bytes (reinterpret_cast<const UTF16Type*> (str));
+   #endif
 }
 
 //------------------------------------------------------------------------

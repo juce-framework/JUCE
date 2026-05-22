@@ -196,12 +196,12 @@ public:
             if (std::exchange (pathIsEmpty, true) == false)
             {
                 path.startNewSubPath (p);
-                pts.push_back (std::make_pair (p, 0.0f));
+                pts.emplace_back (p, 0.0f);
             }
             else
             {
                 path.lineTo (p);
-                pts.push_back (std::make_pair (p, path.getLength()));
+                pts.emplace_back (p, path.getLength());
             }
         }
     }
@@ -226,15 +226,15 @@ public:
                 partialPath.lineTo (p);
         };
 
-        for (const auto& point : pts)
+        for (const auto& [point, length] : pts)
         {
-            if (point.second > proportionalLength)
+            if (length > proportionalLength)
             {
                 lineTo (path.getPointAlongPath (proportionalLength));
                 break;
             }
 
-            lineTo (point.first);
+            lineTo (point);
         }
 
         return partialPath;
@@ -242,7 +242,7 @@ public:
 
 private:
     Path path;
-    std::vector<std::pair<Point<float>, float>> pts;
+    std::vector<std::tuple<Point<float>, float>> pts;
 };
 
 class Checkmark : public Paintable

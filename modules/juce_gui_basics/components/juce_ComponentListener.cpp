@@ -35,13 +35,14 @@
 namespace juce
 {
 
-void ComponentListener::componentMovedOrResized (Component&, bool, bool)    {}
-void ComponentListener::componentBroughtToFront (Component&)                {}
-void ComponentListener::componentVisibilityChanged (Component&)             {}
-void ComponentListener::componentChildrenChanged (Component&)               {}
-void ComponentListener::componentParentHierarchyChanged (Component&)        {}
-void ComponentListener::componentNameChanged (Component&)                   {}
-void ComponentListener::componentBeingDeleted (Component&)                  {}
-void ComponentListener::componentEnablementChanged (Component&)             {}
+void ComponentListener::componentMovedOrResized (Component&, bool, bool) {}
+void ComponentListener::componentBroughtToFront (Component&) {}
+void ComponentListener::componentVisibilityChanged (Component&) {}
+void ComponentListener::componentChildrenChanged (Component&) {}
+void ComponentListener::componentParentHierarchyChanged (Component&) {}
+void ComponentListener::componentNameChanged (Component&) {}
+void ComponentListener::componentBeingDeleted (Component&) {}
+void ComponentListener::componentEnablementChanged (Component&) {}
+void ComponentListener::componentPainted (Component&, const ComponentPaintDiagnostics&) {}
 
 } // namespace juce

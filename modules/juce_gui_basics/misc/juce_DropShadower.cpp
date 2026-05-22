@@ -41,6 +41,12 @@ public:
     ShadowWindow (Component* comp, const DropShadow& ds)
         : target (comp), shadow (ds)
     {
+        if (comp == nullptr)
+        {
+            jassertfalse;
+            return;
+        }
+
         setVisible (true);
         setAccessible (false);
         setInterceptsMouseClicks (false, false);
@@ -48,20 +54,17 @@ public:
         if (comp->isOnDesktop())
         {
            #if JUCE_WINDOWS
-            const auto scope = [&]() -> std::optional<ScopedThreadDPIAwarenessSetter>
-            {
-                if (comp != nullptr)
-                    if (auto* handle = comp->getWindowHandle())
-                        return ScopedThreadDPIAwarenessSetter (handle);
-
-                return {};
-            }();
+            const ScopedThreadDPIAwarenessSetter scope { comp != nullptr ? comp->getWindowHandle() : nullptr };
            #endif
 
             setSize (1, 1); // to keep the OS happy by not having zero-size windows
             addToDesktop (ComponentPeer::windowIgnoresMouseClicks
                             | ComponentPeer::windowIsTemporary
                             | ComponentPeer::windowIgnoresKeyPresses);
+
+            if (auto* compPeer = comp->getPeer())
+                if (auto* selfPeer = getPeer())
+                    selfPeer->setCustomPlatformScaleFactor (compPeer->getPlatformScaleFactor());
         }
         else if (Component* const parent = comp->getParentComponent())
         {
@@ -73,11 +76,6 @@ public:
     {
         if (Component* c = target)
             shadow.drawForRectangle (g, getLocalArea (c, c->getLocalBounds()));
-    }
-
-    void resized() override
-    {
-        repaint();  // (needed for correct repainting)
     }
 
     float getDesktopScaleFactor() const override
@@ -226,7 +224,7 @@ private:
 
     void updateParentHierarchy()
     {
-        const auto lastSeenComponents = std::exchange (observedComponents, [&]
+        const auto lastSeenComponents = std::exchange (observedComponents, std::invoke ([&]
         {
             std::set<ComponentWithWeakReference> result;
 
@@ -234,7 +232,7 @@ private:
                 result.emplace (*node);
 
             return result;
-        }());
+        }));
 
         const auto withDifference = [] (const auto& rangeA, const auto& rangeB, auto&& callback)
         {
@@ -256,6 +254,33 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (ParentVisibilityChangedListener)
     JUCE_DECLARE_NON_MOVEABLE (ParentVisibilityChangedListener)
+};
+
+class DropShadower::ScaleWatcher
+{
+public:
+    explicit ScaleWatcher (DropShadower& shadower)
+    {
+        if (shadower.owner == nullptr)
+            return;
+
+        notifier.emplace (shadower.owner.get(), [&shadower] (auto x)
+        {
+            for (auto sw : shadower.shadowWindows)
+            {
+                if (! sw->isOnDesktop())
+                    continue;
+
+                if (auto* peer = sw->getPeer())
+                    peer->setCustomPlatformScaleFactor (x);
+            }
+
+            shadower.updateShadows();
+        });
+    }
+
+private:
+    std::optional<NativeScaleFactorNotifier> notifier;
 };
 
 //==============================================================================
@@ -300,7 +325,9 @@ void DropShadower::setOwner (Component* componentToFollow)
                                                                                        static_cast<ComponentListener&> (*this));
 
         virtualDesktopWatcher = std::make_unique<VirtualDesktopWatcher> (*owner);
-        virtualDesktopWatcher->addListener (this, [this]() { updateShadows(); });
+        virtualDesktopWatcher->addListener (this, [this] { updateShadows(); });
+
+        scaleWatcher = std::make_unique<ScaleWatcher> (*this);
 
         updateShadows();
     }
@@ -365,17 +392,15 @@ void DropShadower::updateShadows()
         while (shadowWindows.size() < 4)
             shadowWindows.add (new ShadowWindow (owner, shadow));
 
-        const int shadowEdge = jmax (shadow.offset.x, shadow.offset.y) + shadow.radius;
-        const int x = owner->getX();
-        const int y = owner->getY() - shadowEdge;
-        const int w = owner->getWidth();
-        const int h = owner->getHeight() + shadowEdge + shadowEdge;
+        const auto shadowEdge = jmax (shadow.offset.x, shadow.offset.y) + shadow.radius;
+        const auto w = owner->getWidth();
+        const auto h = owner->getHeight();
 
         for (int i = 4; --i >= 0;)
         {
             // there seem to be rare situations where the dropshadower may be deleted by
             // callbacks during this loop, so use a weak ref to watch out for this
-            WeakReference<Component> sw (shadowWindows[i]);
+            const WeakReference sw (shadowWindows[i]);
 
             if (sw != nullptr)
             {
@@ -384,13 +409,42 @@ void DropShadower::updateShadows()
                 if (sw == nullptr)
                     return;
 
-                switch (i)
+                const auto shadowBounds = std::invoke ([&]
                 {
-                    case 0: sw->setBounds (x - shadowEdge, y, shadowEdge, h); break;
-                    case 1: sw->setBounds (x + w, y, shadowEdge, h); break;
-                    case 2: sw->setBounds (x, y, w, shadowEdge); break;
-                    case 3: sw->setBounds (x, owner->getBottom(), w, shadowEdge); break;
-                    default: break;
+                    switch (i)
+                    {
+                        case 0: return Rectangle { shadowEdge, h + shadowEdge + shadowEdge }.withPosition ({ -shadowEdge, -shadowEdge });
+                        case 1: return Rectangle { shadowEdge, h + shadowEdge + shadowEdge }.withPosition ({ w, -shadowEdge });
+                        case 2: return Rectangle { w, shadowEdge }.withPosition ({ 0, -shadowEdge });
+                        case 3: return Rectangle { w, shadowEdge }.withPosition ({ 0, h });
+                        default: break;
+                    }
+
+                    return Rectangle<int>{};
+                });
+
+                {
+                    using Scope = decltype (std::declval<ComponentPeer>().setMultimonitorPositionOverride ({}));
+                    const auto scope = std::invoke ([&]() -> std::optional<Scope>
+                    {
+                        auto* peer = owner->isOnDesktop() ? owner->getPeer() : nullptr;
+
+                        if (peer == nullptr)
+                            return std::nullopt;
+
+                        auto* shadowPeer = sw->getPeer();
+
+                        if (shadowPeer == nullptr)
+                            return std::nullopt;
+
+                        using SH = detail::ScalingHelpers;
+                        const auto localPos = SH::scaledScreenPosToUnscaled (*owner, shadowBounds.getPosition().toFloat());
+                        const auto multimonitorPos = peer->localToMultimonitor (localPos);
+
+                        return shadowPeer->setMultimonitorPositionOverride (multimonitorPos.roundToInt());
+                    });
+
+                    sw->setBounds (shadowBounds + owner->getPosition());
                 }
 
                 if (sw == nullptr)

@@ -125,6 +125,19 @@ public:
     */
     virtual void writeAsJSON (OutputStream&, const JSON::FormatOptions&);
 
+    /** Returns true if the properties of this object match the properties of the specified object,
+        or false otherwise.
+    */
+    bool equals (const DynamicObject& other) const;
+
+    /** Returns true if the properties of this object match the properties of the specified object,
+        or false otherwise.
+    */
+    bool operator== (const DynamicObject& other) const { return equals (other); }
+
+    /** The inverse of operator==() */
+    bool operator!= (const DynamicObject& other) const { return ! operator== (other); }
+
 private:
     /** Derived classes may override this function to take additional actions after
         properties are assigned or removed.

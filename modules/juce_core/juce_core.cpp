@@ -73,7 +73,13 @@
  #if JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
   #include <sys/types.h>
   #include <sys/socket.h>
-  #include <sys/errno.h>
+
+  #if __has_include (<errno.h>)
+   #include <errno.h>
+  #else
+   #include <sys/errno.h>
+  #endif
+
   #include <unistd.h>
   #include <netinet/in.h>
  #endif
@@ -108,7 +114,7 @@
  #include <net/if.h>
  #include <sys/ioctl.h>
 
- #if ! (JUCE_ANDROID || JUCE_WASM)
+ #if ! (JUCE_ANDROID || JUCE_WASM) && __has_include (<execinfo.h>)
   #include <execinfo.h>
  #endif
 #endif

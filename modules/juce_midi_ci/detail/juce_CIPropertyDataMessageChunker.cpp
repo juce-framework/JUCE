@@ -159,4 +159,19 @@ void PropertyDataMessageChunker::populateStorage() const
     storage->resize (storage->size() + numBytesRead - room);
 }
 
+auto PropertyDataMessageChunker::tie() const
+{
+    return std::tie (storage, body, source, dest, chunkSize, messageKind, requestId);
+}
+
+bool PropertyDataMessageChunker::operator== (const PropertyDataMessageChunker& other) const noexcept
+{
+    return tie() == other.tie();
+}
+
+bool PropertyDataMessageChunker::operator!= (const PropertyDataMessageChunker& other) const noexcept
+{
+    return tie() != other.tie();
+}
+
 } // namespace juce::midi_ci::detail

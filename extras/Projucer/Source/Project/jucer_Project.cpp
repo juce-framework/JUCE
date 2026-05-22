@@ -376,7 +376,7 @@ void Project::initialiseAudioPluginValues()
     pluginEnableARA.referTo                  (projectRoot, Ids::enableARA,                  getUndoManager(),  shouldEnableARA(), ",");
     pluginARAAnalyzableContentValue.referTo  (projectRoot, Ids::pluginARAAnalyzableContent, getUndoManager(), getDefaultARAContentTypes(), ",");
     pluginARATransformFlagsValue.referTo     (projectRoot, Ids::pluginARATransformFlags,    getUndoManager(), getDefaultARATransformationFlags(), ",");
-    pluginARACompatibleArchiveIDsValue.referTo (projectRoot, Ids::araCompatibleArchiveIDs,    getUndoManager(), getDefaultARACompatibleArchiveIDs());
+    pluginARACompatibleArchiveIDsValue.referTo (projectRoot, Ids::araCompatibleArchiveIDs,  getUndoManager(), getDefaultARACompatibleArchiveIDs());
 
     pluginVSTNumMidiInputsValue.referTo      (projectRoot, Ids::pluginVSTNumMidiInputs,     getUndoManager(), 16);
     pluginVSTNumMidiOutputsValue.referTo     (projectRoot, Ids::pluginVSTNumMidiOutputs,    getUndoManager(), 16);
@@ -991,6 +991,47 @@ void Project::updateModuleNotFoundWarning (bool showWarning)
         removeProjectMessage (ProjectMessages::Ids::moduleNotFound);
 }
 
+void Project::updatePaceFusionWarnings()
+{
+    const auto paceProtectionEnabledOnAnyExporter = [&]
+    {
+        for (ExporterIterator exporter (*this); exporter.next();)
+        {
+            if (exporter->isPaceProtectionEnabled())
+                return true;
+        }
+
+        return false;
+    };
+
+    if (shouldBuildLV2() && paceProtectionEnabledOnAnyExporter())
+    {
+        auto disableLV2 = [&]
+        {
+            const auto v = pluginFormatsValue.get();
+            auto* currentFormats = v.getArray();
+            currentFormats->removeFirstMatchingValue (Ids::buildLV2.toString());
+            pluginFormatsValue.setValue (*currentFormats, getUndoManager());
+        };
+
+        auto resetPaceProtection = [&]
+        {
+            for (ExporterIterator exporter (*this); exporter.next();)
+            {
+                if (exporter->isPaceProtectionEnabled())
+                    exporter->resetPaceProtection();
+            }
+        };
+
+        addProjectMessage (ProjectMessages::Ids::lv2PaceProtectionWarning, { { "Disable LV2", std::move (disableLV2) },
+                                                                             { "Reset PACE Protection", std::move (resetPaceProtection) } });
+    }
+    else
+    {
+        removeProjectMessage (ProjectMessages::Ids::lv2PaceProtectionWarning);
+    }
+}
+
 void Project::changeListenerCallback (ChangeBroadcaster*)
 {
     updateJUCEPathWarning();
@@ -1111,6 +1152,8 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         {
             if (shouldWriteLegacyPluginFormatSettings)
                 writeLegacyPluginFormatSettings();
+
+            updatePaceFusionWarnings();
         }
         else if (property == Ids::pluginCharacteristicsValue)
         {
@@ -1138,6 +1181,10 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
             updateCodeWarning (ProjectMessages::Ids::manufacturerCodeInvalid, pluginManufacturerCodeValue.get());
         }
     }
+    else if (property == Ids::paceProtectionEnabled)
+    {
+        updatePaceFusionWarnings();
+    }
 
     changed();
 }
@@ -1145,9 +1192,14 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
 void Project::valueTreeChildAddedOrRemoved (ValueTree& parent, ValueTree& child)
 {
     if (child.getType() == Ids::MODULE)
+    {
         updateModuleWarnings();
+    }
     else if (parent.getType() == Ids::EXPORTFORMATS)
+    {
         updateExporterWarnings();
+        updatePaceFusionWarnings();
+    }
 
     changed();
 }
@@ -1616,6 +1668,30 @@ void Project::findAllImageItems (OwnedArray<Project::Item>& items)
     findImages (getMainGroup(), items);
 }
 
+static void findIconComposerIcons (const Project::Item& item, std::vector<Project::IconComposerNameAndItem>& found)
+{
+    if (item.isFile())
+    {
+        const auto f = item.getFile();
+        const auto parent = f.getParentDirectory();
+
+        if (f.getFileName() == "icon.json" && parent.hasFileExtension ("icon"))
+            found.push_back ({ parent.getFileName(), item });
+    }
+    else if (item.isGroup())
+    {
+        for (int i = 0; i < item.getNumChildren(); ++i)
+            findIconComposerIcons (item.getChild (i), found);
+    }
+}
+
+std::vector<Project::IconComposerNameAndItem> Project::findAllIconComposerItems()
+{
+    std::vector<Project::IconComposerNameAndItem> items;
+    findIconComposerIcons (getMainGroup(), items);
+    return items;
+}
+
 //==============================================================================
 Project::Item::Item (Project& p, const ValueTree& s, bool isModuleCode)
     : project (p), state (s), belongsToModule (isModuleCode)
@@ -1997,13 +2073,27 @@ bool Project::Item::addFileRetainingSortOrder (const File& file, bool shouldComp
     return true;
 }
 
+static bool isPartOfIconComposerBundle (const File& file)
+{
+    const auto parent = file.getParentDirectory();
+
+    if (parent.isRoot())
+        return false;
+
+    if (parent.getFileName().endsWith (".icon") && parent.getChildFile ("icon.json").existsAsFile())
+        return true;
+
+    return isPartOfIconComposerBundle (parent);
+}
+
 void Project::Item::addFileUnchecked (const File& file, int insertIndex, const bool shouldCompile)
 {
     Item item (project, ValueTree (Ids::FILE), belongsToModule);
     item.initialiseMissingProperties();
     item.getNameValue() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile && file.hasFileExtension (fileTypesToCompileByDefault);
-    item.getShouldAddToBinaryResourcesValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
+    item.getShouldAddToBinaryResourcesValue() = project.shouldBeAddedToBinaryResourcesByDefault (file)
+                                                && ! isPartOfIconComposerBundle (file);
 
     if (canContain (item))
     {

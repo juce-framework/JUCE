@@ -827,7 +827,7 @@ public:
           nativeFileChooser (std::make_unique<Win32NativeFileChooser> (this, flagsIn, previewComp, fileChooser.startingFile,
                                                                        fileChooser.title, fileChooser.filters))
     {
-        auto mainMon = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
+        auto mainMon = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userBounds.toNearestInt();
 
         setBounds (mainMon.getX() + mainMon.getWidth() / 4,
                    mainMon.getY() + mainMon.getHeight() / 4,

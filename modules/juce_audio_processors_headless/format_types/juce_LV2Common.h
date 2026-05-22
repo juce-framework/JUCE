@@ -151,13 +151,13 @@ struct NumericAtomParser
     template <typename T> struct Tag { LV2_URID urid; };
 
     template <typename Target, typename... Types>
-    static Optional<Target> tryParse (const LV2_Atom&, const void*)
+    static std::optional<Target> tryParse (const LV2_Atom&, const void*)
     {
         return {};
     }
 
     template <typename Target, typename Head, typename... Tail>
-    static Optional<Target> tryParse (const LV2_Atom& atom, const void* data, Tag<Head> head, Tag<Tail>... tail)
+    static std::optional<Target> tryParse (const LV2_Atom& atom, const void* data, Tag<Head> head, Tag<Tail>... tail)
     {
         if (atom.type == head.urid && atom.size == sizeof (Head))
             return static_cast<Target> (*reinterpret_cast<const Head*> (data));
@@ -166,7 +166,7 @@ struct NumericAtomParser
     }
 
     template <typename Target>
-    Optional<Target> parseNumericAtom (const LV2_Atom* atom, const void* data) const
+    std::optional<Target> parseNumericAtom (const LV2_Atom* atom, const void* data) const
     {
         if (atom == nullptr)
             return {};
@@ -181,13 +181,13 @@ struct NumericAtomParser
     }
 
     template <typename Target>
-    Optional<Target> parseNumericAtom (const LV2_Atom* atom) const
+    std::optional<Target> parseNumericAtom (const LV2_Atom* atom) const
     {
         return parseNumericAtom<Target> (atom, atom + 1);
     }
 
     template <typename Target>
-    Optional<Target> parseNumericOption (const LV2_Options_Option* option) const
+    std::optional<Target> parseNumericOption (const LV2_Options_Option* option) const
     {
         if (option != nullptr)
         {
@@ -278,7 +278,7 @@ struct PatchSetHelper
 
         const auto parseResult = parser.parseNumericAtom<float> (value);
 
-        if (! parseResult.hasValue())
+        if (! parseResult.has_value())
         {
             // Didn't understand the type of this atom.
             jassertfalse;

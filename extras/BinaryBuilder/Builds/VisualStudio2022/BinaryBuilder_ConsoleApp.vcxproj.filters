@@ -912,6 +912,12 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\time\juce_Time.h">
       <Filter>JUCE Modules\juce_core\time</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\time\juce_TimedDiagnostic.h">
+      <Filter>JUCE Modules\juce_core\time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\time\juce_TimeUnits.h">
+      <Filter>JUCE Modules\juce_core\time</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\unit_tests\juce_UnitTest.h">
       <Filter>JUCE Modules\juce_core\unit_tests</Filter>
     </ClInclude>

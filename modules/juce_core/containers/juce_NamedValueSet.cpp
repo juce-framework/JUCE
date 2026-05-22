@@ -35,62 +35,21 @@
 namespace juce
 {
 
-NamedValueSet::NamedValue::NamedValue() noexcept {}
-NamedValueSet::NamedValue::~NamedValue() noexcept {}
-
-NamedValueSet::NamedValue::NamedValue (const Identifier& n, const var& v)  : name (n), value (v) {}
-NamedValueSet::NamedValue::NamedValue (const NamedValue& other) : NamedValue (other.name, other.value) {}
-
-NamedValueSet::NamedValue::NamedValue (NamedValue&& other) noexcept
-   : NamedValue (std::move (other.name),
-                 std::move (other.value))
-{}
-
-NamedValueSet::NamedValue::NamedValue (const Identifier& n, var&& v) noexcept
-   : name (n), value (std::move (v))
+bool NamedValue::operator== (const NamedValue& other) const noexcept
 {
+    const auto tie = [] (auto& x) { return std::tie (x.name, x.value); };
+    return tie (*this) == tie (other);
 }
 
-NamedValueSet::NamedValue::NamedValue (Identifier&& n, var&& v) noexcept
-   : name (std::move (n)),
-     value (std::move (v))
-{}
-
-NamedValueSet::NamedValue& NamedValueSet::NamedValue::operator= (NamedValue&& other) noexcept
+bool NamedValue::operator!= (const NamedValue& other) const noexcept
 {
-    name = std::move (other.name);
-    value = std::move (other.value);
-    return *this;
+    return ! operator== (other);
 }
-
-bool NamedValueSet::NamedValue::operator== (const NamedValue& other) const noexcept   { return name == other.name && value == other.value; }
-bool NamedValueSet::NamedValue::operator!= (const NamedValue& other) const noexcept   { return ! operator== (other); }
 
 //==============================================================================
-NamedValueSet::NamedValueSet() noexcept {}
-NamedValueSet::~NamedValueSet() noexcept {}
-
-NamedValueSet::NamedValueSet (const NamedValueSet& other)  : values (other.values) {}
-
-NamedValueSet::NamedValueSet (NamedValueSet&& other) noexcept
-   : values (std::move (other.values)) {}
-
 NamedValueSet::NamedValueSet (std::initializer_list<NamedValue> list)
    : values (std::move (list))
 {
-}
-
-NamedValueSet& NamedValueSet::operator= (const NamedValueSet& other)
-{
-    clear();
-    values = other.values;
-    return *this;
-}
-
-NamedValueSet& NamedValueSet::operator= (NamedValueSet&& other) noexcept
-{
-    other.values.swapWith (values);
-    return *this;
 }
 
 void NamedValueSet::clear()

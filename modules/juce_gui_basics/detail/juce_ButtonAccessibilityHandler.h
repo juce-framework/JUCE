@@ -111,8 +111,16 @@ private:
                                                          [&button] { button.triggerClick(); });
 
         if (button.isToggleable())
+        {
             actions = actions.addAction (AccessibilityActionType::toggle,
-                                         [&button] { button.setToggleState (! button.getToggleState(), sendNotification); });
+                                         [&button]
+                                         {
+                                             if (! button.isEnabled())
+                                                 return;
+
+                                             button.setToggleState (! button.getToggleState(), sendNotification);
+                                         });
+        }
 
         return actions;
     }

@@ -397,7 +397,7 @@ template <class JuceClass>
 struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
 {
     ObjCLifetimeManagedClass()
-        : ObjCClass<NSObject> ("ObjCLifetimeManagedClass_")
+        : ObjCClass ("ObjCLifetimeManagedClass_")
     {
         addIvar<JuceClass*> ("cppObject");
 

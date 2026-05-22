@@ -162,6 +162,7 @@ public:
     virtual String getDescription()  { return {}; }
 
     virtual bool supportsPrecompiledHeaders() const  { return false; }
+    virtual bool supportsPaceProtection() const { return false; }
 
     //==============================================================================
     // cross-platform audio plug-ins supported by exporter
@@ -272,10 +273,9 @@ public:
 
     build_tools::RelativePath getVST3HelperProgramSource() const
     {
-        const auto suffix = isOSX() ? "mm" : "cpp";
         return getModuleFolderRelativeToProject ("juce_audio_plugin_client")
                .getChildFile ("VST3")
-               .getChildFile (String ("juce_VST3ManifestHelper.") + suffix);
+               .getChildFile ("juce_VST3ManifestHelper.cpp");
     }
 
     //==============================================================================
@@ -508,6 +508,23 @@ public:
     String getCompilerFlagsForFileCompilerFlagScheme (StringRef) const;
     String getCompilerFlagsForProjectItem (const Project::Item&) const;
 
+    bool isPaceProtectionEnabled() const { return paceProtectionValue.get(); }
+    void resetPaceProtection() { paceProtectionValue.resetToDefault(); }
+
+    File getPaceConfigurationFile() const
+    {
+        const String path = paceConfigurationFileValue.get();
+        return project.getProjectFolder().getChildFile (path);
+    }
+
+    File getPaceBuildSourceRoot() const
+    {
+        const String path = paceBuildSourceRootValue.get();
+        return project.getProjectFolder().getChildFile (path);
+    }
+
+    bool shouldUsePaceSharableTargetNames() const { return paceUseSharableTargetNames.get(); }
+
 protected:
     //==============================================================================
     String name;
@@ -520,7 +537,9 @@ protected:
     ValueTreePropertyWithDefaultWrapper vstLegacyPathValueWrapper, aaxPathValueWrapper, araPathValueWrapper;
 
     ValueTreePropertyWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
-                                 userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
+                                 userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue,
+                                 paceProtectionValue, paceConfigurationFileValue, paceBuildSourceRootValue,
+                                 paceUseSharableTargetNames;
 
     Value projectCompilerFlagSchemesValue;
 

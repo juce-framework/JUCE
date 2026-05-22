@@ -485,6 +485,7 @@ class FontFeaturesDemo : public Component
 public:
     FontFeaturesDemo()
     {
+        setName ("Font features demo");
         fontsListBox.setTitle ("Fonts");
         fontsListBox.setRowHeight (20);
         fontsListBox.setColour (ListBox::textColourId, Colours::black);
@@ -507,6 +508,11 @@ public:
         addAndMakeVisible (featureListBox);
 
         setSize (750, 750);
+    }
+
+    void paint (Graphics& g) override
+    {
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
     }
 
     void resized() override

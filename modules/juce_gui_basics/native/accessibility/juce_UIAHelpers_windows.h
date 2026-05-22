@@ -35,12 +35,53 @@
 namespace juce
 {
 
+class SafeArrayHandle
+{
+public:
+    SafeArrayHandle() = default;
+
+    explicit SafeArrayHandle (SAFEARRAY* x) : ptr (x) {}
+
+    SafeArrayHandle (const SafeArrayHandle& x) = delete;
+    SafeArrayHandle& operator= (const SafeArrayHandle& x) = delete;
+
+    SafeArrayHandle (SafeArrayHandle&& x) noexcept : ptr (std::exchange (x.ptr, {})) {}
+    SafeArrayHandle& operator= (SafeArrayHandle&& x) noexcept
+    {
+        SafeArrayHandle tmp { std::move (x) };
+        std::swap (tmp.ptr, ptr);
+        return *this;
+    }
+
+    ~SafeArrayHandle()
+    {
+        if (ptr != nullptr)
+            SafeArrayDestroy (ptr);
+    }
+
+    SAFEARRAY* release()
+    {
+        return std::exchange (ptr, {});
+    }
+
+    [[nodiscard]] SAFEARRAY* get() const
+    {
+        return ptr;
+    }
+
+    bool operator== (std::nullptr_t) const { return ptr == nullptr; }
+    bool operator!= (std::nullptr_t) const { return ptr != nullptr; }
+
+private:
+    SAFEARRAY* ptr = nullptr;
+};
+
 namespace VariantHelpers
 {
     namespace Detail
     {
         template <typename Fn, typename ValueType>
-        inline VARIANT getWithValueGeneric (Fn&& setter, ValueType value)
+        VARIANT getWithValueGeneric (Fn&& setter, ValueType value)
         {
             VARIANT result{};
             setter (value, &result);
@@ -85,34 +126,33 @@ inline JUCE_COMRESULT addHandlersToArray (const std::vector<const AccessibilityH
 {
     auto numHandlers = handlers.size();
 
-    *pRetVal = SafeArrayCreateVector (VT_UNKNOWN, 0, (ULONG) numHandlers);
+    SafeArrayHandle result { SafeArrayCreateVector (VT_UNKNOWN, 0, (ULONG) numHandlers) };
 
-    if (pRetVal != nullptr)
+    if (result == nullptr)
+        return E_FAIL;
+
+    for (LONG i = 0; i < (LONG) numHandlers; ++i)
     {
-        for (LONG i = 0; i < (LONG) numHandlers; ++i)
-        {
-            auto* handler = handlers[(size_t) i];
+        auto* handler = handlers[(size_t) i];
 
-            if (handler == nullptr)
-                continue;
+        if (handler == nullptr)
+            continue;
 
-            ComSmartPtr<IRawElementProviderSimple> provider;
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-            handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        ComSmartPtr<IRawElementProviderSimple> provider;
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-            auto hr = SafeArrayPutElement (*pRetVal, &i, provider);
-
-            if (FAILED (hr))
-                return E_FAIL;
-        }
+        if (FAILED (SafeArrayPutElement (result.get(), &i, provider)))
+            return E_FAIL;
     }
 
+    *pRetVal = result.release();
     return S_OK;
 }
 
 template <typename Value, typename Object, typename Callback>
-inline JUCE_COMRESULT withCheckedComArgs (Value* pRetVal, Object& handle, Callback&& callback)
+JUCE_COMRESULT withCheckedComArgs (Value* pRetVal, Object& handle, Callback&& callback)
 {
     if (pRetVal == nullptr)
         return E_INVALIDARG;

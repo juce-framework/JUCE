@@ -554,11 +554,11 @@ void MPEInstrument::updateNoteTotalPitchbend (MPENote& note)
     {
         auto zone = zoneLayout.getLowerZone();
 
-        if (! zone.isActive() || ! zone.isUsing (note.midiChannel))
+        if (! zone.isUsing (note.midiChannel))
         {
             auto upperZone = zoneLayout.getUpperZone();
 
-            if (upperZone.isActive() && upperZone.isUsing (note.midiChannel))
+            if (upperZone.isUsing (note.midiChannel))
             {
                 zone = upperZone;
             }

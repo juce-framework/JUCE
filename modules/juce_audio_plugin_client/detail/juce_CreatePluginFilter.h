@@ -48,7 +48,7 @@ inline std::unique_ptr<AudioProcessor> createPluginFilterOfType (AudioProcessor:
     jassert (pluginInstance != nullptr && pluginInstance->wrapperType == type);
 
    #if JucePlugin_Enable_ARA
-    jassert (dynamic_cast<juce::AudioProcessorARAExtension*> (pluginInstance.get()) != nullptr);
+    jassert (pluginInstance->getARAClientExtensions() != nullptr);
    #endif
 
     return pluginInstance;

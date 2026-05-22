@@ -129,11 +129,7 @@ struct MidiDeviceInfo
     [[nodiscard]] MidiDeviceInfo withIdentifier (String x) const { return withMember (*this, &MidiDeviceInfo::identifier, x); }
 
     //==============================================================================
-    bool operator== (const MidiDeviceInfo& other) const noexcept
-    {
-        const auto tie = [] (auto& x) { return std::tuple (x.name, x.identifier); };
-        return tie (*this) == tie (other);
-    }
+    bool operator== (const MidiDeviceInfo& other) const noexcept;
 
     bool operator!= (const MidiDeviceInfo& other) const noexcept   { return ! operator== (other); }
 };
@@ -384,19 +380,13 @@ public:
     /** Sends out a MIDI message immediately. */
     void sendMessageNow (const MidiMessage& message)
     {
-        converter.convert ({ group, message.asSpan() }, [this] (const ump::View& view)
-        {
-            ump::Iterator b (view.data(), view.size());
-            auto e = std::next (b);
-            connection.send (b, e);
-        });
+        convertAndSend (mainPackets, Span { &message, 1 });
     }
 
     /** Sends out a sequence of MIDI messages immediately. */
     void sendBlockOfMessagesNow (const MidiBuffer& buffer)
     {
-        for (const auto metadata : buffer)
-            sendMessageNow (metadata.getMessage());
+        convertAndSend (mainPackets, buffer);
     }
 
     /** This lets you supply a block of messages that will be sent out at some point
@@ -440,7 +430,11 @@ public:
     /** Starts up a background thread so that the device can send blocks of data.
         Call this to get the device ready, before using sendBlockOfMessages().
     */
-    void startBackgroundThread()            { outputThread.start(); }
+    void startBackgroundThread()
+    {
+        backgroundPackets.reserve (2048);
+        outputThread.start();
+    }
 
     /** Stops the background thread, and clears any pending midi events.
         @see startBackgroundThread
@@ -460,17 +454,33 @@ private:
                 const MidiDeviceInfo&,
                 ump::LegacyVirtualOutput);
 
+    template <typename Range>
+    void convertAndSend (ump::Packets& packets, Range&& range)
+    {
+        packets.clear();
+
+        std::for_each (std::begin (range), std::end (range), [&] (const auto& item)
+        {
+            ump::ToUMP1Converter{}.convert ({ group, item.asSpan() }, [&packets] (auto view)
+            {
+                packets.add (view);
+            });
+        });
+
+        connection.send (packets.begin(), packets.end());
+    }
+
     //==============================================================================
     std::shared_ptr<ump::Session> session;
     ump::LegacyVirtualOutput virtualEndpoint;
     std::optional<String> customName;
     ump::Output connection;
     MidiDeviceInfo storedInfo;
-    ump::ToUMP1Converter converter;
+    ump::Packets mainPackets, backgroundPackets;
     uint8_t group{};
     ScheduledEventThread<MidiMessage> outputThread { [this] (const MidiMessage& message)
     {
-        sendMessageNow (message);
+        convertAndSend (backgroundPackets, Span { &message, 1 });
     } };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutput)

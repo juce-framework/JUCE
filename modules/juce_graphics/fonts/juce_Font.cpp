@@ -78,7 +78,6 @@ public:
         const ScopedWriteLock sl (lock);
 
         setSize (faces.size());
-        defaultFace = nullptr;
     }
 
     Typeface::Ptr findTypefaceFor (const Font& font)
@@ -126,16 +125,7 @@ public:
 
         face = std::move (newFace);
 
-        if (defaultFace == nullptr && key == Key{})
-            defaultFace = face.typeface;
-
         return face.typeface;
-    }
-
-    Typeface::Ptr getDefaultFace() const noexcept
-    {
-        const ScopedReadLock slr (lock);
-        return defaultFace;
     }
 
 private:
@@ -166,7 +156,6 @@ private:
         Typeface::Ptr typeface;
     };
 
-    Typeface::Ptr defaultFace;
     ReadWriteLock lock;
     Array<CachedFace> faces;
     size_t counter = 0;
@@ -184,6 +173,7 @@ void (*clearOpenGLGlyphCache)() = nullptr;
 void Typeface::clearTypefaceCache()
 {
     TypefaceCache::getInstance()->clear();
+    GlyphCacheRegistry::get().clear();
 
     RenderingHelpers::SoftwareRendererSavedState::clearGlyphCache();
 
@@ -836,24 +826,6 @@ float Font::getHeightInPoints() const
 
 float Font::getAscentInPoints() const       { return font->getAscentDescent (*this).ascent  * getHeightInPoints(); }
 float Font::getDescentInPoints() const      { return font->getAscentDescent (*this).descent * getHeightInPoints(); }
-
-int Font::getStringWidth (const String& text) const
-{
-    JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
-    return (int) std::ceil (getStringWidthFloat (text));
-    JUCE_END_IGNORE_DEPRECATION_WARNINGS
-}
-
-float Font::getStringWidthFloat (const String& text) const
-{
-    if (auto typeface = getTypefacePtr())
-    {
-        const auto w = typeface->getStringWidth (getMetricsKind(), text, getHeight(), getHorizontalScale());
-        return w + (getHeight() * getHorizontalScale() * getExtraKerningFactor() * (float) text.length());
-    }
-
-    return 0;
-}
 
 void Font::findFonts (Array<Font>& destArray)
 {

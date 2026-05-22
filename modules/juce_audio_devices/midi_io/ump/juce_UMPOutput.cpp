@@ -48,6 +48,11 @@ public:
         virtual bool send (Iterator b, Iterator e) = 0;
     };
 
+    ~Impl() override
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+    }
+
     EndpointId getEndpointId() const
     {
         return identifier;
@@ -55,10 +60,7 @@ public:
 
     bool send (Iterator beginIterator, Iterator endIterator)
     {
-        if (native != nullptr)
-            return native->send (beginIterator, endIterator);
-
-        return false;
+        return isAlive() && native->send (beginIterator, endIterator);
     }
 
     void addDisconnectionListener (DisconnectionListener& x)
@@ -73,7 +75,7 @@ public:
 
     bool isAlive() const
     {
-        return native != nullptr;
+        return connected && native != nullptr;
     }
 
     template <typename Callback>
@@ -90,19 +92,22 @@ public:
     }
 
 private:
-    Impl() = default;
+    Impl()
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+    }
 
     void disconnected() override
     {
         JUCE_ASSERT_MESSAGE_THREAD
-
-        native = nullptr;
+        connected = false;
         disconnectListeners.call ([] (auto& x) { x.disconnected(); });
     }
 
     ListenerList<DisconnectionListener> disconnectListeners;
     std::unique_ptr<Native> native;
     EndpointId identifier;
+    std::atomic<bool> connected { true };
 };
 
 Output::Output() = default;
@@ -138,12 +143,18 @@ void Output::addDisconnectionListener (DisconnectionListener& x)
     // You should ensure that isAlive() returns true before calling other member functions!
     jassert (isAlive());
 
+    // This function should only be called on the main thread!
+    JUCE_ASSERT_MESSAGE_THREAD
+
     if (impl != nullptr)
         impl->addDisconnectionListener (x);
 }
 
 void Output::removeDisconnectionListener (DisconnectionListener& x)
 {
+    // This function should only be called on the main thread!
+    JUCE_ASSERT_MESSAGE_THREAD
+
     if (impl != nullptr)
         impl->removeDisconnectionListener (x);
 }

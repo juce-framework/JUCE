@@ -270,7 +270,7 @@ public:
     std::unique_ptr<AudioProcessorEditor> createInnerEditor() const
     {
         const ScopedLock sl (innerMutex);
-        return rawToUniquePtr (inner->hasEditor() ? inner->createEditorIfNeeded() : nullptr);
+        return rawToUniquePtr (inner->hasEditor() ? inner->createEditorAndMakeActive() : nullptr);
     }
 
     EditorStyle getEditorStyle() const noexcept { return editorStyle; }

@@ -270,7 +270,19 @@ public:
 
         @param options  the options to use when creating the dialog.
 
-        @returns  the index of the button that was clicked.
+        @returns the following result codes:
+        - One button:
+            - button[0] returns 0
+        - Two buttons:
+            - button[0] returns 1
+            - button[1] returns 0
+        - Three buttons:
+            - button[0] returns 1
+            - button[1] returns 2
+            - button[2] returns 0
+
+        Another way of expressing this is that, when there are N buttons, then the result code for
+        button X is equal to ((X + 1) % N).
 
         @see MessageBoxOptions
     */

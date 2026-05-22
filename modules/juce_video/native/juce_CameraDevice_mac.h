@@ -200,7 +200,8 @@ private:
     //==============================================================================
     struct DelegateClass  : public ObjCClass<NSObject>
     {
-        DelegateClass()  : ObjCClass<NSObject> ("JUCECameraDelegate_")
+        DelegateClass()
+            : ObjCClass ("JUCECameraDelegate_")
         {
             addIvar<Pimpl*> ("owner");
             addProtocol (@protocol (AVCaptureFileOutputRecordingDelegate));

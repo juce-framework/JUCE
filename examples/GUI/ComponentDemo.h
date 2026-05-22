@@ -144,7 +144,9 @@ public:
     //==============================================================================
     ComponentDemo()
     {
-        // add the light grid to out main component.
+        setName ("Component demo");
+
+        // add the light grid to our main component.
         addAndMakeVisible (lightGrid);
 
         setSize (600, 600);

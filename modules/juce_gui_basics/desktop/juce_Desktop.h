@@ -458,7 +458,7 @@ private:
 
     std::unique_ptr<FocusOutline> focusOutline;
 
-    Component* kioskModeComponent = nullptr;
+    Component::SafePointer<Component> kioskModeComponent;
     Rectangle<int> kioskComponentOriginalBounds;
     bool kioskModeReentrant = false;
 

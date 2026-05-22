@@ -62,6 +62,7 @@ namespace juce::build_tools
            << newLine
            << "VS_VERSION_INFO VERSIONINFO" << newLine
            << "FILEVERSION  " << getCommaSeparatedVersionNumber (version) << newLine
+           << "PRODUCTVERSION  " << getCommaSeparatedVersionNumber (version) << newLine
            << "BEGIN" << newLine
            << "  BLOCK \"StringFileInfo\"" << newLine
            << "  BEGIN" << newLine

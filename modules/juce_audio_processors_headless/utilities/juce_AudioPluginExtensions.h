@@ -75,34 +75,21 @@ struct AEffect;
 namespace juce
 {
 
-//==============================================================================
-/** Create a derived implementation of this class and pass it to
-    AudioPluginInstance::getExtensions() to retrieve format-specific
-    information about a plugin instance.
-
-    Note that the references passed to the visit member functions are only
-    guaranteed to live for the duration of the function call, so don't
-    store pointers to these objects! If you need to store and reuse
-    format-specific information, it is recommended to copy the result
-    of the function calls that you care about. For example, you should
-    store the result of VST::getAEffectPtr() rather than storing a pointer
-    to the VST instance.
+/** A collection of interfaces for interacting with hosted plugins in a plugin-format-specific way.
 
     @tags{Audio}
 */
-struct ExtensionsVisitor
+struct AudioPluginExtensions
 {
-    /** Indicates that there is no platform specific information available. */
-    struct Unknown {};
+    AudioPluginExtensions() = delete;
 
     /** Can be used to retrieve information about a VST3 that is wrapped by an AudioProcessor. */
     struct VST3Client
     {
         virtual ~VST3Client() = default;
         virtual Steinberg::Vst::IComponent* getIComponentPtr() const noexcept = 0;
-
         virtual MemoryBlock getPreset() const = 0;
-        virtual bool setPreset (const MemoryBlock&) const = 0;
+        virtual bool setPreset (const MemoryBlock&) = 0;
     };
 
     /** Can be used to retrieve information about an AudioUnit that is wrapped by an AudioProcessor. */
@@ -117,6 +104,47 @@ struct ExtensionsVisitor
     {
         virtual ~VSTClient() = default;
         virtual AEffect* getAEffectPtr() const noexcept = 0;
+
+        /** Attempts to retrieve the VSTXML data from a plugin.
+            Will return nullptr if the plugin doesn't have any VSTXML.
+        */
+        virtual const XmlElement* getVSTXML() const = 0;
+
+        /** Attempts to reload a VST plugin's state from some FXB or FXP data. */
+        virtual bool loadFromFXBFile (Span<const std::byte> data) = 0;
+
+        /** Attempts to save a VST's state to some FXP or FXB data. */
+        virtual bool saveToFXBFile (MemoryBlock& result, bool asFXB) = 0;
+
+        /** Attempts to set a VST's state from a chunk of memory. */
+        virtual bool setChunkData (Span<const std::byte> data, bool isPreset) = 0;
+
+        /** Attempts to get a VST's state as a chunk of memory. */
+        virtual bool getChunkData (MemoryBlock& result, bool isPreset) const = 0;
+
+        //==============================================================================
+        /** Base class for some extra functions that can be attached to a VST plugin instance. */
+        class ExtraFunctions
+        {
+        public:
+            virtual ~ExtraFunctions() = default;
+
+            /** This should return 10000 * the BPM at this position in the current edit. */
+            virtual int64 getTempoAt (int64 samplePos) = 0;
+
+            /** This should return the host's automation state.
+                @returns 0 = not supported, 1 = off, 2 = read, 3 = write, 4 = read/write
+            */
+            virtual int getAutomationState() = 0;
+        };
+
+        /** Provides an ExtraFunctions callback object for a plugin to use.
+            The plugin will take ownership of the object and will delete it automatically.
+        */
+        virtual void setExtraFunctions (std::unique_ptr<ExtraFunctions> functions) = 0;
+
+        /** This simply calls directly to the VST's AEffect::dispatcher() function. */
+        virtual pointer_sized_int dispatcher (int32, int32, pointer_sized_int, void*, float) = 0;
     };
 
     /** Can be used to retrieve information about a plugin that provides ARA extensions. */
@@ -125,31 +153,6 @@ struct ExtensionsVisitor
         virtual ~ARAClient() = default;
         virtual void createARAFactoryAsync (std::function<void (ARAFactoryWrapper)>) const = 0;
     };
-
-    ExtensionsVisitor() = default;
-
-    ExtensionsVisitor (const ExtensionsVisitor&) = default;
-    ExtensionsVisitor (ExtensionsVisitor&&) = default;
-
-    ExtensionsVisitor& operator= (const ExtensionsVisitor&) = default;
-    ExtensionsVisitor& operator= (ExtensionsVisitor&&) = default;
-
-    virtual ~ExtensionsVisitor() = default;
-
-    /** Will be called if there is no platform specific information available. */
-    virtual void visitUnknown           (const Unknown&)         {}
-
-    /** Called with VST3-specific information. */
-    virtual void visitVST3Client        (const VST3Client&)      {}
-
-    /** Called with VST-specific information. */
-    virtual void visitVSTClient         (const VSTClient&)       {}
-
-    /** Called with AU-specific information. */
-    virtual void visitAudioUnitClient   (const AudioUnitClient&) {}
-
-    /** Called with ARA-specific information. */
-    virtual void visitARAClient         (const ARAClient&)       {}
 };
 
 } // namespace juce

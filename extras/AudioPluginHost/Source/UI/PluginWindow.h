@@ -169,10 +169,13 @@ public:
         numTypes
     };
 
-    PluginWindow (AudioProcessorGraph::Node* n, Type t, OwnedArray<PluginWindow>& windowList)
+    PluginWindow (AudioProcessorGraph::Node* n,
+                  Type t,
+                  OwnedArray<PluginWindow>& windowList,
+                  KeyListener* keyListener)
         : DocumentWindow (n->getProcessor()->getName() + getFormatSuffix (n->getProcessor()),
-                          LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
-                          DocumentWindow::minimiseButton | DocumentWindow::closeButton),
+                          LookAndFeel::getDefaultLookAndFeel().findColour (backgroundColourId),
+                          minimiseButton | closeButton),
           activeWindowList (windowList),
           node (n), type (t)
     {
@@ -206,6 +209,8 @@ public:
         node->properties.set (getOpenProp (type), true);
 
         setVisible (true);
+
+        addKeyListener (keyListener);
     }
 
     ~PluginWindow() override
@@ -284,7 +289,7 @@ private:
         if (type == PluginWindow::Type::normal)
         {
             if (processor.hasEditor())
-                if (auto* ui = processor.createEditorIfNeeded())
+                if (auto* ui = processor.createEditorAndMakeActive())
                     return ui;
 
             type = PluginWindow::Type::generic;

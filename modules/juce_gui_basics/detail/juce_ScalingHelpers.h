@@ -118,16 +118,25 @@ struct ScalingHelpers
     static Point<float>     subtractPosition (Point<float> p,     const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
     static Rectangle<float> subtractPosition (Rectangle<float> p, const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
 
-    static Point<float> screenPosToLocalPos (Component& comp, Point<float> pos)
+    static Point<float> screenPosToLocalPos (const Component& comp, Point<float> pos)
     {
         if (auto* peer = comp.getPeer())
         {
-            pos = peer->globalToLocal (pos);
             auto& peerComp = peer->getComponent();
-            return comp.getLocalPoint (&peerComp, unscaledScreenPosToScaled (peerComp, pos));
+            return comp.getLocalPoint (&peerComp, unscaledScreenPosToScaled (peerComp, peer->globalToLocal (pos)));
         }
 
         return comp.getLocalPoint (nullptr, unscaledScreenPosToScaled (comp, pos));
+    }
+
+    static Point<float> convertPhysicalScreenPointToLogical (Point<float> p) noexcept
+    {
+        return scaledScreenPosToUnscaled (Desktop::getInstance().getDisplays().physicalToLogical (p, nullptr));
+    }
+
+    static Point<float> convertLogicalScreenPointToPhysical (Point<float> p) noexcept
+    {
+        return Desktop::getInstance().getDisplays().logicalToPhysical (unscaledScreenPosToScaled (p), nullptr);
     }
 };
 

@@ -43,8 +43,11 @@ class ARAEditorView;
 class ARAInputStream;
 class ARAOutputStream;
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
+=======
+>>>>>>> 0df3dbb197b22595aa0818dfab4dcf05b5e6ed37
 /** This class provides customisable configuration options that are available at the ARAFactory
     construction's time.
 
@@ -77,8 +80,6 @@ struct ARADocumentControllerConfiguration
         return ARA::kARAAPIGeneration_2_3_Final;
     }
 };
-
->>>>>>> Stashed changes
 /** This class contains the customisation points for the JUCE provided ARA document controller
     implementation.
 
@@ -136,6 +137,13 @@ class ARADocumentControllerSpecialisation  : public ARADocument::Listener,
                                              public ARAPlaybackRegion::Listener
 {
 public:
+    /** Used for configuration options that are available during the ARAFactory's construction.
+
+        You can shadow this type member with a custom type that has the same member function
+        signatures.
+    */
+    using ARAConfigurationType = ARADocumentControllerConfiguration;
+
     //==============================================================================
     /** Constructor. Used internally by the ARAFactory implementation.
     */
@@ -170,6 +178,9 @@ public:
     {
         static_assert (std::is_base_of_v<ARADocumentControllerSpecialisation, SpecialisationType>,
                        "DocumentController specialization types must inherit from ARADocumentControllerSpecialisation");
+        static_assert (std::is_same_v<ARA::ARAAPIGeneration, decltype (SpecialisationType::ARAConfigurationType::getHighestSupportedApiGeneration())>,
+                       "The ARAConfigurationType type member must have a static member function "
+                       "`ARAAPIGeneration getHighestSupportedApiGeneration()`.");
         return ARA::PlugIn::PlugInEntry::getPlugInEntry<FactoryConfig<SpecialisationType>>()->getFactory();
     }
 
@@ -418,6 +429,8 @@ private:
     class FactoryConfig  : public ARA::PlugIn::FactoryConfig
     {
     public:
+        using ARAConfigurationType = typename SpecialisationType::ARAConfigurationType;
+
         FactoryConfig() noexcept
         {
             const juce::String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
@@ -464,6 +477,11 @@ private:
                     supportedPlaybackTransformationFlags |= playbackTransformationFlags[i];
 
             JUCE_END_IGNORE_WARNINGS_MSVC
+        }
+
+        ARA::ARAAPIGeneration getHighestSupportedApiGeneration() const noexcept override
+        {
+            return ARAConfigurationType::getHighestSupportedApiGeneration();
         }
 
         const char* getFactoryID() const noexcept override         { return JucePlugin_ARAFactoryID; }

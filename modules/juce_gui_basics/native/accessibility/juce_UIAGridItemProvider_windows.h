@@ -109,11 +109,16 @@ public:
                                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
                                 if (child->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress())) == S_OK && provider != nullptr)
                                 {
-                                    *pRetVal = SafeArrayCreateVector (VT_UNKNOWN, 0, 1);
-                                    LONG index = 0;
-                                    const auto hr = SafeArrayPutElement (*pRetVal, &index, provider);
+                                    SafeArrayHandle result { SafeArrayCreateVector (VT_UNKNOWN, 0, 1) };
 
-                                    return ! FAILED (hr);
+                                    if (result == nullptr)
+                                        return false;
+
+                                    if (LONG index = 0; FAILED (SafeArrayPutElement (result.get(), &index, provider)))
+                                        return false;
+
+                                    *pRetVal = result.release();
+                                    return true;
                                 }
                                 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
                             }

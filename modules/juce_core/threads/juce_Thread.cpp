@@ -105,13 +105,16 @@ void Thread::threadEntryPoint()
         if (affinityMask != 0)
             setCurrentThreadAffinityMask (affinityMask);
 
-        try
+        JUCE_AUTORELEASEPOOL
         {
-            run();
-        }
-        catch (...)
-        {
-            jassertfalse; // Your run() method mustn't throw any exceptions!
+            try
+            {
+                run();
+            }
+            catch (...)
+            {
+                jassertfalse; // Your run() method mustn't throw any exceptions!
+            }
         }
     }
 

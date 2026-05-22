@@ -49,12 +49,22 @@ class JUCE_API  RelativeTime
 {
 public:
     //==============================================================================
+    /** Creates a RelativeTime with a period of zero seconds. */
+    RelativeTime() noexcept = default;
+
+    //==============================================================================
     /** Creates a RelativeTime.
 
         @param seconds  the number of seconds, which may be +ve or -ve.
         @see milliseconds, minutes, hours, days, weeks
     */
-    explicit RelativeTime (double seconds = 0.0) noexcept;
+    explicit RelativeTime (double seconds) noexcept;
+
+    /** Creates a relative time from a std::chrono::duration. */
+    template <typename Rep, typename Period>
+    explicit RelativeTime (std::chrono::duration<Rep, Period> duration) noexcept
+        : RelativeTime (std::chrono::duration_cast<Seconds> (duration).count())
+    {}
 
     /** Copies another relative time. */
     RelativeTime (const RelativeTime& other) noexcept;
@@ -132,6 +142,20 @@ public:
     */
     double inWeeks() const noexcept;
 
+    /** Converts this RelativeTime to a numeric value in the requested time unit. */
+    template <typename TimeUnit>
+    auto to() const noexcept
+    {
+        return toStdDuration<TimeUnit>().count();
+    }
+
+    /** Converts this RelativeTime to a std::chrono::duration. */
+    template <typename DurationType>
+    auto toStdDuration() const noexcept
+    {
+        return std::chrono::duration_cast<DurationType> (Seconds { numSeconds });
+    }
+
     /** Returns a readable textual description of the time.
 
         The exact format of the string returned will depend on
@@ -170,7 +194,7 @@ public:
 
 private:
     //==============================================================================
-    double numSeconds;
+    double numSeconds{};
 };
 
 //==============================================================================

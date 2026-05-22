@@ -605,7 +605,7 @@ void AlertWindow::showMessageBox (MessageBoxIconType iconType,
 int AlertWindow::show (const MessageBoxOptions& options)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        return NativeMessageBox::show (options);
+        return showNativeBoxUnmanaged (options, nullptr, ResultCodeMappingMode::alertWindow);
 
     return showAlertWindowUnmanaged (options, nullptr);
 }

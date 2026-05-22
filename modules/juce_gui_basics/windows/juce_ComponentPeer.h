@@ -194,6 +194,12 @@ public:
 
         If the native window is contained in another window, then the coordinates are
         relative to the parent window's origin, not the screen origin.
+        In this case, the position is specified in the same coordinate space as the size.
+
+        As an example, imagine that setBounds() is called on a contained ComponentPeer
+        with newBounds set to { 10, 20, 30, 40 }, where the peer's native scale factor is 1.5.
+        The new bounds will be converted to physical pixels, { 15, 30, 45, 60 }, meaning that
+        the peer will be positioned at { 15, 30 } *physical pixels* in the parent.
 
         This should result in a callback to handleMovedOrResized().
     */
@@ -232,6 +238,20 @@ public:
 
     /** Converts a screen area to a position relative to the top-left of this component. */
     Rectangle<float> globalToLocal (const Rectangle<float>& screenPosition);
+
+    /** Converts the argument, in local peer coordinates, to a continuous coordinate space
+        suitable for positioning windows consistently in multimonitor setups.
+
+        @see multimonitorToLocal()
+    */
+    virtual Point<float> localToMultimonitor (Point<float> x) { return localToGlobal (x); }
+
+    /** Converts the argument, in a continuous coordinate space suitable for positioning windows
+        consistently in multimonitor setups, to local peer coordinates.
+
+        @see localToMultimonitor()
+    */
+    virtual Point<float> multimonitorToLocal (Point<float> x) { return globalToLocal (x); }
 
     /** Returns the area in peer coordinates that is covered by the given sub-comp (which
         may be at any depth)
@@ -538,6 +558,25 @@ public:
     */
     virtual double getPlatformScaleFactor() const noexcept    { return 1.0; }
 
+    /** On Windows and Linux, calling this with a non-null optional will override whatever scale
+        factor the platform has specified for this window. The new scale factor will persist even
+        in the case that the platform attempts to set a new scale! Pass a null optional to revert
+        back to the platform-provided scale.
+
+        This is intended for use by plugin wrappers, where hosts may attempt to set a scale factor
+        different from the platform scale. You should never need to call this directly.
+    */
+    virtual void setCustomPlatformScaleFactor (std::optional<double>) {}
+
+    /** Returns the custom scale factor set using setCustomPlatformScaleFactor(), if any.
+
+        If a custom scale factor has been set, getPlatformScaleFactor() will always return that
+        value, effectively overriding any scale factor requested by the system.
+        Otherwise, if the custom platform scale factor is nullopt, then the system will update the
+        scale factor automatically.
+    */
+    virtual std::optional<double> getCustomPlatformScaleFactor() const { return {}; }
+
     /** On platforms that support it, this will update the window's titlebar in some
         way to indicate that the window's document needs saving.
     */
@@ -577,6 +616,64 @@ public:
         match logging calls to specific frames.
     */
     uint64_t getNumFramesPainted() const { return peerFrameNumber; }
+
+    auto setMultimonitorPositionOverride (Point<int> pendingPosition)
+    {
+        struct Disabler
+        {
+            Disabler() = default;
+            Disabler (Component* x, Point<int> next)
+                : self (x)
+            {
+                if (auto* peer = getPeer())
+                    previous = std::exchange (peer->multimonitorPositionOverride, next);
+            }
+
+            Disabler (Disabler&& other) noexcept
+                : self (std::exchange (other.self, {})),
+                  previous (std::exchange (other.previous, {}))
+            {
+            }
+
+            Disabler (const Disabler& other) = delete;
+
+            Disabler& operator= (Disabler&& other) noexcept
+            {
+                Disabler { std::move (other) }.swap (*this);
+                return *this;
+            }
+
+            Disabler& operator= (const Disabler& other) = delete;
+
+            ~Disabler()
+            {
+                if (auto* peer = getPeer())
+                    peer->multimonitorPositionOverride = previous;
+            }
+
+            void swap (Disabler& other) noexcept
+            {
+                std::swap (other.self, self);
+                std::swap (other.previous, previous);
+            }
+
+            ComponentPeer* getPeer() const
+            {
+                if (self != nullptr)
+                    return self->getPeer();
+
+                return nullptr;
+            }
+
+            WeakReference<Component> self;
+            std::optional<Point<int>> previous;
+        };
+
+        return Disabler { &component, pendingPosition };
+    }
+
+    /** @internal */
+    auto getMultimonitorPositionOverride() const { return multimonitorPositionOverride; }
 
 protected:
     //==============================================================================
@@ -621,6 +718,7 @@ private:
     Component* lastDragAndDropCompUnderMouse = nullptr;
     TextInputTarget* textInputTarget = nullptr;
     const uint32 uniqueID;
+    std::optional<Point<int>> multimonitorPositionOverride;
     uint64_t peerFrameNumber = 0;
     bool isWindowMinimised = false;
 

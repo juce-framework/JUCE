@@ -719,7 +719,9 @@ void LADSPAPluginFormatHeadless::recursiveFileSearch (StringArray& results, cons
 
 FileSearchPath LADSPAPluginFormatHeadless::getDefaultLocationsToSearch()
 {
-    return  { SystemStats::getEnvironmentVariable ("LADSPA_PATH", "/usr/lib/ladspa;/usr/local/lib/ladspa;~/.ladspa").replace (":", ";") };
+    FileSearchPath result { SystemStats::getEnvironmentVariable ("LADSPA_PATH", "").replace (":", ";") };
+    result.addPath ({ "~/.ladspa;/usr/local/lib/ladspa;/usr/lib/ladspa" });
+    return result;
 }
 
 } // namespace juce

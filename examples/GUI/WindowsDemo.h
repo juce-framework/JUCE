@@ -317,7 +317,7 @@ private:
 
     static auto getDisplayArea()
     {
-        return Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea.reduced (20);
+        return Desktop::getInstance().getDisplays().getPrimaryDisplay()->userBounds.reduced (20).toNearestInt();
     }
 
     void showDialogWindow()

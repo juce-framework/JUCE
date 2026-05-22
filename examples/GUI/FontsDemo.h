@@ -60,6 +60,7 @@ class FontsDemo final : public Component,
 public:
     FontsDemo()
     {
+        setName ("Fonts demo");
         setOpaque (true);
 
         addAndMakeVisible (listBox);

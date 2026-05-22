@@ -838,52 +838,9 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
     auto imageRect = CGRectMake (0, 0, iw, ih);
 
     if (fillEntireClipAsTiles)
-    {
-      #if JUCE_IOS
         CGContextDrawTiledImage (context.get(), imageRect, image.get());
-      #else
-        // There's a bug in CGContextDrawTiledImage that makes it incredibly slow
-        // if it's doing a transformation - it's quicker to just draw lots of images manually,
-        // but we might not be able to draw the images ourselves if the clipping region is not
-        // finite
-        const auto doCustomTiling = [&]
-        {
-            if (transform.isOnlyTranslation())
-                return false;
-
-            const auto bound = CGContextGetClipBoundingBox (context.get());
-
-            if (CGRectIsNull (bound))
-                return false;
-
-            const auto clip = CGRectIntegral (bound);
-
-            int x = 0, y = 0;
-            while (x > clip.origin.x)   x -= iw;
-            while (y > clip.origin.y)   y -= ih;
-
-            auto right  = (int) (clip.origin.x + clip.size.width);
-            auto bottom = (int) (clip.origin.y + clip.size.height);
-
-            while (y < bottom)
-            {
-                for (int x2 = x; x2 < right; x2 += iw)
-                    CGContextDrawImage (context.get(), CGRectMake (x2, y, iw, ih), image.get());
-
-                y += ih;
-            }
-
-            return true;
-        };
-
-        if (! doCustomTiling())
-            CGContextDrawTiledImage (context.get(), imageRect, image.get());
-      #endif
-    }
     else
-    {
         CGContextDrawImage (context.get(), imageRect, image.get());
-    }
 }
 
 //==============================================================================
@@ -983,12 +940,12 @@ void CoreGraphicsContext::drawGlyphs (Span<const uint16_t> glyphs,
     {
         Path p;
         auto& f = state->font;
-        f.getTypefacePtr()->getOutlineForGlyph (f.getMetricsKind(), glyph, p);
+        f.getTypefacePtr()->getOutlineForGlyph (glyph, p);
 
         if (p.isEmpty())
             continue;
 
-        const auto scale = f.getHeight();
+        const auto scale = f.getHeightInPoints();
         fillPath (p, AffineTransform::scale (scale * f.getHorizontalScale(), scale).translated (positions[index]).followedBy (transform));
     }
 }

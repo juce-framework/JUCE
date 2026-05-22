@@ -50,7 +50,7 @@ namespace VideoRenderers
     //==============================================================================
     struct VMR7  : public Base
     {
-        VMR7() {}
+        VMR7() = default;
 
         HRESULT create (ComSmartPtr<IGraphBuilder>& graphBuilder,
                         ComSmartPtr<IBaseFilter>& baseFilter, HWND hwnd) override
@@ -169,8 +169,7 @@ namespace VideoRenderers
 }
 
 //==============================================================================
-struct VideoComponent::Pimpl  : public Component,
-                                private ComponentPeer::ScaleFactorListener
+struct VideoComponent::Pimpl  : public Component
 {
     Pimpl (VideoComponent& ownerToUse, bool)
         : owner (ownerToUse)
@@ -185,9 +184,6 @@ struct VideoComponent::Pimpl  : public Component,
         close();
         context = nullptr;
         componentWatcher = nullptr;
-
-        if (currentPeer != nullptr)
-            currentPeer->removeScaleFactorListener (this);
     }
 
     Result loadFromString (const String& fileOrURLPath)
@@ -351,9 +347,10 @@ private:
     VideoComponent& owner;
     ComponentPeer* currentPeer = nullptr;
     bool videoLoaded = false;
+    NativeScaleFactorNotifier notifier { &owner, [this] (auto) { nativeScaleFactorChanged(); } };
 
     //==============================================================================
-    void nativeScaleFactorChanged (double /*newScaleFactor*/) override
+    void nativeScaleFactorChanged()
     {
         if (videoLoaded)
             updateContextPosition();
@@ -375,9 +372,6 @@ private:
 
         void componentPeerChanged() override
         {
-            if (owner.currentPeer != nullptr)
-                owner.currentPeer->removeScaleFactorListener (&owner);
-
             if (owner.videoLoaded)
                 owner.recreateNativeWindowAsync();
         }
@@ -779,7 +773,6 @@ private:
 
                 hwnd = nativeWindow->hwnd;
                 component.currentPeer = topLevelPeer;
-                component.currentPeer->addScaleFactorListener (&component);
 
                 if (hwnd != nullptr)
                 {

@@ -128,7 +128,7 @@ struct ASIOSampleFormat
     {
         if (formatIsFloat)
         {
-            memcpy (dst, src, samps * sizeof (float));
+            memcpy (dst, src, (size_t) samps * sizeof (float));
         }
         else
         {
@@ -146,7 +146,7 @@ struct ASIOSampleFormat
     {
         if (formatIsFloat)
         {
-            memcpy (dst, src, samps * sizeof (float));
+            memcpy (dst, src, (size_t) samps * sizeof (float));
         }
         else
         {
@@ -163,7 +163,7 @@ struct ASIOSampleFormat
     void clear (void* dst, int numSamps) noexcept
     {
         if (dst != nullptr)
-            zeromem (dst, numSamps * byteStride);
+            zeromem (dst, (size_t) (numSamps * byteStride));
     }
 
     int bitDepth = 24, byteStride = 4;
@@ -202,7 +202,8 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *(uint16*) dest = ByteOrder::swapIfBigEndian ((uint16) (short) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                const auto value = ByteOrder::swapIfBigEndian ((uint16) (short) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                std::memcpy (dest, &value, sizeof (value));
                 dest += dstStrideBytes;
             }
         }
@@ -210,7 +211,8 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *(uint16*) dest = ByteOrder::swapIfLittleEndian ((uint16) (short) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                const auto value = ByteOrder::swapIfLittleEndian ((uint16) (short) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                std::memcpy (dest, &value, sizeof (value));
                 dest += dstStrideBytes;
             }
         }
@@ -248,7 +250,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                ByteOrder::littleEndian24BitToChars ((uint32) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
+                ByteOrder::littleEndian24BitToChars ((int32) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
                 dest += dstStrideBytes;
             }
         }
@@ -256,7 +258,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                ByteOrder::bigEndian24BitToChars ((uint32) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
+                ByteOrder::bigEndian24BitToChars ((int32) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
                 dest += dstStrideBytes;
             }
         }
@@ -294,7 +296,8 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *(uint32*) dest = ByteOrder::swapIfBigEndian ((uint32) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                const auto value = ByteOrder::swapIfBigEndian ((uint32) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                std::memcpy (dest, &value, sizeof (value));
                 dest += dstStrideBytes;
             }
         }
@@ -302,7 +305,8 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *(uint32*) dest = ByteOrder::swapIfLittleEndian ((uint32) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                const auto value = ByteOrder::swapIfLittleEndian ((uint32) roundToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                std::memcpy (dest, &value, sizeof (value));
                 dest += dstStrideBytes;
             }
         }
@@ -330,7 +334,7 @@ public:
          owner (ownerType),
          classId (clsID)
     {
-        ::CoInitialize (nullptr);
+        [[maybe_unused]] const auto result = ::CoInitialize (nullptr);
 
         name = devName;
         inBuffers.calloc (4);
@@ -430,10 +434,13 @@ public:
 
         updateSampleRates();
 
-        if (sampleRate == 0 || (sampleRates.size() > 0 && ! sampleRates.contains (sampleRate)))
-            sampleRate = sampleRates[0];
+        if (! sampleRates.isEmpty())
+        {
+            if (sampleRate <= 0 || ! sampleRates.contains (sampleRate))
+                sampleRate = sampleRates[0];
+        }
 
-        if (sampleRate == 0)
+        if (sampleRate <= 0)
         {
             jassertfalse;
             sampleRate = 44100.0;
@@ -955,7 +962,7 @@ private:
 
     void setSampleRate (double newRate)
     {
-        if (currentSampleRate != newRate)
+        if (! approximatelyEqual (currentSampleRate, newRate))
         {
             JUCE_ASIO_LOG ("rate change: " + String (currentSampleRate) + " to " + String (newRate));
             auto err = asioObject->setSampleRate (newRate);
@@ -1104,11 +1111,20 @@ private:
 
         if (asioObject != nullptr)
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6320)
+
             __try
             {
                 asioObject->Release();
             }
-            __except (EXCEPTION_EXECUTE_HANDLER) { releasedOK = false; }
+            __except (EXCEPTION_EXECUTE_HANDLER)
+            {
+                releasedOK = false;
+            }
+
+            JUCE_END_IGNORE_WARNINGS_MSVC
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             asioObject = nullptr;
         }
@@ -1132,12 +1148,22 @@ private:
 
     bool tryCreatingDriver (bool& crashed)
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6320)
+
         __try
         {
-            return CoCreateInstance (classId, 0, CLSCTX_INPROC_SERVER,
+            return CoCreateInstance (classId, nullptr, CLSCTX_INPROC_SERVER,
                                      classId, (void**) &asioObject) == S_OK;
         }
-        __except (EXCEPTION_EXECUTE_HANDLER) { crashed = true; }
+        __except (EXCEPTION_EXECUTE_HANDLER)
+        {
+            crashed = true;
+        }
+
+        JUCE_END_IGNORE_WARNINGS_MSVC
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
         return false;
     }
 
@@ -1454,7 +1480,7 @@ public:
         deviceNames.clear();
         classIds.clear();
 
-        HKEY hk = 0;
+        HKEY hk = nullptr;
         int index = 0;
 
         if (RegOpenKey (HKEY_LOCAL_MACHINE, _T ("software\\asio"), &hk) == ERROR_SUCCESS)
@@ -1555,7 +1581,7 @@ private:
     //==============================================================================
     static bool checkClassIsOk (const String& classId)
     {
-        HKEY hk = 0;
+        HKEY hk = nullptr;
         bool ok = false;
 
         if (RegOpenKey (HKEY_CLASSES_ROOT, _T ("clsid"), &hk) == ERROR_SUCCESS)
@@ -1577,7 +1603,7 @@ private:
                             DWORD dtype = REG_SZ;
                             DWORD dsize = sizeof (pathName);
 
-                            if (RegQueryValueEx (pathKey, 0, 0, &dtype, (LPBYTE) pathName, &dsize) == ERROR_SUCCESS)
+                            if (RegQueryValueEx (pathKey, nullptr, nullptr, &dtype, (LPBYTE) pathName, &dsize) == ERROR_SUCCESS)
                                 // In older code, this used to check for the existence of the file, but there are situations
                                 // where our process doesn't have access to it, but where the driver still loads ok.
                                 ok = (pathName[0] != 0);
@@ -1614,7 +1640,7 @@ private:
             DWORD dtype = REG_SZ;
             DWORD dsize = sizeof (buf);
 
-            if (RegQueryValueEx (subKey, _T ("clsid"), 0, &dtype, (LPBYTE) buf, &dsize) == ERROR_SUCCESS)
+            if (RegQueryValueEx (subKey, _T ("clsid"), nullptr, &dtype, (LPBYTE) buf, &dsize) == ERROR_SUCCESS)
             {
                 if (dsize > 0 && checkClassIsOk (buf))
                 {
@@ -1626,7 +1652,7 @@ private:
                         dsize = sizeof (buf);
                         String deviceName;
 
-                        if (RegQueryValueEx (subKey, _T ("description"), 0, &dtype, (LPBYTE) buf, &dsize) == ERROR_SUCCESS)
+                        if (RegQueryValueEx (subKey, _T ("description"), nullptr, &dtype, (LPBYTE) buf, &dsize) == ERROR_SUCCESS)
                             deviceName = buf;
                         else
                             deviceName = keyName;

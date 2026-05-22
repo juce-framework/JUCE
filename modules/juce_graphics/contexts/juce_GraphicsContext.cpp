@@ -55,14 +55,60 @@ static auto operator< (const Justification& a, const Justification& b)
 //==============================================================================
 namespace
 {
+    struct GlyphArrangementCacheBase
+    {
+        virtual ~GlyphArrangementCacheBase() = default;
+    };
+
+    struct GlyphCacheRegistry
+    {
+    public:
+        using List = std::list<GlyphArrangementCacheBase*>;
+        using Token = List::const_iterator;
+
+        static GlyphCacheRegistry& get()
+        {
+            static GlyphCacheRegistry result;
+            return result;
+        }
+
+        void clear()
+        {
+            const ScopedLock lock { mutex };
+
+            while (! list.empty())
+                delete list.front();
+        }
+
+        Token insert (GlyphArrangementCacheBase* cache)
+        {
+            const ScopedLock lock { mutex };
+            return list.emplace (list.begin(), cache);
+        }
+
+        void erase (Token it)
+        {
+            const ScopedLock lock { mutex };
+            list.erase (it);
+        }
+
+    private:
+        GlyphCacheRegistry() = default;
+
+        CriticalSection mutex;
+        List list;
+    };
+
     template <typename ArrangementArgs>
-    class GlyphArrangementCache final : public DeletedAtShutdown
+    class GlyphArrangementCache final : public DeletedAtShutdown,
+                                        public GlyphArrangementCacheBase
     {
     public:
         GlyphArrangementCache() = default;
 
         ~GlyphArrangementCache() override
         {
+            GlyphCacheRegistry::get().erase (token);
             clearSingletonInstance();
         }
 
@@ -74,9 +120,10 @@ namespace
                                   : configureArrangement (args);
         }
 
-        JUCE_DECLARE_SINGLETON_INLINE (GlyphArrangementCache<ArrangementArgs>, false)
+        JUCE_DECLARE_SINGLETON_INLINE (GlyphArrangementCache, false)
 
     private:
+        GlyphCacheRegistry::Token token = GlyphCacheRegistry::get().insert (this);
         LruCache<ArrangementArgs, GlyphArrangement> cache;
         CriticalSection lock;
     };

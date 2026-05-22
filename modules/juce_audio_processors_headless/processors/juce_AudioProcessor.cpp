@@ -901,7 +901,7 @@ AudioProcessorEditor* AudioProcessor::getActiveEditor() const noexcept
     return activeEditor;
 }
 
-AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
+AudioProcessorEditor* AudioProcessor::createEditorAndMakeActive()
 {
     // Don't create UI objects from non-UI threads!
     JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
@@ -910,7 +910,7 @@ AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
 
     if (activeEditor != nullptr)
     {
-        // There's already an active editor! Before calling createEditorIfNeeded(),
+        // There's already an active editor! Before calling createEditorAndMakeActive(),
         // you should check whether there's already an editor using getActiveEditor().
         jassertfalse;
         return nullptr;
@@ -1281,6 +1281,36 @@ VST3ClientExtensions* AudioProcessor::getVST3ClientExtensions()
         jassertfalse;
         return extensions;
     }
+
+    return nullptr;
+}
+
+AudioProcessorARAExtension* AudioProcessor::getARAClientExtensions()
+{
+   #if JucePlugin_Enable_ARA
+    if (auto* extensions = dynamic_cast<AudioProcessorARAExtension*> (this))
+    {
+        //  To silence this jassert there are two options:
+        //
+        //  1. - Override AudioProcessor::getARAClientExtensions() and
+        //       return the "this" pointer.
+        //
+        //     - This option has the advantage of being quick and easy,
+        //       and avoids the above dynamic_cast.
+        //
+        //  2. - Create a new object that inherits from AudioProcessorARAClientExtension.
+        //
+        //     - Port your existing functionality from the AudioProcessor
+        //       to the new object.
+        //
+        //     - Return a pointer to the object in AudioProcessor::getARAClientExtensions().
+        //
+        //     - This option has the advantage of allowing you to break
+        //       up your AudioProcessor into smaller composable objects.
+        jassertfalse;
+        return extensions;
+    }
+   #endif
 
     return nullptr;
 }

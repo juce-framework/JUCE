@@ -691,7 +691,7 @@ struct AlsaMidiHelpers
         int clientId = snd_seq_client_id (handle.get());
         WaitFreeListeners<InputCallback> inputCallbacks;
         WaitFreeListeners<PortExitCallback> portExitCallbacks;
-        std::map<ump::EndpointId, AlsaClientInfo> cachedEndpoints;
+        std::map<ump::EndpointId, AlsaClientInfo> cachedEndpoints = findEndpoints (handle.get());
         SequencerThread inputThread { handle.get(), *this, *this, *this };
     };
 

@@ -960,7 +960,7 @@ void MainWindowList::checkWindowBounds (MainWindow& windowToCheck)
     auto ensureWindowIsFullyOnscreen = [&]
     {
         auto windowBounds = windowToCheck.getScreenBounds();
-        auto screenLimits = Desktop::getInstance().getDisplays().getDisplayForRect (windowBounds)->userArea;
+        auto screenLimits = Desktop::getInstance().getDisplays().getDisplayForRect (windowBounds)->userBounds.toNearestInt();
 
         if (auto* peer = windowToCheck.getPeer())
             if (const auto frameSize = peer->getFrameSizeIfPresent())

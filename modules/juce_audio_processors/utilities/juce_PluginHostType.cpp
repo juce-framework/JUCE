@@ -120,6 +120,7 @@ const char* PluginHostType::getHostDescription() const noexcept
         case CakewalkByBandlab:        return "Cakewalk by Bandlab";
         case DaVinciResolve:           return "DaVinci Resolve";
         case DigitalPerformer:         return "DigitalPerformer";
+        case FenderStudioPro:          return "Fender Studio Pro";
         case FinalCut:                 return "Final Cut";
         case FruityLoops:              return "FL Studio";
         case JUCEPluginHost:           return "JUCE AudioPluginHost";
@@ -214,6 +215,7 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostFilename.containsIgnoreCase   ("reaper"))                   return Reaper;
     if (hostFilename.containsIgnoreCase   ("Reason"))                   return Reason;
     if (hostPath.containsIgnoreCase       ("Studio One"))               return StudioOne;
+    if (hostFilename.containsIgnoreCase   ("Studio Pro"))               return FenderStudioPro;
     if (hostFilename.startsWithIgnoreCase ("Waveform"))                 return TracktionWaveform;
     if (hostPath.containsIgnoreCase       ("Tracktion 3"))              return Tracktion3;
     if (hostFilename.containsIgnoreCase   ("Tracktion"))                return TracktionGeneric;
@@ -295,6 +297,7 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostFilename.startsWith           ("FL"))                    return FruityLoops;
     if (hostFilename.contains             ("ilbridge."))             return FruityLoops;
     if (hostPath.containsIgnoreCase       ("Studio One"))            return StudioOne;
+    if (hostFilename.containsIgnoreCase   ("Studio Pro"))            return FenderStudioPro;
     if (hostPath.containsIgnoreCase       ("Digital Performer"))     return DigitalPerformer;
     if (hostFilename.containsIgnoreCase   ("VST_Scanner"))           return VBVSTScanner;
     if (hostPath.containsIgnoreCase       ("Merging Technologies"))  return MergingPyramix;

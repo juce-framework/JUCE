@@ -688,11 +688,21 @@ bool MidiMessage::isSysEx() const noexcept
 
 MidiMessage MidiMessage::createSysExMessage (const void* sysexData, const int dataSize)
 {
+    jassert (sysexData != nullptr);
+    jassert (dataSize > 0);
+
     HeapBlock<uint8> m (dataSize + 2);
 
     m[0] = 0xf0;
     memcpy (m + 1, sysexData, (size_t) dataSize);
     m[dataSize + 1] = 0xf7;
+
+    // The sysex data should not contain any header or tail status bytes, these
+    // will be added automatically.
+   #if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
+    for (auto i = 1; i < dataSize + 1; ++i)
+        jassert (m[i] != 0xf0 && m[i] != 0xf7);
+   #endif
 
     return MidiMessage (m, dataSize + 2);
 }

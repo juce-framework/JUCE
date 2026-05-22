@@ -306,7 +306,7 @@ public final class ComponentPeerView extends ViewGroup
     }
 
     //==============================================================================
-    private native void handleKeyDown (long host, int keycode, int textchar, int kbFlags);
+    private native boolean handleKeyDown (long host, int keycode, int textchar, int kbFlags);
     private native void handleKeyUp (long host, int keycode, int textchar);
     private native void handleBackButton (long host);
     private native void handleKeyboardHidden (long host);
@@ -403,11 +403,6 @@ public final class ComponentPeerView extends ViewGroup
         if (host == 0)
             return false;
 
-        // The key event may move the cursor, or in some cases it might enter characters (e.g.
-        // digits). In this case, we need to reset the IME so that it's aware of the new contents
-        // of the TextInputTarget.
-        closeInputMethodContext();
-
         switch (keyCode)
         {
             case KeyEvent.KEYCODE_VOLUME_UP:
@@ -423,10 +418,13 @@ public final class ComponentPeerView extends ViewGroup
                 break;
         }
 
-        handleKeyDown (host,
-                       keyCode,
-                       event.getUnicodeChar(),
-                       event.getMetaState());
+        // The key event may move the cursor, or in some cases it might enter characters (e.g.
+        // the digit keyboard tends to send digits as key presses instead of as IME inputs, although
+        // the '.' key of the digits keyboard may still be sent via the IME text-entry callback).
+        // If the key press was used, we assume that the content of the focused text field has
+        // changed in some way, and restart the IME to keep its context up-to-date.
+        if (handleKeyDown (host, keyCode, event.getUnicodeChar(), event.getMetaState()))
+            closeInputMethodContext();
 
         return true;
     }
@@ -438,6 +436,7 @@ public final class ComponentPeerView extends ViewGroup
             return false;
 
         handleKeyUp (host, keyCode, event.getUnicodeChar());
+
         return true;
     }
 
