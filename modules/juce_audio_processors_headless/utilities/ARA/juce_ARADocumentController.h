@@ -43,11 +43,6 @@ class ARAEditorView;
 class ARAInputStream;
 class ARAOutputStream;
 
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> 0df3dbb197b22595aa0818dfab4dcf05b5e6ed37
 /** This class provides customisable configuration options that are available at the ARAFactory
     construction's time.
 
