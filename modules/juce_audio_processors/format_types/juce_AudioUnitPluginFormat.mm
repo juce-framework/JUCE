@@ -287,8 +287,9 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
 
 bool AudioUnitPluginFormat::setStateFromAUPresetFile (AudioPluginInstance* api, const MemoryBlock& rawData)
 {
-    AudioUnit audioUnit = (AudioUnit) api->getPlatformSpecificData();
-    jassert (audioUnit != nullptr);
+    auto* auClient = api->getAudioUnitClient();
+    jassert (auClient != nullptr);
+    AudioUnit audioUnit = auClient->getAudioUnitHandle();
 
     CFReadStreamRef stream = CFReadStreamCreateWithBytesNoCopy (kCFAllocatorDefault, (const UInt8*) rawData.getData(),
                                                                 rawData.getSize(), kCFAllocatorNull);
@@ -319,8 +320,9 @@ bool AudioUnitPluginFormat::setStateFromAUPresetFile (AudioPluginInstance* api, 
 
 bool AudioUnitPluginFormat::saveStateToAUPresetFile (AudioPluginInstance* api, MemoryBlock& rawData)
 {
-    AudioUnit audioUnit = (AudioUnit) api->getPlatformSpecificData();
-    jassert (audioUnit != nullptr);
+    auto* auClient = api->getAudioUnitClient();
+    jassert (auClient != nullptr);
+    AudioUnit audioUnit = auClient->getAudioUnitHandle();
 
     CFPropertyListRef propertyList = 0;
     UInt32 sz = sizeof (CFPropertyListRef);
