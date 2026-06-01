@@ -224,6 +224,7 @@
  #include "native/juce_FileChooser_windows.cpp"
 
 #elif JUCE_LINUX || JUCE_BSD
+ #include "native/accessibility/juce_Accessibility_linux.cpp"
  #include "native/juce_XSymbols_linux.cpp"
  #include "native/juce_DragAndDrop_linux.cpp"
 
