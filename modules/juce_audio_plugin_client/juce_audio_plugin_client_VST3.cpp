@@ -2186,6 +2186,19 @@ private:
         tresult PLUGIN_API setContentScaleFactor ([[maybe_unused]] const IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            // Only honour a content scale that exceeds the window's own DPI
+            // scaling. A per-monitor-aware window is already scaled by the OS, so
+            // a factor at or below that scale (including hosts that send 1.0, or
+            // that mirror the monitor scale) is redundant: applying it as a host
+            // scale would shrink or double-scale the editor. The max(_, 1) also
+            // ignores a no-op scale sent before the window has a valid DPI.
+            if (const auto osScale = jmax ((decltype (factor)) detail::PluginScaleFactorManager::getScaleFactorForWindow (static_cast<HWND> (systemWindow)),
+                                           (decltype (factor)) 1);
+                factor < osScale || approximatelyEqual (factor, osScale))
+                return kResultTrue;
+           #endif
+
             const auto scaleToApply = std::invoke ([&]
             {
                #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
