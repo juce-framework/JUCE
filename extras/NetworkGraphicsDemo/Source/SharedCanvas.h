@@ -420,7 +420,7 @@ public:
             auto& path             = cache[glyphNumber];
 
             if (path.isEmpty())
-                font.getTypefacePtr()->getOutlineForGlyph (TypefaceMetricsKind::legacy, glyphNumber, path);
+                font.getTypefacePtr()->getOutlineForGlyph (glyphNumber, path);
 
             auto t = AffineTransform::scale (font.getHeight() * font.getHorizontalScale(), font.getHeight())
                                      .followedBy (AffineTransform::translation (pos))

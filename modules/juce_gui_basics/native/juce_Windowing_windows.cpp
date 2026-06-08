@@ -264,26 +264,6 @@ struct ScopedDeviceContext
  #define GET_POINTERID_WPARAM(wParam)    (LOWORD(wParam))
 #endif
 
-#ifndef MONITOR_DPI_TYPE
- enum Monitor_DPI_Type
- {
-     MDT_Effective_DPI = 0,
-     MDT_Angular_DPI   = 1,
-     MDT_Raw_DPI       = 2,
-     MDT_Default       = MDT_Effective_DPI
- };
-#endif
-
-#ifndef DPI_AWARENESS
- enum DPI_Awareness
- {
-     DPI_Awareness_Invalid           = -1,
-     DPI_Awareness_Unaware           = 0,
-     DPI_Awareness_System_Aware      = 1,
-     DPI_Awareness_Per_Monitor_Aware = 2
- };
-#endif
-
 #ifndef USER_DEFAULT_SCREEN_DPI
  #define USER_DEFAULT_SCREEN_DPI 96
 #endif
@@ -354,84 +334,35 @@ static void checkForPointerAPI()
 }
 
 //==============================================================================
-using SetProcessDPIAwareFunc                   = BOOL                  (WINAPI*) ();
-using SetProcessDPIAwarenessContextFunc        = BOOL                  (WINAPI*) (DPI_AWARENESS_CONTEXT);
-using SetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (DPI_Awareness);
-using SetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (DPI_AWARENESS_CONTEXT);
-using GetDPIForWindowFunc                      = UINT                  (WINAPI*) (HWND);
-using GetDPIForMonitorFunc                     = HRESULT               (WINAPI*) (HMONITOR, Monitor_DPI_Type, UINT*, UINT*);
-using GetSystemMetricsForDpiFunc               = int                   (WINAPI*) (int, UINT);
-using GetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (HANDLE, DPI_Awareness*);
-using GetWindowDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (HWND);
-using GetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) ();
-using GetAwarenessFromDpiAwarenessContextFunc  = DPI_Awareness         (WINAPI*) (DPI_AWARENESS_CONTEXT);
-using EnableNonClientDPIScalingFunc            = BOOL                  (WINAPI*) (HWND);
-
-static SetProcessDPIAwareFunc                  setProcessDPIAware                  = nullptr;
-static SetProcessDPIAwarenessContextFunc       setProcessDPIAwarenessContext       = nullptr;
-static SetProcessDPIAwarenessFunc              setProcessDPIAwareness              = nullptr;
-static SetThreadDPIAwarenessContextFunc        setThreadDPIAwarenessContext        = nullptr;
-static GetDPIForMonitorFunc                    getDPIForMonitor                    = nullptr;
-static GetDPIForWindowFunc                     getDPIForWindow                     = nullptr;
-static GetProcessDPIAwarenessFunc              getProcessDPIAwareness              = nullptr;
-static GetWindowDPIAwarenessContextFunc        getWindowDPIAwarenessContext        = nullptr;
-static GetThreadDPIAwarenessContextFunc        getThreadDPIAwarenessContext        = nullptr;
-static GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromDPIAwarenessContext = nullptr;
-static EnableNonClientDPIScalingFunc           enableNonClientDPIScaling           = nullptr;
-
-static bool hasCheckedForDPIAwareness = false;
-
-static void loadDPIAwarenessFunctions()
+static bool setDPIAwareness()
 {
-    setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
+    static const auto didSetDpiAwareness = std::invoke ([]
+    {
+        constexpr auto shcore = "SHCore.dll";
+        LoadLibraryA (shcore);
 
-    constexpr auto shcore = "SHCore.dll";
-    LoadLibraryA (shcore);
-    const auto shcoreModule = GetModuleHandleA (shcore);
+        const auto shcoreModule = GetModuleHandleA (shcore);
 
-    if (shcoreModule == nullptr)
-        return;
+        if (shcoreModule == nullptr)
+            return false;
 
-    getDPIForMonitor                    = (GetDPIForMonitorFunc) GetProcAddress (shcoreModule, "GetDpiForMonitor");
-    setProcessDPIAwareness              = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
+        using SetProcessDpiAwarenessContextFunc = BOOL (WINAPI*) (DPI_AWARENESS_CONTEXT);
+        const auto setProcessDpiAwarenessContext = (SetProcessDpiAwarenessContextFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwarenessContext");
 
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    getDPIForWindow                     = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
-    getProcessDPIAwareness              = (GetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "GetProcessDpiAwareness");
-    getWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-    setThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-    getThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
-    getAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
-    setProcessDPIAwarenessContext       = (SetProcessDPIAwarenessContextFunc) getUser32Function ("SetProcessDpiAwarenessContext");
-    enableNonClientDPIScaling           = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
-   #endif
-}
+        if (setProcessDpiAwarenessContext != nullptr
+            && setProcessDpiAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
+            return true;
 
-static void setDPIAwareness()
-{
-    if (hasCheckedForDPIAwareness)
-        return;
+        if (SUCCEEDED (SetProcessDpiAwareness (PROCESS_PER_MONITOR_DPI_AWARE)))
+            return true;
 
-    hasCheckedForDPIAwareness = true;
+        if (SUCCEEDED (SetProcessDpiAwareness (PROCESS_SYSTEM_DPI_AWARE)))
+            return true;
 
-    if (! JUCEApplicationBase::isStandaloneApp())
-        return;
+        return SetProcessDPIAware() != 0;
+    });
 
-    loadDPIAwarenessFunctions();
-
-    if (setProcessDPIAwarenessContext != nullptr
-        && setProcessDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
-        return;
-
-    if (setProcessDPIAwareness != nullptr && enableNonClientDPIScaling != nullptr
-        && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_Per_Monitor_Aware)))
-        return;
-
-    if (setProcessDPIAwareness != nullptr && getDPIForMonitor != nullptr
-        && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_System_Aware)))
-        return;
-
-    NullCheckedInvocation::invoke (setProcessDPIAware);
+    return didSetDpiAwareness;
 }
 
 static bool isPerMonitorDPIAwareProcess()
@@ -439,21 +370,15 @@ static bool isPerMonitorDPIAwareProcess()
    #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
     return false;
    #else
-    static bool dpiAware = []() -> bool
+    static bool dpiAware = std::invoke ([]
     {
         setDPIAwareness();
 
-        if (! JUCEApplication::isStandaloneApp())
-            return false;
+        PROCESS_DPI_AWARENESS context{};
+        GetProcessDpiAwareness (nullptr, &context);
 
-        if (getProcessDPIAwareness == nullptr)
-            return false;
-
-        DPI_Awareness context;
-        getProcessDPIAwareness (nullptr, &context);
-
-        return context == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
-    }();
+        return context == PROCESS_PER_MONITOR_DPI_AWARE;
+    });
 
     return dpiAware;
    #endif
@@ -466,33 +391,20 @@ static bool isPerMonitorDPIAwareWindow ([[maybe_unused]] HWND nativeWindow)
    #else
     setDPIAwareness();
 
-    if (getWindowDPIAwarenessContext != nullptr
-        && getAwarenessFromDPIAwarenessContext != nullptr)
-    {
-        return (getAwarenessFromDPIAwarenessContext (getWindowDPIAwarenessContext (nativeWindow))
-                  == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
-    }
-
-    return isPerMonitorDPIAwareProcess();
+    return (GetAwarenessFromDpiAwarenessContext (GetWindowDpiAwarenessContext (nativeWindow))
+              == DPI_AWARENESS_PER_MONITOR_AWARE);
    #endif
 }
 
-static bool isPerMonitorDPIAwareThread (GetThreadDPIAwarenessContextFunc getThreadDPIAwarenessContextIn = getThreadDPIAwarenessContext,
-                                        GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromDPIAwarenessContextIn = getAwarenessFromDPIAwarenessContext)
+static bool isPerMonitorDPIAwareThread()
 {
    #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
     return false;
    #else
     setDPIAwareness();
 
-    if (getThreadDPIAwarenessContextIn != nullptr
-        && getAwarenessFromDPIAwarenessContextIn != nullptr)
-    {
-        return (getAwarenessFromDPIAwarenessContextIn (getThreadDPIAwarenessContextIn())
-                  == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
-    }
-
-    return isPerMonitorDPIAwareProcess();
+    return (GetAwarenessFromDpiAwarenessContext (GetThreadDpiAwarenessContext())
+              == DPI_AWARENESS_PER_MONITOR_AWARE);
    #endif
 }
 
@@ -554,55 +466,26 @@ private:
 class ScopedThreadDPIAwarenessSetter::NativeImpl
 {
 public:
-    static auto& getFunctions()
-    {
-        struct Functions
-        {
-            SetThreadDPIAwarenessContextFunc setThreadAwareness             = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-            GetWindowDPIAwarenessContextFunc getWindowAwareness             = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-            GetThreadDPIAwarenessContextFunc getThreadAwareness             = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
-            GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
-
-            bool isLoaded() const noexcept
-            {
-                return setThreadAwareness != nullptr
-                    && getWindowAwareness != nullptr
-                    && getThreadAwareness != nullptr
-                    && getAwarenessFromContext != nullptr;
-            }
-
-            Functions() = default;
-            JUCE_DECLARE_NON_COPYABLE (Functions)
-            JUCE_DECLARE_NON_MOVEABLE (Functions)
-        };
-
-        static const Functions functions;
-        return functions;
-    }
-
     explicit NativeImpl (HWND nativeWindow [[maybe_unused]])
     {
        #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        if (const auto& functions = getFunctions(); functions.isLoaded())
-        {
-            auto dpiAwareWindow = (functions.getAwarenessFromContext (functions.getWindowAwareness (nativeWindow))
-                                   == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+        auto dpiAwareWindow = (GetAwarenessFromDpiAwarenessContext (GetWindowDpiAwarenessContext (nativeWindow))
+                               == DPI_AWARENESS_PER_MONITOR_AWARE);
 
-            auto dpiAwareThread = (functions.getAwarenessFromContext (functions.getThreadAwareness())
-                                   == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+        auto dpiAwareThread = (GetAwarenessFromDpiAwarenessContext (GetThreadDpiAwarenessContext())
+                               == DPI_AWARENESS_PER_MONITOR_AWARE);
 
-            if (dpiAwareWindow && ! dpiAwareThread)
-                oldContext = functions.setThreadAwareness (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
-            else if (! dpiAwareWindow && dpiAwareThread)
-                oldContext = functions.setThreadAwareness (DPI_AWARENESS_CONTEXT_UNAWARE);
-        }
+        if (dpiAwareWindow && ! dpiAwareThread)
+            oldContext = SetThreadDpiAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+        else if (! dpiAwareWindow && dpiAwareThread)
+            oldContext = SetThreadDpiAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
        #endif
     }
 
     ~NativeImpl()
     {
         if (oldContext != nullptr)
-            getFunctions().setThreadAwareness (oldContext);
+            SetThreadDpiAwarenessContext (oldContext);
     }
 
 private:
@@ -614,7 +497,7 @@ private:
 
 ScopedThreadDPIAwarenessSetter::ScopedThreadDPIAwarenessSetter (void* nativeWindow)
 {
-    pimpl = std::make_unique<NativeImpl> ((HWND) nativeWindow);
+    pimpl = nativeWindow != nullptr ? std::make_unique<NativeImpl> ((HWND) nativeWindow) : nullptr;
 }
 
 ScopedThreadDPIAwarenessSetter::~ScopedThreadDPIAwarenessSetter() = default;
@@ -622,46 +505,23 @@ ScopedThreadDPIAwarenessSetter::~ScopedThreadDPIAwarenessSetter() = default;
 ScopedThreadDPIAwarenessSetter::ScopedThreadDPIAwarenessSetter (ScopedThreadDPIAwarenessSetter&&) noexcept = default;
 ScopedThreadDPIAwarenessSetter& ScopedThreadDPIAwarenessSetter::operator= (ScopedThreadDPIAwarenessSetter&&) noexcept = default;
 
-static auto& getScopedDPIAwarenessDisablerFunctions()
-{
-    struct Functions
-    {
-        GetThreadDPIAwarenessContextFunc localGetThreadDpiAwarenessContext = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
-        GetAwarenessFromDpiAwarenessContextFunc localGetAwarenessFromDpiAwarenessContextFunc = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
-        SetThreadDPIAwarenessContextFunc localSetThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-
-        Functions() = default;
-        JUCE_DECLARE_NON_COPYABLE (Functions)
-        JUCE_DECLARE_NON_MOVEABLE (Functions)
-    };
-
-    static const Functions functions;
-    return functions;
-}
-
 ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
 {
-    const auto& functions = getScopedDPIAwarenessDisablerFunctions();
-
-    if (! isPerMonitorDPIAwareThread (functions.localGetThreadDpiAwarenessContext, functions.localGetAwarenessFromDpiAwarenessContextFunc))
+    if (! isPerMonitorDPIAwareThread())
         return;
 
-    if (auto* localSetThreadDPIAwarenessContext = functions.localSetThreadDPIAwarenessContext)
-    {
-        previousContext = localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
+    previousContext = SetThreadDpiAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
 
-       #if JUCE_DEBUG
-        ++numActiveScopedDpiAwarenessDisablers;
-       #endif
-    }
+   #if JUCE_DEBUG
+    ++numActiveScopedDpiAwarenessDisablers;
+   #endif
 }
 
 ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
 {
     if (previousContext != nullptr)
     {
-        if (auto* localSetThreadDPIAwarenessContext = getScopedDPIAwarenessDisablerFunctions().localSetThreadDPIAwarenessContext)
-            localSetThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
+        SetThreadDpiAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
 
        #if JUCE_DEBUG
         --numActiveScopedDpiAwarenessDisablers;
@@ -670,57 +530,13 @@ ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
 }
 
 //==============================================================================
-using SettingChangeCallbackFunc = void (*)(void);
+using SettingChangeCallbackFunc = void (*) (void);
 extern SettingChangeCallbackFunc settingChangeCallback;
 
 //==============================================================================
-static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd);
-
-template <typename ValueType>
-static Rectangle<ValueType> convertPhysicalScreenRectangleToLogical (Rectangle<ValueType> r, HWND h) noexcept
+static double getScaleFactorForWindow (HWND h)
 {
-    if (isPerMonitorDPIAwareWindow (h))
-        return Desktop::getInstance().getDisplays().physicalToLogical (r, getCurrentDisplayFromScaleFactor (h));
-
-    return r;
-}
-
-template <typename ValueType>
-static Rectangle<ValueType> convertLogicalScreenRectangleToPhysical (Rectangle<ValueType> r, HWND h) noexcept
-{
-    if (isPerMonitorDPIAwareWindow (h))
-        return Desktop::getInstance().getDisplays().logicalToPhysical (r, getCurrentDisplayFromScaleFactor (h));
-
-    return r;
-}
-
-static Point<int> convertPhysicalScreenPointToLogical (Point<int> p, HWND h) noexcept
-{
-    if (isPerMonitorDPIAwareWindow (h))
-        return Desktop::getInstance().getDisplays().physicalToLogical (p, getCurrentDisplayFromScaleFactor (h));
-
-    return p;
-}
-
-static Point<int> convertLogicalScreenPointToPhysical (Point<int> p, HWND h) noexcept
-{
-    if (isPerMonitorDPIAwareWindow (h))
-        return Desktop::getInstance().getDisplays().logicalToPhysical (p, getCurrentDisplayFromScaleFactor (h));
-
-    return p;
-}
-
-JUCE_API double getScaleFactorForWindow (HWND h);
-JUCE_API double getScaleFactorForWindow (HWND h)
-{
-    // NB. Using a local function here because we need to call this method from the plug-in wrappers
-    // which don't load the DPI-awareness functions on startup
-    static auto localGetDPIForWindow = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
-
-    if (localGetDPIForWindow != nullptr)
-        return (double) localGetDPIForWindow (h) / USER_DEFAULT_SCREEN_DPI;
-
-    return 1.0;
+    return (double) GetDpiForWindow (h) / USER_DEFAULT_SCREEN_DPI;
 }
 
 static RECT getWindowScreenRect (HWND hwnd)
@@ -755,7 +571,7 @@ RTL_OSVERSIONINFOW getWindowsVersionInfo();
 
 double Desktop::getDefaultMasterScale()
 {
-    if (! JUCEApplicationBase::isStandaloneApp() || isPerMonitorDPIAwareProcess())
+    if (isPerMonitorDPIAwareProcess())
         return 1.0;
 
     return getGlobalDPI() / USER_DEFAULT_SCREEN_DPI;
@@ -1410,7 +1226,6 @@ struct RenderContext
     virtual void updateConstantAlpha() = 0;
     virtual void handlePaintMessage() = 0;
     virtual void repaint (const Rectangle<int>& area) = 0;
-    virtual void dispatchDeferredRepaints() = 0;
     virtual void performAnyPendingRepaintsNow() = 0;
     virtual void onVBlank() = 0;
     virtual void handleShowWindow() = 0;
@@ -1486,7 +1301,6 @@ public:
         if (dropTarget != nullptr)
         {
             dropTarget->peerIsDeleted = true;
-            dropTarget->Release();
             dropTarget = nullptr;
         }
     }
@@ -1569,86 +1383,38 @@ public:
         if (isNowFullScreen != isFullScreen())
             setFullScreen (isNowFullScreen);
 
-        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
+        if (isNowFullScreen)
+            return;
 
-        const auto borderSize = findPhysicalBorderSize().value_or (BorderSize<int>{});
-        auto newBounds = borderSize.addedTo ([&]
+        setBoundsPhysical (std::invoke ([&]
         {
             ScopedThreadDPIAwarenessSetter setter { hwnd };
-
-            if (! isPerMonitorDPIAwareWindow (hwnd))
-                return bounds;
-
-            if (inDpiChange)
-                return convertLogicalScreenRectangleToPhysical (bounds, hwnd);
-
-            return convertLogicalScreenRectangleToPhysical (bounds, hwnd)
-                    .withPosition (Desktop::getInstance().getDisplays().logicalToPhysical (bounds.getTopLeft()));
-        }());
-
-        if (getTransparencyKind() == TransparencyKind::perPixel)
-        {
-            if (auto parentHwnd = GetParent (hwnd))
-            {
-                auto parentRect = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (parentHwnd)), hwnd);
-                newBounds.translate (parentRect.getX(), parentRect.getY());
-            }
-        }
-
-        const auto oldBounds = [this]
-        {
-            ScopedThreadDPIAwarenessSetter setter { hwnd };
-            RECT result;
-            GetWindowRect (hwnd, &result);
-            return D2DUtilities::toRectangle (result);
-        }();
-
-        const bool hasMoved = (oldBounds.getPosition() != bounds.getPosition());
-        const bool hasResized = (oldBounds.getWidth() != bounds.getWidth()
-                                  || oldBounds.getHeight() != bounds.getHeight());
-
-        DWORD flags = SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED;
-        if (! hasMoved)    flags |= SWP_NOMOVE;
-        if (! hasResized)  flags |= SWP_NOSIZE;
-
-        SetWindowPos (hwnd,
-                      nullptr,
-                      newBounds.getX(),
-                      newBounds.getY(),
-                      newBounds.getWidth(),
-                      newBounds.getHeight(),
-                      flags);
-
-        if (hasResized && isValidPeer (this))
-        {
-            repaintNowIfTransparent();
-        }
+            using SH = detail::ScalingHelpers;
+            const auto pos = SH::convertLogicalScreenPointToPhysical (bounds.getPosition().toFloat());
+            return (bounds.toFloat() * getPlatformScaleFactor()).withPosition (pos).toNearestInt();
+        }));
     }
 
     Rectangle<int> getBounds() const override
     {
+        using SH = detail::ScalingHelpers;
+
         if (parentToAddTo == nullptr)
         {
-            if (hasTitleBar())
-            {
-                // Depending on the desktop scale factor, the physical size of the window may not map to
-                // an integral client-area size.
-                // In this case, we always round the width and height of the client area up to the next
-                // integer.
-                // This means that we may end up clipping off up to one logical pixel under the physical
-                // window border, but this is preferable to displaying an uninitialised/unpainted
-                // region of the client area.
-                const auto physicalBorder = findPhysicalBorderSize().value_or (BorderSize<int>{});
-
-                const auto physicalBounds = D2DUtilities::toRectangle (getWindowScreenRect (hwnd));
-                const auto physicalClient = physicalBorder.subtractedFrom (physicalBounds);
-                const auto logicalClient = convertPhysicalScreenRectangleToLogical (physicalClient.toFloat(), hwnd);
-                const auto snapped = logicalClient.withPosition (logicalClient.getPosition().roundToInt().toFloat()).getSmallestIntegerContainer();
-                return snapped;
-            }
-
-            const auto logicalClient = convertPhysicalScreenRectangleToLogical (getClientRectInScreen(), hwnd);
-            return logicalClient;
+            // Depending on the desktop scale factor, the physical size of the window may not map to
+            // an integral client-area size.
+            // In this case, we always round the width and height of the client area up to the next
+            // integer.
+            // This means that we may end up clipping off up to one logical pixel under the physical
+            // window border, but this is preferable to displaying an uninitialised/unpainted
+            // region of the client area.
+            const auto physicalClient = getClientRectInScreen().toFloat();
+            const auto physicalPosition = physicalClient.getPosition().toFloat();
+            const auto logicalPosition = SH::convertPhysicalScreenPointToLogical (physicalPosition);
+            const auto logicalClient = physicalClient / getPlatformScaleFactor();
+            const auto snapped = logicalClient.withPosition (logicalPosition.roundToInt().toFloat())
+                                              .getSmallestIntegerContainer();
+            return snapped;
         }
 
         auto localBounds = D2DUtilities::toRectangle (getWindowClientRect (hwnd));
@@ -1659,13 +1425,31 @@ public:
         return localBounds;
     }
 
-    Point<int> getScreenPosition() const
+    Point<float> localToMultimonitor (Point<float> x) override
     {
-        return convertPhysicalScreenPointToLogical (getClientRectInScreen().getPosition(), hwnd);
+        const auto localPhysical = x * getPlatformScaleFactor();
+        const auto physical = localPhysical + getClientRectInScreen().getPosition().toFloat();
+        return physical;
     }
 
-    Point<float> localToGlobal (Point<float> relativePosition) override  { return relativePosition + getScreenPosition().toFloat(); }
-    Point<float> globalToLocal (Point<float> screenPosition) override    { return screenPosition   - getScreenPosition().toFloat(); }
+    Point<float> multimonitorToLocal (Point<float> x) override
+    {
+        const auto localPhysical = x - getClientRectInScreen().getPosition().toFloat();
+        const auto local = localPhysical / getPlatformScaleFactor();
+        return local;
+    }
+
+    Point<float> localToGlobal (Point<float> relativePosition) override
+    {
+        const auto multimonitor = localToMultimonitor (relativePosition);
+        return detail::ScalingHelpers::convertPhysicalScreenPointToLogical (multimonitor);
+    }
+
+    Point<float> globalToLocal (Point<float> screenPosition) override
+    {
+        const auto physical = detail::ScalingHelpers::convertLogicalScreenPointToPhysical (screenPosition);
+        return multimonitorToLocal (physical);
+    }
 
     using ComponentPeer::localToGlobal;
     using ComponentPeer::globalToLocal;
@@ -1771,14 +1555,15 @@ public:
 
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        auto r = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (hwnd)), hwnd);
+        const auto localPhysical = localPos.toFloat() * getPlatformScaleFactor();
+        const auto r = D2DUtilities::toRectangle (getWindowScreenRect (hwnd)).toFloat();
 
-        if (! r.withZeroOrigin().contains (localPos))
+        if (! r.withZeroOrigin().contains (localPhysical))
             return false;
 
-        const auto screenPos = convertLogicalScreenPointToPhysical (localPos + getScreenPosition(), hwnd);
+        const auto screenPos = (localPhysical + getClientRectInScreen().getPosition().toFloat()).roundToInt();
+        const auto w = WindowFromPoint (D2DUtilities::toPOINT (screenPos));
 
-        auto w = WindowFromPoint (D2DUtilities::toPOINT (screenPos));
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 
@@ -1789,7 +1574,7 @@ public:
 
     BorderSize<int> getFrameSize() const override
     {
-        return findPhysicalBorderSize().value_or (BorderSize<int>{}).multipliedBy (1.0 / scaleFactor);
+        return findPhysicalBorderSize().value_or (BorderSize<int>{}).multipliedBy (1.0 / getPlatformScaleFactor());
     }
 
     bool setAlwaysOnTop (bool alwaysOnTop) override
@@ -1903,12 +1688,6 @@ public:
             renderContext->repaint ((area.toDouble() * getPlatformScaleFactor()).getSmallestIntegerContainer());
     }
 
-    void dispatchDeferredRepaints()
-    {
-        if (renderContext != nullptr)
-            renderContext->dispatchDeferredRepaints();
-    }
-
     void performAnyPendingRepaintsNow() override
     {
         if (renderContext != nullptr)
@@ -1927,7 +1706,6 @@ public:
     void onVBlank (double timestampSec) override
     {
         callVBlankListeners (timestampSec);
-        dispatchDeferredRepaints();
 
         if (renderContext != nullptr)
             renderContext->onVBlank();
@@ -2040,8 +1818,8 @@ public:
         Point<float> getMousePos (POINTL mousePos) const
         {
             const auto originalPos = D2DUtilities::toPoint ({ mousePos.x, mousePos.y });
-            const auto logicalPos = convertPhysicalScreenPointToLogical (originalPos, peer.hwnd);
-            return detail::ScalingHelpers::screenPosToLocalPos (peer.component, logicalPos.toFloat());
+            const auto logicalPos = detail::ScalingHelpers::convertPhysicalScreenPointToLogical (originalPos.toFloat());
+            return detail::ScalingHelpers::screenPosToLocalPos (peer.component, logicalPos);
         }
 
         struct DroppedData
@@ -2186,7 +1964,7 @@ public:
         return peer->doKeyUp (msg.wParam);
     }
 
-    double getPlatformScaleFactor() const noexcept override
+    double getPlatformScaleFactorWithoutOverride() const noexcept
     {
        #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
         return 1.0;
@@ -2199,12 +1977,37 @@ public:
             if (auto* parentPeer = getOwnerOfWindow (parentHWND))
                 return parentPeer->getPlatformScaleFactor();
 
-            if (getDPIForWindow != nullptr)
-                return getScaleFactorForWindow (parentHWND);
+            return getScaleFactorForWindow (parentHWND);
         }
 
         return scaleFactor;
        #endif
+    }
+
+    double getPlatformScaleFactor() const noexcept override
+    {
+        if (scaleFactorOverride.has_value())
+            return *scaleFactorOverride;
+
+        return getPlatformScaleFactorWithoutOverride();
+    }
+
+    void setCustomPlatformScaleFactor (std::optional<double> scaleIn) override
+    {
+        const auto prev = getPlatformScaleFactor();
+        scaleFactorOverride = scaleIn;
+        const auto next = getPlatformScaleFactor();
+
+        if (approximatelyEqual (prev, next))
+            return;
+
+        InvalidateRect (hwnd, nullptr, FALSE);
+        scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (next); });
+    }
+
+    std::optional<double> getCustomPlatformScaleFactor() const override
+    {
+        return scaleFactorOverride;
     }
 
     static void getLastError()
@@ -2259,7 +2062,6 @@ public:
     }
 
     bool hasTitleBar() const                 { return (styleFlags & windowHasTitleBar) != 0; }
-    double getScaleFactor() const            { return scaleFactor; }
 
 private:
     HWND hwnd, parentToAddTo;
@@ -2269,7 +2071,7 @@ private:
     bool isDragging = false, isMouseOver = false,
          hasCreatedCaret = false, constrainerIsResizing = false, sizing = false;
     IconConverters::IconPtr currentWindowIcon;
-    FileDropTarget* dropTarget = nullptr;
+    ComSmartPtr<FileDropTarget> dropTarget;
     UWPUIViewSettings uwpViewSettings;
     TransparencyKind transparencyKind = TransparencyKind::opaque;
    #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
@@ -2277,6 +2079,7 @@ private:
    #endif
 
     double scaleFactor = 1.0;
+    std::optional<double> scaleFactorOverride;
     bool inDpiChange = 0, inHandlePositionChanged = 0;
     HMONITOR currentMonitor = nullptr;
 
@@ -2481,7 +2284,7 @@ private:
                 if (peer == nullptr)
                     peer = this;
 
-                dropTarget = new FileDropTarget (*peer);
+                dropTarget = ComSmartPtr { new FileDropTarget (*peer), IncrementRef::no };
             }
 
             RegisterDragDrop (hwnd, dropTarget);
@@ -2917,7 +2720,10 @@ private:
         if (peer == nullptr)
             peer = this;
 
-        return std::tuple (peer, peer->globalToLocal (convertPhysicalScreenPointToLogical (D2DUtilities::toPoint (currentMousePos), hwnd).toFloat()));
+        using SH = detail::ScalingHelpers;
+        const auto physical = D2DUtilities::toPoint (currentMousePos).toFloat();
+        const auto logical = SH::convertPhysicalScreenPointToLogical (physical);
+        return std::tuple (peer, peer->globalToLocal (logical));
     }
 
     static MouseInputSource::InputSourceType getPointerType (WPARAM wParam)
@@ -3026,10 +2832,11 @@ private:
     {
         auto isCancel = false;
 
+        using SH = detail::ScalingHelpers;
+
         const auto touchIndex = currentTouches.getIndexOfTouch (this, touch.dwID);
         const auto time = getMouseEventTime();
-        const auto pos = globalToLocal (convertPhysicalScreenPointToLogical (D2DUtilities::toPoint ({ roundToInt (touch.x / 100.0f),
-                                                                                                      roundToInt (touch.y / 100.0f) }), hwnd).toFloat());
+        const auto pos = globalToLocal (SH::convertPhysicalScreenPointToLogical ({ (float) touch.x / 100.0f, (float) touch.y / 100.0f }));
         const auto pressure = touchPressure;
         auto modsToSend = ModifierKeys::getCurrentModifiers();
 
@@ -3115,8 +2922,11 @@ private:
 
             const auto pressure = (penInfo.penMask & PEN_MASK_PRESSURE) ? (float) penInfo.pressure / 1024.0f : MouseInputSource::defaultPressure;
 
-            if (! handlePenInput (penInfo, globalToLocal (convertPhysicalScreenPointToLogical (D2DUtilities::toPoint (getPOINTFromLParam (lParam)), hwnd).toFloat()),
-                                  pressure, isDown, isUp))
+            using SH = detail::ScalingHelpers;
+            const auto physical = D2DUtilities::toPoint (getPOINTFromLParam (lParam)).toFloat();
+            const auto logical = SH::convertPhysicalScreenPointToLogical (physical);
+
+            if (! handlePenInput (penInfo, globalToLocal (logical), pressure, isDown, isUp))
                 return false;
         }
         else
@@ -3465,6 +3275,8 @@ private:
         if (! physicalBorder.has_value())
             return {};
 
+        using SH = detail::ScalingHelpers;
+
         const auto logicalBorder = getFrameSize();
 
         // The constrainer expects to operate in logical coordinate space.
@@ -3477,9 +3289,12 @@ private:
         // borders with physical.
         const auto requestedPhysicalBounds = proposed;
         const auto requestedPhysicalClient = physicalBorder->subtractedFrom (requestedPhysicalBounds);
-        const auto requestedLogicalClient = detail::ScalingHelpers::unscaledScreenPosToScaled (
-                component,
-                convertPhysicalScreenRectangleToLogical (requestedPhysicalClient, hwnd));
+        const auto requestedPhysicalPosition = requestedPhysicalClient.getPosition().toFloat();
+        const auto requestedLogicalPosition = SH::convertPhysicalScreenPointToLogical (requestedPhysicalPosition);
+        const auto requestedPeerBounds = requestedPhysicalClient.toFloat() / getPlatformScaleFactor();
+        const auto requestedComponentBounds = SH::unscaledScreenPosToScaled (component, requestedPeerBounds);
+        const auto requestedLogicalClient = requestedComponentBounds.withPosition (requestedLogicalPosition)
+                                                                    .toNearestInt();
         const auto requestedLogicalBounds = logicalBorder.addedTo (requestedLogicalClient);
 
         const auto originalLogicalBounds = logicalBorder.addedTo (component.getBounds());
@@ -3495,15 +3310,14 @@ private:
                                   right);
 
         const auto modifiedLogicalClient = logicalBorder.subtractedFrom (modifiedLogicalBounds);
-        const auto modifiedPhysicalClient = convertLogicalScreenRectangleToPhysical (
-                detail::ScalingHelpers::scaledScreenPosToUnscaled (component, modifiedLogicalClient).toFloat(),
-                hwnd);
+        const auto unscaledClient = SH::scaledScreenPosToUnscaled (component, modifiedLogicalClient);
+        const auto modifiedPhysicalClient = unscaledClient.toFloat() * getPlatformScaleFactor();
 
         const auto closestIntegralSize = modifiedPhysicalClient
                 .withPosition (requestedPhysicalClient.getPosition().toFloat())
                 .getLargestIntegerWithin();
 
-        const auto withSnappedPosition = [&]
+        const auto withSnappedPosition = std::invoke ([&]
         {
             auto modified = closestIntegralSize;
 
@@ -3520,7 +3334,7 @@ private:
             }
 
             return modified;
-        }();
+        });
 
         return physicalBorder->addedTo (withSnappedPosition);
     }
@@ -3583,12 +3397,6 @@ private:
     //==============================================================================
     LRESULT handleDPIChanging (int newDPI, RECT newRect)
     {
-        // Sometimes, windows that should not be automatically scaled (secondary windows in plugins)
-        // are sent WM_DPICHANGED. The size suggested by the OS is incorrect for our unscaled
-        // window, so we should ignore it.
-        if (! isPerMonitorDPIAwareWindow (hwnd))
-            return 0;
-
         const auto newScale = (double) newDPI / USER_DEFAULT_SCREEN_DPI;
 
         if (approximatelyEqual (scaleFactor, newScale))
@@ -3749,7 +3557,7 @@ private:
         // Ensure that non-client areas are scaled for per-monitor DPI awareness v1 - can't
         // do this in peerWindowProc as we have no window at this point
         if (message == WM_NCCREATE)
-            NullCheckedInvocation::invoke (enableNonClientDPIScaling, h);
+            EnableNonClientDpiScaling (h);
 
         if (auto* peer = getOwnerOfWindow (h))
         {
@@ -3778,29 +3586,20 @@ private:
     Point<float> getLocalPointFromScreenLParam (LPARAM lParam)
     {
         const auto globalPos = D2DUtilities::toPoint (getPOINTFromLParam (lParam));
-        return globalToLocal (convertPhysicalScreenPointToLogical (globalPos, hwnd).toFloat());
+        return globalToLocal (detail::ScalingHelpers::convertPhysicalScreenPointToLogical (globalPos.toFloat()));
     }
 
     Point<float> getPointFromLocalLParam (LPARAM lParam) noexcept
     {
-        const auto p = D2DUtilities::toPoint (getPOINTFromLParam (lParam));
-
-        if (! isPerMonitorDPIAwareWindow (hwnd))
-            return p.toFloat();
-
-        // LPARAM is relative to this window's top-left but may be on a different monitor so we need to calculate the
-        // physical screen position and then convert this to local logical coordinates
-        auto r = getWindowScreenRect (hwnd);
-        const auto windowBorder = findPhysicalBorderSize().value_or (BorderSize<int>{});
-        const auto offset = p
-                          + Point { (int) r.left, (int) r.top }
-                          + Point { windowBorder.getLeft(), windowBorder.getTop() };
-        return globalToLocal (Desktop::getInstance().getDisplays().physicalToLogical (offset).toFloat());
+        // LPARAM should hold the cursor position relative to the top left of the client area
+        // in the format used by WM_LBUTTONDOWN, WM_MOUSEMOVE, WM_LBUTTONUP, etc.
+        return D2DUtilities::toPoint (getPOINTFromLParam (lParam)).toFloat() / getPlatformScaleFactor();
     }
 
     Point<float> getCurrentMousePos() noexcept
     {
-        return globalToLocal (convertPhysicalScreenPointToLogical (D2DUtilities::toPoint (getPOINTFromLParam ((LPARAM) GetMessagePos())), hwnd).toFloat());
+        const auto physical = D2DUtilities::toPoint (getPOINTFromLParam ((LPARAM) GetMessagePos())).toFloat();
+        return globalToLocal (detail::ScalingHelpers::convertPhysicalScreenPointToLogical (physical));
     }
 
     static ModifierKeys getMouseModifiers()
@@ -3882,10 +3681,12 @@ private:
                         if (const auto result = DefWindowProc (h, message, wParam, lParam); HTSIZEFIRST <= result && result <= HTSIZELAST)
                             return result;
 
+                    using SH = detail::ScalingHelpers;
+
                     const auto physicalPoint = D2DUtilities::toPoint (getPOINTFromLParam (lParam));
-                    const auto logicalPoint = convertPhysicalScreenPointToLogical (physicalPoint, hwnd);
+                    const auto logicalPoint = SH::convertPhysicalScreenPointToLogical (physicalPoint.toFloat());
                     const auto localPoint = globalToLocal (logicalPoint.toFloat());
-                    const auto componentPoint = detail::ScalingHelpers::unscaledScreenPosToScaled (component, localPoint);
+                    const auto componentPoint = SH::unscaledScreenPosToScaled (component, localPoint);
 
                     const auto kind = component.findControlAtPoint (componentPoint);
 
@@ -3987,9 +3788,6 @@ private:
                 break;
 
             case WM_ERASEBKGND:
-                if (hasTitleBar())
-                    break;
-
                 return 1;
 
             case WM_NCCALCSIZE:
@@ -4119,7 +3917,8 @@ private:
 
                 return handlePositionChanging (*(WINDOWPOS*) lParam);
 
-            case 0x2e0: /* WM_DPICHANGED */  return handleDPIChanging ((int) HIWORD (wParam), *(RECT*) lParam);
+            case WM_DPICHANGED:
+                return handleDPIChanging ((int) HIWORD (wParam), *(RECT*) lParam);
 
             case WM_WINDOWPOSCHANGED:
             {
@@ -4440,6 +4239,56 @@ private:
         }
 
         return DefWindowProc (h, message, wParam, lParam);
+    }
+
+    void setBoundsPhysical (const Rectangle<int>& boundsIn)
+    {
+        if (inHandlePositionChanged)
+            return;
+
+        const auto bounds = boundsIn.withPosition (getMultimonitorPositionOverride().value_or (boundsIn.getPosition()));
+
+        const ScopedValueSetter scope (shouldIgnoreModalDismiss, true);
+
+        const auto borderSize = findPhysicalBorderSize().value_or (BorderSize<int>{});
+        auto newBounds = borderSize.addedTo (bounds);
+
+        if (getTransparencyKind() == TransparencyKind::perPixel)
+        {
+            if (auto parentHwnd = GetParent (hwnd))
+            {
+                const auto parentRect = (D2DUtilities::toRectangle (getWindowScreenRect (parentHwnd)).toFloat() / getPlatformScaleFactor()).toNearestInt();
+                newBounds += parentRect.getPosition();
+            }
+        }
+
+        const auto oldBounds = std::invoke ([this]
+        {
+            ScopedThreadDPIAwarenessSetter setter { hwnd };
+            RECT result;
+            GetWindowRect (hwnd, &result);
+            return D2DUtilities::toRectangle (result);
+        });
+
+        const bool hasMoved = (oldBounds.getPosition() != bounds.getPosition());
+        const bool hasResized = (oldBounds.getWidth() != bounds.getWidth()
+                                  || oldBounds.getHeight() != bounds.getHeight());
+
+        DWORD flags = SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED;
+        if (! hasMoved)    flags |= SWP_NOMOVE;
+        if (! hasResized)  flags |= SWP_NOSIZE;
+
+        ScopedThreadDPIAwarenessSetter setter { hwnd };
+        SetWindowPos (hwnd,
+                      nullptr,
+                      newBounds.getX(),
+                      newBounds.getY(),
+                      newBounds.getWidth(),
+                      newBounds.getHeight(),
+                      flags);
+
+        if (hasResized && isValidPeer (this))
+            repaintNowIfTransparent();
     }
 
     bool sendInputAttemptWhenModalMessage()
@@ -4804,9 +4653,12 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentPeer)
 };
 
+extern bool juce_isRunningInWine();
+
 ComponentPeer* Component::createNewPeer (int styleFlags, void* parentHWND)
 {
-    return new HWNDComponentPeer { *this, styleFlags, (HWND) parentHWND, false, 1 };
+    const auto renderer = juce_isRunningInWine() ? 0 : 1;
+    return new HWNDComponentPeer { *this, styleFlags, (HWND) parentHWND, false, renderer };
 }
 
 Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
@@ -4857,11 +4709,9 @@ public:
 
         // If something in a paint handler calls, e.g. a message box, this can become reentrant and
         // corrupt the image it's using to paint into, so do a check here.
-        static bool reentrant = false;
-
         if (! reentrant)
         {
-            const ScopedValueSetter<bool> setter (reentrant, true, false);
+            const ScopedValueSetter setter (reentrant, true, false);
 
             if (peer.dontRepaint)
                 peer.getComponent().handleCommandMessage (0); // (this triggers a repaint in the openGL context)
@@ -4883,23 +4733,12 @@ public:
         deferredRepaints.add (area);
     }
 
-    void dispatchDeferredRepaints() override
-    {
-        for (auto deferredRect : deferredRepaints)
-        {
-            auto r = D2DUtilities::toRECT (deferredRect);
-            InvalidateRect (peer.getHWND(), &r, FALSE);
-        }
-
-        deferredRepaints.clear();
-    }
-
     void performAnyPendingRepaintsNow() override
     {
         if (! peer.getComponent().isVisible())
             return;
 
-        dispatchDeferredRepaints();
+        onVBlank();
 
         WeakReference localRef (&peer.getComponent());
         MSG m;
@@ -4919,7 +4758,16 @@ public:
              : createSnapshotOfNormalWindow();
     }
 
-    void onVBlank() override {}
+    void onVBlank() override
+    {
+        for (auto deferredRect : deferredRepaints)
+        {
+            auto r = D2DUtilities::toRECT (deferredRect);
+            InvalidateRect (peer.getHWND(), &r, FALSE);
+        }
+
+        deferredRepaints.clear();
+    }
 
     void handleShowWindow() override {}
 
@@ -4951,7 +4799,7 @@ private:
     {
         auto hwnd = peer.getHWND();
 
-        auto r = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (hwnd)), hwnd);
+        auto r = (peer.getClientRectInScreen().toFloat() / peer.getPlatformScaleFactor()).toNearestInt();
         const auto w = r.getWidth();
         const auto h = r.getHeight();
 
@@ -5159,10 +5007,10 @@ private:
     HWNDComponentPeer& peer;
     TemporaryImage offscreenImageGenerator;
     RectangleList<int> deferredRepaints;
+    bool reentrant = false;
 };
 
-class D2DRenderContext : public RenderContext,
-                         private Direct2DHwndContext::SwapchainDelegate
+class D2DRenderContext : public RenderContext
 {
 public:
     static constexpr auto name = "Direct2D";
@@ -5181,7 +5029,7 @@ public:
         if (transparent != direct2DContext->supportsTransparency())
         {
             direct2DContext.reset();
-            direct2DContext = getContextForPeer (peer, *this);
+            direct2DContext = getContextForPeer (peer);
         }
 
         if (direct2DContext->supportsTransparency())
@@ -5190,26 +5038,19 @@ public:
 
     void handlePaintMessage() override
     {
-       #if JUCE_DIRECT2D_METRICS
-        auto paintStartTicks = Time::getHighResolutionTicks();
-       #endif
-
         updateRegion.findRECTAndValidate (peer.getHWND());
 
         for (const auto& rect : updateRegion.getRects())
-            repaint (D2DUtilities::toRectangle (rect));
+            direct2DContext->addDeferredRepaint (D2DUtilities::toRectangle (rect));
 
-       #if JUCE_DIRECT2D_METRICS
-        lastPaintStartTicks = paintStartTicks;
-       #endif
+        schedulePaintOnVblank = true;
     }
 
     void repaint (const Rectangle<int>& area) override
     {
-        direct2DContext->addDeferredRepaint (area);
+        auto r = D2DUtilities::toRECT (area);
+        InvalidateRect (peer.getHWND(), &r, FALSE);
     }
-
-    void dispatchDeferredRepaints() override {}
 
     void performAnyPendingRepaintsNow() override {}
 
@@ -5220,7 +5061,8 @@ public:
 
     void onVBlank() override
     {
-        handleDirect2DPaint();
+        if (std::exchange (schedulePaintOnVblank, false))
+            handleDirect2DPaint();
     }
 
     void handleShowWindow() override
@@ -5230,11 +5072,6 @@ public:
     }
 
 private:
-    void onSwapchainEvent() override
-    {
-        handleDirect2DPaint();
-    }
-
     struct WrappedD2DHwndContextBase
     {
         virtual ~WrappedD2DHwndContextBase() = default;
@@ -5265,8 +5102,8 @@ private:
     class WrappedD2DHwndContext : public WrappedD2DHwndContextBase
     {
     public:
-        WrappedD2DHwndContext (HWND hwnd, SwapchainDelegate& swapDelegate)
-            : ctx (hwnd, swapDelegate) {}
+        explicit WrappedD2DHwndContext (HWND hwnd)
+            : ctx (hwnd) {}
 
         void addDeferredRepaint (Rectangle<int> area) override
         {
@@ -5561,11 +5398,18 @@ private:
         //
         // Direct2DLowLevelGraphicsContext::endFrame calls ID2D1DeviceContext::EndDraw to finish painting
         // and then tells the swap chain to present the next swap chain back buffer.
-        if (auto* ctx = direct2DContext->startFrame ((float) peer.getPlatformScaleFactor()))
+
+        schedulePaintOnVblank = std::invoke ([&]
         {
-            peer.handlePaint (*ctx);
-            direct2DContext->endFrame();
-        }
+            if (auto* ctx = direct2DContext->startFrame ((float) peer.getPlatformScaleFactor()))
+            {
+                peer.handlePaint (*ctx);
+                direct2DContext->endFrame();
+                return false;
+            }
+
+            return true;
+        });
 
        #if JUCE_DIRECT2D_METRICS
         if (lastPaintStartTicks > 0)
@@ -5582,19 +5426,19 @@ private:
        #endif
     }
 
-    static std::unique_ptr<WrappedD2DHwndContextBase> getContextForPeer (HWNDComponentPeer& peer,
-                                                                         SwapchainDelegate& delegate)
+    static std::unique_ptr<WrappedD2DHwndContextBase> getContextForPeer (HWNDComponentPeer& peer)
     {
         if (peer.getTransparencyKind() != HWNDComponentPeer::TransparencyKind::opaque)
             return std::make_unique<WrappedD2DHwndContextTransparent> (peer);
 
-        return std::make_unique<WrappedD2DHwndContext> (peer.getHWND(), delegate);
+        return std::make_unique<WrappedD2DHwndContext> (peer.getHWND());
     }
 
     HWNDComponentPeer& peer;
 
-    std::unique_ptr<WrappedD2DHwndContextBase> direct2DContext = getContextForPeer (peer, *this);
+    std::unique_ptr<WrappedD2DHwndContextBase> direct2DContext = getContextForPeer (peer);
     UpdateRegion updateRegion;
+    bool schedulePaintOnVblank = false;
 
    #if JUCE_ETW_TRACELOGGING
     struct ETWEventProvider
@@ -5694,14 +5538,14 @@ JUCE_API ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& compo
 //==============================================================================
 bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 {
-    const auto k = [&]
+    const auto k = std::invoke ([&]
     {
         if ((keyCode & extendedKeyModifier) != 0)
             return keyCode & (extendedKeyModifier - 1);
 
         const auto vk = BYTE (VkKeyScan ((WCHAR) keyCode) & 0xff);
         return vk != (BYTE) -1 ? vk : keyCode;
-    }();
+    });
 
     return HWNDComponentPeer::isKeyDown (k);
 }
@@ -5770,24 +5614,22 @@ Point<float> MouseInputSource::getCurrentRawMousePosition()
     POINT mousePos;
     GetCursorPos (&mousePos);
 
-    auto p = D2DUtilities::toPoint (mousePos);
+    const auto p = D2DUtilities::toPoint (mousePos).toFloat();
 
     if (isPerMonitorDPIAwareThread())
-        p = Desktop::getInstance().getDisplays().physicalToLogical (p);
+        return detail::ScalingHelpers::convertPhysicalScreenPointToLogical (p);
 
-    return p.toFloat();
+    return p;
 }
 
 void MouseInputSource::setRawMousePosition (Point<float> newPosition)
 {
-    auto newPositionInt = newPosition.roundToInt();
-
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
     if (isPerMonitorDPIAwareThread())
-        newPositionInt = Desktop::getInstance().getDisplays().logicalToPhysical (newPositionInt);
+        newPosition = detail::ScalingHelpers::convertLogicalScreenPointToPhysical (newPosition);
    #endif
 
-    auto point = D2DUtilities::toPOINT (newPositionInt);
+    const auto point = D2DUtilities::toPOINT (newPosition.roundToInt());
     SetCursorPos (point.x, point.y);
 }
 
@@ -5887,6 +5729,12 @@ String SystemClipboard::getTextFromClipboard()
 //==============================================================================
 void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
+    if (kioskModeComp == nullptr)
+    {
+        jassertfalse;
+        return;
+    }
+
     if (auto* peer = dynamic_cast<HWNDComponentPeer*> (kioskModeComp->getPeer()))
     {
         const auto prevFlags = (DWORD) GetWindowLong (peer->getHWND(), GWL_STYLE);
@@ -5916,65 +5764,16 @@ void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable,
         jassertfalse;
     }
 
-    if (kioskModeComp != nullptr && enableOrDisable)
-        kioskModeComp->setBounds (getDisplays().getDisplayForRect (kioskModeComp->getScreenBounds())->totalArea);
+    if (enableOrDisable)
+    {
+        if (const auto* display = getDisplays().getDisplayForRect (kioskModeComp->getScreenBounds()); display != nullptr)
+            kioskModeComp->setBounds (display->logicalBounds.getSmallestIntegerContainer());
+        else
+            jassertfalse;
+    }
 }
 
 void Desktop::allowedOrientationsChanged() {}
-
-//==============================================================================
-static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
-{
-    Array<const Displays::Display*> candidateDisplays;
-
-    const auto scaleToLookFor = [&]
-    {
-        if (auto* peer = HWNDComponentPeer::getOwnerOfWindow (hwnd))
-            return peer->getPlatformScaleFactor();
-
-        return getScaleFactorForWindow (hwnd);
-    }();
-
-    auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
-
-    for (auto& d : Desktop::getInstance().getDisplays().displays)
-        if (approximatelyEqual (d.scale / globalScale, scaleToLookFor))
-            candidateDisplays.add (&d);
-
-    if (candidateDisplays.size() > 0)
-    {
-        if (candidateDisplays.size() == 1)
-            return candidateDisplays[0];
-
-        const auto bounds = [&]
-        {
-            if (auto* peer = HWNDComponentPeer::getOwnerOfWindow (hwnd))
-                return peer->getComponent().getTopLevelComponent()->getBounds();
-
-            return Desktop::getInstance().getDisplays().physicalToLogical (D2DUtilities::toRectangle (getWindowScreenRect (hwnd)));
-        }();
-
-        const Displays::Display* retVal = nullptr;
-        int maxArea = -1;
-
-        for (auto* d : candidateDisplays)
-        {
-            auto intersection = d->totalArea.getIntersection (bounds);
-            auto area = intersection.getWidth() * intersection.getHeight();
-
-            if (area > maxArea)
-            {
-                maxArea = area;
-                retVal = d;
-            }
-        }
-
-        if (retVal != nullptr)
-            return retVal;
-    }
-
-    return Desktop::getInstance().getDisplays().getPrimaryDisplay();
-}
 
 //==============================================================================
 struct MonitorInfo
@@ -6003,13 +5802,10 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT, LPARAM userInfo
     auto isMain = (info.dwFlags & 1 /* MONITORINFOF_PRIMARY */) != 0;
     auto dpi = 0.0;
 
-    if (getDPIForMonitor != nullptr)
-    {
-        UINT dpiX = 0, dpiY = 0;
+    UINT dpiX = 0, dpiY = 0;
 
-        if (SUCCEEDED (getDPIForMonitor (hm, MDT_Default, &dpiX, &dpiY)))
-            dpi = (dpiX + dpiY) / 2.0;
-    }
+    if (SUCCEEDED (GetDpiForMonitor (hm, MDT_DEFAULT, &dpiX, &dpiY)))
+        dpi = (dpiX + dpiY) / 2.0;
 
     // Call EnumDisplayDevices and EnumDisplaySettings to get the refresh rate of the monitor
     BOOL ok = TRUE;
@@ -6077,8 +5873,9 @@ void Displays::findDisplays (const Desktop& desktop)
             d.scale = (d.dpi / USER_DEFAULT_SCREEN_DPI) * (masterScale / Desktop::getDefaultMasterScale());
         }
 
-        d.totalArea = D2DUtilities::toRectangle (monitor.totalAreaRect);
-        d.userArea  = D2DUtilities::toRectangle (monitor.workAreaRect);
+        d.physicalBounds = D2DUtilities::toRectangle (monitor.totalAreaRect);
+        d.logicalBounds = d.physicalBounds.toFloat();
+        d.userBounds  = D2DUtilities::toRectangle (monitor.workAreaRect).toFloat();
 
         displays.add (d);
     }
@@ -6091,8 +5888,8 @@ void Displays::findDisplays (const Desktop& desktop)
     {
         for (auto& d : displays)
         {
-            d.totalArea /= masterScale;
-            d.userArea  /= masterScale;
+            d.logicalBounds /= masterScale;
+            d.userBounds    /= masterScale;
         }
     }
 }
@@ -6129,13 +5926,13 @@ public:
 
     static void showInWindow (PlatformSpecificHandle* handle, ComponentPeer* peer)
     {
-        SetCursor ([&]
+        SetCursor (std::invoke ([&]
         {
             if (handle != nullptr && handle->impl != nullptr && peer != nullptr)
                 return handle->impl->getCursor (*peer);
 
             return LoadCursor (nullptr, IDC_ARROW);
-        }());
+        }));
     }
 
 private:
@@ -6204,31 +6001,6 @@ private:
 
     static auto getCursorSizeForPeerFunction() -> int (*) (ComponentPeer&)
     {
-        static const auto getDpiForMonitor = []() -> GetDPIForMonitorFunc
-        {
-            constexpr auto library = "SHCore.dll";
-            LoadLibraryA (library);
-
-            if (auto* handle = GetModuleHandleA (library))
-                return (GetDPIForMonitorFunc) GetProcAddress (handle, "GetDpiForMonitor");
-
-            return nullptr;
-        }();
-
-        static const auto getSystemMetricsForDpi = []() -> GetSystemMetricsForDpiFunc
-        {
-            constexpr auto library = "User32.dll";
-            LoadLibraryA (library);
-
-            if (auto* handle = GetModuleHandleA (library))
-                return (GetSystemMetricsForDpiFunc) GetProcAddress (handle, "GetSystemMetricsForDpi");
-
-            return nullptr;
-        }();
-
-        if (getDpiForMonitor == nullptr || getSystemMetricsForDpi == nullptr)
-            return [] (ComponentPeer&) { return unityCursorSize; };
-
         return [] (ComponentPeer& p)
         {
             const ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { p.getNativeHandle() };
@@ -6236,8 +6008,8 @@ private:
             UINT dpiX = 0, dpiY = 0;
 
             if (auto* monitor = MonitorFromWindow ((HWND) p.getNativeHandle(), MONITOR_DEFAULTTONULL))
-                if (SUCCEEDED (getDpiForMonitor (monitor, MDT_Default, &dpiX, &dpiY)))
-                    return getSystemMetricsForDpi (SM_CXCURSOR, dpiX);
+                if (SUCCEEDED (GetDpiForMonitor (monitor, MDT_DEFAULT, &dpiX, &dpiY)))
+                    return GetSystemMetricsForDpi (SM_CXCURSOR, dpiX);
 
             return unityCursorSize;
         };
@@ -6306,13 +6078,13 @@ private:
                 jassertfalse; break;
         }
 
-        return std::make_unique<BuiltinImpl> ([&]
+        return std::make_unique<BuiltinImpl> (std::invoke ([&]
         {
             if (auto* c = LoadCursor (nullptr, cursorName))
                 return c;
 
             return LoadCursor (nullptr, IDC_ARROW);
-        }());
+        }));
     }
 
     std::unique_ptr<Impl> impl;

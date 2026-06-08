@@ -560,7 +560,8 @@ private:
         //==============================================================================
         struct SessionDelegateClass    : public ObjCClass<NSObject>
         {
-            SessionDelegateClass()  : ObjCClass<NSObject> ("SessionDelegateClass_")
+            SessionDelegateClass()
+                : ObjCClass ("SessionDelegateClass_")
             {
                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                 addMethod (@selector (sessionDidStartRunning:),
@@ -729,7 +730,8 @@ private:
             class PhotoOutputDelegateClass : public ObjCClass<NSObject>
             {
             public:
-                PhotoOutputDelegateClass() : ObjCClass<NSObject> ("PhotoOutputDelegateClass_")
+                PhotoOutputDelegateClass()
+                    : ObjCClass ("PhotoOutputDelegateClass_")
                 {
                     addMethod (@selector (captureOutput:willBeginCaptureForResolvedSettings:),
                                [] (id, SEL, AVCapturePhotoOutput*, AVCaptureResolvedPhotoSettings*)
@@ -977,7 +979,8 @@ private:
             //==============================================================================
             struct FileOutputRecordingDelegateClass    : public ObjCClass<NSObject<AVCaptureFileOutputRecordingDelegate>>
             {
-                FileOutputRecordingDelegateClass()  : ObjCClass<NSObject<AVCaptureFileOutputRecordingDelegate>> ("FileOutputRecordingDelegateClass_")
+                FileOutputRecordingDelegateClass()
+                    : ObjCClass ("FileOutputRecordingDelegateClass_")
                 {
                     addMethod (@selector (captureOutput:didStartRecordingToOutputFileAtURL:fromConnections:),
                                [] (id self, SEL, AVCaptureFileOutput*, NSURL*, NSArray<AVCaptureConnection*>*)
@@ -1156,7 +1159,8 @@ struct CameraDevice::ViewerComponent  : public UIViewComponent
     //==============================================================================
     struct JuceCameraDeviceViewerClass    : public ObjCClass<UIView>
     {
-        JuceCameraDeviceViewerClass()  : ObjCClass ("JuceCameraDeviceViewerClass_")
+        JuceCameraDeviceViewerClass()
+            : ObjCClass ("JuceCameraDeviceViewerClass_")
         {
             addMethod (@selector (layoutSubviews),
                        [] (id self, SEL)

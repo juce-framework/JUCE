@@ -472,6 +472,10 @@ public:
     {
         ignoreUnused (playbackRegionHostRef, range, scopeFlags);
     }
+
+    void notifyDocumentDataChanged() noexcept override
+    {
+    }
 };
 
 class PlaybackController final : public ARA::Host::PlaybackControllerInterface
@@ -1130,7 +1134,7 @@ public:
     AudioProcessorEditor* createEditor() override
     {
         std::lock_guard<std::mutex> lock (innerMutex);
-        return inner->createEditorIfNeeded();
+        return inner->createEditorAndMakeActive();
     }
 
     bool hasEditor() const override

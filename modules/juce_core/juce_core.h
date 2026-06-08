@@ -44,7 +44,7 @@
 
   ID:                 juce_core
   vendor:             juce
-  version:            8.0.12
+  version:            8.0.13
   name:               JUCE core classes
   description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:            http://www.juce.com/juce
@@ -225,6 +225,7 @@ namespace juce
     class FileInputStream;
     class FileOutputStream;
     class XmlElement;
+    class NamedValue;
 
     extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept;
     extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
@@ -276,6 +277,8 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "containers/juce_ElementComparator.h"
 #include "containers/juce_ArrayAllocationBase.h"
 #include "containers/juce_ArrayBase.h"
+#include "misc/juce_Functional.h"
+#include "containers/juce_Span.h"
 #include "containers/juce_Array.h"
 #include "containers/juce_LinkedListPointer.h"
 #include "misc/juce_ScopeGuard.h"
@@ -296,8 +299,6 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "text/juce_TextDiff.h"
 #include "text/juce_LocalisedStrings.h"
 #include "text/juce_Base64.h"
-#include "misc/juce_Functional.h"
-#include "containers/juce_Span.h"
 #include "misc/juce_Result.h"
 #include "misc/juce_Uuid.h"
 #include "misc/juce_ConsoleApplication.h"
@@ -307,6 +308,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "containers/juce_DynamicObject.h"
 #include "containers/juce_HashMap.h"
 #include "containers/juce_FixedSizeFunction.h"
+#include "time/juce_TimeUnits.h"
 #include "time/juce_RelativeTime.h"
 #include "time/juce_Time.h"
 #include "streams/juce_InputStream.h"
@@ -359,6 +361,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "network/juce_WebInputStream.h"
 #include "streams/juce_URLInputSource.h"
 #include "time/juce_PerformanceCounter.h"
+#include "time/juce_TimedDiagnostic.h"
 #include "unit_tests/juce_UnitTest.h"
 #include "xml/juce_XmlDocument.h"
 #include "xml/juce_XmlElement.h"

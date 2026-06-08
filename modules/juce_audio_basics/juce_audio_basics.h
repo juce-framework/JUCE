@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_basics
   vendor:             juce
-  version:            8.0.12
+  version:            8.0.13
   name:               JUCE audio and MIDI data classes
   description:        Classes for audio buffer manipulation, midi message handling, synthesis, etc.
   website:            http://www.juce.com/juce
@@ -78,8 +78,10 @@
  #undef JUCE_USE_SSE_INTRINSICS
 #endif
 
-#if __ARM_NEON__ && ! (JUCE_USE_VDSP_FRAMEWORK || defined (JUCE_USE_ARM_NEON))
- #define JUCE_USE_ARM_NEON 1
+#ifndef JUCE_USE_ARM_NEON
+ #if (__ARM_NEON || __ARM_NEON__) && ! JUCE_USE_VDSP_FRAMEWORK
+  #define JUCE_USE_ARM_NEON 1
+ #endif
 #endif
 
 #if TARGET_IPHONE_SIMULATOR

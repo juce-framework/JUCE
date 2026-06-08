@@ -187,7 +187,10 @@ PluginWindow* PluginGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node
             }
 
             auto localDpiDisabler = makeDPIAwarenessDisablerForPlugin (description);
-            return activePluginWindows.add (new PluginWindow (node, type, activePluginWindows));
+            return activePluginWindows.add (new PluginWindow (node,
+                                                              type,
+                                                              activePluginWindows,
+                                                              getCommandManager().getKeyMappings()));
         }
     }
 

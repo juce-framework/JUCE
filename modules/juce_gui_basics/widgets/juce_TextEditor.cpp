@@ -1507,10 +1507,8 @@ void TextEditor::paintOverChildren (Graphics& g)
         g.setColour (colourForTextWhenEmpty);
         g.setFont (getFont());
 
-        Rectangle<int> textBounds (leftIndent,
-                                   topIndent,
-                                   viewport->getWidth() - leftIndent,
-                                   getHeight() - topIndent);
+        const auto textBounds = viewport->getBounds().withTrimmedLeft (leftIndent)
+                                                     .withTrimmedTop (topIndent);
 
         if (! textBounds.isEmpty())
             g.drawText (textToShowWhenEmpty, textBounds, justification, true);

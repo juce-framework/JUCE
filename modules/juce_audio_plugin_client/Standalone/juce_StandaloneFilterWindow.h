@@ -691,7 +691,7 @@ public:
 
                 if (x != defaultValue && y != defaultValue)
                 {
-                    const auto screenLimits = displays.getDisplayForRect ({ x, y, width, height })->userArea;
+                    const auto screenLimits = displays.getDisplayForRect ({ x, y, width, height })->userBounds.toNearestInt();
 
                     return { jlimit (screenLimits.getX(), jmax (screenLimits.getX(), screenLimits.getRight()  - width),  x),
                              jlimit (screenLimits.getY(), jmax (screenLimits.getY(), screenLimits.getBottom() - height), y),
@@ -699,7 +699,7 @@ public:
                 }
             }
 
-            const auto displayArea = displays.getPrimaryDisplay()->userArea;
+            const auto displayArea = displays.getPrimaryDisplay()->userBounds.toNearestInt();
 
             return { displayArea.getCentreX() - width / 2,
                      displayArea.getCentreY() - height / 2,
@@ -852,7 +852,7 @@ private:
     public:
         MainContentComponent (StandaloneFilterWindow& filterWindow)
             : owner (filterWindow), notification (this),
-              editor (owner.getAudioProcessor()->hasEditor() ? owner.getAudioProcessor()->createEditorIfNeeded()
+              editor (owner.getAudioProcessor()->hasEditor() ? owner.getAudioProcessor()->createEditorAndMakeActive()
                                                              : new GenericAudioProcessorEditor (*owner.getAudioProcessor()))
         {
             inputMutedValue.referTo (owner.pluginHolder->getMuteInputValue());

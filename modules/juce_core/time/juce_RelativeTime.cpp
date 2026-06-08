@@ -49,11 +49,11 @@ RelativeTime RelativeTime::days (double numberOfDays) noexcept              { re
 RelativeTime RelativeTime::weeks (double numberOfWeeks) noexcept            { return RelativeTime (numberOfWeeks * (60.0 * 60.0 * 24.0 * 7.0)); }
 
 //==============================================================================
-int64 RelativeTime::inMilliseconds() const noexcept { return (int64) (numSeconds * 1000.0); }
-double RelativeTime::inMinutes() const noexcept     { return numSeconds / 60.0; }
-double RelativeTime::inHours() const noexcept       { return numSeconds / (60.0 * 60.0); }
-double RelativeTime::inDays() const noexcept        { return numSeconds / (60.0 * 60.0 * 24.0); }
-double RelativeTime::inWeeks() const noexcept       { return numSeconds / (60.0 * 60.0 * 24.0 * 7.0); }
+int64 RelativeTime::inMilliseconds() const noexcept { return (int64) to<Milliseconds>(); }
+double RelativeTime::inMinutes() const noexcept     { return to<Minutes>(); }
+double RelativeTime::inHours() const noexcept       { return to<Hours>(); }
+double RelativeTime::inDays() const noexcept        { return to<Days>(); }
+double RelativeTime::inWeeks() const noexcept       { return to<Weeks>(); }
 
 //==============================================================================
 RelativeTime& RelativeTime::operator= (const RelativeTime& other) noexcept      { numSeconds = other.numSeconds; return *this; }
@@ -134,39 +134,39 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
 
     StringArray fields;
 
-    auto n = (int) inWeeks();
+    auto n = (int) to<Weeks>();
 
     if (n > 0)
         fields.add (describeWeeks (n));
 
-    n = ((int) inDays()) % 7;
+    n = ((int) to<Days>()) % 7;
 
     if (n > 0)
         fields.add (describeDays (n));
 
     if (fields.size() < 2)
     {
-        n = ((int) inHours()) % 24;
+        n = ((int) to<Hours>()) % 24;
 
         if (n > 0)
             fields.add (describeHours (n));
 
         if (fields.size() < 2)
         {
-            n = ((int) inMinutes()) % 60;
+            n = ((int) to<Minutes>()) % 60;
 
             if (n > 0)
                 fields.add (describeMinutes (n));
 
             if (fields.size() < 2)
             {
-                n = ((int) inSeconds()) % 60;
+                n = ((int) to<Seconds>()) % 60;
 
                 if (n > 0)
                     fields.add (describeSeconds (n));
 
                 if (fields.isEmpty())
-                    fields.add (String (((int) inMilliseconds()) % 1000) + " " + TRANS ("ms"));
+                    fields.add (String (((int) to<Milliseconds>()) % 1000) + " " + TRANS ("ms"));
             }
         }
     }

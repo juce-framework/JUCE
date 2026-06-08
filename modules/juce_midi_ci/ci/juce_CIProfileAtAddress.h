@@ -42,19 +42,19 @@ namespace juce::midi_ci
 */
 class ProfileAtAddress
 {
-    auto tie() const { return std::tie (profile, address); }
+    auto tie() const;
 
 public:
     Profile profile;            ///< The id of a MIDI-CI profile
     ChannelAddress address;     ///< A group and channel
 
-    bool operator== (const ProfileAtAddress& x) const { return tie() == x.tie(); }
-    bool operator!= (const ProfileAtAddress& x) const { return tie() != x.tie(); }
+    bool operator== (const ProfileAtAddress& x) const;
+    bool operator!= (const ProfileAtAddress& x) const;
 
-    bool operator<  (const ProfileAtAddress& x) const { return tie() <  x.tie(); }
-    bool operator<= (const ProfileAtAddress& x) const { return tie() <= x.tie(); }
-    bool operator>  (const ProfileAtAddress& x) const { return tie() >  x.tie(); }
-    bool operator>= (const ProfileAtAddress& x) const { return tie() >= x.tie(); }
+    bool operator<  (const ProfileAtAddress& x) const;
+    bool operator<= (const ProfileAtAddress& x) const;
+    bool operator>  (const ProfileAtAddress& x) const;
+    bool operator>= (const ProfileAtAddress& x) const;
 };
 
 } // namespace juce::midi_ci

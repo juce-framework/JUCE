@@ -66,13 +66,12 @@ void SplashScreen::makeVisible (int w, int h, bool useDropShadow, bool fullscree
     clickCountToDelete = Desktop::getInstance().getMouseButtonClickCounter();
     creationTime = Time::getCurrentTime();
 
-    const Rectangle<int> screenSize = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
-    const int width  = (fullscreen ? screenSize.getWidth()   : w);
-    const int height = (fullscreen ? screenSize.getHeight()  : h);
+    const auto screenSize = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userBounds.getSmallestIntegerContainer();
+    const auto size = fullscreen ? screenSize : Rectangle { w, h };
 
     setAlwaysOnTop (true);
     setVisible (true);
-    centreWithSize (width, height);
+    centreWithSize (size.getWidth(), size.getHeight());
     addToDesktop (useDropShadow ? ComponentPeer::windowHasDropShadow : 0);
 
     if (fullscreen)

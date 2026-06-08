@@ -72,7 +72,7 @@ struct ZipFile::ZipEntryHolder
         auto day       = (int) (date & 31);
         auto hours     = (int) time >> 11;
         auto minutes   = (int) ((time >> 5) & 63);
-        auto seconds   = (int) ((time & 31) << 1);
+        auto seconds   = (int) ((time & 31) * 2);
 
         return { year, month, day, hours, minutes, seconds };
     }
@@ -249,28 +249,48 @@ private:
 
 
 //==============================================================================
-ZipFile::ZipFile (InputStream* stream, bool deleteStreamWhenDestroyed)
-   : inputStream (stream)
+ZipFile::ZipFile (OptionalScopedPointer<InputStream> stream)
+    : inputStream (stream.get())
 {
-    if (deleteStreamWhenDestroyed)
+    if (stream.willDeleteObject())
+    {
         streamToDelete.reset (inputStream);
+        stream.release();
+    }
 
     init();
 }
 
-ZipFile::ZipFile (InputStream& stream)  : inputStream (&stream)
+ZipFile::ZipFile (std::unique_ptr<InputStream> stream)
+    : ZipFile (OptionalScopedPointer<InputStream> (std::move (stream)))
+{
+}
+
+ZipFile::ZipFile (InputStream* stream, bool deleteStreamWhenDestroyed)
+   : ZipFile (OptionalScopedPointer<InputStream> (stream, deleteStreamWhenDestroyed))
+{
+}
+
+ZipFile::ZipFile (InputStream& stream)
+    : ZipFile (OptionalScopedPointer<InputStream> (stream))
+{
+}
+
+ZipFile::ZipFile (const File& file)
+    : inputSource (new FileInputSource (file))
 {
     init();
 }
 
-ZipFile::ZipFile (const File& file)  : inputSource (new FileInputSource (file))
+ZipFile::ZipFile (std::unique_ptr<InputSource> source)
+    : inputSource (std::move (source))
 {
     init();
 }
 
-ZipFile::ZipFile (InputSource* source)  : inputSource (source)
+ZipFile::ZipFile (InputSource* source)
+    : ZipFile (rawToUniquePtr (source))
 {
-    init();
 }
 
 ZipFile::~ZipFile()
@@ -502,8 +522,16 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, Overwri
 //==============================================================================
 struct ZipFile::Builder::Item
 {
-    Item (const File& f, InputStream* s, int compression, const String& storedPath, Time time)
-        : file (f), stream (s), storedPathname (storedPath), fileTime (time), compressionLevel (compression)
+    Item (const File& f,
+          std::unique_ptr<InputStream> s,
+          int compression,
+          const String& storedPath,
+          Time time)
+        : file (f),
+          stream (std::move (s)),
+          storedPathname (storedPath),
+          fileTime (time),
+          compressionLevel (compression)
     {
         symbolicLink = (file.exists() && file.isSymbolicLink());
     }
@@ -572,7 +600,7 @@ private:
 
     static void writeTimeAndDate (OutputStream& target, Time t)
     {
-        target.writeShort ((short) (t.getSeconds() + (t.getMinutes() << 5) + (t.getHours() << 11)));
+        target.writeShort ((short) ((t.getSeconds() / 2) + (t.getMinutes() << 5) + (t.getHours() << 11)));
         target.writeShort ((short) (t.getDayOfMonth() + ((t.getMonth() + 1) << 5) + ((t.getYear() - 1980) << 9)));
     }
 
@@ -634,11 +662,19 @@ void ZipFile::Builder::addFile (const File& file, int compression, const String&
                          file.getLastModificationTime()));
 }
 
-void ZipFile::Builder::addEntry (InputStream* stream, int compression, const String& path, Time time)
+void ZipFile::Builder::addEntry (std::unique_ptr<InputStream> stream,
+                                 int compression,
+                                 const String& path,
+                                 Time time)
 {
     jassert (stream != nullptr); // must not be null!
     jassert (path.isNotEmpty());
-    items.add (new Item ({}, stream, compression, path, time));
+    items.add (new Item ({}, std::move (stream), compression, path, time));
+}
+
+void ZipFile::Builder::addEntry (InputStream* stream, int compression, const String& path, Time time)
+{
+    addEntry (rawToUniquePtr (stream), compression, path, time);
 }
 
 bool ZipFile::Builder::writeToStream (OutputStream& target, double* const progress) const
@@ -699,7 +735,10 @@ struct ZIPTests final : public UnitTest
             MemoryOutputStream mo (block, false);
             mo << entryName;
             mo.flush();
-            builder.addEntry (new MemoryInputStream (block, false), 9, entryName, Time::getCurrentTime());
+            builder.addEntry (std::make_unique<MemoryInputStream> (block, false),
+                              9,
+                              entryName,
+                              Time::getCurrentTime());
         }
 
         MemoryBlock data;
@@ -727,8 +766,8 @@ struct ZIPTests final : public UnitTest
 
         StringArray entryNames;
 
-        for (const auto& testCase : testCases)
-            entryNames.add (testCase.first);
+        for (const auto& tc : testCases)
+            entryNames.add (tc.first);
 
         TemporaryFile tmpDir;
         tmpDir.getFile().createDirectory();

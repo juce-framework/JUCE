@@ -74,7 +74,7 @@ static auto getJucePriority (qos_class_t qos)
     return Thread::Priority::normal;
 }
 
-template<typename Type>
+template <typename Type>
 static std::optional<Type> firstOptionalWithValue (const std::initializer_list<std::optional<Type>>& optionals)
 {
     for (const auto& optional : optionals)
@@ -154,10 +154,7 @@ bool Thread::createNativeThread (Priority priority)
 
         data.started.set_value (true);
 
-        JUCE_AUTORELEASEPOOL
-        {
-            juce_threadEntryPoint (&thread);
-        }
+        juce_threadEntryPoint (&thread);
 
         return nullptr;
     });

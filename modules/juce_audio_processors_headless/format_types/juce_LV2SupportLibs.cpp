@@ -63,6 +63,9 @@ extern "C"
 
 #include <math.h>
 
+#pragma push_macro ("_POSIX_C_SOURCE")
+#undef _POSIX_C_SOURCE
+
 #define is_windows_path serd_is_windows_path
 
 #include "serd/src/base64.c"
@@ -98,6 +101,8 @@ extern "C"
 #include "lilv/src/util.c"
 #include "lilv/src/world.c"
 #include "lilv/src/zix/tree.c"
+
+#pragma pop_macro ("_POSIX_C_SOURCE")
 
 #undef NS_RDF
 #undef NS_XSD

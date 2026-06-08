@@ -25,11 +25,10 @@ project(AUDIO_PLUGIN_EXAMPLE VERSION 0.0.1)
 # or
 # add_subdirectory(JUCE)                    # If you've put JUCE in a subdirectory called JUCE
 
-# If you are building a VST2 or AAX plugin, CMake needs to be told where to find these SDKs on your
+# If you are building a VST2, CMake needs to be told where to find the SDK on your
 # system. This setup should be done before calling `juce_add_plugin`.
 
 # juce_set_vst2_sdk_path(...)
-# juce_set_aax_sdk_path(...)
 
 # `juce_add_plugin` adds a static library target with the name passed as the first argument
 # (AudioPluginExample here). This target is a normal CMake target, but has a lot of extra properties set

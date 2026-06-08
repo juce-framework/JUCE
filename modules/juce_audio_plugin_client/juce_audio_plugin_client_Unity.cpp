@@ -309,7 +309,7 @@ public:
 
         if (! isTemporary && pluginInstance->hasEditor())
         {
-            pluginInstanceEditor.reset (pluginInstance->createEditorIfNeeded());
+            pluginInstanceEditor.reset (pluginInstance->createEditorAndMakeActive());
             pluginInstanceEditor->setVisible (true);
             detail::PluginUtilities::addToDesktop (*pluginInstanceEditor, nullptr);
         }

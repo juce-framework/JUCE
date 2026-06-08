@@ -45,7 +45,8 @@ public:
         std::function<void()> windowClosed;
     };
 
-    BluetoothMidiPairingWindowClass()   : ObjCClass<NSObject> ("JUCEBluetoothMidiPairingWindowClass_")
+    BluetoothMidiPairingWindowClass()
+        : ObjCClass ("JUCEBluetoothMidiPairingWindowClass_")
     {
         addIvar<Callbacks*> ("callbacks");
         addIvar<CABTLEMIDIWindowController*> ("controller");

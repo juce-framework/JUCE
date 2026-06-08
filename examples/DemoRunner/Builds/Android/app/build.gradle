@@ -1,92 +1,89 @@
 apply plugin: 'com.android.application'
 
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 def ndkVersionString = "28.1.13356709"
 
 android {
-    compileSdk 35
-    ndkVersion ndkVersionString
-    namespace "com.rmsl.jucedemorunner"
+    compileSdk(35)
+    ndkVersion = ndkVersionString
+    namespace = "com.rmsl.jucedemorunner"
     externalNativeBuild {
         cmake {
-            path "CMakeLists.txt"
-            version "3.22.1"
+            path("CMakeLists.txt")
+            version = "3.22.1"
         }
     }
     signingConfigs {
         juceSigning {
-            storeFile     file("${System.properties['user.home']}${File.separator}.android${File.separator}debug.keystore")
-            storePassword "android"
-            keyAlias      "androiddebugkey"
-            keyPassword   "android"
-            storeType     "jks"
+            storeFile(file("${System.properties['user.home']}${File.separator}.android${File.separator}debug.keystore"))
+            storePassword("android")
+            keyAlias("androiddebugkey")
+            keyPassword("android")
+            storeType("jks")
         }
     }
 
     defaultConfig {
-        applicationId "com.rmsl.jucedemorunner"
-        minSdkVersion    24
-        targetSdkVersion 35
+        applicationId("com.rmsl.jucedemorunner")
+        minSdkVersion(24)
+        targetSdkVersion(35)
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-24", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE", "-DANDROID_WEAK_API_DEFS=ON", "-DCMAKE_CXX_STANDARD=17", "-DCMAKE_CXX_EXTENSIONS=OFF"
+                arguments("-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-24", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE", "-DANDROID_WEAK_API_DEFS=ON", "-DCMAKE_CXX_STANDARD=17", "-DCMAKE_CXX_EXTENSIONS=OFF")
             }
         }
     }
 
     buildTypes {
          debug {
-             initWith debug
-             debuggable    true
-             jniDebuggable true
-             signingConfig signingConfigs.juceSigning
+             initWith(debug)
+             debuggable(true)
+             jniDebuggable(true)
+             signingConfig = signingConfigs.juceSigning
          }
          release {
-             initWith release
-             debuggable    false
-             jniDebuggable false
-             signingConfig signingConfigs.juceSigning
+             initWith(release)
+             debuggable(false)
+             jniDebuggable(false)
+             signingConfig = signingConfigs.juceSigning
          }
     }
 
-    flavorDimensions "default"
+    flavorDimensions("default")
     productFlavors {
         debug_ {
             ndk {
-                abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
+                abiFilters("armeabi-v7a", "x86", "arm64-v8a", "x86_64")
             }
             externalNativeBuild {
                 cmake {
-                    cFlags    "-O0"
-                    cppFlags  "-O0"
-                    arguments "-DJUCE_BUILD_CONFIGURATION=DEBUG"
+                    cFlags("-O0")
+                    cppFlags("-O0")
+                    arguments("-DJUCE_BUILD_CONFIGURATION=DEBUG")
                 }
             }
 
-            dimension "default"
+            dimension("default")
         }
         release_ {
             externalNativeBuild {
                 cmake {
-                    cFlags    "-O3"
-                    cppFlags  "-O3"
-                    arguments "-DJUCE_BUILD_CONFIGURATION=RELEASE"
+                    cFlags("-O3")
+                    cppFlags("-O3")
+                    arguments("-DJUCE_BUILD_CONFIGURATION=RELEASE")
                 }
             }
 
-            dimension "default"
+            dimension("default")
         }
     }
 
-    variantFilter { variant ->
-        def names = variant.flavors*.name
-        if (names.contains ("debug_")
-              && variant.buildType.name != "debug") {
-            setIgnore(true)
-        }
-        if (names.contains ("release_")
-              && variant.buildType.name != "release") {
-            setIgnore(true)
-        }
+    androidComponents {
+        beforeVariants(selector().all(), { variant ->
+            variant.enabled = false
+            variant.enabled |= variant.productFlavors*.second.contains ("debug_") && variant.buildType == "debug"
+            variant.enabled |= variant.productFlavors*.second.contains ("release_") && variant.buildType == "release"
+        })
     }
 
     sourceSets {

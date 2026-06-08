@@ -143,7 +143,7 @@ void SidePanel::resized()
     {
         if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (parent->getScreenBounds()))
         {
-            const auto safeArea = display->safeAreaInsets.subtractedFrom (display->keyboardInsets.subtractedFrom (display->userArea));
+            const auto safeArea = display->safeAreaInsets.subtractedFrom (display->keyboardInsets.subtractedFrom (display->userBounds.getLargestIntegerWithin()));
             const auto safeAreaInLocalSpace = getLocalArea (nullptr, safeArea) + getCurrentOffset();
             bounds = bounds.getIntersection (safeAreaInLocalSpace);
         }

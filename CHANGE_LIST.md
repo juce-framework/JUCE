@@ -3,6 +3,20 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.13
+
+  - Improved the compile time of the juce_gui_basics module
+  - Added support for Apple Icon Composer
+  - Improved the performance of Component painting
+  - Added a new ComponentDiagnosticsDemo
+  - Reduced the stack size of Component and ListenerList
+  - Improved macOS image tiling
+  - Bumped the minimum Windows target version to 1607
+  - Improved rendering performance on Windows
+  - Improved Windows resizing behaviour
+  - Improved iOS input support (touch, mouse, pencil)
+  - Added Linux FreeDesktop.org Trash support
+
 ## Version 8.0.12
 
   - Made Visual Studio 2026 the default in the Projucer
@@ -66,7 +80,7 @@ about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
 ## Version 8.0.6
 
-  - Changed a Visual Studio toolchain error into a warning 
+  - Changed a Visual Studio toolchain error into a warning
 
 ## Version 8.0.5
 

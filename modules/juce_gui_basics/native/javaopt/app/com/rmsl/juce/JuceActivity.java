@@ -50,6 +50,7 @@ public class JuceActivity   extends Activity
     private native void appNewIntent (Intent intent);
     private native void appOnResume();
 
+    @SuppressWarnings ("deprecation")
     private void initEdgeToEdge()
     {
         if (Build.VERSION.SDK_INT < 35)

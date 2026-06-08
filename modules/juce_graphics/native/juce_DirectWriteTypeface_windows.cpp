@@ -50,8 +50,6 @@ StringArray Font::findAllTypefaceStyles (const String& family)
     return factories->getFonts().findAllTypefaceStyles (family);
 }
 
-extern bool juce_isRunningInWine();
-
 class WindowsDirectWriteTypeface final : public Typeface
 {
 public:
@@ -416,25 +414,10 @@ private:
 
 struct DefaultFontNames
 {
-    DefaultFontNames()
-    {
-        if (juce_isRunningInWine())
-        {
-            // If we're running in Wine, then use fonts that might be available on Linux.
-            defaultSans     = "Bitstream Vera Sans";
-            defaultSerif    = "Bitstream Vera Serif";
-            defaultFixed    = "Bitstream Vera Sans Mono";
-        }
-        else
-        {
-            defaultSans     = "Verdana";
-            defaultSerif    = "Times New Roman";
-            defaultFixed    = "Lucida Console";
-            defaultFallback = "Tahoma";  // (contains plenty of unicode characters)
-        }
-    }
-
-    String defaultSans, defaultSerif, defaultFixed, defaultFallback;
+    const String defaultSans     { "Verdana" },
+                 defaultSerif    { "Times New Roman" },
+                 defaultFixed    { "Lucida Console" },
+                 defaultFallback { "Tahoma" };  // (contains plenty of unicode characters)
 };
 
 Typeface::Ptr Font::Native::getDefaultPlatformTypefaceForFont (const Font& font)

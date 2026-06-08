@@ -37,6 +37,7 @@ namespace juce
 
 class AudioProcessorEditorListener;
 class AudioProcessor;
+class AudioProcessorEditorARAExtension;
 
 //==============================================================================
 /**
@@ -213,6 +214,16 @@ public:
         You will only need to call this function if you are implementing a plugin host.
     */
     void setHostContext (AudioProcessorEditorHostContext* context) noexcept   { hostContext = context; }
+
+    /** Returns a non-owning pointer to an object that implements ARA specific information
+        regarding this AudioProcessorEditor.
+
+        By default, for backwards compatibility, this will attempt to dynamic-cast this
+        AudioProcessor to AudioProcessorEditorARAExtension.
+        It is recommended to override this function to return a pointer directly to an object
+        of the correct type in order to avoid this dynamic cast.
+    */
+    virtual AudioProcessorEditorARAExtension* getARAClientExtensions();
 
     /** The ResizableCornerComponent which is currently being used by this editor,
         or nullptr if it does not have one.

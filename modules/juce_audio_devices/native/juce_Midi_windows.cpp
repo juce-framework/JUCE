@@ -154,7 +154,7 @@ private:
 
         void handleAsyncUpdate() override
         {
-             disconnectListeners.call ([] (auto& c) { c.disconnected(); });
+            disconnectListeners.call ([] (auto& c) { c.disconnected(); });
         }
 
         static void setUpConnection (const wm2::MidiEndpointConnection&)

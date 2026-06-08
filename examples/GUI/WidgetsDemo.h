@@ -446,10 +446,10 @@ struct ButtonsPage final : public Component
     }
 
 private:
+    SharedResourcePointer<TooltipWindow> tooltipWindow;
+
     OwnedArray<Component> components;
     std::unique_ptr<BubbleMessageComponent> bubbleMessage;
-
-    TooltipWindow tooltipWindow;
 
     // This little function avoids a bit of code-duplication by adding a component to
     // our list as well as calling addAndMakeVisible on it..
@@ -910,7 +910,7 @@ private:
             if (iconsFromZipFile.size() == 0)
             {
                 // If we've not already done so, load all the images from the zip file..
-                ZipFile icons (createAssetInputStream ("icons.zip").release(), true);
+                ZipFile icons { createAssetInputStream ("icons.zip") };
 
                 for (int i = 0; i < icons.getNumEntries(); ++i)
                 {
@@ -1577,6 +1577,7 @@ struct WidgetsDemo final : public Component
     WidgetsDemo (bool isRunningComponenTransformsDemo = false)
         : tabs (isRunningComponenTransformsDemo)
     {
+        setName ("Widgets demo");
         setOpaque (true);
         addAndMakeVisible (tabs);
 

@@ -219,7 +219,8 @@ private:
         //==============================================================================
         struct JucePlayerStatusObserverClass : public ObjCClass<NSObject>
         {
-            JucePlayerStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerStatusObserverClass_")
+            JucePlayerStatusObserverClass()
+                : ObjCClass ("JucePlayerStatusObserverClass_")
             {
                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                 addMethod (@selector (observeValueForKeyPath:ofObject:change:context:), valueChanged);
@@ -263,7 +264,8 @@ private:
         //==============================================================================
         struct JucePlayerItemPlaybackStatusObserverClass : public ObjCClass<NSObject>
         {
-            JucePlayerItemPlaybackStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerItemPlaybackStatusObserverClass_")
+            JucePlayerItemPlaybackStatusObserverClass()
+                : ObjCClass ("JucePlayerItemPlaybackStatusObserverClass_")
             {
                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                 addMethod (@selector (processNotification:), notificationReceived);
@@ -320,7 +322,8 @@ private:
             //==============================================================================
             struct JucePlayerItemPreparationStatusObserverClass : public ObjCClass<NSObject>
             {
-                JucePlayerItemPreparationStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerItemStatusObserverClass_")
+                JucePlayerItemPreparationStatusObserverClass()
+                    : ObjCClass ("JucePlayerItemStatusObserverClass_")
                 {
                     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                     addMethod (@selector (observeValueForKeyPath:ofObject:change:context:), valueChanged);
@@ -756,7 +759,8 @@ private:
         //==============================================================================
         struct JuceVideoViewerClass    : public ObjCClass<UIView>
         {
-            JuceVideoViewerClass()  : ObjCClass<UIView> ("JuceVideoViewerClass_")
+            JuceVideoViewerClass()
+                : ObjCClass ("JuceVideoViewerClass_")
             {
                 addMethod (@selector (layoutSubviews), layoutSubviews);
 

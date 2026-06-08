@@ -248,7 +248,7 @@ uint32 juce_millisecondsSinceStartup() noexcept
     timespec t;
     clock_gettime (CLOCK_MONOTONIC, &t);
 
-    return static_cast<uint32> (t.tv_sec) * 1000U + static_cast<uint32> (t.tv_nsec) / 1000000U;
+    return static_cast<uint32> (t.tv_sec) * 1'000U + static_cast<uint32> (t.tv_nsec) / 1'000'000U;
 }
 
 int64 Time::getHighResolutionTicks() noexcept
@@ -256,12 +256,12 @@ int64 Time::getHighResolutionTicks() noexcept
     timespec t;
     clock_gettime (CLOCK_MONOTONIC, &t);
 
-    return (t.tv_sec * (int64) 1000000) + (t.tv_nsec / 1000);
+    return (t.tv_sec * (int64) 1'000'000) + (t.tv_nsec / 1'000);
 }
 
 int64 Time::getHighResolutionTicksPerSecond() noexcept
 {
-    return 1000000;  // (microseconds)
+    return 1'000'000;  // (microseconds)
 }
 
 double Time::getMillisecondCounterHiRes() noexcept

@@ -182,16 +182,41 @@ bool File::moveToTrash() const
     if (! exists())
         return true;
 
-    File trashCan ("~/.Trash");
+    static auto gio = std::invoke ([]
+    {
+        DynamicLibrary lib;
 
-    if (! trashCan.isDirectory())
-        trashCan = "~/.local/share/Trash/files";
+        if (lib.open ("libgio-2.0.so.0") || lib.open ("libgio-2.0.so"))
+            return lib;
 
-    if (! trashCan.isDirectory())
+        // Maybe the GLib/gio library isn't installed?
+        // This might be innocent if you're running on a minimal or embedded
+        // install or if no desktop environment is installed.
+        jassertfalse;
+        return lib;
+    });
+
+    if (! gio.isOpen())
         return false;
 
-    return moveFileTo (trashCan.getNonexistentChildFile (getFileNameWithoutExtension(),
-                                                         getFileExtension()));
+    static const auto g_file_new_for_path = gio.getFunction<void* (const char*)> ("g_file_new_for_path");
+    static const auto g_object_unref = gio.getFunction<void (void*)> ("g_object_unref");
+    static const auto g_file_trash = gio.getFunction<int (void*, void*, void*)> ("g_file_trash");
+
+    if (g_file_new_for_path == nullptr
+        || g_object_unref == nullptr
+        || g_file_trash == nullptr)
+    {
+        // Symbols failed to load!
+        // Please let the JUCE team know if you encounter this assertion.
+        jassertfalse;
+        return false;
+    }
+
+    void* file = g_file_new_for_path (fullPath.toRawUTF8());
+    const ScopeGuard scope { [&] { g_object_unref (file); } };
+
+    return (bool) g_file_trash (file, nullptr, nullptr);
 }
 
 //==============================================================================

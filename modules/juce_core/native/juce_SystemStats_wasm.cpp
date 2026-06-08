@@ -73,12 +73,12 @@ uint32 juce_millisecondsSinceStartup() noexcept
 
 int64 Time::getHighResolutionTicks() noexcept
 {
-    return static_cast<int64> (emscripten_get_now() * 1000.0);
+    return static_cast<int64> (emscripten_get_now() * 1'000.0);
 }
 
 int64 Time::getHighResolutionTicksPerSecond() noexcept
 {
-    return 1000000;  // (microseconds)
+    return 1'000'000;  // (microseconds)
 }
 
 double Time::getMillisecondCounterHiRes() noexcept

@@ -188,7 +188,7 @@ namespace
         return (double) micro.tv_usec * 1000.0;
        #elif JUCE_MAC
         UnsignedWide micro;
-        Microseconds (&micro);
+        ::Microseconds (&micro);
         return micro.lo * 1000.0;
        #endif
     }
@@ -833,7 +833,8 @@ private:
 };
 
 //==============================================================================
-struct VSTPluginInstanceHeadless : public AudioPluginInstance
+struct VSTPluginInstanceHeadless : public AudioPluginInstance,
+                                   private AudioPluginExtensions::VSTClient
 {
     struct VSTParameter final   : public Parameter
     {
@@ -1235,21 +1236,10 @@ struct VSTPluginInstanceHeadless : public AudioPluginInstance
         setLatencySamples (vstEffect->initialDelay);
     }
 
-    void getExtensions (ExtensionsVisitor& visitor) const override
-    {
-        struct Extensions final : public ExtensionsVisitor::VSTClient
-        {
-            explicit Extensions (const VSTPluginInstanceHeadless* instanceIn) : instance (instanceIn) {}
+          AudioPluginExtensions::VSTClient* getVSTClient()       override { return this; }
+    const AudioPluginExtensions::VSTClient* getVSTClient() const override { return this; }
 
-            AEffect* getAEffectPtr() const noexcept override   { return reinterpret_cast<AEffect*> (instance->vstEffect); }
-
-            const VSTPluginInstanceHeadless* instance = nullptr;
-        };
-
-        visitor.visitVSTClient (Extensions { this });
-    }
-
-    void* getPlatformSpecificData() override    { return vstEffect; }
+    AEffect* getAEffectPtr() const noexcept override   { return reinterpret_cast<AEffect*> (vstEffect); }
 
     const String getName() const override
     {
@@ -1591,8 +1581,8 @@ struct VSTPluginInstanceHeadless : public AudioPluginInstance
     void getStateInformation (MemoryBlock& mb) override                  { saveToFXBFile (mb, true); }
     void getCurrentProgramStateInformation (MemoryBlock& mb) override    { saveToFXBFile (mb, false); }
 
-    void setStateInformation (const void* data, int size) override               { loadFromFXBFile (data, (size_t) size); }
-    void setCurrentProgramStateInformation (const void* data, int size) override { loadFromFXBFile (data, (size_t) size); }
+    void setStateInformation (const void* data, int size) override               { loadFromFXBFile ({ static_cast<const std::byte*> (data), (size_t) size }); }
+    void setCurrentProgramStateInformation (const void* data, int size) override { loadFromFXBFile ({ static_cast<const std::byte*> (data), (size_t) size }); }
 
     //==============================================================================
     pointer_sized_int handleCallback (int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
@@ -1735,12 +1725,23 @@ struct VSTPluginInstanceHeadless : public AudioPluginInstance
         return result;
     }
 
-    bool loadFromFXBFile (const void* const data, const size_t dataSize)
+    const XmlElement* getVSTXML() const override
     {
+        if (vstModule != nullptr)
+            return vstModule->vstXml.get();
+
+        return nullptr;
+    }
+
+    bool loadFromFXBFile (Span<const std::byte> span) override
+    {
+        const auto* data = span.data();
+        const auto dataSize = span.size();
+
         if (dataSize < 28)
             return false;
 
-        auto set = (const fxSet*) data;
+        auto set = unalignedPointerCast<const fxSet*> (data);
 
         if ((! compareMagic (set->chunkMagic, "CcnK")) || fxbSwap (set->version) > fxbVersionNum)
             return false;
@@ -1786,7 +1787,7 @@ struct VSTPluginInstanceHeadless : public AudioPluginInstance
         else if (compareMagic (set->fxMagic, "FxCk"))
         {
             // single program
-            auto prog = (const fxProgram*) data;
+            auto prog = unalignedPointerCast<const fxProgram*> (data);
 
             if (! compareMagic (prog->chunkMagic, "CcnK"))
                 return false;
@@ -1800,22 +1801,22 @@ struct VSTPluginInstanceHeadless : public AudioPluginInstance
         else if (compareMagic (set->fxMagic, "FBCh"))
         {
             // non-preset chunk
-            auto cset = (const fxChunkSet*) data;
+            auto cset = unalignedPointerCast <const fxChunkSet*> (data);
 
             if ((size_t) fxbSwap (cset->chunkSize) + sizeof (fxChunkSet) - 8 > (size_t) dataSize)
                 return false;
 
-            setChunkData (cset->chunk, fxbSwap (cset->chunkSize), false);
+            setChunkData ({ unalignedPointerCast<const std::byte*> (cset->chunk), (size_t) fxbSwap (cset->chunkSize) }, false);
         }
         else if (compareMagic (set->fxMagic, "FPCh"))
         {
             // preset chunk
-            auto cset = (const fxProgramSet*) data;
+            auto cset = unalignedPointerCast <const fxProgramSet*> (data);
 
             if ((size_t) fxbSwap (cset->chunkSize) + sizeof (fxProgramSet) - 8 > (size_t) dataSize)
                 return false;
 
-            setChunkData (cset->chunk, fxbSwap (cset->chunkSize), true);
+            setChunkData ({ unalignedPointerCast<const std::byte*> (cset->chunk), (size_t) fxbSwap (cset->chunkSize) }, true);
 
             changeProgramName (getCurrentProgram(), cset->name);
         }
@@ -1827,15 +1828,16 @@ struct VSTPluginInstanceHeadless : public AudioPluginInstance
         return true;
     }
 
-    bool saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSizeMB = 128)
+    bool saveToFXBFile (MemoryBlock& dest, bool isFXB) override
     {
+        constexpr auto maxSizeMB = 128;
         auto numPrograms = getNumPrograms();
         auto numParams = getParameters().size();
 
         if (usesChunks())
         {
             MemoryBlock chunk;
-            getChunkData (chunk, ! isFXB, maxSizeMB);
+            getChunkDataImpl (chunk, ! isFXB, maxSizeMB);
 
             if (isFXB)
             {
@@ -1924,7 +1926,7 @@ struct VSTPluginInstanceHeadless : public AudioPluginInstance
 
     bool usesChunks() const noexcept        { return vstEffect != nullptr && (vstEffect->flags & Vst2::effFlagsProgramChunks) != 0; }
 
-    bool getChunkData (MemoryBlock& mb, bool isPreset, int maxSizeMB) const
+    bool getChunkDataImpl (MemoryBlock& mb, bool isPreset, int maxSizeMB) const
     {
         if (usesChunks())
         {
@@ -1943,8 +1945,16 @@ struct VSTPluginInstanceHeadless : public AudioPluginInstance
         return false;
     }
 
-    bool setChunkData (const void* data, const int size, bool isPreset)
+    bool getChunkData (MemoryBlock& mb, bool isPreset) const override
     {
+        return getChunkDataImpl (mb, isPreset, 128);
+    }
+
+    bool setChunkData (Span<const std::byte> span, bool isPreset) override
+    {
+        const auto* data = span.data();
+        const auto size = (pointer_sized_int) span.size();
+
         if (size > 0 && usesChunks())
         {
             dispatch (Vst2::effSetChunk, isPreset ? 1 : 0, size, (void*) data, 0.0f);
@@ -1956,6 +1966,20 @@ struct VSTPluginInstanceHeadless : public AudioPluginInstance
         }
 
         return false;
+    }
+
+    void setExtraFunctions (std::unique_ptr<ExtraFunctions> functions) override
+    {
+        extraFunctions = std::move (functions);
+    }
+
+    pointer_sized_int dispatcher (int32 opcode,
+                                  int32 index,
+                                  pointer_sized_int value,
+                                  void* ptr,
+                                  float opt) override
+    {
+        return dispatch (opcode, index, value, ptr, opt);
     }
 
     virtual bool updateSizeFromEditor (int, int) { return false; }

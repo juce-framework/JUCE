@@ -86,56 +86,13 @@ public:
     /** Returns the unicode character that this pointer is pointing to. */
     juce_wchar operator*() const noexcept
     {
-        auto byte = (signed char) *data;
-
-        if (byte >= 0)
-            return (juce_wchar) (uint8) byte;
-
-        uint32 n = (uint32) (uint8) byte;
-        uint32 mask = 0x7f;
-        uint32 bit = 0x40;
-        int numExtraValues = 0;
-
-        while ((n & bit) != 0 && bit > 0x8)
-        {
-            mask >>= 1;
-            ++numExtraValues;
-            bit >>= 1;
-        }
-
-        n &= mask;
-
-        for (int i = 1; i <= numExtraValues; ++i)
-        {
-            auto nextByte = (uint32) (uint8) data[i];
-
-            if ((nextByte & 0xc0) != 0x80)
-                break;
-
-            n <<= 6;
-            n |= (nextByte & 0x3f);
-        }
-
-        return (juce_wchar) n;
+        return getDerefAndIncrement().character;
     }
 
     /** Moves this pointer along to the next character in the string. */
     CharPointer_UTF8& operator++() noexcept
     {
-        jassert (*data != 0); // trying to advance past the end of the string?
-        auto n = (signed char) *data++;
-
-        if (n < 0)
-        {
-            uint8 bit = 0x40;
-
-            while ((static_cast<uint8> (n) & bit) != 0 && bit > 0x8)
-            {
-                ++data;
-                bit = static_cast<uint8> (bit >> 1);
-            }
-        }
-
+        data += getDerefAndIncrement().increment;
         return *this;
     }
 
@@ -154,38 +111,9 @@ public:
         advances the pointer to point to the next character. */
     juce_wchar getAndAdvance() noexcept
     {
-        auto byte = (signed char) *data++;
-
-        if (byte >= 0)
-            return (juce_wchar) (uint8) byte;
-
-        uint32 n = (uint32) (uint8) byte;
-        uint32 mask = 0x7f;
-        uint32 bit = 0x40;
-        int numExtraValues = 0;
-
-        while ((n & bit) != 0 && bit > 0x8)
-        {
-            mask >>= 1;
-            ++numExtraValues;
-            bit >>= 1;
-        }
-
-        n &= mask;
-
-        while (--numExtraValues >= 0)
-        {
-            auto nextByte = (uint32) (uint8) *data;
-
-            if ((nextByte & 0xc0) != 0x80)
-                break;
-
-            ++data;
-            n <<= 6;
-            n |= (nextByte & 0x3f);
-        }
-
-        return (juce_wchar) n;
+        const auto derefAndIncrement = getDerefAndIncrement();
+        data += derefAndIncrement.increment;
+        return derefAndIncrement.character;
     }
 
     /** Moves this pointer along to the next character in the string. */
@@ -334,20 +262,26 @@ public:
     {
         auto c = (uint32) charToWrite;
 
-        if (c >= 0x80)
+        const auto numExtraBytes = std::invoke ([&]
         {
-            int numExtraBytes = 1;
-            if (c >= 0x800)
-            {
-                ++numExtraBytes;
-                if (c >= 0x10000)
-                    ++numExtraBytes;
-            }
+            if (c >= 0x10000)
+                return 3;
 
+            if (c >= 0x800)
+                return 2;
+
+            if (c >= 0x80)
+                return 1;
+
+            return 0;
+        });
+
+        if (numExtraBytes > 0)
+        {
             *data++ = (CharType) ((uint32) (0xff << (7 - numExtraBytes)) | (c >> (numExtraBytes * 6)));
 
-            while (--numExtraBytes >= 0)
-                *data++ = (CharType) (0x80 | (0x3f & (c >> (numExtraBytes * 6))));
+            for (auto i = numExtraBytes; --i >= 0;)
+                *data++ = (CharType) (0x80 | (0x3f & (c >> (i * 6))));
         }
         else
         {
@@ -542,8 +476,12 @@ public:
                 if (++codeUnitIndex >= maxCodeUnitsToRead)
                     return false;
 
-                bytes <<= 8;
-                bytes |= (uint32_t) (uint8_t) codeUnits[codeUnitIndex];
+                const auto trailing = codeUnits[codeUnitIndex];
+
+                if ((trailing & 0xc0) != 0x80)
+                    return false;
+
+                bytes = (bytes << 8) | (uint32_t) (uint8_t) trailing;
             }
 
             if (constexpr uint32_t firstTwoByteCodePoint = 0xc280; bytes < firstTwoByteCodePoint)
@@ -606,6 +544,52 @@ public:
     }
 
 private:
+    struct CharacterAndIncrement
+    {
+        juce_wchar character;
+        uint32_t increment;
+    };
+
+    CharacterAndIncrement getDerefAndIncrement() const noexcept
+    {
+        auto byte = (signed char) *data;
+
+        if (byte >= 0)
+            return { (juce_wchar) (uint8) byte, 1 };
+
+        auto n = (uint32) (uint8) byte;
+        uint32 bit = 0x40;
+        uint32 numExtraValues = 0;
+
+        while ((n & bit) != 0 && bit > 0x8)
+        {
+            ++numExtraValues;
+            bit >>= 1;
+        }
+
+        static constexpr juce_wchar replacement = 0xfffd;
+
+        if (numExtraValues == 0)
+            return { replacement, 1 };
+
+        n &= (uint32) 0x7f >> numExtraValues;
+
+        for (decltype (numExtraValues) i = 1; i <= numExtraValues; ++i)
+        {
+            auto nextByte = (uint32) (uint8) data[i];
+
+            if ((nextByte & 0xc0) != 0x80)
+                return { replacement, i };
+
+            n = (n << 6) | (nextByte & 0x3f);
+        }
+
+        constexpr uint32_t limits[] { 0x80, 0x800, 0x10000, 0x110000 };
+        const auto lo = limits[numExtraValues - 1];
+        const auto hi = limits[numExtraValues];
+        return { lo <= n && n < hi ? (juce_wchar) n : replacement, 1 + numExtraValues };
+    }
+
     CharType* data;
 };
 

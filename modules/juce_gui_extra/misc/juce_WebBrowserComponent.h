@@ -583,6 +583,11 @@ public:
         // Unsubscribing
         window.__JUCE__.backend.removeEventListener(removalToken);
         @endcode
+
+        On some platforms, the JUCE Javascript framework that emits these events isn't loaded until
+        triggering the first document load i.e. the first call to goToURL(). In this case a Javascript
+        exception is logged in debug builds and an assertion is triggered on the C++ side.
+        Simply put, you should call goToURL() at least once before this function.
     */
     void emitEventIfBrowserIsVisible (const Identifier& eventId, const var& object);
 

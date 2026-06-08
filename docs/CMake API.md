@@ -377,6 +377,11 @@ attributes directly to these creation functions, rather than adding them later.
   is specified, then that image will be used for all icon resolutions. If both arguments are
   specified, then the appropriate image will be picked for each icon resolution.
 
+`ICON_COMPOSER_BUNDLE`
+- An Icon Composer bundle used for MacOS and iOS builds. This argument takes precedence over the
+  ICON_BIG and ICON_SMALL settings with Xcode versions 26 and later. Older versions of Xcode will
+  continue to use ICON_BIG and ICON_SMALL, even if this argument is specified.
+
 `COMPANY_COPYRIGHT`
 - Copyright text which will be added to the app/plugin's Info.plist. The value of this argument
   will be inherited from the `JUCE_COMPANY_COPYRIGHT` property, so if you want to use the same
@@ -601,14 +606,14 @@ attributes directly to these creation functions, rather than adding them later.
 
 `AU_SANDBOX_SAFE`
 - Adds the appropriate entries to an AU plugin's Info.plist. May be either `TRUE` or `FALSE`.
-  Defaults to `FALSE`.
+  Defaults to `FALSE`. If this is `TRUE` then `SUPPRESS_AU_PLIST_RESOURCE_USAGE` has no effect.
 
 `SUPPRESS_AU_PLIST_RESOURCE_USAGE`
 - May be either `TRUE` or `FALSE`. Defaults to `FALSE`. Set this to `TRUE` to disable the
   `resourceUsage` key in the target's plist. This is useful for AU plugins that must access
   resources which cannot be declared in the resourceUsage block, such as UNIX domain sockets. In
   particular, PACE-protected AU plugins may require this option to be enabled in order for the
-  plugin to load in GarageBand.
+  plugin to load in GarageBand. This option has no effect if `AU_SANDBOX_SAFE` is set to `TRUE`.
 
 `AAX_CATEGORY`
 - Should be one or more of: `None`, `EQ`, `Dynamics`, `PitchShift`, `Reverb`, `Delay`, `Modulation`,

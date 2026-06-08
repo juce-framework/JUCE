@@ -3020,7 +3020,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
             [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
                                                               : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];
 
-            kioskComp->setBounds (getDisplays().getDisplayForRect (kioskComp->getScreenBounds())->totalArea);
+            kioskComp->setBounds (getDisplays().getDisplayForRect (kioskComp->getScreenBounds())->logicalBounds.getSmallestIntegerContainer());
             peer->becomeKeyWindow();
         }
         else

@@ -134,7 +134,9 @@ private:
     //==============================================================================
     String getMachineInfoToDisplay() const
     {
-        auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (getScreenBounds().getCentre());
+        const auto screenBounds = getScreenBounds().toFloat();
+        const auto& displays = Desktop::getInstance().getDisplays();
+        const auto* display = displays.getDisplayForPoint (screenBounds.getCentre());
         return getOSName() + "   " + String (display->dpi) + "   "  + String (display->scale);
     }
 
@@ -190,9 +192,10 @@ private:
     {
         if (auto client = canvas.findClient (clientName))
         {
-            auto screenBounds = getScreenBounds();
-            auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (screenBounds.getCentre());
-            return ((screenBounds - display->userArea.getCentre()).toFloat() / (client->scaleFactor * display->dpi / display->scale)) + client->centre;
+            const auto screenBounds = getScreenBounds().toFloat();
+            const auto& displays = Desktop::getInstance().getDisplays();
+            const auto* display = displays.getDisplayForPoint (screenBounds.getCentre());
+            return ((screenBounds - display->userBounds.getCentre()) / (client->scaleFactor * display->dpi / display->scale)) + client->centre;
         }
 
         return {};
@@ -202,8 +205,10 @@ private:
     {
         if (auto client = canvas.findClient (clientName))
         {
-            auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (getScreenBounds().getCentre());
-            return (display->userArea.toFloat() / (client->scaleFactor * display->dpi / display->scale)).withCentre (client->centre);
+            const auto screenBounds = getScreenBounds().toFloat();
+            const auto& displays = Desktop::getInstance().getDisplays();
+            const auto* display = displays.getDisplayForPoint (screenBounds.getCentre());
+            return (display->userBounds / (client->scaleFactor * display->dpi / display->scale)).withCentre (client->centre);
         }
 
         return {};

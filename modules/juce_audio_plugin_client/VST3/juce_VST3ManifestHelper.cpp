@@ -38,21 +38,6 @@
  #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 #endif
 
-#include <array>
-#include <atomic>
-#include <cassert>
-#include <cctype>
-#include <cstddef>
-#include <cstring>
-#include <functional>
-#include <iomanip>
-#include <ios>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <utility>
-#include <vector>
-
 //==============================================================================
 // This suppresses a warning in juce_TargetPlatform.h
 #ifndef JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
@@ -61,6 +46,32 @@
 
 #include <juce_core/system/juce_CompilerWarnings.h>
 #include <juce_core/system/juce_CompilerSupport.h>
+
+#include <array>
+#include <atomic>
+#include <cassert>
+#include <cctype>
+#include <cstddef>
+#include <cstring>
+
+// There's a template specialisation to std::wstring_convert in
+// wstring_convert.h that triggers a warning on Xcode 26.4.1 when used by the
+// VST3 SDK. It cannot be suppressed at the call site. This file is included
+// in <locale>, and would transitively be included by <functional>.
+#if defined (__apple_build_version__)
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+#include <locale>
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+#endif
+
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
 //==============================================================================
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wc++98-compat-extra-semi",
@@ -77,7 +88,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wc++98-compat-extra-semi",
                                      "-Wsign-conversion",
                                      "-Wzero-as-null-pointer-constant")
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6387 6031)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 6031 6387)
 
 #ifndef NOMINMAX
  #define NOMINMAX

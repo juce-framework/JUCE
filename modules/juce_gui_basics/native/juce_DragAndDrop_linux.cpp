@@ -165,10 +165,10 @@ public:
         if (windowH == 0)
             windowH = (::Window) peer->getNativeHandle();
 
-        const auto displays = Desktop::getInstance().getDisplays();
-        const auto logicalPos = displays.physicalToLogical (Point<int> ((int) clientMsg.data.l[2] >> 16,
-                                                                        (int) clientMsg.data.l[2] & 0xffff));
-        const auto dropPos = detail::ScalingHelpers::screenPosToLocalPos (peer->getComponent(), logicalPos.toFloat()).roundToInt();
+        const auto& displays = Desktop::getInstance().getDisplays();
+        const auto logicalPos = displays.physicalToLogical (Point ((int) clientMsg.data.l[2] >> 16,
+                                                                   (int) clientMsg.data.l[2] & 0xffff).toFloat());
+        const auto dropPos = detail::ScalingHelpers::screenPosToLocalPos (peer->getComponent(), logicalPos).roundToInt();
 
         const auto& atoms = getAtoms();
 
@@ -469,7 +469,7 @@ private:
         if (silentRect.contains (mousePos)) // we've been asked to keep silent
             return;
 
-        mousePos = Desktop::getInstance().getDisplays().logicalToPhysical (mousePos);
+        mousePos = Desktop::getInstance().getDisplays().logicalToPhysical (mousePos.toFloat()).roundToInt();
 
         msg.data.l[1] = 0;
         msg.data.l[2] = (mousePos.x << 16) | mousePos.y;

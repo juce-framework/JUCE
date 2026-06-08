@@ -98,38 +98,40 @@ public:
     {
         return withTableInterface (pRetVal, [&] (const AccessibilityTableInterface& tableInterface)
         {
-            if (auto* header = tableInterface.getHeaderHandler())
+            auto* header = tableInterface.getHeaderHandler();
+
+            if (header == nullptr)
+                return (HRESULT) UIA_E_NOTSUPPORTED;
+
+            const auto children = header->getChildren();
+
+            SafeArrayHandle result { SafeArrayCreateVector (VT_UNKNOWN, 0, (ULONG) children.size()) };
+
+            if (result == nullptr)
+                return E_FAIL;
+
+            LONG index = 0;
+
+            for (const auto& child : children)
             {
-                const auto children = header->getChildren();
+                ComSmartPtr<IRawElementProviderSimple> provider;
 
-                *pRetVal = SafeArrayCreateVector (VT_UNKNOWN, 0, (ULONG) children.size());
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+                if (child != nullptr)
+                    child->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-                LONG index = 0;
+                if (provider == nullptr)
+                    return E_FAIL;
 
-                for (const auto& child : children)
-                {
-                    ComSmartPtr<IRawElementProviderSimple> provider;
+                if (FAILED (SafeArrayPutElement (result.get(), &index, provider)))
+                    return E_FAIL;
 
-                    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-                    if (child != nullptr)
-                        child->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
-                    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-                    if (provider == nullptr)
-                        return E_FAIL;
-
-                    const auto hr = SafeArrayPutElement (*pRetVal, &index, provider);
-
-                    if (FAILED (hr))
-                        return E_FAIL;
-
-                    ++index;
-                }
-
-                return S_OK;
+                ++index;
             }
 
-            return (HRESULT) UIA_E_NOTSUPPORTED;
+            *pRetVal = result.release();
+            return S_OK;
         });
     }
 

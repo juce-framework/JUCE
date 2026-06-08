@@ -261,12 +261,6 @@ static PluginHostApp& getApp()                    { return *dynamic_cast<PluginH
 ApplicationProperties& getAppProperties()         { return *getApp().appProperties; }
 ApplicationCommandManager& getCommandManager()    { return getApp().commandManager; }
 
-bool isOnTouchDevice()
-{
-    static bool isTouch = Desktop::getInstance().getMainMouseSource().isTouch();
-    return isTouch;
-}
-
 //==============================================================================
 static AutoScale autoScaleFromString (StringRef str)
 {

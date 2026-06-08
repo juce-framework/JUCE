@@ -6,7 +6,7 @@
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIconFile</key>
-    <string>Icon.icns</string>
+    <string>AppIcon.icns</string>
     <key>CFBundleIdentifier</key>
     <string>com.juce.NetworkGraphicsDemo</string>
     <key>CFBundleName</key>

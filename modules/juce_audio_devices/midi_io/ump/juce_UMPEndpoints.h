@@ -192,7 +192,7 @@ public:
     */
     void setVirtualMidiUmpServiceActive (bool);
 
-    JUCE_DECLARE_SINGLETON_INLINE (Endpoints, true)
+    JUCE_DECLARE_SINGLETON_INLINE (Endpoints, false)
 
     ~Endpoints() override;
 

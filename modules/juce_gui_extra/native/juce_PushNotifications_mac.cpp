@@ -295,7 +295,8 @@ protected:
 private:
     struct Class final : public ObjCClass<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>>
     {
-        Class() : ObjCClass<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>> ("JucePushNotificationsDelegate_")
+        Class()
+            : ObjCClass ("JucePushNotificationsDelegate_")
         {
             addIvar<PushNotificationsDelegate*> ("self");
 

@@ -83,20 +83,22 @@ static int findNumberOfPhysicalCores() noexcept
  #if JUCE_CLANG
 static void callCPUID (int result[4], uint32 type)
 {
-  uint32 la = (uint32) result[0], lb = (uint32) result[1],
-         lc = (uint32) result[2], ld = (uint32) result[3];
+  uint32 la = 0, lb = 0, lc = 0, ld = 0;
 
   asm ("mov %%ebx, %%esi \n\t"
        "cpuid \n\t"
        "xchg %%esi, %%ebx"
-       : "=a" (la), "=S" (lb), "=c" (lc), "=d" (ld) : "a" (type)
-        #if JUCE_64BIT
-     , "b" (lb), "c" (lc), "d" (ld)
-        #endif
+       : "=a" (la), "=S" (lb), "=c" (lc), "=d" (ld)
+       : "a" (type)
+      #if JUCE_64BIT
+       , "b" (lb), "c" (lc), "d" (ld)
+      #endif
        );
 
-  result[0] = (int) la; result[1] = (int) lb;
-  result[2] = (int) lc; result[3] = (int) ld;
+  result[0] = (int) la;
+  result[1] = (int) lb;
+  result[2] = (int) lc;
+  result[3] = (int) ld;
 }
  #else
 static void callCPUID (int result[4], int infoType)
@@ -406,7 +408,6 @@ class HiResCounterHandler
 {
 public:
     HiResCounterHandler()
-        : hiResTicksOffset (0)
     {
         // This macro allows you to override the default timer-period
         // used on Windows. By default this is set to 1, because that has
@@ -428,23 +429,23 @@ public:
         LARGE_INTEGER f;
         QueryPerformanceFrequency (&f);
         hiResTicksPerSecond = f.QuadPart;
-        hiResTicksScaleFactor = 1000.0 / (double) hiResTicksPerSecond;
+        hiResMillisecondsPerTick = 1'000.0 / (double) hiResTicksPerSecond;
     }
 
     inline int64 getHighResolutionTicks() noexcept
     {
         LARGE_INTEGER ticks;
         QueryPerformanceCounter (&ticks);
-        return ticks.QuadPart + hiResTicksOffset;
+        return ticks.QuadPart;
     }
 
     inline double getMillisecondCounterHiRes() noexcept
     {
-        return (double) getHighResolutionTicks() * hiResTicksScaleFactor;
+        return (double) getHighResolutionTicks() * hiResMillisecondsPerTick;
     }
 
-    int64 hiResTicksPerSecond, hiResTicksOffset;
-    double hiResTicksScaleFactor;
+    int64 hiResTicksPerSecond;
+    double hiResMillisecondsPerTick;
 };
 
 static HiResCounterHandler hiResCounterHandler;

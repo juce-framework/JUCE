@@ -213,7 +213,7 @@ public:
         lastSwapTime = now;
     }
 
-    void updateWindowPosition (Rectangle<int>)
+    void updateWindowPosition()
     {
         if (auto* peer = owner.getTopLevelComponent()->getPeer())
         {
