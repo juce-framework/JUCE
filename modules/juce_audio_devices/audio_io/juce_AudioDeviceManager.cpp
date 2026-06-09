@@ -206,6 +206,7 @@ AudioDeviceManager::AudioDeviceManager()
 
 AudioDeviceManager::~AudioDeviceManager()
 {
+    enabledMidiInputs.clear();
     currentAudioDevice.reset();
     defaultMidiOutput.reset();
 }
