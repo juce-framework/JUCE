@@ -264,8 +264,10 @@ Module::PathList Module::getModulePaths ()
 {
 	/* VST3 component locations on linux :
 	 * User privately installed	: $HOME/.vst3/
-	 * Distribution installed	: /usr/lib/vst3/, /usr/lib64/vst3/, /usr/lib/<arch>-linux-gnu/vst3/	 *   Supported architectures: x86_64, i386, arm-linux-gnueabihf, aarch64, riscv64	 * Locally installed		: /usr/local/lib/vst3/, /usr/local/lib64/vst3/, /usr/local/lib/<arch>-linux-gnu/vst3/, /opt/vst3/
+	 * Distribution installed	: /usr/lib/vst3/, /usr/lib64/vst3/, /usr/lib/<arch>-linux-gnu/vst3/
+	 * Locally installed		: /usr/local/lib/vst3/, /usr/local/lib64/vst3/, /usr/local/lib/<arch>-linux-gnu/vst3/, /opt/vst3/
 	 * Application				: /$APPFOLDER/vst3/
+	 * Supported architectures  : x86_64, i386, arm-linux-gnueabihf, aarch64, riscv64
 	 * NOTE: Keep this list in sync with juce_VST3PluginFormat.cpp::getDefaultLocationsToSearch()
 	 */
 

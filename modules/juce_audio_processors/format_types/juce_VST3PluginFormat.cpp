@@ -638,12 +638,11 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
                                              int,
                                              PluginCreationCallback callback)
 {
-<<<<<<< HEAD
     createVst3InstanceImpl<VST3PluginInstance> (*this,
                                                 { new VST3HostContextWithContextMenu, IncrementRef::no },
                                                 description,
                                                 callback);
-=======
+
     for (const auto& file : getLibraryPaths (description.fileOrIdentifier))
     {
         if (auto result = createVST3Instance (*this, description, file))
