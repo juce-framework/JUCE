@@ -720,7 +720,8 @@ FileSearchPath VST3PluginFormat::getDefaultLocationsToSearch()
    #elif JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST3;/Library/Audio/Plug-Ins/VST3");
    #else
-    return FileSearchPath ("~/.vst3/;/usr/lib/vst3/;/usr/lib64/vst3/;/usr/local/lib/vst3/;/usr/local/lib64/vst3/;/opt/vst3/");
+    // NOTE: Keep this list in sync with VST3_SDK/public.sdk/source/vst/hosting/module_linux.cpp::getModulePaths()
+    return FileSearchPath ("~/.vst3/;/usr/lib/vst3/;/usr/lib64/vst3/;/usr/lib/x86_64-linux-gnu/vst3/;/usr/lib/i386-linux-gnu/vst3/;/usr/lib/arm-linux-gnueabihf/vst3/;/usr/lib/aarch64-linux-gnu/vst3/;/usr/lib/riscv64-linux-gnu/vst3/;/usr/local/lib/vst3/;/usr/local/lib64/vst3/;/usr/local/lib/x86_64-linux-gnu/vst3/;/usr/local/lib/i386-linux-gnu/vst3/;/usr/local/lib/arm-linux-gnueabihf/vst3/;/usr/local/lib/aarch64-linux-gnu/vst3/;/usr/local/lib/riscv64-linux-gnu/vst3/;/opt/vst3/");
    #endif
 }
 
