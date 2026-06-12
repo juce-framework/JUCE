@@ -410,12 +410,12 @@ public:
             return;
         }
 
-        if (isConstrainedNativeWindow())
-            XWindowSystem::getInstance()->updateConstraints (windowH);
-
         physicalBounds = XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow);
         fullScreen = XWindowSystem::getInstance()->isFullScreen (windowH);
         updateScaleFactorFromNewBounds (physicalBounds, true);
+
+        if (isConstrainedNativeWindow())
+            XWindowSystem::getInstance()->updateSizeHints (windowH, *this, physicalBounds);
 
         updateVBlankTimer();
     }

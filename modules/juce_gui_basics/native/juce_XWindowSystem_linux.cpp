@@ -1902,19 +1902,7 @@ std::optional<unsigned long> XWindowSystem::setBounds (::Window windowH, Rectang
             }
         }
 
-        updateConstraints (windowH, *peer);
-
-        XWindowSystemUtilities::ScopedXLock xLock;
-
-        if (auto hints = makeXFreePtr (X11Symbols::getInstance()->xAllocSizeHints()))
-        {
-            hints->flags  = USSize | USPosition;
-            hints->x      = newBounds.getX();
-            hints->y      = newBounds.getY();
-            hints->width  = newBounds.getWidth();
-            hints->height = newBounds.getHeight();
-            X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints.get());
-        }
+        updateSizeHints (windowH, *peer, newBounds);
 
         const auto nativeWindowBorder = std::invoke ([&]() -> BorderSize<int>
         {
@@ -1924,6 +1912,7 @@ std::optional<unsigned long> XWindowSystem::setBounds (::Window windowH, Rectang
             return {};
         });
 
+        const XWindowSystemUtilities::ScopedXLock xLock;
         const auto serial = X11Symbols::getInstance()->xNextRequest (display);
         X11Symbols::getInstance()->xMoveResizeWindow (display, windowH,
                                                       newBounds.getX() - nativeWindowBorder.getLeft(),
@@ -1998,23 +1987,23 @@ void XWindowSystem::startHostManagedResize (::Window windowH,
                                            unalignedPointerCast<XEvent*> (&clientMsg));
 }
 
-void XWindowSystem::updateConstraints (::Window windowH) const
-{
-    if (auto* peer = getPeerFor (windowH))
-        updateConstraints (windowH, *peer);
-}
-
-void XWindowSystem::updateConstraints (::Window windowH, ComponentPeer& peer) const
+void XWindowSystem::updateSizeHints (::Window windowH, ComponentPeer& peer, Rectangle<int> physicalBounds) const
 {
     XWindowSystemUtilities::ScopedXLock xLock;
 
     if (auto hints = makeXFreePtr (X11Symbols::getInstance()->xAllocSizeHints()))
     {
+        hints->flags  = USSize | USPosition;
+        hints->x      = physicalBounds.getX();
+        hints->y      = physicalBounds.getY();
+        hints->width  = physicalBounds.getWidth();
+        hints->height = physicalBounds.getHeight();
+
         if ((peer.getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
         {
-            hints->min_width  = hints->max_width  = (int) (peer.getPlatformScaleFactor() * peer.getBounds().getWidth());
-            hints->min_height = hints->max_height = (int) (peer.getPlatformScaleFactor() * peer.getBounds().getHeight());
-            hints->flags = PMinSize | PMaxSize;
+            hints->min_width  = hints->max_width  = physicalBounds.getWidth();
+            hints->min_height = hints->max_height = physicalBounds.getHeight();
+            hints->flags |= PMinSize | PMaxSize;
         }
         else if (auto* c = peer.getConstrainer())
         {
@@ -2029,11 +2018,18 @@ void XWindowSystem::updateConstraints (::Window windowH, ComponentPeer& peer) co
             const auto factor       = peer.getPlatformScaleFactor();
             const auto leftAndRight = windowBorder.getLeftAndRight();
             const auto topAndBottom = windowBorder.getTopAndBottom();
-            hints->min_width  = jmax (1, (int) (factor * c->getMinimumWidth())  - leftAndRight);
-            hints->max_width  = jmax (1, (int) (factor * c->getMaximumWidth())  - leftAndRight);
-            hints->min_height = jmax (1, (int) (factor * c->getMinimumHeight()) - topAndBottom);
-            hints->max_height = jmax (1, (int) (factor * c->getMaximumHeight()) - topAndBottom);
-            hints->flags = PMinSize | PMaxSize;
+
+            const auto scaledLimit = [factor] (int limit, int border)
+            {
+                const auto scaled = jmin ((double) std::numeric_limits<int>::max(), factor * limit);
+                return jmax (1, (int) scaled - border);
+            };
+
+            hints->min_width  = scaledLimit (c->getMinimumWidth(),  leftAndRight);
+            hints->max_width  = scaledLimit (c->getMaximumWidth(),  leftAndRight);
+            hints->min_height = scaledLimit (c->getMinimumHeight(), topAndBottom);
+            hints->max_height = scaledLimit (c->getMaximumHeight(), topAndBottom);
+            hints->flags |= PMinSize | PMaxSize;
         }
 
         X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints.get());
