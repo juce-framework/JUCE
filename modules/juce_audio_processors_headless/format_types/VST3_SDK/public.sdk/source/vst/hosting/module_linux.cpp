@@ -264,12 +264,12 @@ Module::PathList Module::getModulePaths ()
 {
 	/* VST3 component locations on linux :
 	 * User privately installed	: $HOME/.vst3/
-	 * Distribution installed	: /usr/lib/vst3/
-	 * Locally installed		: /usr/local/lib/vst3/
+	 * Distribution installed	: /usr/lib/vst3/, /usr/lib64/vst3/
+	 * Locally installed		: /usr/local/lib/vst3/, /usr/local/lib64/vst3/, /opt/vst3/
 	 * Application				: /$APPFOLDER/vst3/
 	 */
 
-	const auto systemPaths = {"/usr/lib/vst3/", "/usr/local/lib/vst3/"};
+	const auto systemPaths = {"/usr/lib/vst3/", "/usr/lib64/vst3/", "/usr/local/lib/vst3/", "/usr/local/lib64/vst3/", "/opt/vst3/"};
 
 	PathList list;
 	if (auto homeDir = getenv ("HOME"))

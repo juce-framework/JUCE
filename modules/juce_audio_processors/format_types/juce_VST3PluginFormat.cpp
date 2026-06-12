@@ -638,10 +638,90 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
                                              int,
                                              PluginCreationCallback callback)
 {
+<<<<<<< HEAD
     createVst3InstanceImpl<VST3PluginInstance> (*this,
                                                 { new VST3HostContextWithContextMenu, IncrementRef::no },
                                                 description,
                                                 callback);
+=======
+    for (const auto& file : getLibraryPaths (description.fileOrIdentifier))
+    {
+        if (auto result = createVST3Instance (*this, description, file))
+        {
+            callback (std::move (result), {});
+            return;
+        }
+    }
+
+    callback (nullptr, TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-3"));
+}
+
+bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const
+{
+    return false;
+}
+
+bool VST3PluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
+{
+    auto f = File::createFileWithoutCheckingPath (fileOrIdentifier);
+
+    return f.hasFileExtension (".vst3") && f.exists();
+}
+
+String VST3PluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)
+{
+    return fileOrIdentifier; //Impossible to tell because every VST3 is a type of shell...
+}
+
+bool VST3PluginFormat::pluginNeedsRescanning (const PluginDescription& description)
+{
+    return File (description.fileOrIdentifier).getLastModificationTime() != description.lastFileModTime;
+}
+
+bool VST3PluginFormat::doesPluginStillExist (const PluginDescription& description)
+{
+    return File (description.fileOrIdentifier).exists();
+}
+
+StringArray VST3PluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive, bool)
+{
+    StringArray results;
+
+    for (int i = 0; i < directoriesToSearch.getNumPaths(); ++i)
+        recursiveFileSearch (results, directoriesToSearch[i], recursive);
+
+    return results;
+}
+
+void VST3PluginFormat::recursiveFileSearch (StringArray& results, const File& directory, const bool recursive)
+{
+    for (const auto& iter : RangedDirectoryIterator (directory, false, "*", File::findFilesAndDirectories))
+    {
+        auto f = iter.getFile();
+        bool isPlugin = false;
+
+        if (fileMightContainThisPluginType (f.getFullPathName()))
+        {
+            isPlugin = true;
+            results.add (f.getFullPathName());
+        }
+
+        if (recursive && (! isPlugin) && f.isDirectory())
+            recursiveFileSearch (results, f, true);
+    }
+}
+
+FileSearchPath VST3PluginFormat::getDefaultLocationsToSearch()
+{
+   #if JUCE_WINDOWS
+    const auto localAppData = File::getSpecialLocation (File::windowsLocalAppData)        .getFullPathName();
+    const auto programFiles = File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName();
+    return FileSearchPath (localAppData + "\\Programs\\Common\\VST3;" + programFiles + "\\Common Files\\VST3");
+   #elif JUCE_MAC
+    return FileSearchPath ("~/Library/Audio/Plug-Ins/VST3;/Library/Audio/Plug-Ins/VST3");
+   #else
+    return FileSearchPath ("~/.vst3/;/usr/lib/vst3/;/usr/lib64/vst3/;/usr/local/lib/vst3/;/usr/local/lib64/vst3/;/opt/vst3/");
+   #endif
 }
 
 JUCE_END_NO_SANITIZE
