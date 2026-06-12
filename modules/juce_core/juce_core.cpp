@@ -62,7 +62,7 @@
  #include <ctime>
 
  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4091)
- #include <Dbghelp.h>
+ #include <dbghelp.h>
  JUCE_END_IGNORE_WARNINGS_MSVC
 
  #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
