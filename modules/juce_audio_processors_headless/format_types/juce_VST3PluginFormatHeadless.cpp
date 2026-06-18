@@ -74,7 +74,7 @@ void VST3PluginFormatHeadless::findAllTypesForFile (OwnedArray<PluginDescription
         if (pluginFactory == nullptr)
             continue;
 
-        VSTComSmartPtr host { new VST3HostContextHeadless(), IncrementRef::yes };
+        VSTComSmartPtr host { new VST3HostContextHeadless(), IncrementRef::no };
 
         for (const auto& d : DescriptionLister::findDescriptionsSlow (*host, *pluginFactory, File (file)))
             results.add (new PluginDescription (d));
