@@ -273,8 +273,12 @@ public:
 
     Typeface::Ptr createSystemFallback (const String& text, const String& language) const override
     {
+       #if __ANDROID_API__ >= 29
         if (__builtin_available (android 29, *))
             return matchWithAFontMatcher (text, language);
+       #else
+        ignoreUnused (text, language);
+       #endif
 
         // The font-fallback API is only available on Android API level 29+
         jassertfalse;
@@ -295,12 +299,15 @@ public:
 
     static Typeface::Ptr findSystemTypeface()
     {
+       #if __ANDROID_API__ >= 29
         if (__builtin_available (android 29, *))
             return findSystemTypefaceWithMatcher();
+       #endif
 
         return from (FontOptions{}.withName ("Roboto"));
     }
 
+   #if __ANDROID_API__ >= 29
     static JUCE_INTRODUCED_IN_29 Typeface::Ptr findGenericTypefaceWithMatcher (const Font& font)
     {
         using AFontMatcherPtr = std::unique_ptr<AFontMatcher, FunctionPointerDestructor<AFontMatcher_destroy>>;
@@ -320,6 +327,7 @@ public:
 
         return fromMatchedFont (matched.get());
     }
+   #endif
 
 private:
     enum class DoCache
@@ -328,6 +336,7 @@ private:
         yes
     };
 
+   #if __ANDROID_API__ >= 29
     static JUCE_INTRODUCED_IN_29 Typeface::Ptr fromMatchedFont (AFont* matched)
     {
         if (matched == nullptr)
@@ -379,6 +388,7 @@ private:
 
         return fromMatchedFont (matched.get());
     }
+   #endif
 
     static bool shouldStoreAndroidFont (hb_face_t* face)
     {
@@ -793,6 +803,7 @@ Typeface::Ptr Font::Native::getDefaultPlatformTypefaceForFont (const Font& font)
 {
     const auto faceName = font.getTypefaceName();
 
+   #if __ANDROID_API__ >= 29
     const auto idealFace = std::invoke ([&]() -> Typeface::Ptr
     {
         if (__builtin_available (android 29, *))
@@ -818,6 +829,9 @@ Typeface::Ptr Font::Native::getDefaultPlatformTypefaceForFont (const Font& font)
 
     if (idealFace != nullptr)
         return idealFace;
+   #else
+    ignoreUnused (faceName);
+   #endif
 
     Font f (font);
     f.setTypefaceName (std::invoke ([&]() -> String
