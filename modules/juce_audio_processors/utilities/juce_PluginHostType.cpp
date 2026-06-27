@@ -316,6 +316,12 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostFilename.startsWith           ("Bitwig"))            return BitwigStudio;
     if (hostFilename.containsIgnoreCase   ("pluginval"))         return pluginval;
     if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
+    // Renoise hosts plug-ins in a separate process named "AudioPluginServer_*",
+    // so the host filename never contains "Renoise"; only the versioned install
+    // path (".../renoise-X.Y.Z/...") does. Test the path too so the host is
+    // still recognised when running out of process.
+    if (hostPath.containsIgnoreCase       ("Renoise")
+        || hostFilename.containsIgnoreCase("Renoise"))           return Renoise;
 
    #elif JUCE_IOS
    #elif JUCE_ANDROID
