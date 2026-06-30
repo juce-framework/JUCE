@@ -1553,7 +1553,12 @@ static int getAllEventsMask (bool ignoresMouseClicks)
     swa.override_redirect = ((styleFlags & ComponentPeer::windowIsTemporary) != 0) ? True : False;
     swa.event_mask = getAllEventsMask (styleFlags & ComponentPeer::windowIgnoresMouseClicks);
 
-    auto windowH = X11Symbols::getInstance()->xCreateWindow (display, parentToAddTo != 0 ? parentToAddTo : root,
+    // A floating child must be a real top-level window related to its parent via WM_TRANSIENT_FOR,
+    // rather than an embedded X11 child of it, so create it under the root window in that case.
+    const auto floatingChild = (styleFlags & ComponentPeer::windowFloatingChild) != 0;
+    const auto xParent = (parentToAddTo != 0 && ! floatingChild) ? parentToAddTo : root;
+
+    auto windowH = X11Symbols::getInstance()->xCreateWindow (display, xParent,
                                                              0, 0, 1, 1,
                                                              0, visualAndDepth.depth, InputOutput, visualAndDepth.visual,
                                                              CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask | CWOverrideRedirect,
@@ -1595,6 +1600,11 @@ static int getAllEventsMask (bool ignoresMouseClicks)
 
     // Set the window type
     setWindowType (windowH, styleFlags);
+
+    // Relate a floating child to its parent so the window manager keeps it above the parent
+    // (without it being globally always-on-top) and minimises/restores it together with the parent.
+    if (floatingChild && parentToAddTo != 0)
+        xchangeProperty (windowH, XA_WM_TRANSIENT_FOR, XA_WINDOW, 32, &parentToAddTo, 1);
 
     // Define decoration
     if ((styleFlags & ComponentPeer::windowHasTitleBar) == 0)

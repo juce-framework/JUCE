@@ -184,7 +184,7 @@ public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
         : ComponentPeer (comp, windowStyleFlags),
           safeComponent (&comp),
-          isSharedWindow (viewToAttachTo != nil),
+          isSharedWindow (viewToAttachTo != nil && (windowStyleFlags & windowFloatingChild) == 0),
           lastRepaintTime (Time::getMillisecondCounter())
     {
         appFocusChangeCallback = appFocusChanged;
@@ -290,6 +290,12 @@ public:
             scopedObservers.emplace_back (view, frameChangedSelector, NSWindowDidMiniaturizeNotification, window);
             scopedObservers.emplace_back (view, @selector (windowWillMiniaturize:), NSWindowWillMiniaturizeNotification, window);
             scopedObservers.emplace_back (view, @selector (windowDidDeminiaturize:), NSWindowDidDeminiaturizeNotification, window);
+
+            // Remember the parent window for floating children. The actual parent/child link is
+            // established in setVisible(), because ordering the window out (which addToDesktop()
+            // does before the window is first shown) can detach a child from its parent.
+            if ((windowStyleFlags & windowFloatingChild) != 0 && viewToAttachTo != nil)
+                floatingChildParent = [[viewToAttachTo window] retain];
         }
 
         auto alpha = component.getAlpha();
@@ -322,6 +328,15 @@ public:
 
         if (! isSharedWindow)
         {
+            if (floatingChildParent != nil)
+            {
+                if ([window parentWindow] != nil)
+                    [floatingChildParent removeChildWindow: window];
+
+                [floatingChildParent release];
+                floatingChildParent = nil;
+            }
+
             setOwner (window, nullptr);
             [window setContentView: nil];
             [window close];
@@ -347,6 +362,11 @@ public:
         {
             if (shouldBeVisible)
             {
+                // (Re)attach floating children to their parent so they float above it (without
+                // being globally always-on-top) and minimise/restore/close together with it.
+                if (floatingChildParent != nil && [window parentWindow] == nil)
+                    [floatingChildParent addChildWindow: window ordered: NSWindowAbove];
+
                 ++insideToFrontCall;
                 [window orderFront: nil];
                 --insideToFrontCall;
@@ -1743,6 +1763,7 @@ public:
     NSView* view = nil;
     WeakReference<Component> safeComponent;
     const bool isSharedWindow = false;
+    NSWindow* floatingChildParent = nil;
    #if USE_COREGRAPHICS_RENDERING
     bool usingCoreGraphics = true;
    #else

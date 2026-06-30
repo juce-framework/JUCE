@@ -84,6 +84,11 @@ public:
                                                                            asynchronous Core Graphics drawing operations. Use this if there
                                                                            are issues with regions not being redrawn at the expected time
                                                                            (macOS and iOS only). */
+        windowFloatingChild                             = (1 << 12),  /**< Indicates that the window should float above the parent window
+                                                                           passed to Component::addToDesktop(), without being globally
+                                                                           always-on-top, and should be minimised/restored/closed together
+                                                                           with that parent. Used to emulate floating child windows, which
+                                                                           JUCE does not otherwise support. */
         windowIsSemiTransparent                         = (1 << 30)   /**< Not intended for public use - makes a window transparent. */
 
     };

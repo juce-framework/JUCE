@@ -2039,7 +2039,9 @@ public:
 
         if (parentToAddTo != nullptr)
         {
-            if ((styleFlags & windowHasCloseButton) == 0)
+            // A floating child is an owned top-level window (never WS_CHILD): it floats above its
+            // owner without being topmost and is minimised/restored together with the owner.
+            if ((styleFlags & windowHasCloseButton) == 0 && (styleFlags & windowFloatingChild) == 0)
                 result |= WS_CHILD;
         }
         else if (titled || usesDropShadow)
