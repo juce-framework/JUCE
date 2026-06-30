@@ -265,10 +265,23 @@ private:
         else
             File::getSpecialLocation (File::userHomeDirectory).setAsCurrentWorkingDirectory();
 
-        auto filename = owner.startingFile.getFileName();
+        // zenity needs an absolute path in --filename: a bare relative name is
+        // ignored and the dialog falls back to $HOME. For a directory, a trailing
+        // separator tells zenity to open inside it rather than selecting it within
+        // its parent.
+        String startPath;
 
-        if (! filename.isEmpty())
-            args.add ("--filename=" + filename);
+        if (owner.startingFile.isDirectory())
+            startPath = File::addTrailingSeparator (owner.startingFile.getFullPathName());
+        else if (owner.startingFile.getParentDirectory().exists())
+            startPath = owner.startingFile.getFullPathName();
+        else if (owner.startingFile.getFileName().isNotEmpty())
+            startPath = File::getSpecialLocation (File::userHomeDirectory)
+                            .getChildFile (owner.startingFile.getFileName())
+                            .getFullPathName();
+
+        if (startPath.isNotEmpty())
+            args.add ("--filename=" + startPath);
 
         // supplying the window ID of the topmost window makes sure that Zenity pops up..
         if (uint64 topWindowID = getTopWindowID())
