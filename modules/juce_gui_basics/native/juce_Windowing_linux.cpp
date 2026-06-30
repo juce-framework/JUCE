@@ -57,7 +57,11 @@ public:
         repainter = std::make_unique<LinuxRepaintManager> (*this);
 
         windowH = instance->createWindow (parentToAddTo, this);
-        parentWindow = parentToAddTo;
+
+        // A floating child is a real top-level window (related to its parent via WM_TRANSIENT_FOR
+        // inside createWindow), so it must not be treated as an embedded child for coordinate
+        // purposes - keep parentWindow at 0 in that case.
+        parentWindow = (windowStyleFlags & windowFloatingChild) != 0 ? 0 : parentToAddTo;
 
         setTitle (component.getName());
 
