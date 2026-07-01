@@ -569,7 +569,8 @@ namespace AAXClasses
             if (component != nullptr)
             {
                 *viewSize = convertToHostBounds ({ (float) component->getHeight(),
-                                                   (float) component->getWidth() });
+                                                   (float) component->getWidth() },
+                                                 component.get());
 
                 return AAX_SUCCESS;
             }
@@ -626,15 +627,23 @@ namespace AAXClasses
         AAX_CParamID getAAXParamIDFromJuceIndex (int index) const noexcept;
 
         //==============================================================================
-        static AAX_Point convertToHostBounds (AAX_Point pluginSize)
+        static AAX_Point convertToHostBounds (AAX_Point pluginSize, const Component* comp)
         {
-            auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
+            // The host works in physical pixels. The logical-to-physical scale is
+            // the global scale times the window's platform scale; depending on the
+            // platform's DPI awareness either term may carry the factor, so apply
+            // both.
+            auto scale = (float) Desktop::getInstance().getGlobalScaleFactor();
 
-            if (approximatelyEqual (desktopScale, 1.0f))
+            if (comp != nullptr)
+                if (auto* peer = comp->getPeer())
+                    scale *= (float) peer->getPlatformScaleFactor();
+
+            if (approximatelyEqual (scale, 1.0f))
                 return pluginSize;
 
-            return { pluginSize.vert * desktopScale,
-                     pluginSize.horz * desktopScale };
+            return { pluginSize.vert * scale,
+                     pluginSize.horz * scale };
         }
 
         //==============================================================================
@@ -720,7 +729,8 @@ namespace AAXClasses
                 if (pluginEditor != nullptr)
                 {
                     auto newSize = convertToHostBounds ({ (float) pluginEditor->getHeight(),
-                                                          (float) pluginEditor->getWidth() });
+                                                          (float) pluginEditor->getWidth() },
+                                                        this);
 
                     return owner.GetViewContainer()->SetViewSize (newSize) == AAX_SUCCESS;
                 }
