@@ -47,6 +47,8 @@ public:
         LinuxEventLoop::registerFdCallback (getReadHandle(),
                                             [this] (int fd)
                                             {
+                                                const auto timeout = Time::getMillisecondCounter() + 100;
+
                                                 while (auto msg = popNextMessage (fd))
                                                 {
                                                     JUCE_TRY
@@ -54,6 +56,11 @@ public:
                                                         msg->messageCallback();
                                                     }
                                                     JUCE_CATCH_EXCEPTION
+
+                                                    // Avoid starving other LinuxEventLoop callbacks
+                                                    // such as the XWindowSystem.
+                                                    if (Time::getMillisecondCounter() > timeout)
+                                                        break;
                                                 }
                                             });
     }
@@ -74,14 +81,18 @@ public:
         ScopedLock sl (lock);
         queue.add (msg);
 
-        if (bytesInSocket < maxBytesInSocketQueue)
+        if (bytesInSocket >= maxBytesInSocketQueue)
         {
-            bytesInSocket++;
-
-            ScopedUnlock ul (lock);
-            unsigned char x = 0xff;
-            [[maybe_unused]] auto numBytes = write (getWriteHandle(), &x, 1);
+            // Is the message thread overloaded by tasks taking too long?
+            jassertfalse;
+            return;
         }
+
+        bytesInSocket++;
+
+        ScopedUnlock ul (lock);
+        unsigned char x = 0xff;
+        [[maybe_unused]] auto numBytes = write (getWriteHandle(), &x, 1);
     }
 
     //==============================================================================
