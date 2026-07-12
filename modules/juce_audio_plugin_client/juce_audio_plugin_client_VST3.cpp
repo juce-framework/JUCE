@@ -2302,8 +2302,7 @@ private:
 
             void createEditor (AudioProcessor& plugin)
             {
-                // Acon Digital modification - Premiere makes a second view before releasing the
-                // first, so adopt the existing editor rather than leave two views alive.
+                // Acon Digital modification - Quick fix, may be fixed in a newer JUCE version (> 8.0.13).
                 if (detail::PluginUtilities::getHostType().isPremiere())
                     if (auto* active = plugin.getActiveEditor())
                     {
