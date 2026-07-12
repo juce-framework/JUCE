@@ -2302,7 +2302,29 @@ private:
 
             void createEditor (AudioProcessor& plugin)
             {
-                pluginEditor.reset (plugin.createEditorAndMakeActive());
+                // Acon Digital modification - Premiere makes a second view before releasing the
+                // first, so adopt the existing editor rather than leave two views alive.
+                if (detail::PluginUtilities::getHostType().isPremiere())
+                    if (auto* active = plugin.getActiveEditor())
+                    {
+                        auto* preflight = dynamic_cast<ContentWrapperComponent*> (active->getParentComponent());
+                        if (preflight != nullptr && preflight->pluginEditor.get() == active)
+                        {
+                            active->setHostContext (nullptr);
+                            preflight->editorHostContext.reset();
+                            pluginEditor = std::move (preflight->pluginEditor);
+                        }
+                        else
+                        {
+                            // Defensive fallback: preserve the working behaviour if JUCE changes
+                            // the component hierarchy in a future update.
+                            plugin.editorBeingDeleted (active);
+                        }
+                    }
+
+                if (pluginEditor == nullptr)
+                    pluginEditor.reset (plugin.createEditorAndMakeActive());
+                // Acon Digital modification - End of modification
 
                #if JucePlugin_Enable_ARA
                 jassert (pluginEditor->getARAClientExtensions() != nullptr);
