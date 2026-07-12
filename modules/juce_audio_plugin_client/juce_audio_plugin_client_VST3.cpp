@@ -2313,12 +2313,6 @@ private:
                             preflight->editorHostContext.reset();
                             pluginEditor = std::move (preflight->pluginEditor);
                         }
-                        else
-                        {
-                            // Defensive fallback: preserve the working behaviour if JUCE changes
-                            // the component hierarchy in a future update.
-                            plugin.editorBeingDeleted (active);
-                        }
                     }
 
                 if (pluginEditor == nullptr)
