@@ -3108,7 +3108,9 @@ private:
             cachedParamValues = CachedParamValues { std::move (allIds) };
         }
 
-        for (int i = 0; i < editController->getParameterCount(); ++i)
+        const auto parameterCount = editController->getParameterCount();
+
+        for (int i = 0; i < parameterCount; ++i)
         {
             auto* param = new VST3Parameter (*this, i);
             const auto paramInfo = param->getParameterInfo();
