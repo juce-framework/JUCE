@@ -1,0 +1,55 @@
+{
+  "name": "@juce-framework/webview",
+  "version": "1.0.0",
+  "author": "Raw Material Software Limited",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juce-framework/JUCE.git",
+    "directory": "modules/juce_gui_extra/native/typescript/webview-interop"
+  },
+  "description": "TypeScript bindings for the frontend projects running in the JUCE framework's WebView component.",
+  "keywords": [
+    "juce",
+    "webview",
+    "audio",
+    "plugin",
+    "frontend"
+  ],
+  "license": "AGPL-3.0-only OR LicenseRef-JUCE",
+  "files": [
+    "dist",
+    "src",
+    "LICENSE.md",
+    "LICENSE-AGPL.md",
+    "LICENSE-JUCE.md"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "prettier": "^3.9.5",
+    "typescript": "^7.0.2"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "test": "tsc --noEmit",
+    "build:index": "node build.mjs",
+    "build:check-native-interop": "esbuild src/check_native_interop.ts --legal-comments=none --bundle --format=esm --target=es2015 --outfile=dist/check_native_interop.js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build": "npm run build:index && npm run build:types",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepublishOnly": "npm run format:check && npm run clean && npm run build"
+  }
+}

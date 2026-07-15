@@ -58,7 +58,7 @@ namespace juce
 
     @code
     // In your Javascript GUI code you obtain an object from the framework
-    import * as Juce from "juce-framework-frontend";
+    import * as Juce from "@juce-framework/webview";
     const sliderState = Juce.getSliderState("cutoffSlider");
     @endcode
 
@@ -137,7 +137,7 @@ private:
 
     @code
     // In your Javascript GUI code you obtain an object from the framework
-    import * as Juce from "juce-framework-frontend";
+    import * as Juce from "@juce-framework/webview";
     const checkboxState = Juce.getToggleState("muteToggle");
     @endcode
 
@@ -214,7 +214,7 @@ private:
 
     @code
     // In your Javascript GUI code you obtain an object from the framework
-    import * as Juce from "juce-framework-frontend";
+    import * as Juce from "@juce-framework/webview";
     const comboBoxState = Juce.getComboBoxState("filterTypeCombo");
     @endcode
 

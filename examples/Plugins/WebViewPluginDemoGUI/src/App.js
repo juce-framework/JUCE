@@ -35,7 +35,7 @@ import Button from "@mui/material/Button";
 import CardActions from "@mui/material/CardActions";
 import Snackbar from "@mui/material/Snackbar";
 import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
+import CloseIcon from "@mui/icons-material/esm/Close";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -46,7 +46,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import { React, useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 
-import * as Juce from "juce-framework-frontend";
+import * as Juce from "@juce-framework/webview";
 
 import "./App.css";
 
@@ -316,7 +316,6 @@ function FreqBandInfo() {
   let dataReceiver = null;
   let isActive = true;
 
-  // eslint-disable-next-line no-unused-vars
   const render = (timeStampMs) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");

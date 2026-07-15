@@ -1,5 +1,35 @@
 # JUCE breaking changes
 
+# develop
+
+## Change
+
+The WebBrowserComponent native integrations package location changed from
+modules/juce_gui_extra/native/javascript to
+modules/juce_gui_extra/native/typescript/webview-interop.
+
+**Possible Issues**
+
+Applications linking directly to the original in-source package location will
+fail to load the library.
+
+**Workaround**
+
+The package location should be upgraded to reflect the new in-source location.
+Alternatively, projects using a package manager can use the
+@juce-framework/webview package from npm.
+
+Javascript projects relying on the original index.js file can directly import
+webview-interop/dist/index.js instead.
+
+**Rationale**
+
+The WebBrowserComponent native integrations package has been translated to
+TypeScript and prepared to be published as a public npm package. This provides
+type information for projects consuming this package, but it imposes new
+requirements on the directory structure.
+
+
 # Version 9.0.0
 
 ## Change

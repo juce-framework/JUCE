@@ -56,6 +56,8 @@ public:
 
     File getFolder() const                  { return moduleDescription.getFolder(); }
 
+    String getWebviewInteropLibraryVersion() const;
+
     void writeIncludes (ProjectSaver&, OutputStream&);
     void addSettingsForModuleToExporter (ProjectExporter&, ProjectSaver&) const;
     void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;

@@ -43,6 +43,19 @@ LibraryModule::LibraryModule (const ModuleDescription& d)
 {
 }
 
+String LibraryModule::getWebviewInteropLibraryVersion() const
+{
+    if (getID() != "juce_gui_extra")
+        return {};
+
+    auto packageJsonFile = getFolder().getChildFile ("native")
+                                      .getChildFile ("typescript")
+                                      .getChildFile ("webview-interop")
+                                      .getChildFile ("package.json");
+
+    return JSON::parse (packageJsonFile).getProperty ("version", {}).toString();
+}
+
 void LibraryModule::writeIncludes (ProjectSaver& projectSaver, OutputStream& out)
 {
     auto& project = projectSaver.getProject();

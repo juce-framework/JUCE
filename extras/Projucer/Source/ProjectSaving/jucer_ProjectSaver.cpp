@@ -433,6 +433,13 @@ void ProjectSaver::writeAppConfig (MemoryOutputStream& out, const OwnedArray<Lib
                 << "#endif"
                 << newLine;
             }
+
+            if (const auto webviewInteropVersion = module->getWebviewInteropLibraryVersion();
+                webviewInteropVersion.isNotEmpty())
+            {
+                out << newLine << "#define JUCE_WEBVIEW_INTEROP_LIBRARY_VERSION "
+                    << webviewInteropVersion.quoted() << newLine;
+            }
         }
     }
 
