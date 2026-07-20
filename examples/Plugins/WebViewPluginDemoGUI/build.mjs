@@ -26,17 +26,16 @@ async function copyPublicAssets() {
 }
 
 const buildOptions = {
-  entryPoints: ["src/index.js"],
+  entryPoints: ["src/index.tsx"],
   outdir,
   bundle: true,
   format: "esm",
-  target: "es2022",
+  target: "es2015",
   sourcemap: true,
   minify: !isServe,
   entryNames: "[name]",
   assetNames: "assets/[name]-[hash]",
   loader: {
-    ".js": "jsx",
     ".woff": "file",
     ".woff2": "file",
   },

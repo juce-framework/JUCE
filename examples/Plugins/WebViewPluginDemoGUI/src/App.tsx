@@ -39,12 +39,12 @@ import CloseIcon from "@mui/icons-material/esm/Close";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 
-import { React, useState, useEffect, useRef } from "react";
-import PropTypes from "prop-types";
+import { useState, useEffect, useRef } from "react";
+import type { ChangeEvent, CSSProperties, SyntheticEvent } from "react";
 
 import * as Juce from "@juce-framework/webview";
 
@@ -53,28 +53,32 @@ import "./App.css";
 // Custom attributes in React must be in all lower case
 const controlParameterIndexAnnotation = "controlparameterindex";
 
-function JuceSlider({ identifier, title }) {
-  JuceSlider.propTypes = {
-    identifier: PropTypes.string,
-    title: PropTypes.string,
-  };
-
+function JuceSlider({
+  identifier,
+  title,
+}: {
+  identifier: string;
+  title: string;
+}) {
   const sliderState = Juce.getSliderState(identifier);
 
   const [value, setValue] = useState(sliderState.getNormalisedValue());
   const [properties, setProperties] = useState(sliderState.properties);
 
-  const handleChange = (event, newValue) => {
-    sliderState.setNormalisedValue(newValue);
-    setValue(newValue);
+  const handleChange = (_event: Event, newValue: number | number[]) => {
+    sliderState.setNormalisedValue(newValue as number);
+    setValue(newValue as number);
   };
 
   const mouseDown = () => {
     sliderState.sliderDragStarted();
   };
 
-  const changeCommitted = (event, newValue) => {
-    sliderState.setNormalisedValue(newValue);
+  const changeCommitted = (
+    _event: SyntheticEvent | Event,
+    newValue: number | number[]
+  ) => {
+    sliderState.setNormalisedValue(newValue as number);
     sliderState.sliderDragEnded();
   };
 
@@ -121,17 +125,13 @@ function JuceSlider({ identifier, title }) {
   );
 }
 
-function JuceCheckbox({ identifier }) {
-  JuceCheckbox.propTypes = {
-    identifier: PropTypes.string,
-  };
-
+function JuceCheckbox({ identifier }: { identifier: string }) {
   const checkboxState = Juce.getToggleState(identifier);
 
   const [value, setValue] = useState(checkboxState.getValue());
   const [properties, setProperties] = useState(checkboxState.properties);
 
-  const handleChange = (event) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     checkboxState.setValue(event.target.checked);
     setValue(event.target.checked);
   };
@@ -167,19 +167,15 @@ function JuceCheckbox({ identifier }) {
   );
 }
 
-function JuceComboBox({ identifier }) {
-  JuceComboBox.propTypes = {
-    identifier: PropTypes.string,
-  };
-
+function JuceComboBox({ identifier }: { identifier: string }) {
   const comboBoxState = Juce.getComboBoxState(identifier);
 
   const [value, setValue] = useState(comboBoxState.getChoiceIndex());
   const [properties, setProperties] = useState(comboBoxState.properties);
 
-  const handleChange = (event) => {
-    comboBoxState.setChoiceIndex(event.target.value);
-    setValue(event.target.value);
+  const handleChange = (event: SelectChangeEvent<number>) => {
+    comboBoxState.setChoiceIndex(event.target.value as number);
+    setValue(event.target.value as number);
   };
 
   useEffect(() => {
@@ -227,7 +223,7 @@ const sayHello = Juce.getNativeFunction("sayHello");
 
 const SpectrumDataReceiver_eventId = "spectrumData";
 
-function interpolate(a, b, s) {
+function interpolate(a: number[], b: number[], s: number): number[] {
   let result = new Array(a.length).fill(0);
 
   for (const [i, val] of a.entries()) result[i] += (1 - s) * val;
@@ -237,13 +233,23 @@ function interpolate(a, b, s) {
   return result;
 }
 
-function mod(dividend, divisor) {
+function mod(dividend: number, divisor: number): number {
   const quotient = Math.floor(dividend / divisor);
   return dividend - divisor * quotient;
 }
 
 class SpectrumDataReceiver {
-  constructor(bufferLength) {
+  bufferLength: number;
+  buffer: number[][];
+  readIndex: number;
+  writeIndex: number;
+  lastTimeStampMs: number;
+  timeResolutionMs: number;
+  spectrumDataRegistrationId: ReturnType<
+    typeof window.__JUCE__.backend.addEventListener
+  >;
+
+  constructor(bufferLength: number) {
     this.bufferLength = bufferLength;
     this.buffer = new Array(this.bufferLength);
     this.readIndex = 0;
@@ -278,11 +284,11 @@ class SpectrumDataReceiver {
     );
   }
 
-  getBufferItem(index) {
+  getBufferItem(index: number): number[] {
     return this.buffer[mod(index, this.buffer.length)];
   }
 
-  getLevels(timeStampMs) {
+  getLevels(timeStampMs: number): number[] | null {
     if (this.timeResolutionMs == 0) return null;
 
     const previousTimeStampMs = this.lastTimeStampMs;
@@ -312,13 +318,13 @@ class SpectrumDataReceiver {
 }
 
 function FreqBandInfo() {
-  const canvasRef = useRef(null);
-  let dataReceiver = null;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  let dataReceiver: SpectrumDataReceiver | null = null;
   let isActive = true;
 
-  const render = (timeStampMs) => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+  const render = (timeStampMs: number) => {
+    const canvas = canvasRef.current!;
+    const ctx = canvas.getContext("2d")!;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     var grd = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -355,11 +361,11 @@ function FreqBandInfo() {
 
     return function cleanup() {
       isActive = false;
-      dataReceiver.unregister();
+      dataReceiver!.unregister();
     };
   });
 
-  const canvasStyle = {
+  const canvasStyle: CSSProperties = {
     marginLeft: "0",
     marginRight: "0",
     marginTop: "1em",
@@ -392,7 +398,7 @@ function App() {
     setOpen(true);
   };
 
-  const handleClose = (event, reason) => {
+  const handleClose = (_event: SyntheticEvent | Event, reason?: string) => {
     if (reason === "clickaway") {
       return;
     }
@@ -424,7 +430,7 @@ function App() {
           sx={{ marginTop: 2 }}
           onClick={() => {
             sayHello("JUCE").then((result) => {
-              setMessage(result);
+              setMessage(result as string);
               openSnackbar();
             });
           }}

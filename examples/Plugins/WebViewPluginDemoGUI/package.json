@@ -10,22 +10,25 @@
     "@mui/icons-material": "^5.13.7",
     "@mui/material": "^5.13.7",
     "@juce-framework/webview": "file:../../../modules/juce_gui_extra/native/typescript/webview-interop",
-    "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "scripts": {
     "dev": "node build.mjs --serve",
-    "build": "node build.mjs",
+    "build": "npm run typecheck && node build.mjs",
     "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
     "zip": "npm-build-zip --destination=../../Assets"
   },
   "devDependencies": {
     "@eslint/js": "^9.7.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "esbuild": "^0.28.1",
     "eslint": "^9.7.0",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^17.0.0",
-    "npm-build-zip": "^2.0.1"
+    "npm-build-zip": "^2.0.1",
+    "typescript": "^7.0.2"
   }
 }
