@@ -301,7 +301,7 @@ private:
 class CanvasGeneratingContext final : public LowLevelGraphicsContext
 {
 public:
-    CanvasGeneratingContext (SharedCanvasDescription& c)  : canvas (c)
+    explicit CanvasGeneratingContext (SharedCanvasDescription& c)  : canvas (c)
     {
         stateStack.add (new SavedState());
     }
@@ -393,6 +393,7 @@ public:
     }
 
     void drawImage (const Image&, const AffineTransform&) override {}
+    void setImageBlendMode (BlendMode) override {}
 
     void drawLine (const Line<float>& line) override
     {
