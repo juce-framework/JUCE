@@ -448,10 +448,10 @@ public:
                       bool textureOriginIsBottomLeft,
                       bool blend = true);
 
-    /** Changes the amount of GPU memory that the internal cache for Images is allowed to use. */
+    /** Changes the amount of GPU memory, in bytes, that the internal cache for Images is allowed to use. */
     void setImageCacheSize (size_t cacheSizeBytes) noexcept;
 
-    /** Returns the amount of GPU memory that the internal cache for Images is allowed to use. */
+    /** Returns the amount of GPU memory, in bytes, that the internal cache for Images is allowed to use. */
     size_t getImageCacheSize() const noexcept;
 
     //==============================================================================
@@ -493,7 +493,7 @@ private:
         Profile::compatibility
        #endif
     , actualProfile{};
-    size_t imageCacheMaxSize = 8 * 1024 * 1024;
+    size_t imageCacheMaxSize = 32 * 1024 * 1024;
     bool renderComponents = true, useMultisampling = false, overrideCanAttach = false;
     std::atomic<bool> continuousRepaint { false };
     TextureMagnificationFilter texMagFilter = linear;

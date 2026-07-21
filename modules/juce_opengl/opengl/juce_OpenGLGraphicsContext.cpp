@@ -92,7 +92,7 @@ struct CachedImageList final : public ReferenceCountedObject,
             c = images.add (new CachedImage (*this, pixelData.get()));
             totalSize += c->imageSize;
 
-            while (totalSize > maxCacheSize && images.size() > 1 && totalSize > 0)
+            while (totalSize > maxCacheSize && images.size() > 1)
                 removeOldestItem();
         }
 
@@ -104,7 +104,7 @@ struct CachedImageList final : public ReferenceCountedObject,
         CachedImage (CachedImageList& list, ImagePixelData* im)
             : owner (list), pixelData (im),
               lastUsed (Time::getCurrentTime()),
-              imageSize ((size_t) (im->width * im->height))
+              imageSize ((size_t) im->width * (size_t) im->height * sizeof (PixelARGB))
         {
             pixelData->listeners.add (&owner);
         }
