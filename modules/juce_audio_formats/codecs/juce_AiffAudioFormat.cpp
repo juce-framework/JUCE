@@ -594,9 +594,14 @@ public:
 
         input->setPosition (dataChunkStart + startSampleInFile * bytesPerFrame);
 
+        const int tempBufSize = 480 * 3 * 4; // (keep this a multiple of 3)
+
+        // a frame larger than the buffer truncates numThisTime to zero, so the loop would never terminate
+        if (bytesPerFrame <= 0 || bytesPerFrame > tempBufSize)
+            return false;
+
         while (numSamples > 0)
         {
-            const int tempBufSize = 480 * 3 * 4; // (keep this a multiple of 3)
             char tempBuffer [tempBufSize];
 
             const int numThisTime = jmin (tempBufSize / bytesPerFrame, numSamples);
