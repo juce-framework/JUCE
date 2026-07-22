@@ -1350,6 +1350,7 @@ public:
                     bwavChunkStart = input->getPosition();
                     bwavSize = length;
 
+                    length = (uint32) jmin ((int64) length, input->getNumBytesRemaining());
                     HeapBlock<BWAVChunk> bwav;
                     bwav.calloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
                     input->read (bwav, (int) length);
@@ -1357,6 +1358,7 @@ public:
                 }
                 else if (chunkType == chunkName ("smpl"))
                 {
+                    length = (uint32) jmin ((int64) length, input->getNumBytesRemaining());
                     HeapBlock<SMPLChunk> smpl;
                     smpl.calloc (jmax ((size_t) length + 1, sizeof (SMPLChunk)), 1);
                     input->read (smpl, (int) length);
@@ -1364,6 +1366,7 @@ public:
                 }
                 else if (chunkType == chunkName ("inst") || chunkType == chunkName ("INST")) // need to check which...
                 {
+                    length = (uint32) jmin ((int64) length, input->getNumBytesRemaining());
                     HeapBlock<InstChunk> inst;
                     inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
                     input->read (inst, (int) length);
@@ -1371,6 +1374,7 @@ public:
                 }
                 else if (chunkType == chunkName ("cue "))
                 {
+                    length = (uint32) jmin ((int64) length, input->getNumBytesRemaining());
                     HeapBlock<CueChunk> cue;
                     cue.calloc (jmax ((size_t) length + 1, sizeof (CueChunk)), 1);
                     input->read (cue, (int) length);

@@ -549,6 +549,7 @@ public:
                     }
                     else if (type == chunkName ("INST"))
                     {
+                        length = (uint32) jmin ((int64) length, input->getNumBytesRemaining());
                         HeapBlock<InstChunk> inst;
                         inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
                         input->read (inst, (int) length);
