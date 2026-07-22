@@ -1216,7 +1216,7 @@ private:
             subDevice.setString (kAudioSubDeviceUIDKey, uid);
             subDevice.setInt (kAudioSubDeviceDriftCompensationKey, uid != clockingDeviceUid);
             subDevice.setInt (kAudioSubDeviceDriftCompensationQualityKey,
-                             #if JUCE_MAC_API_VERSION_CAN_BE_BUILT (13, 0)
+                             #if JUCE_MAC_API_VERSION_CAN_BE_BUILT (14, 0)
                               kAudioAggregateDriftCompensationHighQuality);
                              #else
                               kAudioSubDeviceDriftCompensationHighQuality);
