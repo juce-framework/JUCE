@@ -44,6 +44,13 @@ namespace juce
     you can then use a Graphics object to draw into the framebuffer using normal
     JUCE 2D operations.
 
+    OpenGLFrameBuffer only supports RGBA framebuffers, so single channel images
+    keep their image data in CPU memory instead, and upload it to a texture when
+    drawn. For these images getFrameBufferFrom() will return nullptr.
+
+    A request for an Image::RGB image is promoted to Image::ARGB, and will use a
+    framebuffer in the same way as an Image::ARGB request.
+
     @see Image, ImageType, ImagePixelData, OpenGLFrameBuffer
 
     @tags{OpenGL}
@@ -54,7 +61,7 @@ public:
     OpenGLImageType();
     ~OpenGLImageType() override;
 
-    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool shouldClearImage) const override;
+    ImagePixelData::Ptr create (Image::PixelFormat format, int width, int height, bool shouldClearImage) const override;
     int getTypeID() const override;
 
     static OpenGLFrameBuffer* getFrameBufferFrom (const Image&);

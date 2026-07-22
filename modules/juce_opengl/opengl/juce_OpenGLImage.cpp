@@ -142,6 +142,81 @@ private:
 };
 
 //==============================================================================
+class SoftwareBackedOpenGLPixelData final : public ImagePixelData,
+                                            private ImagePixelData::Listener
+{
+public:
+    explicit SoftwareBackedOpenGLPixelData (Ptr sourceIn)
+        : ImagePixelData (sourceIn->pixelFormat, sourceIn->width, sourceIn->height),
+          source (std::move (sourceIn))
+    {
+        source->listeners.add (this);
+    }
+
+    ~SoftwareBackedOpenGLPixelData() override
+    {
+        source->listeners.remove (this);
+    }
+
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
+    {
+        return source->createLowLevelContext();
+    }
+
+    Ptr clone() override
+    {
+        if (auto cloned = source->clone())
+            return *new SoftwareBackedOpenGLPixelData (std::move (cloned));
+
+        return {};
+    }
+
+    std::unique_ptr<ImageType> createType() const override
+    {
+        return std::make_unique<OpenGLImageType>();
+    }
+
+    void initialiseBitmapData (Image::BitmapData& bitmapData, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+    {
+        source->initialiseBitmapData (bitmapData, x, y, mode);
+    }
+
+    void applySingleChannelBoxBlurEffectInArea (Rectangle<int> bounds, int radius) override
+    {
+        source->applySingleChannelBoxBlurEffectInArea (bounds, radius);
+    }
+
+    void applyGaussianBlurEffectInArea (Rectangle<int> bounds, float radius) override
+    {
+        source->applyGaussianBlurEffectInArea (bounds, radius);
+    }
+
+    void multiplyAllAlphasInArea (Rectangle<int> bounds, float amount) override
+    {
+        source->multiplyAllAlphasInArea (bounds, amount);
+    }
+
+    void desaturateInArea (Rectangle<int> bounds) override
+    {
+        source->desaturateInArea (bounds);
+    }
+
+    int getSharedCount() const noexcept override { return getReferenceCount() + source->getSharedCount() - 1; }
+
+private:
+    void imageDataChanged (ImagePixelData*) override
+    {
+        sendDataChangeMessage();
+    }
+
+    void imageDataBeingDeleted (ImagePixelData*) override {}
+
+    const Ptr source;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SoftwareBackedOpenGLPixelData)
+};
+
+//==============================================================================
 OpenGLImageType::OpenGLImageType() {}
 OpenGLImageType::~OpenGLImageType() {}
 
@@ -150,8 +225,11 @@ int OpenGLImageType::getTypeID() const
     return 3;
 }
 
-ImagePixelData::Ptr OpenGLImageType::create (Image::PixelFormat, int width, int height, bool /*shouldClearImage*/) const
+ImagePixelData::Ptr OpenGLImageType::create (Image::PixelFormat format, int width, int height, bool shouldClearImage) const
 {
+    if (format == Image::SingleChannel)
+        return *new SoftwareBackedOpenGLPixelData (SoftwareImageType().create (format, width, height, shouldClearImage));
+
     OpenGLContext* currentContext = OpenGLContext::getCurrentContext();
     jassert (currentContext != nullptr); // an OpenGL image can only be created when a valid context is active!
 

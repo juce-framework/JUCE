@@ -4,6 +4,32 @@
 
 ## Change
 
+OpenGLImageType::create() now honours a request for an Image::SingleChannel
+image. Previously the requested format was ignored, and the returned image was
+always an Image::ARGB image backed by an OpenGL framebuffer.
+
+**Possible Issues**
+
+OpenGLImageType::getFrameBufferFrom() returns nullptr for single channel
+images, where it previously returned a valid framebuffer. Such images also
+report Image::SingleChannel rather than Image::ARGB from Image::getFormat().
+
+**Workaround**
+
+Request an Image::ARGB image explicitly if a framebuffer-backed image is
+required.
+
+**Rationale**
+
+The format requested when creating an image was previously ignored, so an image
+could report a different format to the one that was asked for. This caused
+rendering issues in places where a real single channel image was needed, and
+OpenGLImageType was the only JUCE image type that did not produce a real single
+channel format.
+
+
+## Change
+
 OpenGLContext::setImageCacheSize() now interprets its argument as a number of
 bytes, as documentated. Previously the value was compared against a pixel count,
 so the effective cache was four times larger than requested. The default cache
