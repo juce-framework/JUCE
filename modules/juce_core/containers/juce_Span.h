@@ -38,6 +38,9 @@ namespace juce
 //==============================================================================
 inline constexpr auto dynamicExtent = std::numeric_limits<size_t>::max();
 
+template <typename Value, size_t Extent>
+class Span;
+
 namespace detail
 {
     //==============================================================================
@@ -54,6 +57,25 @@ namespace detail
     constexpr auto hasDataAndSize<T,
                                   Void<decltype (std::data (std::declval<T>())),
                                        decltype (std::size (std::declval<T>()))>> = true;
+
+    template <typename From, typename To>
+    constexpr auto isSpanConvertible = std::is_convertible_v<From (*)[], To (*)[]>;
+
+    template <typename T>
+    constexpr auto isSpanType = false;
+
+    template <typename Value, size_t Extent>
+    constexpr auto isSpanType<Span<Value, Extent>> = true;
+
+    template <typename Range, typename Value, typename = void>
+    constexpr auto isSpanCompatibleRange = false;
+
+    template <typename Range, typename Value>
+    constexpr auto isSpanCompatibleRange<Range,
+                                         Value,
+                                         Void<std::enable_if_t<hasDataAndSize<Range>
+                                                               && ! isSpanType<std::remove_cv_t<std::remove_reference_t<Range>>>>>>
+        = isSpanConvertible<std::remove_pointer_t<decltype (std::data (std::declval<Range&>()))>, Value>;
 
     template <size_t Extent>
     struct NumBase
@@ -118,9 +140,17 @@ public:
     constexpr Span (It it, size_t end)
         : Base (end), ptr (detail::toAddress (it)) {}
 
-    template <typename Range, std::enable_if_t<detail::hasDataAndSize<Range>, int> = 0>
+    template <typename Range, std::enable_if_t<detail::isSpanCompatibleRange<Range, Value>, int> = 0>
     constexpr Span (Range&& range)
-        : Base (std::size (range)), ptr (std::data (range)) {}
+        : Base (static_cast<size_t> (std::size (range))),
+          ptr (std::data (range)) {}
+
+    template <typename OtherValue,
+              size_t OtherExtent,
+              std::enable_if_t<(Extent == dynamicExtent || Extent == OtherExtent)
+                               && detail::isSpanConvertible<OtherValue, Value>, int> = 0>
+    constexpr Span (const Span<OtherValue, OtherExtent>& other) noexcept
+        : Base (other.size()), ptr (other.data()) {}
 
     constexpr Span (const Span&) = default;
 
