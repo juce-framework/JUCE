@@ -528,18 +528,90 @@ public:
     }
 };
 
+template <typename T>
+class FindNearestValueTests final : public UnitTest
+{
+public:
+    FindNearestValueTests()
+        : UnitTest { getTemplatedMathsFunctionUnitTestName<T> ("findNearestValue"), UnitTestCategories::maths }
+    {}
+
+    void runTest() final
+    {
+        beginTest ("Empty span returns a default-constructed value");
+        {
+            expect (exactlyEqual (findNearestValue (Span<T>{}, T (1)), T{}));
+        }
+
+        beginTest ("Single element is always returned");
+        {
+            const T value { 5 };
+            expect (exactlyEqual (findNearestValue (Span { &value, (size_t) 1 }, T (100)), value));
+            expect (exactlyEqual (findNearestValue (Span { &value, (size_t) 1 }, T (-100)), value));
+            expect (exactlyEqual (findNearestValue (Span { &value, (size_t) 1 }, value), value));
+        }
+
+        beginTest ("Exact matches are returned");
+        {
+            const T values[] { T (1), T (3), T (5), T (9) };
+
+            expect (exactlyEqual (findNearestValue (Span { values }, T (1)), T (1)));
+            expect (exactlyEqual (findNearestValue (Span { values }, T (5)), T (5)));
+            expect (exactlyEqual (findNearestValue (Span { values }, T (9)), T (9)));
+        }
+
+        beginTest ("Targets outside the range clamp to the nearest endpoint");
+        {
+            const T values[] { T (10), T (20), T (30) };
+
+            expect (exactlyEqual (findNearestValue (Span { values }, T (0)), T (10)));
+            expect (exactlyEqual (findNearestValue (Span { values }, T (100)), T (30)));
+        }
+
+        beginTest ("Targets between values select the closer neighbour");
+        {
+            const T values[] { T (0), T (10) };
+
+            expect (exactlyEqual (findNearestValue (Span { values }, T (1)), T (0)));
+            expect (exactlyEqual (findNearestValue (Span { values }, T (9)), T (10)));
+        }
+
+        beginTest ("Equidistant targets prefer the upper neighbour");
+        {
+            const T values[] { T (0), T (10) };
+
+            expect (exactlyEqual (findNearestValue (Span { values }, T (5)), T (10)));
+        }
+
+        beginTest ("Works with const and mutable Array");
+        {
+            const Array<T> constValues   { T (44100), T (48000), T (96000) };
+                  Array<T> mutableValues { T (44100), T (48000), T (96000) };
+
+            expect (exactlyEqual (findNearestValue (Span { constValues }, T (40000)), T (44100)));
+            expect (exactlyEqual (findNearestValue (Span { constValues }, T (45000)), T (44100)));
+            expect (exactlyEqual (findNearestValue (Span { constValues }, T (47000)), T (48000)));
+            expect (exactlyEqual (findNearestValue (Span { constValues }, T (100000)), T (96000)));
+
+            expect (exactlyEqual (findNearestValue (Span { mutableValues }, T (47000)), T (48000)));
+        }
+    }
+};
+
 template <typename Type>
 struct MathsFloatingPointFunctionsTests
 {
     IsFiniteTests<Type> isFiniteTests;
     NextFloatTests<Type> nextFloatTests;
     ApproximatelyEqualTests<Type> approximatelyEqualTests;
+    FindNearestValueTests<Type> findNearestValueTests;
 };
 
 template<>
 struct MathsFloatingPointFunctionsTests<int>
 {
     ApproximatelyEqualTests<int> approximatelyEqualTests;
+    FindNearestValueTests<int> findNearestValueTests;
 };
 
 struct MathsFunctionsTests

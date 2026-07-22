@@ -36,30 +36,6 @@ namespace juce
 {
 
 //==============================================================================
-template <typename T>
-static T findNearestValue (const Array<T>& v, T target)
-{
-    if (v.begin() == v.end())
-    {
-        jassertfalse;
-        return T{};
-    }
-
-    const auto it = std::lower_bound (v.begin(), v.end(), target);
-
-    if (it == v.begin())
-        return *it;
-
-    if (it == v.end())
-        return *(it - 1);
-
-    const T upper = *it;
-    const T lower = *(it - 1);
-
-    return std::abs (target - lower) < std::abs (target - upper) ? lower : upper;
-}
-
-//==============================================================================
 class ScopedCFDictionary;
 
 class ScopedCFArray
@@ -1702,7 +1678,7 @@ private:
     {
         jassert (bufferSizesToTry.has_value() && ! bufferSizesToTry->isEmpty());
 
-        const auto nextBufferSize = findNearestValue (*bufferSizesToTry, coreAudioDevice.getBufferSize());
+        const auto nextBufferSize = findNearestValue (Span (*bufferSizesToTry), coreAudioDevice.getBufferSize());
         bufferSizesToTry->removeFirstMatchingValue (nextBufferSize);
 
         const auto bufferSize = requestBufferSize (nextBufferSize);
@@ -1736,7 +1712,7 @@ private:
     std::optional<double> requestSampleRate (double newSampleRate)
     {
         const auto sampleRates = juceDevice->getAvailableSampleRates();
-        const auto targetSampleRate = newSampleRate > 0.0 ? findNearestValue (sampleRates, newSampleRate)
+        const auto targetSampleRate = newSampleRate > 0.0 ? findNearestValue (Span (sampleRates), newSampleRate)
                                                           : coreAudioDevice.getSampleRate();
 
         const auto tryRequestingSampleRate = [&] (auto dev)
@@ -1758,7 +1734,7 @@ private:
     std::optional<int> requestBufferSize (int newBufferSize)
     {
         const auto sizes = juceDevice->getAvailableBufferSizes();
-        const auto targetBufferSize = newBufferSize > 0 ? findNearestValue (sizes, newBufferSize)
+        const auto targetBufferSize = newBufferSize > 0 ? findNearestValue (Span (sizes), newBufferSize)
                                                         : juceDevice->getDefaultBufferSize();
 
         JUCE_COREAUDIO_LOG ("Requesting buffer-size: ", targetBufferSize);

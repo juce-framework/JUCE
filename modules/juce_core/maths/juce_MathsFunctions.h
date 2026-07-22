@@ -499,6 +499,37 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
     }
 }
 
+/** Returns the value in the provided sorted span that is nearest to the target.
+
+    If the provided span is empty this returns a default constructed value.
+ */
+template <typename Type, size_t Extent>
+std::remove_cv_t<Type> findNearestValue (Span<Type, Extent> values, std::remove_cv_t<Type> target)
+{
+    static_assert (std::is_arithmetic_v<Type>);
+
+    const auto begin = values.begin();
+    const auto end = values.end();
+
+    if (begin == end)
+        return {};
+
+    jassert (std::is_sorted (begin, end));
+
+    const auto it = std::lower_bound (begin, end, target);
+
+    if (it == begin)
+        return *it;
+
+    if (it == end)
+        return *(it - 1);
+
+    const auto upper = *it;
+    const auto lower = *(it - 1);
+
+    return std::abs (target - lower) < std::abs (target - upper) ? lower : upper;
+}
+
 //==============================================================================
 /** Constrains a value to keep it within a given range.
 
