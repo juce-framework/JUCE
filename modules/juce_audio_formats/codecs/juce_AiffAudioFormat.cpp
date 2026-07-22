@@ -256,7 +256,7 @@ namespace AiffFileHelpers
             {
                 bool isGenre = false;
 
-                if (isValidTag (data))
+                if (data + 2 < dataEnd && isValidTag (data))
                 {
                     auto tag = String (CharPointer_UTF8 (data), CharPointer_UTF8 (dataEnd));
                     isGenre = isAppleGenre (tag);
