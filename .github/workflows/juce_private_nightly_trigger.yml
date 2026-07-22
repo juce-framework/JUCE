@@ -5,7 +5,7 @@ on:
     - cron: '0 3 * * *'
 env:
   GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  TRIGGER_WORKFLOW_REF: juce9
+  TRIGGER_WORKFLOW_REF: develop
 jobs:
   juce-private-nightly-trigger:
     if: github.repository == 'juce-framework/JUCE-dev'
