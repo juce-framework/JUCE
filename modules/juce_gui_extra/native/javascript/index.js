@@ -153,6 +153,7 @@ class SliderState {
       numSteps: 100,
       interval: 0,
       parameterIndex: -1,
+      defaultValue: 0
     };
     this.valueChangedEvent = new ListenerList();
     this.propertiesChangedEvent = new ListenerList();
