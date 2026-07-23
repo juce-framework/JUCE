@@ -36,8 +36,6 @@
 
 #if JUCE_INTERNAL_HAS_AU
 
-#include <AudioToolbox/AudioUnitUtilities.h>
-
 #if JUCE_MAC
 #include <AudioUnit/AUCocoaUIView.h>
 #include <CoreAudioKit/AUGenericView.h>
@@ -56,6 +54,63 @@
 #include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
 #include <juce_audio_processors_headless/format_types/juce_AU_Shared.h>
 #include <juce_audio_processors_headless/format_types/juce_ARACommonInternal.h>
+
+#if __has_include (<AudioToolbox/AudioUnitUtilities.h>)
+#include <AudioToolbox/AudioUnitUtilities.h>
+#else
+
+extern "C"
+{
+
+// These symbols are available on iOS 6+, but are not exported in a public header.
+using AUEventListenerRef = struct AUListenerBase*;
+struct AudioUnitEvent
+{
+    UInt32 mEventType;
+    union
+    {
+        AudioUnitParameter mParameter;
+        AudioUnitProperty mProperty;
+    } mArgument;
+};
+
+OSStatus AUParameterSet (AUEventListenerRef,
+                         void*,
+                         const AudioUnitParameter*,
+                         AudioUnitParameterValue,
+                         UInt32);
+OSStatus AUParameterListenerNotify (AUEventListenerRef,
+                                    void*,
+                                    const AudioUnitParameter*);
+OSStatus AUEventListenerNotify (AUEventListenerRef,
+                                void*,
+                                const AudioUnitEvent*);
+OSStatus AUEventListenerAddEventType (AUEventListenerRef,
+                                      void*,
+                                      const AudioUnitEvent*);
+using AUEventListenerProc = void (*) (void*, void*, const AudioUnitEvent*, unsigned long long, float);
+OSStatus AUEventListenerCreate (AUEventListenerProc,
+                                void*,
+                                CFRunLoopRef,
+                                CFStringRef,
+                                Float32,
+                                Float32,
+                                AUEventListenerRef*);
+OSStatus AUListenerDispose (AUEventListenerRef);
+
+enum : UInt32
+{
+    kAUParameterListener_AnyParameter = 0xffffffff,
+
+    kAudioUnitEvent_ParameterValueChange = 0,
+    kAudioUnitEvent_BeginParameterChangeGesture = 1,
+    kAudioUnitEvent_EndParameterChangeGesture = 2,
+    kAudioUnitEvent_PropertyChange = 3,
+};
+
+} // extern "C"
+
+#endif
 
 namespace juce
 {

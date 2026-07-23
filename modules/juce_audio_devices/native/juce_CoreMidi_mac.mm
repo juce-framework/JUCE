@@ -683,7 +683,7 @@ struct CoreMidiHelpers
 
                 case kMIDIMsgSetupChanged:
                #if JUCE_IOS
-                case kMIDIMsgInternalStart:
+                case 0x1000: // kMIDIMsgInternalStart
                #endif
 
                 default:
