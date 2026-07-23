@@ -574,7 +574,7 @@ public:
         {
             outputChanList->setRowHeight (jmin (22, h));
             outputChanList->setBounds (r.removeFromTop (outputChanList->getBestHeight (maxListBoxHeight)));
-            outputChanLabel->setBounds (0, outputChanList->getBounds().getCentreY() - h / 2, r.getX(), h);
+            outputChanLabel->setBounds (0, outputChanList->getBounds().getY(), r.getX(), h);
             r.removeFromTop (space);
         }
 
@@ -582,7 +582,7 @@ public:
         {
             inputChanList->setRowHeight (jmin (22, h));
             inputChanList->setBounds (r.removeFromTop (inputChanList->getBestHeight (maxListBoxHeight)));
-            inputChanLabel->setBounds (0, inputChanList->getBounds().getCentreY() - h / 2, r.getX(), h);
+            inputChanLabel->setBounds (0, inputChanList->getBounds().getY(), r.getX(), h);
             r.removeFromTop (space);
         }
 
