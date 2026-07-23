@@ -348,6 +348,8 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "threads/juce_Thread.h"
 #include "threads/juce_HighResolutionTimer.h"
 #include "threads/juce_ThreadLocalValue.h"
+#include "threads/juce_ThreadPoolJob.h"
+#include "detail/juce_ThreadPoolLambdaJob.h"
 #include "threads/juce_ThreadPool.h"
 #include "threads/juce_TimeSliceThread.h"
 #include "threads/juce_ReadWriteLock.h"

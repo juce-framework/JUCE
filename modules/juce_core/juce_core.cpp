@@ -191,6 +191,7 @@
 #include "threads/juce_ReadWriteLock.cpp"
 #include "threads/juce_Thread.cpp"
 #include "threads/juce_ThreadPool.cpp"
+#include "threads/juce_ThreadPoolJob.cpp"
 #include "threads/juce_TimeSliceThread.cpp"
 #include "time/juce_PerformanceCounter.cpp"
 #include "time/juce_RelativeTime.cpp"

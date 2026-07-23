@@ -4,6 +4,32 @@
 
 ## Change
 
+ThreadPool::addJob no longer provides separate std::function overloads for
+void and ThreadPoolJob::JobStatus return types. It now accepts a single
+callable template parameter that must return exactly void or
+ThreadPoolJob::JobStatus.
+
+**Possible Issues**
+
+Code that previously passed a callable returning a type other than void or
+ThreadPoolJob::JobStatus (for example int or bool) will fail to compile. The
+return value was previously discarded via conversion to std::function<void()>.
+
+**Workaround**
+
+Change the callable so that it returns void, or returns a
+ThreadPoolJob::JobStatus to control whether the job should run again.
+
+**Rationale**
+
+The previous overloads were ambiguous for lambdas returning
+ThreadPoolJob::JobStatus, because std::function<void()> can be constructed from
+callables with non-void return types. Constraining the accepted return types
+removes that ambiguity and rejects accidental misuse at compile time.
+
+
+## Change
+
 The AudioDeviceSelectorComponent::getMidiInputSelectorListBox function has been
 removed.
 

@@ -60,52 +60,6 @@ struct ThreadPool::ThreadPoolThread final : public Thread
 };
 
 //==============================================================================
-ThreadPoolJob::ThreadPoolJob (const String& name)  : jobName (name)
-{
-}
-
-ThreadPoolJob::~ThreadPoolJob()
-{
-    // you mustn't delete a job while it's still in a pool! Use ThreadPool::removeJob()
-    // to remove it first!
-    jassert (pool == nullptr || ! pool->contains (this));
-}
-
-String ThreadPoolJob::getJobName() const
-{
-    return jobName;
-}
-
-void ThreadPoolJob::setJobName (const String& newName)
-{
-    jobName = newName;
-}
-
-void ThreadPoolJob::signalJobShouldExit()
-{
-    shouldStop = true;
-    listeners.call ([] (Thread::Listener& l) { l.exitSignalSent(); });
-}
-
-void ThreadPoolJob::addListener (Thread::Listener* listener)
-{
-    listeners.add (listener);
-}
-
-void ThreadPoolJob::removeListener (Thread::Listener* listener)
-{
-    listeners.remove (listener);
-}
-
-ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()
-{
-    if (auto* t = dynamic_cast<ThreadPool::ThreadPoolThread*> (Thread::getCurrentThread()))
-        return t->currentJob.load();
-
-    return nullptr;
-}
-
-//==============================================================================
 ThreadPool::ThreadPool (const Options& options)
 {
     // not much point having a pool without any threads!
@@ -162,32 +116,6 @@ void ThreadPool::addJob (ThreadPoolJob* job, bool deleteJobWhenFinished)
         for (auto* t : threads)
             t->notify();
     }
-}
-
-void ThreadPool::addJob (std::function<ThreadPoolJob::JobStatus()> jobToRun)
-{
-    struct LambdaJobWrapper final : public ThreadPoolJob
-    {
-        LambdaJobWrapper (std::function<ThreadPoolJob::JobStatus()> j) : ThreadPoolJob ("lambda"), job (j) {}
-        JobStatus runJob() override      { return job(); }
-
-        std::function<ThreadPoolJob::JobStatus()> job;
-    };
-
-    addJob (new LambdaJobWrapper (jobToRun), true);
-}
-
-void ThreadPool::addJob (std::function<void()> jobToRun)
-{
-    struct LambdaJobWrapper final : public ThreadPoolJob
-    {
-        LambdaJobWrapper (std::function<void()> j) : ThreadPoolJob ("lambda"), job (std::move (j)) {}
-        JobStatus runJob() override      { job(); return ThreadPoolJob::jobHasFinished; }
-
-        std::function<void()> job;
-    };
-
-    addJob (new LambdaJobWrapper (std::move (jobToRun)), true);
 }
 
 int ThreadPool::getNumJobs() const noexcept

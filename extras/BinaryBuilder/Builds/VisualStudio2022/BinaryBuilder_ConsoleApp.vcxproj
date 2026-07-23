@@ -441,6 +441,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPool.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPoolJob.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_TimeSliceThread.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -550,6 +553,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_IncrementRef.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_LruCache.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_NativeFileHandle.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_ThreadPoolLambdaJob.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_AndroidDocument.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_common_MimeTypes.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_DirectoryIterator.h"/>
@@ -663,6 +667,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_Thread.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ThreadLocalValue.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPool.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPoolJob.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_TimeSliceThread.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_WaitableEvent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\time\juce_PerformanceCounter.h"/>

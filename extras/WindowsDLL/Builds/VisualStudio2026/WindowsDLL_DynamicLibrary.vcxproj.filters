@@ -2866,6 +2866,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPool.cpp">
       <Filter>JUCE Modules\juce_core\threads</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPoolJob.cpp">
+      <Filter>JUCE Modules\juce_core\threads</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_TimeSliceThread.cpp">
       <Filter>JUCE Modules\juce_core\threads</Filter>
     </ClCompile>
@@ -6864,6 +6867,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_NativeFileHandle.h">
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_ThreadPoolLambdaJob.h">
+      <Filter>JUCE Modules\juce_core\detail</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_AndroidDocument.h">
       <Filter>JUCE Modules\juce_core\files</Filter>
     </ClInclude>
@@ -7201,6 +7207,9 @@
       <Filter>JUCE Modules\juce_core\threads</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPool.h">
+      <Filter>JUCE Modules\juce_core\threads</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPoolJob.h">
       <Filter>JUCE Modules\juce_core\threads</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_TimeSliceThread.h">
