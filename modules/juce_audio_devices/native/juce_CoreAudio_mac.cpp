@@ -573,19 +573,15 @@ private:
         UInt32 size{};
     };
 
-    bool hasProperty (PropertyAddress address) const
-    {
-        if (isValid() && AudioObjectHasProperty (objectId, address.get()))
-            return true;
-
-        JUCE_COREAUDIO_LOG (" Property not found!");
-        return false;
-    }
+    // We deliberately avoid AudioObjectHasProperty, for some properties on an
+    // Apogee Symphony I/O Mk2 it can lock up coreaudiod (likely a driver bug).
+    // Missing properties are detected instead when the Get/IsProperty* calls
+    // below fail through checkStatus.
 
     size_t getPropertySize (PropertyAddress address, DataType arg) const
     {
-        if (! hasProperty (address))
-            return 0;
+        if (! isValid())
+            return {};
 
         UInt32 size{};
 
@@ -599,7 +595,7 @@ private:
     template <typename PropertyType>
     bool copyPropertyData (PropertyAddress address, Span<PropertyType> property, DataType arg) const
     {
-        if (! hasProperty (address))
+        if (! isValid())
             return {};
 
         auto size = (UInt32) (property.getSizeInBytes());
@@ -639,7 +635,7 @@ private:
 
     bool isPropertySettable (PropertyAddress address) const
     {
-        if (! hasProperty (address))
+        if (! isValid())
             return {};
 
         Boolean isSettable = NO;
