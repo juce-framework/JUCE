@@ -2124,6 +2124,16 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEv
 
         updateButtonMask (mask);
     }
+    else
+    {
+        // iOS 12, we only have 'primary button' clicks
+        const auto newFlags = isUp (mouseEventFlags)
+                            ? 0
+                            : ModifierKeys::leftButtonModifier;
+        ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers()
+                                            .withoutMouseButtons()
+                                            .withFlags (newFlags);
+    }
 
     NSArray* touches = [[event touchesForView: view] allObjects];
 
