@@ -37,8 +37,7 @@
 #else
 extern "C"
 {
-#include <png.h>
-#include <pngconf.h>
+#include JUCE_PNGLIB_INCLUDE_PATH
 }
 #endif
 

@@ -40,7 +40,7 @@ namespace juce
 #else
 extern "C"
 {
-#include <jpeglib.h>
+#include JUCE_JPEGLIB_INCLUDE_PATH
 }
 #endif
 

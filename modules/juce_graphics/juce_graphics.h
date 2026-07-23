@@ -87,12 +87,36 @@
  #define JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING 0
 #endif
 
+/** Config: JUCE_INCLUDE_PNGLIB_CODE
+    This can be used to disable Juce's embedded 3rd-party pnglib code.
+    You might need to tweak this if you're linking to an external pnglib library in your app,
+    but for normal apps, this option should be left alone.
+
+    If you disable this, you might also want to set a value for JUCE_PNGLIB_INCLUDE_PATH, to
+    specify the path where your pnglib headers live.
+*/
 #ifndef JUCE_INCLUDE_PNGLIB_CODE
  #define JUCE_INCLUDE_PNGLIB_CODE 1
 #endif
 
+#ifndef JUCE_PNGLIB_INCLUDE_PATH
+ #define JUCE_PNGLIB_INCLUDE_PATH <png.h>
+#endif
+
+/** Config: JUCE_INCLUDE_JPEGLIB_CODE
+    This can be used to disable Juce's embedded 3rd-party jpeglib code.
+    You might need to tweak this if you're linking to an external jpeglib library in your app,
+    but for normal apps, this option should be left alone.
+
+    If you disable this, you might also want to set a value for JUCE_JPEGLIB_INCLUDE_PATH, to
+    specify the path where your jpeglib headers live.
+*/
 #ifndef JUCE_INCLUDE_JPEGLIB_CODE
  #define JUCE_INCLUDE_JPEGLIB_CODE 1
+#endif
+
+#ifndef JUCE_JPEGLIB_INCLUDE_PATH
+ #define JUCE_JPEGLIB_INCLUDE_PATH <jpeglib.h>
 #endif
 
 #ifndef USE_COREGRAPHICS_RENDERING

@@ -39,7 +39,7 @@ namespace juce
 
 #define FLAC__NO_DLL 1
 
-#if JUCE_INCLUDE_FLAC_CODE || ! defined (JUCE_INCLUDE_FLAC_CODE)
+#if ! defined (JUCE_INCLUDE_FLAC_CODE) || JUCE_INCLUDE_FLAC_CODE
  extern "C"
  {
      #include "flac/all.h"
@@ -47,7 +47,7 @@ namespace juce
 #else
  extern "C"
  {
-     #include <FLAC/all.h>
+     #include JUCE_FLAC_INCLUDE_PATH
  }
 #endif
 

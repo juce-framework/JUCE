@@ -75,6 +75,24 @@
  #define JUCE_USE_FLAC 1
 #endif
 
+/** Config: JUCE_INCLUDE_FLAC_CODE
+    This can be used to disable Juce's embedded 3rd-party flaclib code.
+    You might need to tweak this if you're linking to an external flaclib library in your app,
+    but for normal apps, this option should be left alone.
+
+    If you disable this, you might also want to set a value for JUCE_FLAC_INCLUDE_PATH, to
+    specify the path where your flaclib headers live.
+
+    This config option only has an effect with JUCE_USE_FLAC is enabled.
+*/
+#ifndef JUCE_INCLUDE_FLAC_CODE
+ #define JUCE_INCLUDE_FLAC_CODE 1
+#endif
+
+#ifndef JUCE_FLAC_INCLUDE_PATH
+ #define JUCE_FLAC_INCLUDE_PATH <FLAC/all.h>
+#endif
+
 /** Config: JUCE_USE_OGGVORBIS
     Enables the Ogg-Vorbis audio codec classes (available on all platforms).
     If your app doesn't need to read Ogg-Vorbis files, you might want to disable this to

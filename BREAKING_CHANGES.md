@@ -4,6 +4,40 @@
 
 ## Change
 
+zlib, libjpeg, libpng, and libflac are now built in C language mode, instead
+of as C++.
+
+**Possible Issues**
+
+Symbols in these libraries are no longer wrapped in C++ namespaces. If JUCE is
+linked into a binary that separately includes/links zlib, libjpeg, libpng,
+and/or libflac, then the internal symbols in JUCE may conflict with the symbols
+from the external copy of the library. This will result in ODR violations, and
+potentially linker errors.
+
+**Workaround**
+
+If your project already includes external copies of these libraries, set the
+preprocessor definitions JUCE_INCLUDE_ZLIB_CODE, JUCE_INCLUDE_JPEGLIB_CODE,
+JUCE_INCLUDE_PNGLIB_CODE, and/or JUCE_INCLUDE_FLAC_CODE to 0 in order to
+disable the copies bundled in JUCE. You may also set the definitions
+JUCE_ZLIB_INCLUDE_PATH, JUCE_JPEGLIB_INCLUDE_PATH, JUCE_PNGLIB_INCLUDE_PATH,
+and/or JUCE_FLAC_INCLUDE_PATH to set custom include paths for the library
+headers.
+
+**Rationale**
+
+Building these libraries as C code means that the copies vendored by JUCE
+require fewer intrusive changes. Building them as C++ historically required
+internal changes due to (for example) C++'s stricter type-checking rules.
+Building as C should allow for quicker, smoother upgrades of vendored
+dependencies in the future. Another consideration is that the C language has
+different semantics to C++ in some respects, so building as C is more likely to
+produce a binary that has the behaviour intended by the authors.
+
+
+## Change
+
 The WebBrowserComponent native integrations package location changed from
 modules/juce_gui_extra/native/javascript to
 modules/juce_gui_extra/native/typescript/webview-interop.

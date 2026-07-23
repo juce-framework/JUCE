@@ -91,7 +91,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 4127 4996 6001 6011 6326 6385 6386 6387 28
 #undef FIX_0_541196100
 #undef MULTIPLY
 #include "juce_graphics/image_formats/jpglib/jfdctfst.c"
-#endif
 
 #define savable_state dedup_savable_state
 #define huff_entropy_ptr dedup_huff_entryopy_ptr
@@ -100,3 +99,5 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 4127 4996 6001 6011 6326 6385 6386 6387 28
 #undef savable_state
 #undef huff_entropy_ptr
 #undef finish_pass_huff
+
+#endif
