@@ -299,6 +299,46 @@ bool XmlDocument::parseDTD()
     return true;
 }
 
+template <typename CharPtr>
+static auto skipIgnoredElement (CharPtr p)
+{
+    struct SkipIgnoredElementResult
+    {
+        CharPtr next;
+        bool exhausted;
+    };
+
+    jassert (*p == '<');
+
+    if (p[1] == '!' && p[2] == '-' && p[3] == '-')
+    {
+        p += 4;
+        const auto close = p.indexOf (CharPointer_ASCII ("-->"));
+
+        if (close < 0)
+        {
+            return SkipIgnoredElementResult { p.findTerminatingNull(), true };
+        }
+
+        return SkipIgnoredElementResult { p + close + 3, false };
+    }
+
+    if (p[1] == '?')
+    {
+        p += 2;
+        const auto close = p.indexOf (CharPointer_ASCII ("?>"));
+
+        if (close < 0)
+        {
+            return SkipIgnoredElementResult { p.findTerminatingNull(), true };
+        }
+
+        return SkipIgnoredElementResult { p + close + 2, false };
+    }
+
+    return SkipIgnoredElementResult { p, false };
+}
+
 void XmlDocument::skipNextWhiteSpace()
 {
     for (;;)
@@ -313,37 +353,14 @@ void XmlDocument::skipNextWhiteSpace()
 
         if (*input == '<')
         {
-            if (input[1] == '!'
-                 && input[2] == '-'
-                 && input[3] == '-')
-            {
-                input += 4;
-                auto closeComment = input.indexOf (CharPointer_ASCII ("-->"));
+            const auto prevInput = input;
+            const auto result = skipIgnoredElement (input);
+            std::tie (input, outOfData) = std::tie (result.next, result.exhausted);
 
-                if (closeComment < 0)
-                {
-                    outOfData = true;
-                    break;
-                }
+            if (outOfData || input == prevInput)
+                break;
 
-                input += closeComment + 3;
-                continue;
-            }
-
-            if (input[1] == '?')
-            {
-                input += 2;
-                auto closeBracket = input.indexOf (CharPointer_ASCII ("?>"));
-
-                if (closeBracket < 0)
-                {
-                    outOfData = true;
-                    break;
-                }
-
-                input += closeBracket + 2;
-                continue;
-            }
+            continue;
         }
 
         break;
@@ -577,23 +594,20 @@ void XmlDocument::readChildElements (XmlElement& parent)
 
                 if (c == '<')
                 {
-                    if (input[1] == '!' && input[2] == '-' && input[3] == '-')
+                    const auto prevInput = input;
+                    const auto result = skipIgnoredElement (input);
+                    std::tie (input, outOfData) = std::tie (result.next, result.exhausted);
+
+                    if (outOfData)
                     {
-                        input += 4;
-                        auto closeComment = input.indexOf (CharPointer_ASCII ("-->"));
-
-                        if (closeComment < 0)
-                        {
-                            setLastError ("unterminated comment", false);
-                            outOfData = true;
-                            return;
-                        }
-
-                        input += closeComment + 3;
-                        continue;
+                        setLastError ("unexpected end of stream", false);
+                        return;
                     }
 
-                    break;
+                    if (prevInput == input)
+                        break;
+
+                    continue;
                 }
 
                 if (c == 0)
