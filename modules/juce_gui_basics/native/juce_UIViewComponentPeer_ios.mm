@@ -557,7 +557,9 @@ private:
                 return windowSceneTracker->getWindowScene() != currentScene;
             }
 
-            return false;
+            // If we're on iOS 12 (or lower), this will only get called when setting up
+            // the peer, in which case we still want to handle the initial setup of the window.
+            return true;
         });
 
         if (! sceneDidChange)
