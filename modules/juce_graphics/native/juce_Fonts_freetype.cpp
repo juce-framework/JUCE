@@ -48,6 +48,10 @@ extern "C"
 {
     // Available since FT 2.13.1, so not available on Ubuntu 20.04 for example
     [[gnu::weak]] FT_Error FT_Get_Default_Named_Instance (FT_Face, FT_UInt*);
+
+    // Unavailable on Ubuntu 18.04
+    [[gnu::weak]] FT_Error FT_Done_MM_Var (FT_Library, FT_MM_Var*);
+    [[gnu::weak]] FT_Error FT_Set_Named_Instance (FT_Face, FT_UInt);
 } // extern "C"
 
 struct FTLibWrapper final : public ReferenceCountedObject
@@ -121,6 +125,9 @@ struct FTFaceWrapper final : public ReferenceCountedObject
     {
         const auto numInstances = std::invoke ([&]() -> FT_UInt
         {
+            if (FT_Done_MM_Var == nullptr)
+                return 0;
+
             if (FT_MM_Var* ftMmVar{}; FT_Get_MM_Var (face, &ftMmVar) == 0)
             {
                 const ScopeGuard scope { [&] { FT_Done_MM_Var (library->library, ftMmVar); } };
@@ -391,7 +398,7 @@ private:
             {
                 auto insertionPoint = findInsertionPoint (FileTypeface (*face, file));
 
-                const auto handledNamedStyles = face->forEachStyleDefaultFirst ([&] (auto index)
+                const auto handledNamedStyles = FT_Set_Named_Instance != nullptr && face->forEachStyleDefaultFirst ([&] (auto index)
                 {
                     const auto err = FT_Set_Named_Instance (face->face, index);
                     jassertquiet (err == 0);
@@ -492,6 +499,9 @@ public:
 
         const auto numAxes = std::invoke ([&]() -> FT_UInt
         {
+            if (FT_Done_MM_Var == nullptr)
+                return 0;
+
             if (FT_MM_Var* ftMmVar{}; FT_Get_MM_Var (newFreeTypeFace->face, &ftMmVar) == 0)
             {
                 const ScopeGuard scope { [&] { FT_Done_MM_Var (newFreeTypeFace->library->library, ftMmVar); } };
