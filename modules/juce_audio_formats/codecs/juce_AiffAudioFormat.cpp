@@ -211,9 +211,10 @@ namespace AiffFileHelpers
     //==============================================================================
     namespace CATEChunk
     {
-        static bool isValidTag (const char* d) noexcept
+        static bool isValidTag (const char* d, const char* end) noexcept
         {
-            return CharacterFunctions::isLetterOrDigit (d[0]) && CharacterFunctions::isUpperCase (static_cast<juce_wchar> (d[0]))
+            return 3 <= std::distance (d, end)
+                && CharacterFunctions::isLetterOrDigit (d[0]) && CharacterFunctions::isUpperCase (static_cast<juce_wchar> (d[0]))
                 && CharacterFunctions::isLetterOrDigit (d[1]) && CharacterFunctions::isLowerCase (static_cast<juce_wchar> (d[1]))
                 && CharacterFunctions::isLetterOrDigit (d[2]) && CharacterFunctions::isLowerCase (static_cast<juce_wchar> (d[2]));
         }
@@ -256,7 +257,7 @@ namespace AiffFileHelpers
             {
                 bool isGenre = false;
 
-                if (isValidTag (data))
+                if (isValidTag (data, dataEnd))
                 {
                     auto tag = String (CharPointer_UTF8 (data), CharPointer_UTF8 (dataEnd));
                     isGenre = isAppleGenre (tag);
@@ -267,9 +268,14 @@ namespace AiffFileHelpers
 
                 if (data < dataEnd && data[0] == 0)
                 {
-                    if      (data + 52  < dataEnd && isValidTag (data + 50))   data += 50;
-                    else if (data + 120 < dataEnd && isValidTag (data + 118))  data += 118;
-                    else if (data + 170 < dataEnd && isValidTag (data + 168))  data += 168;
+                    for (const auto& offset : { 50, 118, 168 })
+                    {
+                        if (isValidTag (data + offset, dataEnd))
+                        {
+                            data += offset;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -426,6 +432,15 @@ public:
                 {
                     auto type = input->readInt();
                     auto length = (uint32) input->readIntBigEndian();
+
+                    const auto numBytesAvailable = input->getNumBytesRemaining();
+
+                    if (numBytesAvailable >= 0 && length > numBytesAvailable)
+                    {
+                        // Malformed chunk, its length is longer than the stream itself
+                        break;
+                    }
+
                     auto chunkEnd = input->getPosition() + length;
 
                     if (type == chunkName ("FVER"))
@@ -551,6 +566,10 @@ public:
                     {
                         HeapBlock<InstChunk> inst;
                         inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
+
+                        if (inst.getData() == nullptr)
+                            break;
+
                         input->read (inst, (int) length);
                         inst->copyTo (metadataValuesMap);
                     }
