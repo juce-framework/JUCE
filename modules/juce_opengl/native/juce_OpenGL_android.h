@@ -379,14 +379,18 @@ private:
         if (auto* peer = component.getPeer())
         {
             const auto peerBounds = peer->getAreaCoveredBy (component).toFloat();
+            const auto desktopScale = peer->getComponent().getDesktopScaleFactor();
             const auto globalRect = Rectangle { peer->localToGlobal (peerBounds.getTopLeft()),
                                                 peer->localToGlobal (peerBounds.getBottomRight()) }
-                                  / peer->getComponent().getDesktopScaleFactor();
+                                  / desktopScale;
 
             const auto& displays = Desktop::getInstance().getDisplays();
             const Rectangle physical { displays.logicalToPhysical (globalRect.getTopLeft()),
                                        displays.logicalToPhysical (globalRect.getBottomRight()) };
-            return physical.toNearestInt();
+
+            const auto physicalPeerPos = displays.logicalToPhysical (peer->localToGlobal (Point<float>{}) / desktopScale);
+
+            return (physical - physicalPeerPos).toNearestInt();
         }
 
         return component.getBounds();
