@@ -518,6 +518,12 @@
     <Filter Include="JUCE Modules\juce_gui_extra\misc">
       <UniqueIdentifier>{08BBBECB-B0D1-7611-37EC-F57E1D0CE2A2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_gui_extra\native\typescript\webview-interop">
+      <UniqueIdentifier>{5FB8F92A-5112-FDC0-439F-9254356EA7BE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_gui_extra\native\typescript">
+      <UniqueIdentifier>{C408CEDC-9847-15D6-4EBE-2C2C18FFF00B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_gui_extra\native">
       <UniqueIdentifier>{268E8F2A-980C-BF2F-B161-AACABC9D91F3}</UniqueIdentifier>
     </Filter>
@@ -6445,6 +6451,18 @@
     </None>
     <None Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\JUCE_CHANGES.txt">
       <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_gui_extra\native\typescript\webview-interop\LICENSE-AGPL.md">
+      <Filter>JUCE Modules\juce_gui_extra\native\typescript\webview-interop</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_gui_extra\native\typescript\webview-interop\LICENSE-JUCE.md">
+      <Filter>JUCE Modules\juce_gui_extra\native\typescript\webview-interop</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_gui_extra\native\typescript\webview-interop\LICENSE.md">
+      <Filter>JUCE Modules\juce_gui_extra\native\typescript\webview-interop</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_gui_extra\native\typescript\webview-interop\README.md">
+      <Filter>JUCE Modules\juce_gui_extra\native\typescript\webview-interop</Filter>
     </None>
     <None Include=".\icon.ico">
       <Filter>JUCE Library Code</Filter>
