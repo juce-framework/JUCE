@@ -102,6 +102,33 @@ public:
         removeListener (this);
     }
 
+    void startTimer (Timer* t, int interval)
+    {
+        const LockType::ScopedLockType sl (lock);
+
+        if (t->timerPeriodMs.exchange (interval) > 0)
+            resetTimerCounter (t);
+        else
+            addTimer (t);
+    }
+
+    void stopTimer (Timer* t)
+    {
+        if (! t->isTimerRunning())
+            return;
+
+        const LockType::ScopedLockType sl (lock);
+
+        if (t->timerPeriodMs.exchange (0) > 0)
+            removeTimer (t);
+    }
+
+    void callTimersSynchronously()
+    {
+        callTimers();
+    }
+
+private:
     void run() override
     {
         auto lastTime = Time::getMillisecondCounter();
@@ -157,7 +184,7 @@ public:
                 break;
 
             auto* timer = first.timer;
-            first.countdownMs = timer->timerPeriodMs;
+            first.countdownMs = timer->getTimerInterval();
             shuffleTimerBackInQueue (0);
             notify();
 
@@ -177,15 +204,8 @@ public:
         callbackArrived.signal();
     }
 
-    void callTimersSynchronously()
-    {
-        callTimers();
-    }
-
     void addTimer (Timer* t)
     {
-        const LockType::ScopedLockType sl (lock);
-
         if (! isThreadRunning())
             startThread (Thread::Priority::high);
 
@@ -196,7 +216,7 @@ public:
 
         auto pos = timers.size();
 
-        timers.push_back ({ t, t->timerPeriodMs });
+        timers.push_back ({ t, t->getTimerInterval() });
         t->positionInQueue = pos;
         shuffleTimerForwardInQueue (pos);
         notify();
@@ -204,10 +224,8 @@ public:
 
     void removeTimer (Timer* t)
     {
-        const LockType::ScopedLockType sl (lock);
-
-        auto pos = t->positionInQueue;
-        auto lastIndex = timers.size() - 1;
+        const auto pos = t->positionInQueue;
+        const auto lastIndex = timers.size() - 1;
 
         jassert (pos <= lastIndex);
         jassert (timers[pos].timer == t);
@@ -223,15 +241,13 @@ public:
 
     void resetTimerCounter (Timer* t) noexcept
     {
-        const LockType::ScopedLockType sl (lock);
-
         auto pos = t->positionInQueue;
 
         jassert (pos < timers.size());
         jassert (timers[pos].timer == t);
 
-        auto lastCountdown = timers[pos].countdownMs;
-        auto newCountdown = t->timerPeriodMs;
+        const auto lastCountdown = timers[pos].countdownMs;
+        const auto newCountdown = t->getTimerInterval();
 
         if (newCountdown != lastCountdown)
         {
@@ -246,7 +262,6 @@ public:
         }
     }
 
-private:
     LockType lock;
 
     struct TimerCountdown
@@ -371,14 +386,7 @@ void Timer::startTimer (int interval) noexcept
     // If you're calling this before (or after) the MessageManager is
     // running, then you're not going to get any timer callbacks!
     JUCE_ASSERT_MESSAGE_MANAGER_EXISTS
-
-    bool wasStopped = (timerPeriodMs == 0);
-    timerPeriodMs = jmax (1, interval);
-
-    if (wasStopped)
-        timerThread->addTimer (this);
-    else
-        timerThread->resetTimerCounter (this);
+    timerThread->startTimer (this, jmax (1, interval));
 }
 
 void Timer::startTimerHz (int timerFrequencyHz) noexcept
@@ -391,11 +399,7 @@ void Timer::startTimerHz (int timerFrequencyHz) noexcept
 
 void Timer::stopTimer() noexcept
 {
-    if (timerPeriodMs > 0)
-    {
-        timerThread->removeTimer (this);
-        timerPeriodMs = 0;
-    }
+    timerThread->stopTimer (this);
 }
 
 void JUCE_CALLTYPE Timer::callPendingTimersSynchronously()
