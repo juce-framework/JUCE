@@ -272,7 +272,7 @@ struct AlsaMidiHelpers
     template <size_t N>
     static constexpr std::array<std::byte, N> makeBytesLittleEndian (unsigned int b)
     {
-        std::array<std::byte, N> result;
+        std::array<std::byte, N> result{};
 
         for (size_t i = 0; i != N; ++i)
         {
@@ -796,9 +796,9 @@ struct AlsaMidiHelpers
                                                                            0,
                                                                            findMaxGroup);
 
-            const unsigned int caps = protocol == ump::PacketProtocol::MIDI_2_0
-                                    ? SND_UMP_EP_INFO_PROTO_MIDI2
-                                    : SND_UMP_EP_INFO_PROTO_MIDI1;
+            const auto caps = protocol == ump::PacketProtocol::MIDI_2_0
+                            ? (unsigned int) SND_UMP_EP_INFO_PROTO_MIDI2
+                            : (unsigned int) SND_UMP_EP_INFO_PROTO_MIDI1;
 
             snd_ump_endpoint_info_t* e{};
             snd_ump_endpoint_info_alloca (&e);
