@@ -251,6 +251,16 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
 
     if (eventType == AccessibilityEvent::valueChanged)
     {
+        if (getCurrentState().isCheckable())
+        {
+            VARIANT newValue;
+            VariantHelpers::setInt (getCurrentState().isChecked() ? ToggleState_On
+                                                                  : ToggleState_Off,
+                                    &newValue);
+
+            sendAccessibilityPropertyChangedEvent (*this, UIA_ToggleToggleStatePropertyId, newValue);
+        }
+
         if (auto* valueInterface = getValueInterface())
         {
             const auto propertyType = getRole() == AccessibilityRole::slider ? UIA_RangeValueValuePropertyId
