@@ -93,6 +93,9 @@ public:
 
     JUCE_COMRESULT disconnectAllProviders()
     {
+        if (! JUCEApplicationBase::isStandaloneApp())
+            return (HRESULT) UIA_E_NOTSUPPORTED;
+
         if (uiaDisconnectAllProviders != nullptr)
         {
             const ScopedValueSetter<bool> disconnectingAllProvidersSetter (disconnectingAllProviders, true);

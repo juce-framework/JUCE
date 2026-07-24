@@ -139,7 +139,7 @@ public:
         {
             uiaWrapper->disconnectProvider (provider);
 
-            if (providerCount == 0 && JUCEApplicationBase::isStandaloneApp())
+            if (providerCount == 0)
                 uiaWrapper->disconnectAllProviders();
         }
     }
