@@ -128,6 +128,12 @@ public:
 
         auto sharedTexture = resources->getSharedTexture();
 
+        if (sharedTexture == nullptr)
+        {
+            jassertfalse;
+            return dirtyRegions;
+        }
+
         auto encodeBlit = [] (id<MTLCommandBuffer> commandBuffer,
                               id<MTLTexture> source,
                               id<MTLTexture> destination)
@@ -149,9 +155,12 @@ public:
         {
             @autoreleasepool
             {
-                id<MTLCommandBuffer> commandBuffer = [commandQueue.get() commandBuffer];
-
                 id<CAMetalDrawable> drawable = [layer nextDrawable];
+
+                if (drawable == nullptr)
+                    return dirtyRegions;
+
+                id<MTLCommandBuffer> commandBuffer = [commandQueue.get() commandBuffer];
                 encodeBlit (commandBuffer, sharedTexture, drawable.texture);
 
                 [commandBuffer commit];
@@ -180,6 +189,9 @@ public:
                 @autoreleasepool
                 {
                     id<CAMetalDrawable> drawable = [layer nextDrawable];
+
+                    if (drawable == nullptr)
+                        return;
 
                     id<MTLCommandBuffer> presentationCommandBuffer = [commandQueue.get() commandBuffer];
 
