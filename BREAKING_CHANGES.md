@@ -1,5 +1,30 @@
 # JUCE breaking changes
 
+# develop
+
+## Change
+
+The AudioDeviceSelectorComponent::getMidiInputSelectorListBox function has been
+removed.
+
+**Possible Issues**
+
+Code using the removed function will fail to compile.
+
+**Workaround**
+
+There is no workaround.
+
+**Rationale**
+
+Prior to this change the MidiInputSelectorListBox was not accessible when using
+screen reader software. Even if we reworked the component and kept the ListBox
+base class, it would've been a poor fit conceptually for the MidiInputSelector,
+and it would have made the interaction with screen readers unnecessarily
+complex. Hence the ListBox base class was removed, and it's no longer possible
+to return a ListBox pointer to the new MidiInputSelector object.
+
+
 # Version 9.0.1
 
 ## Change

@@ -91,9 +91,6 @@ public:
     /** Returns the standard height used for items in the panel. */
     int getItemHeight() const noexcept      { return itemHeight; }
 
-    /** Returns the ListBox that's being used to show the midi inputs, or nullptr if there isn't one. */
-    ListBox* getMidiInputSelectorListBox() const noexcept;
-
     //==============================================================================
     /** @internal */
     void resized() override;
@@ -117,11 +114,11 @@ private:
     const bool showChannelsAsStereoPairs;
     const bool hideAdvancedOptionsWithButton;
 
-    class MidiInputSelectorComponentListBox;
+    class MidiInputSelectorComponent;
     class MidiOutputSelector;
 
     Array<MidiDeviceInfo> currentMidiOutputs;
-    std::unique_ptr<MidiInputSelectorComponentListBox> midiInputsList;
+    std::unique_ptr<MidiInputSelectorComponent> midiInputsList;
     std::unique_ptr<MidiOutputSelector> midiOutputSelector;
     std::unique_ptr<Label> midiInputsLabel, midiOutputLabel;
     std::unique_ptr<TextButton> bluetoothButton;

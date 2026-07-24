@@ -76,23 +76,6 @@ struct SimpleDeviceManagerInputLevelMeter final : public Component,
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDeviceManagerInputLevelMeter)
 };
 
-static void drawTextLayout (Graphics& g, Component& owner, StringRef text, const Rectangle<int>& textBounds, bool enabled)
-{
-    const auto textColour = owner.findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f);
-
-    AttributedString attributedString { text };
-    attributedString.setColour (textColour);
-    attributedString.setFont (owner.withDefaultMetrics (FontOptions { (float) textBounds.getHeight() * 0.6f }));
-    attributedString.setJustification (Justification::centredLeft);
-    attributedString.setWordWrap (AttributedString::WordWrap::none);
-
-    TextLayout textLayout;
-    textLayout.createLayout (attributedString,
-                             (float) textBounds.getWidth(),
-                             (float) textBounds.getHeight());
-    textLayout.draw (g, textBounds.toFloat());
-}
-
 struct ToggleButtonListItem
 {
     String name;
@@ -329,97 +312,55 @@ private:
 };
 
 //==============================================================================
-class AudioDeviceSelectorComponent::MidiInputSelectorComponentListBox final : public ListBox,
-                                                                              private ListBoxModel
+class AudioDeviceSelectorComponent::MidiInputSelectorComponent final : public Component
 {
 public:
-    MidiInputSelectorComponentListBox (AudioDeviceManager& dm, const String& noItems)
-        : ListBox ({}, nullptr),
-          deviceManager (dm),
-          noItemsMessage (noItems)
+    MidiInputSelectorComponent (AudioDeviceManager& dm, const String& noItems)
+        : deviceManager (dm),
+          buttonList (noItems, [this] (int channel, bool) { flipEnablement (channel); })
     {
         updateDevices();
-        setModel (this);
-        setOutlineThickness (1);
+        addAndMakeVisible (buttonList);
     }
 
     void updateDevices()
     {
         items = MidiInput::getAvailableDevices();
+
+        std::vector<ToggleButtonListItem> toggleButtonListItems;
+
+        for (const auto [i, item] : enumerate (items, int{}))
+            toggleButtonListItems.push_back ({ item.name, isEnabled (i) });
+
+        buttonList.setItems (toggleButtonListItems);
     }
 
-    int getNumRows() override
+    bool isEnabled (int row) const
     {
-        return items.size();
-    }
-
-    void paintListBoxItem (int row, Graphics& g, int width, int height, bool rowIsSelected) override
-    {
-        if (isPositiveAndBelow (row, items.size()))
-        {
-            if (rowIsSelected)
-                g.fillAll (findColour (TextEditor::highlightColourId)
-                               .withMultipliedAlpha (0.3f));
-
-            auto item = items[row];
-            bool enabled = deviceManager.isMidiInputDeviceEnabled (item.identifier);
-
-            auto x = getTickX();
-            auto tickW = (float) height * 0.75f;
-
-            getLookAndFeel().drawTickBox (g, *this, (float) x - tickW, ((float) height - tickW) * 0.5f, tickW, tickW,
-                                          enabled, true, true, false);
-
-            drawTextLayout (g, *this, item.name, { x + 5, 0, width - x - 5, height }, enabled);
-        }
-    }
-
-    void listBoxItemClicked (int row, const MouseEvent& e) override
-    {
-        selectRow (row);
-
-        if (e.x < getTickX())
-            flipEnablement (row);
-    }
-
-    void listBoxItemDoubleClicked (int row, const MouseEvent&) override
-    {
-        flipEnablement (row);
-    }
-
-    void returnKeyPressed (int row) override
-    {
-        flipEnablement (row);
-    }
-
-    void paint (Graphics& g) override
-    {
-        ListBox::paint (g);
-
-        if (items.isEmpty())
-        {
-            g.setColour (Colours::grey);
-            g.setFont (0.5f * (float) getRowHeight());
-            g.drawText (noItemsMessage,
-                        0, 0, getWidth(), getHeight() / 2,
-                        Justification::centred, true);
-        }
+        const auto item = items[row];
+        return deviceManager.isMidiInputDeviceEnabled (item.identifier);
     }
 
     int getBestHeight (int preferredHeight)
     {
-        auto extra = getOutlineThickness() * 2;
+        return buttonList.getBestHeight (preferredHeight);
+    }
 
-        return jmax (getRowHeight() * 2 + extra,
-                     jmin (getRowHeight() * getNumRows() + extra,
-                           preferredHeight));
+    void resized() override
+    {
+        buttonList.setBounds (getLocalBounds());
+    }
+
+    void setRowHeight (int h)
+    {
+        buttonList.setRowHeight (h);
     }
 
 private:
     //==============================================================================
     AudioDeviceManager& deviceManager;
-    const String noItemsMessage;
     Array<MidiDeviceInfo> items;
+    ToggleButtonList buttonList;
 
     void flipEnablement (const int row)
     {
@@ -430,12 +371,7 @@ private:
         }
     }
 
-    int getTickX() const
-    {
-        return getRowHeight();
-    }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputSelectorComponentListBox)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputSelectorComponent)
 };
 
 
@@ -1302,8 +1238,8 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
 
     if (showMidiInputOptions)
     {
-        midiInputsList = std::make_unique <MidiInputSelectorComponentListBox> (deviceManager,
-                                                                               "(" + TRANS ("No MIDI inputs available") + ")");
+        midiInputsList = std::make_unique <MidiInputSelectorComponent> (deviceManager,
+                                                                        "(" + TRANS ("No MIDI inputs available") + ")");
         addAndMakeVisible (midiInputsList.get());
 
         midiInputsLabel = std::make_unique<Label> (String{}, TRANS ("Active MIDI inputs:"));
@@ -1444,7 +1380,6 @@ void AudioDeviceSelectorComponent::updateAllControls()
     if (midiInputsList != nullptr)
     {
         midiInputsList->updateDevices();
-        midiInputsList->updateContent();
         midiInputsList->repaint();
     }
 
@@ -1465,11 +1400,6 @@ void AudioDeviceSelectorComponent::handleBluetoothButton()
                 BluetoothMidiDevicePairingDialogue::open();
         });
     }
-}
-
-ListBox* AudioDeviceSelectorComponent::getMidiInputSelectorListBox() const noexcept
-{
-    return midiInputsList.get();
 }
 
 } // namespace juce
