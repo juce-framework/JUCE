@@ -432,9 +432,14 @@ void MessageManager::doPlatformSpecificShutdown()
 
 bool MessageManager::postMessageToSystemQueue (MessageBase* message)
 {
-    jassert (appDelegate != nil);
-    appDelegate->messageQueue.post (message);
-    return true;
+    if (appDelegate != nullptr)
+    {
+        appDelegate->messageQueue.post (message);
+        return true;
+    }
+
+    jassertfalse;
+    return false;
 }
 
 void MessageManager::broadcastMessage (const String& message)
