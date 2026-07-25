@@ -1452,7 +1452,9 @@ struct StateHelpers
 
         void draw() noexcept
         {
-            context.extensions.glBufferSubData (GL_ARRAY_BUFFER, 0, (GLsizeiptr) ((size_t) numVertices * sizeof (VertexInfo)), vertexData);
+            context.extensions.glBufferData (GL_ARRAY_BUFFER,
+                                             (GLsizeiptr) ((size_t) numVertices * sizeof (VertexInfo)),
+                                             vertexData, GL_STREAM_DRAW);
             // NB: If you get a random crash in here and are running in a Parallels VM, it seems to be a bug in
             // their driver. Can't find a workaround unfortunately.
             glDrawElements (GL_TRIANGLES, (numVertices * 3) / 2, GL_UNSIGNED_SHORT, nullptr);
