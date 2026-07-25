@@ -215,6 +215,247 @@ private:
 };
 
 //==============================================================================
+struct ActiveTextures
+{
+    explicit ActiveTextures (const OpenGLContext& c) noexcept
+        : needsToEnableTexture (c.getProfile() == OpenGLProfile::compatibility)
+    {
+    }
+
+    void clear() noexcept
+    {
+        zeromem (currentTextureID, sizeof (currentTextureID));
+    }
+
+    template <typename QuadQueueType>
+    void setTexturesEnabled (QuadQueueType& quadQueue, int textureIndexMask) noexcept
+    {
+        if (texturesEnabled != textureIndexMask)
+        {
+            quadQueue.flush();
+
+            for (int i = numTextures; --i >= 0;)
+            {
+                if ((texturesEnabled & (1 << i)) != (textureIndexMask & (1 << i)))
+                {
+                    setActiveTexture (i);
+                    JUCE_CHECK_OPENGL_ERROR
+
+                    const auto thisTextureEnabled = (textureIndexMask & (1 << i)) != 0;
+
+                    if (! thisTextureEnabled)
+                        currentTextureID[i] = 0;
+
+                   #if ! JUCE_ANDROID
+                    if (needsToEnableTexture)
+                    {
+                        if (thisTextureEnabled)
+                            glEnable (GL_TEXTURE_2D);
+                        else
+                            glDisable (GL_TEXTURE_2D);
+
+                        JUCE_CHECK_OPENGL_ERROR
+                    }
+                   #endif
+                }
+            }
+
+            texturesEnabled = textureIndexMask;
+        }
+    }
+
+    template <typename QuadQueueType>
+    void disableTextures (QuadQueueType& quadQueue) noexcept
+    {
+        setTexturesEnabled (quadQueue, 0);
+    }
+
+    template <typename QuadQueueType>
+    void setSingleTextureMode (QuadQueueType& quadQueue) noexcept
+    {
+        setTexturesEnabled (quadQueue, 1);
+        setActiveTexture (0);
+    }
+
+    template <typename QuadQueueType>
+    void setTwoTextureMode (QuadQueueType& quadQueue, GLuint texture1, GLuint texture2)
+    {
+        JUCE_CHECK_OPENGL_ERROR
+        setTexturesEnabled (quadQueue, 3);
+
+        if (currentActiveTexture == 0)
+        {
+            bindTexture (texture1);
+            setActiveTexture (1);
+            bindTexture (texture2);
+        }
+        else
+        {
+            setActiveTexture (1);
+            bindTexture (texture2);
+            setActiveTexture (0);
+            bindTexture (texture1);
+        }
+
+        JUCE_CHECK_OPENGL_ERROR
+    }
+
+    void setActiveTexture (int index) noexcept
+    {
+        if (currentActiveTexture != index)
+        {
+            currentActiveTexture = index;
+            glActiveTexture (GL_TEXTURE0 + (GLenum) index);
+            JUCE_CHECK_OPENGL_ERROR
+        }
+    }
+
+    void bindTexture (GLuint textureID) noexcept
+    {
+        if (currentActiveTexture < 0 || numTextures <= currentActiveTexture)
+        {
+            jassertfalse;
+            return;
+        }
+
+        if (currentTextureID[currentActiveTexture] != textureID)
+        {
+            currentTextureID[currentActiveTexture] = textureID;
+            glBindTexture (GL_TEXTURE_2D, textureID);
+            JUCE_CHECK_OPENGL_ERROR
+        }
+       #if JUCE_DEBUG
+        else
+        {
+            GLint t = 0;
+            glGetIntegerv (GL_TEXTURE_BINDING_2D, &t);
+            jassert (t == (GLint) textureID);
+        }
+       #endif
+    }
+
+private:
+    static constexpr auto numTextures = 3;
+    GLuint currentTextureID[numTextures];
+    int texturesEnabled = 0, currentActiveTexture = -1;
+    bool needsToEnableTexture;
+
+    JUCE_DECLARE_NON_COPYABLE (ActiveTextures)
+    JUCE_DECLARE_NON_MOVEABLE (ActiveTextures)
+};
+
+//==============================================================================
+struct GradientTextureCache final : public ReferenceCountedObject
+{
+    GradientTextureCache() = default;
+
+    static GradientTextureCache& get (OpenGLContext& c)
+    {
+        const char cacheValueID[] = "GradientTextureCache";
+        auto* cache = static_cast<GradientTextureCache*> (c.getAssociatedObject (cacheValueID));
+
+        if (cache == nullptr)
+        {
+            cache = new GradientTextureCache();
+            c.setAssociatedObject (cacheValueID, cache);
+        }
+
+        return *cache;
+    }
+
+    // Entries are kept most-recently-used first, so consecutive fills with the same
+    // gradient hit the front entry immediately.
+    OpenGLTexture& getTextureFor (const ColourGradient& gradient, ActiveTextures& activeTextures)
+    {
+        for (const auto [index, entry] : enumerate (entries, ptrdiff_t{}))
+        {
+            if (matches (entry.key, gradient))
+            {
+                std::rotate (entries.begin(), entries.begin() + index, entries.begin() + index + 1);
+                return *entries.front().texture;
+            }
+        }
+
+        auto texture = std::invoke ([&]() -> std::unique_ptr<OpenGLTexture>
+        {
+            if (entries.size() < maxCachedGradients)
+            {
+                activeTextures.clear();
+                return std::make_unique<OpenGLTexture>();
+            }
+
+            auto evicted = std::move (entries.back().texture);
+            entries.pop_back();
+            return evicted;
+        });
+
+        PixelARGB lookup[lookupTableSize];
+        gradient.createLookupTable (lookup);
+        texture->loadARGB (lookup, lookupTableSize, 1);
+
+        entries.insert (entries.begin(), { buildKey (gradient), std::move (texture) });
+        return *entries.front().texture;
+    }
+
+private:
+    struct Entry
+    {
+        std::vector<uint64> key;
+        std::unique_ptr<OpenGLTexture> texture;
+    };
+
+    // point1 and point2 are deliberately excluded as they position the gradient through
+    // the shader's matrix and do not change the table
+    template <typename Callback>
+    static bool emitKeyWords (const ColourGradient& gradient, Callback&& callback)
+    {
+        const auto numStops = gradient.getNumColours();
+
+        if (! callback (((uint64) numStops << 1) | (gradient.isRadial ? 1u : 0u)))
+            return false;
+
+        for (int i = 0; i < numStops; ++i)
+        {
+            const auto position = gradient.getColourPosition (i);
+            uint64 positionBits{};
+            std::memcpy (&positionBits, &position, sizeof (positionBits));
+
+            if (! callback (positionBits) || ! callback ((uint64) gradient.getColour (i).getARGB()))
+                return false;
+        }
+
+        return true;
+    }
+
+    static bool matches (const std::vector<uint64>& key, const ColourGradient& gradient)
+    {
+        size_t index = 0;
+
+        auto result = emitKeyWords (gradient, [&] (uint64 word)
+        {
+            return index < key.size() && key[index++] == word;
+        });
+
+        return result && index == key.size();
+    }
+
+    static std::vector<uint64> buildKey (const ColourGradient& gradient)
+    {
+        std::vector<uint64> key;
+        key.reserve ((size_t) (2 * gradient.getNumColours() + 1));
+        emitKeyWords (gradient, [&] (uint64 word) { key.push_back (word); return true; });
+        return key;
+    }
+
+    static constexpr size_t maxCachedGradients = 128;
+    static constexpr int lookupTableSize = 256;
+
+    std::vector<Entry> entries;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GradientTextureCache)
+};
+
+//==============================================================================
 struct Target
 {
     Target (OpenGLContext& c, GLuint fbID, int width, int height) noexcept
@@ -1125,136 +1366,6 @@ struct StateHelpers
     };
 
     //==============================================================================
-    struct ActiveTextures
-    {
-        explicit ActiveTextures (const OpenGLContext& c) noexcept
-            : needsToEnableTexture (c.getProfile() == OpenGLProfile::compatibility)
-        {
-        }
-
-        void clear() noexcept
-        {
-            zeromem (currentTextureID, sizeof (currentTextureID));
-        }
-
-        template <typename QuadQueueType>
-        void setTexturesEnabled (QuadQueueType& quadQueue, int textureIndexMask) noexcept
-        {
-            if (texturesEnabled != textureIndexMask)
-            {
-                quadQueue.flush();
-
-                for (int i = numTextures; --i >= 0;)
-                {
-                    if ((texturesEnabled & (1 << i)) != (textureIndexMask & (1 << i)))
-                    {
-                        setActiveTexture (i);
-                        JUCE_CHECK_OPENGL_ERROR
-
-                        const auto thisTextureEnabled = (textureIndexMask & (1 << i)) != 0;
-
-                        if (! thisTextureEnabled)
-                            currentTextureID[i] = 0;
-
-                       #if ! JUCE_ANDROID
-                        if (needsToEnableTexture)
-                        {
-                            if (thisTextureEnabled)
-                                glEnable (GL_TEXTURE_2D);
-                            else
-                                glDisable (GL_TEXTURE_2D);
-
-                            JUCE_CHECK_OPENGL_ERROR
-                        }
-                       #endif
-                    }
-                }
-
-                texturesEnabled = textureIndexMask;
-            }
-        }
-
-        template <typename QuadQueueType>
-        void disableTextures (QuadQueueType& quadQueue) noexcept
-        {
-            setTexturesEnabled (quadQueue, 0);
-        }
-
-        template <typename QuadQueueType>
-        void setSingleTextureMode (QuadQueueType& quadQueue) noexcept
-        {
-            setTexturesEnabled (quadQueue, 1);
-            setActiveTexture (0);
-        }
-
-        template <typename QuadQueueType>
-        void setTwoTextureMode (QuadQueueType& quadQueue, GLuint texture1, GLuint texture2)
-        {
-            JUCE_CHECK_OPENGL_ERROR
-            setTexturesEnabled (quadQueue, 3);
-
-            if (currentActiveTexture == 0)
-            {
-                bindTexture (texture1);
-                setActiveTexture (1);
-                bindTexture (texture2);
-            }
-            else
-            {
-                setActiveTexture (1);
-                bindTexture (texture2);
-                setActiveTexture (0);
-                bindTexture (texture1);
-            }
-
-            JUCE_CHECK_OPENGL_ERROR
-        }
-
-        void setActiveTexture (int index) noexcept
-        {
-            if (currentActiveTexture != index)
-            {
-                currentActiveTexture = index;
-                glActiveTexture (GL_TEXTURE0 + (GLenum) index);
-                JUCE_CHECK_OPENGL_ERROR
-            }
-        }
-
-        void bindTexture (GLuint textureID) noexcept
-        {
-            if (currentActiveTexture < 0 || numTextures <= currentActiveTexture)
-            {
-                jassertfalse;
-                return;
-            }
-
-            if (currentTextureID[currentActiveTexture] != textureID)
-            {
-                currentTextureID[currentActiveTexture] = textureID;
-                glBindTexture (GL_TEXTURE_2D, textureID);
-                JUCE_CHECK_OPENGL_ERROR
-            }
-           #if JUCE_DEBUG
-            else
-            {
-                GLint t = 0;
-                glGetIntegerv (GL_TEXTURE_BINDING_2D, &t);
-                jassert (t == (GLint) textureID);
-            }
-           #endif
-        }
-
-    private:
-        static constexpr auto numTextures = 3;
-        GLuint currentTextureID[numTextures];
-        int texturesEnabled = 0, currentActiveTexture = -1;
-        bool needsToEnableTexture;
-
-        JUCE_DECLARE_NON_COPYABLE (ActiveTextures)
-        JUCE_DECLARE_NON_MOVEABLE (ActiveTextures)
-    };
-
-    //==============================================================================
     struct TextureCache
     {
         TextureCache() = default;
@@ -1278,44 +1389,17 @@ struct StateHelpers
             return textures.removeAndReturn (0);
         }
 
-        void resetGradient() noexcept
+        void bindTextureForGradient (OpenGLContext& context, ActiveTextures& activeTextures,
+                                     const ColourGradient& gradient)
         {
-            gradientNeedsRefresh = true;
+            JUCE_CHECK_OPENGL_ERROR;
+            auto& texture = GradientTextureCache::get (context).getTextureFor (gradient, activeTextures);
+            activeTextures.bindTexture (texture.getTextureID());
         }
-
-        void bindTextureForGradient (ActiveTextures& activeTextures, const ColourGradient& gradient)
-        {
-            if (gradientNeedsRefresh)
-            {
-                gradientNeedsRefresh = false;
-
-                if (gradientTextures.size() < numGradientTexturesToCache)
-                {
-                    activeGradientIndex = gradientTextures.size();
-                    activeTextures.clear();
-                    gradientTextures.add (new OpenGLTexture());
-                }
-                else
-                {
-                    activeGradientIndex = (activeGradientIndex + 1) % numGradientTexturesToCache;
-                }
-
-                JUCE_CHECK_OPENGL_ERROR;
-                PixelARGB lookup[gradientTextureSize];
-                gradient.createLookupTable (lookup);
-                gradientTextures.getUnchecked (activeGradientIndex)->loadARGB (lookup, gradientTextureSize, 1);
-            }
-
-            activeTextures.bindTexture (gradientTextures.getUnchecked (activeGradientIndex)->getTextureID());
-        }
-
-        enum { gradientTextureSize = 256 };
 
     private:
-        enum { numTexturesToCache = 8, numGradientTexturesToCache = 10 };
-        OwnedArray<OpenGLTexture> textures, gradientTextures;
-        int activeGradientIndex = 0;
-        bool gradientNeedsRefresh = true;
+        enum { numTexturesToCache = 8 };
+        OwnedArray<OpenGLTexture> textures;
     };
 
     //==============================================================================
@@ -1664,12 +1748,12 @@ struct GLState : private ImagePixelData::Listener
             activeTextures.setActiveTexture (1);
             activeTextures.bindTexture ((GLuint) maskTextureID);
             activeTextures.setActiveTexture (0);
-            textureCache.bindTextureForGradient (activeTextures, g);
+            textureCache.bindTextureForGradient (target.context, activeTextures, g);
         }
         else
         {
             activeTextures.setSingleTextureMode (shaderQuadQueue);
-            textureCache.bindTextureForGradient (activeTextures, g);
+            textureCache.bindTextureForGradient (target.context, activeTextures, g);
         }
 
         auto t = transform.translated (0.5f - (float) target.bounds.getX(),
@@ -1831,7 +1915,7 @@ struct GLState : private ImagePixelData::Listener
     Target target;
 
     StateHelpers::BlendingMode blendMode;
-    StateHelpers::ActiveTextures activeTextures;
+    ActiveTextures activeTextures;
     StateHelpers::TextureCache textureCache;
     StateHelpers::CurrentShader currentShader;
     StateHelpers::ShaderQuadQueue shaderQuadQueue;
@@ -1913,12 +1997,6 @@ struct SavedState final : public RenderingHelpers::SavedStateBase<SavedState>
     }
 
     Rectangle<int> getMaximumBounds() const     { return state->target.bounds; }
-
-    void setFillType (const FillType& newFill)
-    {
-        BaseClass::setFillType (newFill);
-        state->textureCache.resetGradient();
-    }
 
     //==============================================================================
     template <typename IteratorType>
