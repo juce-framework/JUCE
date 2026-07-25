@@ -54,33 +54,53 @@ public:
 
         The image will be arranged so that its top-left corner is at texture
         coordinate (0, 1).
+
+        This must be called while a context is current. If there is no current
+        context, this function does nothing, and the texture is left unchanged.
     */
     void loadImage (const Image& image);
 
     /** Creates a texture from a raw array of pixels.
+
         If width and height are not powers-of-two, the texture will be created with a
         larger size, and only the subsection (0, 0, width, height) will be initialised.
         The data is sent directly to the OpenGL driver without being flipped vertically,
         so the first pixel will be mapped onto texture coordinate (0, 0).
+
+        This must be called while a context is current. If there is no current
+        context, this function does nothing, and the texture is left unchanged.
     */
     void loadARGB (const PixelARGB* pixels, int width, int height);
 
     /** Creates a texture from a raw array of pixels.
+
         This is like loadARGB, but will vertically flip the data so that the first
         pixel ends up at texture coordinate (0, 1), and if the width and height are
         not powers-of-two, it will compensate by using a larger texture size.
+
+        This must be called while a context is current. If there is no current
+        context, this function does nothing, and the texture is left unchanged.
     */
     void loadARGBFlipped (const PixelARGB* pixels, int width, int height);
 
     /** Creates an alpha-channel texture from an array of alpha values.
+
         If width and height are not powers-of-two, the texture will be created with a
         larger size, and only the subsection (0, 0, width, height) will be initialised.
         The data is sent directly to the OpenGL driver without being flipped vertically,
         so the first pixel will be mapped onto texture coordinate (0, 0).
+
+        This must be called while a context is current. If there is no current
+        context, this function does nothing, and the texture is left unchanged.
     */
     void loadAlpha (const uint8* pixels, int width, int height);
 
-    /** Frees the texture, if there is one. */
+    /** Frees the texture, if there is one.
+
+        The texture can only be freed while the context that created it is
+        current. If a different context is current, this function asserts and
+        the texture will leak until the context that created it is destroyed.
+    */
     void release();
 
     /** Binds the texture to the currently active openGL context. */
