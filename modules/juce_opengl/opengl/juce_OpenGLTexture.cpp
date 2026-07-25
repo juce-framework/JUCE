@@ -135,6 +135,15 @@ struct Flipper
             auto* srcLine = srcData + lineStride * y;
             auto* dstLine = dataCopy.get() + w * (h - 1 - y);
 
+            if constexpr (std::is_same_v<PixelType, PixelARGB>)
+            {
+                if ((size_t) pixelStride == sizeof (PixelARGB))
+                {
+                    std::memcpy (dstLine, srcLine, (size_t) w * sizeof (PixelARGB));
+                    continue;
+                }
+            }
+
             for (int x = 0; x < w; ++x)
             {
                 auto* srcPixel = srcLine + x * pixelStride;
