@@ -58,24 +58,27 @@ void OpenGLTexture::create (const int w, const int h, const void* pixels, GLenum
     // context. You'll need to create this object in one of the OpenGLContext's callbacks.
     jassert (ownerContext != nullptr);
 
-    if (textureID == 0)
-    {
-        JUCE_CHECK_OPENGL_ERROR
-        glGenTextures (1, &textureID);
-        glBindTexture (GL_TEXTURE_2D, textureID);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    JUCE_CHECK_OPENGL_ERROR
 
-        auto glMagFilter = (GLint) (ownerContext->texMagFilter == OpenGLContext::linear ? GL_LINEAR : GL_NEAREST);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glMagFilter);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        JUCE_CHECK_OPENGL_ERROR
-    }
-    else
-    {
-        glBindTexture (GL_TEXTURE_2D, textureID);
-        JUCE_CHECK_OPENGL_ERROR;
-    }
+    if (textureID == 0)
+        glGenTextures (1, &textureID);
+
+    glBindTexture (GL_TEXTURE_2D, textureID);
+
+    // We need to set parameters on every upload, not just when the texture name is
+    // generated. Textures that outlive a single upload, like those held by the image
+    // cache, would otherwise be stuck with the magnification filter that was current
+    // when they were first created, and would ignore any later call to
+    // OpenGLContext::setTextureMagnificationFilter().
+    const auto glMagFilter = (GLint) (ownerContext != nullptr && ownerContext->texMagFilter == OpenGLContext::nearest
+                                          ? GL_NEAREST
+                                          : GL_LINEAR);
+
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glMagFilter);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    JUCE_CHECK_OPENGL_ERROR
 
     glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
     JUCE_CHECK_OPENGL_ERROR
