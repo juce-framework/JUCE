@@ -936,7 +936,12 @@ private:
             mo << "        implementation(files('libs/" << File (d).getFileName() << "'))" << newLine;
 
         if (isInAppBillingEnabled())
-            mo << "        implementation('com.android.billingclient:billing:7.0.0')" << newLine;
+        {
+            mo << "        implementation('com.android.billingclient:billing:9.1.0') {" << newLine;
+            mo << "            exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'" << newLine;
+            mo << "            exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'" << newLine;
+            mo << "        }" << newLine;
+        }
 
         if (areRemoteNotificationsEnabled())
         {
