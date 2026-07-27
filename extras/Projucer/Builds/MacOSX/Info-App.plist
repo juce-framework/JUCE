@@ -43,7 +43,7 @@
         <key>CFBundleTypeRole</key>
         <string>Editor</string>
         <key>CFBundleTypeIconFile</key>
-        <string>Icon</string>
+        <string>AppIcon</string>
         <key>NSPersistentStoreTypeKey</key>
         <string>XML</string>
         <key>LSHandlerRank</key>
