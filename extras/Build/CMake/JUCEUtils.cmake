@@ -659,17 +659,6 @@ function(_juce_generate_icon source_target dest_target)
     get_filename_component(icon_composer_icon_name "${juce_property_icon_composer_bundle}" NAME_WE)
 
     if(juce_property_icon_composer_bundle AND (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS"))
-        set_source_files_properties("${juce_property_icon_composer_bundle}"
-            PROPERTIES
-                MACOSX_PACKAGE_LOCATION Resources
-                XCODE_EXPLICIT_FILE_TYPE folder.iconcomposer.icon
-        )
-
-        target_sources(${dest_target} PRIVATE "${juce_property_icon_composer_bundle}")
-
-        set_target_properties(${dest_target} PROPERTIES
-            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "${icon_composer_icon_name}")
-
         if((CMAKE_SYSTEM_NAME STREQUAL "Darwin") AND (NOT CMAKE_GENERATOR STREQUAL "Xcode"))
             add_custom_command(TARGET ${target} POST_BUILD
                 COMMAND "${CMAKE_COMMAND}"
@@ -677,6 +666,17 @@ function(_juce_generate_icon source_target dest_target)
                     "-Dicon_path=${juce_property_icon_composer_bundle}"
                     "-P" "${JUCE_CMAKE_UTILS_DIR}/generateXcassetsFromIcon.cmake"
                 VERBATIM)
+        else()
+            set_source_files_properties("${juce_property_icon_composer_bundle}"
+                PROPERTIES
+                    MACOSX_PACKAGE_LOCATION Resources
+                    XCODE_EXPLICIT_FILE_TYPE folder.iconcomposer.icon
+            )
+
+            target_sources(${dest_target} PRIVATE "${juce_property_icon_composer_bundle}")
+
+            set_target_properties(${dest_target} PROPERTIES
+                XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "${icon_composer_icon_name}")
         endif()
     endif()
 
