@@ -99,15 +99,18 @@ void OpenGLTexture::create (const int w, const int h, const void* pixels, GLenum
         return;
     }
 
-    glTexSubImage2D (GL_TEXTURE_2D,
-                     0,
-                     0,
-                     topLeft ? (height - h) : 0,
-                     w,
-                     h,
-                     type,
-                     GL_UNSIGNED_BYTE,
-                     pixels);
+    if (pixels != nullptr)
+    {
+        glTexSubImage2D (GL_TEXTURE_2D,
+                         0,
+                         0,
+                         topLeft ? (height - h) : 0,
+                         w,
+                         h,
+                         type,
+                         GL_UNSIGNED_BYTE,
+                         pixels);
+    }
 
     JUCE_CHECK_OPENGL_ERROR
 }
