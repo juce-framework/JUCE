@@ -1139,7 +1139,7 @@ public:
         stop();
         detail::ComponentHelpers::releaseAllCachedImageResources (comp);
         comp.setCachedComponentImage (nullptr);
-        context.nativeContext = nullptr;
+        context.clearNativeContext();
     }
 
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
@@ -1444,7 +1444,7 @@ void OpenGLContext::detach()
         attachment.reset();
     }
 
-    nativeContext = nullptr;
+    clearNativeContext();
 }
 
 bool OpenGLContext::isAttached() const noexcept
@@ -1777,6 +1777,13 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
     }
 
     JUCE_CHECK_OPENGL_ERROR
+}
+
+void OpenGLContext::clearNativeContext()
+{
+    nativeContextListeners.call ([] (auto& l) { l.contextWillBeDestroyed(); });
+    nativeContextListeners.clear();
+    nativeContext = nullptr;
 }
 
 #if JUCE_ANDROID

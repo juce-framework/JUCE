@@ -61,9 +61,8 @@ static bool tryAllocTexture (int w, int h, GLenum type)
     return false;
 }
 
-/*
-    Used on Android to detect when the GL context and associated resources (textures, framebuffers,
-    etc.) need to be destroyed/created due to the Surface changing state.
+/*  Used to detect when the GL context and associated resources (textures, framebuffers, etc.)
+    need to be destroyed/created.
 */
 class OpenGLContext::NativeContextListener
 {
@@ -72,6 +71,7 @@ public:
 
     virtual void contextWillPause() = 0;
     virtual void contextDidResume() = 0;
+    virtual void contextWillBeDestroyed() = 0;
 
     void registerWith (OpenGLContext& c)    { c.nativeContextListeners.add (this); }
     void unregisterFrom (OpenGLContext& c)  { c.nativeContextListeners.remove (this); }
@@ -439,6 +439,13 @@ private:
             return frameBufferID != 0 && textureID != 0;
         }
 
+        void abandon()
+        {
+            textureID = 0;
+            frameBufferID = 0;
+            depthOrStencilBuffer = 0;
+        }
+
         void bind()
         {
             glGetIntegerv (GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
@@ -492,8 +499,10 @@ private:
             return transientState;
         }
 
-        // trying to use a framebuffer after saving it with saveAndRelease()! Be sure to call
-        // reloadSavedCopy() to put it back into GPU memory before using it
+        // Trying to use a framebuffer that isn't currently in GPU memory! Either it was saved
+        // with saveAndRelease(), in which case call reloadSavedCopy() to put it back before
+        // using it, or the context that owned it has been detached or destroyed, in which case
+        // the framebuffer must be initialised again with a live context.
         jassertfalse;
 
         return nullptr;
@@ -508,6 +517,15 @@ private:
     {
         if (associatedContext != nullptr)
             reloadSavedCopy (*associatedContext);
+    }
+
+    void contextWillBeDestroyed() override
+    {
+        if (auto* transientState = std::get_if<TransientState> (&state))
+            transientState->abandon();
+
+        associatedContext = nullptr;
+        state.emplace<std::monostate>();
     }
 
     OpenGLContext* associatedContext = nullptr;
