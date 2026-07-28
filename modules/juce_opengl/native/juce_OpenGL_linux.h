@@ -384,9 +384,6 @@ public:
         const ScopedLock lock;
     };
 
-    void addListener (NativeContextListener&) {}
-    void removeListener (NativeContextListener&) {}
-
 private:
     bool tryChooseConfig (const OpenGLPixelFormat& format, Span<const EGLint> optionalAttribs)
     {

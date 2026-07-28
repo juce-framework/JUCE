@@ -472,6 +472,9 @@ private:
 
     class CachedImage;
     class Attachment;
+
+    ListenerList<NativeContextListener> nativeContextListeners;
+
     NativeContext* nativeContext = nullptr;
     OpenGLRenderer* renderer = nullptr;
     double currentRenderScale = 1.0;

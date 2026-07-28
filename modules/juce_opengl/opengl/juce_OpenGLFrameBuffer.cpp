@@ -73,8 +73,8 @@ public:
     virtual void contextWillPause() = 0;
     virtual void contextDidResume() = 0;
 
-    static void addListener (OpenGLContext& ctx, NativeContextListener& l);
-    static void removeListener (OpenGLContext& ctx, NativeContextListener& l);
+    void registerWith (OpenGLContext& c)    { c.nativeContextListeners.add (this); }
+    void unregisterFrom (OpenGLContext& c)  { c.nativeContextListeners.remove (this); }
 };
 
 class OpenGLFrameBuffer::Pimpl : private OpenGLContext::NativeContextListener
@@ -112,7 +112,7 @@ public:
             return false;
 
         associatedContext = &context;
-        NativeContextListener::addListener (*associatedContext, *this);
+        registerWith (*associatedContext);
 
         return true;
     }
@@ -167,7 +167,7 @@ public:
     void release()
     {
         if (auto* prev = std::exchange (associatedContext, nullptr))
-            NativeContextListener::removeListener (*prev, *this);
+            unregisterFrom (*prev);
 
         state.emplace<std::monostate>();
     }

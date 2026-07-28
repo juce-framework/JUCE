@@ -272,26 +272,6 @@ public:
         const ScopedLock lock;
     };
 
-    void addListener (NativeContextListener& l)
-    {
-        listeners.add (&l);
-    }
-
-    void removeListener (NativeContextListener& l)
-    {
-        listeners.remove (&l);
-    }
-
-    void notifyWillPause()
-    {
-        listeners.call ([&] (auto& l) { l.contextWillPause(); });
-    }
-
-    void notifyDidResume()
-    {
-        listeners.call ([&] (auto& l) { l.contextDidResume(); });
-    }
-
     Component& component;
 
 private:
@@ -431,7 +411,6 @@ private:
 
     mutable std::mutex nativeHandleMutex;
     OpenGLContext* juceContext = nullptr;
-    ListenerList<NativeContextListener> listeners;
     EGLHelpers::PtrEGLSurface surface{};
     EGLHelpers::PtrEGLContext context{};
 

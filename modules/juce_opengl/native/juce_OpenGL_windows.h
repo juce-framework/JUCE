@@ -207,9 +207,6 @@ public:
         return nullptr;
     }
 
-    void addListener (NativeContextListener&) {}
-    void removeListener (NativeContextListener&) {}
-
 private:
     //==============================================================================
     Rectangle<int> getPhysicalBounds() const
