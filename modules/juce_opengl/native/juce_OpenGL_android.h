@@ -177,7 +177,7 @@ public:
             if (LocalRef<jobject> holder { env->CallObjectMethod (surfaceView, AndroidSurfaceView.getHolder) })
                 env->CallVoidMethod (holder, AndroidSurfaceHolder.removeCallback, surfaceHolderCallback.get());
 
-        if (jobject viewParent = env->CallObjectMethod (surfaceView.get(), JuceOpenGLViewSurface.getParent))
+        if (LocalRef viewParent { env->CallObjectMethod (surfaceView.get(), JuceOpenGLViewSurface.getParent) })
             env->CallVoidMethod (viewParent, AndroidViewGroup.removeView, surfaceView.get());
     }
 

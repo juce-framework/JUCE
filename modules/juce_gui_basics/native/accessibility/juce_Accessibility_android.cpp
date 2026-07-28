@@ -339,8 +339,8 @@ public:
                              true);
         env->CallVoidMethod (info,
                              AndroidAccessibilityNodeInfo.setPackageName,
-                             env->CallObjectMethod (appContext.get(),
-                                                    AndroidContext.getPackageName));
+                             LocalRef { env->CallObjectMethod (appContext.get(),
+                                                               AndroidContext.getPackageName) }.get());
         env->CallVoidMethod (info,
                              AndroidAccessibilityNodeInfo.setSource,
                              sourceView,
@@ -792,8 +792,8 @@ public:
 
             env->CallVoidMethod (event,
                                  AndroidAccessibilityEvent.setPackageName,
-                                 env->CallObjectMethod (appContext.get(),
-                                                        AndroidContext.getPackageName));
+                                 LocalRef { env->CallObjectMethod (appContext.get(),
+                                                                   AndroidContext.getPackageName) }.get());
 
             env->CallVoidMethod (event,
                                  AndroidAccessibilityEvent.setSource,

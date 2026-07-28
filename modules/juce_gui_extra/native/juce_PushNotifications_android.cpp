@@ -456,7 +456,7 @@ struct PushNotifications::Impl
         auto firebaseMessaging = LocalRef<jobject> (env->CallStaticObjectMethod (FirebaseMessaging,
                                                                                  FirebaseMessaging.getInstance));
 
-        env->CallObjectMethod (firebaseMessaging, FirebaseMessaging.subscribeToTopic, javaString (topic).get());
+        LocalRef { env->CallObjectMethod (firebaseMessaging, FirebaseMessaging.subscribeToTopic, javaString (topic).get()) };
       #endif
     }
 
@@ -468,7 +468,7 @@ struct PushNotifications::Impl
         auto firebaseMessaging = LocalRef<jobject> (env->CallStaticObjectMethod (FirebaseMessaging,
                                                                                  FirebaseMessaging.getInstance));
 
-        env->CallObjectMethod (firebaseMessaging, FirebaseMessaging.unsubscribeFromTopic, javaString (topic).get());
+        LocalRef { env->CallObjectMethod (firebaseMessaging, FirebaseMessaging.unsubscribeFromTopic, javaString (topic).get()) };
       #endif
     }
 
@@ -486,18 +486,18 @@ struct PushNotifications::Impl
                                                                  RemoteMessageBuilder.constructor,
                                                                  javaString (serverSenderId + "@gcm_googleapis.com").get()));
 
-        env->CallObjectMethod (messageBuilder, RemoteMessageBuilder.setCollapseKey, javaString (collapseKey).get());
-        env->CallObjectMethod (messageBuilder, RemoteMessageBuilder.setMessageId, javaString (messageId).get());
-        env->CallObjectMethod (messageBuilder, RemoteMessageBuilder.setMessageType, javaString (messageType).get());
-        env->CallObjectMethod (messageBuilder, RemoteMessageBuilder.setTtl, timeToLive);
+        LocalRef { env->CallObjectMethod (messageBuilder, RemoteMessageBuilder.setCollapseKey, javaString (collapseKey).get()) };
+        LocalRef { env->CallObjectMethod (messageBuilder, RemoteMessageBuilder.setMessageId, javaString (messageId).get()) };
+        LocalRef { env->CallObjectMethod (messageBuilder, RemoteMessageBuilder.setMessageType, javaString (messageType).get()) };
+        LocalRef { env->CallObjectMethod (messageBuilder, RemoteMessageBuilder.setTtl, timeToLive) };
 
         auto keys = additionalData.getAllKeys();
 
         for (const auto& key : keys)
-            env->CallObjectMethod (messageBuilder,
-                                   RemoteMessageBuilder.addData,
-                                   javaString (key).get(),
-                                   javaString (additionalData[key]).get());
+            LocalRef { env->CallObjectMethod (messageBuilder,
+                                              RemoteMessageBuilder.addData,
+                                              javaString (key).get(),
+                                              javaString (additionalData[key]).get()) };
 
         auto message = LocalRef<jobject> (env->CallObjectMethod (messageBuilder, RemoteMessageBuilder.build));
 
@@ -647,9 +647,9 @@ struct PushNotifications::Impl
         auto actionStringSuffix = javaString (".JUCE_NOTIFICATION." + n.identifier);
         auto actionString       = LocalRef<jstring> ((jstring)env->CallObjectMethod (packageNameString, JavaString.concat, actionStringSuffix.get()));
 
-        env->CallObjectMethod (notifyIntent, AndroidIntent.setAction, actionString.get());
+        LocalRef { env->CallObjectMethod (notifyIntent, AndroidIntent.setAction, actionString.get()) };
         // Packaging entire notification into extras bundle here, so that we can retrieve all the details later on
-        env->CallObjectMethod (notifyIntent, AndroidIntent.putExtras, juceNotificationToBundle (n).get());
+        LocalRef { env->CallObjectMethod (notifyIntent, AndroidIntent.putExtras, juceNotificationToBundle (n).get()) };
 
         auto notifyPendingIntent = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidPendingIntent,
                                                                                    AndroidPendingIntent.getActivity,
@@ -658,9 +658,9 @@ struct PushNotifications::Impl
                                                                                    notifyIntent.get(),
                                                                                    FLAG_IMMUTABLE));
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentTitle,  javaString (n.title).get());
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentText,   javaString (n.body).get());
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentIntent, notifyPendingIntent.get());
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentTitle,  javaString (n.title).get()) };
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentText,   javaString (n.body).get()) };
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentIntent, notifyPendingIntent.get()) };
 
         auto resources = LocalRef<jobject> (env->CallObjectMethod (context.get(), AndroidContext.getResources));
         const auto iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (n.icon).get(),
@@ -674,7 +674,7 @@ struct PushNotifications::Impl
             return {};
         }
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSmallIcon, iconId);
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSmallIcon, iconId) };
 
         if (n.publicVersion != nullptr)
         {
@@ -690,7 +690,7 @@ struct PushNotifications::Impl
                 return {};
 
             auto publicVersion = LocalRef<jobject> (env->CallObjectMethod (publicNotificationBuilder, NotificationBuilderBase.build));
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setPublicVersion, publicVersion.get());
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setPublicVersion, publicVersion.get()) };
         }
 
         return notificationBuilder;
@@ -761,33 +761,33 @@ struct PushNotifications::Impl
         auto* env = getEnv();
 
         if (n.subtitle.isNotEmpty())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentInfo, javaString (n.subtitle).get());
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentInfo, javaString (n.subtitle).get()) };
 
         auto soundName = n.soundToPlay.toString (true);
 
         if (soundName == "default_os_sound")
         {
             const int playDefaultSound = 1;
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setDefaults, playDefaultSound);
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setDefaults, playDefaultSound) };
         }
         else if (! soundName.isEmpty())
         {
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSound, juceUrlToAndroidUri (n.soundToPlay).get());
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSound, juceUrlToAndroidUri (n.soundToPlay).get()) };
         }
 
         if (n.largeIcon.isValid())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setLargeIcon, imagetoJavaBitmap (n.largeIcon).get());
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setLargeIcon, imagetoJavaBitmap (n.largeIcon).get()) };
 
         if (n.tickerText.isNotEmpty())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setTicker, javaString (n.tickerText).get());
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setTicker, javaString (n.tickerText).get()) };
 
         if (n.ledColour != Colour())
         {
-            env->CallObjectMethod (notificationBuilder,
-                                   NotificationBuilderBase.setLights,
-                                   n.ledColour.getARGB(),
-                                   n.ledBlinkPattern.msToBeOn,
-                                   n.ledBlinkPattern.msToBeOff);
+            LocalRef { env->CallObjectMethod (notificationBuilder,
+                                              NotificationBuilderBase.setLights,
+                                              n.ledColour.getARGB(),
+                                              n.ledBlinkPattern.msToBeOn,
+                                              n.ledBlinkPattern.msToBeOff) };
         }
 
         if (! n.vibrationPattern.isEmpty())
@@ -804,65 +804,65 @@ struct PushNotifications::Impl
                     elements[i] = (jlong) n.vibrationPattern[i];
 
                 env->SetLongArrayRegion (array, 0, size, elements);
-                env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setVibrate, array.get());
+                LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setVibrate, array.get()) };
             }
         }
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setProgress, n.progress.max, n.progress.current, n.progress.indeterminate);
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setNumber, n.badgeNumber);
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setAutoCancel, n.shouldAutoCancel);
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setOngoing, n.ongoing);
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setOnlyAlertOnce, n.alertOnlyOnce);
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setProgress, n.progress.max, n.progress.current, n.progress.indeterminate) };
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setNumber, n.badgeNumber) };
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setAutoCancel, n.shouldAutoCancel) };
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setOngoing, n.ongoing) };
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setOnlyAlertOnce, n.alertOnlyOnce) };
 
         if (n.subtitle.isNotEmpty())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSubText, javaString (n.subtitle).get());
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSubText, javaString (n.subtitle).get()) };
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setPriority, n.priority);
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setPriority, n.priority) };
 
         const bool showTimeStamp = n.timestampVisibility != Notification::off;
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setShowWhen, showTimeStamp);
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setShowWhen, showTimeStamp) };
 
         if (n.groupId.isNotEmpty())
         {
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setGroup, javaString (n.groupId).get());
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setGroupSummary, n.groupSummary);
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setGroup, javaString (n.groupId).get()) };
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setGroupSummary, n.groupSummary) };
         }
 
         if (n.groupSortKey.isNotEmpty())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSortKey, javaString (n.groupSortKey).get());
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSortKey, javaString (n.groupSortKey).get()) };
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setLocalOnly, n.localOnly);
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setLocalOnly, n.localOnly) };
 
         auto extras = LocalRef<jobject> (env->NewObject (AndroidBundle, AndroidBundle.constructor));
 
         env->CallVoidMethod (extras, AndroidBundle.putBundle, javaString ("notificationData").get(),
                              juceNotificationToBundle (n).get());
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.addExtras, extras.get());
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.addExtras, extras.get()) };
 
         if (n.person.isNotEmpty())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.addPerson, javaString (n.person).get());
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.addPerson, javaString (n.person).get()) };
 
         auto categoryString = typeToCategory (n.type);
         if (categoryString.isNotEmpty())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setCategory, javaString (categoryString).get());
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setCategory, javaString (categoryString).get()) };
 
         if (n.accentColour != Colour())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setColor, n.accentColour.getARGB());
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setColor, n.accentColour.getARGB()) };
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setVisibility, n.lockScreenAppearance);
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setVisibility, n.lockScreenAppearance) };
 
         const bool useChronometer = n.timestampVisibility == Notification::chronometer;
         const bool useCountDownChronometer = n.timestampVisibility == Notification::countDownChronometer;
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setChronometerCountDown, useCountDownChronometer);
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setUsesChronometer, useChronometer | useCountDownChronometer);
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setChronometerCountDown, useCountDownChronometer) };
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setUsesChronometer, useChronometer | useCountDownChronometer) };
 
         if (getAndroidSDKVersion() >= 26)
         {
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setBadgeIconType, n.badgeIconType);
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setGroupAlertBehavior, n.groupAlertBehaviour);
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setTimeoutAfter, (jlong) n.timeoutAfterMs);
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setBadgeIconType, n.badgeIconType) };
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setGroupAlertBehavior, n.groupAlertBehaviour) };
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setTimeoutAfter, (jlong) n.timeoutAfterMs) };
         }
 
         return setupNotificationDeletedCallback (n, notificationBuilder);
@@ -884,8 +884,8 @@ struct PushNotifications::Impl
         auto actionStringSuffix = javaString (".JUCE_NOTIFICATION_DELETED." + n.identifier);
         auto actionString       = LocalRef<jstring> ((jstring)env->CallObjectMethod (packageNameString, JavaString.concat, actionStringSuffix.get()));
 
-        env->CallObjectMethod (deleteIntent, AndroidIntent.setAction, actionString.get());
-        env->CallObjectMethod (deleteIntent, AndroidIntent.putExtras, juceNotificationToBundle (n).get());
+        LocalRef { env->CallObjectMethod (deleteIntent, AndroidIntent.setAction, actionString.get()) };
+        LocalRef { env->CallObjectMethod (deleteIntent, AndroidIntent.putExtras, juceNotificationToBundle (n).get()) };
 
         auto deletePendingIntent = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidPendingIntent,
                                                                                    AndroidPendingIntent.getActivity,
@@ -894,7 +894,7 @@ struct PushNotifications::Impl
                                                                                    deleteIntent.get(),
                                                                                    FLAG_IMMUTABLE));
 
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setDeleteIntent, deletePendingIntent.get());
+        LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setDeleteIntent, deletePendingIntent.get()) };
 
         return notificationBuilder;
     }
@@ -919,9 +919,9 @@ struct PushNotifications::Impl
             auto actionStringSuffix  = javaString (notificationActionString + n.identifier + "." + String (actionIndex) + "." + action.title);
             auto actionString        = LocalRef<jstring> ((jstring)env->CallObjectMethod (packageNameString, JavaString.concat, actionStringSuffix.get()));
 
-            env->CallObjectMethod (notifyIntent, AndroidIntent.setAction, actionString.get());
+            LocalRef { env->CallObjectMethod (notifyIntent, AndroidIntent.setAction, actionString.get()) };
             // Packaging entire notification into extras bundle here, so that we can retrieve all the details later on
-            env->CallObjectMethod (notifyIntent, AndroidIntent.putExtras, juceNotificationToBundle (n).get());
+            LocalRef { env->CallObjectMethod (notifyIntent, AndroidIntent.putExtras, juceNotificationToBundle (n).get()) };
 
             auto notifyPendingIntent = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidPendingIntent,
                                                                                        AndroidPendingIntent.getActivity,
@@ -952,8 +952,8 @@ struct PushNotifications::Impl
                                                                     javaString (action.title).get(),
                                                                     notifyPendingIntent.get()));
 
-            env->CallObjectMethod (actionBuilder, NotificationActionBuilder.addExtras,
-                                   varToBundleWithPropertiesString (action.parameters).get());
+            LocalRef { env->CallObjectMethod (actionBuilder, NotificationActionBuilder.addExtras,
+                                              varToBundleWithPropertiesString (action.parameters).get()) };
 
             if (isTextStyle)
             {
@@ -963,11 +963,11 @@ struct PushNotifications::Impl
                                                                              resultKey.get()));
 
                 if (! action.textInputPlaceholder.isEmpty())
-                    env->CallObjectMethod (remoteInputBuilder, RemoteInputBuilder.setLabel, javaString (action.textInputPlaceholder).get());
+                    LocalRef { env->CallObjectMethod (remoteInputBuilder, RemoteInputBuilder.setLabel, javaString (action.textInputPlaceholder).get()) };
 
                 if (! action.allowedResponses.isEmpty())
                 {
-                    env->CallObjectMethod (remoteInputBuilder, RemoteInputBuilder.setAllowFreeFormInput, false);
+                    LocalRef { env->CallObjectMethod (remoteInputBuilder, RemoteInputBuilder.setAllowFreeFormInput, false) };
 
                     const int size = action.allowedResponses.size();
 
@@ -981,15 +981,15 @@ struct PushNotifications::Impl
                         env->SetObjectArrayElement (array, i, responseString.get());
                     }
 
-                    env->CallObjectMethod (remoteInputBuilder, RemoteInputBuilder.setChoices, array.get());
+                    LocalRef { env->CallObjectMethod (remoteInputBuilder, RemoteInputBuilder.setChoices, array.get()) };
                 }
 
-                env->CallObjectMethod (actionBuilder, NotificationActionBuilder.addRemoteInput,
-                                       env->CallObjectMethod (remoteInputBuilder, RemoteInputBuilder.build));
+                LocalRef { env->CallObjectMethod (actionBuilder, NotificationActionBuilder.addRemoteInput,
+                                                  LocalRef {env->CallObjectMethod (remoteInputBuilder, RemoteInputBuilder.build) }.get()) };
             }
 
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.addAction,
-                                   env->CallObjectMethod (actionBuilder, NotificationActionBuilder.build));
+            LocalRef { env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.addAction,
+                                              LocalRef { env->CallObjectMethod (actionBuilder, NotificationActionBuilder.build) }.get()) };
         }
 
         return notificationBuilder;
@@ -1078,8 +1078,8 @@ struct PushNotifications::Impl
     {
         auto* env = getEnv();
 
-        auto varString = LocalRef<jstring> ((jstring)env->CallObjectMethod (bundle, AndroidBundle.getString,
-                                                                            javaString ("properties").get()));
+        auto varString = LocalRef<jstring> ((jstring) env->CallObjectMethod (bundle, AndroidBundle.getString,
+                                                                             javaString ("properties").get()));
 
         var resultVar;
         JSON::parse (juceString (varString.get()), resultVar);
@@ -1446,8 +1446,8 @@ struct PushNotifications::Impl
             LocalRef<jobject> builder (env->NewObject (AndroidAudioAttributesBuilder, AndroidAudioAttributesBuilder.constructor));
             const int contentTypeSonification = 4;
             const int usageNotification = 5;
-            env->CallObjectMethod (builder.get(), AndroidAudioAttributesBuilder.setContentType, contentTypeSonification);
-            env->CallObjectMethod (builder.get(), AndroidAudioAttributesBuilder.setUsage, usageNotification);
+            LocalRef { env->CallObjectMethod (builder.get(), AndroidAudioAttributesBuilder.setContentType, contentTypeSonification) };
+            LocalRef { env->CallObjectMethod (builder.get(), AndroidAudioAttributesBuilder.setUsage, usageNotification) };
             auto audioAttributes = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAudioAttributesBuilder.build));
             env->CallVoidMethod (channel, NotificationChannel.setSound, juceUrlToAndroidUri (c.soundToPlay).get(), audioAttributes.get());
 

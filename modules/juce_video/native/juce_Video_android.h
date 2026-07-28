@@ -1457,7 +1457,7 @@ private:
                                                       (jlong) 1));
 
             env->CallVoidMethod (nativeMediaSession, AndroidMediaSession.setMetadata,
-                                 env->CallObjectMethod (metadataBuilder, AndroidMediaMetadataBuilder.build));
+                                 LocalRef { env->CallObjectMethod (metadataBuilder, AndroidMediaMetadataBuilder.build) }.get());
         }
 
         void errorOccurred (const String& errorMessage)

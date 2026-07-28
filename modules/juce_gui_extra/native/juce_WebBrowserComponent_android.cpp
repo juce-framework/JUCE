@@ -482,9 +482,9 @@ public:
                 auto name  = header.upToFirstOccurrenceOf (":", false, false).trim();
                 auto value = header.fromFirstOccurrenceOf (":", false, false).trim();
 
-                env->CallObjectMethod (headersMap, JavaMap.put,
-                                       javaString (name).get(),
-                                       javaString (value).get());
+                LocalRef { env->CallObjectMethod (headersMap, JavaMap.put,
+                                                 javaString (name).get(),
+                                                 javaString (value).get()) };
             }
 
             env->CallVoidMethod ((jobject) getView(), JuceWebView.loadUrl,
@@ -817,9 +817,9 @@ private:
                                                                    JavaHashMap.constructorWithCapacity,
                                                                    1) };
 
-                    env->CallObjectMethod (headersMap, JavaMap.put,
-                                           javaString ("Access-Control-Allow-Origin").get(),
-                                           javaString (*allowedOrigin).get());
+                    LocalRef { env->CallObjectMethod (headersMap, JavaMap.put,
+                                                      javaString ("Access-Control-Allow-Origin").get(),
+                                                      javaString (*allowedOrigin).get()) };
 
                     env->CallVoidMethod (resource,
                                          WebResourceResponse.setResponseHeaders,

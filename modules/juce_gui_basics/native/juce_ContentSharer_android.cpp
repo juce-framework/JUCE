@@ -267,22 +267,27 @@ public:
                                                       : "android.intent.action.SEND_MULTIPLE";
 
         LocalRef<jobject> intent (env->NewObject (AndroidIntent, AndroidIntent.constructor));
-        env->CallObjectMethod (intent, AndroidIntent.setAction, javaString (action).get());
+        LocalRef { env->CallObjectMethod (intent, AndroidIntent.setAction, javaString (action).get()) };
 
-        env->CallObjectMethod (intent,
-                               AndroidIntent.setType,
-                               javaString (getCommonMimeType (mimeTypes)).get());
+        LocalRef { env->CallObjectMethod (intent,
+                                          AndroidIntent.setType,
+                                          javaString (getCommonMimeType (mimeTypes)).get()) };
 
         constexpr jint grantReadUriPermission   = 1;
         constexpr jint grantPrefixUriPermission = 128;
 
-        env->CallObjectMethod (intent, AndroidIntent.setFlags, grantReadUriPermission | grantPrefixUriPermission);
+        LocalRef { env->CallObjectMethod (intent,
+                                          AndroidIntent.setFlags,
+                                          grantReadUriPermission | grantPrefixUriPermission) };
 
         if (fileForUriIn.size() == 1)
         {
             const auto uri = fileForUriIn.begin()->first;
             LocalRef<jobject> androidUri { env->CallStaticObjectMethod (AndroidUri, AndroidUri.parse, javaString (uri).get()) };
-            env->CallObjectMethod (intent, AndroidIntent.putExtraParcelable, javaString ("android.intent.extra.STREAM").get(), androidUri.get());
+            LocalRef { env->CallObjectMethod (intent,
+                                              AndroidIntent.putExtraParcelable,
+                                              javaString ("android.intent.extra.STREAM").get(),
+                                              androidUri.get()) };
         }
         else
         {
@@ -297,10 +302,10 @@ public:
                                                                      javaString (pair.first).get()));
             }
 
-            env->CallObjectMethod (intent,
-                                   AndroidIntent.putParcelableArrayListExtra,
-                                   javaString ("android.intent.extra.STREAM").get(),
-                                   fileUris.get());
+            LocalRef { env->CallObjectMethod (intent,
+                                              AndroidIntent.putParcelableArrayListExtra,
+                                              javaString ("android.intent.extra.STREAM").get(),
+                                              fileUris.get()) };
         }
 
         return doIntent (intent, callback);
@@ -324,14 +329,14 @@ public:
         auto* env = getEnv();
 
         LocalRef<jobject> intent (env->NewObject (AndroidIntent, AndroidIntent.constructor));
-        env->CallObjectMethod (intent,
-                               AndroidIntent.setAction,
-                               javaString ("android.intent.action.SEND").get());
-        env->CallObjectMethod (intent,
-                               AndroidIntent.putExtra,
-                               javaString ("android.intent.extra.TEXT").get(),
-                               javaString (text).get());
-        env->CallObjectMethod (intent, AndroidIntent.setType, javaString ("text/plain").get());
+        LocalRef { env->CallObjectMethod (intent,
+                                          AndroidIntent.setAction,
+                                          javaString ("android.intent.action.SEND").get()) };
+        LocalRef { env->CallObjectMethod (intent,
+                                          AndroidIntent.putExtra,
+                                          javaString ("android.intent.extra.TEXT").get(),
+                                          javaString (text).get()) };
+        LocalRef { env->CallObjectMethod (intent, AndroidIntent.setType, javaString ("text/plain").get()) };
 
         return doIntent (intent, callback);
     }
@@ -377,7 +382,10 @@ private:
 
         LocalRef<jclass> klass { env->FindClass ("com/rmsl/juce/Receiver") };
         const LocalRef<jobject> replyIntent (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), klass.get()));
-        getEnv()->CallObjectMethod (replyIntent, AndroidIntent.putExtraInt, javaString ("com.rmsl.juce.JUCE_REQUEST_CODE").get(), request);
+        LocalRef { getEnv()->CallObjectMethod (replyIntent,
+                                               AndroidIntent.putExtraInt,
+                                               javaString ("com.rmsl.juce.JUCE_REQUEST_CODE").get(),
+                                               request) };
 
         const auto flags = FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE;
         const LocalRef<jobject> pendingIntent (env->CallStaticObjectMethod (AndroidPendingIntent,
@@ -391,8 +399,8 @@ private:
                                                                AndroidIntent.createChooserWithSender,
                                                                intent.get(),
                                                                text.get(),
-                                                               env->CallObjectMethod (pendingIntent,
-                                                                                      AndroidPendingIntent.getIntentSender)));
+                                                               LocalRef { env->CallObjectMethod (pendingIntent,
+                                                                                                 AndroidPendingIntent.getIntentSender) }.get()));
     }
 
     //==============================================================================

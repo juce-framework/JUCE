@@ -1229,7 +1229,7 @@ private:
 
             auto bufferSize = env->CallIntMethod (imagePlaneBuffer, JavaByteBuffer.remaining);
             auto byteArray = LocalRef<jbyteArray> (env->NewByteArray (bufferSize));
-            env->CallObjectMethod (imagePlaneBuffer, JavaByteBuffer.get, byteArray.get());
+            LocalRef { env->CallObjectMethod (imagePlaneBuffer, JavaByteBuffer.get, byteArray.get()) };
 
             auto rotationAngle = getRotationAngle (deviceOrientationFromAccelerometerSensor, targetOrientation,
                                                   cameraLensFrontFacing, cameraSensorOrientation);
@@ -3078,7 +3078,7 @@ private:
         env->CallVoidMethod (handlerThread, AndroidHandlerThread.start);
         handler = GlobalRef (LocalRef<jobject> (env->NewObject (AndroidHandler,
                                                                 AndroidHandler.constructorWithLooper,
-                                                                env->CallObjectMethod (handlerThread, AndroidHandlerThread.getLooper))));
+                                                                LocalRef { env->CallObjectMethod (handlerThread, AndroidHandlerThread.getLooper) }.get())));
     }
 
     void stopBackgroundThread()

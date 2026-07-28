@@ -351,14 +351,14 @@ private:
         LocalRef<jobject> byteBuffer { env->CallStaticObjectMethod (JavaByteBuffer,
                                                                     JavaByteBuffer.allocateDirect,
                                                                     (jint) blob.size()) };
-        env->CallObjectMethod (byteBuffer, JavaByteBuffer.put, bytes.get());
+        LocalRef { env->CallObjectMethod (byteBuffer, JavaByteBuffer.put, bytes.get()) };
 
         LocalRef<jobject> builder { env->NewObject (AndroidFontBuilder,
                                                     AndroidFontBuilder.create,
                                                     byteBuffer.get()) };
-        env->CallObjectMethod (builder,
-                               AndroidFontBuilder.setTtcIndex,
-                               (jint) index);
+        LocalRef { env->CallObjectMethod (builder,
+                                          AndroidFontBuilder.setTtcIndex,
+                                          (jint) index) };
 
         if (! variables.empty())
         {
@@ -372,9 +372,9 @@ private:
                 return s.dropLastCharacters (2);
             });
 
-            env->CallObjectMethod (builder,
-                                   AndroidFontBuilder.setFontVariationSettings,
-                                   javaString (androidVariableSettings).get());
+            LocalRef { env->CallObjectMethod (builder,
+                                              AndroidFontBuilder.setFontVariationSettings,
+                                              javaString (androidVariableSettings).get()) };
         }
 
         LocalRef<jobject> androidFont { env->CallObjectMethod (builder,
@@ -736,7 +736,7 @@ private:
 
         const LocalRef paint { env->NewObject (AndroidPaint, AndroidPaint.constructor, constructorFlags) };
 
-        env->CallObjectMethod (paint, AndroidPaint.setTypeface, typeface.get());
+        LocalRef { env->CallObjectMethod (paint, AndroidPaint.setTypeface, typeface.get()) };
         env->CallVoidMethod (paint, AndroidPaint.setTextSize, referenceFontSize);
 
         const auto fullAscent  = std::abs (env->CallFloatMethod (paint, AndroidPaint.ascent));

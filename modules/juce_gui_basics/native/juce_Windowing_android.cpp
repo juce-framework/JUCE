@@ -2161,7 +2161,7 @@ private:
         if (mainWindow == nullptr)
             return {};
 
-        return getViewLocationOnScreen (env, env->CallObjectMethod (mainWindow, AndroidWindow.getDecorView));
+        return getViewLocationOnScreen (env, LocalRef { env->CallObjectMethod (mainWindow, AndroidWindow.getDecorView) });
     }
 
     static void enableLayoutInCutout (JNIEnv* env, jobject windowLayoutParams)
@@ -2360,7 +2360,7 @@ private:
         Array<Range<int>> result;
 
         for (jint i = 0; i < env->CallIntMethod (list, JavaList.size); ++i)
-            if (const auto range = getRangeFromPair (env, env->CallObjectMethod (list, JavaList.get, i)))
+            if (const auto range = getRangeFromPair (env, LocalRef { env->CallObjectMethod (list, JavaList.get, i) }))
                 result.add (*range);
 
         return result;
@@ -2374,7 +2374,9 @@ private:
     class ViewWindowInsetsListener final : public AndroidInterfaceImplementer
     {
     private:
-        jobject onApplyWindowInsets (JNIEnv* env, LocalRef<jobject>, LocalRef<jobject> insets) const
+        jobject onApplyWindowInsets (JNIEnv* env,
+                                     LocalRef<jobject>,
+                                     LocalRef<jobject> insets) const
         {
             forceDisplayUpdate();
 
@@ -2703,8 +2705,8 @@ JUCE_API void JUCE_CALLTYPE Process::hide()
     if (env->CallBooleanMethod (currentActivity.get(), AndroidActivity.moveTaskToBack, true) == 0)
     {
         GlobalRef intent (LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructor)));
-        env->CallObjectMethod (intent, AndroidIntent.setAction,   javaString ("android.intent.action.MAIN")  .get());
-        env->CallObjectMethod (intent, AndroidIntent.addCategory, javaString ("android.intent.category.HOME").get());
+        LocalRef { env->CallObjectMethod (intent, AndroidIntent.setAction,   javaString ("android.intent.action.MAIN")  .get()) };
+        LocalRef { env->CallObjectMethod (intent, AndroidIntent.addCategory, javaString ("android.intent.category.HOME").get()) };
 
         env->CallVoidMethod (currentActivity.get(), AndroidContext.startActivity, intent.get());
     }

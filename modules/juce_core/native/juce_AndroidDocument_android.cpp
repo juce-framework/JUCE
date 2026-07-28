@@ -729,7 +729,7 @@ std::vector<AndroidDocumentPermission> AndroidDocumentPermission::getPersistedPe
         permission.time  = env->CallLongMethod    (uriPermission, AndroidUriPermission.getPersistedTime);
         permission.read  = env->CallBooleanMethod (uriPermission, AndroidUriPermission.isReadPermission);
         permission.write = env->CallBooleanMethod (uriPermission, AndroidUriPermission.isWritePermission);
-        permission.url = AndroidDocumentDetail::uriToUrl (env->CallObjectMethod  (uriPermission, AndroidUriPermission.getUri));
+        permission.url = AndroidDocumentDetail::uriToUrl (LocalRef { env->CallObjectMethod  (uriPermission, AndroidUriPermission.getUri) }.get());
 
         result.push_back (std::move (permission));
     }

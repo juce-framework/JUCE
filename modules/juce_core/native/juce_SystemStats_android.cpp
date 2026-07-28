@@ -80,10 +80,10 @@ namespace AndroidStatsHelpers
         auto* env = getEnv();
         LocalRef<jobject> locale (env->CallStaticObjectMethod (JavaLocale, JavaLocale.getDefault));
 
-        auto stringResult = isRegion ? env->CallObjectMethod (locale.get(), JavaLocale.getCountry)
-                                     : env->CallObjectMethod (locale.get(), JavaLocale.getLanguage);
+        LocalRef stringResult { isRegion ? (jstring) env->CallObjectMethod (locale.get(), JavaLocale.getCountry)
+                                         : (jstring) env->CallObjectMethod (locale.get(), JavaLocale.getLanguage) };
 
-        return juceString (LocalRef<jstring> ((jstring) stringResult));
+        return juceString (stringResult);
     }
 
     static String getAndroidOsBuildValue (const char* fieldName)

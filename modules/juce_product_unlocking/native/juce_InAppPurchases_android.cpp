@@ -811,7 +811,7 @@ private:
                                   params.get());
     }
 
-    void changeExistingSubscription (GlobalRef productDetails, const String& subscriptionIdentifier, bool creditForUnusedSubscription)
+    void changeExistingSubscription (GlobalRef, const String& subscriptionIdentifier, bool creditForUnusedSubscription)
     {
         if (! isReady())
         {
@@ -833,25 +833,25 @@ private:
                     {
                         const LocalRef<jobject> subscriptionBuilder { getEnv()->CallStaticObjectMethod (BillingFlowParamsSubscriptionUpdateParams,
                                                                                                         BillingFlowParamsSubscriptionUpdateParams.newBuilder) };
-                        env->CallObjectMethod (subscriptionBuilder.get(),
-                                               BillingFlowParamsSubscriptionUpdateParamsBuilder.setOldPurchaseToken,
-                                               javaString (purchase.purchaseToken).get());
+                        LocalRef { env->CallObjectMethod (subscriptionBuilder.get(),
+                                                          BillingFlowParamsSubscriptionUpdateParamsBuilder.setOldPurchaseToken,
+                                                          javaString (purchase.purchaseToken).get()) };
 
                         if (! creditForUnusedSubscription)
                         {
                             constexpr auto WITHOUT_PRORATION = 3;
-                            env->CallObjectMethod (subscriptionBuilder.get(),
-                                                   BillingFlowParamsSubscriptionUpdateParamsBuilder.setSubscriptionReplacementMode,
-                                                   WITHOUT_PRORATION);
+                            LocalRef { env->CallObjectMethod (subscriptionBuilder.get(),
+                                                              BillingFlowParamsSubscriptionUpdateParamsBuilder.setSubscriptionReplacementMode,
+                                                              WITHOUT_PRORATION) };
                         }
 
                         const LocalRef<jobject> subscriptionParams { env->CallObjectMethod (subscriptionBuilder.get(),
                                                                                             BillingFlowParamsSubscriptionUpdateParamsBuilder.build) };
 
                         const LocalRef<jobject> builder { env->CallStaticObjectMethod (BillingFlowParams, BillingFlowParams.newBuilder) };
-                        env->CallObjectMethod (builder.get(),
-                                               BillingFlowParamsBuilder.setSubscriptionUpdateParams,
-                                               subscriptionParams.get());
+                        LocalRef { env->CallObjectMethod (builder.get(),
+                                                          BillingFlowParamsBuilder.setSubscriptionUpdateParams,
+                                                          subscriptionParams.get()) };
                         const LocalRef<jobject> params { env->CallObjectMethod (builder.get(), BillingFlowParamsBuilder.build) };
 
                         launchBillingFlowWithParameters (params);
@@ -878,7 +878,9 @@ private:
 
         auto* env = getEnv();
         const LocalRef<jobject> billingFlowParamsProductDetailsParamsBuilder { env->CallStaticObjectMethod (BillingFlowParamsProductDetailsParams, BillingFlowParamsProductDetailsParams.newBuilder) };
-        env->CallObjectMethod (billingFlowParamsProductDetailsParamsBuilder, BillingFlowParamsProductDetailsParamsBuilder.setProductDetails, productDetails.get());
+        LocalRef { env->CallObjectMethod (billingFlowParamsProductDetailsParamsBuilder,
+                                          BillingFlowParamsProductDetailsParamsBuilder.setProductDetails,
+                                          productDetails.get()) };
 
         if (const LocalRef<jobject> subscriptionDetailsList { env->CallObjectMethod (productDetails, ProductDetails.getSubscriptionOfferDetails) })
         {
@@ -886,7 +888,9 @@ private:
             {
                 const LocalRef<jobject> subscriptionDetails { env->CallObjectMethod (subscriptionDetailsList, JavaList.get, 0) };
                 const LocalRef<jobject> offerToken { env->CallObjectMethod (subscriptionDetails, SubscriptionOfferDetails.getOfferToken) };
-                env->CallObjectMethod (billingFlowParamsProductDetailsParamsBuilder, BillingFlowParamsProductDetailsParamsBuilder.setOfferToken, offerToken.get());
+                LocalRef { env->CallObjectMethod (billingFlowParamsProductDetailsParamsBuilder,
+                                                  BillingFlowParamsProductDetailsParamsBuilder.setOfferToken,
+                                                  offerToken.get()) };
             }
         }
 
@@ -896,7 +900,9 @@ private:
         env->CallBooleanMethod (list, JavaArrayList.add, billingFlowParamsProductDetailsParams.get());
 
         const LocalRef<jobject> billingFlowParamsBuilder { env->CallStaticObjectMethod (BillingFlowParams, BillingFlowParams.newBuilder) };
-        env->CallObjectMethod (billingFlowParamsBuilder, BillingFlowParamsBuilder.setProductDetailsParamsList, list.get());
+        LocalRef { env->CallObjectMethod (billingFlowParamsBuilder,
+                                          BillingFlowParamsBuilder.setProductDetailsParamsList,
+                                          list.get()) };
         const LocalRef<jobject> params { env->CallObjectMethod (billingFlowParamsBuilder, BillingFlowParamsBuilder.build) };
 
         launchBillingFlowWithParameters (params);

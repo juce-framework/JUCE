@@ -77,9 +77,11 @@ public:
             if (owner.startingFile != File())
             {
                 if (saveMode && (! owner.startingFile.isDirectory()))
-                    env->CallObjectMethod (intent.get(), AndroidIntent.putExtraString,
-                                           javaString ("android.intent.extra.TITLE").get(),
-                                           javaString (owner.startingFile.getFileName()).get());
+                {
+                    LocalRef { env->CallObjectMethod (intent.get(), AndroidIntent.putExtraString,
+                                                      javaString ("android.intent.extra.TITLE").get(),
+                                                      javaString (owner.startingFile.getFileName()).get()) };
+                }
 
 
                 URL url (owner.startingFile);
@@ -87,26 +89,30 @@ public:
                                                                     javaString (url.toString (true)).get()));
 
                 if (uri)
-                    env->CallObjectMethod (intent.get(), AndroidIntent.putExtraParcelable,
-                                           javaString ("android.provider.extra.INITIAL_URI").get(),
-                                           uri.get());
+                {
+                    LocalRef { env->CallObjectMethod (intent.get(), AndroidIntent.putExtraParcelable,
+                                                      javaString ("android.provider.extra.INITIAL_URI").get(),
+                                                      uri.get()) };
+                }
             }
 
-            env->CallObjectMethod (intent.get(),
-                                   AndroidIntent.putExtraBool,
-                                   javaString ("android.intent.extra.ALLOW_MULTIPLE").get(),
-                                   canSelectMultiple);
+            LocalRef { env->CallObjectMethod (intent.get(),
+                                              AndroidIntent.putExtraBool,
+                                              javaString ("android.intent.extra.ALLOW_MULTIPLE").get(),
+                                              canSelectMultiple) };
 
             if (! selectsDirectories)
             {
-                env->CallObjectMethod (intent.get(), AndroidIntent.addCategory,
-                                       javaString ("android.intent.category.OPENABLE").get());
+                LocalRef { env->CallObjectMethod (intent.get(), AndroidIntent.addCategory,
+                                                  javaString ("android.intent.category.OPENABLE").get()) };
 
                 auto mimeTypes = convertFiltersToMimeTypes (owner.filters);
 
                 if (mimeTypes.size() == 1)
                 {
-                    env->CallObjectMethod (intent.get(), AndroidIntent.setType, javaString (mimeTypes[0]).get());
+                    LocalRef { env->CallObjectMethod (intent.get(),
+                                                      AndroidIntent.setType,
+                                                      javaString (mimeTypes[0]).get()) };
                 }
                 else
                 {
@@ -128,15 +134,17 @@ public:
                                 allMimeTypesHaveSameGroup = false;
                         }
 
-                        env->CallObjectMethod (intent.get(), AndroidIntent.putExtraStrings,
-                                               javaString ("android.intent.extra.MIME_TYPES").get(),
-                                               jMimeTypes.get());
+                        LocalRef { env->CallObjectMethod (intent.get(), AndroidIntent.putExtraStrings,
+                                                          javaString ("android.intent.extra.MIME_TYPES").get(),
+                                                          jMimeTypes.get()) };
 
                         if (! allMimeTypesHaveSameGroup)
                             mimeGroup = "*";
                     }
 
-                    env->CallObjectMethod (intent.get(), AndroidIntent.setType, javaString (mimeGroup + "/*").get());
+                    LocalRef { env->CallObjectMethod (intent.get(),
+                                                      AndroidIntent.setType,
+                                                      javaString (mimeGroup + "/*").get()) };
                 }
             }
         }
@@ -189,7 +197,7 @@ public:
 
             const auto addUrl = [env, &chosenURLs] (jobject uri)
             {
-                if (auto jStr = (jstring) env->CallObjectMethod (uri, JavaObject.toString))
+                if (LocalRef jStr { (jstring) env->CallObjectMethod (uri, JavaObject.toString) })
                     chosenURLs.add (URL (juceString (env, jStr)));
             };
 
