@@ -91,8 +91,17 @@ public:
 
     void runTest() override
     {
-        const auto pipeName = "TestPipe" + String ((intptr_t) Thread::getCurrentThreadId());
+        const auto pid =
+       #if JUCE_WINDOWS
+            _getpid();
+       #else
+            getpid();
+       #endif
 
+        const auto pipeName = "TestPipe-"
+                            + String::toHexString (pid)
+                            + "-"
+                            + String::toHexString (Time::currentTimeMillis());
         beginTest ("Pre test cleanup");
         {
             NamedPipe pipe;
