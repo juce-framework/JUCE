@@ -34,7 +34,7 @@ jobs:
     outputs:
       build: ${{ steps.status_check.outputs.build }}
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
           sparse-checkout: |
