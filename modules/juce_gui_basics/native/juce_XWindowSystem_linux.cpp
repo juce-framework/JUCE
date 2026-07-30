@@ -652,6 +652,10 @@ enum
 
          int numDevices = 0;
          auto* info = X11Symbols::getInstance()->xiQueryDevice (display, XIAllDevices, &numDevices);
+
+         if (info == nullptr)
+             return;
+
          const ScopeGuard scope { [info] { X11Symbols::getInstance()->xiFreeDeviceInfo (info); } };
 
          for (auto& deviceInfo : makeRange (info, info + numDevices))
