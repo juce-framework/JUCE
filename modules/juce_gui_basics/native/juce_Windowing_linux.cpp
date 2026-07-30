@@ -648,11 +648,12 @@ private:
         {
             // Some systems fail to set an explicit refresh rate, or ask for a refresh rate of 0
             // (observed on Raspbian Bullseye over VNC). In these situations, use a fallback value.
-            const auto newIntFrequencyHz = roundToInt (display->verticalFrequencyHz.value_or (0.0));
-            const auto frequencyToUse = newIntFrequencyHz != 0 ? newIntFrequencyHz : 100;
+            const auto reportedHz = display->verticalFrequencyHz.value_or (0.0);
+            const auto frequencyToUse = reportedHz > 0.0 ? reportedHz : 100.0;
+            const auto periodMs = jmax (1, (int) (1000.0 / frequencyToUse));
 
-            if (vBlankManager.getTimerInterval() != frequencyToUse)
-                vBlankManager.startTimerHz (frequencyToUse);
+            if (vBlankManager.getTimerInterval() != periodMs)
+                vBlankManager.startTimer (periodMs);
         }
     }
 
