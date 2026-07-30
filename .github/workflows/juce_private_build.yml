@@ -68,8 +68,8 @@ jobs:
     # below.
     uses: juce-framework/JUCE-utils/.github/workflows/main.yml@master
     with:
-      juce-utils-branch: master
-      triggerer: ${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}
+      juce-utils-branch: &juce-utils-branch master
+      triggerer: &triggerer ${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}
       cpp-std: ${{ inputs.cpp-std }}
     secrets: inherit
   nightly:
@@ -77,9 +77,9 @@ jobs:
     name: .
     uses: juce-framework/JUCE-utils/.github/workflows/nightly.yml@master
     with:
-      juce-utils-branch: master
+      juce-utils-branch: *juce-utils-branch
       nightly-targets: ${{ inputs.nightly-targets }}
-      triggerer: ${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}
+      triggerer: *triggerer
     secrets: inherit
   deploy:
     if: ${{ !cancelled() && (success() || needs.build.result == 'skipped') && contains(fromJSON('["master", "develop", "juce9"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
@@ -115,7 +115,7 @@ jobs:
     name: Notify
     uses: juce-framework/JUCE-utils/.github/workflows/notify.yml@master
     with:
-      juce-utils-branch: master
-      triggerer: ${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}
+      juce-utils-branch: *juce-utils-branch
+      triggerer: *triggerer
       context: ${{ toJson(needs) }}
     secrets: inherit

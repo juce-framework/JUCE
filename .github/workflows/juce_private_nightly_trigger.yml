@@ -18,15 +18,15 @@ jobs:
       - env:
           TRIGGER_WORKFLOW_INPUTS: |
             {"triggerer":"Nightly Build Targets","nightly-targets":${{ vars.NIGHTLY_BUILD_TARGETS }}}
-        run: python3 ./.github/workflows/trigger_workflow.py
+        run: &trigger-workflow python3 ./.github/workflows/trigger_workflow.py
       - if: ${{ contains(fromJSON(vars.NIGHTLY_BUILD_TARGETS), 'cpp20') }}
         env:
           TRIGGER_WORKFLOW_INPUTS: |
             {"triggerer":"Nightly Build C++20","cpp-std":"20"}
-        run: python3 ./.github/workflows/trigger_workflow.py
+        run: *trigger-workflow
       - if: ${{ contains(fromJSON(vars.NIGHTLY_BUILD_TARGETS), 'cpp23') }}
         env:
           TRIGGER_WORKFLOW_INPUTS: |
             {"triggerer":"Nightly Build C++23","cpp-std":"23"}
-        run: python3 ./.github/workflows/trigger_workflow.py
+        run: *trigger-workflow
 
