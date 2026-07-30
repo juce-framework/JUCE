@@ -2075,7 +2075,6 @@ public:
 
     void performAnyPendingRepaintsNow() override
     {
-        // TODO
     }
 
     void setAlpha (float /*newAlpha*/) override

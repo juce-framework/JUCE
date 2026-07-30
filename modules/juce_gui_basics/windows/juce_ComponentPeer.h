@@ -426,6 +426,8 @@ public:
 
         You shouldn't ever really need to use this, it's mainly for special purposes
         like supporting audio plugins where the host's event loop is out of our control.
+
+        This has no effect on Android and iOS where the OS schedules all window painting.
     */
     virtual void performAnyPendingRepaintsNow() = 0;
 
