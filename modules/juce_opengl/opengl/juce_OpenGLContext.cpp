@@ -653,12 +653,11 @@ public:
     //==============================================================================
     InitResult initialiseOnThread (ScopedContextActivator& activator)
     {
-        // On android, this can get called twice, so drop any previous state.
+        activator.activate (context);
+
         associatedObjectNames.clear();
         associatedObjects.clear();
         cachedImageFrameBuffer.release();
-
-        activator.activate (context);
 
         if (const auto nativeResult = nativeContext->initialiseOnRenderThread (context); nativeResult != InitResult::success)
             return nativeResult;
