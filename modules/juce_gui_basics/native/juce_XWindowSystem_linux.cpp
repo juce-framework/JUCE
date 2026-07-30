@@ -2730,7 +2730,6 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
     auto workAreaHints = XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WORKAREA");
 
    #if JUCE_USE_XRANDR
-    if (workAreaHints != None)
     {
         int major_opcode, first_event, first_error;
 
@@ -2742,10 +2741,14 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
             for (int i = 0; i < numMonitors; ++i)
             {
                 auto rootWindow = X11Symbols::getInstance()->xRootWindow (display, i);
-                XWindowSystemUtilities::GetXProperty prop (display, rootWindow, workAreaHints, 0, 4, false, XA_CARDINAL);
 
-                if (! hasWorkAreaData (prop))
-                    continue;
+                if (workAreaHints != None)
+                {
+                    XWindowSystemUtilities::GetXProperty prop (display, rootWindow, workAreaHints, 0, 4, false, XA_CARDINAL);
+
+                    if (! hasWorkAreaData (prop))
+                        continue;
+                }
 
                 if (auto screens = makeDeletedPtr (X11Symbols::getInstance()->xRRGetScreenResources (display, rootWindow),
                                                    [] (XRRScreenResources* srs) { X11Symbols::getInstance()->xRRFreeScreenResources (srs); }))
@@ -2782,7 +2785,8 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
                                                                             [&crtc] (const auto& m) { return m.id == crtc->mode; });
                                                     it != screens->modes + screens->nmode)
                                                 {
-                                                    return (double) it->dotClock / ((double) it->hTotal * (double) it->vTotal);
+                                                    if (it->hTotal > 0 && it->vTotal > 0)
+                                                        return (double) it->dotClock / ((double) it->hTotal * (double) it->vTotal);
                                                 }
                                             }
 
