@@ -403,7 +403,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
         }
     }
 
-    return quitMessagePosted;
+    return ! quitMessagePosted;
 }
 #endif
 
