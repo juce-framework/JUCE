@@ -35,21 +35,29 @@
 namespace juce
 {
 
-class OpenGLFrameBufferImage final : public ImagePixelData
+class OpenGLFrameBufferImage final : public ImagePixelData,
+                                     private OpenGLContext::NativeContextListener
 {
 public:
     using Ptr = ReferenceCountedObjectPtr<OpenGLFrameBufferImage>;
 
     OpenGLFrameBufferImage (OpenGLContext& c, int w, int h)
         : ImagePixelData (Image::ARGB, w, h),
-          context (c),
+          context (&c),
           pixelStride (4)
     {
+        registerWith (c);
+    }
+
+    ~OpenGLFrameBufferImage() override
+    {
+        if (context != nullptr)
+            unregisterFrom (*context);
     }
 
     bool initialise()
     {
-        if (! frameBuffer.initialise (context, width, height))
+        if (! frameBuffer.initialise (*context, width, height))
             return false;
 
         frameBuffer.clear (Colours::transparentBlack);
@@ -58,15 +66,27 @@ public:
 
     std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
+        if (context == nullptr)
+        {
+            jassertfalse;
+            return SoftwareImageType().create (pixelFormat, width, height, true)->createLowLevelContext();
+        }
+
         sendDataChangeMessage();
-        return createOpenGLGraphicsContext (context, frameBuffer);
+        return createOpenGLGraphicsContext (*context, frameBuffer);
     }
 
     std::unique_ptr<ImageType> createType() const override     { return std::make_unique<OpenGLImageType>(); }
 
     ImagePixelData::Ptr clone() override
     {
-        std::unique_ptr<OpenGLFrameBufferImage> im (new OpenGLFrameBufferImage (context, width, height));
+        if (context == nullptr)
+        {
+            jassertfalse;
+            return {};
+        }
+
+        std::unique_ptr<OpenGLFrameBufferImage> im (new OpenGLFrameBufferImage (*context, width, height));
 
         if (! im->initialise())
             return ImagePixelData::Ptr();
@@ -101,10 +121,14 @@ public:
             sendDataChangeMessage();
     }
 
-    OpenGLContext& context;
+    OpenGLContext* context;
     OpenGLFrameBuffer frameBuffer;
 
 private:
+    void contextWillPause() override {}
+    void contextDidResume() override {}
+    void contextWillBeDestroyed() override { context = nullptr; }
+
     int pixelStride;
 
     struct DataReleaser final : public Image::BitmapData::BitmapDataReleaser
