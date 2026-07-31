@@ -116,6 +116,14 @@ public class JuceBillingClient implements PurchasesUpdatedListener,
 
     private void queryPurchasesImpl(java.util.List<String> toCheck, java.util.ArrayList<Purchase> purchases) {
         if (toCheck == null || toCheck.isEmpty()) {
+            // Purchases can become PURCHASED even when our app isn't running. In such cases we
+            // will not receive an onPurchasesUpdated callback, so we need to process them here.
+            for (Purchase purchase : purchases) {
+                if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged()) {
+                    handlePurchase(purchase, BillingClient.BillingResponseCode.OK);
+                }
+            }
+
             purchasesListQueryCallback(host, purchases);
         } else {
             billingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(toCheck.get(0)).build(), new PurchasesResponseListener() {
