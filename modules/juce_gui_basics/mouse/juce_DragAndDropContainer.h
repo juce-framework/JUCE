@@ -48,6 +48,12 @@ namespace juce
     callbacks to any child components derived from DragAndDropTarget which the mouse
     moves over.
 
+    By default, a drop can only be received by DragAndDropTargets inside this container. To
+    allow targets in the application's other windows to receive it too, pass true for
+    startDragging()'s allowDraggingToOtherJuceWindows parameter. The drag image then becomes a
+    desktop window of its own, and targets are found by hit-testing the desktop, so a drag can
+    be dropped onto a target in any window belonging to the same application.
+
     Note: If all that you need to do is to respond to files being drag-and-dropped from
     the operating system onto your component, you don't need any of these classes: you can do this
     simply by overriding FileDragAndDropTarget::filesDropped().
