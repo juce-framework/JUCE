@@ -76,7 +76,7 @@ function JuceSlider({
 
   const changeCommitted = (
     _event: SyntheticEvent | Event,
-    newValue: number | number[]
+    newValue: number | number[],
   ) => {
     sliderState.setNormalisedValue(newValue as number);
     sliderState.sliderDragEnded();
@@ -87,7 +87,7 @@ function JuceSlider({
       setValue(sliderState.getNormalisedValue());
     });
     const propertiesListenerId = sliderState.propertiesChangedEvent.addListener(
-      () => setProperties(sliderState.properties)
+      () => setProperties(sliderState.properties),
     );
 
     return function cleanup() {
@@ -142,7 +142,7 @@ function JuceCheckbox({ identifier }: { identifier: string }) {
     });
     const propertiesListenerId =
       checkboxState.propertiesChangedEvent.addListener(() =>
-        setProperties(checkboxState.properties)
+        setProperties(checkboxState.properties),
       );
 
     return function cleanup() {
@@ -280,7 +280,7 @@ class SpectrumDataReceiver {
             for (const f of data.frames)
               self.buffer[mod(self.writeIndex++, self.bufferLength)] = f;
           });
-      }
+      },
     );
   }
 
@@ -306,13 +306,13 @@ class SpectrumDataReceiver {
     return interpolate(
       this.getBufferItem(integralPart),
       this.getBufferItem(integralPart + 1),
-      fractionalPart
+      fractionalPart,
     );
   }
 
   unregister() {
     window.__JUCE__.backend.removeEventListener(
-      this.spectrumDataRegistrationId
+      this.spectrumDataRegistrationId,
     );
   }
 }
@@ -345,7 +345,7 @@ function FreqBandInfo() {
             i * barWidth,
             barHeight - l * barHeight,
             barWidth,
-            l * barHeight
+            l * barHeight,
           );
         }
       }
@@ -383,16 +383,24 @@ function FreqBandInfo() {
 }
 
 function App() {
-  const controlParameterIndexUpdater = new Juce.ControlParameterIndexUpdater(
-    controlParameterIndexAnnotation
-  );
-
-  document.addEventListener("mousemove", (event) => {
-    controlParameterIndexUpdater.handleMouseMove(event);
-  });
-
   const [open, setOpen] = useState(false);
   const [snackbarMessage, setMessage] = useState("No message received yet");
+
+  useEffect(() => {
+    const controlParameterIndexUpdater = new Juce.ControlParameterIndexUpdater(
+      controlParameterIndexAnnotation,
+    );
+
+    const handleMouseMove = (event: MouseEvent) => {
+      controlParameterIndexUpdater.handleMouseMove(event);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
 
   const openSnackbar = () => {
     setOpen(true);
