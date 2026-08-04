@@ -2702,14 +2702,17 @@ JUCE_API void JUCE_CALLTYPE Process::hide()
     auto* env = getEnv();
     auto currentActivity = getCurrentActivity();
 
-    if (env->CallBooleanMethod (currentActivity.get(), AndroidActivity.moveTaskToBack, true) == 0)
-    {
-        GlobalRef intent (LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructor)));
-        LocalRef { env->CallObjectMethod (intent, AndroidIntent.setAction,   javaString ("android.intent.action.MAIN")  .get()) };
-        LocalRef { env->CallObjectMethod (intent, AndroidIntent.addCategory, javaString ("android.intent.category.HOME").get()) };
+    if (currentActivity == nullptr)
+        return;
 
-        env->CallVoidMethod (currentActivity.get(), AndroidContext.startActivity, intent.get());
-    }
+    if (env->CallBooleanMethod (currentActivity.get(), AndroidActivity.moveTaskToBack, true) != 0)
+        return;
+
+    GlobalRef intent (LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructor)));
+    LocalRef { env->CallObjectMethod (intent, AndroidIntent.setAction,   javaString ("android.intent.action.MAIN")  .get()) };
+    LocalRef { env->CallObjectMethod (intent, AndroidIntent.addCategory, javaString ("android.intent.category.HOME").get()) };
+
+    env->CallVoidMethod (currentActivity.get(), AndroidContext.startActivity, intent.get());
 }
 
 //==============================================================================
