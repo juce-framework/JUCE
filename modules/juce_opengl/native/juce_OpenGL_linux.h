@@ -132,9 +132,28 @@ public:
     {
         const auto* ext = eglQueryString (nullDisplay, EGL_EXTENSIONS);
 
-        if (ext == nullptr || strstr (ext, "EGL_KHR_platform_x11") == nullptr)
+        if (ext == nullptr)
         {
-            // At the moment we can only create a GL context under X11.
+            // JUCE needs the EGL implementation to support at least the X11
+            // platform extension.
+            jassertfalse;
+            return;
+        }
+
+        const auto platformDisplayToken = std::invoke ([&]() -> std::optional<EGLenum>
+        {
+            if (strstr (ext, "EGL_KHR_platform_x11") != nullptr)
+                return EGL_PLATFORM_X11_KHR;
+
+            if (strstr (ext, "EGL_EXT_platform_x11") != nullptr)
+                return EGL_PLATFORM_X11_EXT;
+
+            return {};
+        });
+
+        if (! platformDisplayToken.has_value())
+        {
+            // At the moment JUCE can only create a GL context under X11.
             // If this EGL implementation doesn't support X11, things would break
             // when we tried to pass an X11 display/window/etc. into EGL functions.
             jassertfalse;
@@ -147,7 +166,7 @@ public:
 
         X11Symbols::getInstance()->xSync (display, False);
 
-        eglDisplay = eglGetPlatformDisplay (EGL_PLATFORM_X11_KHR, display, nullptr);
+        eglDisplay = eglGetPlatformDisplay (*platformDisplayToken, display, nullptr);
 
         if (eglDisplay == nullDisplay)
             return;
