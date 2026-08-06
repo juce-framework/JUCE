@@ -2238,7 +2238,9 @@ public:
         }
 
         //==============================================================================
-        void addShellScriptBuildPhase (const String& phaseName, const String& script)
+        void addShellScriptBuildPhase (const String& phaseName,
+                                       const String& script,
+                                       const StringArray& inputPaths = {})
         {
             if (script.trim().isEmpty())
                 return;
@@ -2246,6 +2248,10 @@ public:
             auto v = addBuildPhase ("PBXShellScriptBuildPhase", {});
             v.setProperty (Ids::name, phaseName, nullptr);
             v.setProperty ("alwaysOutOfDate", 1, nullptr);
+
+            if (! inputPaths.isEmpty())
+                v.setProperty ("inputPaths", "(\"" + inputPaths.joinIntoString (R"(",")") + "\")", nullptr);
+
             v.setProperty ("shellPath", "/bin/sh", nullptr);
             v.setProperty ("shellScript", script.replace ("\\", "\\\\")
                                                 .replace ("\"", "\\\"")
@@ -2773,7 +2779,10 @@ private:
             }
 
             if (! script.isEmpty())
-                target.addShellScriptBuildPhase ("Strip Target", script.toStringWithDefaultShellOptions());
+            {
+                target.addShellScriptBuildPhase ("Strip Target", script.toStringWithDefaultShellOptions(),
+                                                 { "$(DWARF_DSYM_FOLDER_PATH)/$(DWARF_DSYM_FILE_NAME)/Contents/Resources/DWARF/$(EXECUTABLE_NAME)" });
+            }
         };
 
         const auto signTarget = [&]
