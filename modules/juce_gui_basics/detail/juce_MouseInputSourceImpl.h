@@ -356,19 +356,23 @@ public:
         }
     }
 
-    Component* getTargetForGesture (ComponentPeer& peer, Point<float> positionWithinPeer,
-                                    Time time, Point<float>& screenPos)
+    Component* getTargetForGesture (ComponentPeer& peer,
+                                    Point<float> positionWithinPeer,
+                                    Time time,
+                                    Point<float>& physicalScreenPos)
     {
         lastTime = time;
         ++mouseEventCounter;
 
-        screenPos = peer.localToGlobal (positionWithinPeer);
-        const auto pointerState = lastPointerState.withPosition (screenPos);
+        physicalScreenPos = peer.localToGlobal (positionWithinPeer);
+        const auto pointerState = lastPointerState.withPosition (physicalScreenPos);
         setPeer (peer, pointerState, time);
         setPointerState (pointerState, time, false);
         triggerFakeMove();
 
-        return peer.getComponent().getComponentAt (positionWithinPeer);
+        const auto positionWithinComponent = positionWithinPeer / peer.getComponent().getDesktopScaleFactor();
+
+        return peer.getComponent().getComponentAt (positionWithinComponent);
     }
 
     void handleWheel (ComponentPeer& peer, Point<float> positionWithinPeer,
