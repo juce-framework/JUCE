@@ -801,12 +801,25 @@ private:
         return format;
     }
 
+    // WAVEFORMATEXTENSIBLE::dwChannelMask only allows us to specify a channel mask with at most
+    // 32 bits set. But it's legal to query for a format with more than 32 channels. When
+    // WAVEFORMATEXTENSIBLE::Format::nChannels is greater than the number of bits set in
+    // dwChannelMask, it is considered as a query without the requirement to assign speaker
+    // positions to the channels.
+    //
+    // Additionally, WASAPI seems to only have 18 known speaker positions.
+    //
+    // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ksmedia/ns-ksmedia-waveformatextensible#remarks
+    static DWORD channelMaskWithLowestNBitsSet (int numBits)
+    {
+        return numBits < 32 ? static_cast<DWORD> ((1u << numBits) - 1u) : 0;
+    }
+
     std::optional<WAVEFORMATEXTENSIBLE> findSupportedFormat (IAudioClient* clientToUse, int newNumChannels, double newSampleRate) const
     {
         for (auto ch = newNumChannels; ch <= maxNumChannels; ++ch)
         {
-            auto maskWithLowestNBitsSet = static_cast<DWORD> ((1 << ch) - 1);
-            auto mixFormatChannelMask = (ch == defaultNumChannels ? defaultFormatChannelMask : maskWithLowestNBitsSet);
+            auto mixFormatChannelMask = (ch == defaultNumChannels ? defaultFormatChannelMask : channelMaskWithLowestNBitsSet (ch));
 
             for (auto const& sampleFormat: formatsToTry)
                 if (auto format = tryFormat (sampleFormat, clientToUse, deviceMode, ch, newSampleRate, mixFormatChannelMask))
@@ -828,7 +841,7 @@ private:
 
         for (auto ch = maxNumChannelsToQuery; ch > result; --ch)
         {
-            auto channelMask = static_cast<DWORD> ((1 << ch) - 1);
+            auto channelMask = channelMaskWithLowestNBitsSet (ch);
 
             for (auto rate : rates)
                 for (auto const& sampleFormat: formatsToTry)
