@@ -131,7 +131,7 @@ private:
 
         const LockType::ScopedLockType sl (lock);
 
-        while (! timers.empty())
+        while (! isShuttingDown && ! timers.empty())
         {
             auto& first = timers.front();
 
@@ -161,9 +161,6 @@ private:
 
     void addTimer (Timer* t)
     {
-        if (! isThreadRunning())
-            startThread (Thread::Priority::high);
-
         // Trying to add a timer that's already here - shouldn't get to this point,
         // so if you get this assertion, let me know!
         jassert (std::none_of (timers.begin(), timers.end(),
@@ -174,6 +171,8 @@ private:
         timers.push_back ({ t, t->getTimerInterval() });
         t->positionInQueue = pos;
         shuffleTimerForwardInQueue (pos);
+
+        tryStartThread();
         notify();
     }
 
@@ -226,6 +225,7 @@ private:
     };
 
     std::vector<TimerCountdown> timers;
+    bool isShuttingDown = false;
 
     WaitableEvent callbackArrived;
 
@@ -305,10 +305,31 @@ private:
     }
 
     //==============================================================================
-    void messageManagerStarting() final {}
+    void tryStartThread()
+    {
+        if (isThreadRunning()
+            || timers.empty()
+            || isShuttingDown
+            || MessageManager::getInstanceWithoutCreating() == nullptr)
+            return;
+
+        startThread (Priority::high);
+    }
+
+    void messageManagerStarting() final
+    {
+        const LockType::ScopedLockType sl (lock);
+        isShuttingDown = false;
+        tryStartThread();
+    }
 
     void messageManagerStopping() final
     {
+        {
+            const LockType::ScopedLockType sl (lock);
+            isShuttingDown = true;
+        }
+
         stopThread();
     }
 
@@ -340,9 +361,6 @@ Timer::~Timer()
 
 void Timer::startTimer (int interval) noexcept
 {
-    // If you're calling this before (or after) the MessageManager is
-    // running, then you're not going to get any timer callbacks!
-    JUCE_ASSERT_MESSAGE_MANAGER_EXISTS
     timerThread->startTimer (this, jmax (1, interval));
 }
 
