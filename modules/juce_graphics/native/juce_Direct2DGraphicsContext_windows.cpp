@@ -355,8 +355,13 @@ bool Direct2DGraphicsContext::clipToRectangle (const Rectangle<int>& r)
     }
     else if (currentState->isCurrentTransformAxisAligned())
     {
-        // The current transform is a simple scale + translation, so pre-transform the rectangle
-        auto transformedR = transform.boundsAfterTransform (r.toFloat());
+        // The current transform is a simple scale + translation, so pre-transform the rectangle.
+        // Expand the transformed rectangle to whole device pixels so that a fractional scale
+        // can't leave the boundary pixel unpainted; this matches the software renderer, which
+        // rounds transformed clips outward in Rectangle<int>::transformedBy.
+        auto transformedR = transform.boundsAfterTransform (r.toFloat())
+                                     .getSmallestIntegerContainer()
+                                     .toFloat();
         deviceSpaceClipList.clipTo (transformedR);
 
         pendingClipList.clipTo (transformedR);
@@ -406,7 +411,11 @@ bool Direct2DGraphicsContext::clipToRectangleList (const RectangleList<int>& new
         RectangleList<float> scaledList;
 
         for (auto& i : newClipList)
-            scaledList.add (transform.boundsAfterTransform (i.toFloat()));
+        {
+            scaledList.add (transform.boundsAfterTransform (i.toFloat())
+                                     .getSmallestIntegerContainer()
+                                     .toFloat());
+        }
 
         deviceSpaceClipList.clipTo (scaledList);
         pendingClipList.clipTo (scaledList);
