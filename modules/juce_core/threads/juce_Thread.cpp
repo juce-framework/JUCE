@@ -227,16 +227,30 @@ bool Thread::currentThreadShouldExit()
     return false;
 }
 
-bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
+bool Thread::waitForThreadToExit (int timeOutMilliseconds) const
 {
-    // Doh! So how exactly do you expect this thread to wait for itself to stop??
+    if (timeOutMilliseconds >= 0)
+        return waitForThreadToExit (Milliseconds { (double) timeOutMilliseconds });
+
+    waitForThreadToExit();
+    return true;
+}
+
+bool Thread::waitForThreadToExit (Seconds timeOut) const
+{
+    // It doesn't make sense to wait a negative amount of time for a thread to
+    // exit.
+    jassert (timeOut >= Seconds { 0 });
+
+    // A thread can't wait for itself to stop. This function must only ever be
+    // called from another thread.
     jassert (getThreadId() != getCurrentThreadId() || getCurrentThreadId() == ThreadID());
 
-    auto timeoutEnd = Time::getMillisecondCounter() + (uint32) timeOutMilliseconds;
+    const auto timeoutEnd = std::chrono::steady_clock::now() + timeOut;
 
     while (isThreadRunning())
     {
-        if (timeOutMilliseconds >= 0 && Time::getMillisecondCounter() > timeoutEnd)
+        if (std::chrono::steady_clock::now() > timeoutEnd)
             return false;
 
         sleep (2);
@@ -245,10 +259,34 @@ bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
     return true;
 }
 
-bool Thread::stopThread (const int timeOutMilliseconds)
+void Thread::waitForThreadToExit() const
 {
-    // agh! You can't stop the thread that's calling this method! How on earth
-    // would that work??
+    // A thread can't wait for itself to stop!
+    jassert (getThreadId() != getCurrentThreadId() || getCurrentThreadId() == ThreadID());
+
+    while (isThreadRunning())
+        sleep (2);
+}
+
+bool Thread::stopThread (int timeOut)
+{
+    if (timeOut >= 0)
+        return stopThread (Milliseconds { (double) timeOut });
+
+    stopThread();
+    return true;
+}
+
+bool Thread::stopThread (Seconds timeOut)
+{
+    // Unlike stopThread (int), only positive timeout values are supported.
+    // To wait indefinitely, call stopThread() with no arguments.
+    // If you're trying to wait for 0 seconds, this will almost definitely
+    // result in the thread being killed by force, potentially leaving members
+    // in an unexpected state.
+    jassert (timeOut > Seconds { 0.0 });
+
+    // A thread can't stop itself, another thread must stop this thread.
     jassert (getCurrentThreadId() != getThreadId());
 
     const ScopedLock sl (startStopLock);
@@ -258,10 +296,7 @@ bool Thread::stopThread (const int timeOutMilliseconds)
         signalThreadShouldExit();
         notify();
 
-        if (timeOutMilliseconds != 0)
-            waitForThreadToExit (timeOutMilliseconds);
-
-        if (isThreadRunning())
+        if (! waitForThreadToExit (timeOut))
         {
             // very bad karma if this point is reached, as there are bound to be
             // locks and events left in silly states when a thread is killed by force
@@ -277,6 +312,24 @@ bool Thread::stopThread (const int timeOutMilliseconds)
     }
 
     return true;
+}
+
+void Thread::stopThread()
+{
+    // A thread can't stop itself, another thread must stop this thread.
+    jassert (getCurrentThreadId() != getThreadId());
+
+    const ScopedLock sl (startStopLock);
+
+    if (isThreadRunning())
+    {
+        signalThreadShouldExit();
+        notify();
+        waitForThreadToExit();
+    }
+
+    if (threadHandle != nullptr)
+        closeThreadHandle();
 }
 
 void Thread::addListener (Listener* listener)
@@ -303,6 +356,16 @@ void Thread::setAffinityMask (const uint32 newAffinityMask)
 bool Thread::wait (double timeOutMilliseconds) const
 {
     return defaultEvent.wait (timeOutMilliseconds);
+}
+
+bool Thread::wait (Seconds timeOut) const
+{
+    return defaultEvent.wait (timeOut);
+}
+
+void Thread::wait() const
+{
+    defaultEvent.wait();
 }
 
 void Thread::notify() const

@@ -53,6 +53,11 @@ bool CriticalSection::tryEnter() const noexcept     { return pthread_mutex_trylo
 void CriticalSection::exit() const noexcept         { pthread_mutex_unlock (&lock); }
 
 //==============================================================================
+void JUCE_CALLTYPE Thread::sleep (Milliseconds duration)
+{
+    std::this_thread::sleep_for (duration);
+}
+
 void JUCE_CALLTYPE Thread::sleep (int millisecs)
 {
     std::this_thread::sleep_for (std::chrono::milliseconds (millisecs));

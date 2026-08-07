@@ -207,6 +207,11 @@ struct SleepEvent
 
 static SleepEvent sleepEvent;
 
+void JUCE_CALLTYPE Thread::sleep (Milliseconds duration)
+{
+    sleep (roundToInt (duration.count()));
+}
+
 void JUCE_CALLTYPE Thread::sleep (const int millisecs)
 {
     jassert (millisecs >= 0);

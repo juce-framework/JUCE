@@ -303,6 +303,42 @@ public:
         This method will cause the threadShouldExit() method to return true
         and call notify() in case the thread is currently waiting.
 
+        @see signalThreadShouldExit, threadShouldExit, waitForThreadToExit, isThreadRunning
+    */
+    void stopThread();
+
+    /** Attempts to stop the thread running.
+
+        This method will cause the threadShouldExit() method to return true
+        and call notify() in case the thread is currently waiting.
+
+        Hopefully the thread will then respond to this by exiting cleanly, and
+        the stopThread method will wait for a given time-period for this to
+        happen.
+
+        If the thread is stuck and fails to respond after the timeout, it gets
+        forcibly killed, which is a very bad thing to happen, as it could still
+        be holding locks, etc. which are needed by other parts of your program.
+
+        For this reason, unlike stopThread (int), only positive timeout values
+        are supported, anything else will trigger an assertion. To wait
+        indefinitely, call stopThread() with no arguments.
+
+        @param timeOut  The maximum time to wait for the thread to finish before
+                        killing it by force. Must be positive.
+
+        @returns    true if the thread was cleanly stopped before the timeout,
+                    or false if it had to be killed by force.
+
+        @see signalThreadShouldExit, threadShouldExit, waitForThreadToExit, isThreadRunning
+    */
+    bool stopThread (Seconds timeOut);
+
+    /** Attempts to stop the thread running.
+
+        This method will cause the threadShouldExit() method to return true
+        and call notify() in case the thread is currently waiting.
+
         Hopefully the thread will then respond to this by exiting cleanly, and
         the stopThread method will wait for a given time-period for this to
         happen.
@@ -314,8 +350,10 @@ public:
         @param timeOutMilliseconds  The number of milliseconds to wait for the
                                     thread to finish before killing it by force. A negative
                                     value in here will wait forever.
+
         @returns    true if the thread was cleanly stopped before the timeout, or false
                     if it had to be killed by force.
+
         @see signalThreadShouldExit, threadShouldExit, waitForThreadToExit, isThreadRunning
     */
     bool stopThread (int timeOutMilliseconds);
@@ -394,6 +432,28 @@ public:
     static bool currentThreadShouldExit();
 
     /** Waits for the thread to stop.
+
+        This will wait until isThreadRunning() is false.
+    */
+    void waitForThreadToExit() const;
+
+    /** Waits for the thread to stop.
+
+        This will wait until isThreadRunning() is false or until a timeout expires.
+
+        Unlike waitForThreadToExit (int), a negative timeout is not supported and
+        will trigger an assertion. To wait indefinitely, call waitForThreadToExit()
+        with no arguments.
+
+        @param timeOut      The maximum time to wait before returning. Must not
+                            be negative.
+
+        @returns    true if the thread exits, or false if the timeout expires first.
+    */
+    bool waitForThreadToExit (Seconds timeOut) const;
+
+    /** Waits for the thread to stop.
+
         This will wait until isThreadRunning() is false or until a timeout expires.
 
         @param timeOutMilliseconds  the time to wait, in milliseconds. If this value
@@ -454,6 +514,15 @@ public:
         be woken up so it should only be used for short periods of time and when other
         methods such as using a WaitableEvent or CriticalSection are not possible.
     */
+    static void JUCE_CALLTYPE sleep (Milliseconds duration);
+
+    /** Suspends the execution of the current thread until the specified timeout period
+        has elapsed (note that this may not be exact).
+
+        The timeout period must not be negative and whilst sleeping the thread cannot
+        be woken up so it should only be used for short periods of time and when other
+        methods such as using a WaitableEvent or CriticalSection are not possible.
+    */
     static void JUCE_CALLTYPE sleep (int milliseconds);
 
     /** Yields the current thread's CPU time-slot and allows a new thread to run.
@@ -464,6 +533,24 @@ public:
     static void JUCE_CALLTYPE yield();
 
     //==============================================================================
+    /** Suspends the execution of this thread until another thread calls the notify()
+        method to wake it up.
+    */
+    void wait() const;
+
+    /** Suspends the execution of this thread until either the specified timeout period
+        has elapsed, or another thread calls the notify() method to wake it up.
+
+        Unlike wait (double), a negative timeout is not supported and will trigger
+        an assertion. To wait indefinitely, call wait() with no arguments.
+
+        @param timeOut  The maximum time to wait for the thread to be notified.
+                        Must not be negative.
+
+        @returns    true if the event has been signalled, false if the timeout expires.
+    */
+    bool wait (Seconds timeOut) const;
+
     /** Suspends the execution of this thread until either the specified timeout period
         has elapsed, or another thread calls the notify() method to wake it up.
 

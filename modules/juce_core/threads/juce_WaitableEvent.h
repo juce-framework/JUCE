@@ -70,7 +70,11 @@ public:
         manualReset was set to false in the WaitableEvent's constructor, then
         the event will be reset.
 
-        @param timeOut  the maximum time to wait.
+        Unlike wait (double), a negative timeout is not supported and will
+        trigger an assertion. To wait indefinitely, call wait() with no
+        arguments.
+
+        @param timeOut  the maximum time to wait. Must not be negative.
 
         @returns    true if the object has been signalled, false if the timeout
                     expires first.

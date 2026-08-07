@@ -53,6 +53,10 @@ void WaitableEvent::wait() const
 
 bool WaitableEvent::wait (Seconds timeOut) const
 {
+    // Unlike wait (double), a negative timeout is not supported. To wait
+    // indefinitely, call wait() with no arguments.
+    jassert (timeOut >= Seconds { 0.0 });
+
     std::unique_lock<std::mutex> lock (mutex);
 
     if (! triggered && ! condition.wait_for (lock, timeOut, [this] { return triggered == true; }))
