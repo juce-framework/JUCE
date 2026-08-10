@@ -3,6 +3,16 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 9.0.1
+
+  - Added a new TypeScript npm package for WebView integrarion
+  - Added protection against malformed AudioFormat input
+  - Fixed iOS builds with Xcode 12.4
+  - Fixed Freetype compilation on older Linux distros
+  - Fixed missing macOS icons for associated documents
+  - Fixed unresponsive Linux GUIs
+  - Fixed a macOS CoreAudio compilation issue
+
 ## Version 9.0.0
 
   - Added a new SVG parser

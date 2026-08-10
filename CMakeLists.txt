@@ -34,7 +34,7 @@ cmake_minimum_required(VERSION 3.22)
 
 get_property(_juce_initial_global_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
-project(JUCE VERSION 9.0.0 LANGUAGES C CXX)
+project(JUCE VERSION 9.0.1 LANGUAGES C CXX)
 
 if(NOT (JUCE_IS_TOP_LEVEL OR "C" IN_LIST _juce_initial_global_languages))
     message(FATAL_ERROR "A C compiler is required to build targets that depend on JUCE. "
