@@ -289,6 +289,11 @@ public:
     String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
                  double /* sampleRate */, int /* bufferSizeSamples */) override
     {
+        // The port connection callback may update the device manager's channel masks while this
+        // function is still running. Take copies so that the requested channels remain stable.
+        const auto requestedInputChannels = inputChannels;
+        const auto requestedOutputChannels = outputChannels;
+
         if (client == nullptr)
         {
             lastError = "No JACK client running";
@@ -307,11 +312,11 @@ public:
         juce::jack_activate (client);
         deviceIsOpen = true;
 
-        if (! inputChannels.isZero())
+        if (! requestedInputChannels.isZero())
         {
             forEachClientChannel (inputName, false, [&] (const char* portName, int index)
             {
-                if (! inputChannels[index])
+                if (! requestedInputChannels[index])
                     return;
 
                 jassert (index < inputPorts.size());
@@ -328,11 +333,11 @@ public:
             });
         }
 
-        if (! outputChannels.isZero())
+        if (! requestedOutputChannels.isZero())
         {
             forEachClientChannel (outputName, true, [&] (const char* portName, int index)
             {
-                if (! outputChannels[index])
+                if (! requestedOutputChannels[index])
                     return;
 
                 jassert (index < outputPorts.size());
