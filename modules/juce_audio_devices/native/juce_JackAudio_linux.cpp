@@ -302,7 +302,16 @@ public:
         juce::jack_on_shutdown (client, shutdownCallback, this);
         juce::jack_on_info_shutdown (client, infoShutdownCallback, this);
         juce::jack_set_xrun_callback (client, xrunCallback, this);
-        juce::jack_activate (client);
+
+        // If the client can't be activated, fail the whole open call:
+        // reporting success here would produce a device that appears to be
+        // running but never invokes its callback.
+        if (juce::jack_activate (client) != 0)
+        {
+            lastError = "Failed to activate JACK client";
+            return lastError;
+        }
+
         deviceIsOpen = true;
 
         if (! inputChannels.isZero())
