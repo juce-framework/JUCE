@@ -1170,6 +1170,41 @@ function(juce_enable_vst3_manifest_step shared_code_target)
     set_target_properties(${shared_code_target} PROPERTIES _JUCE_VST3_MANIFEST_STEP_ADDED TRUE)
 endfunction()
 
+function(juce_enable_lv2_manifest_step shared_code_target)
+    get_target_property(manifest_step_added ${shared_code_target} _JUCE_LV2_MANIFEST_STEP_ADDED)
+
+    if(manifest_step_added)
+        message(WARNING "LV2 manifest generation has already been enabled for target ${shared_code_target}. "
+            "You may need to set LV2_AUTO_MANIFEST FALSE in juce_add_plugin, and/or check that you're "
+            "not calling juce_enable_lv2_manifest_step multiple times.")
+        return()
+    endif()
+
+    get_target_property(copy_step_added ${shared_code_target} _JUCE_PLUGIN_COPY_STEP_ADDED)
+
+    if(copy_step_added)
+        message(FATAL_ERROR "LV2 manifest generation would run after plugin copy step, so it has been disabled. "
+            "If you're manually calling juce_enable_lv2_manifest_step, then you probably need to call "
+            "juce_enable_copy_plugin_step too.")
+    endif()
+
+    set(target_name ${shared_code_target}_LV2)
+
+    # Formats that can't be built are quietly dropped from a plugin's FORMATS,
+    # so a plugin configured without an LV2 target is not an error.
+    if(NOT TARGET ${target_name})
+        return()
+    endif()
+
+    _juce_add_lv2_manifest_helper_target()
+
+    add_custom_command(TARGET ${target_name} POST_BUILD
+        COMMAND juce_lv2_helper "$<TARGET_FILE:${target_name}>"
+        VERBATIM)
+
+    set_target_properties(${shared_code_target} PROPERTIES _JUCE_LV2_MANIFEST_STEP_ADDED TRUE)
+endfunction()
+
 # ==================================================================================================
 
 function(_juce_disable_system_includes target)
@@ -1404,11 +1439,11 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
 
         _juce_adhoc_sign(${target_name})
 
-        _juce_add_lv2_manifest_helper_target()
+        get_target_property(lv2_auto_manifest ${shared_code_target} JUCE_LV2_AUTO_MANIFEST)
 
-        add_custom_command(TARGET ${target_name} POST_BUILD
-            COMMAND juce_lv2_helper "$<TARGET_FILE:${target_name}>"
-            VERBATIM)
+        if(lv2_auto_manifest)
+            juce_enable_lv2_manifest_step(${shared_code_target})
+        endif()
 
         _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_LV2_COPY_DIR)
     endif()
@@ -1862,6 +1897,7 @@ function(_juce_set_fallback_properties target)
     _juce_set_property_if_not_set(${target} APP_SANDBOX_INHERIT FALSE)
 
     _juce_set_property_if_not_set(${target} VST3_AUTO_MANIFEST TRUE)
+    _juce_set_property_if_not_set(${target} LV2_AUTO_MANIFEST TRUE)
 
     get_target_property(is_synth ${target} JUCE_IS_SYNTH)
 
@@ -2092,6 +2128,7 @@ function(_juce_initialise_target target)
         APP_SANDBOX_ENABLED
         APP_SANDBOX_INHERIT
         VST3_AUTO_MANIFEST
+        LV2_AUTO_MANIFEST
 
         PLUGIN_NAME
         PLUGIN_MANUFACTURER_CODE
