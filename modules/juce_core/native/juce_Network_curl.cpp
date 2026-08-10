@@ -449,8 +449,13 @@ public:
                 return;
         }
 
+        // Cap the wait even when curl suggests a long timeout (it reports the
+        // full remaining connect budget during the connect phase), so that
+        // cancel() never has to wait for more than one bounded step: closing
+        // the transfer's sockets does not wake a select() that is already
+        // sleeping on them.
         // why 980? see http://curl.haxx.se/libcurl/c/curl_multi_timeout.html
-        if (curl_timeo < 0)
+        if (curl_timeo < 0 || curl_timeo > 980)
             curl_timeo = 980;
 
         struct timeval tv;
