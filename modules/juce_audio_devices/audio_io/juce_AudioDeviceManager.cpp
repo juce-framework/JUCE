@@ -111,6 +111,20 @@ public:
         jassert ((int) storedInputChannels.size()  == numInputChannels);
         jassert ((int) storedOutputChannels.size() == numOutputChannels);
 
+        // A device that is mid-reconfiguration can report a buffer size of 0
+        // (e.g. the JACK backend does this when its client is unavailable),
+        // which would otherwise make the chunking loop below spin forever on
+        // the audio thread. Emit a silent block instead; the next call to
+        // audioDeviceAboutToStart() will restore the real block size.
+        if (maximumSize <= 0)
+        {
+            for (int i = 0; i < numOutputChannels; ++i)
+                if (auto* channel = outputChannelData[i])
+                    zeromem (channel, (size_t) numSamples * sizeof (float));
+
+            return;
+        }
+
         int position = 0;
 
         while (position < numSamples)
