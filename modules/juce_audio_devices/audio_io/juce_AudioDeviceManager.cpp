@@ -102,14 +102,21 @@ public:
     }
 
     void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
-                                           [[maybe_unused]] int numInputChannels,
+                                           int numInputChannels,
                                            float* const* outputChannelData,
-                                           [[maybe_unused]] int numOutputChannels,
+                                           int numOutputChannels,
                                            int numSamples,
                                            const AudioIODeviceCallbackContext& context) override
     {
         jassert ((int) storedInputChannels.size()  == numInputChannels);
         jassert ((int) storedOutputChannels.size() == numOutputChannels);
+
+        // A device whose active-channel bitsets disagree with the channel arrays
+        // it passes here leaves the tail of the stored vectors holding the null
+        // pointers that resize() default-constructed, so the counts sent on are
+        // the number of channels actually filled in below, not the vector sizes.
+        const auto numIns  = jmin ((int) storedInputChannels.size(),  numInputChannels);
+        const auto numOuts = jmin ((int) storedOutputChannels.size(), numOutputChannels);
 
         int position = 0;
 
@@ -118,13 +125,13 @@ public:
             const auto blockLength = jmin (maximumSize, numSamples - position);
 
             const auto addOffset = [position] (auto ptr) { return ptr + position; };
-            std::transform (inputChannelData,  inputChannelData  + numInputChannels,  storedInputChannels .begin(), addOffset);
-            std::transform (outputChannelData, outputChannelData + numOutputChannels, storedOutputChannels.begin(), addOffset);
+            std::transform (inputChannelData,  inputChannelData  + numIns,  storedInputChannels .begin(), addOffset);
+            std::transform (outputChannelData, outputChannelData + numOuts, storedOutputChannels.begin(), addOffset);
 
             inner.audioDeviceIOCallbackWithContext (storedInputChannels.data(),
-                                                    (int) storedInputChannels.size(),
+                                                    numIns,
                                                     storedOutputChannels.data(),
-                                                    (int) storedOutputChannels.size(),
+                                                    numOuts,
                                                     blockLength,
                                                     context);
 
@@ -1295,8 +1302,11 @@ void AudioDeviceManager::LevelMeter::updateLevel (const float* const* channelDat
         {
             float s = 0;
 
+            // Channels that weren't specified in AudioIODevice::open() are
+            // passed as null pointers, as documented by AudioIODeviceCallback.
             for (int i = 0; i < numChannels; ++i)
-                s += std::abs (channelData[i][j]);
+                if (auto* channel = channelData[i])
+                    s += std::abs (channel[j]);
 
             s /= (float) numChannels;
 
