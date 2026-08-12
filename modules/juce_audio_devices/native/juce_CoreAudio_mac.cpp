@@ -324,6 +324,7 @@ private:
 };
 
 using CFStringProperty = CFProperty<CFStringRef>;
+using CFDictionaryProperty = CFProperty<CFDictionaryRef>;
 
 //==============================================================================
 template <typename T>
@@ -407,6 +408,12 @@ template<>
 String propertyValueToString (const CFDictionaryRef& dict)
 {
     return String::fromCFString (makeCFUniquePtr (CFCopyDescription (dict)).get());
+}
+
+template<>
+String propertyValueToString (const CFDictionaryProperty& dict)
+{
+    return dict.get() != nullptr ? propertyValueToString (dict.get()) : String{};
 }
 
 template<>
@@ -545,6 +552,11 @@ public:
     std::shared_ptr<PropertyListener> createPropertyListener (PropertySelector selector, PropertyListener::Callback callback)
     {
         return std::make_shared<PropertyListener> (getId(), selector, PropertyScope::wildcard, std::move (callback));
+    }
+
+    bool operator< (const AudioObject& other) const
+    {
+        return objectId < other.objectId;
     }
 
     bool operator== (const AudioObject& other) const
@@ -1012,6 +1024,35 @@ public:
         return getPropertyArray<AudioDevice> (kAudioAggregateDevicePropertyActiveSubDeviceList);
     }
 
+    // A Multi-Output Device is a stacked aggregate device. Its output channels are arranged such
+    // that the output streams are all fed the same data.
+    bool isStacked() const
+    {
+        const auto composition = getPropertyOrDefault<CFDictionaryProperty> (kAudioAggregateDevicePropertyComposition);
+
+        if (composition.get() == nullptr)
+            return false;
+
+        const auto* value = CFDictionaryGetValue (composition.get(), CFSTR (kAudioAggregateDeviceIsStackedKey));
+
+        if (value == nullptr)
+            return false;
+
+        // This is a lightly documented part of the Core Audio API and in practice the returned type
+        // can be either a CFBoolean or a CFNumber, depending on how the device was created.
+        if (CFGetTypeID (value) == CFBooleanGetTypeID())
+            return CFBooleanGetValue (static_cast<CFBooleanRef> (value));
+
+        if (CFGetTypeID (value) == CFNumberGetTypeID())
+        {
+            int stacked{};
+            CFNumberGetValue (static_cast<CFNumberRef> (value), kCFNumberIntType, &stacked);
+            return stacked != 0;
+        }
+
+        return false;
+    }
+
     bool configure (const ScopedCFDictionary& newComposition)
     {
         return setProperty (kAudioAggregateDevicePropertyComposition, newComposition.get());
@@ -1090,6 +1131,27 @@ private:
 };
 
 //==============================================================================
+template <typename T>
+class UniqueArray
+{
+public:
+    void addIfNotAlreadyThere (T device)
+    {
+        if (setData.insert (device).second)
+            arrayData.add (device);
+    }
+
+    auto& getArray() const { return arrayData; }
+
+    auto begin() const { return arrayData.begin(); }
+    auto end() const { return arrayData.end(); }
+
+private:
+    std::set<T> setData;
+    Array<T> arrayData;
+};
+
+//==============================================================================
 class AggregateDeviceDescription
 {
 public:
@@ -1153,11 +1215,26 @@ private:
         return startIndex;
     }
 
-    void addDevice (AudioDevice device, PlaybackDirection direction)
+    void addStackedOutputDevice (AudioDevice device)
     {
-        if (! device.isValid())
-            return;
+        const auto dir = PlaybackDirection::output;
 
+        for (auto audioDevice : getAudioDevices (device))
+        {
+            devices.addIfNotAlreadyThere (audioDevice);
+
+            const auto numChannels = std::min (device.getNumChannels (dir),
+                                               audioDevice.getNumChannels (dir));
+
+            const auto aggregateChannelIndex = getFirstChannelIndexFor (audioDevice, dir);
+
+            for (auto channel = 0; channel < numChannels; ++channel)
+                channelMap[toUnderlyingType (dir)].set (aggregateChannelIndex + channel, channel);
+        }
+    }
+
+    void addConcatenatedDevice (AudioDevice device, PlaybackDirection direction)
+    {
         int deviceChannelIndex = 0;
 
         for (auto audioDevice : getAudioDevices (device))
@@ -1172,6 +1249,19 @@ private:
 
             deviceChannelIndex += numChannels;
         }
+    }
+
+    void addDevice (AudioDevice device, PlaybackDirection direction)
+    {
+        if (! device.isValid())
+            return;
+
+        const auto stacked = device.isAggregateDevice() && AggregateAudioDevice { device.getId() }.isStacked();
+
+        if (direction == PlaybackDirection::output && stacked)
+            addStackedOutputDevice (device);
+        else
+            addConcatenatedDevice (device, direction);
     }
 
     ScopedCFDictionary toDictionary() const
@@ -1235,7 +1325,7 @@ private:
 
     String name;
     AudioDevice clockingDevice;
-    Array<AudioDevice> devices;
+    UniqueArray<AudioDevice> devices;
     std::array<ChannelMap, 2> channelMap;
 };
 
@@ -1822,12 +1912,12 @@ private:
         //==============================================================================
         Array<double> getAvailableSampleRates() final
         {
-            const auto getDeviceSampleRates = [] (auto device)
+            const auto getDeviceSampleRates = [] (auto device) -> Array<double>
             {
-                Array<double> sampleRates;
+                UniqueArray<double> sampleRates;
 
                 if (! device.isValid())
-                    return sampleRates;
+                    return sampleRates.getArray();
 
                 for (const auto& range : device.getAvailableSampleRateRanges())
                 {
@@ -1844,7 +1934,7 @@ private:
                     }
                 }
 
-                return sampleRates;
+                return sampleRates.getArray();
             };
 
             auto inputSampleRates = getDeviceSampleRates (ioDevices[toUnderlyingType (PlaybackDirection::input)]);
@@ -2076,11 +2166,18 @@ private:
 
             if (device.isAggregateDevice())
             {
-                const auto devs = AggregateAudioDevice { device.getId() }.getSubDevices();
-                subDevices.reserve (devs.size());
+                const AggregateAudioDevice aggregate { device.getId() };
 
-                for (auto dev : devs)
-                    subDevices.push_back ({ dev.getName(), dev.getNumChannels (direction) });
+                // We can't assign specific device names to the channels with a stacked aggregate device,
+                // because each channel will be broadcast to all sub-devices.
+                if (! aggregate.isStacked())
+                {
+                    const auto devs = aggregate.getSubDevices();
+                    subDevices.reserve (devs.size());
+
+                    for (const auto& dev : devs)
+                        subDevices.push_back ({ dev.getName(), dev.getNumChannels (direction) });
+                }
             }
 
             for (int index = 0; index < numChannels; ++index)
