@@ -393,6 +393,8 @@ static std::vector<ShapedGlyph> lowLevelShape (const SanitisedString& string,
         return (int64) infosCapt[(size_t) next].cluster + range.getStart();
     };
 
+    std::map<int64, int64> clusterToGlyphCount;
+
     for (size_t visualIndex = 0; visualIndex < infos.size(); ++visualIndex)
     {
         const auto glyphId = infos[visualIndex].codepoint;
@@ -413,8 +415,22 @@ static std::vector<ShapedGlyph> lowLevelShape (const SanitisedString& string,
         const auto newline = string.isNewline (infos[visualIndex].cluster + (size_t) range.getStart());
         const auto cluster = (int64) infos[visualIndex].cluster + range.getStart();
 
+        const auto numGlyphsInCluster = std::invoke ([&, c = infos[visualIndex].cluster, &infosCapt = infos]
+        {
+            if (auto it = clusterToGlyphCount.find (c); it != clusterToGlyphCount.end())
+                return it->second;
+
+            const auto numItems = (int64) std::count_if (infosCapt.begin(), infosCapt.end(), [&] (const hb_glyph_info_t& inf)
+                                          {
+                                              return inf.cluster == c;
+                                          });
+
+            clusterToGlyphCount[c] = numItems;
+            return numItems;
+        });
+
         const auto numLigaturePlaceholders = std::max ((int64) 0,
-                                                       std::abs (getNextCluster (visualIndex) - cluster) - 1);
+                                                       std::abs (getNextCluster (visualIndex) - cluster) - numGlyphsInCluster);
 
         // Tracking is only applied at the beginning of a new cluster to avoid inserting it before
         // diacritic marks.
