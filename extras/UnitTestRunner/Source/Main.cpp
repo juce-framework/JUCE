@@ -56,7 +56,6 @@ class ConsoleUnitTestRunner final : public UnitTestRunner
     }
 };
 
-
 //==============================================================================
 int main (int argc, char **argv)
 {
@@ -114,34 +113,44 @@ int main (int argc, char **argv)
         return Random::getSystemRandom().nextInt64();
     });
 
+    std::vector<String> failures;
+
+    const auto appendFailures = [&]
+    {
+        for (int i = 0; i < runner.getNumResults(); ++i)
+        {
+            auto* result = runner.getResult (i);
+
+            if (result->failures > 0)
+            {
+                const auto testName = result->unitTestName + " / " + result->subcategoryName;
+                const auto testSummary = String (result->failures) + " test failure" + (result->failures > 1 ? "s" : "");
+                const auto newLineAndTab = newLine + "\t";
+
+                failures.push_back (testName + ": " + testSummary + newLineAndTab
+                                    + result->messages.joinIntoString (newLineAndTab));
+            }
+        }
+    };
+
     if (args.containsOption (categoryOption) || args.containsOption (nameOption))
     {
         while (args.containsOption (categoryOption))
+        {
             runner.runTestsInCategory (args.removeValueForOption (categoryOption), seed);
+            appendFailures();
+        }
 
         while (args.containsOption (nameOption))
+        {
             runner.runTestsWithName (args.removeValueForOption (nameOption), seed);
+            appendFailures();
+        }
     }
     else
     {
         runner.runAllTests (seed);
-    }
-
-    std::vector<String> failures;
-
-    for (int i = 0; i < runner.getNumResults(); ++i)
-    {
-        auto* result = runner.getResult (i);
-
-        if (result->failures > 0)
-        {
-            const auto testName = result->unitTestName + " / " + result->subcategoryName;
-            const auto testSummary = String (result->failures) + " test failure" + (result->failures > 1 ? "s" : "");
-            const auto newLineAndTab = newLine + "\t";
-
-            failures.push_back (testName + ": " + testSummary + newLineAndTab
-                                + result->messages.joinIntoString (newLineAndTab));
-        }
+        appendFailures();
     }
 
     logger.writeToLog (newLine + String::repeatedString ("-", 65));
