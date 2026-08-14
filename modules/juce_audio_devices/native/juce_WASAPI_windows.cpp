@@ -1609,7 +1609,9 @@ public:
             {
                 const ScopedTryLock sl (startStopLock);
 
-                if (sl.isLocked() && (loadedFlags & flagStarted) != 0)
+                // Re-read the flags: stop() clears flagStarted under this lock, so the
+                // value loaded at the top of the loop may be stale by now.
+                if (sl.isLocked() && (flags.load (std::memory_order_acquire) & flagStarted) != 0)
                 {
                     callback->audioDeviceIOCallbackWithContext (ins.getArrayOfReadPointers(),
                                                                 numInputBuffers,
