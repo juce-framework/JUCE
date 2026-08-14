@@ -142,6 +142,27 @@ requirements on the directory structure.
 
 ## Change
 
+libxi-dev is now a required dependency for building JUCE on Linux, unless the
+JUCE_USE_XINPUT=0 preprocessor definition is set.
+
+**Possible Issues**
+
+Applications that don't disable XInput will fail to compile unless the
+dependency is met.
+
+**Workaround**
+
+Install libxi-dev.
+
+**Rationale**
+
+In order to add multi-touch support on Linux, the XInput2 extension is
+required. The libxi-dev package provides the necessary headers and libraries
+for this extension.
+
+
+## Change
+
 Multi-touch is now disabled on Windows by default.
 
 **Possible Issues**
