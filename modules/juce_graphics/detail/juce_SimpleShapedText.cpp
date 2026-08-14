@@ -393,8 +393,6 @@ static std::vector<ShapedGlyph> lowLevelShape (const SanitisedString& string,
         return (int64) infosCapt[(size_t) next].cluster + range.getStart();
     };
 
-    std::map<int64, int64> clusterToGlyphCount;
-
     for (size_t visualIndex = 0; visualIndex < infos.size(); ++visualIndex)
     {
         const auto glyphId = infos[visualIndex].codepoint;
@@ -417,16 +415,15 @@ static std::vector<ShapedGlyph> lowLevelShape (const SanitisedString& string,
 
         const auto numGlyphsInCluster = std::invoke ([&, c = infos[visualIndex].cluster, &infosCapt = infos]
         {
-            if (auto it = clusterToGlyphCount.find (c); it != clusterToGlyphCount.end())
-                return it->second;
+            const auto sameCluster = [&] (const hb_glyph_info_t& inf) { return inf.cluster == c; };
+            const auto pos = infosCapt.begin() + (ptrdiff_t) visualIndex;
 
-            const auto numItems = (int64) std::count_if (infosCapt.begin(), infosCapt.end(), [&] (const hb_glyph_info_t& inf)
-                                          {
-                                              return inf.cluster == c;
-                                          });
+            const auto clusterEnd = std::find_if_not (pos, infosCapt.end(), sameCluster);
+            const auto clusterBegin = std::find_if_not (std::make_reverse_iterator (pos),
+                                                        std::make_reverse_iterator (infosCapt.begin()),
+                                                        sameCluster).base();
 
-            clusterToGlyphCount[c] = numItems;
-            return numItems;
+            return (int64) std::distance (clusterBegin, clusterEnd);
         });
 
         const auto numLigaturePlaceholders = std::max ((int64) 0,
@@ -1118,6 +1115,7 @@ struct LineState
     }
 
     int64 largestVisualOrderInLine = -1;
+    int64 clusterOfLastConsumedGlyph = -1;
     float maxWidth{};
     float width{};
     bool trailingWhitespaceCanExtendBeyondMargin;
@@ -1161,6 +1159,7 @@ public:
                                                 const auto remainingWidth = nextState.maxWidth - nextState.width;
 
                                                 return nextState.isEmpty()
+                                                       || glyph.cluster == nextState.clusterOfLastConsumedGlyph
                                                        || glyph.advance.getX() <= remainingWidth
                                                        || (nextState.trailingWhitespaceCanExtendBeyondMargin
                                                            && glyph.isWhitespace()
@@ -1198,6 +1197,7 @@ private:
         {
             newState.width += newIt->advance.getX();
             newState.largestVisualOrderInLine = std::max (newState.largestVisualOrderInLine, newIt->cluster);
+            newState.clusterOfLastConsumedGlyph = newIt->cluster;
             ++newIt;
         }
 
@@ -1348,6 +1348,8 @@ void SimpleShapedText::shape (const String& data,
 
             for (const auto& s : glyphSpansInLine)
             {
+                jassert (! s.textRange.isEmpty());
+
                 const auto start = (int64) glyphsInVisualOrder.size();
                 bool ltr = true;
 
@@ -1431,6 +1433,7 @@ Range<int64> SimpleShapedText::getTextRange (int64 glyphIndex) const
                                                     (size_t) glyphRange.getLength() };
 
     const auto indexInRun = glyphIndex - glyphRange.getStart();
+    jassert (indexInRun >= 0);
 
     const auto cluster = glyphRun[(size_t) indexInRun].cluster;
 
@@ -1629,6 +1632,37 @@ struct SimpleShapedTextTests : public UnitTest
         {
             for (auto* testString : testStrings)
                 runTest (testString, 60.0f);
+        }
+
+        beginTest ("The glyphLookup must cover every glyph");
+        {
+            const auto defaultTypeface = Font::getDefaultTypefaceForFont (FontOptions{});
+
+            if (defaultTypeface == nullptr)
+            {
+                DBG ("Skipping test: No default typeface found!");
+                return;
+            }
+
+            // Arabic Ain, combining high tah, CR and a Latin a. The first two codepoints are
+            // shaped into two glyphs both belonging to cluster 0.
+            const auto testString = String::charToString (0x0639)
+                                    + String::charToString (0x0615)
+                                    + String::charToString (0x000d)
+                                    + String::charToString (0x0061);
+
+            SimpleShapedText st { &testString,
+                                  ShapedTextOptions{}.withFont (FontOptions { defaultTypeface })
+                                                     .withWordWrapWidth (1)
+                                                     .withAllowBreakingInsideWord() };
+
+            detail::Ranges rangeCoveredByGlyphs;
+            detail::Ranges::Operations ops;
+
+            for (const auto entry : st.getGlyphLookup())
+                rangeCoveredByGlyphs.set (entry.value.glyphRange, ops);
+
+            expect (rangeCoveredByGlyphs.covers ({ 0, st.getNumGlyphs() }));
         }
     }
 };
