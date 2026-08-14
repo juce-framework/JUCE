@@ -9,15 +9,14 @@
 /* Begin PBXBuildFile section */
 		02E8F35A8E0D4A0DF6F38D60 /* include_juce_data_structures.mm */ = {isa = PBXBuildFile; fileRef = 1DE5BBC777FB64798D823002; };
 		05A08E366EBF8D650974E695 /* jucer_HeaderComponent.cpp */ = {isa = PBXBuildFile; fileRef = 516D6D7C564DD5DF5C15CB06; };
-		08D8FA18C031543DEAA7C97A /* MetalKit.framework */ = {isa = PBXBuildFile; fileRef = DF40404150A5A3D6F5AAC856; settings = { ATTRIBUTES = (Weak, ); }; };
+		05E797F393A5B98B879F203B /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = D1F9B0E9F5D54FE48BEB46EA; };
 		09C4EDDF7F8B6E75EA3CE3A9 /* jucer_DocumentEditorComponent.cpp */ = {isa = PBXBuildFile; fileRef = BC3B310D42C489E8B8D93327; };
 		0A89E8E0E99C3B5B2B38F2E6 /* jucer_NewProjectWizard.cpp */ = {isa = PBXBuildFile; fileRef = C2835F16963B34839FC36220; };
 		0E783907C6214ADD59EC95DC /* jucer_Modules.cpp */ = {isa = PBXBuildFile; fileRef = F58B23995765C9FDBE28F871; };
 		10E26DA28CF28BBFDC64E796 /* include_juce_core_CompilationTime.cpp */ = {isa = PBXBuildFile; fileRef = 5F0374A45E6B5EC8E47D688F; };
-		11D42F7EC6E6539D79A7F4B1 /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = E5D6C36496F5BC84D7213BE8; };
 		13180B0F6CE42B355C90CF3C /* include_juce_graphics_Harfbuzz.cpp */ = {isa = PBXBuildFile; fileRef = 39F69DABE999E4B2CBC6041F; };
+		163154C3AD08C4D57AC3DE5C /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = E5D6C36496F5BC84D7213BE8; };
 		234B6BA2952CBC7C61EF70EF /* include_juce_events.mm */ = {isa = PBXBuildFile; fileRef = 5867DC4E39DF8539B54C0D59; };
-		241F29FCBB7A17BB44A0B10C /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = D1F9B0E9F5D54FE48BEB46EA; };
 		244567D3AE2E417A8CB2B95E /* jucer_ProjectExporter.cpp */ = {isa = PBXBuildFile; fileRef = C3BB9F92B02B06D04A73794C; };
 		254A7C08594A152C2C646334 /* include_juce_graphics.mm */ = {isa = PBXBuildFile; fileRef = 1B9B5A37F079FE3B3CF8FAB6; };
 		25EF9B3FECB4C9F0F522DCAA /* jucer_MiscUtilities.cpp */ = {isa = PBXBuildFile; fileRef = 486E8D02DAD2A0BF54A901C0; };
@@ -27,24 +26,24 @@
 		30B921C38DCEE787B294B746 /* jucer_Project.cpp */ = {isa = PBXBuildFile; fileRef = BAC43B20E14A340CCF14119C; };
 		31FA8402C0C4506C69F3F76B /* include_juce_core_zlib.c */ = {isa = PBXBuildFile; fileRef = 04F410046F61CC7232187524; };
 		3C5267E06A897B0DC0F7EA50 /* BinaryData.cpp */ = {isa = PBXBuildFile; fileRef = 472F9A90F685220D730EBF6C; };
+		41998FE4F14B90682181D502 /* Security.framework */ = {isa = PBXBuildFile; fileRef = 4E410AEB132B44674291105A; };
 		44AD0D81A65C5EAE3BE588FD /* jucer_VersionInfo.cpp */ = {isa = PBXBuildFile; fileRef = FF3A6A384D536E1AEF47CD54; };
 		4581B3A9A0D92FC01D4149EF /* jucer_NewFileWizard.cpp */ = {isa = PBXBuildFile; fileRef = E4532338917106FA0B61A429; };
 		468548FB21D264DC12321327 /* jucer_JucerTreeViewBase.cpp */ = {isa = PBXBuildFile; fileRef = 4D5F0CA8D1273144681A1D48; };
 		48B533B313D6C24BE5B2E2EE /* include_juce_graphics_libpng.c */ = {isa = PBXBuildFile; fileRef = 7F7B24BE16E4EE7B8728E55B; };
-		49C22786B54C5DC94E4654B8 /* IOKit.framework */ = {isa = PBXBuildFile; fileRef = E96597BBC6A98255B51B94DC; };
 		4C743A3DA8682EEE89BDBD28 /* include_juce_build_tools.cpp */ = {isa = PBXBuildFile; fileRef = E2687B099347B364D1919A9B; };
+		4DB06ECCCBE52DE7922B477E /* WebKit.framework */ = {isa = PBXBuildFile; fileRef = CF6C8BD0DA3D8CD4E99EBADA; };
 		4E6DC4778D583C48C3CCD4DC /* jucer_ResourceFile.cpp */ = {isa = PBXBuildFile; fileRef = E13A54A6D3A1895EACE53E51; };
-		54C391DB9AC4AFABD2EFFD7E /* Security.framework */ = {isa = PBXBuildFile; fileRef = 4E410AEB132B44674291105A; };
 		5DD883699B85E4C492CAD065 /* include_juce_core.mm */ = {isa = PBXBuildFile; fileRef = DB9C8E35DF815B803CB4A9CF; };
 		631D75A9FA398C5254F0EF19 /* include_juce_graphics_lunasvg.c */ = {isa = PBXBuildFile; fileRef = D3FCC98B46178C9E20FA8225; };
 		638C7247B6DBA67EFE46E124 /* jucer_PIPGenerator.cpp */ = {isa = PBXBuildFile; fileRef = 191330B20DAC08B890656EA0; };
+		665FBC5A73EF037CB894CEEA /* MetalKit.framework */ = {isa = PBXBuildFile; fileRef = DF40404150A5A3D6F5AAC856; settings = { ATTRIBUTES = (Weak, ); }; };
 		6DD9DA1677A6CF789CDAB478 /* jucer_AutoUpdater.cpp */ = {isa = PBXBuildFile; fileRef = 0D4D508C638BC74943B9976D; };
 		6ECB2F11D2F593FACCCF99DB /* jucer_ProjucerLookAndFeel.cpp */ = {isa = PBXBuildFile; fileRef = 0F8C000E5FF4A2DAC1FEF8EB; };
 		71713DE4716DCEDB45A206E2 /* jucer_OpenDocumentManager.cpp */ = {isa = PBXBuildFile; fileRef = F9111E150CFF155329D44853; };
 		76DF3E1A9DA34FC06261E6E4 /* include_juce_gui_basics_2.cpp */ = {isa = PBXBuildFile; fileRef = DD723261F7F20BCF952FA60D; };
 		7A055FDAFC2A6215D12AD97C /* include_juce_gui_basics_4.cpp */ = {isa = PBXBuildFile; fileRef = 34B30AB4C55FAD8CC770BBCF; };
 		7E43279B5881EA0FFDA49647 /* AppIcon.icon */ = {isa = PBXBuildFile; fileRef = E09429B88DD8ADA381D4BF61; };
-		7F1928D425D075E93DC254A8 /* Metal.framework */ = {isa = PBXBuildFile; fileRef = E419F3AED6A220EDCB179A8C; settings = { ATTRIBUTES = (Weak, ); }; };
 		7F2403E53A8BDEFBC0E14E13 /* include_juce_graphics_libjpg_3.c */ = {isa = PBXBuildFile; fileRef = EF62FE6479498B3024190187; };
 		8BE478303CDF061B72F219E2 /* jucer_CodeHelpers.cpp */ = {isa = PBXBuildFile; fileRef = F2E4998FB2C7221587A79F8B; };
 		908B7D4FB180F53405DA8EF9 /* jucer_StartPageComponent.cpp */ = {isa = PBXBuildFile; fileRef = 82C18723A3D0E39BBD8F0F6E; };
@@ -58,13 +57,14 @@
 		AA9D0B8E23F3D87A23DE9F8A /* jucer_MainWindow.cpp */ = {isa = PBXBuildFile; fileRef = 9069981E414A631B036CC9AC; };
 		B18248959DDC44EF4E85320A /* include_juce_gui_extra.mm */ = {isa = PBXBuildFile; fileRef = AECE3914F5119A3D586A5635; };
 		B6DCEB2D40305DF0BBD72C8E /* include_juce_gui_basics_5.cpp */ = {isa = PBXBuildFile; fileRef = E69BC77F1469FAEBB63D0BC8; };
-		B980464FA2761CCD64B1FAD6 /* WebKit.framework */ = {isa = PBXBuildFile; fileRef = CF6C8BD0DA3D8CD4E99EBADA; };
 		BF913199032B4CE970E82AA3 /* jucer_FileHelpers.cpp */ = {isa = PBXBuildFile; fileRef = B403AF75EAF361ED74EE476E; };
 		D0E26EB54B0087C8BE3D541E /* jucer_Icons.cpp */ = {isa = PBXBuildFile; fileRef = 846B2A670C5A19DE0039E11A; };
+		D149343A142899C5A3EBE5B3 /* Metal.framework */ = {isa = PBXBuildFile; fileRef = E419F3AED6A220EDCB179A8C; settings = { ATTRIBUTES = (Weak, ); }; };
 		D5C9125F65493CA481F18E53 /* include_juce_cryptography.mm */ = {isa = PBXBuildFile; fileRef = D766BB9D8C32B5560F0493F3; };
+		D5DDDFE99E627C607CD605B7 /* IOKit.framework */ = {isa = PBXBuildFile; fileRef = E96597BBC6A98255B51B94DC; };
 		D76134C6646C526A210A78E2 /* include_juce_graphics_Sheenbidi.c */ = {isa = PBXBuildFile; fileRef = 276A4D5D4A2DD84C6D41F0CA; };
 		DBE437EE41F174A6F27FC0E2 /* AppIcon.icns */ = {isa = PBXBuildFile; fileRef = F3FE62637ACC2263A7594E8A; };
-		DD0FF38F7E8DE0220D73671D /* Foundation.framework */ = {isa = PBXBuildFile; fileRef = BF006EF584FB274FF0319E08; };
+		DFBFD515533CDBCD57F8C265 /* Foundation.framework */ = {isa = PBXBuildFile; fileRef = BF006EF584FB274FF0319E08; };
 		EE722B47BC36CC8A87E0FB76 /* jucer_AppearanceSettings.cpp */ = {isa = PBXBuildFile; fileRef = BE618CE21C794BDEE319E328; };
 		F15F0512666FF8CDC0D08905 /* include_juce_gui_basics.mm */ = {isa = PBXBuildFile; fileRef = 0462692BAA9CD1BE6DFBCC33; };
 		F4719C767DE9D1B4FE2F33D3 /* include_juce_gui_basics_3.cpp */ = {isa = PBXBuildFile; fileRef = BDBEAFE6B7499EFB920FF105; };
@@ -292,14 +292,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				241F29FCBB7A17BB44A0B10C,
-				DD0FF38F7E8DE0220D73671D,
-				49C22786B54C5DC94E4654B8,
-				11D42F7EC6E6539D79A7F4B1,
-				54C391DB9AC4AFABD2EFFD7E,
-				B980464FA2761CCD64B1FAD6,
-				7F1928D425D075E93DC254A8,
-				08D8FA18C031543DEAA7C97A,
+				05E797F393A5B98B879F203B,
+				DFBFD515533CDBCD57F8C265,
+				D5DDDFE99E627C607CD605B7,
+				163154C3AD08C4D57AC3DE5C,
+				41998FE4F14B90682181D502,
+				4DB06ECCCBE52DE7922B477E,
+				D149343A142899C5A3EBE5B3,
+				665FBC5A73EF037CB894CEEA,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,58 +7,58 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		008E9799E13B3320E8485CE3 /* MetalKit.framework */ = {isa = PBXBuildFile; fileRef = C8C4E9A4028028FF1F5B76F2; settings = { ATTRIBUTES = (Weak, ); }; };
 		0977FEC02DAF29438583198A /* include_juce_core.mm */ = {isa = PBXBuildFile; fileRef = 01E0EEF68A11C1CAF180E173; };
 		0FA2A3321630EBE83E439D99 /* include_juce_cryptography.mm */ = {isa = PBXBuildFile; fileRef = AFF729977947528F3E4AAA96; };
+		14DAFF4798426DA78BB4C27F /* Accelerate.framework */ = {isa = PBXBuildFile; fileRef = 2E13A899F4E3C99054A3656F; };
 		1683F77932E40BFDB5BB5385 /* include_juce_gui_basics_4.cpp */ = {isa = PBXBuildFile; fileRef = DC7E90D5ED3F4B96335423A1; };
 		204FE224D562F0519DE438A4 /* include_juce_core_CompilationTime.cpp */ = {isa = PBXBuildFile; fileRef = BD85090C86849423E95A0014; };
 		22F59D1B33807354C257F4D2 /* include_juce_graphics_lunasvg.c */ = {isa = PBXBuildFile; fileRef = D7DC62402EA011FA46185BB2; };
 		27DC91F4D9D92BD6BF92779C /* include_juce_graphics_libjpg_1.c */ = {isa = PBXBuildFile; fileRef = 955F0BB737554BACC98E0FBE; };
 		2B5440F666E80949B39362A1 /* include_juce_graphics_libjpg_2.c */ = {isa = PBXBuildFile; fileRef = 1BB319A871B7F5F78C0EFA73; };
 		2E28F61A64DEF942FE7B94C4 /* include_juce_audio_processors.mm */ = {isa = PBXBuildFile; fileRef = AED58461CE961C62A0E0A552; };
+		319AFD20FA27BBBAEB23E58D /* AudioToolbox.framework */ = {isa = PBXBuildFile; fileRef = 9E8129263CD42C6029FC2CAD; };
 		32A18F8D205B7493D2837AC8 /* include_juce_graphics_libpng.c */ = {isa = PBXBuildFile; fileRef = 3A270474A7AA63CA2A1A3D42; };
+		358453867F221BDBFFC267AE /* CoreMIDI.framework */ = {isa = PBXBuildFile; fileRef = 448838BE6E937D450A3C84CE; };
 		3717B9F9A0F7C9CB95F1BE7F /* include_juce_gui_extra.mm */ = {isa = PBXBuildFile; fileRef = 7BE6330821794919A88ED8ED; };
-		3C30D7C28C86F4054257DCD5 /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = C78806A6727F44EACFDED4A5; };
 		3E99AFD8F597D7D96B383389 /* include_juce_gui_basics_2.cpp */ = {isa = PBXBuildFile; fileRef = 6F448A205D85D5419A8766DD; };
+		58B18EEF465CD4F07BB85C48 /* Security.framework */ = {isa = PBXBuildFile; fileRef = 9D1E94FAB66D1FB2531A3F9F; };
 		5E278603F05C4AAA3ACC7253 /* include_juce_audio_formats_flac_2.c */ = {isa = PBXBuildFile; fileRef = A8EE226D947B4F7AB48E0F4A; };
 		5FF49672946F9857D0566A06 /* include_juce_graphics_Sheenbidi.c */ = {isa = PBXBuildFile; fileRef = 53EC217F09F0762DFA2910A8; };
 		602138A25FD8ACB48B8BA915 /* include_juce_gui_basics_5.cpp */ = {isa = PBXBuildFile; fileRef = D37E4AB5BF7B4DAB27F60645; };
 		61B523C52EBA17F738FFE31A /* include_juce_opengl.mm */ = {isa = PBXBuildFile; fileRef = 660F1970CF687A7AE8371C6D; };
-		64DEB67F9523F28D899D1821 /* MetalKit.framework */ = {isa = PBXBuildFile; fileRef = C8C4E9A4028028FF1F5B76F2; settings = { ATTRIBUTES = (Weak, ); }; };
 		65B2C4ED19229E0EDC8EF993 /* RecentFilesMenuTemplate.nib */ = {isa = PBXBuildFile; fileRef = 696F7896036B652369517438; };
 		66B98271A3EC8BBE696ADABE /* include_juce_graphics_libjpg_3.c */ = {isa = PBXBuildFile; fileRef = 62E6C44029DFE002958FDA18; };
-		67DF295E93E54432043126DF /* CoreAudio.framework */ = {isa = PBXBuildFile; fileRef = 6799B056504F9F017998B9E2; };
 		6C2200C52B65E1BE80544E50 /* include_juce_audio_devices.mm */ = {isa = PBXBuildFile; fileRef = AF330F41D1A4865108690E3C; };
 		6E24A926494D678975AA56E5 /* AppIcon.icns */ = {isa = PBXBuildFile; fileRef = 3A798A17A29957CC426E04FB; };
-		770AB74B1D3A0108F764DD47 /* CoreAudioKit.framework */ = {isa = PBXBuildFile; fileRef = 4D1DB6D77B6F3DE7A569780B; };
-		77745BF98931B91341FE17F6 /* IOKit.framework */ = {isa = PBXBuildFile; fileRef = F3292E3563DB7ABB076DB400; };
-		80B9F7ED2009922C693B7DD4 /* DiscRecording.framework */ = {isa = PBXBuildFile; fileRef = CB82A14817C3E2ABBBBC3864; };
-		80EE2C27B466BAFD83881D3F /* Accelerate.framework */ = {isa = PBXBuildFile; fileRef = 2E13A899F4E3C99054A3656F; };
-		88DB5C5128E42AD59AD944D9 /* Security.framework */ = {isa = PBXBuildFile; fileRef = 9D1E94FAB66D1FB2531A3F9F; };
 		8CE87C0D717B6D9BF77437D2 /* include_juce_audio_processors_headless.mm */ = {isa = PBXBuildFile; fileRef = 52CBBACAC86AD67BAF0687F6; };
-		8ECB0767EE340DD83869E37D /* WebKit.framework */ = {isa = PBXBuildFile; fileRef = EC794872987FEA2E129C589A; };
+		9331B904E75F11559D5C749F /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = C78806A6727F44EACFDED4A5; };
 		987CBD5330E76B404F0D966C /* Main.cpp */ = {isa = PBXBuildFile; fileRef = 77C0AC21C1028911123844FC; };
+		9B3974452C0F9CE2F7CCA5CF /* CoreAudio.framework */ = {isa = PBXBuildFile; fileRef = 6799B056504F9F017998B9E2; };
 		9DD9576677DEB98F70A07432 /* include_juce_audio_formats_flac_1.c */ = {isa = PBXBuildFile; fileRef = 0F2AB299AACAC363D46DD1FD; };
 		9EFD2AA2FFF3C125FDAA4279 /* include_juce_data_structures.mm */ = {isa = PBXBuildFile; fileRef = 7525879E73E8AF32FFA0CDDE; };
 		9F618C008A503063D10076C4 /* BinaryData.cpp */ = {isa = PBXBuildFile; fileRef = 74711D7544168CCAC4969A07; };
+		A11179D3C4009801530A5560 /* Metal.framework */ = {isa = PBXBuildFile; fileRef = B57F11A8AC0C8D3A8BF3BDCF; settings = { ATTRIBUTES = (Weak, ); }; };
 		A1204C6C832C4F05CB526169 /* include_juce_audio_processors_headless_ara.cpp */ = {isa = PBXBuildFile; fileRef = 6033B963F05D21CB55E99E91; };
 		A1F34D09F4E4338775917ED1 /* include_juce_audio_formats.mm */ = {isa = PBXBuildFile; fileRef = C6E2284D86D93F1D9D5C7666; };
-		AC37CDB417E2D3FE619E5944 /* Metal.framework */ = {isa = PBXBuildFile; fileRef = B57F11A8AC0C8D3A8BF3BDCF; settings = { ATTRIBUTES = (Weak, ); }; };
-		B323E5E5FBD5663B21A8E623 /* OpenGL.framework */ = {isa = PBXBuildFile; fileRef = 996E743A20FC78671766BF59; };
+		A746017B76595B19A48E259C /* CoreAudioKit.framework */ = {isa = PBXBuildFile; fileRef = 4D1DB6D77B6F3DE7A569780B; };
+		B2F897180931A251B1F3C85F /* IOKit.framework */ = {isa = PBXBuildFile; fileRef = F3292E3563DB7ABB076DB400; };
 		B46846A62EB869045A0FD27B /* include_juce_audio_processors_headless_lv2_libs.cpp */ = {isa = PBXBuildFile; fileRef = E802B3AC9DEDACF4D31E09F5; };
+		B771877F6A285B833DCC8150 /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = 935CA85EF98714D3A17AE737; };
+		B8E6228FF985EBEBF7703629 /* WebKit.framework */ = {isa = PBXBuildFile; fileRef = EC794872987FEA2E129C589A; };
+		BAFF9D3C75923FA88677C4AF /* Foundation.framework */ = {isa = PBXBuildFile; fileRef = F7D557738137CA1A370BAA27; };
 		BB9A9692D99DD0DDB1047B60 /* include_juce_audio_basics.mm */ = {isa = PBXBuildFile; fileRef = 6D1F9E505D20C09647124F0A; };
-		C4D6C466C41173D6970553D2 /* AudioToolbox.framework */ = {isa = PBXBuildFile; fileRef = 9E8129263CD42C6029FC2CAD; };
 		C5E7BAD864E02CF37F7BD707 /* include_juce_events.mm */ = {isa = PBXBuildFile; fileRef = 33AA348465F512DBA8778DAF; };
 		C6348C6B1D0312580E97EA19 /* include_juce_osc.cpp */ = {isa = PBXBuildFile; fileRef = 3BF06B70407FFDBE9534F942; };
-		CA694B2A73FCF12D7F9E7E49 /* CoreMIDI.framework */ = {isa = PBXBuildFile; fileRef = 448838BE6E937D450A3C84CE; };
 		CADEA83EAAC94E0011C07908 /* include_juce_gui_basics.mm */ = {isa = PBXBuildFile; fileRef = 84B287BB2AD252B7D69AC47E; };
 		CBC8F7E5225C73CEDFB3B72E /* include_juce_graphics.mm */ = {isa = PBXBuildFile; fileRef = A7FF2B353C8568B5A7A80117; };
 		D0A216D18DA4B8BE0B7DE49F /* include_juce_gui_basics_3.cpp */ = {isa = PBXBuildFile; fileRef = 8914CC86A626EEFD963A0658; };
+		DA88BB8533FBDA26E0FC17E8 /* OpenGL.framework */ = {isa = PBXBuildFile; fileRef = 996E743A20FC78671766BF59; };
+		E6591F7836D91819C982B750 /* DiscRecording.framework */ = {isa = PBXBuildFile; fileRef = CB82A14817C3E2ABBBBC3864; };
 		EA153740F801BC51EFD75A5A /* include_juce_graphics_Harfbuzz.cpp */ = {isa = PBXBuildFile; fileRef = AC684ED3A008C6E513200C05; };
 		EA487FA4116517A8DFEE85B0 /* include_juce_audio_utils.mm */ = {isa = PBXBuildFile; fileRef = FCEBB157FB526741DB6791D1; };
 		EA736EA0E28E5285F10BB3E1 /* include_juce_core_zlib.c */ = {isa = PBXBuildFile; fileRef = 0D4F9B9579EBDF235B5A8AB0; };
-		EC14DA30C090DDC62084DB4C /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = 935CA85EF98714D3A17AE737; };
 		F468E8C7B02DFD4D53911277 /* App */ = {isa = PBXBuildFile; fileRef = E4162459ED4C829EF7B19691; };
-		F918FB5901F09EA77DB32022 /* Foundation.framework */ = {isa = PBXBuildFile; fileRef = F7D557738137CA1A370BAA27; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -144,21 +144,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				80EE2C27B466BAFD83881D3F,
-				C4D6C466C41173D6970553D2,
-				3C30D7C28C86F4054257DCD5,
-				67DF295E93E54432043126DF,
-				770AB74B1D3A0108F764DD47,
-				CA694B2A73FCF12D7F9E7E49,
-				80B9F7ED2009922C693B7DD4,
-				F918FB5901F09EA77DB32022,
-				77745BF98931B91341FE17F6,
-				B323E5E5FBD5663B21A8E623,
-				EC14DA30C090DDC62084DB4C,
-				88DB5C5128E42AD59AD944D9,
-				8ECB0767EE340DD83869E37D,
-				AC37CDB417E2D3FE619E5944,
-				64DEB67F9523F28D899D1821,
+				14DAFF4798426DA78BB4C27F,
+				319AFD20FA27BBBAEB23E58D,
+				9331B904E75F11559D5C749F,
+				9B3974452C0F9CE2F7CCA5CF,
+				A746017B76595B19A48E259C,
+				358453867F221BDBFFC267AE,
+				E6591F7836D91819C982B750,
+				BAFF9D3C75923FA88677C4AF,
+				B2F897180931A251B1F3C85F,
+				DA88BB8533FBDA26E0FC17E8,
+				B771877F6A285B833DCC8150,
+				58B18EEF465CD4F07BB85C48,
+				B8E6228FF985EBEBF7703629,
+				A11179D3C4009801530A5560,
+				008E9799E13B3320E8485CE3,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

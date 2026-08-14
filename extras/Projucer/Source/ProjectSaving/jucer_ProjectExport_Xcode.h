@@ -3408,6 +3408,11 @@ private:
                 s.insert (0, "AudioUnit");
             }
 
+            // Frameworks that are linked normally somewhere in the project shouldn't also be
+            // linked weakly, otherwise we would emit two build files with clashing IDs
+            for (const auto& framework : s)
+                xcodeWeakFrameworks.removeString (framework, true);
+
             for (const auto& [frameworkList, kind] : { std::tuple (&s,                   FrameworkKind::normal),
                                                        std::tuple (&xcodeWeakFrameworks, FrameworkKind::weak) })
             {
@@ -3417,16 +3422,23 @@ private:
 
                 for (auto& framework : cleaned)
                 {
-                    auto frameworkID = addFramework (framework, kind);
-
-                    // find all the targets that are referring to this object
+                    // A PBXBuildFile is only allowed to be referenced from a single build phase,
+                    // so a separate one must be created for every target linking this framework.
+                    // Otherwise Xcode won't apply attributes like Weak to all targets.
                     for (auto& target : targets)
                     {
+                        // These targets don't get a frameworks build phase
+                        if (target->type == XcodeTarget::SharedCodeTarget
+                            || target->type == XcodeTarget::AggregateTarget)
+                        {
+                            continue;
+                        }
+
                         if (xcodeFrameworks.contains (framework)
                             || xcodeWeakFrameworks.contains (framework)
                             || target->xcodeFrameworks.contains (framework))
                         {
-                            target->frameworkIDs.add (frameworkID);
+                            target->frameworkIDs.add (addFramework (framework, kind, *target));
                         }
                     }
                 }
@@ -3772,6 +3784,7 @@ private:
         FileOptions& withPath (const String& p)                             { path = p;                  return *this; }
         FileOptions& withRelativePath (const build_tools::RelativePath& p)  { path = p.toUnixStyle();    return *this; }
         FileOptions& withFileRefID (const String& fid)                      { fileRefID = fid;           return *this; }
+        FileOptions& withBuildFileID (const String& bid)                    { buildFileID = bid;         return *this; }
         FileOptions& withCompilerFlags (const String& f)                    { compilerFlags = f;         return *this; }
         FileOptions& withCompilationEnabled (bool e)                        { compile = e;               return *this; }
         FileOptions& withAddToBinaryResourcesEnabled (bool e)               { addToBinaryResources = e;  return *this; }
@@ -3783,6 +3796,7 @@ private:
 
         String path;
         String fileRefID;
+        String buildFileID;
         String compilerFlags;
         bool compile = false;
         bool addToBinaryResources = false;
@@ -3841,7 +3855,7 @@ private:
 
     String addBuildFile (const FileOptions& opts) const
     {
-        auto fileID = createID (opts.path + "buildref");
+        auto fileID = createID (opts.buildFileID.isEmpty() ? opts.path + "buildref" : opts.buildFileID);
         auto filename = build_tools::RelativePath (opts.path, build_tools::RelativePath::unknown).getFileName();
 
         if (opts.compile)
@@ -3987,7 +4001,7 @@ private:
         weak,
     };
 
-    String addFramework (const String& frameworkName, FrameworkKind kind) const
+    String addFramework (const String& frameworkName, FrameworkKind kind, const XcodeTarget& target) const
     {
         auto path = frameworkName;
         auto isRelativePath = path.startsWith ("../");
@@ -4001,10 +4015,11 @@ private:
         auto fileRefID = createFileRefID (path);
 
         addFileReference (((build_tools::isAbsolutePath (frameworkName) || isRelativePath) ? "" : "${SDKROOT}/") + path);
-        frameworkFileIDs.add (fileRefID);
+        frameworkFileIDs.addIfNotAlreadyThere (fileRefID);
 
         return addBuildFile (FileOptions().withPath (path)
                                           .withFileRefID (fileRefID)
+                                          .withBuildFileID (path + target.getName() + "buildref")
                                           .withAttributeWeak (kind == FrameworkKind::weak));
     }
 
