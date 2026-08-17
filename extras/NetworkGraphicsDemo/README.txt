@@ -19,7 +19,7 @@ We wrote a few simple animations to run in this context, mainly around the idea 
 flocking bird-type objects, because this creates a nice effect as they fly between
 each monitor, which helps to create the illusion of a bigger picture.
 
-Any touchs/mouse-clicks on each slave display are sent back to the master, so that
+Any touches/mouse-clicks on each slave display are sent back to the master, so that
 it can react to these. In our demos we used this to cause the flock to swarm towards
 the place that was being touched.
 
@@ -29,7 +29,7 @@ will open a special window that lets you modify the positions of all the network
 devices by dragging/mouse-wheeling. In this window you can also press cursor
 left/right to select the demo to run.
 
-These are some interesting bits of code in here - notably a special
+There are some interesting bits of code in here - notably a special
 LowLevelGraphicsContext class which allows the content generator to simply
 draw to a Graphics object as you normally would, but instead of painting to the
 screen, everything that is drawn gets serialised into binary packets and broadcast

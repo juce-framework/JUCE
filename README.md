@@ -16,7 +16,7 @@ The JUCE repository contains a
 develop branch contains the latest bug fixes and features and is periodically
 merged into the master branch in stable [tagged
 releases](https://github.com/juce-framework/JUCE/releases) (the latest release
-containing pre-built binaries can be also downloaded from the [JUCE
+containing pre-built binaries can also be downloaded from the [JUCE
 website](https://juce.com/get-juce)).
 
 JUCE projects can be managed with either the Projucer (JUCE's own
