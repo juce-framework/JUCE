@@ -50,4 +50,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments", "-Wm
  #include <ARA_Library/Debug/ARADebug.c>
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
+#else
+ // To get around 'has no symbols' warnings emitted by libtool
+ void juce_audioProcessorsHeadlessAraPlaceholder();
+ void juce_audioProcessorsHeadlessAraPlaceholder() {}
 #endif

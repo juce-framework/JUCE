@@ -64,4 +64,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 4996 6385 28182)
 #undef FIX
 #include "juce_graphics/image_formats/jpglib/jccolor.c"
 
+#else
+// To get around 'empty translation unit' errors and 'has no symbols' warnings emitted by libtool
+void juce_graphicsLibjpg3Placeholder (void);
+void juce_graphicsLibjpg3Placeholder (void) {}
 #endif

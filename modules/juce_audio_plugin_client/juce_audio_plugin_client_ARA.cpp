@@ -55,4 +55,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
+#else
+// To get around 'has no symbols' warnings emitted by libtool
+void juce_audioPluginClientAraPlaceholder();
+void juce_audioPluginClientAraPlaceholder() {}
 #endif

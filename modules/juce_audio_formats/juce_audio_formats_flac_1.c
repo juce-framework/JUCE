@@ -51,6 +51,7 @@
   #include "juce_audio_formats/codecs/flac/win_utf8_io/win_utf8_io.c"
  #endif
 #else
- // To get around 'empty translation unit' errors
- enum { placeholder = 0 };
+ // To get around 'empty translation unit' errors and 'has no symbols' warnings emitted by libtool
+ void juce_audioFormatsFlac1Placeholder (void);
+ void juce_audioFormatsFlac1Placeholder (void) {}
 #endif

@@ -58,4 +58,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 4996 6385 6386 6387)
 #include "juce_graphics/image_formats/jpglib/jquant1.c"
 #include "juce_graphics/image_formats/jpglib/jdsample.c"
 
+#else
+// To get around 'empty translation unit' errors and 'has no symbols' warnings emitted by libtool
+void juce_graphicsLibjpg2Placeholder (void);
+void juce_graphicsLibjpg2Placeholder (void) {}
 #endif

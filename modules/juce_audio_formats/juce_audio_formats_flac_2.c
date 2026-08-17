@@ -58,6 +58,7 @@
  #include "juce_audio_formats/codecs/flac/libFLAC/stream_encoder_framing.c"
  #include "juce_audio_formats/codecs/flac/libFLAC/window_flac.c"
 #else
- // To get around 'empty translation unit' errors
- enum { placeholder = 0 };
+ // To get around 'empty translation unit' errors and 'has no symbols' warnings emitted by libtool
+ void juce_audioFormatsFlac2Placeholder (void);
+ void juce_audioFormatsFlac2Placeholder (void) {}
 #endif
