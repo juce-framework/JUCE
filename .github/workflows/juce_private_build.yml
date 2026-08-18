@@ -18,11 +18,16 @@ on:
         type: string
         default: ""
         description: The C++ standard to use (optional [20, 23])
+      commit-message:
+        required: false
+        type: string
+        default: ""
+        description: Shortened subject of the triggering commit (optional, will default to the triggering commit's message or SHA)
 
 env:
   target_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-run-name: "[${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}] ${{ github.sha }}"
+run-name: "[${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}] ${{ inputs.commit-message && inputs.commit-message || github.sha }}"
 
 jobs:
   setup:
