@@ -1398,9 +1398,8 @@ struct MP3Stream
             if (lastFrameSize == -1 || needToSyncBitStream)
             {
                 needToSyncBitStream = false;
-                readVBRHeader();
 
-                if (vbrHeaderFound)
+                if (readVBRHeader (jmax (0, nextFrameOffset)))
                     return 1;
             }
 
@@ -1581,7 +1580,6 @@ struct MP3Stream
     VBRTagData vbrTagData;
     BufferedInputStream stream;
     int numFrames = 0, currentFrameIndex = 0;
-    bool vbrHeaderFound = false;
 
 private:
     bool headerParsed, sideParsed, dataParsed, needToSyncBitStream;
@@ -1739,21 +1737,22 @@ private:
         return offset;
     }
 
-    void readVBRHeader()
+    bool readVBRHeader (int frameOffset)
     {
         auto oldPos = stream.getPosition();
+        stream.setPosition (oldPos + frameOffset);
         uint8 xing[194];
         stream.read (xing, sizeof (xing));
 
-        vbrHeaderFound = vbrTagData.read (xing);
-
-        if (vbrHeaderFound)
+        if (vbrTagData.read (xing))
         {
             numFrames = (int) vbrTagData.frames;
-            oldPos += jmax (vbrTagData.headersize, 1);
+            stream.setPosition (oldPos + frameOffset + jmax (vbrTagData.headersize, 1));
+            return true;
         }
 
         stream.setPosition (oldPos);
+        return false;
     }
 
     void decodeLayer1Frame (float* pcm0, float* pcm1, int& samplesDone) noexcept
