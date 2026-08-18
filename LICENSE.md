@@ -47,6 +47,7 @@ The JUCE modules contain the following dependencies:
 - [AAX](modules/juce_audio_plugin_client/AAX/SDK/) ([Proprietary Avid AAX License/GPLv3](modules/juce_audio_plugin_client/AAX/SDK/LICENSE.txt))
 - [VST3](modules/juce_audio_processors_headless/format_types/VST3_SDK/) ([MIT](modules/juce_audio_processors_headless/format_types/VST3_SDK/LICENSE.txt))
 - [Box2D](modules/juce_box2d/box2d/) ([zlib](modules/juce_box2d/box2d/Box2D.h))
+- [Chromium cubic_bezier](modules/juce_animation/detail/chromium/) ([BSD](modules/juce_animation/detail/chromium/cubic_bezier.h))
 - [pnglib](modules/juce_graphics/image_formats/pnglib/) ([zlib](modules/juce_graphics/image_formats/pnglib/LICENSE))
 - [zlib](modules/juce_core/zip/zlib/) ([zlib](modules/juce_core/zip/zlib/README))
 - [HarfBuzz](modules/juce_graphics/fonts/harfbuzz/) ([Old MIT](modules/juce_graphics/fonts/harfbuzz/COPYING))
