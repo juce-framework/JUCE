@@ -52,7 +52,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-align",
                                      "-Wcomma",
                                      "-Wimplicit-int-float-conversion",
                                      "-Wunused-but-set-variable",
-                                     "-Wdeprecated-declarations")
+                                     "-Wdeprecated-declarations",
+                                     "-Wimplicit-fallthrough")
 
 #include <juce_graphics/drawables/lunasvg/plutovg/source/plutovg-blend.c>
 #include <juce_graphics/drawables/lunasvg/plutovg/source/plutovg-canvas.c>

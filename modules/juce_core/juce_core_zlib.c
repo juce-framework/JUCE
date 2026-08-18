@@ -41,7 +41,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-align",
                                      "-Wsign-conversion",
                                      "-Wredundant-decls",
                                      "-Wshadow",
-                                     "-Wcomma")
+                                     "-Wcomma",
+                                     "-Wimplicit-fallthrough")
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6385 6326)
 

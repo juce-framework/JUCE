@@ -171,6 +171,7 @@ namespace juce::build_tools
                         charsOnLine += 2;
                         break;
                     }
+                    [[fallthrough]];
 
                     // deliberate fall-through...
 

@@ -41,7 +41,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wsign-conversion",
                                      "-Wshadow",
                                      "-Wshorten-64-to-32",
                                      "-Wdeprecated-declarations",
-                                     "-Wredundant-decls")
+                                     "-Wredundant-decls",
+                                     "-Wimplicit-fallthrough")
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4146 4996)
 
