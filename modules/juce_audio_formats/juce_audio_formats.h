@@ -104,18 +104,11 @@
 
 /** Config: JUCE_USE_MP3AUDIOFORMAT
     Enables the software-based MP3AudioFormat class.
-    IMPORTANT DISCLAIMER: By choosing to enable the JUCE_USE_MP3AUDIOFORMAT flag and to compile
-    this MP3 code into your software, you do so AT YOUR OWN RISK! By doing so, you are agreeing
-    that Raw Material Software Limited is in no way responsible for any patent, copyright, or other
-    legal issues that you may suffer as a result.
-
-    The code in juce_MP3AudioFormat.cpp is NOT guaranteed to be free from infringements of 3rd-party
-    intellectual property. If you wish to use it, please seek your own independent advice about the
-    legality of doing so. If you are not willing to accept full responsibility for the consequences
-    of using this code, then do not enable this setting.
+    If your app doesn't need to read MP3 files, you might want to disable this to
+    reduce the size of your codebase and build time.
 */
 #ifndef JUCE_USE_MP3AUDIOFORMAT
- #define JUCE_USE_MP3AUDIOFORMAT 0
+ #define JUCE_USE_MP3AUDIOFORMAT 1
 #endif
 
 /** Config: JUCE_USE_LAME_AUDIO_FORMAT
