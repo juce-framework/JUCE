@@ -808,6 +808,15 @@ static void updateSetupChannels (AudioDeviceManager::AudioDeviceSetup& setup, in
     updateChannels (setup.outputDeviceName, setup.outputChannels, setup.useDefaultOutputChannels ? defaultNumOuts : -1);
 }
 
+template <typename T>
+static T getNonZeroOrDefault (T value, T defaultValue)
+{
+    if (exactlyEqual (value, (T) 0))
+        return defaultValue;
+
+    return value;
+}
+
 String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
                                                 bool treatAsChosenDevice)
 {
@@ -883,26 +892,29 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
         return {};
     }
 
-    const auto sampleRate = findNearestValue (Span { currentAudioDevice->getAvailableSampleRates() }, currentSetup.sampleRate);
-    const auto preBufferSize = findNearestValue (Span { currentAudioDevice->getAvailableBufferSizes() }, currentSetup.bufferSize);
+    currentSetup.sampleRate = findNearestValue (Span { currentAudioDevice->getAvailableSampleRates() },
+                                                getNonZeroOrDefault (currentSetup.sampleRate, currentAudioDevice->getCurrentSampleRate()));
+
+    const auto requestedBufferSize = getNonZeroOrDefault (currentSetup.bufferSize, currentAudioDevice->getDefaultBufferSize());
+    const auto preBufferSize = findNearestValue (Span { currentAudioDevice->getAvailableBufferSizes() }, requestedBufferSize);
 
     error = currentAudioDevice->open (currentSetup.inputChannels,
                                       currentSetup.outputChannels,
-                                      sampleRate,
+                                      currentSetup.sampleRate,
                                       preBufferSize);
 
     if (error.isEmpty())
     {
         // The available buffer sizes may have changed, if the sample rate has
         // changed. If so we'll need to reconfigure with a different buffer size.
-        const auto postBufferSize = findNearestValue (Span { currentAudioDevice->getAvailableBufferSizes() }, currentSetup.bufferSize);
+        currentSetup.bufferSize = findNearestValue (Span { currentAudioDevice->getAvailableBufferSizes() }, requestedBufferSize);
 
-        if (preBufferSize != postBufferSize)
+        if (preBufferSize != currentSetup.bufferSize)
         {
             error = currentAudioDevice->open (currentSetup.inputChannels,
                                               currentSetup.outputChannels,
                                               currentSetup.sampleRate,
-                                              postBufferSize);
+                                              currentSetup.bufferSize);
         }
     }
 
