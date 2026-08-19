@@ -693,7 +693,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt"/>
-    <None Include="..\..\..\..\modules\juce_core\zip\zlib\JUCE_CHANGES.txt"/>
+    <None Include="..\..\..\..\modules\juce_core\zip\zlib\JUCE_UPSTREAM.txt"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc"/>

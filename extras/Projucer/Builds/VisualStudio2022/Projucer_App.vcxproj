@@ -3374,12 +3374,12 @@
     <None Include="..\..\Source\BinaryData\colourscheme_dark.xml"/>
     <None Include="..\..\Source\BinaryData\colourscheme_light.xml"/>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt"/>
-    <None Include="..\..\..\..\modules\juce_core\zip\zlib\JUCE_CHANGES.txt"/>
+    <None Include="..\..\..\..\modules\juce_core\zip\zlib\JUCE_UPSTREAM.txt"/>
     <None Include="..\..\..\..\modules\juce_graphics\drawables\lunasvg\plutovg\source\FTL.TXT"/>
-    <None Include="..\..\..\..\modules\juce_graphics\drawables\lunasvg\JUCE_CHANGES.txt"/>
-    <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\JUCE_CHANGES.txt"/>
-    <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\JUCE_CHANGES.txt"/>
-    <None Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\JUCE_CHANGES.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\drawables\lunasvg\JUCE_UPSTREAM.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\JUCE_UPSTREAM.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\JUCE_UPSTREAM.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\JUCE_UPSTREAM.txt"/>
     <None Include="..\..\..\..\modules\juce_gui_extra\native\typescript\webview-interop\LICENSE-AGPL.md"/>
     <None Include="..\..\..\..\modules\juce_gui_extra\native\typescript\webview-interop\LICENSE-JUCE.md"/>
     <None Include="..\..\..\..\modules\juce_gui_extra\native\typescript\webview-interop\LICENSE.md"/>
