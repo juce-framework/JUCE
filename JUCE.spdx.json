@@ -1,0 +1,1473 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "JUCE-9.0.1",
+  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.1-9fe5f9c5b0da",
+  "creationInfo": {
+    "created": "2026-08-20T00:00:00Z",
+    "creators": [
+      "Tool: generate_sbom.py",
+      "Organization: Raw Material Software Limited"
+    ]
+  },
+  "packages": [
+    {
+      "name": "JUCE",
+      "SPDXID": "SPDXRef-JUCE",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited"
+    },
+    {
+      "name": "juce_analytics",
+      "SPDXID": "SPDXRef-juce-analytics",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_analytics in the JUCE source tree"
+    },
+    {
+      "name": "juce_animation",
+      "SPDXID": "SPDXRef-juce-animation",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_animation in the JUCE source tree"
+    },
+    {
+      "name": "juce_audio_basics",
+      "SPDXID": "SPDXRef-juce-audio-basics",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_audio_basics in the JUCE source tree"
+    },
+    {
+      "name": "juce_audio_devices",
+      "SPDXID": "SPDXRef-juce-audio-devices",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_audio_devices in the JUCE source tree"
+    },
+    {
+      "name": "juce_audio_formats",
+      "SPDXID": "SPDXRef-juce-audio-formats",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_audio_formats in the JUCE source tree"
+    },
+    {
+      "name": "juce_audio_plugin_client",
+      "SPDXID": "SPDXRef-juce-audio-plugin-client",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_audio_plugin_client in the JUCE source tree"
+    },
+    {
+      "name": "juce_audio_processors",
+      "SPDXID": "SPDXRef-juce-audio-processors",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_audio_processors in the JUCE source tree"
+    },
+    {
+      "name": "juce_audio_processors_headless",
+      "SPDXID": "SPDXRef-juce-audio-processors-headless",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_audio_processors_headless in the JUCE source tree"
+    },
+    {
+      "name": "juce_audio_utils",
+      "SPDXID": "SPDXRef-juce-audio-utils",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_audio_utils in the JUCE source tree"
+    },
+    {
+      "name": "juce_box2d",
+      "SPDXID": "SPDXRef-juce-box2d",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_box2d in the JUCE source tree"
+    },
+    {
+      "name": "juce_core",
+      "SPDXID": "SPDXRef-juce-core",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_core in the JUCE source tree"
+    },
+    {
+      "name": "juce_cryptography",
+      "SPDXID": "SPDXRef-juce-cryptography",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_cryptography in the JUCE source tree"
+    },
+    {
+      "name": "juce_data_structures",
+      "SPDXID": "SPDXRef-juce-data-structures",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_data_structures in the JUCE source tree"
+    },
+    {
+      "name": "juce_dsp",
+      "SPDXID": "SPDXRef-juce-dsp",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_dsp in the JUCE source tree"
+    },
+    {
+      "name": "juce_events",
+      "SPDXID": "SPDXRef-juce-events",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_events in the JUCE source tree"
+    },
+    {
+      "name": "juce_graphics",
+      "SPDXID": "SPDXRef-juce-graphics",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_graphics in the JUCE source tree"
+    },
+    {
+      "name": "juce_gui_basics",
+      "SPDXID": "SPDXRef-juce-gui-basics",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_gui_basics in the JUCE source tree"
+    },
+    {
+      "name": "juce_gui_extra",
+      "SPDXID": "SPDXRef-juce-gui-extra",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_gui_extra in the JUCE source tree"
+    },
+    {
+      "name": "juce_javascript",
+      "SPDXID": "SPDXRef-juce-javascript",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_javascript in the JUCE source tree"
+    },
+    {
+      "name": "juce_midi_ci",
+      "SPDXID": "SPDXRef-juce-midi-ci",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_midi_ci in the JUCE source tree"
+    },
+    {
+      "name": "juce_opengl",
+      "SPDXID": "SPDXRef-juce-opengl",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_opengl in the JUCE source tree"
+    },
+    {
+      "name": "juce_osc",
+      "SPDXID": "SPDXRef-juce-osc",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_osc in the JUCE source tree"
+    },
+    {
+      "name": "juce_product_unlocking",
+      "SPDXID": "SPDXRef-juce-product-unlocking",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_product_unlocking in the JUCE source tree"
+    },
+    {
+      "name": "juce_video",
+      "SPDXID": "SPDXRef-juce-video",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "modules/juce_video in the JUCE source tree"
+    },
+    {
+      "name": "examples",
+      "SPDXID": "SPDXRef-examples",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "ISC",
+      "licenseDeclared": "ISC",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "The JUCE example projects in the JUCE source tree"
+    },
+    {
+      "name": "extras",
+      "SPDXID": "SPDXRef-extras",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "The bundled JUCE applications in the JUCE source tree"
+    },
+    {
+      "name": "build-system",
+      "SPDXID": "SPDXRef-build-system",
+      "versionInfo": "9.0.1",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "Copyright (c) Raw Material Software Limited",
+      "sourceInfo": "The JUCE build system in the JUCE source tree"
+    },
+    {
+      "name": "zlib",
+      "SPDXID": "SPDXRef-juce-core.zlib",
+      "versionInfo": "1.3.2",
+      "supplier": "Person: Jean-loup Gailly and Mark Adler",
+      "downloadLocation": "https://zlib.net",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Zlib",
+      "licenseDeclared": "Zlib",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_core/zip/zlib in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/madler/zlib@1.3.2"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:zlib:zlib:1.3.2:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "name": "HarfBuzz",
+      "SPDXID": "SPDXRef-juce-graphics.harfbuzz",
+      "versionInfo": "14.2.1",
+      "supplier": "Organization: HarfBuzz Project",
+      "downloadLocation": "https://harfbuzz.github.io",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT-Modern-Variant",
+      "licenseDeclared": "MIT-Modern-Variant",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_graphics/fonts/harfbuzz in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/harfbuzz/harfbuzz@14.2.1"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:harfbuzz_project:harfbuzz:14.2.1:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "name": "SheenBidi",
+      "SPDXID": "SPDXRef-juce-graphics.sheenbidi",
+      "versionInfo": "2.9.0",
+      "supplier": "Person: Muhammad Tayyab Akram",
+      "downloadLocation": "https://github.com/Tehreer/SheenBidi",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_graphics/unicode/sheenbidi in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/Tehreer/SheenBidi@2.9.0"
+        }
+      ]
+    },
+    {
+      "name": "LunaSVG",
+      "SPDXID": "SPDXRef-juce-graphics.lunasvg",
+      "versionInfo": "3.5.0",
+      "supplier": "Person: Samuel Ugochukwu",
+      "downloadLocation": "https://github.com/sammycage/lunasvg",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_graphics/drawables/lunasvg in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/sammycage/lunasvg@3.5.0"
+        }
+      ]
+    },
+    {
+      "name": "PlutoVG",
+      "SPDXID": "SPDXRef-juce-graphics.plutovg",
+      "versionInfo": "1.3.2",
+      "supplier": "Person: Samuel Ugochukwu",
+      "downloadLocation": "https://github.com/sammycage/plutovg",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_graphics/drawables/lunasvg/plutovg in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/sammycage/plutovg@1.3.2"
+        }
+      ]
+    },
+    {
+      "name": "libpng",
+      "SPDXID": "SPDXRef-juce-graphics.libpng",
+      "versionInfo": "1.6.58",
+      "supplier": "Organization: The PNG Reference Library Authors",
+      "downloadLocation": "http://www.libpng.org/pub/png/libpng.html",
+      "filesAnalyzed": false,
+      "licenseConcluded": "libpng-2.0",
+      "licenseDeclared": "libpng-2.0",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_graphics/image_formats/pnglib in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/pnggroup/libpng@1.6.58"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:libpng:libpng:1.6.58:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "name": "jpeglib",
+      "SPDXID": "SPDXRef-juce-graphics.jpeglib",
+      "versionInfo": "10.0",
+      "supplier": "Organization: Independent JPEG Group",
+      "downloadLocation": "https://ijg.org",
+      "filesAnalyzed": false,
+      "licenseConcluded": "IJG",
+      "licenseDeclared": "IJG",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_graphics/image_formats/jpglib in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/jpeglib@10.0"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:ijg:libjpeg:10.0:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "name": "Chromium cubic_bezier",
+      "SPDXID": "SPDXRef-juce-animation.chromium-cubic-bezier",
+      "versionInfo": "3e1a26c44c024d97dc9a4c09bbc6a2365398ca2c",
+      "supplier": "Organization: The Chromium Authors",
+      "downloadLocation": "https://chromium.googlesource.com/chromium/src",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_animation/detail/chromium in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/chromium-cubic-bezier@3e1a26c44c024d97dc9a4c09bbc6a2365398ca2c"
+        }
+      ]
+    },
+    {
+      "name": "FLAC",
+      "SPDXID": "SPDXRef-juce-audio-formats.flac",
+      "versionInfo": "1.5.0",
+      "supplier": "Organization: Xiph.Org Foundation",
+      "downloadLocation": "https://xiph.org/flac",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_formats/codecs/flac in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/xiph/flac@1.5.0"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:xiph:flac:1.5.0:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "name": "libogg",
+      "SPDXID": "SPDXRef-juce-audio-formats.libogg",
+      "versionInfo": "1.3.4",
+      "supplier": "Organization: Xiph.Org Foundation",
+      "downloadLocation": "https://xiph.org/ogg",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_formats/codecs/oggvorbis in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/xiph/ogg@1.3.4"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:xiph.org:libogg:1.3.4:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "name": "libvorbis",
+      "SPDXID": "SPDXRef-juce-audio-formats.libvorbis",
+      "versionInfo": "1.3.7",
+      "supplier": "Organization: Xiph.Org Foundation",
+      "downloadLocation": "https://xiph.org/vorbis",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.7 in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/xiph/vorbis@1.3.7"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:xiph.org:libvorbis:1.3.7:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "name": "Oboe",
+      "SPDXID": "SPDXRef-juce-audio-devices.oboe",
+      "versionInfo": "1.10.0",
+      "supplier": "Organization: Google LLC",
+      "downloadLocation": "https://github.com/google/oboe",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_devices/native/oboe in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/google/oboe@1.10.0"
+        }
+      ]
+    },
+    {
+      "name": "ASIO SDK",
+      "SPDXID": "SPDXRef-juce-audio-devices.asio-sdk",
+      "versionInfo": "2.3",
+      "supplier": "Organization: Steinberg Media Technologies GmbH",
+      "downloadLocation": "https://www.steinberg.net/developers",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-Steinberg-ASIO OR GPL-3.0-only",
+      "licenseDeclared": "LicenseRef-Steinberg-ASIO OR GPL-3.0-only",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_devices/native/asio in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/asio-sdk@2.3"
+        }
+      ]
+    },
+    {
+      "name": "VST3 SDK",
+      "SPDXID": "SPDXRef-juce-audio-processors-headless.vst3-sdk",
+      "versionInfo": "3.8.0",
+      "supplier": "Organization: Steinberg Media Technologies GmbH",
+      "downloadLocation": "https://github.com/steinbergmedia/vst3sdk",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/VST3_SDK in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/steinbergmedia/vst3sdk@3.8.0"
+        }
+      ]
+    },
+    {
+      "name": "LV2",
+      "SPDXID": "SPDXRef-juce-audio-processors-headless.lv2",
+      "versionInfo": "1.18.0",
+      "supplier": "Person: Steve Harris and David Robillard",
+      "downloadLocation": "https://lv2plug.in",
+      "filesAnalyzed": false,
+      "licenseConcluded": "ISC",
+      "licenseDeclared": "ISC",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/lv2 in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/lv2/lv2@1.18.0"
+        }
+      ]
+    },
+    {
+      "name": "lilv",
+      "SPDXID": "SPDXRef-juce-audio-processors-headless.lilv",
+      "versionInfo": "0.24.12",
+      "supplier": "Person: David Robillard",
+      "downloadLocation": "https://drobilla.net/software/lilv.html",
+      "filesAnalyzed": false,
+      "licenseConcluded": "ISC",
+      "licenseDeclared": "ISC",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/lilv in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/lilv@0.24.12"
+        }
+      ]
+    },
+    {
+      "name": "serd",
+      "SPDXID": "SPDXRef-juce-audio-processors-headless.serd",
+      "versionInfo": "0.30.10",
+      "supplier": "Person: David Robillard",
+      "downloadLocation": "https://drobilla.net/software/serd.html",
+      "filesAnalyzed": false,
+      "licenseConcluded": "ISC",
+      "licenseDeclared": "ISC",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/serd in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/serd@0.30.10"
+        }
+      ]
+    },
+    {
+      "name": "sord",
+      "SPDXID": "SPDXRef-juce-audio-processors-headless.sord",
+      "versionInfo": "0.16.9",
+      "supplier": "Person: David Robillard",
+      "downloadLocation": "https://drobilla.net/software/sord.html",
+      "filesAnalyzed": false,
+      "licenseConcluded": "ISC",
+      "licenseDeclared": "ISC",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/sord in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/sord@0.16.9"
+        }
+      ]
+    },
+    {
+      "name": "sratom",
+      "SPDXID": "SPDXRef-juce-audio-processors-headless.sratom",
+      "versionInfo": "0.6.8",
+      "supplier": "Person: David Robillard",
+      "downloadLocation": "https://drobilla.net/software/sratom.html",
+      "filesAnalyzed": false,
+      "licenseConcluded": "ISC",
+      "licenseDeclared": "ISC",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/sratom in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/sratom@0.6.8"
+        }
+      ]
+    },
+    {
+      "name": "pslextensions",
+      "SPDXID": "SPDXRef-juce-audio-processors-headless.pslextensions",
+      "versionInfo": "NOASSERTION",
+      "supplier": "Organization: PreSonus Software Ltd.",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-Public-Domain",
+      "licenseDeclared": "LicenseRef-Public-Domain",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/pslextensions in the JUCE source tree; PreSonus distributed these extension headers without version information",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/pslextensions"
+        }
+      ]
+    },
+    {
+      "name": "AAX SDK",
+      "SPDXID": "SPDXRef-juce-audio-plugin-client.aax-sdk",
+      "versionInfo": "2.9",
+      "supplier": "Organization: Avid Technology, Inc.",
+      "downloadLocation": "https://developer.avid.com/aax",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-Avid-AAX OR GPL-3.0-only",
+      "licenseDeclared": "LicenseRef-Avid-AAX OR GPL-3.0-only",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_plugin_client/AAX/SDK in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/aax-sdk@2.9"
+        }
+      ]
+    },
+    {
+      "name": "AudioUnitSDK",
+      "SPDXID": "SPDXRef-juce-audio-plugin-client.audiounitsdk",
+      "versionInfo": "1.1.0",
+      "supplier": "Organization: Apple Inc.",
+      "downloadLocation": "https://github.com/apple/AudioUnitSDK",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_plugin_client/AU/AudioUnitSDK in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/apple/AudioUnitSDK@1.1.0"
+        }
+      ]
+    },
+    {
+      "name": "Box2D",
+      "SPDXID": "SPDXRef-juce-box2d.box2d",
+      "versionInfo": "2.2.1",
+      "supplier": "Person: Erin Catto",
+      "downloadLocation": "https://box2d.org",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Zlib",
+      "licenseDeclared": "Zlib",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_box2d/box2d in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/erincatto/box2d@2.2.1"
+        }
+      ]
+    },
+    {
+      "name": "CHOC",
+      "SPDXID": "SPDXRef-juce-javascript.choc",
+      "versionInfo": "123d322c7ed4de8f0db2c30edea07b248dfe14c4",
+      "supplier": "Organization: Tracktion Corporation",
+      "downloadLocation": "https://github.com/Tracktion/choc",
+      "filesAnalyzed": false,
+      "licenseConcluded": "ISC",
+      "licenseDeclared": "ISC",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_javascript/choc in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/Tracktion/choc@123d322c7ed4de8f0db2c30edea07b248dfe14c4"
+        }
+      ]
+    },
+    {
+      "name": "QuickJS",
+      "SPDXID": "SPDXRef-juce-javascript.quickjs",
+      "versionInfo": "2021-03-27",
+      "supplier": "Person: Fabrice Bellard",
+      "downloadLocation": "https://bellard.org/quickjs",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_javascript/choc/javascript/choc_javascript_QuickJS.h in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/bellard/quickjs@2021-03-27"
+        }
+      ]
+    },
+    {
+      "name": "OpenGL registry headers",
+      "SPDXID": "SPDXRef-juce-opengl.opengl-registry-headers",
+      "versionInfo": "2024-01-16",
+      "supplier": "Organization: The Khronos Group Inc.",
+      "downloadLocation": "https://registry.khronos.org/OpenGL",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause AND MIT",
+      "licenseDeclared": "BSD-3-Clause AND MIT",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_opengl/opengl/juce_gl.h in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/opengl-registry-headers@2024-01-16"
+        }
+      ]
+    },
+    {
+      "name": "@juce-framework/webview",
+      "SPDXID": "SPDXRef-juce-gui-extra.juce-framework-webview",
+      "versionInfo": "1.0.0",
+      "supplier": "Organization: Raw Material Software Limited",
+      "downloadLocation": "https://github.com/juce-framework/JUCE",
+      "filesAnalyzed": false,
+      "licenseConcluded": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "licenseDeclared": "AGPL-3.0-only OR LicenseRef-JUCE-Commercial",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_gui_extra/native/typescript/webview-interop in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40juce-framework/webview@1.0.0"
+        }
+      ]
+    },
+    {
+      "name": "reaper-sdk",
+      "SPDXID": "SPDXRef-examples.reaper-sdk",
+      "versionInfo": "ec0c1dc1655eb6a192fa7a22c2258a38a5ebbe9c",
+      "supplier": "Organization: Cockos Incorporated",
+      "downloadLocation": "https://github.com/justinfrankel/reaper-sdk",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Zlib",
+      "licenseDeclared": "Zlib",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at examples/Plugins/extern in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/justinfrankel/reaper-sdk@ec0c1dc1655eb6a192fa7a22c2258a38a5ebbe9c"
+        }
+      ]
+    },
+    {
+      "name": "Box2D testbed",
+      "SPDXID": "SPDXRef-examples.box2d-testbed",
+      "versionInfo": "2.2.1",
+      "supplier": "Person: Erin Catto",
+      "downloadLocation": "https://box2d.org",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Zlib",
+      "licenseDeclared": "Zlib",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at examples/Assets/Box2DTests in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/erincatto/box2d@2.2.1"
+        }
+      ]
+    },
+    {
+      "name": "Projucer icons",
+      "SPDXID": "SPDXRef-extras.projucer-icons",
+      "versionInfo": "NOASSERTION",
+      "supplier": "Person: Dmitry Baranovskiy",
+      "downloadLocation": "https://raphaeljs.com/icons",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at extras/Projucer/Source/Utility/UI/jucer_Icons.cpp in the JUCE source tree; path data derived from the unversioned Raphael icon set",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/projucer-icons"
+        }
+      ]
+    },
+    {
+      "name": "Gradle wrapper",
+      "SPDXID": "SPDXRef-build-system.gradle-wrapper",
+      "versionInfo": "8.13",
+      "supplier": "Organization: Gradle Inc.",
+      "downloadLocation": "https://gradle.org",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at examples/DemoRunner/Builds/Android/gradle/wrapper in the JUCE source tree",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/gradle/gradle@8.13"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:gradle:gradle:8.13:*:*:*:*:*:*:*"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-JUCE"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-analytics"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-analytics",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-gui-basics"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-animation"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-animation",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-gui-basics"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-basics"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-basics",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-core"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-devices"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-devices",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-audio-basics"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-devices",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-events"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-formats"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-formats",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-audio-basics"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-plugin-client"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-plugin-client",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-processors",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-gui-extra"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-processors",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors-headless"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors-headless"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-processors-headless",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-audio-basics"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-processors-headless",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-events"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-utils"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-utils",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-utils",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-audio-formats"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-utils",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-audio-devices"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-box2d"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-box2d",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-graphics"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-core"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-cryptography"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-cryptography",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-core"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-data-structures"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-data-structures",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-events"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-dsp"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-dsp",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-audio-formats"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-events"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-events",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-core"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-graphics"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-graphics",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-events"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-gui-basics"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-gui-basics",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-graphics"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-gui-basics",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-data-structures"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-gui-extra"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-gui-extra",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-gui-basics"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-javascript"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-javascript",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-core"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-midi-ci"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-midi-ci",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-audio-basics"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-opengl"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-opengl",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-gui-extra"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-osc"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-osc",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-events"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-product-unlocking"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-product-unlocking",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-cryptography"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-video"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-video",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-juce-gui-extra"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-examples"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-extras"
+    },
+    {
+      "spdxElementId": "SPDXRef-JUCE",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-build-system"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-core",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-core.zlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-graphics",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-graphics.harfbuzz"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-graphics",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-graphics.sheenbidi"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-graphics",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-graphics.lunasvg"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-graphics",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-graphics.plutovg"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-graphics",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-graphics.libpng"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-graphics",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-graphics.jpeglib"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-animation",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-animation.chromium-cubic-bezier"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-formats",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-formats.flac"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-formats",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-formats.libogg"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-formats",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-formats.libvorbis"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-devices",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-devices.oboe"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-devices",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-devices.asio-sdk"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-processors-headless",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors-headless.vst3-sdk"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-processors-headless",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors-headless.lv2"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-processors-headless",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors-headless.lilv"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-processors-headless",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors-headless.serd"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-processors-headless",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors-headless.sord"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-processors-headless",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors-headless.sratom"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-processors-headless",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-processors-headless.pslextensions"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-plugin-client",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-plugin-client.aax-sdk"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-plugin-client",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-plugin-client.audiounitsdk"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-box2d",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-box2d.box2d"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-javascript",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-javascript.choc"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-javascript",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-javascript.quickjs"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-opengl",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-opengl.opengl-registry-headers"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-gui-extra",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-gui-extra.juce-framework-webview"
+    },
+    {
+      "spdxElementId": "SPDXRef-examples",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-examples.reaper-sdk"
+    },
+    {
+      "spdxElementId": "SPDXRef-examples.reaper-sdk",
+      "relationshipType": "DEV_DEPENDENCY_OF",
+      "relatedSpdxElement": "SPDXRef-JUCE"
+    },
+    {
+      "spdxElementId": "SPDXRef-examples",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-examples.box2d-testbed"
+    },
+    {
+      "spdxElementId": "SPDXRef-examples.box2d-testbed",
+      "relationshipType": "DEV_DEPENDENCY_OF",
+      "relatedSpdxElement": "SPDXRef-JUCE"
+    },
+    {
+      "spdxElementId": "SPDXRef-extras",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-extras.projucer-icons"
+    },
+    {
+      "spdxElementId": "SPDXRef-extras.projucer-icons",
+      "relationshipType": "DEV_DEPENDENCY_OF",
+      "relatedSpdxElement": "SPDXRef-JUCE"
+    },
+    {
+      "spdxElementId": "SPDXRef-build-system",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-build-system.gradle-wrapper"
+    },
+    {
+      "spdxElementId": "SPDXRef-build-system.gradle-wrapper",
+      "relationshipType": "DEV_DEPENDENCY_OF",
+      "relatedSpdxElement": "SPDXRef-JUCE"
+    }
+  ],
+  "hasExtractedLicensingInfos": [
+    {
+      "licenseId": "LicenseRef-Avid-AAX",
+      "name": "Avid AAX SDK Licence",
+      "extractedText": "Copyright (c) 2024 Avid Technology Inc.\n\nThe AAX SDK is subject to commercial or open-source licensing.\n\nBy using the AAX SDK, you agree to the terms of both the Avid AAX SDK License\nAgreement and Avid Privacy Policy.\n\nAAX SDK License: https://developer.avid.com/aax\nPrivacy Policy: https://www.avid.com/legal/privacy-policy-statement\n\nOr: You may also use this code under the terms of the GPL v3 (see\nwww.gnu.org/licenses).\n\nTHE AAX SDK IS PROVIDED \"AS IS\" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER\nEXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE\nDISCLAIMED.",
+      "seeAlsos": [
+        "https://developer.avid.com/aax"
+      ]
+    },
+    {
+      "licenseId": "LicenseRef-JUCE-Commercial",
+      "name": "JUCE Commercial Licence",
+      "extractedText": "# The JUCE Framework\n\nThe JUCE Framework is an open source framework licensed under a combination of\nopen source and commercial licences.\n\nThe JUCE Framework modules are dual-licensed under the\n[AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html) and the commercial [JUCE\nlicence](https://juce.com/legal/juce-9-licence/).\n\n## The JUCE Licence\n\nIf you are not licensing the JUCE Framework modules under the\n[AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html) then by downloading,\ninstalling, or using the JUCE Framework, or combining the JUCE Framework with\nany other source code, object code, content or any other copyrightable work, you\nagree to the terms of the [JUCE 9 End User Licence\nAgreement](https://juce.com/legal/juce-9-licence/), and all incorporated terms\nincluding the [JUCE Privacy Policy](https://juce.com/legal/juce-privacy-policy/)\nand the [JUCE Website Terms of\nService](https://juce.com/legal/juce-website-terms-of-service/), as applicable,\nwhich will bind you. If you do not agree to the terms of this Agreement, we will\nnot license the JUCE Framework to you, and you must discontinue the installation\nor download process and cease use of the JUCE Framework.\n\nTHE JUCE FRAMEWORK IS PROVIDED \"AS IS\" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,\nWHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF MERCHANTABILITY OR FITNESS\nFOR A PARTICULAR PURPOSE, ARE DISCLAIMED.\n\nFor more information, visit the [JUCE website](https://juce.com).\n\nFull licence terms:\n- [JUCE 9 End User Licence Agreement](https://juce.com/legal/juce-9-licence/)\n- [JUCE Privacy Policy](https://juce.com/legal/juce-privacy-policy/)\n- [JUCE Website Terms of Service](https://juce.com/legal/juce-website-terms-of-service/)\n\n## The JUCE Framework Dependencies\n\nThe JUCE modules, examples, bundled applications, and build system contain\nthird-party software. A complete inventory of these dependencies, including\ntheir versions, licences, and the locations where they are vendored into this\nrepository, is maintained in an SPDX software bill of materials:\n[JUCE.spdx.json](JUCE.spdx.json).\n\nThe JUCE examples are licensed under the terms of the\n[ISC license](http://www.isc.org/downloads/software-support-policy/isc-license/).",
+      "seeAlsos": [
+        "https://juce.com/legal/juce-9-licence/"
+      ]
+    },
+    {
+      "licenseId": "LicenseRef-Public-Domain",
+      "name": "Public Domain",
+      "extractedText": "//************************************************************************************************\n//\n// PreSonus Plug-In Extensions\n// Written and placed in the PUBLIC DOMAIN by PreSonus Software Ltd.\n//\n// Filename    : ipslcontextinfo.h\n// Created by  : PreSonus Software Ltd., 08/2013, last updated 11/2016\n// Description : Context Information Interface\n//\n//************************************************************************************************\n/*\n\tDISCLAIMER:\n\tThe PreSonus Plug-In Extensions are host-specific extensions of existing proprietary technologies,\n\tprovided to the community on an AS IS basis. They are not part of any official 3rd party SDK and\n\tPreSonus is not affiliated with the owner of the underlying technology in any way.\n*/\n//************************************************************************************************\n\n#ifndef _ipslcontextinfo_h\n#define _ipslcontextinfo_h\n\n#include \"pluginterfaces/vst/vsttypes.h\"\n#include \"pluginterfaces/base/falignpush.h\"\n\nnamespace Presonus {\n\n//************************************************************************************************\n// IContextInfoProvider\n/**\tCallback interface to access context information from the host. Implemented by the host\n\tas extension of Steinberg::Vst::IComponentHandler.\n\n\tThe host might not be able to report all available attributes at all times. Please check the\n\treturn value of getContextInfoValue() and getContextInfoString(). It's not required to implement\n\tIContextInfoHandler on the plug-in side, but we recommend to do so. The host will then call\n\tnotifyContextInfoChange() during initialization to inform the plug-in about the initial state of\n\tthe available attributes.\n\n\tUsage Example:\n\n\tIComponentHandler* handler;\n\tFUnknownPtr<IContextInfoProvider> contextInfoProvider (handler);\n\n\tvoid PLUGIN_API MyEditController::notifyContextInfoChange ()\n\t{\n\t\tint32 channelIndex = 0;\n\t\tcontextInfoProvider->getContextInfoValue (channelIndex, ContextInfo::kIndex);\n\n\t\tTChar channelName[128] = {0};\n\t\tcontextInfoProvider->getContextInfoString (channelName, 128, ContextInfo::kName);\n\t}\n*/\n//************************************************************************************************\n\nstruct IContextInfoProvider: Steinberg::FUnknown\n{\n\t/** Get context information by identifier. */\n\tvirtual Steinberg::tresult PLUGIN_API getContextInfoValue (Steinberg::int32& value, Steinberg::FIDString id) = 0;\n\n\t/** Get context information by identifier. */\n\tvirtual Steinberg::tresult PLUGIN_API getContextInfoString (Steinberg::Vst::TChar* string, Steinberg::int32 maxCharCount, Steinberg::FIDString id) = 0;\n\n    static const Steinberg::FUID iid;\n};\n\nDECLARE_CLASS_IID (IContextInfoProvider, 0x483e61ea, 0x17994494, 0x8199a35a, 0xebb35e3c)\n\n//************************************************************************************************\n// IContextInfoProvider2\n/**\tExtension to IContextInfoProvider enabling the plug-in to modify host context information.\n\tValues like volume or pan support both, numeric and string representation for get and set.*/\n//************************************************************************************************\n\nstruct IContextInfoProvider2: IContextInfoProvider\n{\n\tusing IContextInfoProvider::getContextInfoValue;\n\n\t/** Get context information by identifier (floating-point). */\n\tvirtual Steinberg::tresult PLUGIN_API getContextInfoValue (double& value, Steinberg::FIDString id) = 0;\n\n\t/** Set context information by identifier (floating-point). */\n\tvirtual Steinberg::tresult PLUGIN_API setContextInfoValue (Steinberg::FIDString id, double value) = 0;\n\n\t/** Set context information by identifier (integer). */\n\tvirtual Steinberg::tresult PLUGIN_API setContextInfoValue (Steinberg::FIDString id, Steinberg::int32 value) = 0;\n\n\t/** Set context information by identifier (string). */\n\tvirtual Steinberg::tresult PLUGIN_API setContextInfoString (Steinberg::FIDString id, Steinberg::Vst::TChar* string) = 0;\n\n    static const Steinberg::FUID iid;\n};\n\nDECLARE_CLASS_IID (IContextInfoProvider2, 0x61e45968, 0x3d364f39, 0xb15e1733, 0x4944172b)\n\n//************************************************************************************************\n// IContextInfoHandler\n/**\tNotification interface for context information changes. Implemented by the plug-in as extension of\n\tSteinberg::Vst::IEditController. */\n//************************************************************************************************\n\nstruct IContextInfoHandler: Steinberg::FUnknown\n{\n\t/** Called by the host if context information has changed. */\n\tvirtual void PLUGIN_API notifyContextInfoChange () = 0;\n\n\tstatic const Steinberg::FUID iid;\n};\n\nDECLARE_CLASS_IID (IContextInfoHandler, 0xc3b17bc0, 0x2c174494, 0x80293402, 0xfbc4bbf8)\n\n//************************************************************************************************\n// IContextInfoHandler2\n/**\tReplacement of IContextInfoHandler passing additional information about what changed on the host-side.\n\tThis interface will be preferred if implemented by the plug-in. It is required to\n\treceive certain notifications like volume, pan, etc. */\n//************************************************************************************************\n\nstruct IContextInfoHandler2: Steinberg::FUnknown\n{\n\t/**\tCalled by the host if context information has changed.\n\t\tThe identifier (id) is empty for the inital update. */\n\tvirtual void PLUGIN_API notifyContextInfoChange (Steinberg::FIDString id) = 0;\n\n\tstatic const Steinberg::FUID iid;\n};\n\nDECLARE_CLASS_IID (IContextInfoHandler2, 0x31e29a7a, 0xe55043ad, 0x8b95b9b8, 0xda1fbe1e)\n\n//************************************************************************************************\n// Context Information Attributes\n//************************************************************************************************\n\nnamespace ContextInfo\n{\n\t/** Channel types. */\n\tenum ChannelType\n\t{\n\t\tkTrack = 0,\t\t///< audio track\n\t\tkBus,\t\t\t///< audio bus\n\t\tkFX,\t\t\t///< FX channel\n\t\tkSynth,\t\t\t///< output of virtual instrument\n\t\tkIn,\t\t\t///< input from audio driver\n\t\tkOut\t\t\t///< output to audio driver (main or sub-out)\n\t};\n\n\t/** Channel index mode. */\n\tenum ChannelIndexMode\n\t{\n\t\tkFlatIndex = 0,\t///< channel indices are contiguous (example: track 1, track 2, bus 3, bus 4)\n\t\tkPerTypeIndex\t///< channel indices restarts at zero for each type (example: track 1, track 2, bus 1, bus 2)\n\t};\n\n\t// per instance\n\tconst Steinberg::FIDString kID = \"id\";\t\t\t\t\t\t\t///< (R) channel identifier, use to compare identity (string)\n\tconst Steinberg::FIDString kName = \"name\";\t\t\t\t\t\t///< (R/W) channel name, can be displayed to the user (string)\n\tconst Steinberg::FIDString kType = \"type\";\t\t\t\t\t\t///< (R) channel type (int32, see ChannelType enumeration)\n\tconst Steinberg::FIDString kMain = \"main\";\t\t\t\t\t\t///< (R) channel is main output (int32, 0: false, 1: true)\n\tconst Steinberg::FIDString kIndex = \"index\";\t\t\t\t\t///< (R) channel index (int32, starts at zero)\n\tconst Steinberg::FIDString kColor = \"color\";\t\t\t\t\t///< (R/W) channel color (int32: RGBA)\n\tconst Steinberg::FIDString kVisibility = \"visibility\";\t\t\t///< (R) channel visibility (int32, 0: false, 1: true)\n\tconst Steinberg::FIDString kSelected = \"selected\";\t\t\t\t///< (R/W) selection state, channel is selected exlusively and scrolled into view on write (int32, 0: false, 1: true)\n\tconst Steinberg::FIDString kMultiSelect = \"multiselect\";\t\t///< (W) select channel without unselecting others (int32, 0: false, 1: true)\n\tconst Steinberg::FIDString kFocused = \"focused\";\t\t\t\t///< (R) focus for user input when multiple channels are selected (int32, 0: false, 1: true)\n\n\tconst Steinberg::FIDString kRegionName = \"regionName\";\t\t\t///< (R) name of region/event for region/event-based effects (string)\n\tconst Steinberg::FIDString kRegionSelected = \"regionSelected\";\t///< (R) selection state of region/event for region/event-based effects (int32, 0: false, 1: true)\n\n\t// per instance (requires IContextInfoHandler2 on plug-in side)\n\tconst Steinberg::FIDString kVolume = \"volume\";\t\t\t\t\t///< (R/W) volume factor [float, 0. = -oo dB, 1. = 0dB, etc.], also available as string\n\tconst Steinberg::FIDString kMaxVolume = \"maxVolume\";\t\t\t///< (R) maximum volume factor [float, 1. = 0dB], also available as string\n\tconst Steinberg::FIDString kPan = \"pan\";\t\t\t\t\t\t///< (R/W) stereo panning [float, < 0.5 = (L), 0.5 = (C), > 0.5 = (R)], also available as string\n\tconst Steinberg::FIDString kMute = \"mute\";\t\t\t\t\t\t///< (R/W) mute (int32, 0: false, 1: true)\n\tconst Steinberg::FIDString kSolo = \"solo\";\t\t\t\t\t\t///< (R/W) solo (int32, 0: false, 1: true)\n\tconst Steinberg::FIDString kSendCount = \"sendcount\";\t\t\t///< (R) send count [int]\n\tconst Steinberg::FIDString kSendLevel = \"sendlevel\";\t\t\t///< (R/W) send level factor, index is appended to id (e.g. \"sendlevel0\" for first), also available as string\n\tconst Steinberg::FIDString kMaxSendLevel = \"maxSendlevel\";\t\t///< (R) maximum send level factor, also available as string\n\n\t// global\n\tconst Steinberg::FIDString kActiveDocumentID = \"activeDocumentID\";\t///< (R) active document identifier, use to get identity of the active document (string)\n\tconst Steinberg::FIDString kDocumentID = \"documentID\";\t\t\t\t///< (R) document identifier, use to compare identity (string)\n\tconst Steinberg::FIDString kDocumentName = \"documentName\";\t\t\t///< (R) document name, can be displayed to user (string)\n\tconst Steinberg::FIDString kDocumentFolder = \"documentFolder\";\t\t///< (R) document folder (string)\n\tconst Steinberg::FIDString kAudioFolder = \"audioFolder\";\t\t\t///< (R) folder for audio files (string)\n\tconst Steinberg::FIDString kIndexMode = \"indexMode\";\t\t\t\t///< (R) channel index mode (default is flat, see ChannelIndexMode enumeration)\n}\n\n} // namespace Presonus\n\n#include \"pluginterfaces/base/falignpop.h\"\n\n#endif // _ipslcontextinfo_h"
+    },
+    {
+      "licenseId": "LicenseRef-Steinberg-ASIO",
+      "name": "Steinberg ASIO SDK Licence",
+      "extractedText": "//-----------------------------------------------------------------------------\n// LICENSE\n// (c) 2025, Steinberg Media Technologies GmbH, All Rights Reserved\n//-----------------------------------------------------------------------------\nThis license applies only to files referencing this license,\nfor other files of the Software Development Kit the respective embedded license text\nis applicable.\n\nThis Software Development Kit is licensed under the terms of the Steinberg ASIO License,\nor alternatively under the terms of the General Public License (GPL) Version 3.\nYou may use the Software Development Kit according to either of these licenses as it is\nmost appropriate for your project on a case-by-case basis (commercial or not).\n\na) Proprietary Steinberg ASIO License\nThe Software Development Kit may not be distributed in parts or its entirety\nwithout prior written agreement by Steinberg Media Technologies GmbH.\nThe SDK must not be used to re-engineer or manipulate any technology used\nin any Steinberg or Third-party application or software module,\nunless permitted by law.\nNeither the name of the Steinberg Media Technologies GmbH nor the names of its\ncontributors may be used to endorse or promote products derived from this\nsoftware without specific prior written permission.\nBefore publishing a software under the proprietary license, you need to obtain a copy\nof the License Agreement signed by Steinberg Media Technologies GmbH.\nThe Steinberg ASIO SDK License Agreement can be found at:\nwww.steinberg.net/en/company/developers.html\n\nTHE SDK IS PROVIDED BY STEINBERG MEDIA TECHNOLOGIES GMBH \"AS IS\" AND\nANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\nWARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.\nIN NO EVENT SHALL STEINBERG MEDIA TECHNOLOGIES GMBH BE LIABLE FOR ANY DIRECT,\nINDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,\nBUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\nDATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF\nLIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE\nOR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED\nOF THE POSSIBILITY OF SUCH DAMAGE.\n\nb) General Public License (GPL) Version 3\nDetails of these licenses can be found at: www.gnu.org/licenses/gpl-3.0.html\n\nBest Practice recommendation:\nPlease refer to the Steinberg ASIO usage guidelines for the use of ASIO, ASIO logo and ASIO\ncompatible logos.\n//----------------------------------------------------------------------------------",
+      "seeAlsos": [
+        "https://www.steinberg.net/en/company/developers.html"
+      ]
+    }
+  ]
+}

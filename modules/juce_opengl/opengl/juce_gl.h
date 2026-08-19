@@ -34,6 +34,7 @@
 
 // This file was generated automatically using data from the opengl-registry
 // https://github.com/KhronosGroup/OpenGL-Registry
+// Registry data retrieved on 2024-01-16
 
 #pragma once
 

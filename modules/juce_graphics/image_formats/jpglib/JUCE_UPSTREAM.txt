@@ -1,3 +1,4 @@
+Upstream: https://ijg.org
 
 I've included libjpeg in the JUCE tree because loading jpegs is a pretty useful thing to
 be able to do, but I've left out as many files as possible to keep it lean-and-mean.
