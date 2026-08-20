@@ -1,0 +1,7 @@
+Upstream: https://chromium.googlesource.com/chromium/src
+Commit: 3e1a26c44c024d97dc9a4c09bbc6a2365398ca2c
+
+cubic_bezier.h and cubic_bezier.cc are from ui/gfx/geometry at the commit
+above, modified for JUCE: include paths flattened, the base and
+geometry_export dependencies removed, DCHECK replaced with jassert, and
+base::clamp replaced with std::clamp.

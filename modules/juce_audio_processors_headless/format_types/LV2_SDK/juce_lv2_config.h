@@ -53,6 +53,7 @@
 #define LILV_VERSION "0.24.12"
 #define SERD_VERSION "0.30.10"
 #define SORD_VERSION "0.16.9"
+#define SRATOM_VERSION "0.6.8"
 
 #define LILV_CXX 1
 

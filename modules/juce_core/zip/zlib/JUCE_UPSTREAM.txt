@@ -1,3 +1,5 @@
+Upstream: https://zlib.net
+
 # inflate.h and inftrees.h
 
 Include guards were added to these files to support multiple inclusion in a

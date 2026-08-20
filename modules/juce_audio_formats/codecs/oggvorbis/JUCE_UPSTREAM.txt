@@ -1,0 +1,8 @@
+Upstream: https://github.com/xiph/ogg
+Version: 1.3.4
+
+The libogg sources in this directory (ogg.h, os_types.h, crctable.h,
+bitwise.c, framing.c) are from libogg 1.3.4, modified for JUCE: include
+paths flattened, explicit casts added for C++ compilation, and some MSVC
+warnings disabled. The accompanying libvorbis sources are in the
+libvorbis-1.3.7 directory.

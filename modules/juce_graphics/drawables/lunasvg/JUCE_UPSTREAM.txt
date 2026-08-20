@@ -1,3 +1,5 @@
+Upstream: https://github.com/sammycage/lunasvg
+
 The files in this directory are from the LunaSVG 3.5.0 release downloaded in a tarball from
 https://github.com/sammycage/lunasvg/releases/tag/v3.5.0
 
