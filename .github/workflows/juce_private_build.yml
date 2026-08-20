@@ -82,20 +82,29 @@ jobs:
       triggerer: *triggerer
     secrets: inherit
   deploy:
-    if: ${{ !cancelled() && (success() || needs.build.result == 'skipped') && contains(fromJSON('["master", "develop", "juce9"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
-    needs: [build]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && contains(fromJSON('["success", "skipped"]'), needs.build.result) && contains(fromJSON('["master", "develop", "juce9"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
+    needs: [setup, build]
     name: Deploy
     uses: juce-framework/JUCE-utils/.github/workflows/deploy.yml@master
     secrets: inherit
+  submit-sbom:
+    # juce_submit_sbom.yml is also called directly for pushes to master in the
+    # public repository - it only has an effect on the default branch
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.deploy.result == 'success' && contains(fromJSON('["develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
+    needs: [setup, build, deploy]
+    name: Submit SBOM
+    permissions:
+      contents: write
+    uses: ./.github/workflows/juce_submit_sbom.yml
   docs:
-    if: ${{ !cancelled() && (success() || needs.deploy.result == 'success') && contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
-    needs: [deploy]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.deploy.result == 'success' && contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
+    needs: [setup, build, deploy]
     name: Docs
     uses: juce-framework/JUCE-utils/.github/workflows/docs.yml@master
     secrets: inherit
   set-commit-status:
     if: ${{ always() && (inputs.nightly-targets == '[]') && (inputs.cpp-std == '') }}
-    needs: [setup, build, deploy, docs]
+    needs: [setup, build, deploy, submit-sbom, docs]
     name: Set CI commit status
     runs-on: ubuntu-latest
     env:
@@ -111,7 +120,7 @@ jobs:
           targetUrl: ${{ env.target_url }}
   notify:
     if: ${{ always() && !contains(needs.*.result, 'cancelled') }}
-    needs: [setup, build, nightly, deploy, docs]
+    needs: [setup, build, nightly, deploy, docs, submit-sbom]
     name: Notify
     uses: juce-framework/JUCE-utils/.github/workflows/notify.yml@master
     with:
