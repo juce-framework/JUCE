@@ -1,4 +1,4 @@
-name: JUCE Private Push Trigger
+name: Push Trigger
 on:
   push:
     branches:
@@ -8,19 +8,24 @@ on:
       - feature/**
       - juce9
 jobs:
-  juce-private-push-trigger:
+  run-ci:
     if: github.repository == 'juce-framework/JUCE-dev'
-    name: JUCE Push Trigger
+    name: Run CI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
         with:
           sparse-checkout: ./.github/workflows
-      - name: Trigger a private build using the GitHub API
+      - name: Trigger a CI build using the GitHub API
         env:
           GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TRIGGER_WORKFLOW_INPUTS: |
             {"triggerer":"${{ github.actor }}"}
           TRIGGER_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: python3 ./.github/workflows/trigger_workflow.py
-
+  submit-sbom:
+    if: github.repository == 'juce-framework/JUCE' && github.ref_name == 'master'
+    name: Submit SBOM
+    permissions:
+      contents: write
+    uses: ./.github/workflows/juce_submit_sbom.yml
