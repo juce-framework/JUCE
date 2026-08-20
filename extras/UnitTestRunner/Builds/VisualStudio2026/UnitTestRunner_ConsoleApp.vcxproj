@@ -5141,8 +5141,9 @@
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\CMakeLists.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\README.md"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\Flac Licence.txt"/>
-    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\JUCE_CHANGES.txt"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\JUCE_UPSTREAM.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\README.md"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\JUCE_UPSTREAM.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\README.md"/>
     <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\LICENSE.txt"/>
@@ -5156,16 +5157,17 @@
     <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\LICENSE.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\README.md"/>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt"/>
-    <None Include="..\..\..\..\modules\juce_core\zip\zlib\JUCE_CHANGES.txt"/>
+    <None Include="..\..\..\..\modules\juce_core\zip\zlib\JUCE_UPSTREAM.txt"/>
     <None Include="..\..\..\..\modules\juce_graphics\drawables\lunasvg\plutovg\source\FTL.TXT"/>
-    <None Include="..\..\..\..\modules\juce_graphics\drawables\lunasvg\JUCE_CHANGES.txt"/>
-    <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\JUCE_CHANGES.txt"/>
-    <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\JUCE_CHANGES.txt"/>
-    <None Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\JUCE_CHANGES.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\drawables\lunasvg\JUCE_UPSTREAM.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\JUCE_UPSTREAM.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\JUCE_UPSTREAM.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\JUCE_UPSTREAM.txt"/>
     <None Include="..\..\..\..\modules\juce_gui_extra\native\typescript\webview-interop\LICENSE-AGPL.md"/>
     <None Include="..\..\..\..\modules\juce_gui_extra\native\typescript\webview-interop\LICENSE-JUCE.md"/>
     <None Include="..\..\..\..\modules\juce_gui_extra\native\typescript\webview-interop\LICENSE.md"/>
     <None Include="..\..\..\..\modules\juce_gui_extra\native\typescript\webview-interop\README.md"/>
+    <None Include="..\..\..\..\modules\juce_javascript\choc\JUCE_UPSTREAM.txt"/>
     <None Include="..\..\..\..\modules\juce_javascript\choc\LICENSE.md"/>
   </ItemGroup>
   <ItemGroup>

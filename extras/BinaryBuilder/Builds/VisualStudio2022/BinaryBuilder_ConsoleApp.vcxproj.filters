@@ -995,7 +995,7 @@
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt">
       <Filter>JUCE Modules\juce_core\native\java</Filter>
     </None>
-    <None Include="..\..\..\..\modules\juce_core\zip\zlib\JUCE_CHANGES.txt">
+    <None Include="..\..\..\..\modules\juce_core\zip\zlib\JUCE_UPSTREAM.txt">
       <Filter>JUCE Modules\juce_core\zip\zlib</Filter>
     </None>
   </ItemGroup>
