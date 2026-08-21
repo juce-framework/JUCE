@@ -60,7 +60,7 @@ public:
     {
         auto random = getRandom();
 
-        beginTest ("Short bytestream midi messages can be round-tripped through the UMP converter");
+        testCase ("Short bytestream midi messages can be round-tripped through the UMP converter", [&]
         {
             SingleGroupMidi1ToBytestreamTranslator translator (0);
 
@@ -80,9 +80,9 @@ public:
                     expect (equal (m, makeMidiMessage (roundTripped, time)));
                 });
             });
-        }
+        });
 
-        beginTest ("Bytestream SysEx converts to universal packets");
+        testCase ("Bytestream SysEx converts to universal packets", [&]
         {
             {
                 // Zero length message
@@ -141,7 +141,7 @@ public:
                 expect (packets.data()[4] == Utils::bytesToWord (std::byte { 0x30 },     std::byte { 0x31 },     std::byte { sysEx[12] }, std::byte { 0 }));
                 expect (packets.data()[5] == 0x00000000);
             }
-        }
+        });
 
         ToBytestreamDispatcher converter (0);
         Packets packets;
@@ -158,7 +158,7 @@ public:
             expect (equal (expected, output));
         };
 
-        beginTest ("Long SysEx bytestream midi messages can be round-tripped through the UMP converter");
+        testCase ("Long SysEx bytestream midi messages can be round-tripped through the UMP converter", [&]
         {
             for (auto length : { 0, 1, 2, 3, 4, 5, 6, 7, 13, 20, 100, 1000 })
             {
@@ -166,9 +166,9 @@ public:
                 expected.addEvent (createRandomSysEx (random, size_t (length)), 0);
                 checkRoundTrip (expected);
             }
-        }
+        });
 
-        beginTest ("UMP SysEx7 messages interspersed with utility messages convert to bytestream");
+        testCase ("UMP SysEx7 messages interspersed with utility messages convert to bytestream", [&]
         {
             const auto sysEx = createRandomSysEx (random, 100);
             const auto originalPackets = toMidi1 (sysEx);
@@ -196,9 +196,9 @@ public:
 
             for (const auto meta : output)
                 expect (equal (meta.getMessage(), sysEx));
-        }
+        });
 
-        beginTest ("UMP SysEx7 messages interspersed with System Realtime messages convert to bytestream");
+        testCase ("UMP SysEx7 messages interspersed with System Realtime messages convert to bytestream", [&]
         {
             const auto sysEx = createRandomSysEx (random, 200);
             const auto originalPackets = toMidi1 (sysEx);
@@ -249,9 +249,9 @@ public:
                     ++it;
                 }
             }
-        }
+        });
 
-        beginTest ("UMP SysEx7 messages interspersed with System Realtime and Utility messages convert to bytestream");
+        testCase ("UMP SysEx7 messages interspersed with System Realtime and Utility messages convert to bytestream", [&]
         {
             const auto sysEx = createRandomSysEx (random, 300);
             const auto originalPackets = toMidi1 (sysEx);
@@ -309,9 +309,9 @@ public:
                     ++it;
                 }
             }
-        }
+        });
 
-        beginTest ("SysEx messages are terminated by non-Utility, non-Realtime messages");
+        testCase ("SysEx messages are terminated by non-Utility, non-Realtime messages", [&]
         {
             const auto noteOn = [&]
             {
@@ -381,9 +381,9 @@ public:
 
             for (const auto meta : output)
                 expect (equal (meta.getMessage(), newSysEx));
-        }
+        });
 
-        beginTest ("Widening conversions work");
+        testCase ("Widening conversions work", [&]
         {
             // This is similar to the 'slow' example code from the MIDI 2.0 spec
             const auto baselineScale = [] (uint32_t srcVal, uint32_t srcBits, uint32_t dstBits)
@@ -485,9 +485,9 @@ public:
                 expectEquals ((int64_t) Conversion::scaleTo32 (rand),
                               (int64_t) baselineScale14To32 (rand));
             }
-        }
+        });
 
-        beginTest ("Round-trip widening/narrowing conversions work");
+        testCase ("Round-trip widening/narrowing conversions work", [&]
         {
             for (auto i = 0; i != 100; ++i)
             {
@@ -516,9 +516,9 @@ public:
                     expectEquals ((uint64_t) Conversion::scaleTo14 (Conversion::scaleTo32 (rand)), (uint64_t) rand);
                 }
             }
-        }
+        });
 
-        beginTest ("MIDI 2 -> 1 note on conversions");
+        testCase ("MIDI 2 -> 1 note on conversions", [&]
         {
             {
                 Packets midi2;
@@ -540,9 +540,9 @@ public:
 
                 checkMidi2ToMidi1Conversion (midi2, midi1);
             }
-        }
+        });
 
-        beginTest ("MIDI 2 -> 1 note off conversion");
+        testCase ("MIDI 2 -> 1 note off conversion", [&]
         {
             Packets midi2;
             midi2.add (PacketX2 { 0x448b0520, 0xfedcba98 });
@@ -551,9 +551,9 @@ public:
             midi1.add (PacketX1 { 0x248b057f });
 
             checkMidi2ToMidi1Conversion (midi2, midi1);
-        }
+        });
 
-        beginTest ("MIDI 2 -> 1 poly pressure conversion");
+        testCase ("MIDI 2 -> 1 poly pressure conversion", [&]
         {
             Packets midi2;
             midi2.add (PacketX2 { 0x49af0520, 0x80dcba98 });
@@ -562,9 +562,9 @@ public:
             midi1.add (PacketX1 { 0x29af0540 });
 
             checkMidi2ToMidi1Conversion (midi2, midi1);
-        }
+        });
 
-        beginTest ("MIDI 2 -> 1 control change conversion");
+        testCase ("MIDI 2 -> 1 control change conversion", [&]
         {
             Packets midi2;
             midi2.add (PacketX2 { 0x49b00520, 0x80dcba98 });
@@ -573,9 +573,9 @@ public:
             midi1.add (PacketX1 { 0x29b00540 });
 
             checkMidi2ToMidi1Conversion (midi2, midi1);
-        }
+        });
 
-        beginTest ("MIDI 2 -> 1 channel pressure conversion");
+        testCase ("MIDI 2 -> 1 channel pressure conversion", [&]
         {
             Packets midi2;
             midi2.add (PacketX2 { 0x40d20520, 0x80dcba98 });
@@ -584,9 +584,9 @@ public:
             midi1.add (PacketX1 { 0x20d24000 });
 
             checkMidi2ToMidi1Conversion (midi2, midi1);
-        }
+        });
 
-        beginTest ("MIDI 2 -> 1 nrpn rpn conversion");
+        testCase ("MIDI 2 -> 1 nrpn rpn conversion", [&]
         {
             {
                 Packets midi2;
@@ -613,9 +613,9 @@ public:
 
                 checkMidi2ToMidi1Conversion (midi2, midi1);
             }
-        }
+        });
 
-        beginTest ("MIDI 2 -> 1 program change and bank select conversion");
+        testCase ("MIDI 2 -> 1 program change and bank select conversion", [&]
         {
             {
                 // If the bank valid bit is 0, just emit a program change
@@ -640,9 +640,9 @@ public:
 
                 checkMidi2ToMidi1Conversion (midi2, midi1);
             }
-        }
+        });
 
-        beginTest ("MIDI 2 -> 1 pitch bend conversion");
+        testCase ("MIDI 2 -> 1 pitch bend conversion", [&]
         {
             Packets midi2;
             midi2.add (PacketX2 { 0x4eee0000, 0x12340000 });
@@ -651,9 +651,9 @@ public:
             midi1.add (PacketX1 { 0x2eee0d09 });
 
             checkMidi2ToMidi1Conversion (midi2, midi1);
-        }
+        });
 
-        beginTest ("MIDI 2 -> 1 messages which don't convert");
+        testCase ("MIDI 2 -> 1 messages which don't convert", [&]
         {
             const std::byte opcodes[] { std::byte { 0x0 },
                                         std::byte { 0x1 },
@@ -668,9 +668,9 @@ public:
                 midi2.add (PacketX2 { Utils::bytesToWord (std::byte { 0x40 }, std::byte { opcode << 0x4 }, std::byte { 0 }, std::byte { 0 }), 0x0 });
                 checkMidi2ToMidi1Conversion (midi2, {});
             }
-        }
+        });
 
-        beginTest ("MIDI 2 -> 1 messages which are passed through");
+        testCase ("MIDI 2 -> 1 messages which are passed through", [&]
         {
             const uint8_t typecodesX1[] { 0x0, 0x1, 0x2 };
 
@@ -699,9 +699,9 @@ public:
 
                 checkMidi2ToMidi1Conversion (p, p);
             }
-        }
+        });
 
-        beginTest ("MIDI 2 -> 1 control changes which should be ignored");
+        testCase ("MIDI 2 -> 1 control changes which should be ignored", [&]
         {
             const uint8_t CCs[] { 6, 38, 98, 99, 100, 101, 0, 32 };
 
@@ -712,9 +712,9 @@ public:
 
                 checkMidi2ToMidi1Conversion (midi2, {});
             }
-        }
+        });
 
-        beginTest ("MIDI 1 -> 2 note on conversions");
+        testCase ("MIDI 1 -> 2 note on conversions", [&]
         {
             {
                 Packets midi1;
@@ -736,9 +736,9 @@ public:
 
                 checkMidi1ToMidi2Conversion (midi1, midi2);
             }
-        }
+        });
 
-        beginTest ("MIDI 1 -> 2 note off conversions");
+        testCase ("MIDI 1 -> 2 note off conversions", [&]
         {
             Packets midi1;
             midi1.add (PacketX1 { 0x21831020 });
@@ -747,9 +747,9 @@ public:
             midi2.add (PacketX2 { 0x41831000, static_cast<uint32_t> (Conversion::scaleTo16 (0x20_u8)) << 0x10 });
 
             checkMidi1ToMidi2Conversion (midi1, midi2);
-        }
+        });
 
-        beginTest ("MIDI 1 -> 2 poly pressure conversions");
+        testCase ("MIDI 1 -> 2 poly pressure conversions", [&]
         {
             Packets midi1;
             midi1.add (PacketX1 { 0x20af7330 });
@@ -758,9 +758,9 @@ public:
             midi2.add (PacketX2 { 0x40af7300, Conversion::scaleTo32 (0x30_u8) });
 
             checkMidi1ToMidi2Conversion (midi1, midi2);
-        }
+        });
 
-        beginTest ("individual MIDI 1 -> 2 control changes which should be ignored");
+        testCase ("individual MIDI 1 -> 2 control changes which should be ignored", [&]
         {
             const uint8_t CCs[] { 6, 38, 98, 99, 100, 101, 0, 32 };
 
@@ -771,9 +771,9 @@ public:
 
                 checkMidi1ToMidi2Conversion (midi1, {});
             }
-        }
+        });
 
-        beginTest ("MIDI 1 -> 2 control change conversions");
+        testCase ("MIDI 1 -> 2 control change conversions", [&]
         {
             // normal control change
             {
@@ -813,9 +813,9 @@ public:
 
                 checkMidi1ToMidi2Conversion (midi1, midi2);
             }
-        }
+        });
 
-        beginTest ("MIDI 1 -> MIDI 2 program change and bank select");
+        testCase ("MIDI 1 -> MIDI 2 program change and bank select", [&]
         {
             Packets midi1;
             // program change with bank
@@ -830,9 +830,9 @@ public:
             midi2.add (PacketX2 { 0x40c00000, 0x10000000 });
 
             checkMidi1ToMidi2Conversion (midi1, midi2);
-        }
+        });
 
-        beginTest ("MIDI 1 -> MIDI 2 channel pressure conversions");
+        testCase ("MIDI 1 -> MIDI 2 channel pressure conversions", [&]
         {
             Packets midi1;
             midi1.add (PacketX1 { 0x20df3000 });
@@ -841,9 +841,9 @@ public:
             midi2.add (PacketX2 { 0x40df0000, Conversion::scaleTo32 (0x30_u8) });
 
             checkMidi1ToMidi2Conversion (midi1, midi2);
-        }
+        });
 
-        beginTest ("MIDI 1 -> MIDI 2 pitch bend conversions");
+        testCase ("MIDI 1 -> MIDI 2 pitch bend conversions", [&]
         {
             Packets midi1;
             midi1.add (PacketX1 { 0x20e74567 });
@@ -852,7 +852,7 @@ public:
             midi2.add (PacketX2 { 0x40e70000, Conversion::scaleTo32 (static_cast<uint16_t> ((0x67 << 7) | 0x45)) });
 
             checkMidi1ToMidi2Conversion (midi1, midi2);
-        }
+        });
     }
 
 private:
