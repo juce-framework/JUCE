@@ -274,6 +274,9 @@ public:
 
                 case SysexExtractorCallbackKind::lastSysex:
                 {
+                    if (pendingSysExData.empty())
+                        pendingSysExTime = time;
+
                     pendingSysExData.insert (pendingSysExData.end(), bytes.begin(), bytes.end());
 
                     if (pendingSysExData.empty())

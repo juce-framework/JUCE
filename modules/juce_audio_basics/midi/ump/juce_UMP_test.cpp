@@ -82,6 +82,24 @@ public:
             });
         });
 
+        testCase ("Single-packet sysex messages have an appropriate time stamp", [&]
+        {
+            SingleGroupMidi1ToBytestreamTranslator translator (0);
+
+            const auto message = createRandomSysEx (random, 1);
+            const auto packets = toMidi1 (message);
+
+            const auto timestamp = random.nextDouble();
+            std::optional<double> receivedTimestamp;
+
+            translator.dispatch (View { packets.data() }, timestamp, [&] (const BytesOnGroup&, double time)
+            {
+                receivedTimestamp = time;
+            });
+
+            expect (receivedTimestamp == timestamp);
+        });
+
         testCase ("Bytestream SysEx converts to universal packets", [&]
         {
             {
