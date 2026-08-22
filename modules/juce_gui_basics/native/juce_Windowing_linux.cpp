@@ -323,6 +323,16 @@ public:
 
     void grabFocus() override
     {
+        const auto style = getStyleFlags();
+
+        const auto shouldDeferToEmbedder =
+            parentWindow != 0
+            && (style & ComponentPeer::windowIgnoresKeyPresses) != 0
+            && (style & ComponentPeer::windowIsTemporary) == 0;
+
+        if (shouldDeferToEmbedder)
+            return;
+
         if (XWindowSystem::getInstance()->grabFocus (windowH))
             isActiveApplication = true;
     }
