@@ -4584,6 +4584,24 @@ private:
         result.numInputChannels     = static_cast<int> (numInputs);
         result.numOutputChannels    = static_cast<int> (numOutputs);
 
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
+        const auto getValue = [&] (const char* propertyName)
+        {
+            for (const auto* item : wrapped.getValue (world->newUri (propertyName).get()))
+                return lv2_host::lilvNodeToString (item);
+
+            return String{};
+        };
+        JUCE_END_IGNORE_WARNINGS_MSVC
+
+        result.version = std::invoke ([&]
+        {
+            StringArray versionComponents { getValue (LV2_CORE__minorVersion),
+                                            getValue (LV2_CORE__microVersion) };
+            versionComponents.removeEmptyStrings();
+            return versionComponents.joinIntoString (".");
+        });
+
         const auto classPtr     = wrapped.getClass();
         const auto classes      = collectPluginClassUris (classPtr);
         const auto isInstrument = std::any_of (classes.cbegin(),
