@@ -1097,6 +1097,7 @@ EXCLUDE                = ../../modules/juce_graphics/image_formats \
                          ../../modules/juce_core/zip/zlib \
                          ../../modules/juce_audio_formats/codecs/flac \
                          ../../modules/juce_audio_formats/codecs/ogg \
+                         ../../modules/juce_audio_formats/codecs/opus \
                          ../../modules/juce_audio_formats/codecs/vorbis \
                          ../../modules/juce_audio_devices/native \
                          ../../modules/juce_audio_plugin_client/AU/AudioUnitSDK \

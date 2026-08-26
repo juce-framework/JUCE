@@ -38,7 +38,12 @@
  #define JUCE_USE_OGGVORBIS 1
 #endif
 
-#if JUCE_USE_OGGVORBIS && (JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE))
+#ifndef JUCE_USE_OPUS
+ #define JUCE_USE_OPUS 1
+#endif
+
+#if (JUCE_USE_OGGVORBIS && (JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE))) \
+ || (JUCE_USE_OPUS && (JUCE_INCLUDE_OPUS_CODE || ! defined (JUCE_INCLUDE_OPUS_CODE)))
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
                                      "-Wsign-conversion")

@@ -1,0 +1,7 @@
+Upstream: https://github.com/xiph/opusfile.git
+Version:  0.12-59-g6dfd29e (commit 6dfd29e7adb87f2e193575fc3fa88cbf1a0b27df)
+
+Vendored by vendor.py in the parent directory; rerun it to update. It copies
+the .c files the unity translation units compile and every header reachable
+from them, and rewrites their includes as paths relative to the including
+file.

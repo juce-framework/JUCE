@@ -102,6 +102,30 @@
  #define JUCE_USE_OGGVORBIS 1
 #endif
 
+/** Config: JUCE_USE_OPUS
+    Enables the Opus audio codec classes (available on all platforms).
+    If your app doesn't need to read or write Opus files, you might want to disable this to
+    reduce the size of your codebase and build time.
+*/
+#ifndef JUCE_USE_OPUS
+ #define JUCE_USE_OPUS 1
+#endif
+
+/** Config: JUCE_INCLUDE_OPUS_CODE
+    This can be used to disable Juce's embedded 3rd-party opus, opusfile and libopusenc code.
+    You might need to tweak this if you're linking to external copies of these libraries in
+    your app, but for normal apps, this option should be left alone.
+
+    The embedded libogg is compiled when this option or JUCE_INCLUDE_OGGVORBIS_CODE is
+    enabled. If only one of them is, it may collide with the libogg that the external
+    library depends on.
+
+    This config option only has an effect with JUCE_USE_OPUS is enabled.
+*/
+#ifndef JUCE_INCLUDE_OPUS_CODE
+ #define JUCE_INCLUDE_OPUS_CODE 1
+#endif
+
 /** Config: JUCE_USE_MP3AUDIOFORMAT
     Enables the software-based MP3AudioFormat class.
     If your app doesn't need to read MP3 files, you might want to disable this to

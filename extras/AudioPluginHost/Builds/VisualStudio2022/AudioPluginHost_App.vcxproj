@@ -695,6 +695,477 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\src\framing.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\ogg_packer.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\opus_header.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\opusenc.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\picture.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\resample.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\unicode_support.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\arm\celt_neon_intr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\arm\pitch_neon_intr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\x86\pitch_sse.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\x86\pitch_sse2.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\x86\vq_sse2.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\bands.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\celt.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\celt_decoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\celt_encoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\celt_lpc.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\cwrs.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\entcode.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\entdec.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\entenc.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\kiss_fft.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\laplace.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\mathops.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\mdct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\modes.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\pitch.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\quant_bands.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\rate.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\vq.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\arm\biquad_alt_neon_intr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\arm\LPC_inv_pred_gain_neon_intr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\arm\NSQ_del_dec_neon_intr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\arm\NSQ_neon.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\apply_sine_window_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\autocorrelation_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\burg_modified_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\bwexpander_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\corrMatrix_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\encode_frame_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\energy_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\find_LPC_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\find_LTP_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\find_pitch_lags_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\find_pred_coefs_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\inner_product_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\k2a_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\LPC_analysis_filter_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\LPC_inv_pred_gain_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\LTP_analysis_filter_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\LTP_scale_ctrl_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\noise_shape_analysis_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\pitch_analysis_core_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\process_gains_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\regularize_correlations_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\residual_energy_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\scale_copy_vector_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\scale_vector_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\schur_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\sort_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\warped_autocorrelation_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\wrappers_FLP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\A2NLSF.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\ana_filt_bank_1.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\biquad_alt.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\bwexpander.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\bwexpander_32.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\check_control_input.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\CNG.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\code_signs.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\control_audio_bandwidth.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\control_codec.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\control_SNR.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\debug.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\dec_API.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\decode_core.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\decode_frame.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\decode_indices.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\decode_parameters.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\decode_pitch.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\decode_pulses.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\decoder_set_fs.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\enc_API.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\encode_indices.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\encode_pulses.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\gain_quant.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\HP_variable_cutoff.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\init_decoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\init_encoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\inner_prod_aligned.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\interpolate.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\lin2log.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\log2lin.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\LP_variable_cutoff.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\LPC_analysis_filter.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\LPC_fit.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\LPC_inv_pred_gain.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\NLSF_decode.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\NLSF_del_dec_quant.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\NLSF_encode.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\NLSF_stabilize.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\NLSF_unpack.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\NLSF_VQ.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\NLSF_VQ_weights_laroia.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\NLSF2A.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\NSQ.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\NSQ_del_dec.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\pitch_est_tables.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\PLC.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\process_NLSFs.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\quant_LTP_gains.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\resampler.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\resampler_down2.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\resampler_down2_3.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\resampler_private_AR2.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\resampler_private_down_FIR.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\resampler_private_IIR_FIR.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\resampler_private_up2_HQ.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\resampler_rom.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\shell_coder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\sigm_Q15.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\sort.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\stereo_decode_pred.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\stereo_encode_pred.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\stereo_find_predictor.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\stereo_LR_to_MS.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\stereo_MS_to_LR.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\stereo_quant_pred.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\sum_sqr_shift.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\table_LSF_cos.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\tables_gain.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\tables_LTP.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\tables_NLSF_CB_NB_MB.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\tables_NLSF_CB_WB.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\tables_other.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\tables_pitch_lag.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\tables_pulses_per_block.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\VAD.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\VQ_WMat_EC.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\analysis.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\extensions.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\mapping_matrix.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\mlp.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\mlp_data.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\opus.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\opus_decoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\opus_encoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\opus_multistream.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\opus_multistream_decoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\opus_multistream_encoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\opus_projection_decoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\opus_projection_encoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\repacketizer.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opusfile\src\http.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opusfile\src\info.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opusfile\src\internal.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opusfile\src\opusfile.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opusfile\src\stream.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\analysis.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -825,6 +1296,12 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\juce_audio_formats_ogg.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\juce_audio_formats_opus.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\juce_audio_formats_opusfile.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormatManagerHelpers.cpp">
@@ -3234,6 +3711,8 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats_flac_1.c"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats_flac_2.c"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats_ogg.c"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats_opus.c"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats_opusfile.c"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors.cpp">
       <AdditionalOptions> /bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -3483,6 +3962,88 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\include\ogg\ogg.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\include\ogg\os_types.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\src\crctable.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\include\opusenc.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\arch.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\ogg_packer.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\opus_header.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\picture.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\resample_sse.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\speex_resampler.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\src\unicode_support.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\package_version.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\arm\armcpu.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\arm\mathops_arm.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\arm\pitch_arm.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\x86\pitch_sse.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\x86\vq_sse.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\x86\x86cpu.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\_kiss_fft_guts.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\arch.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\bands.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\celt.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\celt_lpc.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\cpu_support.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\cwrs.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\ecintrin.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\entcode.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\entdec.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\entenc.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\float_cast.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\kiss_fft.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\laplace.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\mathops.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\mdct.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\mfrngcod.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\modes.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\os_support.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\pitch.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\quant_bands.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\rate.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\stack_alloc.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\static_modes_float.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\celt\vq.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\include\opus.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\include\opus_custom.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\include\opus_defines.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\include\opus_multistream.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\include\opus_projection.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\include\opus_types.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\arm\biquad_alt_arm.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\arm\LPC_inv_pred_gain_arm.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\arm\NSQ_del_dec_arm.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\arm\NSQ_neon.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\main_FLP.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\SigProc_FLP.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\float\structs_FLP.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\API.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\control.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\debug.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\define.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\errors.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\Inlines.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\MacroCount.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\MacroDebug.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\macros.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\main.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\NSQ.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\pitch_est_defines.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\PLC.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\resampler_private.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\resampler_rom.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\resampler_structs.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\SigProc_FIX.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\structs.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\tables.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\tuning_parameters.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\silk\typedef.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\analysis.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\mapping_matrix.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\mlp.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\src\opus_private.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\package_version.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opusfile\include\opusfile.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opusfile\src\internal.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\juce_opus_config.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\include\vorbis\codec.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\include\vorbis\vorbisenc.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\include\vorbis\vorbisfile.h"/>
@@ -4978,6 +5539,10 @@
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\JUCE_UPSTREAM.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\JUCE_UPSTREAM.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\JUCE_UPSTREAM.txt"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\libopusenc\JUCE_UPSTREAM.txt"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\JUCE_UPSTREAM.txt"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opus\LICENSE_PLEASE_READ.txt"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\opus\opusfile\JUCE_UPSTREAM.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\JUCE_UPSTREAM.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\README.md"/>
     <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\JUCE_UPSTREAM.txt"/>

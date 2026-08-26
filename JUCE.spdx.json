@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "JUCE-9.0.2",
-  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.2-683974351754",
+  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.2-c39a1262305a",
   "creationInfo": {
     "created": "2026-09-04T00:00:00Z",
     "creators": [
@@ -588,6 +588,73 @@
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
           "referenceLocator": "cpe:2.3:a:xiph.org:libvorbis:1.3.7:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "name": "Opus",
+      "SPDXID": "SPDXRef-juce-audio-formats.opus",
+      "versionInfo": "1.6.1",
+      "supplier": "Organization: Xiph.Org Foundation",
+      "downloadLocation": "https://opus-codec.org",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_formats/codecs/opus/opus in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/xiph/opus@1.6.1"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:opus-codec:opus:1.6.1:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "name": "opusfile",
+      "SPDXID": "SPDXRef-juce-audio-formats.opusfile",
+      "versionInfo": "0.12-59-g6dfd29e",
+      "supplier": "Organization: Xiph.Org Foundation",
+      "downloadLocation": "https://opus-codec.org",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_formats/codecs/opus/opusfile in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/xiph/opusfile@0.12-59-g6dfd29e"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:xiph:opusfile:0.12-59-g6dfd29e:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "name": "libopusenc",
+      "SPDXID": "SPDXRef-juce-audio-formats.libopusenc",
+      "versionInfo": "0.3",
+      "supplier": "Organization: Xiph.Org Foundation",
+      "downloadLocation": "https://opus-codec.org",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_audio_formats/codecs/opus/libopusenc in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/xiph/libopusenc@0.3"
         }
       ]
     },
@@ -1317,6 +1384,21 @@
       "spdxElementId": "SPDXRef-juce-audio-formats",
       "relationshipType": "CONTAINS",
       "relatedSpdxElement": "SPDXRef-juce-audio-formats.libvorbis"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-formats",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-formats.opus"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-formats",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-formats.opusfile"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-audio-formats",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-audio-formats.libopusenc"
     },
     {
       "spdxElementId": "SPDXRef-juce-audio-devices",
