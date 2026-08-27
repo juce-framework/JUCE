@@ -287,102 +287,116 @@ private:
 class OggWriter final : public AudioFormatWriter
 {
 public:
-    OggWriter (OutputStream* out, double rate,
-               unsigned int numChans, unsigned int bitsPerSamp,
-               int qualityIndex, const StringPairArray& metadata)
-        : AudioFormatWriter (out, oggFormatName, rate, numChans, bitsPerSamp)
+    struct VorbisInfoDeleter
     {
-        vorbis_info_init (&vi);
-
-        if (vorbis_encode_init_vbr (&vi, (int) numChans, (int) rate,
-                                    jlimit (0.0f, 1.0f, (float) qualityIndex * 0.1f)) == 0)
+        void operator() (OggVorbisNamespace::vorbis_info* v) const
         {
-            vorbis_comment_init (&vc);
+            vorbis_info_clear (v);
+            delete v;
+        }
+    };
 
-            addMetadata (metadata, OggVorbisAudioFormat::encoderName,    "ENCODER");
-            addMetadata (metadata, OggVorbisAudioFormat::id3title,       "TITLE");
-            addMetadata (metadata, OggVorbisAudioFormat::id3artist,      "ARTIST");
-            addMetadata (metadata, OggVorbisAudioFormat::id3album,       "ALBUM");
-            addMetadata (metadata, OggVorbisAudioFormat::id3comment,     "COMMENT");
-            addMetadata (metadata, OggVorbisAudioFormat::id3date,        "DATE");
-            addMetadata (metadata, OggVorbisAudioFormat::id3genre,       "GENRE");
-            addMetadata (metadata, OggVorbisAudioFormat::id3trackNumber, "TRACKNUMBER");
+    using VorbisInfo = std::unique_ptr<OggVorbisNamespace::vorbis_info, VorbisInfoDeleter>;
 
-            vorbis_analysis_init (&vd, &vi);
-            vorbis_block_init (&vd, &vb);
+    /** Creates the encoder settings for the options, or nullptr if libvorbis
+        rejects them.
+    */
+    static VorbisInfo createVorbisInfo (const AudioFormatWriterOptions& options)
+    {
+        VorbisInfo vi (new OggVorbisNamespace::vorbis_info);
+        vorbis_info_init (vi.get());
 
-            ogg_stream_init (&os, Random::getSystemRandom().nextInt());
+        if (vorbis_encode_init_vbr (vi.get(),
+                                    options.getNumChannels(),
+                                    (long) options.getSampleRate(),
+                                    jlimit (0.0f, 1.0f, (float) options.getQualityOptionIndex() * 0.1f)) != 0)
+            return nullptr;
 
-            ogg_packet header, header_comm, header_code;
-            vorbis_analysis_headerout (&vd, &vc, &header, &header_comm, &header_code);
+        return vi;
+    }
 
-            ogg_stream_packetin (&os, &header);
-            ogg_stream_packetin (&os, &header_comm);
-            ogg_stream_packetin (&os, &header_code);
+    OggWriter (OutputStream* out, VorbisInfo infoToUse, const AudioFormatWriterOptions& options)
+        : AudioFormatWriter (out,
+                             oggFormatName,
+                             options.getSampleRate(),
+                             (unsigned int) options.getNumChannels(),
+                             (unsigned int) options.getBitsPerSample()),
+          vi (std::move (infoToUse))
+    {
+        vorbis_comment_init (&vc);
 
-            for (;;)
-            {
-                if (ogg_stream_flush (&os, &og) == 0)
-                    break;
+        const auto metadata = options.getMetadataValues();
 
-                output->write (og.header, (size_t) og.header_len);
-                output->write (og.body,   (size_t) og.body_len);
-            }
+        const std::pair<const char*, const char*> tags[] = { { OggVorbisAudioFormat::encoderName,    "ENCODER" },
+                                                             { OggVorbisAudioFormat::id3title,       "TITLE" },
+                                                             { OggVorbisAudioFormat::id3artist,      "ARTIST" },
+                                                             { OggVorbisAudioFormat::id3album,       "ALBUM" },
+                                                             { OggVorbisAudioFormat::id3comment,     "COMMENT" },
+                                                             { OggVorbisAudioFormat::id3date,        "DATE" },
+                                                             { OggVorbisAudioFormat::id3genre,       "GENRE" },
+                                                             { OggVorbisAudioFormat::id3trackNumber, "TRACKNUMBER" } };
 
-            ok = true;
+        for (const auto& [key, tag] : tags)
+            if (const auto it = metadata.find (key); it != metadata.end() && it->second.isNotEmpty())
+                vorbis_comment_add_tag (&vc, tag, it->second.toRawUTF8());
+
+        vorbis_analysis_init (&vd, vi.get());
+        vorbis_block_init (&vd, &vb);
+
+        ogg_stream_init (&os, Random::getSystemRandom().nextInt());
+
+        ogg_packet header, header_comm, header_code;
+        vorbis_analysis_headerout (&vd, &vc, &header, &header_comm, &header_code);
+
+        ogg_stream_packetin (&os, &header);
+        ogg_stream_packetin (&os, &header_comm);
+        ogg_stream_packetin (&os, &header_code);
+
+        for (;;)
+        {
+            if (ogg_stream_flush (&os, &og) == 0)
+                break;
+
+            output->write (og.header, (size_t) og.header_len);
+            output->write (og.body,   (size_t) og.body_len);
         }
     }
 
     ~OggWriter() override
     {
-        if (ok)
-        {
-            // write a zero-length packet to show ogg that we're finished
-            writeSamples (0);
+        // write a zero-length packet to show ogg that we're finished
+        writeSamples (0);
 
-            ogg_stream_clear (&os);
-            vorbis_block_clear (&vb);
-            vorbis_dsp_clear (&vd);
-            vorbis_comment_clear (&vc);
-
-            vorbis_info_clear (&vi);
-            output->flush();
-        }
-        else
-        {
-            vorbis_info_clear (&vi);
-            output = nullptr; // to stop the base class deleting this, as it needs to be returned
-                              // to the caller of createWriter()
-        }
+        ogg_stream_clear (&os);
+        vorbis_block_clear (&vb);
+        vorbis_dsp_clear (&vd);
+        vorbis_comment_clear (&vc);
+        output->flush();
     }
 
     //==============================================================================
     bool write (const int** samplesToWrite, int numSamples) override
     {
-        if (ok)
+        if (numSamples > 0)
         {
-            if (numSamples > 0)
-            {
-                const double gain = 1.0 / 0x80000000u;
-                float** const vorbisBuffer = vorbis_analysis_buffer (&vd, numSamples);
+            const double gain = 1.0 / 0x80000000u;
+            float** const vorbisBuffer = vorbis_analysis_buffer (&vd, numSamples);
 
-                for (int i = (int) numChannels; --i >= 0;)
+            for (int i = (int) numChannels; --i >= 0;)
+            {
+                if (auto* dst = vorbisBuffer[i])
                 {
-                    if (auto* dst = vorbisBuffer[i])
+                    if (const int* src = samplesToWrite [i])
                     {
-                        if (const int* src = samplesToWrite [i])
-                        {
-                            for (int j = 0; j < numSamples; ++j)
-                                dst[j] = (float) (src[j] * gain);
-                        }
+                        for (int j = 0; j < numSamples; ++j)
+                            dst[j] = (float) (src[j] * gain);
                     }
                 }
             }
-
-            writeSamples (numSamples);
         }
 
-        return ok;
+        writeSamples (numSamples);
+        return true;
     }
 
     void writeSamples (int numSamples)
@@ -413,24 +427,14 @@ public:
         }
     }
 
-    bool ok = false;
-
 private:
     ogg_stream_state os;
     ogg_page og;
     ogg_packet op;
-    OggVorbisNamespace::vorbis_info vi;
+    VorbisInfo vi;
     OggVorbisNamespace::vorbis_comment vc;
     OggVorbisNamespace::vorbis_dsp_state vd;
     OggVorbisNamespace::vorbis_block vb;
-
-    void addMetadata (const StringPairArray& metadata, const char* name, const char* vorbisName)
-    {
-        auto s = metadata [name];
-
-        if (s.isNotEmpty())
-            vorbis_comment_add_tag (&vc, vorbisName, const_cast<char*> (s.toRawUTF8()));
-    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggWriter)
 };
@@ -479,20 +483,10 @@ std::unique_ptr<AudioFormatWriter> OggVorbisAudioFormat::createWriterFor (std::u
     if (streamToWriteTo == nullptr)
         return nullptr;
 
-    StringPairArray metadata;
-    metadata.addUnorderedMap (options.getMetadataValues());
+    if (auto info = OggWriter::createVorbisInfo (options))
+        return std::make_unique<OggWriter> (std::exchange (streamToWriteTo, {}).release(), std::move (info), options);
 
-    auto w = std::make_unique<OggWriter> (std::exchange (streamToWriteTo, {}).release(),
-                                          options.getSampleRate(),
-                                          (unsigned int) options.getNumChannels(),
-                                          (unsigned int) options.getBitsPerSample(),
-                                          options.getQualityOptionIndex(),
-                                          metadata);
-
-    if (! w->ok)
-        return nullptr;
-
-    return w;
+    return nullptr;
 }
 
 StringArray OggVorbisAudioFormat::getQualityOptions()
@@ -531,6 +525,35 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 
     return 0;
 }
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+struct OggVorbisAudioFormatTests final : public UnitTest
+{
+    OggVorbisAudioFormatTests()  : UnitTest ("Ogg Vorbis audio format tests", UnitTestCategories::audio) {}
+
+    void runTest() override
+    {
+        OggVorbisAudioFormat format;
+
+        beginTest ("Rejected writer options leave the stream with the caller");
+        {
+            MemoryBlock block;
+            std::unique_ptr<OutputStream> out = std::make_unique<MemoryOutputStream> (block, false);
+
+            auto writer = format.createWriterFor (out, AudioFormatWriterOptions{}.withSampleRate (44100)
+                                                                                 .withNumChannels (0)
+                                                                                 .withBitsPerSample (32));
+            expect (writer == nullptr);
+            expect (out != nullptr);
+        }
+    }
+};
+
+static const OggVorbisAudioFormatTests oggVorbisAudioFormatTests;
+
+#endif
 
 #endif
 
