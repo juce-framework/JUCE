@@ -885,14 +885,15 @@ private:
 
         for (;;)
         {
-            GUID session;
+            // A null session GUID joins the endpoint's default audio session,
+            // so the application keeps a single Volume Mixer entry.
             auto hr = client->Initialize (isExclusiveMode (deviceMode) ? AUDCLNT_SHAREMODE_EXCLUSIVE
                                                                        : AUDCLNT_SHAREMODE_SHARED,
                                           getStreamFlags(),
                                           defaultPeriod,
                                           isExclusiveMode (deviceMode) ? defaultPeriod : 0,
                                           (WAVEFORMATEX*) &format,
-                                          &session);
+                                          nullptr);
 
             if (check (hr))
                 return true;
@@ -2121,3 +2122,162 @@ bool  JUCE_CALLTYPE SystemAudioVolume::setMuted (bool mute)   { return WasapiCla
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+namespace juce
+{
+
+JUCE_IUNKNOWNCLASS (IAudioSessionEnumerator, "E2F5BB11-0570-40CA-ACDD-3AA01277DEE8")
+{
+    JUCE_COMCALL GetCount (int*) = 0;
+    JUCE_COMCALL GetSession (int, IAudioSessionControl**) = 0;
+};
+
+JUCE_COMCLASS (IAudioSessionControl2, "bfb7ff88-7239-4fc9-8fa2-07c950be9c6d") : public IAudioSessionControl
+{
+    JUCE_COMCALL GetSessionIdentifier (LPWSTR*) = 0;
+    JUCE_COMCALL GetSessionInstanceIdentifier (LPWSTR*) = 0;
+    JUCE_COMCALL GetProcessId (DWORD*) = 0;
+    JUCE_COMCALL IsSystemSoundsSession() = 0;
+    JUCE_COMCALL SetDuckingPreference (BOOL) = 0;
+};
+
+JUCE_IUNKNOWNCLASS (IAudioSessionManager, "BFA971F1-4D5E-40BB-935E-967039BFBEE4")
+{
+    JUCE_COMCALL GetAudioSessionControl (LPCGUID, DWORD, IAudioSessionControl**) = 0;
+    JUCE_COMCALL GetSimpleAudioVolume (LPCGUID, DWORD, void**) = 0;
+};
+
+JUCE_COMCLASS (IAudioSessionManager2, "77AA99A0-1BD6-484F-8BC7-2C654C9A9B6F") : public IAudioSessionManager
+{
+    JUCE_COMCALL GetSessionEnumerator (IAudioSessionEnumerator**) = 0;
+    JUCE_COMCALL RegisterSessionNotification (void*) = 0;
+    JUCE_COMCALL UnregisterSessionNotification (void*) = 0;
+    JUCE_COMCALL RegisterDuckNotification (LPCWSTR, void*) = 0;
+    JUCE_COMCALL UnregisterDuckNotification (void*) = 0;
+};
+
+} // namespace juce
+
+#ifdef __CRT_UUID_DECL
+__CRT_UUID_DECL (juce::IAudioSessionEnumerator, 0xE2F5BB11, 0x0570, 0x40CA, 0xAC, 0xDD, 0x3A, 0xA0, 0x12, 0x77, 0xDE, 0xE8)
+__CRT_UUID_DECL (juce::IAudioSessionControl2,   0xbfb7ff88, 0x7239, 0x4fc9, 0x8f, 0xa2, 0x07, 0xc9, 0x50, 0xbe, 0x9c, 0x6d)
+__CRT_UUID_DECL (juce::IAudioSessionManager,    0xBFA971F1, 0x4D5E, 0x40BB, 0x93, 0x5E, 0x96, 0x70, 0x39, 0xBF, 0xBE, 0xE4)
+__CRT_UUID_DECL (juce::IAudioSessionManager2,   0x77AA99A0, 0x1BD6, 0x484F, 0x8B, 0xC7, 0x2C, 0x65, 0x4C, 0x9A, 0x9B, 0x6F)
+#endif
+
+namespace juce
+{
+
+class WASAPIAudioSessionTests final : public UnitTest
+{
+public:
+    WASAPIAudioSessionTests()
+        : UnitTest ("WASAPI audio sessions", UnitTestCategories::audio)
+    {
+    }
+
+    void runTest() override
+    {
+        ScopedJuceInitialiser_GUI scopedJuceInitialiser_gui;
+
+        beginTest ("Shared-mode output streams join the endpoint's default audio session");
+
+        AudioDeviceManager manager;
+        manager.setCurrentAudioDeviceType ("Windows Audio", true);
+
+        if (manager.initialiseWithDefaultDevices (0, 2).isNotEmpty()
+            || manager.getCurrentAudioDevice() == nullptr)
+        {
+            logMessage ("No output device is available; skipping");
+            expect (true);
+            return;
+        }
+
+        const auto sessionIds = getSessionInstanceIdentifiersForThisProcess();
+        expect (! sessionIds.isEmpty(), "opening a device did not create an audio session");
+
+        // The default session's GUID is GUID_NULL, and the instance
+        // identifier embeds the session GUID.
+        const String defaultSessionGuid ("{00000000-0000-0000-0000-000000000000}");
+
+        for (const auto& sessionId : sessionIds)
+            expect (sessionId.contains (defaultSessionGuid),
+                    "a stream joined a non-default audio session: " + sessionId);
+
+        manager.closeAudioDevice();
+    }
+
+private:
+    // Returns the session instance identifier of every audio session
+    // belonging to this process on any active render endpoint.
+    static StringArray getSessionInstanceIdentifiersForThisProcess()
+    {
+        StringArray result;
+
+        ComSmartPtr<IMMDeviceEnumerator> enumerator;
+        if (FAILED (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
+            return result;
+
+        ComSmartPtr<IMMDeviceCollection> endpoints;
+        if (FAILED (enumerator->EnumAudioEndpoints (eRender, DEVICE_STATE_ACTIVE,
+                                                    endpoints.resetAndGetPointerAddress())))
+            return result;
+
+        UINT endpointCount = 0;
+        endpoints->GetCount (&endpointCount);
+
+        for (UINT endpointIndex = 0; endpointIndex < endpointCount; ++endpointIndex)
+        {
+            ComSmartPtr<IMMDevice> endpoint;
+            if (FAILED (endpoints->Item (endpointIndex, endpoint.resetAndGetPointerAddress())))
+                continue;
+
+            ComSmartPtr<IAudioSessionManager2> sessionManager;
+            if (FAILED (endpoint->Activate (__uuidof (IAudioSessionManager2), CLSCTX_INPROC_SERVER,
+                                            nullptr, (void**) sessionManager.resetAndGetPointerAddress())))
+                continue;
+
+            ComSmartPtr<IAudioSessionEnumerator> sessions;
+            if (FAILED (sessionManager->GetSessionEnumerator (sessions.resetAndGetPointerAddress())))
+                continue;
+
+            int sessionCount = 0;
+            sessions->GetCount (&sessionCount);
+
+            for (int sessionIndex = 0; sessionIndex < sessionCount; ++sessionIndex)
+            {
+                ComSmartPtr<IAudioSessionControl> control;
+                if (FAILED (sessions->GetSession (sessionIndex, control.resetAndGetPointerAddress())))
+                    continue;
+
+                ComSmartPtr<IAudioSessionControl2> control2;
+                if (FAILED (control.QueryInterface (control2)))
+                    continue;
+
+                DWORD processId = 0;
+                control2->GetProcessId (&processId);
+
+                if (processId != GetCurrentProcessId())
+                    continue;
+
+                LPWSTR sessionId = nullptr;
+                if (SUCCEEDED (control2->GetSessionInstanceIdentifier (&sessionId)))
+                {
+                    result.add (String (sessionId));
+                    CoTaskMemFree (sessionId);
+                }
+            }
+        }
+
+        return result;
+    }
+};
+
+static WASAPIAudioSessionTests wasapiAudioSessionTests;
+
+} // namespace juce
+
+#endif
