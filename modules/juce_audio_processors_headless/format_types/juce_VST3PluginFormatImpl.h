@@ -2026,6 +2026,12 @@ public:
             pluginInstance.parameterDispatcher.push (vstParamIndex, newValue);
         }
 
+        void setValueFromPerformEdit (float newValue)
+        {
+            pluginInstance.cachedParamValues.set (vstParamIndex, newValue);
+            sendValueChangedMessageToListeners (newValue);
+        }
+
         /*  If we're syncing the editor to the processor, the processor won't need to
             be notified about the parameter updates, so we can avoid flagging the
             change when updating the float cache.
@@ -3464,7 +3470,7 @@ tresult VST3HostContextHeadless::performEdit (Vst::ParamID paramID, Vst::ParamVa
 
     if (auto* param = plugin->getParameterForID (paramID))
     {
-        param->setValueNotifyingHost ((float) valueNormalised);
+        param->setValueFromPerformEdit ((float) valueNormalised);
 
         // did the plug-in already update the parameter internally
         if (! approximatelyEqual (plugin->editController->getParamNormalized (paramID), valueNormalised))
