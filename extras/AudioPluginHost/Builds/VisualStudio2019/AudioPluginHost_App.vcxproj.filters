@@ -2083,6 +2083,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_OggVorbisAudioFormat.cpp">
       <Filter>JUCE Modules\juce_audio_formats\codecs</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_OpusAudioFormat.cpp">
+      <Filter>JUCE Modules\juce_audio_formats\codecs</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WavAudioFormat.cpp">
       <Filter>JUCE Modules\juce_audio_formats\codecs</Filter>
     </ClCompile>
@@ -5823,6 +5826,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_OggVorbisAudioFormat.h">
       <Filter>JUCE Modules\juce_audio_formats\codecs</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_OpusAudioFormat.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WavAudioFormat.h">
       <Filter>JUCE Modules\juce_audio_formats\codecs</Filter>
     </ClInclude>
@@ -6646,6 +6652,9 @@
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_CallbackListenerList.h">
+      <Filter>JUCE Modules\juce_core\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_FunctionPointerDestructor.h">
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_IncrementRef.h">
@@ -9040,9 +9049,6 @@
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_FontOptions.h">
-      <Filter>JUCE Modules\juce_graphics\fonts</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_FunctionPointerDestructor.h">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_GlyphArrangement.h">

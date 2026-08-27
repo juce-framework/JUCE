@@ -3105,6 +3105,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_CallbackListenerList.h">
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_FunctionPointerDestructor.h">
+      <Filter>JUCE Modules\juce_core\detail</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_IncrementRef.h">
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
@@ -5356,9 +5359,6 @@
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_FontOptions.h">
-      <Filter>JUCE Modules\juce_graphics\fonts</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_FunctionPointerDestructor.h">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_GlyphArrangement.h">

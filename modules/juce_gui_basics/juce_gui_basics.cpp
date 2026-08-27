@@ -196,7 +196,7 @@
  #include "native/juce_MouseCursor_mac.mm"
 
 #elif JUCE_WINDOWS
- #include <juce_graphics/fonts/juce_FunctionPointerDestructor.h>
+ #include <juce_core/detail/juce_FunctionPointerDestructor.h>
  #include <juce_graphics/native/juce_Direct2DMetrics_windows.h>
  #include <juce_graphics/native/juce_Direct2DGraphicsContext_windows.h>
  #include <juce_graphics/native/juce_DirectX_windows.h>

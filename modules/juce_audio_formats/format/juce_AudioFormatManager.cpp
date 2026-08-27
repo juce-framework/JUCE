@@ -73,6 +73,10 @@ void AudioFormatManager::registerBasicFormats()
     registerFormat (new OggVorbisAudioFormat(), false);
    #endif
 
+   #if JUCE_USE_OPUS
+    registerFormat (new OpusAudioFormat(), false);
+   #endif
+
    #if JUCE_MAC || JUCE_IOS
     registerFormat (new CoreAudioFormat(), false);
    #endif

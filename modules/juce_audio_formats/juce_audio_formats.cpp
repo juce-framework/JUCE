@@ -74,6 +74,7 @@
 #include "codecs/juce_FlacAudioFormat.cpp"
 #include "codecs/juce_MP3AudioFormat.cpp"
 #include "codecs/juce_OggVorbisAudioFormat.cpp"
+#include "codecs/juce_OpusAudioFormat.cpp"
 #include "codecs/juce_WavAudioFormat.cpp"
 #include "codecs/juce_LAMEEncoderAudioFormat.cpp"
 

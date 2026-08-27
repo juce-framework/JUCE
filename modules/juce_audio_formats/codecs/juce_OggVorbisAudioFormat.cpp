@@ -41,6 +41,18 @@ namespace juce
  #define __MACOSX__ 1
 #endif
 
+#if JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE)
+ extern "C"
+ {
+  #include "ogg/include/ogg/ogg.h"
+ }
+#else
+ extern "C"
+ {
+  #include <ogg/ogg.h>
+ }
+#endif
+
 namespace OggVorbisNamespace
 {
 #if JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE)
@@ -239,7 +251,7 @@ public:
         return (size_t) (static_cast<InputStream*> (datasource)->read (ptr, (int) (size * nmemb))) / size;
     }
 
-    static int oggSeekCallback (void* datasource, OggVorbisNamespace::ogg_int64_t offset, int whence)
+    static int oggSeekCallback (void* datasource, ogg_int64_t offset, int whence)
     {
         auto* in = static_cast<InputStream*> (datasource);
 
@@ -301,7 +313,7 @@ public:
 
             ogg_stream_init (&os, Random::getSystemRandom().nextInt());
 
-            OggVorbisNamespace::ogg_packet header, header_comm, header_code;
+            ogg_packet header, header_comm, header_code;
             vorbis_analysis_headerout (&vd, &vc, &header, &header_comm, &header_code);
 
             ogg_stream_packetin (&os, &header);
@@ -404,9 +416,9 @@ public:
     bool ok = false;
 
 private:
-    OggVorbisNamespace::ogg_stream_state os;
-    OggVorbisNamespace::ogg_page og;
-    OggVorbisNamespace::ogg_packet op;
+    ogg_stream_state os;
+    ogg_page og;
+    ogg_packet op;
     OggVorbisNamespace::vorbis_info vi;
     OggVorbisNamespace::vorbis_comment vc;
     OggVorbisNamespace::vorbis_dsp_state vd;

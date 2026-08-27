@@ -50,7 +50,7 @@
 
 #include "juce_graphics.h"
 
-#include "fonts/juce_FunctionPointerDestructor.h"
+#include <juce_core/detail/juce_FunctionPointerDestructor.h>
 
 //==============================================================================
 #if JUCE_MAC
