@@ -657,13 +657,19 @@ struct MenuWindow final : public Component, private AsyncUpdater
         if (! isShowing())
             return;
 
-        auto* accessibleFocus = std::invoke ([this]
+        auto* accessibleFocus = std::invoke ([this]() -> AccessibilityHandler*
         {
             if (currentChild != nullptr)
                 if (auto* childHandler = currentChild->getAccessibilityHandler())
                     return childHandler;
 
-            return getAccessibilityHandler();
+            if (auto* handler = getAccessibilityHandler())
+            {
+                const auto children = handler->getChildren();
+                return children.empty() ? handler : children.front();
+            }
+
+            return nullptr;
         });
 
         if (accessibleFocus != nullptr)
