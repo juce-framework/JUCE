@@ -1602,7 +1602,16 @@ private:
             inputSamples[channel][sample] = value;
         });
 
-        const AudioIODeviceCallbackContext context { inNow != nullptr ? &inNow->mHostTime : nullptr };
+        uint64_t hostTimeNs{};
+
+        AudioIODeviceCallbackContext context;
+
+        if (inNow != nullptr)
+        {
+            hostTimeNs = AudioConvertHostTimeToNanos (inNow->mHostTime);
+            context.hostTimeNs = &hostTimeNs;
+        }
+
         callback->audioDeviceIOCallbackWithContext (buffers[Direction::input].getArrayOfReadPointers(),
                                                     buffers[Direction::input].getNumChannels(),
                                                     buffers[Direction::output].getArrayOfWritePointers(),
