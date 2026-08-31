@@ -1258,16 +1258,20 @@ public:
             {
                 auto chunkType = input->readInt();
                 auto length = (uint32) input->readInt();
-                auto snappedLength = (int64) length + (int64) (length & 1);
                 const auto numBytesAvailable = input->getNumBytesRemaining();
 
-                if (numBytesAvailable >= 0 && snappedLength > numBytesAvailable)
-                {
-                    // Malformed chunk, its length is longer than the stream itself
-                    return;
-                }
+                auto chunkEnd = input->getPosition() + length + (length & 1);
 
-                auto chunkEnd = input->getPosition() + snappedLength;
+                if (numBytesAvailable >= 0)
+                {
+                    if ((int64) length > numBytesAvailable)
+                        return;
+
+                    // We allow the byte padding at the end of the file to be missing as long as
+                    // the chunk length is not greater than the number of bytes available. Programs
+                    // generally seem to parse such malformed wav files.
+                    chunkEnd = jmin (chunkEnd, input->getPosition() + numBytesAvailable);
+                }
 
                 if (chunkType == chunkName ("fmt "))
                 {
@@ -2364,6 +2368,52 @@ struct WaveAudioFormatTests final : public UnitTest
             for (auto [index, value] : enumerate (dataOut, size_t{}))
                 expect (approximatelyEqual (value, dataIn[index]));
         }
+
+        {
+            beginTest ("An odd-length data chunk at the end of the file without a pad byte can be read");
+
+            const auto wav = createPcm8Wav (5, { 0x80, 0x81, 0x7f, 0x80, 0x82 });
+            const auto reader = createReader (wav);
+            expect (reader != nullptr);
+
+            if (reader != nullptr)
+            {
+                expectEquals ((int) reader->sampleRate, 44100);
+                expectEquals (reader->lengthInSamples, (int64) 5);
+            }
+        }
+
+        {
+            beginTest ("A data chunk claiming more bytes than the stream contains is not read");
+
+            const auto wav = createPcm8Wav (1000, { 0x80, 0x81, 0x7f, 0x80, 0x82, 0x83 });
+            const auto reader = createReader (wav);
+            expect (reader == nullptr || reader->lengthInSamples == 0);
+        }
+
+        {
+            beginTest ("A final odd-length LIST chunk without a pad byte can be read");
+
+            const auto wav = createPcm8Wav (6, { 0x80, 0x81, 0x7f, 0x80, 0x82, 0x83 }, [] (OutputStream& out)
+            {
+                out.writeInt (WavFileHelpers::chunkName ("LIST"));
+                out.writeInt (19);                                  // 4 + 8 + 7: odd, and no pad byte follows
+                out.writeInt (WavFileHelpers::chunkName ("adtl"));
+                out.writeInt (WavFileHelpers::chunkName ("labl"));
+                out.writeInt (7);                                   // a cue ID plus three bytes of text
+                out.writeInt (1);
+                out.write ("ab\0", 3);
+            });
+
+            const auto reader = createReader (wav);
+            expect (reader != nullptr);
+
+            if (reader != nullptr)
+            {
+                expectEquals (reader->lengthInSamples, (int64) 6);
+                expectEquals (reader->metadataValues["CueLabel0Text"], String ("ab"));
+            }
+        }
     }
 
 private:
@@ -2421,6 +2471,46 @@ private:
         }
 
         return mb;
+    }
+
+    /*  Creates a minimal 8-bit mono PCM wav file. The declared length of the data chunk may
+        differ from the number of data bytes actually written, in order to simulate malformed files.
+    */
+    static MemoryBlock createPcm8Wav (uint32 declaredDataLength,
+                                      const std::vector<uint8>& dataBytes,
+                                      const std::function<void (OutputStream&)>& appendTrailingChunks = nullptr)
+    {
+        using namespace WavFileHelpers;
+
+        MemoryOutputStream body;
+        body.writeInt (chunkName ("WAVE"));
+
+        body.writeInt (chunkName ("fmt "));
+        body.writeInt (16);
+        body.writeShort (1);        // WAVE_FORMAT_PCM
+        body.writeShort (1);        // channels
+        body.writeInt (44100);      // sample rate
+        body.writeInt (44100);      // bytes per second
+        body.writeShort (1);        // block align
+        body.writeShort (8);        // bits per sample
+
+        body.writeInt (chunkName ("data"));
+        body.writeInt ((int) declaredDataLength);
+        body.write (dataBytes.data(), dataBytes.size());
+
+        if (appendTrailingChunks != nullptr)
+            appendTrailingChunks (body);
+
+        MemoryOutputStream out;
+        out.writeInt (chunkName ("RIFF"));
+        out.writeInt ((int) body.getDataSize());
+        out.write (body.getData(), body.getDataSize());
+        return out.getMemoryBlock();
+    }
+
+    static std::unique_ptr<AudioFormatReader> createReader (const MemoryBlock& mb)
+    {
+        return rawToUniquePtr (WavAudioFormat().createReaderFor (new MemoryInputStream (mb, true), true));
     }
 
     StringPairArray getMetadataAfterReading (WavAudioFormat& format, const MemoryBlock& mb)
