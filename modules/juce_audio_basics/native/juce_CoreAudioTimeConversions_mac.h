@@ -54,11 +54,13 @@ public:
         denominator = info.denom;
     }
 
+    /** A reimplementation of AudioConvertHostTimeToNanos() that does not depend on Core Audio. */
     uint64_t hostTimeToNanos (uint64_t hostTime) const
     {
         return multiplyByRatio (hostTime, numerator, denominator);
     }
 
+    /** A reimplementation of AudioConvertNanosToHostTime() that does not depend on Core Audio. */
     uint64_t nanosToHostTime (uint64_t nanos) const
     {
         return multiplyByRatio (nanos, denominator, numerator);
