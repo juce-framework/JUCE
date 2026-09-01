@@ -885,14 +885,13 @@ private:
 
         for (;;)
         {
-            GUID session;
             auto hr = client->Initialize (isExclusiveMode (deviceMode) ? AUDCLNT_SHAREMODE_EXCLUSIVE
                                                                        : AUDCLNT_SHAREMODE_SHARED,
                                           getStreamFlags(),
                                           defaultPeriod,
                                           isExclusiveMode (deviceMode) ? defaultPeriod : 0,
                                           (WAVEFORMATEX*) &format,
-                                          &session);
+                                          nullptr);
 
             if (check (hr))
                 return true;
