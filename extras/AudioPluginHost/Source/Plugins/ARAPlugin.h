@@ -328,7 +328,7 @@ public:
 class ContentAccessController final : public ARA::Host::ContentAccessControllerInterface
 {
 public:
-    using Converter = ARAHostModel::ConversionFunctions<ARA::ARAContentType, ARA::ARAContentReaderHostRef>;
+    using Converter = ARAHostModel::ConversionFunctions<intptr_t, ARA::ARAContentReaderHostRef>;
 
     bool isMusicalContextContentAvailable (ARA::ARAMusicalContextHostRef musicalContextHostRef,
                                            ARA::ARAContentType type) noexcept override
@@ -384,7 +384,7 @@ public:
 
     ARA::ARAInt32 getContentReaderEventCount (ARA::ARAContentReaderHostRef contentReaderHostRef) noexcept override
     {
-        const auto contentType = Converter::fromHostRef (contentReaderHostRef);
+        const auto contentType = (ARA::ARAContentType) Converter::fromHostRef (contentReaderHostRef);
 
         if (contentType == ARA::kARAContentTypeTempoEntries || contentType == ARA::kARAContentTypeBarSignatures)
             return 2;
