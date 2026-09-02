@@ -572,7 +572,7 @@ struct VST3HostContextHeadless : public Vst::IComponentHandler,
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
-    FUnknown* getFUnknown()     { return static_cast<Vst::IComponentHandler*> (this); }
+    FUnknown& asFUnknown()     { return *static_cast<Vst::IComponentHandler*> (this); }
 
     static bool hasFlag (Steinberg::int32 source, Steinberg::int32 flag) noexcept
     {
@@ -1031,7 +1031,7 @@ struct DescriptionLister
 
                 if (component.loadFrom (&factory, info.cid))
                 {
-                    if (component->initialize (host.getFUnknown()) == kResultOk)
+                    if (component->initialize (&host.asFUnknown()) == kResultOk)
                     {
                         auto numInputs  = getNumSingleDirectionChannelsFor (component.get(), Direction::input);
                         auto numOutputs = getNumSingleDirectionChannelsFor (component.get(), Direction::output);
@@ -1292,7 +1292,9 @@ private:
 struct VST3ModuleHandle final
 {
 public:
-    static VST3ModuleHandle create (const File& pluginFile, const PluginDescription& desc)
+    static VST3ModuleHandle create (const File& pluginFile,
+                                    const PluginDescription& desc,
+                                    FUnknown& hostContext)
     {
         VST3ModuleHandle result;
         result.handle = RefCountedDllHandle::getHandle (pluginFile.getFullPathName());
@@ -1304,6 +1306,14 @@ public:
 
         if (factory == nullptr)
             return {};
+
+        // Shell plugins (e.g. WaveShell) re-enumerate their factory classes when
+        // the host context is set, shifting every class index. Set it before
+        // searching so the index found here still refers to the same class when
+        // VST3ComponentHolder::initialise() sets the same context again and
+        // instantiates by this index.
+        if (VSTComSmartPtr<IPluginFactory3> pf3; pf3.loadFrom (factory.get()))
+            pf3->setHostContext (&hostContext);
 
         const auto numClasses = factory->countClasses();
         result.classIndex = findClassMatchingDescription (factory, desc);
@@ -1584,7 +1594,7 @@ struct VST3ComponentHolder
 
         if (pf3.loadFrom (factory.get()))
         {
-            pf3->setHostContext (host->getFUnknown());
+            pf3->setHostContext (&host->asFUnknown());
             infoW.reset (new PClassInfoW());
             pf3->getClassInfoUnicode (classIdx, infoW.get());
         }
@@ -1635,7 +1645,7 @@ struct VST3ComponentHolder
         pf3.loadFrom (factory.get());
 
         if (pf3 != nullptr)
-            pf3->setHostContext (host->getFUnknown());
+            pf3->setHostContext (&host->asFUnknown());
 
         const auto classIdx = module.getClassIndex();
 
@@ -1651,7 +1661,7 @@ struct VST3ComponentHolder
 
         cidOfComponent = FUID (info.cid);
 
-        if (warnOnFailure (component->initialize (host->getFUnknown())) != kResultOk)
+        if (warnOnFailure (component->initialize (&host->asFUnknown())) != kResultOk)
             return false;
 
         isComponentInitialised = true;
@@ -2206,7 +2216,7 @@ public:
         // If the IComponent and IEditController are the same, we will have
         // already initialized the object at this point and should avoid doing so again.
         if (! holder->isIComponentAlsoIEditController())
-            editController->initialize (holder->host->getFUnknown());
+            editController->initialize (&holder->host->asFUnknown());
 
         isControllerInitialised = true;
         editController->setComponentHandler (holder->host.get());
@@ -2971,12 +2981,6 @@ private:
 
     friend VST3HostContextHeadless;
 
-    // Information objects:
-    String company;
-    std::unique_ptr<PClassInfo> info;
-    std::unique_ptr<PClassInfo2> info2;
-    std::unique_ptr<PClassInfoW> infoW;
-
     // Rudimentary interfaces:
     VSTComSmartPtr<Vst::IEditController> editController;
     VSTComSmartPtr<Vst::IEditController2> editController2;
@@ -3614,7 +3618,7 @@ static std::unique_ptr<AudioPluginInstance> createVST3Instance (VST3PluginFormat
     const ScopedWorkingDirectory scope;
     file.getParentDirectory().setAsCurrentWorkingDirectory();
 
-    const auto module = VST3ModuleHandle::create (file, description);
+    const auto module = VST3ModuleHandle::create (file, description, host->asFUnknown());
 
     if (! module.isValid())
         return nullptr;
