@@ -33,6 +33,14 @@ Full licence terms:
 - [JUCE Privacy Policy](https://juce.com/legal/juce-privacy-policy/)
 - [JUCE Website Terms of Service](https://juce.com/legal/juce-website-terms-of-service/)
 
+The terms of the JUCE End User Licence Agreement define how you can use JUCE,
+and it is written to be as clear as possible. If you have a question, please
+review the [Licensing FAQ](https://juce.com/get-juce/#licensing-faq) and the
+EULA itself first; most questions are answered there. If you need confirmation
+that your specific usage of JUCE falls within the terms of the EULA, you must
+obtain your own legal advice. The JUCE team cannot provide compliance
+confirmations, nor any other legal advice.
+
 ## The JUCE Framework Dependencies
 
 The JUCE modules, examples, bundled applications, and build system contain
