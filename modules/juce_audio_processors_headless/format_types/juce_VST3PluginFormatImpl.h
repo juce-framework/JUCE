@@ -455,7 +455,7 @@ private:
     public:
         ~Impl()
         {
-            for (const auto& h : eventHandlerMap)
+            for (const auto& h : *eventHandlerMap)
                 LinuxEventLoop::unregisterFdCallback (h.first);
         }
 
@@ -465,14 +465,28 @@ private:
             if (handler == nullptr)
                 return kInvalidArgument;
 
-            auto& handlers = eventHandlerMap[fd];
+            auto& handlers = (*eventHandlerMap)[fd];
 
             if (handlers.empty())
             {
-                LinuxEventLoop::registerFdCallback (fd, [this] (int descriptor)
+                // On each iteration, the Linux event loop makes a copy of the callbacks to invoke
+                // before invoking them one-by-one. This means that, if the callback for FD A removes
+                // the callback for FD B, FD B's callback might still get called on this iteration.
+                // It's possible for ~Impl() to be called in FD A's callback before the callback for
+                // FD B, which was just unregistered by ~Impl(). We use a weak_ref to check whether
+                // the eventHandlerMap is still valid, and avoid accessing the map if not.
+                LinuxEventLoop::registerFdCallback (fd, [weak = std::weak_ptr { eventHandlerMap }] (int descriptor)
                 {
-                    for (auto* h : eventHandlerMap[descriptor])
-                        h->onFDIsSet (descriptor);
+                    if (const auto strong = weak.lock())
+                    {
+                        const auto iter = strong->find (descriptor);
+
+                        if (iter == strong->end())
+                            return true;
+
+                        for (auto* h : iter->second)
+                            h->onFDIsSet (descriptor);
+                    }
 
                     return true;
                 });
@@ -488,7 +502,7 @@ private:
             if (handler == nullptr)
                 return kInvalidArgument;
 
-            for (auto iter = eventHandlerMap.begin(), end = eventHandlerMap.end(); iter != end;)
+            for (auto iter = eventHandlerMap->begin(), end = eventHandlerMap->end(); iter != end;)
             {
                 auto& handlers = iter->second;
 
@@ -501,7 +515,7 @@ private:
                     if (handlers.empty())
                     {
                         LinuxEventLoop::unregisterFdCallback (iter->first);
-                        iter = eventHandlerMap.erase (iter);
+                        iter = eventHandlerMap->erase (iter);
                         continue;
                     }
                 }
@@ -534,7 +548,8 @@ private:
         }
 
     private:
-        std::unordered_map<Linux::FileDescriptor, std::vector<Linux::IEventHandler*>> eventHandlerMap;
+        using Map = std::unordered_map<Linux::FileDescriptor, std::vector<Linux::IEventHandler*>>;
+        std::shared_ptr<Map> eventHandlerMap = std::make_shared<Map>();
         std::list<TimerCaller> timerCallers;
     };
 
