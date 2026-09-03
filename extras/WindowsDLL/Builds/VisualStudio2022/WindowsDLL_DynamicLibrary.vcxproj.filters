@@ -3991,6 +3991,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\juce_PNGLoader.cpp">
       <Filter>JUCE Modules\juce_graphics\image_formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\juce_WebPLoader.cpp">
+      <Filter>JUCE Modules\juce_graphics\image_formats</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\images\juce_Image.cpp">
       <Filter>JUCE Modules\juce_graphics\images</Filter>
     </ClCompile>

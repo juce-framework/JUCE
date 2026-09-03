@@ -106,14 +106,14 @@ public:
 
     //==============================================================================
     /** Tries the built-in formats to see if it can find one to read this stream.
-        There are currently built-in decoders for PNG, JPEG and GIF formats.
+        There are currently built-in decoders for PNG, JPEG, GIF and WebP formats.
         The object that is returned should not be deleted by the caller.
         @see canUnderstand, decodeImage, loadFrom
     */
     static ImageFileFormat* findImageFormatForStream (InputStream& input);
 
     /** Looks for a format that can handle the given file extension.
-        There are currently built-in formats for PNG, JPEG and GIF formats.
+        There are currently built-in formats for PNG, JPEG, GIF and WebP formats.
         The object that is returned should not be deleted by the caller.
     */
     static ImageFileFormat* findImageFormatForFileExtension (const File& file);
@@ -227,6 +227,54 @@ public:
     bool canUnderstand (InputStream&) override;
     Image decodeImage (InputStream&) override;
     bool writeImageToStream (const Image&, OutputStream&) override;
+};
+
+//==============================================================================
+/**
+    A subclass of ImageFileFormat for reading and writing WebP files.
+
+    Both lossy and lossless WebP images can be read and written. Writing is lossy
+    by default; call setLossless() to change that.
+
+    Animated WebP files can be read, but as ImageFileFormat has no concept of
+    multiple frames, only the first frame is returned. Writing animations is not
+    supported.
+
+    @see ImageFileFormat, PNGImageFormat, JPEGImageFormat
+
+    @tags{Graphics}
+*/
+class JUCE_API  WebPImageFormat  : public ImageFileFormat
+{
+public:
+    //==============================================================================
+    /** Specifies the quality to be used when writing a lossy WebP file.
+
+        @param newQuality  a value 0 to 1.0, where 0 is low quality, 1.0 is best, the
+                           default value is 0.9
+
+        This has no effect when writing losslessly.
+    */
+    void setQuality (float newQuality);
+
+    /** Specifies whether images should be written losslessly.
+
+        This is false by default, meaning that written images are lossy, using the
+        quality given to setQuality().
+    */
+    void setLossless (bool shouldBeLossless);
+
+    //==============================================================================
+    String getFormatName() override;
+    bool usesFileExtension (const File&) override;
+    bool canUnderstand (InputStream&) override;
+    Image decodeImage (InputStream&) override;
+    bool writeImageToStream (const Image&, OutputStream&) override;
+
+private:
+    // cwebp's default is 75 but it looks bad. We shouldn't have a default looking as bad as that.
+    float quality = 0.9f;
+    bool lossless = false;
 };
 
 } // namespace juce
