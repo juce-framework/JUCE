@@ -100,6 +100,18 @@
                    "patterns": ["#define\\s+JPEG_LIB_VERSION_MAJOR\\s+(\\d+)",
                                 "#define\\s+JPEG_LIB_VERSION_MINOR\\s+(\\d+)"] } },
 
+    { "name": "libwebp",
+      "module": "juce_graphics",
+      "path": "modules/juce_graphics/image_formats/libwebp",
+      "license": "BSD-3-Clause",
+      "licenseFile": "modules/juce_graphics/image_formats/libwebp/COPYING",
+      "homepage": "https://developers.google.com/speed/webp",
+      "supplier": "Organization: Google LLC",
+      "cpe": "cpe:2.3:a:webmproject:libwebp",
+      "purl": "pkg:github/webmproject/libwebp",
+      "version": { "file": "modules/juce_graphics/image_formats/libwebp/JUCE_UPSTREAM.txt",
+        "patterns": ["Version:\\s+(\\S+)"] } },
+
     { "name": "Chromium cubic_bezier",
       "module": "juce_animation",
       "path": "modules/juce_animation/detail/chromium",
