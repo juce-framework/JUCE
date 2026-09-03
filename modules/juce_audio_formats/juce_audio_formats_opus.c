@@ -37,6 +37,10 @@
 
 #if JUCE_USE_OPUS && (JUCE_INCLUDE_OPUS_CODE || ! defined (JUCE_INCLUDE_OPUS_CODE))
 
+// GCC reports a "compiling without optimization" warning message when building in Debug mode,
+// which this define suppresses.
+#define OPUS_WILL_BE_SLOW
+
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#pragma-messages",
                                      "-Wcpp",
                                      "-Wcast-align",
