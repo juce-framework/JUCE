@@ -1430,7 +1430,7 @@ HTML_STYLESHEET        =
 # documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  = css/header.css \
+HTML_EXTRA_STYLESHEET  = css/site-chrome.css \
                          css/doxygen-juce-overrides.css \
                          css/tokyo-night-dark.min.css
 
