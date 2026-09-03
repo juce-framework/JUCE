@@ -1133,8 +1133,31 @@ public:
 
     AudioProcessorEditor* createEditor() override
     {
-        std::lock_guard<std::mutex> lock (innerMutex);
-        return inner->createEditorAndMakeActive();
+        struct Destructor : public ReferenceCountedObject
+        {
+            Destructor (ARAPluginInstanceWrapper& s, AudioProcessorEditor& e)
+                : self (s), editor (e)
+            {
+            }
+
+            ~Destructor() override
+            {
+                self.editorBeingDeleted (&editor);
+            }
+
+            ARAPluginInstanceWrapper& self;
+            AudioProcessorEditor& editor;
+        };
+
+        std::lock_guard lock (innerMutex);
+
+        if (auto result = rawToUniquePtr (inner->createEditorAndMakeActive()))
+        {
+            result->getProperties().set ("_juce_customDestructorBehaviour", new Destructor { *this, *result });
+            return result.release();
+        }
+
+        return nullptr;
     }
 
     bool hasEditor() const override
