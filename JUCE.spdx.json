@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "JUCE-9.0.2",
-  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.2-c39a1262305a",
+  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.2-6cb183b029be",
   "creationInfo": {
     "created": "2026-09-04T00:00:00Z",
     "creators": [
@@ -497,6 +497,30 @@
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
           "referenceLocator": "cpe:2.3:a:ijg:libjpeg:10.0:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "name": "libwebp",
+      "SPDXID": "SPDXRef-juce-graphics.libwebp",
+      "versionInfo": "1.6.0",
+      "supplier": "Organization: Google LLC",
+      "downloadLocation": "https://developers.google.com/speed/webp",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "copyrightText": "NOASSERTION",
+      "sourceInfo": "Vendored at modules/juce_graphics/image_formats/libwebp in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/webmproject/libwebp@1.6.0"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:webmproject:libwebp:1.6.0:*:*:*:*:*:*:*"
         }
       ]
     },
@@ -1364,6 +1388,11 @@
       "spdxElementId": "SPDXRef-juce-graphics",
       "relationshipType": "CONTAINS",
       "relatedSpdxElement": "SPDXRef-juce-graphics.jpeglib"
+    },
+    {
+      "spdxElementId": "SPDXRef-juce-graphics",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-juce-graphics.libwebp"
     },
     {
       "spdxElementId": "SPDXRef-juce-animation",

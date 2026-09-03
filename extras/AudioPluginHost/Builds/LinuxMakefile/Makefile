@@ -106,6 +106,16 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/include_juce_graphics_libjpg_2_ce62d8f1.o \
   $(JUCE_OBJDIR)/include_juce_graphics_libjpg_3_ce62dcb2.o \
   $(JUCE_OBJDIR)/include_juce_graphics_libpng_6e070086.o \
+  $(JUCE_OBJDIR)/include_juce_graphics_libwebp_dec_356f296c.o \
+  $(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_dec_df80faee.o \
+  $(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_dec_avx2_258a73aa.o \
+  $(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_dec_sse41_3dcad1b1.o \
+  $(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_enc_df9329c6.o \
+  $(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_enc_avx2_503bcbd2.o \
+  $(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_enc_sse41_69447e89.o \
+  $(JUCE_OBJDIR)/include_juce_graphics_libwebp_enc_35815844.o \
+  $(JUCE_OBJDIR)/include_juce_graphics_libwebp_sharpyuv_ee7d37d0.o \
+  $(JUCE_OBJDIR)/include_juce_graphics_libwebp_utils_339e1d1b.o \
   $(JUCE_OBJDIR)/include_juce_graphics_lunasvg_92e75770.o \
   $(JUCE_OBJDIR)/include_juce_graphics_Sheenbidi_c310974d.o \
   $(JUCE_OBJDIR)/include_juce_gui_basics_e3f79785.o \
@@ -297,6 +307,56 @@ $(JUCE_OBJDIR)/include_juce_graphics_libjpg_3_ce62dcb2.o: ../../JuceLibraryCode/
 $(JUCE_OBJDIR)/include_juce_graphics_libpng_6e070086.o: ../../JuceLibraryCode/include_juce_graphics_libpng.c
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling include_juce_graphics_libpng.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_graphics_libwebp_dec_356f296c.o: ../../JuceLibraryCode/include_juce_graphics_libwebp_dec.c
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_graphics_libwebp_dec.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_dec_df80faee.o: ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_dec.c
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_graphics_libwebp_dsp_dec.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_dec_avx2_258a73aa.o: ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_dec_avx2.c
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_graphics_libwebp_dsp_dec_avx2.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_dec_sse41_3dcad1b1.o: ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_dec_sse41.c
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_graphics_libwebp_dsp_dec_sse41.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_enc_df9329c6.o: ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_enc.c
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_graphics_libwebp_dsp_enc.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_enc_avx2_503bcbd2.o: ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_enc_avx2.c
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_graphics_libwebp_dsp_enc_avx2.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_graphics_libwebp_dsp_enc_sse41_69447e89.o: ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_enc_sse41.c
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_graphics_libwebp_dsp_enc_sse41.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_graphics_libwebp_enc_35815844.o: ../../JuceLibraryCode/include_juce_graphics_libwebp_enc.c
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_graphics_libwebp_enc.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_graphics_libwebp_sharpyuv_ee7d37d0.o: ../../JuceLibraryCode/include_juce_graphics_libwebp_sharpyuv.c
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_graphics_libwebp_sharpyuv.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_graphics_libwebp_utils_339e1d1b.o: ../../JuceLibraryCode/include_juce_graphics_libwebp_utils.c
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_graphics_libwebp_utils.c"
 	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_graphics_lunasvg_92e75770.o: ../../JuceLibraryCode/include_juce_graphics_lunasvg.c

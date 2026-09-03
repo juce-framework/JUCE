@@ -794,6 +794,30 @@
     <Filter Include="JUCE Modules\juce_graphics\image_formats\jpglib">
       <UniqueIdentifier>{2C55FD42-0ACD-B0B8-7EAE-EB17F09BAEEC}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv">
+      <UniqueIdentifier>{12A308BF-DD8D-5379-2FE2-3F399CA8C3A2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\image_formats\libwebp\src\dec">
+      <UniqueIdentifier>{AC93A83E-C44F-8C82-4986-FB619ECCB32B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp">
+      <UniqueIdentifier>{269A1FD5-B667-294E-10A1-2F2D10C50327}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\image_formats\libwebp\src\enc">
+      <UniqueIdentifier>{3619E00E-1A1B-F6B5-3199-8F5BC6682353}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\image_formats\libwebp\src\utils">
+      <UniqueIdentifier>{C07AE8EC-96A7-0ADB-2F69-EA00B028B46B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\image_formats\libwebp\src\webp">
+      <UniqueIdentifier>{D34DD42A-F37D-FC66-7471-314EB9F15CEC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\image_formats\libwebp\src">
+      <UniqueIdentifier>{5CF48032-CE52-086C-EDED-0BB0633AE734}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\image_formats\libwebp">
+      <UniqueIdentifier>{E50E9AB7-8BB2-029A-2D2E-711ED8154ACF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_graphics\image_formats\pnglib\arm">
       <UniqueIdentifier>{9BD12A4D-6BAE-71A2-47AB-1A33490192D4}</UniqueIdentifier>
     </Filter>
@@ -3823,6 +3847,294 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jutils.c">
       <Filter>JUCE Modules\juce_graphics\image_formats\jpglib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv_cpu.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv_csp.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv_dsp.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv_gamma.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv_neon.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\alpha_dec.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\buffer_dec.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\frame_dec.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\idec_dec.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\io_dec.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\quant_dec.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\tree_dec.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\vp8_dec.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\vp8l_dec.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\webp_dec.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\alpha_processing.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\alpha_processing_neon.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\alpha_processing_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\alpha_processing_sse41.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\cost.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\cost_neon.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\cost_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\cpu.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\dec.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\dec_clip_tables.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\dec_neon.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\dec_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\dec_sse41.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\enc_neon.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\enc_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\enc_sse41.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\filters.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\filters_neon.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\filters_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless_avx2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless_enc_avx2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless_enc_neon.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless_enc_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless_enc_sse41.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless_neon.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless_sse41.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\rescaler.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\rescaler_neon.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\rescaler_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\ssim.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\ssim_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\upsampling.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\upsampling_neon.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\upsampling_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\upsampling_sse41.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\yuv.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\yuv_neon.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\yuv_sse2.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\yuv_sse41.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\alpha_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\analysis_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\backward_references_cost_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\backward_references_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\config_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\cost_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\filter_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\frame_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\histogram_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\iterator_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\near_lossless_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\picture_csp_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\picture_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\picture_psnr_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\picture_rescale_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\picture_tools_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\predictor_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\quant_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\syntax_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\token_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\tree_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\vp8l_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\webp_enc.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\bit_reader_utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\bit_writer_utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\color_cache_utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\filters_utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\huffman_encode_utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\huffman_utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\palette.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\quant_levels_dec_utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\quant_levels_utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\random_utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\rescaler_utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\thread_utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\utils.c">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\arm\arm_init.c">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib\arm</Filter>
     </ClCompile>
@@ -4055,6 +4367,36 @@
       <Filter>JUCE Modules\juce_graphics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_libpng.c">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_libwebp_dec.c">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_libwebp_dsp_dec.c">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_libwebp_dsp_dec_avx2.c">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_libwebp_dsp_dec_sse41.c">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_libwebp_dsp_enc.c">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_libwebp_dsp_enc_avx2.c">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_libwebp_dsp_enc_sse41.c">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_libwebp_enc.c">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_libwebp_sharpyuv.c">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_libwebp_utils.c">
       <Filter>JUCE Modules\juce_graphics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_lunasvg.c">
@@ -4925,6 +5267,36 @@
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_libpng.c">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_libwebp_dec.c">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_libwebp_dsp_dec.c">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_libwebp_dsp_dec_avx2.c">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_libwebp_dsp_dec_sse41.c">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_libwebp_dsp_enc.c">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_libwebp_dsp_enc_avx2.c">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_libwebp_dsp_enc_sse41.c">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_libwebp_enc.c">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_libwebp_sharpyuv.c">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_libwebp_utils.c">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_lunasvg.c">
@@ -9288,6 +9660,141 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jpeglib.h">
       <Filter>JUCE Modules\juce_graphics\image_formats\jpglib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv_cpu.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv_csp.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv_dsp.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\sharpyuv\sharpyuv_gamma.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\sharpyuv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\alphai_dec.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\common_dec.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\vp8_dec.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\vp8i_dec.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\vp8li_dec.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dec\webpi_dec.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\common_sse2.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\common_sse41.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\cpu.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\dsp.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\lossless_common.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\neon.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\quant.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\dsp\yuv.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\backward_references_enc.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\cost_enc.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\histogram_enc.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\vp8i_enc.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\enc\vp8li_enc.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\enc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\bit_reader_inl_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\bit_reader_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\bit_writer_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\color_cache_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\endian_inl_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\filters_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\huffman_encode_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\huffman_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\palette.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\quant_levels_dec_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\quant_levels_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\random_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\rescaler_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\thread_utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\utils\utils.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\webp\decode.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\webp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\webp\encode.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\webp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\webp\format_constants.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\webp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\webp\mux_types.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\webp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\src\webp\types.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp\src\webp</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\png.h">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
     </ClInclude>
@@ -10555,6 +11062,9 @@
     </None>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\JUCE_UPSTREAM.txt">
       <Filter>JUCE Modules\juce_graphics\image_formats\jpglib</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\libwebp\JUCE_UPSTREAM.txt">
+      <Filter>JUCE Modules\juce_graphics\image_formats\libwebp</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\JUCE_UPSTREAM.txt">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>

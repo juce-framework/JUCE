@@ -25,6 +25,7 @@
 		2DF375B40A64BB3778F7ABD1 /* jucer_StoredSettings.cpp */ = {isa = PBXBuildFile; fileRef = F5DD97B45B8EA60C1ED0DD80; };
 		30B921C38DCEE787B294B746 /* jucer_Project.cpp */ = {isa = PBXBuildFile; fileRef = BAC43B20E14A340CCF14119C; };
 		31FA8402C0C4506C69F3F76B /* include_juce_core_zlib.c */ = {isa = PBXBuildFile; fileRef = 04F410046F61CC7232187524; };
+		336D147B1709D89487150D7A /* include_juce_graphics_libwebp_dsp_dec.c */ = {isa = PBXBuildFile; fileRef = 4EF21A63C078FF3F48F0A78F; };
 		3C5267E06A897B0DC0F7EA50 /* BinaryData.cpp */ = {isa = PBXBuildFile; fileRef = 472F9A90F685220D730EBF6C; };
 		41998FE4F14B90682181D502 /* Security.framework */ = {isa = PBXBuildFile; fileRef = 4E410AEB132B44674291105A; };
 		44AD0D81A65C5EAE3BE588FD /* jucer_VersionInfo.cpp */ = {isa = PBXBuildFile; fileRef = FF3A6A384D536E1AEF47CD54; };
@@ -41,10 +42,12 @@
 		6DD9DA1677A6CF789CDAB478 /* jucer_AutoUpdater.cpp */ = {isa = PBXBuildFile; fileRef = 0D4D508C638BC74943B9976D; };
 		6ECB2F11D2F593FACCCF99DB /* jucer_ProjucerLookAndFeel.cpp */ = {isa = PBXBuildFile; fileRef = 0F8C000E5FF4A2DAC1FEF8EB; };
 		71713DE4716DCEDB45A206E2 /* jucer_OpenDocumentManager.cpp */ = {isa = PBXBuildFile; fileRef = F9111E150CFF155329D44853; };
+		71A0A2B6E1445BA348E69B57 /* include_juce_graphics_libwebp_utils.c */ = {isa = PBXBuildFile; fileRef = A0F22031BD4E4FDB90768C11; };
 		76DF3E1A9DA34FC06261E6E4 /* include_juce_gui_basics_2.cpp */ = {isa = PBXBuildFile; fileRef = DD723261F7F20BCF952FA60D; };
 		7A055FDAFC2A6215D12AD97C /* include_juce_gui_basics_4.cpp */ = {isa = PBXBuildFile; fileRef = 34B30AB4C55FAD8CC770BBCF; };
 		7E43279B5881EA0FFDA49647 /* AppIcon.icon */ = {isa = PBXBuildFile; fileRef = E09429B88DD8ADA381D4BF61; };
 		7F2403E53A8BDEFBC0E14E13 /* include_juce_graphics_libjpg_3.c */ = {isa = PBXBuildFile; fileRef = EF62FE6479498B3024190187; };
+		8638B494E2FB16D21089A152 /* include_juce_graphics_libwebp_dsp_dec_sse41.c */ = {isa = PBXBuildFile; fileRef = D813F3E5F09D54C2FCC54163; };
 		8BE478303CDF061B72F219E2 /* jucer_CodeHelpers.cpp */ = {isa = PBXBuildFile; fileRef = F2E4998FB2C7221587A79F8B; };
 		908B7D4FB180F53405DA8EF9 /* jucer_StartPageComponent.cpp */ = {isa = PBXBuildFile; fileRef = 82C18723A3D0E39BBD8F0F6E; };
 		90FF045A353C8508F8D52AA3 /* include_juce_graphics_libjpg_1.c */ = {isa = PBXBuildFile; fileRef = E2AB08CAA1311CDA3CA9502D; };
@@ -52,12 +55,17 @@
 		954A036F5DDB375DB23FFB3E /* jucer_CommandLine.cpp */ = {isa = PBXBuildFile; fileRef = 0400CB0E056A1D840304D2DE; };
 		95B44E6C74B1DED31DBE37EB /* jucer_Main.cpp */ = {isa = PBXBuildFile; fileRef = 8C52A3DDA62A746AA7A68535; };
 		95F56FB44C669F93AE77E465 /* jucer_SlidingPanelComponent.cpp */ = {isa = PBXBuildFile; fileRef = 0CECD562059DFD7FBFB37E3C; };
+		979724FFECCB8931BE6BD018 /* include_juce_graphics_libwebp_dsp_dec_avx2.c */ = {isa = PBXBuildFile; fileRef = A682E55E7CE52B09476A09BB; };
+		97B3A5515DF7315AE4FD9076 /* include_juce_graphics_libwebp_sharpyuv.c */ = {isa = PBXBuildFile; fileRef = 44CF61C1C440DA4B9079B23C; };
 		A244ECDE066147A234A5D43B /* include_juce_graphics_libjpg_2.c */ = {isa = PBXBuildFile; fileRef = 16FA7F1761716EBFFF1F1FD7; };
 		A6A9D7624D002544ECB81D82 /* App */ = {isa = PBXBuildFile; fileRef = 09DE066936CF037E9709ADB1; };
 		AA9D0B8E23F3D87A23DE9F8A /* jucer_MainWindow.cpp */ = {isa = PBXBuildFile; fileRef = 9069981E414A631B036CC9AC; };
 		B18248959DDC44EF4E85320A /* include_juce_gui_extra.mm */ = {isa = PBXBuildFile; fileRef = AECE3914F5119A3D586A5635; };
 		B6DCEB2D40305DF0BBD72C8E /* include_juce_gui_basics_5.cpp */ = {isa = PBXBuildFile; fileRef = E69BC77F1469FAEBB63D0BC8; };
+		BB33BD0E08A8E999E69744DE /* include_juce_graphics_libwebp_dsp_enc_avx2.c */ = {isa = PBXBuildFile; fileRef = 591DAAAC2140A1159F9DDE9E; };
 		BF913199032B4CE970E82AA3 /* jucer_FileHelpers.cpp */ = {isa = PBXBuildFile; fileRef = B403AF75EAF361ED74EE476E; };
+		CDB3EDE24594AB290F9FDDB3 /* include_juce_graphics_libwebp_dsp_enc.c */ = {isa = PBXBuildFile; fileRef = 6DB1F035A926CF5171D96461; };
+		CEF7F250EE626597E7A26485 /* include_juce_graphics_libwebp_dec.c */ = {isa = PBXBuildFile; fileRef = 1DB1CF5D3146E583CEB25700; };
 		D0E26EB54B0087C8BE3D541E /* jucer_Icons.cpp */ = {isa = PBXBuildFile; fileRef = 846B2A670C5A19DE0039E11A; };
 		D149343A142899C5A3EBE5B3 /* Metal.framework */ = {isa = PBXBuildFile; fileRef = E419F3AED6A220EDCB179A8C; settings = { ATTRIBUTES = (Weak, ); }; };
 		D5C9125F65493CA481F18E53 /* include_juce_cryptography.mm */ = {isa = PBXBuildFile; fileRef = D766BB9D8C32B5560F0493F3; };
@@ -65,9 +73,11 @@
 		D76134C6646C526A210A78E2 /* include_juce_graphics_Sheenbidi.c */ = {isa = PBXBuildFile; fileRef = 276A4D5D4A2DD84C6D41F0CA; };
 		DBE437EE41F174A6F27FC0E2 /* AppIcon.icns */ = {isa = PBXBuildFile; fileRef = F3FE62637ACC2263A7594E8A; };
 		DFBFD515533CDBCD57F8C265 /* Foundation.framework */ = {isa = PBXBuildFile; fileRef = BF006EF584FB274FF0319E08; };
+		E6EBC702953983A128171A85 /* include_juce_graphics_libwebp_dsp_enc_sse41.c */ = {isa = PBXBuildFile; fileRef = B678DC15356A7F05B9DAE6D2; };
 		EE722B47BC36CC8A87E0FB76 /* jucer_AppearanceSettings.cpp */ = {isa = PBXBuildFile; fileRef = BE618CE21C794BDEE319E328; };
 		F15F0512666FF8CDC0D08905 /* include_juce_gui_basics.mm */ = {isa = PBXBuildFile; fileRef = 0462692BAA9CD1BE6DFBCC33; };
 		F4719C767DE9D1B4FE2F33D3 /* include_juce_gui_basics_3.cpp */ = {isa = PBXBuildFile; fileRef = BDBEAFE6B7499EFB920FF105; };
+		F8079C96BFCF44A53790E114 /* include_juce_graphics_libwebp_enc.c */ = {isa = PBXBuildFile; fileRef = 9D9B5271998AC04C10389BCC; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -96,6 +106,7 @@
 		1B5BCD4899A9E295786EB642 /* jucer_OpenDocumentManager.h */ /* jucer_OpenDocumentManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_OpenDocumentManager.h; path = ../../Source/CodeEditor/jucer_OpenDocumentManager.h; sourceTree = SOURCE_ROOT; };
 		1B9B5A37F079FE3B3CF8FAB6 /* include_juce_graphics.mm */ /* include_juce_graphics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_graphics.mm; path = ../../JuceLibraryCode/include_juce_graphics.mm; sourceTree = SOURCE_ROOT; };
 		1D7D2E563E8491643C9F2748 /* jucer_StartPageComponent.h */ /* jucer_StartPageComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_StartPageComponent.h; path = ../../Source/Application/StartPage/jucer_StartPageComponent.h; sourceTree = SOURCE_ROOT; };
+		1DB1CF5D3146E583CEB25700 /* include_juce_graphics_libwebp_dec.c */ /* include_juce_graphics_libwebp_dec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_libwebp_dec.c; path = ../../JuceLibraryCode/include_juce_graphics_libwebp_dec.c; sourceTree = SOURCE_ROOT; };
 		1DE5BBC777FB64798D823002 /* include_juce_data_structures.mm */ /* include_juce_data_structures.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_data_structures.mm; path = ../../JuceLibraryCode/include_juce_data_structures.mm; sourceTree = SOURCE_ROOT; };
 		1F0E279DB49BBF49D81C6D0D /* jucer_NewProjectTemplates.h */ /* jucer_NewProjectTemplates.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_NewProjectTemplates.h; path = ../../Source/Application/StartPage/jucer_NewProjectTemplates.h; sourceTree = SOURCE_ROOT; };
 		20075A86A4D0E8A5B973D9DB /* jucer_ProjectExport_Xcode.h */ /* jucer_ProjectExport_Xcode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectExport_Xcode.h; path = ../../Source/ProjectSaving/jucer_ProjectExport_Xcode.h; sourceTree = SOURCE_ROOT; };
@@ -125,6 +136,7 @@
 		3F7C5B53347A487C7FBD2223 /* jucer_OpenGLComponentTemplate.h */ /* jucer_OpenGLComponentTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_OpenGLComponentTemplate.h; path = ../../Source/BinaryData/Templates/jucer_OpenGLComponentTemplate.h; sourceTree = SOURCE_ROOT; };
 		3F8EC008960DBEB2A5D3C3F4 /* jucer_Headers.h */ /* jucer_Headers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Headers.h; path = ../../Source/Application/jucer_Headers.h; sourceTree = SOURCE_ROOT; };
 		41105E536155E394E54BDD35 /* colourscheme_dark.xml */ /* colourscheme_dark.xml */ = {isa = PBXFileReference; lastKnownFileType = file.xml; name = colourscheme_dark.xml; path = ../../Source/BinaryData/colourscheme_dark.xml; sourceTree = SOURCE_ROOT; };
+		44CF61C1C440DA4B9079B23C /* include_juce_graphics_libwebp_sharpyuv.c */ /* include_juce_graphics_libwebp_sharpyuv.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_libwebp_sharpyuv.c; path = ../../JuceLibraryCode/include_juce_graphics_libwebp_sharpyuv.c; sourceTree = SOURCE_ROOT; };
 		463C8CF42FAA00014198B71B /* PIPComponent.cpp.in */ /* PIPComponent.cpp.in */ = {isa = PBXFileReference; lastKnownFileType = file.in; name = PIPComponent.cpp.in; path = ../../../Build/CMake/PIPComponent.cpp.in; sourceTree = SOURCE_ROOT; };
 		472F9A90F685220D730EBF6C /* BinaryData.cpp */ /* BinaryData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryData.cpp; path = ../../JuceLibraryCode/BinaryData.cpp; sourceTree = SOURCE_ROOT; };
 		486E8D02DAD2A0BF54A901C0 /* jucer_MiscUtilities.cpp */ /* jucer_MiscUtilities.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_MiscUtilities.cpp; path = ../../Source/Utility/Helpers/jucer_MiscUtilities.cpp; sourceTree = SOURCE_ROOT; };
@@ -134,6 +146,7 @@
 		4D698BF12BCD6B0896BCDF17 /* jucer_AutoUpdater.h */ /* jucer_AutoUpdater.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AutoUpdater.h; path = ../../Source/Application/jucer_AutoUpdater.h; sourceTree = SOURCE_ROOT; };
 		4E410AEB132B44674291105A /* Security.framework */ /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		4ECF029E3A69BF42FED1503D /* jucer_PIPAudioProcessorTemplate.h */ /* jucer_PIPAudioProcessorTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_PIPAudioProcessorTemplate.h; path = ../../Source/BinaryData/Templates/jucer_PIPAudioProcessorTemplate.h; sourceTree = SOURCE_ROOT; };
+		4EF21A63C078FF3F48F0A78F /* include_juce_graphics_libwebp_dsp_dec.c */ /* include_juce_graphics_libwebp_dsp_dec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_libwebp_dsp_dec.c; path = ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_dec.c; sourceTree = SOURCE_ROOT; };
 		4F687965FBE86EAFDB3ACFEC /* BinaryData.h */ /* BinaryData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BinaryData.h; path = ../../JuceLibraryCode/BinaryData.h; sourceTree = SOURCE_ROOT; };
 		4FF81FC167C924C47BD8C1C9 /* jucer_ProjectSaver.cpp */ /* jucer_ProjectSaver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_ProjectSaver.cpp; path = ../../Source/ProjectSaving/jucer_ProjectSaver.cpp; sourceTree = SOURCE_ROOT; };
 		50F89D3827B83B48855B3564 /* LaunchScreen.storyboard */ /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = ../../../Build/CMake/LaunchScreen.storyboard; sourceTree = SOURCE_ROOT; };
@@ -146,6 +159,7 @@
 		582F659B801F656C2B7C51B1 /* jucer_Modules.h */ /* jucer_Modules.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Modules.h; path = ../../Source/Project/Modules/jucer_Modules.h; sourceTree = SOURCE_ROOT; };
 		5867DC4E39DF8539B54C0D59 /* include_juce_events.mm */ /* include_juce_events.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_events.mm; path = ../../JuceLibraryCode/include_juce_events.mm; sourceTree = SOURCE_ROOT; };
 		58F1FF52E887887A93E84FC2 /* jucer_PresetIDs.h */ /* jucer_PresetIDs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_PresetIDs.h; path = ../../Source/Utility/Helpers/jucer_PresetIDs.h; sourceTree = SOURCE_ROOT; };
+		591DAAAC2140A1159F9DDE9E /* include_juce_graphics_libwebp_dsp_enc_avx2.c */ /* include_juce_graphics_libwebp_dsp_enc_avx2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_libwebp_dsp_enc_avx2.c; path = ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_enc_avx2.c; sourceTree = SOURCE_ROOT; };
 		59203884BC48D3B7F8DEABA8 /* jucer_ContentCompTemplate.h */ /* jucer_ContentCompTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ContentCompTemplate.h; path = ../../Source/BinaryData/Templates/jucer_ContentCompTemplate.h; sourceTree = SOURCE_ROOT; };
 		59520B8137E6A2E483074399 /* jucer_ProjectExport_Make.h */ /* jucer_ProjectExport_Make.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectExport_Make.h; path = ../../Source/ProjectSaving/jucer_ProjectExport_Make.h; sourceTree = SOURCE_ROOT; };
 		59F8A47C0020D62C8836A1E7 /* jucer_PropertyComponentsWithEnablement.h */ /* jucer_PropertyComponentsWithEnablement.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_PropertyComponentsWithEnablement.h; path = ../../Source/Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h; sourceTree = SOURCE_ROOT; };
@@ -160,6 +174,7 @@
 		68F41A216E7454E7442AB1F4 /* jucer_TreeItemTypes.h */ /* jucer_TreeItemTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_TreeItemTypes.h; path = ../../Source/Project/UI/Sidebar/jucer_TreeItemTypes.h; sourceTree = SOURCE_ROOT; };
 		69555CEFC6ED613AA3949298 /* juce_data_structures */ /* juce_data_structures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_data_structures; path = ../../../../modules/juce_data_structures; sourceTree = SOURCE_ROOT; };
 		69B478C992FA0B8C885946A6 /* export_linux.svg */ /* export_linux.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = export_linux.svg; path = ../../Source/BinaryData/Icons/export_linux.svg; sourceTree = SOURCE_ROOT; };
+		6DB1F035A926CF5171D96461 /* include_juce_graphics_libwebp_dsp_enc.c */ /* include_juce_graphics_libwebp_dsp_enc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_libwebp_dsp_enc.c; path = ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_enc.c; sourceTree = SOURCE_ROOT; };
 		6E6140969908E7619F858740 /* jucer_CommonHeaders.h */ /* jucer_CommonHeaders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_CommonHeaders.h; path = ../../Source/Application/jucer_CommonHeaders.h; sourceTree = SOURCE_ROOT; };
 		6FD8DBC0FF42C87D8BEE2452 /* jucer_TranslationHelpers.h */ /* jucer_TranslationHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_TranslationHelpers.h; path = ../../Source/Utility/Helpers/jucer_TranslationHelpers.h; sourceTree = SOURCE_ROOT; };
 		70D3399C01D1EF2CD059B2A4 /* jucer_Sidebar.h */ /* jucer_Sidebar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Sidebar.h; path = ../../Source/Project/UI/Sidebar/jucer_Sidebar.h; sourceTree = SOURCE_ROOT; };
@@ -189,14 +204,17 @@
 		988A3851FBA511FB0B8FF754 /* jucer_AudioPluginARAEditorTemplate.h */ /* jucer_AudioPluginARAEditorTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AudioPluginARAEditorTemplate.h; path = ../../Source/BinaryData/Templates/jucer_AudioPluginARAEditorTemplate.h; sourceTree = SOURCE_ROOT; };
 		996E472B82A75531875A5E38 /* LICENSE */ /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = file; name = LICENSE; path = ../../Source/BinaryData/gradle/LICENSE; sourceTree = SOURCE_ROOT; };
 		9A3B8BBDA8E144A3DF6B9349 /* jucer_AnimatedComponentSimpleTemplate.h */ /* jucer_AnimatedComponentSimpleTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AnimatedComponentSimpleTemplate.h; path = ../../Source/BinaryData/Templates/jucer_AnimatedComponentSimpleTemplate.h; sourceTree = SOURCE_ROOT; };
+		9D9B5271998AC04C10389BCC /* include_juce_graphics_libwebp_enc.c */ /* include_juce_graphics_libwebp_enc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_libwebp_enc.c; path = ../../JuceLibraryCode/include_juce_graphics_libwebp_enc.c; sourceTree = SOURCE_ROOT; };
 		9E0BA495286388EBF929D578 /* jucer_ContentCompSimpleTemplate.h */ /* jucer_ContentCompSimpleTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ContentCompSimpleTemplate.h; path = ../../Source/BinaryData/Templates/jucer_ContentCompSimpleTemplate.h; sourceTree = SOURCE_ROOT; };
 		9E2B1506AC3FDB7863766D59 /* jucer_NewInlineComponentTemplate.h */ /* jucer_NewInlineComponentTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_NewInlineComponentTemplate.h; path = ../../Source/BinaryData/Templates/jucer_NewInlineComponentTemplate.h; sourceTree = SOURCE_ROOT; };
 		9EB33734D0DBD0370AB1247B /* jucer_ColourPropertyComponent.h */ /* jucer_ColourPropertyComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ColourPropertyComponent.h; path = ../../Source/Utility/UI/PropertyComponents/jucer_ColourPropertyComponent.h; sourceTree = SOURCE_ROOT; };
 		9EE3141E20C9CE3EA182FA04 /* jucer_ProjectSaver.h */ /* jucer_ProjectSaver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectSaver.h; path = ../../Source/ProjectSaving/jucer_ProjectSaver.h; sourceTree = SOURCE_ROOT; };
 		A0ECDAF137029C445910D3ED /* PIPAudioProcessor.cpp.in */ /* PIPAudioProcessor.cpp.in */ = {isa = PBXFileReference; lastKnownFileType = file.in; name = PIPAudioProcessor.cpp.in; path = ../../../Build/CMake/PIPAudioProcessor.cpp.in; sourceTree = SOURCE_ROOT; };
+		A0F22031BD4E4FDB90768C11 /* include_juce_graphics_libwebp_utils.c */ /* include_juce_graphics_libwebp_utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_libwebp_utils.c; path = ../../JuceLibraryCode/include_juce_graphics_libwebp_utils.c; sourceTree = SOURCE_ROOT; };
 		A160AEF56553A658E6EA6A8E /* jucer_MainTemplate_Window.cpp */ /* jucer_MainTemplate_Window.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_MainTemplate_Window.cpp; path = ../../Source/BinaryData/Templates/jucer_MainTemplate_Window.cpp; sourceTree = SOURCE_ROOT; };
 		A509BC22854D50E4C786EB32 /* jucer_FileGroupInformationComponent.h */ /* jucer_FileGroupInformationComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_FileGroupInformationComponent.h; path = ../../Source/Project/UI/jucer_FileGroupInformationComponent.h; sourceTree = SOURCE_ROOT; };
 		A66F17E7472E5C19AFE98E46 /* jucer_MainConsoleAppTemplate.cpp */ /* jucer_MainConsoleAppTemplate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_MainConsoleAppTemplate.cpp; path = ../../Source/BinaryData/Templates/jucer_MainConsoleAppTemplate.cpp; sourceTree = SOURCE_ROOT; };
+		A682E55E7CE52B09476A09BB /* include_juce_graphics_libwebp_dsp_dec_avx2.c */ /* include_juce_graphics_libwebp_dsp_dec_avx2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_libwebp_dsp_dec_avx2.c; path = ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_dec_avx2.c; sourceTree = SOURCE_ROOT; };
 		AA1C44E89D792DDC4867B2C8 /* juce_cryptography */ /* juce_cryptography */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_cryptography; path = ../../../../modules/juce_cryptography; sourceTree = SOURCE_ROOT; };
 		AAF90697C0F171EFC3984A5D /* jucer_ContentComponents.h */ /* jucer_ContentComponents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ContentComponents.h; path = ../../Source/Application/StartPage/jucer_ContentComponents.h; sourceTree = SOURCE_ROOT; };
 		AECE3914F5119A3D586A5635 /* include_juce_gui_extra.mm */ /* include_juce_gui_extra.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_gui_extra.mm; path = ../../JuceLibraryCode/include_juce_gui_extra.mm; sourceTree = SOURCE_ROOT; };
@@ -205,6 +223,7 @@
 		B3528C08B84CBC950252EA69 /* jucer_ModulesInformationComponent.h */ /* jucer_ModulesInformationComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ModulesInformationComponent.h; path = ../../Source/Project/UI/jucer_ModulesInformationComponent.h; sourceTree = SOURCE_ROOT; };
 		B403AF75EAF361ED74EE476E /* jucer_FileHelpers.cpp */ /* jucer_FileHelpers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_FileHelpers.cpp; path = ../../Source/Utility/Helpers/jucer_FileHelpers.cpp; sourceTree = SOURCE_ROOT; };
 		B542D78F431A52AF07F4113B /* jucer_AudioPluginARAFilterTemplate.h */ /* jucer_AudioPluginARAFilterTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AudioPluginARAFilterTemplate.h; path = ../../Source/BinaryData/Templates/jucer_AudioPluginARAFilterTemplate.h; sourceTree = SOURCE_ROOT; };
+		B678DC15356A7F05B9DAE6D2 /* include_juce_graphics_libwebp_dsp_enc_sse41.c */ /* include_juce_graphics_libwebp_dsp_enc_sse41.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_libwebp_dsp_enc_sse41.c; path = ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_enc_sse41.c; sourceTree = SOURCE_ROOT; };
 		B6F2905330EA5C560D527209 /* juce_graphics */ /* juce_graphics */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_graphics; path = ../../../../modules/juce_graphics; sourceTree = SOURCE_ROOT; };
 		B83C9BD89F31EA9E5E12A3C6 /* juce_icon.png */ /* juce_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = juce_icon.png; path = ../../Source/BinaryData/Icons/juce_icon.png; sourceTree = SOURCE_ROOT; };
 		B9B130F596953116393138DC /* jucer_SourceCodeEditor.h */ /* jucer_SourceCodeEditor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_SourceCodeEditor.h; path = ../../Source/CodeEditor/jucer_SourceCodeEditor.h; sourceTree = SOURCE_ROOT; };
@@ -235,6 +254,7 @@
 		D4EB334E5186D1584EC63CA4 /* jucer_AudioComponentSimpleTemplate.h */ /* jucer_AudioComponentSimpleTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AudioComponentSimpleTemplate.h; path = ../../Source/BinaryData/Templates/jucer_AudioComponentSimpleTemplate.h; sourceTree = SOURCE_ROOT; };
 		D5795F8CAC5876714DAB355F /* jucer_AnimatedComponentTemplate.h */ /* jucer_AnimatedComponentTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AnimatedComponentTemplate.h; path = ../../Source/BinaryData/Templates/jucer_AnimatedComponentTemplate.h; sourceTree = SOURCE_ROOT; };
 		D766BB9D8C32B5560F0493F3 /* include_juce_cryptography.mm */ /* include_juce_cryptography.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_cryptography.mm; path = ../../JuceLibraryCode/include_juce_cryptography.mm; sourceTree = SOURCE_ROOT; };
+		D813F3E5F09D54C2FCC54163 /* include_juce_graphics_libwebp_dsp_dec_sse41.c */ /* include_juce_graphics_libwebp_dsp_dec_sse41.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_libwebp_dsp_dec_sse41.c; path = ../../JuceLibraryCode/include_juce_graphics_libwebp_dsp_dec_sse41.c; sourceTree = SOURCE_ROOT; };
 		D91E7F8FEF9290195D56782C /* jucer_EditorColourSchemeWindowComponent.h */ /* jucer_EditorColourSchemeWindowComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_EditorColourSchemeWindowComponent.h; path = ../../Source/Application/Windows/jucer_EditorColourSchemeWindowComponent.h; sourceTree = SOURCE_ROOT; };
 		DB9C8E35DF815B803CB4A9CF /* include_juce_core.mm */ /* include_juce_core.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_core.mm; path = ../../JuceLibraryCode/include_juce_core.mm; sourceTree = SOURCE_ROOT; };
 		DD723261F7F20BCF952FA60D /* include_juce_gui_basics_2.cpp */ /* include_juce_gui_basics_2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_gui_basics_2.cpp; path = ../../JuceLibraryCode/include_juce_gui_basics_2.cpp; sourceTree = SOURCE_ROOT; };
@@ -373,6 +393,16 @@
 				16FA7F1761716EBFFF1F1FD7,
 				EF62FE6479498B3024190187,
 				7F7B24BE16E4EE7B8728E55B,
+				1DB1CF5D3146E583CEB25700,
+				4EF21A63C078FF3F48F0A78F,
+				A682E55E7CE52B09476A09BB,
+				D813F3E5F09D54C2FCC54163,
+				6DB1F035A926CF5171D96461,
+				591DAAAC2140A1159F9DDE9E,
+				B678DC15356A7F05B9DAE6D2,
+				9D9B5271998AC04C10389BCC,
+				44CF61C1C440DA4B9079B23C,
+				A0F22031BD4E4FDB90768C11,
 				D3FCC98B46178C9E20FA8225,
 				276A4D5D4A2DD84C6D41F0CA,
 				0462692BAA9CD1BE6DFBCC33,
@@ -895,6 +925,16 @@
 				A244ECDE066147A234A5D43B,
 				7F2403E53A8BDEFBC0E14E13,
 				48B533B313D6C24BE5B2E2EE,
+				CEF7F250EE626597E7A26485,
+				336D147B1709D89487150D7A,
+				979724FFECCB8931BE6BD018,
+				8638B494E2FB16D21089A152,
+				CDB3EDE24594AB290F9FDDB3,
+				BB33BD0E08A8E999E69744DE,
+				E6EBC702953983A128171A85,
+				F8079C96BFCF44A53790E114,
+				97B3A5515DF7315AE4FD9076,
+				71A0A2B6E1445BA348E69B57,
 				631D75A9FA398C5254F0EF19,
 				D76134C6646C526A210A78E2,
 				F15F0512666FF8CDC0D08905,
