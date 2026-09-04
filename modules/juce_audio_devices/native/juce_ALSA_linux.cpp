@@ -658,7 +658,17 @@ public:
 
             const int callbacksToStop = numCallbacks;
 
-            if ((! waitForThreadToExit (400)) && audioIoInProgress && numCallbacks == callbacksToStop)
+            // Closing the devices from this thread while the audio thread is
+            // still inside snd_pcm_readi/writei frees the pcm out from under it,
+            // so the wait has to allow for one full period of i/o before
+            // concluding that the thread is stuck rather than simply busy: a
+            // large buffer at a low sample rate takes far longer than the base
+            // timeout on its own. Capped so that closing stays responsive
+            // whatever the device reports.
+            const auto ioPeriodMs = sampleRate > 0.0 ? (int) (1000.0 * bufferSize / sampleRate) : 0;
+            const auto stuckTimeoutMs = 400 + jmin (2000, ioPeriodMs);
+
+            if ((! waitForThreadToExit (stuckTimeoutMs)) && audioIoInProgress && numCallbacks == callbacksToStop)
             {
                 JUCE_ALSA_LOG ("Thread is stuck in i/o. Is pulseaudio suspended?");
 
