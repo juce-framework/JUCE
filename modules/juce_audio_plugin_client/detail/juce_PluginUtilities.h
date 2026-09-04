@@ -62,6 +62,10 @@ struct PluginUtilities
                    ? 0
                    : ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering;
 
+#if (JUCE_LINUX || JUCE_BSD) && ! JucePlugin_EditorRequiresKeyboardFocus
+        flags |= ComponentPeer::windowIgnoresKeyPresses;
+#endif
+
         return { flags, editor.usesWindowsMultiTouch() };
     }
 
