@@ -1,0 +1,7 @@
+Upstream: https://drobilla.net/software/sratom.html
+Version: 0.6.8
+
+Files not strictly required to build the lilv library, including the generated
+config headers, have been removed. juce_lv2_config.h in the parent directory
+defines the library version. Remember to update the version there if you ever
+update the library version.

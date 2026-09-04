@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-20T00:00:00Z",
+  "lastUpdated": "2026-09-04T00:00:00Z",
 
   "firstPartyPatterns": [
     "^modules/[^/]+/native/java(core|opt)?/"

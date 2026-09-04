@@ -1,0 +1,5 @@
+Upstream: https://lv2plug.in
+
+Files not strictly required to build the lilv library have been removed.
+
+clang-tidy warning suppression comments have been added to lv2/atom/util.h.

@@ -10166,8 +10166,20 @@
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt">
       <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
     </None>
-    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\README.md">
-      <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK</Filter>
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\JUCE_UPSTREAM.txt">
+      <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2\JUCE_UPSTREAM.txt">
+      <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd\JUCE_UPSTREAM.txt">
+      <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\serd</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\JUCE_UPSTREAM.txt">
+      <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sord</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\sratom\JUCE_UPSTREAM.txt">
+      <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\sratom</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\base\LICENSE.txt">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\base</Filter>
@@ -10190,7 +10202,7 @@
     <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk\README.md">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK\public.sdk</Filter>
     </None>
-    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\JUCE_README.md">
+    <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\JUCE_UPSTREAM.txt">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\VST3_SDK</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\VST3_SDK\LICENSE.txt">

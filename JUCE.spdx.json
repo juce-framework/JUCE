@@ -3,9 +3,9 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "JUCE-9.0.1",
-  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.1-14d174a16e5d",
+  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.1-4a177adcf993",
   "creationInfo": {
-    "created": "2026-08-20T00:00:00Z",
+    "created": "2026-09-04T00:00:00Z",
     "creators": [
       "Tool: generate_sbom.py",
       "Organization: Raw Material Software Limited"
@@ -639,7 +639,7 @@
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
-      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/VST3_SDK in the JUCE source tree",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/VST3_SDK in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -658,7 +658,7 @@
       "licenseConcluded": "ISC",
       "licenseDeclared": "ISC",
       "copyrightText": "NOASSERTION",
-      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/lv2 in the JUCE source tree",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/lv2 in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -677,7 +677,7 @@
       "licenseConcluded": "ISC",
       "licenseDeclared": "ISC",
       "copyrightText": "NOASSERTION",
-      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/lilv in the JUCE source tree",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/lilv in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -696,7 +696,7 @@
       "licenseConcluded": "ISC",
       "licenseDeclared": "ISC",
       "copyrightText": "NOASSERTION",
-      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/serd in the JUCE source tree",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/serd in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -715,7 +715,7 @@
       "licenseConcluded": "ISC",
       "licenseDeclared": "ISC",
       "copyrightText": "NOASSERTION",
-      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/sord in the JUCE source tree",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/sord in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -734,7 +734,7 @@
       "licenseConcluded": "ISC",
       "licenseDeclared": "ISC",
       "copyrightText": "NOASSERTION",
-      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/sratom in the JUCE source tree",
+      "sourceInfo": "Vendored at modules/juce_audio_processors_headless/format_types/LV2_SDK/sratom in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -791,7 +791,7 @@
       "licenseConcluded": "Apache-2.0",
       "licenseDeclared": "Apache-2.0",
       "copyrightText": "NOASSERTION",
-      "sourceInfo": "Vendored at modules/juce_audio_plugin_client/AU/AudioUnitSDK in the JUCE source tree",
+      "sourceInfo": "Vendored at modules/juce_audio_plugin_client/AU/AudioUnitSDK in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",

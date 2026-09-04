@@ -1,0 +1,8 @@
+Upstream: https://drobilla.net/software/sord.html
+Version: 0.16.9
+
+Files not strictly required to build the lilv library, including the generated
+config headers, have been removed. A handwritten sord_config.h is provided in
+the parent directory, alongside juce_lv2_config.h which defines the library
+version. Remember to update the versions in the config headers if you ever
+update the library versions.

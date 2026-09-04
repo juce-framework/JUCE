@@ -6,3 +6,7 @@ bitwise.c, framing.c) are from libogg 1.3.4, modified for JUCE: include
 paths flattened, explicit casts added for C++ compilation, and some MSVC
 warnings disabled. The accompanying libvorbis sources are in the
 libvorbis-1.3.7 directory.
+
+The libvorbis sources have had a few include paths changed so that they build
+smoothly. Any significant code modifications are marked by "JUCE CHANGE STARTS
+HERE" and "JUCE CHANGE ENDS HERE" comments.

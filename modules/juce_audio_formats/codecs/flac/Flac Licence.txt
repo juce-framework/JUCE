@@ -1,24 +1,3 @@
-
-=====================================================================
-
-I've incorporated FLAC directly into the JUCE codebase because it makes
-things much easier than having to make all your builds link correctly to
-the appropriate libraries on every different platform.
-
-I've made minimal changes to the FLAC code - just tweaked a few include paths
-to make it build smoothly, added some headers to allow you to turn off FLAC
-compilation, and commented-out a couple of unused bits of code.
-
-=====================================================================
-
-
-The following license is the BSD-style license that comes with the
-Flac distribution, and which applies just to the files I've
-included in this directory. For more info, and to get the rest of the
-distribution, visit the Flac homepage: https://xiph.org/flac/
-
-=====================================================================
-
 libFLAC - Free Lossless Audio Codec library
 Copyright (C) 2000-2009  Josh Coalson
 Copyright (C) 2011-2023  Xiph.Org Foundation
