@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		008E9799E13B3320E8485CE3 /* MetalKit.framework */ = {isa = PBXBuildFile; fileRef = C8C4E9A4028028FF1F5B76F2; settings = { ATTRIBUTES = (Weak, ); }; };
+		0258E20989F2F08C2D8D0028 /* include_juce_audio_formats_ogg.c */ = {isa = PBXBuildFile; fileRef = F25DCF7289218D164ACFE9C4; };
 		03623AA532EE001F735CA9D2 /* CoreServices.framework */ = {isa = PBXBuildFile; fileRef = EA5D4F9D63C0ED79CDE8967A; };
 		0747FC00FFFC813703527CDA /* UserNotifications.framework */ = {isa = PBXBuildFile; fileRef = E8976208A3585295BF93D50D; settings = { ATTRIBUTES = (Weak, ); }; };
 		0977FEC02DAF29438583198A /* include_juce_core.mm */ = {isa = PBXBuildFile; fileRef = 01E0EEF68A11C1CAF180E173; };
@@ -143,6 +144,7 @@
 		E8976208A3585295BF93D50D /* UserNotifications.framework */ /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		EA5D4F9D63C0ED79CDE8967A /* CoreServices.framework */ /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		EC794872987FEA2E129C589A /* WebKit.framework */ /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		F25DCF7289218D164ACFE9C4 /* include_juce_audio_formats_ogg.c */ /* include_juce_audio_formats_ogg.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_audio_formats_ogg.c; path = ../../JuceLibraryCode/include_juce_audio_formats_ogg.c; sourceTree = SOURCE_ROOT; };
 		F7D557738137CA1A370BAA27 /* Foundation.framework */ /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F98A4DAA0502EE9252EBE06F /* juce_events */ /* juce_events */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_events; path = ../../../../modules/juce_events; sourceTree = SOURCE_ROOT; };
 		FA0A789443FD480003E40435 /* juce_gui_basics */ /* juce_gui_basics */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_gui_basics; path = ../../../../modules/juce_gui_basics; sourceTree = SOURCE_ROOT; };
@@ -255,6 +257,7 @@
 				C6E2284D86D93F1D9D5C7666,
 				0F2AB299AACAC363D46DD1FD,
 				A8EE226D947B4F7AB48E0F4A,
+				F25DCF7289218D164ACFE9C4,
 				AED58461CE961C62A0E0A552,
 				52CBBACAC86AD67BAF0687F6,
 				6033B963F05D21CB55E99E91,
@@ -417,6 +420,7 @@
 				A1F34D09F4E4338775917ED1,
 				9DD9576677DEB98F70A07432,
 				5E278603F05C4AAA3ACC7253,
+				0258E20989F2F08C2D8D0028,
 				2E28F61A64DEF942FE7B94C4,
 				8CE87C0D717B6D9BF77437D2,
 				A1204C6C832C4F05CB526169,

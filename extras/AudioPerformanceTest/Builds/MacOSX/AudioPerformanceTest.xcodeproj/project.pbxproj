@@ -35,6 +35,7 @@
 		AC09B866A923A3CF5BED9C4E /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = 0A58FDDF6FB9253F51939A52; };
 		AF2EB447DB57FD8F0FD33703 /* CoreMIDI.framework */ = {isa = PBXBuildFile; fileRef = 12C680C68A15B9A590264B18; };
 		B4455D3F0ECC06FF93134C0A /* include_juce_audio_processors_headless.mm */ = {isa = PBXBuildFile; fileRef = F174958684C8069CF4AE0920; };
+		B47482D816406CF2B1420F72 /* include_juce_audio_formats_ogg.c */ = {isa = PBXBuildFile; fileRef = DD87EB35E921A526066E6219; };
 		BC0D4FA565254E70334D6B5F /* include_juce_audio_processors_headless_lv2_libs.cpp */ = {isa = PBXBuildFile; fileRef = BE9CEE16DC505C59A91EAA37; };
 		C21271A5E7293FAAB664ABCC /* include_juce_audio_formats_flac_1.c */ = {isa = PBXBuildFile; fileRef = 91CFF2EB1319BEF5F68D1D25; };
 		C437EC981DB9977B4E0400EC /* Foundation.framework */ = {isa = PBXBuildFile; fileRef = E1BB9D521BF6C055F5B88628; };
@@ -108,6 +109,7 @@
 		CBBC98B7CD350A07F5145FB4 /* juce_audio_utils */ /* juce_audio_utils */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_utils; path = ../../../../modules/juce_audio_utils; sourceTree = SOURCE_ROOT; };
 		D03C9A859FB4DBA8268D7FBA /* juce_audio_processors */ /* juce_audio_processors */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_processors; path = ../../../../modules/juce_audio_processors; sourceTree = SOURCE_ROOT; };
 		DA16F42CFD9C5D0AED0E6C1B /* include_juce_audio_processors_headless_ara.cpp */ /* include_juce_audio_processors_headless_ara.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_processors_headless_ara.cpp; path = ../../JuceLibraryCode/include_juce_audio_processors_headless_ara.cpp; sourceTree = SOURCE_ROOT; };
+		DD87EB35E921A526066E6219 /* include_juce_audio_formats_ogg.c */ /* include_juce_audio_formats_ogg.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_audio_formats_ogg.c; path = ../../JuceLibraryCode/include_juce_audio_formats_ogg.c; sourceTree = SOURCE_ROOT; };
 		E1BB9D521BF6C055F5B88628 /* Foundation.framework */ /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E575FE2AD2F19FA6AEB536C2 /* juce_core */ /* juce_core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_core; path = ../../../../modules/juce_core; sourceTree = SOURCE_ROOT; };
 		EA6DAAEA6E33A0612EE25B47 /* include_juce_graphics_libjpg_2.c */ /* include_juce_graphics_libjpg_2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_graphics_libjpg_2.c; path = ../../JuceLibraryCode/include_juce_graphics_libjpg_2.c; sourceTree = SOURCE_ROOT; };
@@ -173,6 +175,7 @@
 				9E05B63699A307598B66F829,
 				91CFF2EB1319BEF5F68D1D25,
 				AF628DB5C4D83A7363AAA78A,
+				DD87EB35E921A526066E6219,
 				18E39207A0F5F9B8BC7EE94F,
 				F174958684C8069CF4AE0920,
 				DA16F42CFD9C5D0AED0E6C1B,
@@ -375,6 +378,7 @@
 				48ADBEF873A610909D727C97,
 				C21271A5E7293FAAB664ABCC,
 				D544BD5240F49D6152B2813B,
+				B47482D816406CF2B1420F72,
 				D145903EE5DBFD1BD98423F3,
 				B4455D3F0ECC06FF93134C0A,
 				F17EDC468A88EBC52DA1743A,

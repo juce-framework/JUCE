@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "JUCE-9.0.2",
-  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.2-e61891d1ed55",
+  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.2-683974351754",
   "creationInfo": {
     "created": "2026-09-04T00:00:00Z",
     "creators": [
@@ -546,24 +546,24 @@
     {
       "name": "libogg",
       "SPDXID": "SPDXRef-juce-audio-formats.libogg",
-      "versionInfo": "1.3.4",
+      "versionInfo": "1.3.6",
       "supplier": "Organization: Xiph.Org Foundation",
       "downloadLocation": "https://xiph.org/ogg",
       "filesAnalyzed": false,
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "BSD-3-Clause",
       "copyrightText": "NOASSERTION",
-      "sourceInfo": "Vendored at modules/juce_audio_formats/codecs/oggvorbis in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
+      "sourceInfo": "Vendored at modules/juce_audio_formats/codecs/ogg in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:github/xiph/ogg@1.3.4"
+          "referenceLocator": "pkg:github/xiph/ogg@1.3.6"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:xiph.org:libogg:1.3.4:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:xiph.org:libogg:1.3.6:*:*:*:*:*:*:*"
         }
       ]
     },
@@ -577,7 +577,7 @@
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "BSD-3-Clause",
       "copyrightText": "NOASSERTION",
-      "sourceInfo": "Vendored at modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.7 in the JUCE source tree",
+      "sourceInfo": "Vendored at modules/juce_audio_formats/codecs/vorbis in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",

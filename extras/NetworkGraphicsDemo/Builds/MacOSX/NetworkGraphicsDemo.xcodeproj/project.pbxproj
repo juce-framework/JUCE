@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		008E9799E13B3320E8485CE3 /* MetalKit.framework */ = {isa = PBXBuildFile; fileRef = C8C4E9A4028028FF1F5B76F2; settings = { ATTRIBUTES = (Weak, ); }; };
+		0258E20989F2F08C2D8D0028 /* include_juce_audio_formats_ogg.c */ = {isa = PBXBuildFile; fileRef = F25DCF7289218D164ACFE9C4; };
 		0977FEC02DAF29438583198A /* include_juce_core.mm */ = {isa = PBXBuildFile; fileRef = 01E0EEF68A11C1CAF180E173; };
 		0FA2A3321630EBE83E439D99 /* include_juce_cryptography.mm */ = {isa = PBXBuildFile; fileRef = AFF729977947528F3E4AAA96; };
 		14DAFF4798426DA78BB4C27F /* Accelerate.framework */ = {isa = PBXBuildFile; fileRef = 2E13A899F4E3C99054A3656F; };
@@ -132,6 +133,7 @@
 		E4EA870A22A0C6649E55DD30 /* juce_audio_utils */ /* juce_audio_utils */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_utils; path = ../../../../modules/juce_audio_utils; sourceTree = SOURCE_ROOT; };
 		E802B3AC9DEDACF4D31E09F5 /* include_juce_audio_processors_headless_lv2_libs.cpp */ /* include_juce_audio_processors_headless_lv2_libs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_processors_headless_lv2_libs.cpp; path = ../../JuceLibraryCode/include_juce_audio_processors_headless_lv2_libs.cpp; sourceTree = SOURCE_ROOT; };
 		EC794872987FEA2E129C589A /* WebKit.framework */ /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		F25DCF7289218D164ACFE9C4 /* include_juce_audio_formats_ogg.c */ /* include_juce_audio_formats_ogg.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_audio_formats_ogg.c; path = ../../JuceLibraryCode/include_juce_audio_formats_ogg.c; sourceTree = SOURCE_ROOT; };
 		F3292E3563DB7ABB076DB400 /* IOKit.framework */ /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		F7D557738137CA1A370BAA27 /* Foundation.framework */ /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F98A4DAA0502EE9252EBE06F /* juce_events */ /* juce_events */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_events; path = ../../../../modules/juce_events; sourceTree = SOURCE_ROOT; };
@@ -236,6 +238,7 @@
 				C6E2284D86D93F1D9D5C7666,
 				0F2AB299AACAC363D46DD1FD,
 				A8EE226D947B4F7AB48E0F4A,
+				F25DCF7289218D164ACFE9C4,
 				AED58461CE961C62A0E0A552,
 				52CBBACAC86AD67BAF0687F6,
 				6033B963F05D21CB55E99E91,
@@ -412,6 +415,7 @@
 				A1F34D09F4E4338775917ED1,
 				9DD9576677DEB98F70A07432,
 				5E278603F05C4AAA3ACC7253,
+				0258E20989F2F08C2D8D0028,
 				2E28F61A64DEF942FE7B94C4,
 				8CE87C0D717B6D9BF77437D2,
 				A1204C6C832C4F05CB526169,

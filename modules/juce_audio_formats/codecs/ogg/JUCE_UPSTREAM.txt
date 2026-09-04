@@ -1,0 +1,8 @@
+Upstream: https://github.com/xiph/ogg.git
+Version:  1.3.6 (tag v1.3.6, commit be05b13e98b048f0b5a0f5fa8ce514d56db5f822)
+
+Vendored by vendor.py in this directory; rerun it to update. It copies the
+files listed in it verbatim, rewrites their '#include <ogg/...>' lines as
+paths relative to the including file (JUCE modules have no include
+directories), and generates include/ogg/config_types.h from upstream's
+config_types.h.in using the <stdint.h> types.

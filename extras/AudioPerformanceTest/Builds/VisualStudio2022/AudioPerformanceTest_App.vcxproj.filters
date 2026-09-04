@@ -110,29 +110,47 @@
     <Filter Include="JUCE Modules\juce_audio_formats\codecs\flac">
       <UniqueIdentifier>{9EB3EC7F-2AB7-DDAA-3C05-DF382B728D3F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\coupled">
-      <UniqueIdentifier>{6B9FBFDC-1D10-6246-356D-00FF4535CECB}</UniqueIdentifier>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\ogg\include\ogg">
+      <UniqueIdentifier>{2B9985C9-D21E-21EB-D7A7-E8453591CBFF}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\floor">
-      <UniqueIdentifier>{D6FCFC8E-7136-9109-78C0-91A3EB4C443F}</UniqueIdentifier>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\ogg\include">
+      <UniqueIdentifier>{DAB640F4-A9C0-6994-FF7B-9808FFD0B2FF}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\uncoupled">
-      <UniqueIdentifier>{EBF18AC1-F0ED-937A-2824-4307CE2ADAF7}</UniqueIdentifier>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\ogg\src">
+      <UniqueIdentifier>{6C2EB74D-24D5-C790-AE03-3DF533B27F26}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books">
-      <UniqueIdentifier>{5A0F7922-2EFB-6465-57E4-A445B804EFB5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes">
-      <UniqueIdentifier>{4EC45416-0E7C-7567-6F75-D0C8CEE7DC4F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib">
-      <UniqueIdentifier>{C2985031-0496-55B5-41A8-BAB99E53D89D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7">
-      <UniqueIdentifier>{FB4AB426-7009-0036-BB75-E34256AA7C89}</UniqueIdentifier>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\ogg">
+      <UniqueIdentifier>{97190DA2-8D35-E569-79A1-232B8543571A}</UniqueIdentifier>
     </Filter>
     <Filter Include="JUCE Modules\juce_audio_formats\codecs\oggvorbis">
       <UniqueIdentifier>{E684D858-09E8-0251-8E86-5657129641E1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\vorbis\include\vorbis">
+      <UniqueIdentifier>{859F434D-6D42-0759-4DB4-2144A2097405}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\vorbis\include">
+      <UniqueIdentifier>{BCCF7F55-CC3A-BF19-8BF5-97CAD637E787}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\vorbis\lib\books\coupled">
+      <UniqueIdentifier>{722268F2-842E-F8E5-8570-9463D4EAA0DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\vorbis\lib\books\floor">
+      <UniqueIdentifier>{E41D71DF-E195-D228-177E-0F7D6147BF70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\vorbis\lib\books\uncoupled">
+      <UniqueIdentifier>{EA351DC9-F99A-E747-BA61-B0142E5A5340}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\vorbis\lib\books">
+      <UniqueIdentifier>{14026122-D1CA-ACB8-6311-E725C285A4DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes">
+      <UniqueIdentifier>{D42E6A5A-2DFF-3148-F2DD-D4F135DC622D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\vorbis\lib">
+      <UniqueIdentifier>{4886BB03-3C51-8A4D-CF60-8C8B646A1561}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_formats\codecs\vorbis">
+      <UniqueIdentifier>{EE9B4937-22A7-9B09-6A56-2F8285102B82}</UniqueIdentifier>
     </Filter>
     <Filter Include="JUCE Modules\juce_audio_formats\codecs">
       <UniqueIdentifier>{1EF1BF17-F941-243A-04D1-EE617D140CBA}</UniqueIdentifier>
@@ -1372,80 +1390,80 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\win_utf8_io\win_utf8_io.c">
       <Filter>JUCE Modules\juce_audio_formats\codecs\flac\win_utf8_io</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\analysis.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\src\bitwise.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\ogg\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\bitrate.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\src\framing.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\ogg\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\block.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\analysis.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\codebook.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\bitrate.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\envelope.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\block.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\floor0.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\codebook.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\floor1.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\envelope.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\info.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\floor0.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\lookup.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\floor1.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\lpc.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\info.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\lsp.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\lookup.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\mapping0.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\lpc.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\mdct.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\lsp.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\misc.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\mapping0.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\psy.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\mdct.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\registry.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\misc.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\res0.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\psy.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\sharedbook.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\registry.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\smallft.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\res0.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\synthesis.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\sharedbook.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\vorbisenc.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\smallft.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\vorbisfile.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\synthesis.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\window.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\vorbisenc.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\bitwise.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\vorbisfile.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\framing.c">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\window.c">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_AiffAudioFormat.cpp">
       <Filter>JUCE Modules\juce_audio_formats\codecs</Filter>
@@ -1508,6 +1526,9 @@
       <Filter>JUCE Modules\juce_audio_formats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\juce_audio_formats_flac_2.c">
+      <Filter>JUCE Modules\juce_audio_formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\juce_audio_formats_ogg.c">
       <Filter>JUCE Modules\juce_audio_formats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormatManagerHelpers.cpp">
@@ -3898,6 +3919,9 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats_flac_2.c">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats_ogg.c">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -4572,152 +4596,152 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\win_utf8_io.h">
       <Filter>JUCE Modules\juce_audio_formats\codecs\flac</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\coupled\res_books_51.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\coupled</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\include\ogg\config_types.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\ogg\include\ogg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\coupled\res_books_stereo.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\coupled</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\include\ogg\ogg.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\ogg\include\ogg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\floor\floor_books.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\floor</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\include\ogg\os_types.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\ogg\include\ogg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\uncoupled\res_books_uncoupled.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\uncoupled</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\src\crctable.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\ogg\src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\floor_all.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\include\vorbis\codec.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\include\vorbis</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\psych_8.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\include\vorbis\vorbisenc.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\include\vorbis</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\psych_11.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\include\vorbis\vorbisfile.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\include\vorbis</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\psych_16.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\books\coupled\res_books_51.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\books\coupled</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\psych_44.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\books\coupled\res_books_stereo.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\books\coupled</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\residue_8.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\books\floor\floor_books.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\books\floor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\residue_16.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\books\uncoupled\res_books_uncoupled.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\books\uncoupled</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\residue_44.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\floor_all.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\residue_44p51.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\psych_8.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\residue_44u.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\psych_11.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\setup_8.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\psych_16.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\setup_11.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\psych_44.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\setup_16.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\residue_8.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\setup_22.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\residue_16.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\setup_32.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\residue_44.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\setup_44.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\residue_44p51.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\setup_44p51.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\residue_44u.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\setup_44u.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\setup_8.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes\setup_X.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\modes</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\setup_11.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\backends.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\setup_16.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\bitrate.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\setup_22.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\codebook.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\setup_32.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\codec_internal.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\setup_44.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\envelope.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\setup_44p51.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\highlevel.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\setup_44u.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\lookup.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\modes\setup_X.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib\modes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\lookup_data.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\backends.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\lpc.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\bitrate.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\lsp.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\codebook.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\masking.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\codec_internal.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\mdct.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\envelope.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\misc.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\highlevel.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\os.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\lookup.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\psy.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\lookup_data.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\registry.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\lpc.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\scales.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\lsp.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\smallft.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\masking.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\window.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\mdct.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\codec.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\misc.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\config_types.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\os.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\crctable.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\psy.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\ogg.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\registry.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\os_types.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\scales.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\vorbisenc.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\smallft.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\vorbisfile.h">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\lib\window.h">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis\lib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_AiffAudioFormat.h">
       <Filter>JUCE Modules\juce_audio_formats\codecs</Filter>
@@ -8789,14 +8813,17 @@
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\JUCE_UPSTREAM.txt">
       <Filter>JUCE Modules\juce_audio_formats\codecs\flac</Filter>
     </None>
-    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\README.md">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7</Filter>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\ogg\JUCE_UPSTREAM.txt">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\ogg</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\JUCE_UPSTREAM.txt">
       <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
     </None>
-    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt">
-      <Filter>JUCE Modules\juce_audio_formats\codecs\oggvorbis</Filter>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\JUCE_UPSTREAM.txt">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\vorbis\README.md">
+      <Filter>JUCE Modules\juce_audio_formats\codecs\vorbis</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\JUCE_UPSTREAM.txt">
       <Filter>JUCE Modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv</Filter>

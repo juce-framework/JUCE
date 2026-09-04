@@ -41,6 +41,7 @@
 		8D2948A3B61F73925F04C8D3 /* include_juce_graphics_libjpg_3.c */ = {isa = PBXBuildFile; fileRef = 33644BD035276A0138B4ED9F; };
 		8D8089B1087565D01B474C38 /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = 9794142D24966F93FFDE51A1; };
 		8DD3EB0C33E3E7B30C086034 /* include_juce_audio_processors_headless_ara.cpp */ = {isa = PBXBuildFile; fileRef = A83A4730C7AC85876911E149; };
+		8FC2ACD63A2238AAA30E96F7 /* include_juce_audio_formats_ogg.c */ = {isa = PBXBuildFile; fileRef = 03F642B9CCD338C5CA1A0FBB; };
 		90A0EE51143392635B1C63B2 /* OpenGL.framework */ = {isa = PBXBuildFile; fileRef = D313CF37B25D7FD313C4F336; };
 		937574F3E6597DC4573F370E /* AppIcon.icns */ = {isa = PBXBuildFile; fileRef = 6FDEDC8A2EE1095C83DCAF09; };
 		970A893BD34180916C9D01C4 /* ARAPlugin.cpp */ = {isa = PBXBuildFile; fileRef = 6A01D5F304346E0332264056; };
@@ -71,6 +72,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		03F642B9CCD338C5CA1A0FBB /* include_juce_audio_formats_ogg.c */ /* include_juce_audio_formats_ogg.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = include_juce_audio_formats_ogg.c; path = ../../JuceLibraryCode/include_juce_audio_formats_ogg.c; sourceTree = SOURCE_ROOT; };
 		03FA420AACDD03D50AA16E4A /* Foundation.framework */ /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		04AABCD3491318FB32E844B4 /* MainHostWindow.cpp */ /* MainHostWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MainHostWindow.cpp; path = ../../Source/UI/MainHostWindow.cpp; sourceTree = SOURCE_ROOT; };
 		04DB9A49969ECC740CC25665 /* GraphEditorPanel.h */ /* GraphEditorPanel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GraphEditorPanel.h; path = ../../Source/UI/GraphEditorPanel.h; sourceTree = SOURCE_ROOT; };
@@ -241,6 +243,7 @@
 				5D250A57C7DEA80248F30EED,
 				D9307D9CDC8B0466B5C15106,
 				0EE9BC9334FF1771280F4690,
+				03F642B9CCD338C5CA1A0FBB,
 				5FBD6C402617272052BB4D81,
 				DAB71FA843B80756B5521A4E,
 				A83A4730C7AC85876911E149,
@@ -512,6 +515,7 @@
 				F4DD98B9310B679D50A2C8A6,
 				2C11F0A5BDAE2B220D93D549,
 				D57424E5C2A9511B184174C5,
+				8FC2ACD63A2238AAA30E96F7,
 				CAF0DE157C8F7D9F168AA3B6,
 				3154B78F0813DBD8A2C9234D,
 				8DD3EB0C33E3E7B30C086034,
