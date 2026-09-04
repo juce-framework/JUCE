@@ -73,6 +73,88 @@ public:
         */
         Options();
 
+        /** Returns a copy of these options with the provided application name.
+            This sets the @ref applicationName member.
+        */
+        [[nodiscard]] Options withApplicationName (const String& newApplicationName) const
+        {
+            return withMember (*this, &Options::applicationName, newApplicationName);
+        }
+
+        /** Returns a copy of these options with the provided suffix for the properties file.
+            This sets the @ref filenameSuffix member.
+        */
+        [[nodiscard]] Options withFilenameSuffix (const String& newFilenameSuffix) const
+        {
+            return withMember (*this, &Options::filenameSuffix, newFilenameSuffix);
+        }
+
+        /** Returns a copy of these options with the provided subfolder name.
+            This sets the @ref folderName member.
+        */
+        [[nodiscard]] Options withFolderName (const String& newFolderName) const
+        {
+            return withMember (*this, &Options::folderName, newFolderName);
+        }
+
+        /** Returns a copy of these options with the provided Library subfolder for MacOS.
+            This sets the @ref osxLibrarySubFolder member.
+        */
+        [[nodiscard]] Options withOsxLibrarySubFolder (const String& newOsxLibrarySubFolder) const
+        {
+            return withMember (*this, &Options::osxLibrarySubFolder, newOsxLibrarySubFolder);
+        }
+
+        /** Returns a copy of these options with the provided "commonToAllUsers" flag.
+            This sets the @ref commonToAllUsers member.
+        */
+        [[nodiscard]] Options withCommonToAllUsers (bool newCommonToAllUsersValue) const
+        {
+            return withMember (*this, &Options::commonToAllUsers, newCommonToAllUsersValue);
+        }
+
+        /** Returns a copy of these options with the provided case sensitivity flag for key names.
+            This sets the @ref ignoreCaseOfKeyNames member.
+        */
+        [[nodiscard]] Options withIgnoreCaseOfKeyNames (bool newIgnoreCaseOfKeyNamesValue) const
+        {
+            return withMember (*this, &Options::ignoreCaseOfKeyNames, newIgnoreCaseOfKeyNamesValue);
+        }
+
+        /** Returns a copy of these options with the provided "doNotSave" flag.
+            This sets the @ref doNotSave member.
+        */
+        [[nodiscard]] Options withDoNotSave (bool newDoNotSaveValue) const
+        {
+            return withMember (*this, &Options::doNotSave, newDoNotSaveValue);
+        }
+
+        /** Returns a copy of these options with the provided wait time before saving.
+            This sets the @ref millisecondsBeforeSaving member.
+        */
+        [[nodiscard]] Options withMillisecondsBeforeSaving (int newMillisecondsBeforeSaving) const
+        {
+            return withMember (*this, &Options::millisecondsBeforeSaving, newMillisecondsBeforeSaving);
+        }
+
+        /** Returns a copy of these options with the provided storage format.
+            This sets the @ref storageFormat member.
+            @see StorageFormat
+        */
+        [[nodiscard]] Options withStorageFormat (StorageFormat newStorageFormat) const
+        {
+            return withMember (*this, &Options::storageFormat, newStorageFormat);
+        }
+
+        /** Returns a copy of these options with the provided process lock.
+            This sets the @ref processLock member.
+            @see InterProcessLock
+        */
+        [[nodiscard]] Options withProcessLock (InterProcessLock* newProcessLock) const
+        {
+            return withMember (*this, &Options::processLock, newProcessLock);
+        }
+
         /** The name of your application - this is used to help generate the path and filename
             at which the properties file will be stored. */
         String applicationName;
