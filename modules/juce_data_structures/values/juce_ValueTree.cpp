@@ -435,7 +435,8 @@ public:
                 target->removeProperty (name, nullptr);
             else
                 target->setProperty (name, newValue, nullptr, excludeListener);
-
+            // only exclude on first invocation
+            excludeListener = nullptr;
             return true;
         }
 
