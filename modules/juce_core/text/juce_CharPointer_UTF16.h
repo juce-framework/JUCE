@@ -52,6 +52,13 @@ public:
     using CharType = int16;
    #endif
 
+    // Standard iterator traits for compatibility with STL algorithms
+    using difference_type   = std::ptrdiff_t;
+    using value_type        = juce_wchar;
+    using pointer           = juce_wchar*;
+    using reference         = juce_wchar;  // Returns by value since this is a proxy iterator
+    using iterator_category = std::input_iterator_tag;
+
     explicit CharPointer_UTF16 (const CharType* rawPointer) noexcept
         : data (const_cast<CharType*> (rawPointer))
     {
