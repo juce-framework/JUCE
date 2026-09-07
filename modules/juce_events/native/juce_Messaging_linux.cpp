@@ -60,7 +60,10 @@ public:
                                                     // Avoid starving other LinuxEventLoop callbacks
                                                     // such as the XWindowSystem.
                                                     if (Time::getMillisecondCounter() > timeout)
+                                                    {
+                                                        wakeIfMessagesRemain();
                                                         break;
+                                                    }
                                                 }
                                             });
     }
@@ -87,6 +90,25 @@ public:
             jassertfalse;
             return;
         }
+
+        bytesInSocket++;
+
+        ScopedUnlock ul (lock);
+        unsigned char x = 0xff;
+        [[maybe_unused]] auto numBytes = write (getWriteHandle(), &x, 1);
+    }
+
+    // A message added while the socket already held maxBytesInSocketQueue
+    // bytes carries no wake byte of its own, so a queue that still holds
+    // messages when the callback's time budget ends can have no byte left
+    // to wake the loop for them, and nothing else wakes it once a quit is
+    // posted. One byte keeps the remainder dispatchable.
+    void wakeIfMessagesRemain() noexcept
+    {
+        const ScopedLock sl (lock);
+
+        if (queue.isEmpty() || bytesInSocket > 0)
+            return;
 
         bytesInSocket++;
 
