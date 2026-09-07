@@ -1626,6 +1626,27 @@ public:
             closeDeviceByRequestingEmptyNames       (manager);
         }
 
+        beginTest ("When the AudioDeviceSetup names no sample rate or buffer size, a device that reports no rate before opening gets the lowest rate at or above 44.1 kHz and its default buffer size");
+        {
+            AudioDeviceManager manager;
+            initialiseManager (manager);
+
+            AudioDeviceManager::AudioDeviceSetup setup;
+            setup.outputDeviceName = "x";
+            setup.inputDeviceName = "a";
+
+            expect (manager.setAudioDeviceSetup (setup, true).isEmpty());
+
+            auto* device = manager.getCurrentAudioDevice();
+            expect (device != nullptr);
+
+            if (device != nullptr)
+            {
+                expectEquals (device->getCurrentSampleRate(), 44100.0);
+                expectEquals (device->getCurrentBufferSizeSamples(), device->getDefaultBufferSize());
+            }
+        }
+
         beginTest ("AudioDeviceManager updates its current settings before notifying callbacks when device restarts itself");
         {
             AudioDeviceManager manager;
@@ -1855,7 +1876,7 @@ private:
         StringArray getOutputChannelNames() override { return { "o1", "o2", "o3" }; }
         StringArray getInputChannelNames()  override { return { "i1", "i2", "i3" }; }
 
-        Array<double> getAvailableSampleRates() override { return { 44100.0, 48000.0 }; }
+        Array<double> getAvailableSampleRates() override { return { 22050.0, 44100.0, 48000.0 }; }
         Array<int> getAvailableBufferSizes() override { return { 128, 256 }; }
         int getDefaultBufferSize() override { return 128; }
 
