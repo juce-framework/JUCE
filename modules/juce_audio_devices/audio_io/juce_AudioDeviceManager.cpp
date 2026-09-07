@@ -817,6 +817,25 @@ static T getNonZeroOrDefault (T value, T defaultValue)
     return value;
 }
 
+/*  The rate a setup that names none should get: the device's current rate,
+    or, for a device that reports none until it has been opened (ALSA), the
+    lowest it lists at or above 44.1 kHz, so that the nearest-value search
+    below does not settle on the lowest rate the device offers.
+*/
+static double getDefaultSampleRate (AudioIODevice& device)
+{
+    const auto current = device.getCurrentSampleRate();
+
+    if (current > 0.0)
+        return current;
+
+    for (const auto rate : device.getAvailableSampleRates())
+        if (rate >= 44100.0)
+            return rate;
+
+    return 0.0;
+}
+
 String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
                                                 bool treatAsChosenDevice)
 {
@@ -893,7 +912,7 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
     }
 
     currentSetup.sampleRate = findNearestValue (Span { currentAudioDevice->getAvailableSampleRates() },
-                                                getNonZeroOrDefault (currentSetup.sampleRate, currentAudioDevice->getCurrentSampleRate()));
+                                                getNonZeroOrDefault (currentSetup.sampleRate, getDefaultSampleRate (*currentAudioDevice)));
 
     const auto requestedBufferSize = getNonZeroOrDefault (currentSetup.bufferSize, currentAudioDevice->getDefaultBufferSize());
     const auto preBufferSize = findNearestValue (Span { currentAudioDevice->getAvailableBufferSizes() }, requestedBufferSize);
