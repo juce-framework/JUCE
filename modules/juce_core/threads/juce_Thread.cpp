@@ -552,6 +552,36 @@ public:
             expect (! thread.isThreadRunning());
             expect (! thread.isThreadRunning());
         }
+
+        beginTest ("A thread can be restarted after finishing without stopThread()");
+        {
+            struct TestThread final : public Thread
+            {
+                TestThread() : Thread ("TestThread") {}
+
+                void run() final
+                {
+                    runMethodCalled.signal();
+                    wait (maximumTimeout);
+                }
+
+                WaitableEvent runMethodCalled;
+            };
+
+            TestThread thread;
+            expect (thread.startThread());
+            expect (thread.runMethodCalled.wait (maximumTimeout));
+
+            thread.notify();
+            expect (thread.waitForThreadToExit (maximumTimeout));
+            expect (! thread.isThreadRunning());
+
+            expect (thread.startThread());
+            expect (thread.isThreadRunning());
+            expect (thread.runMethodCalled.wait (maximumTimeout));
+            expect (thread.stopThread (maximumTimeout));
+            expect (! thread.isThreadRunning());
+        }
     }
 };
 
