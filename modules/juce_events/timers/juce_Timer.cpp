@@ -235,8 +235,7 @@ private:
 
         void messageCallback() override
         {
-            if (auto instance = SharedResourcePointer<TimerThread>::getSharedObjectWithoutCreating())
-                (*instance)->callTimers();
+            Timer::callPendingTimersSynchronously();
         }
     };
 
