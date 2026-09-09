@@ -280,6 +280,21 @@ private:
         DylibHandle (const char* str, int flags)
             : handle (dlopen (str, flags)) {}
 
+        /*  The first of the names that opens. A distribution ships the
+            versioned name with the library and the unversioned one only
+            with the library's development package, so a system that has
+            never built against GTK or WebKit carries only the former.
+        */
+        explicit DylibHandle (std::initializer_list<const char*> names)
+            : DylibHandle (names, RTLD_NOW | RTLD_LOCAL) {}
+
+        DylibHandle (std::initializer_list<const char*> names, int flags)
+        {
+            for (auto* name : names)
+                if ((handle = dlopen (name, flags)) != nullptr)
+                    break;
+        }
+
         ~DylibHandle()
         {
             if (handle != nullptr)
@@ -434,9 +449,9 @@ private:
 
     struct WebKitAndDependencyLibraryNames
     {
-        const char* webkitLib;
-        const char* jsLib;
-        const char* soupLib;
+        std::initializer_list<const char*> webkitLib;
+        std::initializer_list<const char*> jsLib;
+        std::initializer_list<const char*> soupLib;
     };
 
     bool openWebKitAndDependencyLibraries (const WebKitAndDependencyLibraryNames& names)
@@ -457,15 +472,15 @@ private:
     //==============================================================================
     DylibHandle webkitLib, jsLib, soupLib;
 
-    DylibHandle gtkLib    { "libgtk-3.so" },
-                glib      { "libglib-2.0.so" };
+    DylibHandle gtkLib    { { "libgtk-3.so", "libgtk-3.so.0" } },
+                glib      { { "libglib-2.0.so", "libglib-2.0.so.0" } };
 
-    const bool webKitIsAvailable =    (   openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.1.so",
-                                                                              "libjavascriptcoregtk-4.1.so",
-                                                                              "libsoup-3.0.so" })
-                                       || openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.0.so",
-                                                                              "libjavascriptcoregtk-4.0.so",
-                                                                              "libsoup-2.4.so" }))
+    const bool webKitIsAvailable =    (   openWebKitAndDependencyLibraries ({ { "libwebkit2gtk-4.1.so", "libwebkit2gtk-4.1.so.0" },
+                                                                              { "libjavascriptcoregtk-4.1.so", "libjavascriptcoregtk-4.1.so.0" },
+                                                                              { "libsoup-3.0.so", "libsoup-3.0.so.0" } })
+                                       || openWebKitAndDependencyLibraries ({ { "libwebkit2gtk-4.0.so", "libwebkit2gtk-4.0.so.37" },
+                                                                              { "libjavascriptcoregtk-4.0.so", "libjavascriptcoregtk-4.0.so.18" },
+                                                                              { "libsoup-2.4.so", "libsoup-2.4.so.1" } }))
                                    && loadWebkitSymbols()
                                    && loadGtkSymbols()
                                    && loadJsLibSymbols()
