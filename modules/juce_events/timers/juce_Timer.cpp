@@ -412,4 +412,111 @@ void JUCE_CALLTYPE Timer::callAfterDelay (int milliseconds, std::function<void()
     new LambdaInvoker (milliseconds, std::move (f));
 }
 
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class TimerTests final : public UnitTest
+{
+public:
+    TimerTests()
+        : UnitTest ("Timer", UnitTestCategories::threads)
+    {}
+
+    void runTest() final
+    {
+        ScopedJuceInitialiser_GUI libraryInitialiser;
+
+        beginTest ("Start and stop a timer");
+        {
+            TestTimer timer;
+            expect (! timer.isTimerRunning());
+            expectEquals (timer.getTimerInterval(), 0);
+
+            timer.startTimer (1000);
+            expect (timer.isTimerRunning());
+            expectEquals (timer.getTimerInterval(), 1000);
+
+            timer.stopTimer();
+            expect (! timer.isTimerRunning());
+            expectEquals (timer.getTimerInterval(), 0);
+        }
+
+        beginTest ("Changing the interval of a running timer");
+        {
+            TestTimer timer;
+            timer.startTimer (1000);
+            expectEquals (timer.getTimerInterval(), 1000);
+
+            timer.startTimer (50);
+            expect (timer.isTimerRunning());
+            expectEquals (timer.getTimerInterval(), 50);
+
+            timer.stopTimer();
+        }
+
+        beginTest ("startTimerHz");
+        {
+            TestTimer timer;
+            timer.startTimerHz (10);
+            expect (timer.isTimerRunning());
+            expectEquals (timer.getTimerInterval(), 100);
+
+            timer.startTimerHz (0);
+            expect (! timer.isTimerRunning());
+        }
+
+        beginTest ("startTimer and stopTimer can be called from a background thread");
+        {
+            TestTimer timer;
+            std::atomic<bool> runningAfterStart { false };
+            std::atomic<bool> runningAfterStop { true };
+
+            WorkerThread worker {[&]
+            {
+                timer.startTimer (1000);
+                runningAfterStart = timer.isTimerRunning();
+                timer.stopTimer();
+                runningAfterStop = timer.isTimerRunning();
+            }};
+
+            expect (worker.waitForThreadToExit (maximumTimeout));
+            expect (runningAfterStart);
+            expect (! runningAfterStop);
+        }
+    }
+
+private:
+    static constexpr Seconds maximumTimeout { 30 };
+
+    class WorkerThread final : public Thread
+    {
+    public:
+        explicit WorkerThread (std::function<void()> fn)
+            : Thread ("TimerTests worker"), callback (std::move (fn))
+        {
+            startThread();
+        }
+
+        ~WorkerThread() final { stopThread(); }
+
+        void run() final { callback(); }
+
+    private:
+        std::function<void()> callback;
+    };
+
+    class TestTimer final : public Timer
+    {
+    public:
+        TestTimer() = default;
+        ~TestTimer() override { stopTimer(); }
+
+        void timerCallback() final {}
+    };
+};
+
+static TimerTests timerTests;
+
+#endif
+
 } // namespace juce
