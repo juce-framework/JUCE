@@ -836,7 +836,7 @@ private:
     {
     public:
         AttributeList() = default;
-        virtual ~AttributeList() = default;
+        ~AttributeList() = default;
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -923,7 +923,7 @@ private:
     struct Message final : public Vst::IMessage
     {
         Message() = default;
-        virtual ~Message() = default;
+        ~Message() = default;
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -1736,7 +1736,7 @@ public:
     {
     }
 
-    virtual ~HostToClientParamQueue() = default;
+    ~HostToClientParamQueue() = default;
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
     JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -1841,7 +1841,7 @@ public:
     {
     }
 
-    virtual ~ClientToHostParamQueue() = default;
+    ~ClientToHostParamQueue() = default;
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
     JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -1924,7 +1924,7 @@ class ParameterChanges final : public Vst::IParameterChanges
     using Queues = std::vector<Entry*>;
 
 public:
-    virtual ~ParameterChanges() = default;
+    ~ParameterChanges() = default;
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
     JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -2660,7 +2660,7 @@ public:
     struct TrackPropertiesAttributeList final : public Vst::IAttributeList
     {
         TrackPropertiesAttributeList (const TrackProperties& properties) : props (properties) {}
-        virtual ~TrackPropertiesAttributeList() {}
+        ~TrackPropertiesAttributeList() {}
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
 
