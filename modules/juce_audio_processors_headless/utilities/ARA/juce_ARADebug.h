@@ -42,7 +42,7 @@
 #endif
 /** @endcond */
 
-#if JUCE_INTERNAL_HAS_ARA || (JucePlugin_Enable_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX))
+#if JUCE_INTERNAL_HAS_ARA || (JucePlugin_Enable_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS))
 
 namespace juce
 {
