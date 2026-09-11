@@ -135,12 +135,7 @@ public:
         // Note: This method used to update the contents of the existing menu in-place, but that caused
         // weird side-effects which messed-up keyboard focus when switching between windows. By creating
         // a new menu and replacing the old one with it, that problem seems to be avoided..
-        NSMenu* menu = [[NSMenu alloc] initWithTitle: juceStringToNS (name)];
-
-        for (PopupMenu::MenuItemIterator iter (menuToCopy); iter.next();)
-            addMenuItem (iter, menu, menuId, topLevelIndex);
-
-        [menu update];
+        NSMenu* menu = createMenu (menuToCopy, name, menuId, topLevelIndex, true);
 
         removeItemRecursive ([parentItem submenu]);
         [parentItem setSubmenu: menu];
