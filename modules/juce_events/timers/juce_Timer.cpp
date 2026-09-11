@@ -141,7 +141,6 @@ private:
             auto* timer = first.timer;
             first.countdownMs = timer->getTimerInterval();
             shuffleTimerBackInQueue (0);
-            notify();
 
             const LockType::ScopedUnlockType ul (lock);
 
@@ -157,6 +156,7 @@ private:
         }
 
         callbackArrived.signal();
+        notify();
     }
 
     void addTimer (Timer* t)
