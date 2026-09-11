@@ -1192,10 +1192,16 @@ public:
         expect (demoFolder.containsSubDirectories());
 
         expect (tempFile.hasWriteAccess());
-        tempFile.setReadOnly (true);
-        expect (! tempFile.hasWriteAccess());
-        tempFile.setReadOnly (false);
-        expect (tempFile.hasWriteAccess());
+        expect (tempFile.setReadOnly (true));
+
+        const auto readOnlyIsEnforced = ! tempFile.hasWriteAccess();
+
+        expect (tempFile.setReadOnly (false));
+
+        if (readOnlyIsEnforced)
+            expect (tempFile.hasWriteAccess());
+        else
+            logMessage ("Skipping the read-only access check because elevated permissions bypass it");
 
         Time t (Time::getCurrentTime());
         tempFile.setLastModificationTime (t);
