@@ -1047,7 +1047,8 @@ struct DescriptionLister
 
     static std::vector<PluginDescription> findDescriptionsSlow (VST3HostContextHeadless& host,
                                                                 IPluginFactory& factory,
-                                                                const File& file)
+                                                                const File& file,
+                                                                const std::function<void (const String&)>& onClassDiscoveryStarted = {})
     {
         std::vector<PluginDescription> result;
 
@@ -1106,6 +1107,9 @@ struct DescriptionLister
             }
 
             foundNames.add (name);
+
+            if (onClassDiscoveryStarted != nullptr)
+                onClassDiscoveryStarted (name);
 
             PluginDescription desc;
 
