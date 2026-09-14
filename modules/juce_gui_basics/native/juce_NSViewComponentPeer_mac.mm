@@ -296,6 +296,15 @@ public:
             // does before the window is first shown) can detach a child from its parent.
             if ((windowStyleFlags & windowFloatingChild) != 0 && viewToAttachTo != nil)
                 floatingChildParent = [[viewToAttachTo window] retain];
+
+            // A child detached onto another display no longer follows its parent by itself - see
+            // updateFloatingChildAttachment().
+            if (floatingChildParent != nil)
+            {
+                scopedObservers.emplace_back (view, @selector (floatingParentWillMiniaturize:), NSWindowWillMiniaturizeNotification, floatingChildParent);
+                scopedObservers.emplace_back (view, @selector (floatingParentDidDeminiaturize:), NSWindowDidDeminiaturizeNotification, floatingChildParent);
+                scopedObservers.emplace_back (view, @selector (floatingParentDidChangeScreen:), NSWindowDidChangeScreenNotification, floatingChildParent);
+            }
         }
 
         auto alpha = component.getAlpha();
@@ -364,8 +373,13 @@ public:
             {
                 // (Re)attach floating children to their parent so they float above it (without
                 // being globally always-on-top) and minimise/restore/close together with it.
-                if (floatingChildParent != nil && [window parentWindow] == nil)
-                    [floatingChildParent addChildWindow: window ordered: NSWindowAbove];
+                if (floatingChildParent != nil)
+                {
+                    updateFloatingChildAttachment ([window frame]);
+
+                    if (! floatingChildDetached && [window parentWindow] == nil)
+                        [floatingChildParent addChildWindow: window ordered: NSWindowAbove];
+                }
 
                 ++insideToFrontCall;
                 [window orderFront: nil];
@@ -420,8 +434,12 @@ public:
         }
         else
         {
-            [window setFrame: [window frameRectForContentRect: flippedScreenRect (r)]
-                     display: false];
+            const auto frame = [window frameRectForContentRect: flippedScreenRect (r)];
+
+            // Before the frame lands on another display, where an attached child would not be drawn
+            updateFloatingChildAttachment (frame);
+
+            [window setFrame: frame display: false];
         }
 
         if (! CGSizeEqualToSize (oldViewSize, r.size))
@@ -629,6 +647,76 @@ public:
         }
 
         return true;
+    }
+
+    // A child window lives in its parent's Space, so with "Displays have separate Spaces" it is not
+    // drawn on any other display. A floating child is therefore only attached while it is on its
+    // parent's display; anywhere else it floats on its own, hidden whenever the app is inactive.
+    void updateFloatingChildAttachment (NSRect frame)
+    {
+        if (floatingChildParent == nil)
+            return;
+
+        NSScreen* parentScreen = [floatingChildParent screen];
+        NSScreen* frameScreen = nil;
+        const auto centre = NSMakePoint (NSMidX (frame), NSMidY (frame));
+
+        for (NSScreen* screen in [NSScreen screens])
+            if (NSPointInRect (centre, [screen frame]))
+                frameScreen = screen;
+
+        const auto onParentDisplay = parentScreen == nil || frameScreen == nil
+                                  || NSEqualRects ([frameScreen frame], [parentScreen frame]);
+
+        if (! onParentDisplay && ! floatingChildDetached)
+        {
+            if ([window parentWindow] != nil)
+                [floatingChildParent removeChildWindow: window];
+
+            if (! isAlwaysOnTop)
+                [window setLevel: NSFloatingWindowLevel];
+
+            [window setHidesOnDeactivate: YES];
+            floatingChildDetached = true;
+        }
+        else if (onParentDisplay && floatingChildDetached)
+        {
+            floatingChildDetached = false;
+
+            if (isAlwaysOnTop)
+            {
+                setAlwaysOnTop (true);
+            }
+            else
+            {
+                [window setLevel: NSNormalWindowLevel];
+                [window setHidesOnDeactivate: NO];
+            }
+
+            if ([window isVisible] && [window parentWindow] == nil)
+                [floatingChildParent addChildWindow: window ordered: NSWindowAbove];
+        }
+    }
+
+    void floatingParentWillMiniaturize()
+    {
+        if (floatingChildDetached)
+            [window orderOut: nil];
+    }
+
+    void floatingParentDidDeminiaturize()
+    {
+        if (floatingChildDetached && component.isVisible())
+        {
+            ++insideToFrontCall;
+            [window orderFront: nil];
+            --insideToFrontCall;
+        }
+    }
+
+    void floatingParentDidChangeScreen()
+    {
+        updateFloatingChildAttachment ([window frame]);
     }
 
     void toFront (bool makeActiveWindow) override
@@ -1764,6 +1852,7 @@ public:
     WeakReference<Component> safeComponent;
     const bool isSharedWindow = false;
     NSWindow* floatingChildParent = nil;
+    bool floatingChildDetached = false;
    #if USE_COREGRAPHICS_RENDERING
     bool usingCoreGraphics = true;
    #else
@@ -2302,6 +2391,24 @@ struct JuceNSViewClass final : public NSViewComponentPeerWrapper<ObjCClass<NSVie
 
                 p->redirectMovedOrResized();
             }
+        });
+
+        addMethod (@selector (floatingParentWillMiniaturize:), [] (id self, SEL, NSNotification*)
+        {
+            if (auto* p = getOwner (self))
+                p->floatingParentWillMiniaturize();
+        });
+
+        addMethod (@selector (floatingParentDidDeminiaturize:), [] (id self, SEL, NSNotification*)
+        {
+            if (auto* p = getOwner (self))
+                p->floatingParentDidDeminiaturize();
+        });
+
+        addMethod (@selector (floatingParentDidChangeScreen:), [] (id self, SEL, NSNotification*)
+        {
+            if (auto* p = getOwner (self))
+                p->floatingParentDidChangeScreen();
         });
 
         addMethod (@selector (wantsDefaultClipping), [] (id, SEL) { return YES; }); // (this is the default, but may want to customise it in future)
