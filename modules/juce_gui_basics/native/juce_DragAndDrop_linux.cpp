@@ -219,7 +219,9 @@ public:
         dragAndDropCurrentMimeType = 0;
         auto dndCurrentVersion = (static_cast<unsigned long> (clientMsg.data.l[1]) & 0xff000000) >> 24;
 
-        if (dndCurrentVersion < 3 || dndCurrentVersion > XWindowSystemUtilities::Atoms::DndVersion)
+        // Newer sources are accepted: their messages are a superset of version 3, and mutter's
+        // XWayland bridge always sends version 5 regardless of the XdndAware version we advertise.
+        if (dndCurrentVersion < 3)
         {
             dragAndDropSourceWindow = 0;
             return;
