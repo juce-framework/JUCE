@@ -72,6 +72,14 @@ public:
 
     FileSearchPath getDefaultLocationsToSearch() override;
 
+    /** Returns the URIs of the plugins in a bundle that searchPathsForPlugins() has found.
+
+        searchPathsForPlugins() reports bundle paths, but a PluginDescription names an LV2 plugin by its
+        URI, so the two never compare equal. This lets a host match a bundle against the descriptions
+        it already holds. Only the bundle's manifest is read; no plugin code is loaded.
+    */
+    StringArray getPluginUrisInBundle (const String& bundlePath);
+
     /** @internal */
     class Pimpl;
 

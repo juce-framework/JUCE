@@ -86,6 +86,11 @@ FileSearchPath LV2PluginFormatHeadless::getDefaultLocationsToSearch()
     return pimpl->getDefaultLocationsToSearch();
 }
 
+StringArray LV2PluginFormatHeadless::getPluginUrisInBundle (const String& bundlePath)
+{
+    return pimpl->getPluginUrisInBundle (bundlePath);
+}
+
 bool LV2PluginFormatHeadless::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const
 {
     return false;

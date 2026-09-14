@@ -4265,9 +4265,16 @@ public:
         return identifier;
     }
 
-    bool pluginNeedsRescanning (const PluginDescription&)
+    bool pluginNeedsRescanning (const PluginDescription& description)
     {
-        return true;
+        // Discovery reads only the bundle's metadata, so the bundle is all a description can be
+        // checked against. getDescription() records its modification time for this.
+        const auto* plugin = findPluginByUri (description.fileOrIdentifier);
+
+        if (plugin == nullptr)
+            return true;
+
+        return getBundleFile (plugin).getLastModificationTime() != description.lastFileModTime;
     }
 
     bool doesPluginStillExist (const PluginDescription& description)
@@ -4275,14 +4282,39 @@ public:
         return findPluginByUri (description.fileOrIdentifier) != nullptr;
     }
 
-    StringArray searchPathsForPlugins (const FileSearchPath& paths, bool, bool)
+    StringArray searchPathsForPlugins (const FileSearchPath& paths, bool recursive, bool)
     {
-        loadAllPluginsFromPaths (paths);
+        // The defaults are always searched. A host that stores the search path it was given would
+        // otherwise never see a later change to LV2_PATH.
+        auto pathsToSearch = paths;
+        pathsToSearch.addPath (getDefaultLocationsToSearch());
 
+        loadAllPluginsFromPaths (pathsToSearch);
+
+        // The world holds every bundle loaded so far, from whichever path, with one entry per plugin.
+        // Report each bundle once, and only the ones under the paths asked for.
         StringArray result;
 
         for (const auto* plugin : world->getAllPlugins())
-            result.add (URL { lv2_host::Plugin { plugin }.getBundleUri().getTyped() }.getLocalFile().getFullPathName());
+        {
+            const auto bundle = getBundleFile (plugin);
+
+            if (pathsToSearch.isFileInPath (bundle, recursive))
+                result.addIfNotAlreadyThere (bundle.getFullPathName());
+        }
+
+        return result;
+    }
+
+    StringArray getPluginUrisInBundle (const String& bundlePath)
+    {
+        std::vector<const LilvPlugin*> plugins;
+        findPluginsByFile (File (bundlePath), plugins);
+
+        StringArray result;
+
+        for (const auto* plugin : plugins)
+            result.add (lv2_host::Plugin { plugin }.getUri().getTyped());
 
         return result;
     }
@@ -4528,6 +4560,11 @@ private:
     const LilvPlugin* findPluginByUri (const String& s)
     {
         return world->getAllPlugins().getByUri (world->newUri (s.toRawUTF8()));
+    }
+
+    static File getBundleFile (const LilvPlugin* plugin)
+    {
+        return lv2_host::bundlePathFromUri (lilv_node_as_uri (lilv_plugin_get_bundle_uri (plugin)));
     }
 
     void findPluginsByFile (const File& f, std::vector<const LilvPlugin*>& result)
