@@ -76,7 +76,7 @@ void VST3PluginFormatHeadless::findAllTypesForFile (OwnedArray<PluginDescription
 
         VSTComSmartPtr host { new VST3HostContextHeadless(), IncrementRef::no };
 
-        for (const auto& d : DescriptionLister::findDescriptionsSlow (*host, *pluginFactory, File (file)))
+        for (const auto& d : DescriptionLister::findDescriptionsSlow (*host, *pluginFactory, File (file), onClassDiscoveryStarted))
             results.add (new PluginDescription (d));
     }
 }

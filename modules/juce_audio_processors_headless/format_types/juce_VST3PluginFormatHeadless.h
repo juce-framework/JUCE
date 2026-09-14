@@ -63,6 +63,13 @@ public:
     FileSearchPath getDefaultLocationsToSearch() override;
     void createARAFactoryAsync (const PluginDescription&, ARAFactoryCreationCallback callback) override;
 
+    /** Called by findAllTypesForFile() with the name of each plug-in in the file, just before it is
+        instantiated. A file that houses many plug-ins is instantiated one plug-in at a time, so this
+        lets a scanner tell a slow shell that is making progress from one that has hung, and name the
+        plug-in it hung in.
+    */
+    std::function<void (const String& className)> onClassDiscoveryStarted;
+
 private:
     //==============================================================================
     void createPluginInstance (const PluginDescription&, double initialSampleRate,
