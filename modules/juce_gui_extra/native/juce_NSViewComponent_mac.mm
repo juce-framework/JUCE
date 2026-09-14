@@ -166,7 +166,11 @@ void NSViewComponent::resizeToFitView()
     {
         auto* view = static_cast<NSViewAttachment*> (attachment.get())->view;
         auto r = [view frame];
-        setBounds (Rectangle<int> ((int) r.size.width, (int) r.size.height));
+
+        // The frame is unscaled, and componentMovedOrResized() multiplies the desktop scale back in.
+        // Without dividing it out here, the two enlarge each other endlessly at any scale but 1.0.
+        const auto scale = getTopLevelComponent()->getDesktopScaleFactor();
+        setBounds (Rectangle<int> ((int) (r.size.width / scale), (int) (r.size.height / scale)));
 
         if (auto* peer = getTopLevelComponent()->getPeer())
         {
