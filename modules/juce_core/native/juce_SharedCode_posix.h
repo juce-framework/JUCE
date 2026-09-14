@@ -630,7 +630,8 @@ File juce_getExecutableFile()
 
             // For the main program glibc reports argv[0], which is a bare name when the app was
             // started through PATH, and would then resolve against the working directory.
-            if (dladdr1 (localSymbol, &exeInfo, RTLD_DL_LINKMAP, &map) != 0 && map != nullptr && map->l_name[0] == 0)
+            if (dladdr1 (localSymbol, &exeInfo, reinterpret_cast<void**> (&map), RTLD_DL_LINKMAP) != 0
+                 && map != nullptr && map->l_name[0] == 0)
             {
                 const File self ("/proc/self/exe");
 
