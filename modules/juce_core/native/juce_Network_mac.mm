@@ -395,6 +395,7 @@ public:
     void cancel()
     {
         const std::scoped_lock lock { mutex };
+        cancelled = true;
         token.cancel();
     }
 
@@ -422,6 +423,14 @@ public:
 
         std::unique_lock lock { mutex };
         token = std::move (newToken);
+
+        // A cancel that arrived while the task was being created found
+        // an empty token; it is honoured here, before anything waits.
+        if (cancelled)
+        {
+            token.cancel();
+            return false;
+        }
 
         while (! condvar.wait_for (lock,
                                    std::chrono::milliseconds { 1 },
@@ -544,6 +553,7 @@ private:
     int statusCode = 0;
     int numRedirects = 0;
     State state = State::beforeStart;
+    bool cancelled = false;
 
     SharedResourcePointer<SharedSession> session;
     TaskToken token;
