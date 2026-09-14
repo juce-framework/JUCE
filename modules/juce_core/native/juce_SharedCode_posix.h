@@ -624,7 +624,23 @@ File juce_getExecutableFile()
             Dl_info exeInfo;
 
             auto localSymbol = (void*) juce_getExecutableFile;
+
+           #if JUCE_LINUX && defined (__GLIBC__)
+            link_map* map = nullptr;
+
+            // For the main program glibc reports argv[0], which is a bare name when the app was
+            // started through PATH, and would then resolve against the working directory.
+            if (dladdr1 (localSymbol, &exeInfo, RTLD_DL_LINKMAP, &map) != 0 && map != nullptr && map->l_name[0] == 0)
+            {
+                const File self ("/proc/self/exe");
+
+                if (self.isSymbolicLink())
+                    return self.getLinkedTarget().getFullPathName();
+            }
+           #else
             dladdr (localSymbol, &exeInfo);
+           #endif
+
             return CharPointer_UTF8 (exeInfo.dli_fname);
         }
     };

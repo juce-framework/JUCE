@@ -186,6 +186,7 @@
  #include <errno.h>
  #include <fcntl.h>
  #include <fnmatch.h>
+ #include <link.h>
  #include <net/if.h>
  #include <netdb.h>
  #include <netinet/in.h>
