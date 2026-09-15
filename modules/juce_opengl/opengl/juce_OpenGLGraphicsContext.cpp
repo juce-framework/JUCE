@@ -1529,7 +1529,7 @@ struct StateHelpers
             glGetIntegerv (GL_MAX_ELEMENTS_INDICES, &maxIndices);
             glGetIntegerv (GL_MAX_ELEMENTS_VERTICES, &maxVertices);
 
-            clearGLError();
+            OpenGLHelpers::resetErrorState();
 
             if (maxIndices <= 0 || maxVertices <= 0)
                 return defaultNumQuads;
@@ -2114,7 +2114,7 @@ struct NonShaderContext final : public LowLevelGraphicsSoftwareRenderer
         if (target.context.getProfile() == OpenGLProfile::compatibility)
             glEnable (GL_TEXTURE_2D);
 
-        clearGLError();
+        OpenGLHelpers::resetErrorState();
        #endif
 
         ViewportRestorer viewportRestorer;

@@ -155,7 +155,7 @@ public:
         if (associatedContext->getProfile() == OpenGLProfile::compatibility)
             glEnable (GL_TEXTURE_2D);
 
-        clearGLError();
+        OpenGLHelpers::resetErrorState();
        #endif
         {
             const ScopedTextureBinding scopedTextureBinding;

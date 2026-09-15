@@ -435,7 +435,7 @@ public:
                 glViewport (0, 0, viewportArea.getWidth(), viewportArea.getHeight());
                 context.currentRenderScale = currentAreaAndScale.scale;
                 context.renderer->renderOpenGL();
-                clearGLError();
+                clearDebugGLError();
             }
 
             if (context.renderComponents)
@@ -699,7 +699,7 @@ public:
         {
             JUCE_CHECK_OPENGL_ERROR
             shadersAvailable = OpenGLShaderProgram::getLanguageVersion() > 0;
-            clearGLError();
+            OpenGLHelpers::resetErrorState();
         }
         else
         {
@@ -749,7 +749,7 @@ public:
             NativeContext::Locker locker (*nativeContext);
 
             (*work) (context);
-            clearGLError();
+            clearDebugGLError();
         }
     }
 
@@ -1768,7 +1768,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         }
         else
         {
-            clearGLError();
+            OpenGLHelpers::resetErrorState();
         }
     }
     else

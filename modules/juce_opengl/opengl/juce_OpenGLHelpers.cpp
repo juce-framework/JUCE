@@ -307,7 +307,12 @@ struct EGLHelpers
 
 void OpenGLHelpers::resetErrorState()
 {
-    while (glGetError() != GL_NO_ERROR) {}
+    // GL implementations retain one flag per error category, so the total number of errors
+    // will be small, but we need to guard against infinite loops in some situations like
+    // when the context has been lost.
+    for (int i = 0; i < 16; ++i)
+        if (glGetError() == GL_NO_ERROR)
+            break;
 }
 
 void* OpenGLHelpers::getExtensionFunction (const char* functionName)
