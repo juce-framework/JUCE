@@ -56,18 +56,25 @@ class JUCE_API  OwningDrawableComponent : private std::unique_ptr<Drawable>,
 public:
     /** Creates an OwningDrawableComponent that takes ownership of the underlying Drawable object.
     */
-    static std::unique_ptr<OwningDrawableComponent> create (std::unique_ptr<Drawable> d)
+    static std::unique_ptr<OwningDrawableComponent> create (std::unique_ptr<Drawable> d, BoundsToEnclose boundsToEnclose)
     {
         if (d == nullptr)
             return {};
 
-        return rawToUniquePtr (new OwningDrawableComponent (std::move (d)));
+        return rawToUniquePtr (new OwningDrawableComponent (std::move (d), boundsToEnclose));
+    }
+
+    /** Creates an OwningDrawableComponent that takes ownership of the underlying Drawable object.
+    */
+    static std::unique_ptr<OwningDrawableComponent> create (std::unique_ptr<Drawable> d)
+    {
+        return create (std::move (d), BoundsToEnclose::drawableBounds);
     }
 
     /** Creates an OwningDrawableComponent that copies a Drawable and takes ownership of the copied
         object.
     */
-    static std::unique_ptr<OwningDrawableComponent> createFromCopy (const Drawable* const d)
+    static std::unique_ptr<OwningDrawableComponent> createFromCopy (const Drawable* const d, BoundsToEnclose boundsToEnclose)
     {
         if (d == nullptr)
             return {};
@@ -77,7 +84,15 @@ public:
         if (copy == nullptr)
             return {};
 
-        return rawToUniquePtr (new OwningDrawableComponent (std::move (copy)));
+        return rawToUniquePtr (new OwningDrawableComponent (std::move (copy), boundsToEnclose));
+    }
+
+    /** Creates an OwningDrawableComponent that copies a Drawable and takes ownership of the copied
+        object.
+    */
+    static std::unique_ptr<OwningDrawableComponent> createFromCopy (const Drawable* const d)
+    {
+        return createFromCopy (d, BoundsToEnclose::drawableBounds);
     }
 
     /** Attempts to parse an SVG (Scalable Vector Graphics) document from a file.
@@ -95,9 +110,14 @@ public:
     }
 
 private:
-    OwningDrawableComponent (std::unique_ptr<Drawable> drawableIn)
+    OwningDrawableComponent (std::unique_ptr<Drawable> drawableIn, BoundsToEnclose boundsToEncloseIn)
         : unique_ptr (std::move (drawableIn)),
-          DrawableComponent (*get())
+          DrawableComponent (*get(), boundsToEncloseIn)
+    {
+    }
+
+    OwningDrawableComponent (std::unique_ptr<Drawable> drawableIn)
+        : OwningDrawableComponent (std::move (drawableIn), BoundsToEnclose::drawableBounds)
     {
     }
 };
