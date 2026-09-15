@@ -35,8 +35,16 @@
 namespace juce
 {
 
-DrawableButton::DrawableButton (const String& name, const DrawableButton::ButtonStyle buttonStyle)
-    : Button (name), style (buttonStyle)
+DrawableButton::DrawableButton (const String& name,
+                                const DrawableButton::ButtonStyle buttonStyle,
+                                BoundsToEnclose boundsToEncloseIn)
+    : Button (name), style (buttonStyle), boundsToEnclose (boundsToEncloseIn)
+{
+}
+
+DrawableButton::DrawableButton (const String& name,
+                                const DrawableButton::ButtonStyle buttonStyle)
+    : DrawableButton (name, buttonStyle, BoundsToEnclose::drawableBounds)
 {
 }
 
@@ -56,14 +64,14 @@ void DrawableButton::setImages (const Drawable* normal,
 {
     jassert (normal != nullptr); // you really need to give it at least a normal image
 
-    normalImage     = OwningDrawableComponent::createFromCopy (normal);
-    overImage       = OwningDrawableComponent::createFromCopy (over);
-    downImage       = OwningDrawableComponent::createFromCopy (down);
-    disabledImage   = OwningDrawableComponent::createFromCopy (disabled);
-    normalImageOn   = OwningDrawableComponent::createFromCopy (normalOn);
-    overImageOn     = OwningDrawableComponent::createFromCopy (overOn);
-    downImageOn     = OwningDrawableComponent::createFromCopy (downOn);
-    disabledImageOn = OwningDrawableComponent::createFromCopy (disabledOn);
+    normalImage     = OwningDrawableComponent::createFromCopy (normal, boundsToEnclose);
+    overImage       = OwningDrawableComponent::createFromCopy (over, boundsToEnclose);
+    downImage       = OwningDrawableComponent::createFromCopy (down, boundsToEnclose);
+    disabledImage   = OwningDrawableComponent::createFromCopy (disabled, boundsToEnclose);
+    normalImageOn   = OwningDrawableComponent::createFromCopy (normalOn, boundsToEnclose);
+    overImageOn     = OwningDrawableComponent::createFromCopy (overOn, boundsToEnclose);
+    downImageOn     = OwningDrawableComponent::createFromCopy (downOn, boundsToEnclose);
+    disabledImageOn = OwningDrawableComponent::createFromCopy (disabledOn, boundsToEnclose);
 
     currentImage = nullptr;
 
