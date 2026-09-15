@@ -116,7 +116,7 @@ std::unique_ptr<AccessibilityHandler> DrawableComponent::createAccessibilityHand
 
 void DrawableComponent::resetComponentBoundsToDrawable()
 {
-    const auto drawableBounds = drawable.getDrawableBounds().toNearestInt();
+    const auto drawableBounds = drawable.getDrawableBounds().getSmallestIntegerContainer();
     originRelativeToComponent = -drawableBounds.getPosition();
     setBounds (drawableBounds);
 }
