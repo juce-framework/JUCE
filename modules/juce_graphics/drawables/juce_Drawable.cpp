@@ -159,4 +159,14 @@ Rectangle<float> Drawable::getDrawableBounds() const
     return getDrawableBoundsUntransformed().transformedBy (getDrawableTransform());
 }
 
+Rectangle<float> Drawable::getContentBounds() const
+{
+    return getContentBoundsUntransformed().transformedBy (getDrawableTransform());
+}
+
+Rectangle<float> Drawable::getContentBoundsUntransformed() const
+{
+    return getDrawableBoundsUntransformed();
+}
+
 } // namespace juce

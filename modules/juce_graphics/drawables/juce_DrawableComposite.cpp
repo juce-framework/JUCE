@@ -63,6 +63,11 @@ Rectangle<float> DrawableComposite::getDrawableBoundsUntransformed() const
     return r;
 }
 
+Rectangle<float> DrawableComposite::getContentBoundsUntransformed() const
+{
+    return contentArea;
+}
+
 void DrawableComposite::setContentArea (Rectangle<float> newArea)
 {
     contentArea = newArea;

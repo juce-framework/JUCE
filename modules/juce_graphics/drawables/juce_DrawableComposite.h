@@ -143,6 +143,8 @@ public:
     /** @internal */
     Rectangle<float> getDrawableBoundsUntransformed() const override;
     /** @internal */
+    Rectangle<float> getContentBoundsUntransformed() const override;
+    /** @internal */
     Path getOutlineAsPath() const override;
 
 private:

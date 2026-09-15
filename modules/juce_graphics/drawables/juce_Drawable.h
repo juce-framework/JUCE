@@ -186,6 +186,30 @@ public:
     */
     virtual Rectangle<float> getDrawableBoundsUntransformed() const = 0;
 
+    /** Returns the bounds that this drawable is intended to occupy. These bounds are affected by
+        the transform passed to setDrawableTransform().
+
+        A DrawableComposite will return the value of getContentArea(), while the base implementation
+        will return the value of getDrawableBounds().
+
+        Consequently, a Drawable parsed from an SVG file will return the SVG viewBox from this
+        function.
+    */
+    Rectangle<float> getContentBounds() const;
+
+    /** Returns the area that this drawable is intended to occupy in its original coordinate
+        system. These bounds are not affected by setDrawableTransform().
+
+        A DrawableComposite will return the value of getContentArea(), while the base implementation
+        will return the value of getDrawableBounds().
+
+        Consequently, a Drawable parsed from an SVG file will return the SVG viewBox from this
+        function.
+
+        @see getContentBounds
+    */
+    virtual Rectangle<float> getContentBoundsUntransformed() const;
+
     /** Returns the width of the drawable bounds rounded up to the nearest integer.
 
         @see getDrawableBounds
