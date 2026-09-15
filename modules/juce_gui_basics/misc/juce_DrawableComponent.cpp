@@ -35,15 +35,21 @@
 namespace juce
 {
 
-DrawableComponent::DrawableComponent (Drawable& drawableIn)
-    : drawable (drawableIn)
+DrawableComponent::DrawableComponent (Drawable& drawableIn, BoundsToEnclose boundsToEncloseIn)
+    : drawable (drawableIn), boundsToEnclose (boundsToEncloseIn)
 {
     drawable.addListener (this);
-    resetComponentBoundsToDrawable();
+    resetComponentBoundsTo (boundsToEnclose == BoundsToEnclose::drawableBounds ? drawable.getDrawableBounds()
+                                                                               : drawable.getContentBounds());
 
     setInterceptsMouseClicks (false, false);
     setPaintingIsUnclipped (true);
     setAccessible (false);
+}
+
+DrawableComponent::DrawableComponent (Drawable& drawableIn)
+    : DrawableComponent (drawableIn, BoundsToEnclose::drawableBounds)
+{
 }
 
 DrawableComponent::~DrawableComponent()
@@ -53,8 +59,12 @@ DrawableComponent::~DrawableComponent()
 
 void DrawableComponent::setTransformToFit (const Rectangle<float>& areaInParent, RectanglePlacement placement)
 {
-    if (! areaInParent.isEmpty())
-        setTransform (placement.getTransformToFit (drawable.getDrawableBounds(), areaInParent));
+    if (areaInParent.isEmpty())
+        return;
+
+    const auto boundsToFit = boundsToEnclose == BoundsToEnclose::drawableBounds ? drawable.getDrawableBounds()
+                                                                                : drawable.getContentBounds();
+    setTransform (placement.getTransformToFit (boundsToFit, areaInParent));
 }
 
 Path DrawableComponent::getOutlineAsPath() const
@@ -114,16 +124,17 @@ std::unique_ptr<AccessibilityHandler> DrawableComponent::createAccessibilityHand
     return Component::createAccessibilityHandler();
 }
 
-void DrawableComponent::resetComponentBoundsToDrawable()
+void DrawableComponent::resetComponentBoundsTo (Rectangle<float> bounds)
 {
-    const auto drawableBounds = drawable.getDrawableBounds().getSmallestIntegerContainer();
+    const auto drawableBounds = bounds.getSmallestIntegerContainer();
     originRelativeToComponent = -drawableBounds.getPosition();
     setBounds (drawableBounds);
 }
 
-void DrawableComponent::drawableBoundsChanged (Drawable*)
+void DrawableComponent::drawableBoundsChanged (Drawable* d)
 {
-    resetComponentBoundsToDrawable();
+    if (boundsToEnclose == BoundsToEnclose::drawableBounds)
+        resetComponentBoundsTo (d->getDrawableBounds());
 }
 
 } // namespace juce

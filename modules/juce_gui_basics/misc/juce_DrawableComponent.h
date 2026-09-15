@@ -35,12 +35,35 @@
 namespace juce
 {
 
+/** Specifies the source bounds that a DrawableComponent should fit itself around.
+
+    New projects should use contentBounds, as this will respect the designer's intent when
+    specifying a viewBox in an SVG file. Even better, avoid using DrawableComponent
+    entirely, which is meant as a backwards compatibility class for projects migrating from
+    JUCE 8.
+
+    @see DrawableComponent
+*/
+enum class BoundsToEnclose
+{
+    drawableBounds, ///< The bounds returned by Drawable::getDrawableBounds(). These are the
+                    ///< smallest rectangular bounds covering visible features of the Drawable.
+                    ///< The Drawable class prior to JUCE 9 used these bounds for fitting.
+    contentBounds   ///< The bounds returned by Drawable::getContentBounds(). For Drawables
+                    ///< that were created by parsing an SVG, this will return the viewBox, which
+                    ///< expresses the designer's intent for fitting purposes. The fallback
+                    ///< value is the same as the one returned by Drawable::getDrawableBounds().
+};
+
 class JUCE_API DrawableComponent : public Component,
                                    private Drawable::Listener
 {
 public:
     /** Wraps a Drawable object in a Component. */
     explicit DrawableComponent (Drawable& drawableIn);
+
+    /** Wraps a Drawable object in a Component. */
+    DrawableComponent (Drawable& drawableIn, BoundsToEnclose boundsToEnclose);
 
     /** Destructor. */
     ~DrawableComponent() override;
@@ -78,13 +101,14 @@ public:
         Intended to replace Drawable::setBoundsToEnclose which is only ever called in conjunction
         with getDrawableBounds().
     */
-    void resetComponentBoundsToDrawable();
+    void resetComponentBoundsTo (Rectangle<float> bounds);
 
 private:
     void drawableBoundsChanged (Drawable*) override;
 
     Drawable& drawable;
     Point<int> originRelativeToComponent;
+    BoundsToEnclose boundsToEnclose;
 };
 
 } // namespace juce
