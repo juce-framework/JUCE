@@ -659,6 +659,7 @@ public:
     void setContentArea (const Rectangle<float>& area)
     {
         composite->setContentArea (area);
+        composite->resetBoundingBoxToContentArea();
     }
 
     Rectangle<float> getContentArea() const
