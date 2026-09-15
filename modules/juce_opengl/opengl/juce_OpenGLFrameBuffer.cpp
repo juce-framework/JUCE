@@ -39,6 +39,8 @@ static bool tryAllocTexture (int w, int h, GLenum type)
 {
     JUCE_CHECK_OPENGL_ERROR
 
+    OpenGLHelpers::resetErrorState();
+
     for (const auto& [testWidth, testHeight] : { std::tuple (w, h),
                                                  std::tuple (nextPowerOfTwo (w), nextPowerOfTwo (h)) })
     {
