@@ -396,6 +396,8 @@ public:
     {
         const std::scoped_lock lock { mutex };
         token.cancel();
+        state = State::cancelled;
+        condvar.notify_one();
     }
 
     int64 getContentLength() const noexcept
@@ -436,7 +438,11 @@ public:
             }
         }
 
-        return true;
+        if (state != State::cancelled)
+            return true;
+
+        token.cancel();
+        return false;
     }
 
     int read (char* dest, int numBytes)
@@ -529,7 +535,8 @@ private:
     {
         beforeStart,
         started,
-        requestFinished
+        requestFinished,
+        cancelled,
     };
 
     mutable std::mutex mutex;
