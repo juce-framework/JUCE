@@ -841,14 +841,7 @@ public:
 
     bool connect (WebInputStream::Listener* webInputListener, [[maybe_unused]] int numRetries = 0)
     {
-        {
-            const ScopedLock lock (createConnectionLock);
-
-            if (hasBeenCancelled)
-                return false;
-
-            createConnection();
-        }
+        createConnection();
 
         if (! connection.has_value())
             return false;
@@ -970,6 +963,11 @@ private:
 
     void createConnection()
     {
+        const ScopedLock lock (createConnectionLock);
+
+        if (hasBeenCancelled)
+            return;
+
         jassert (! connection.has_value());
 
         NSUniquePtr<NSURL> nsURL { [[NSURL URLWithString: juceStringToNS (url.toString (! addParametersToRequestBody))] retain] };
