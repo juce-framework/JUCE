@@ -2221,6 +2221,25 @@ struct JuceNSViewClass final : public NSViewComponentPeerWrapper<ObjCClass<NSVie
         addMethod (@selector (draggingEnded:),                  draggingExited);
         addMethod (@selector (draggingExited:),                 draggingExited);
 
+        addMethod (@selector (hitTest:), [] (id self, SEL, NSPoint pt) -> NSView*
+        {
+            auto* hit = sendSuperclassMessage<NSView*> (self, @selector (hitTest:), pt);
+
+            if (hit == nil || hit == self)
+                return hit;
+
+            auto* owner = getOwner (self);
+
+            if (owner == nullptr || ! owner->isBlockedByModalComponent())
+                return hit;
+
+            for (NSView* v = hit; v != nil && v != self; v = [v superview])
+                if ([v isKindOfClass: [self class]])
+                    return hit;
+
+            return owner->view;
+        });
+
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         addMethod (@selector (clipsToBounds), [] (id, SEL) { return YES; });
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
