@@ -346,11 +346,11 @@ public:
     TaskToken() = default;
 
     explicit TaskToken (NSURLRequest* request, SessionListener* l)
-        : task ([&]
+        : task (std::invoke ([&]
                 {
                     SharedResourcePointer<SharedSession> session;
                     return session->addTask (request, l);
-                }())
+                }))
     {
         if (auto* t = task.get())
             [t resume];
@@ -977,13 +977,13 @@ private:
         if (nsURL == nullptr)
             return;
 
-        const auto timeOutSeconds = [this]
+        const auto timeOutSeconds = std::invoke ([this]
         {
             if (timeOutMs > 0)
                 return timeOutMs / 1000.0;
 
             return timeOutMs < 0 ? std::numeric_limits<double>::infinity() : 60.0;
-        }();
+        });
 
         NSUniquePtr<NSMutableURLRequest> req { [[NSMutableURLRequest requestWithURL: nsURL.get()
                                                                         cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
