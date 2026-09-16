@@ -126,14 +126,30 @@ public:
     };
 
     /** Reads an area of pixels from the framebuffer into a 32-bit ARGB pixel array.
-        The RowOrder parameter specifies the order of rows in the resulting array.
+
+        @param targetData   the array to fill. It must have room for at least
+                            sourceArea.getWidth() * sourceArea.getHeight() pixels, which
+                            are written contiguously with no padding between rows.
+        @param sourceArea   the area to read, in OpenGL coordinates, with its origin at the
+                            bottom-left corner of the framebuffer.
+        @param order        the order in which the rows of the area are written to targetData.
+        @returns            true if the pixels were read, or false if the framebuffer isn't
+                            currently allocated.
     */
-    bool readPixels (PixelARGB* targetData, const Rectangle<int>& sourceArea, RowOrder);
+    bool readPixels (PixelARGB* targetData, const Rectangle<int>& sourceArea, RowOrder order);
 
     /** Writes an area of pixels into the framebuffer from a specified pixel array.
-        The RowOrder parameter specifies the order of rows in srcData.
+
+        @param srcData      the pixels to write. It must contain at least
+                            targetArea.getWidth() * targetArea.getHeight() pixels, stored
+                            contiguously with no padding between rows.
+        @param targetArea   the area to write, in OpenGL coordinates, with its origin at the
+                            bottom-left corner of the framebuffer.
+        @param order        the order of the rows in srcData.
+        @returns            true if the pixels were written, or false if the framebuffer isn't
+                            currently allocated.
     */
-    bool writePixels (const PixelARGB* srcData, const Rectangle<int>& targetArea, RowOrder);
+    bool writePixels (const PixelARGB* srcData, const Rectangle<int>& targetArea, RowOrder order);
 
 private:
     class Pimpl;

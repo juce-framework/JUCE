@@ -147,9 +147,11 @@ public:
 
         jassert (associatedContext != nullptr);
 
+        const OpenGLTargetSaver targetSaver;
         auto* transientState = std::get_if<TransientState> (&state);
         transientState->bind();
         const ScopeGuard unbinder { [transientState] { transientState->unbind(); }};
+        glViewport (0, 0, area.getWidth(), area.getHeight());
 
        #if ! JUCE_ANDROID
         if (associatedContext->getProfile() == OpenGLProfile::compatibility)
@@ -312,15 +314,26 @@ public:
         OpenGLTexture tex;
         tex.loadARGB (data, area.getWidth(), area.getHeight());
 
+        // loadARGB() puts the pixels in the bottom rows of a texture that may be larger than the
+        // area. Bottom-up data is drawn without flipping, so the texture's top edge is anchored
+        // above the target area by the height of the padding, which then falls outside the clip.
+        const auto flipVertically = order == RowOrder::fromTopDown;
+        const auto padding = flipVertically ? 0 : tex.getHeight() - area.getHeight();
+
+        const Rectangle<int> targetArea { area.getX(),
+                                          transientState->height - area.getBottom(),
+                                          area.getWidth(),
+                                          area.getHeight() };
+
         glViewport (0, 0, transientState->width, transientState->height);
-        associatedContext->copyTexture (area,
-                                        Rectangle<int> (area.getX(),
-                                                        area.getY(),
+        associatedContext->copyTexture (targetArea,
+                                        Rectangle<int> (targetArea.getX(),
+                                                        targetArea.getY() - padding,
                                                         tex.getWidth(),
                                                         tex.getHeight()),
                                         transientState->width,
                                         transientState->height,
-                                        order == RowOrder::fromTopDown,
+                                        flipVertically,
                                         false);
 
         JUCE_CHECK_OPENGL_ERROR
