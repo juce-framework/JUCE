@@ -322,9 +322,9 @@ public:
            #ifdef JucePlugin_PreferredChannelConfigurations
             return kAudioUnitErr_PropertyNotWritable;
            #else
-            const int busCount = AudioUnitHelpers::getBusCount (*juceFilter, isInput);
+            const auto busCount = AudioUnitHelpers::getBusCount (*juceFilter, isInput);
 
-            if  ((! juceFilter->canAddBus (isInput)) && ((busCount == 0) || (! juceFilter->canRemoveBus (isInput))))
+            if ((! juceFilter->canAddBus (isInput)) && ((busCount == 0) || (! juceFilter->canRemoveBus (isInput))))
                 return kAudioUnitErr_PropertyNotWritable;
 
             // we need to already create the underlying elements so that we can change their formats
@@ -334,39 +334,44 @@ public:
                 return err;
 
             // however we do need to update the format tag: we need to do the same thing in SetFormat, for example
-            const int requestedNumBus = static_cast<int> (count);
+            const auto requestedNumBus = static_cast<int> (count);
+
+            (isInput ? currentInputLayout : currentOutputLayout).resize (requestedNumBus);
+
+            const auto didSetBusesSuccessfully = std::invoke ([&]
             {
-                (isInput ? currentInputLayout : currentOutputLayout).resize (requestedNumBus);
-
-                int busNr;
-
-                for (busNr = (busCount - 1); busNr != (requestedNumBus - 1); busNr += (requestedNumBus > busCount ? 1 : -1))
+                if (requestedNumBus > busCount)
                 {
-                    if (requestedNumBus > busCount)
+                    for (auto i = busCount; i != requestedNumBus; ++i)
                     {
                         if (! juceFilter->addBus (isInput))
-                            break;
+                            return false;
 
-                        err = syncAudioUnitWithChannelSet (isInput, busNr,
-                                                           juceFilter->getBus (isInput, busNr + 1)->getDefaultLayout());
-                        if (err != noErr)
-                            break;
+                        const auto syncResult = syncAudioUnitWithChannelSet (isInput,
+                                                                             i,
+                                                                             juceFilter->getBus (isInput, i)->getDefaultLayout());
+
+                        if (syncResult != noErr)
+                            return false;
                     }
-                    else
-                    {
-                        if (! juceFilter->removeBus (isInput))
-                            break;
-                    }
+
+                    return true;
                 }
 
-                err = (busNr == (requestedNumBus - 1) ? (OSStatus) noErr : (OSStatus) kAudioUnitErr_FormatNotSupported);
-            }
+                for (auto i = busCount; i != requestedNumBus; --i)
+                {
+                    if (! juceFilter->removeBus (isInput))
+                        return false;
+                }
 
-            // was there an error?
-            if (err != noErr)
+                return true;
+            });
+
+            if (! didSetBusesSuccessfully)
             {
                 // restore bus state
-                const int newBusCount = AudioUnitHelpers::getBusCount (*juceFilter, isInput);
+                const auto newBusCount = AudioUnitHelpers::getBusCount (*juceFilter, isInput);
+
                 for (int i = newBusCount; i != busCount; i += (busCount > newBusCount ? 1 : -1))
                 {
                     if (busCount > newBusCount)
