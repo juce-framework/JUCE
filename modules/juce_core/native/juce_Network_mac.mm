@@ -454,7 +454,10 @@ public:
             std::unique_lock lock { mutex };
 
             const auto getNumAvailable = [&] { return jmin (numBytes, (int) [data.get() length]); };
-            condvar.wait (lock, [&] { return getNumAvailable() > 0 || state == State::requestFinished; });
+            condvar.wait (lock, [&] { return getNumAvailable() > 0 || state == State::requestFinished || state == State::cancelled; });
+
+            if (state == State::cancelled)
+                break;
 
             const auto available = getNumAvailable();
 
