@@ -275,6 +275,32 @@ private:
             return nativeFrame.addedTo (window.getContentComponentBorder());
         }
 
+        void checkBounds (Rectangle<int>& bounds,
+                          const Rectangle<int>& previousBounds,
+                          const Rectangle<int>& limits,
+                          bool isStretchingTop,
+                          bool isStretchingLeft,
+                          bool isStretchingBottom,
+                          bool isStretchingRight) override
+        {
+            if (auto* editor = dynamic_cast<AudioProcessorEditor*> (window.getContentComponent()))
+            {
+                if (! editor->isResizable())
+                {
+                    bounds = previousBounds.withPosition (bounds.getPosition());
+                    return;
+                }
+            }
+
+            BorderedComponentBoundsConstrainer::checkBounds (bounds,
+                                                             previousBounds,
+                                                             limits,
+                                                             isStretchingTop,
+                                                             isStretchingLeft,
+                                                             isStretchingBottom,
+                                                             isStretchingRight);
+        }
+
     private:
         DocumentWindow& window;
     };
