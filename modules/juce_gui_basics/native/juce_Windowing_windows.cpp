@@ -3668,6 +3668,9 @@ private:
                 // painting, so log the click ourselves and only defer to DefWindowProc once the
                 // mouse moves with the button held.
                 captionMouseDown = lParam;
+                // We still want to raise the window if the caption is clicked. This is normally
+                // handled by DefWindowProc but we're bypassing that.
+                SetWindowPos (hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
                 return 0;
         }
 
