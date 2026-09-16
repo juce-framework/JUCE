@@ -94,8 +94,26 @@ public:
     /** Returns the height of the buffer. */
     int getHeight() const noexcept;
 
-    /** Returns the texture ID number for using this buffer as a texture. */
+    /** Returns the texture ID number for using this buffer as a texture.
+
+        The texture may be larger than the buffer itself, see getTextureWidth() and
+        getTextureHeight(). The buffer's content occupies the top-left corner of the
+        texture, so the top-left pixel of the buffer is at texture coordinate (0, 1).
+    */
     GLuint getTextureID() const noexcept;
+
+    /** Returns the width of the texture that backs this buffer.
+
+        This is normally the same as getWidth(), but if the GL implementation is unable
+        to create a texture with the exact size that was requested, a larger texture will
+        be used instead, and this will return the actual width of that texture.
+    */
+    int getTextureWidth() const noexcept;
+
+    /** Returns the height of the texture that backs this buffer.
+        @see getTextureWidth
+    */
+    int getTextureHeight() const noexcept;
 
     //==============================================================================
     /** Selects this buffer as the current OpenGL rendering target. */
