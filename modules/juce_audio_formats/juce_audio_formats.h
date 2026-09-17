@@ -83,7 +83,7 @@
     If you disable this, you might also want to set a value for JUCE_FLAC_INCLUDE_PATH, to
     specify the path where your flaclib headers live.
 
-    This config option only has an effect with JUCE_USE_FLAC is enabled.
+    This config option only has an effect when JUCE_USE_FLAC is enabled.
 */
 #ifndef JUCE_INCLUDE_FLAC_CODE
  #define JUCE_INCLUDE_FLAC_CODE 1
