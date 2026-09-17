@@ -32,9 +32,6 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
 #if JUCE_USE_OGGVORBIS
 
 #if JUCE_MAC && ! defined (__MACOSX__)
@@ -52,6 +49,13 @@ namespace juce
   #include <ogg/ogg.h>
  }
 #endif
+
+#endif
+
+namespace juce
+{
+
+#if JUCE_USE_OGGVORBIS
 
 namespace OggVorbisNamespace
 {

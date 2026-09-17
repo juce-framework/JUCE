@@ -34,9 +34,6 @@
 
 #include <juce_core/detail/juce_FunctionPointerDestructor.h>
 
-namespace juce
-{
-
 #if JUCE_USE_OPUS
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
@@ -58,6 +55,13 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 #endif
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+#endif
+
+namespace juce
+{
+
+#if JUCE_USE_OPUS
 
 //==============================================================================
 static const char* const opusFormatName = "Opus file";
