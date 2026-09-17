@@ -32,7 +32,7 @@
   ==============================================================================
 */
 
-#include "juce_audio_formats/codecs/flac/juce_flac_config.h"
+#include "juce_audio_formats/codecs/juce_flac_config.h"
 
 #if JUCE_USE_FLAC && (JUCE_INCLUDE_FLAC_CODE || ! defined (JUCE_INCLUDE_FLAC_CODE))
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")

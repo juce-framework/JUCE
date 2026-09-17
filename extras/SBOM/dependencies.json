@@ -131,7 +131,7 @@
       "supplier": "Organization: Xiph.Org Foundation",
       "cpe": "cpe:2.3:a:xiph:flac",
       "purl": "pkg:github/xiph/flac",
-      "version": { "file": "modules/juce_audio_formats/codecs/flac/juce_flac_config.h",
+      "version": { "file": "modules/juce_audio_formats/codecs/juce_flac_config.h",
                    "patterns": ["#define\\s+PACKAGE_VERSION\\s+\"([^\"]+)\""] } },
 
     { "name": "libogg",
