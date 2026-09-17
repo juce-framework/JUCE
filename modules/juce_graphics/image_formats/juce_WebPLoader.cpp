@@ -32,6 +32,8 @@
   ==============================================================================
 */
 
+#if JUCE_USE_WEBP
+
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 
 #if ! defined (JUCE_INCLUDE_WEBPLIB_CODE) || JUCE_INCLUDE_WEBPLIB_CODE
@@ -506,3 +508,5 @@ static WebPImageFormatTests webpImageFormatTests;
 #endif
 
 } // namespace juce
+
+#endif

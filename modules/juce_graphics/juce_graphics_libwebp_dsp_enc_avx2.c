@@ -39,7 +39,9 @@
 // through its cpuid-guarded dispatch, so it is safe to compile it with
 // elevated instruction-set options
 
-#if ! defined (JUCE_INCLUDE_WEBPLIB_CODE) || JUCE_INCLUDE_WEBPLIB_CODE
+#include <juce_graphics/image_formats/juce_webp_config.h>
+
+#if JUCE_USE_WEBP && JUCE_INCLUDE_WEBPLIB_CODE
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4244 4245 4310 4701 6001 6011 6239 6286 6287 6297 6326 6385 6387)
 

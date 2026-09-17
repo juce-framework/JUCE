@@ -119,6 +119,15 @@
  #define JUCE_JPEGLIB_INCLUDE_PATH <jpeglib.h>
 #endif
 
+/** Config: JUCE_USE_WEBP
+    Enables the WebP image format class.
+    If your app doesn't need to read or write WebP images, you might want to disable this to
+    reduce the size of your binaries and build time.
+*/
+#ifndef JUCE_USE_WEBP
+ #define JUCE_USE_WEBP 1
+#endif
+
 /** Config: JUCE_INCLUDE_WEBPLIB_CODE
     This can be used to disable Juce's embedded 3rd-party libwebp code.
     You might need to tweak this if you're linking to an external libwebp library in your app,
@@ -126,6 +135,8 @@
 
     If you disable this, you might also want to set values for JUCE_WEBPLIB_DECODE_INCLUDE_PATH
     and JUCE_WEBPLIB_ENCODE_INCLUDE_PATH, to specify the paths where your libwebp headers live.
+
+    This config option only has an effect when JUCE_USE_WEBP is enabled.
 */
 #ifndef JUCE_INCLUDE_WEBPLIB_CODE
  #define JUCE_INCLUDE_WEBPLIB_CODE 1

@@ -10272,6 +10272,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngstruct.h">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\juce_webp_config.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_Image.h">
       <Filter>JUCE Modules\juce_graphics\images</Filter>
     </ClInclude>

@@ -230,6 +230,8 @@ public:
 };
 
 //==============================================================================
+#if JUCE_USE_WEBP || DOXYGEN
+
 /**
     A subclass of ImageFileFormat for reading and writing WebP files.
 
@@ -276,5 +278,7 @@ private:
     float quality = 0.9f;
     bool lossless = false;
 };
+
+#endif
 
 } // namespace juce

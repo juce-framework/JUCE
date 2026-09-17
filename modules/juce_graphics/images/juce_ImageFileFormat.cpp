@@ -42,8 +42,13 @@ struct DefaultImageFormats
         static PNGImageFormat png;
         static JPEGImageFormat jpg;
         static GIFImageFormat gif;
+
+       #if JUCE_USE_WEBP
         static WebPImageFormat webp;
         static ImageFileFormat* formats[] { &png, &jpg, &gif, &webp };
+       #else
+        static ImageFileFormat* formats[] { &png, &jpg, &gif };
+       #endif
         return formats;
     }
 };

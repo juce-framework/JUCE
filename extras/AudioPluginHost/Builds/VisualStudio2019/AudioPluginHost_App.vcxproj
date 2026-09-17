@@ -5580,6 +5580,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pnglibconf.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngpriv.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngstruct.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\juce_webp_config.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_Image.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImageCache.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImageConvolutionKernel.h"/>
