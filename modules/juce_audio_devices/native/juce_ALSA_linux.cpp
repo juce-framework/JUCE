@@ -520,6 +520,13 @@ public:
         sampleRate = newSampleRate;
         bufferSize = newBufferSize;
 
+        // Widened before the loop below fills currentInputChans and
+        // inputChannelDataForCallback, which have to agree: getActiveInputChannels()
+        // must not report more channels than the callback is given pointers for.
+        // A request for no inputs at all stays empty rather than being widened.
+        if (inputChannels.getHighestBit() >= 0)
+            ensureMinimumNumBitsSet (inputChannels, (int) minChansIn);
+
         int maxInputsRequested = inputChannels.getHighestBit() + 1;
         maxInputsRequested = jmax ((int) minChansIn, jmin ((int) maxChansIn, maxInputsRequested));
 
@@ -564,8 +571,6 @@ public:
                 inputDevice.reset();
                 return;
             }
-
-            ensureMinimumNumBitsSet (currentInputChans, (int) minChansIn);
 
             if (! inputDevice->setParameters ((unsigned int) sampleRate,
                                               jlimit ((int) minChansIn, (int) maxChansIn, currentInputChans.getHighestBit() + 1),
