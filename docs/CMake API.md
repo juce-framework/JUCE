@@ -714,6 +714,15 @@ attributes directly to these creation functions, rather than adding them later.
   `kARAPlaybackTransformationContentBasedFadeAtTail`,
   `kARAPlaybackTransformationContentBasedFadeAtHead`.
 
+`LV2_AUTO_MANIFEST`
+- May be either `TRUE` or `FALSE`. Defaults to `TRUE`. When `TRUE`, a `POST_BUILD` step will be
+  added to the LV2 target which will generate the LV2 turtle manifest files into the plugin bundle
+  directory. This is normally desirable, but does require that the plugin can be successfully
+  loaded immediately after building the LV2 target. If the plugin needs further processing before
+  it can be loaded (e.g. custom signing), then set this option to FALSE to disable the automatic
+  manifest generation. To generate the manifest at a later point in the build, use the
+  `juce_enable_lv2_manifest_step` function.
+
 `VST3_AUTO_MANIFEST`
 - May be either `TRUE` or `FALSE`. Defaults to `TRUE`. When `TRUE`, a `POST_BUILD` step will be
   added to the VST3 target which will generate a `moduleinfo.json` file into the Resources
@@ -797,6 +806,21 @@ This is not always appropriate, if extra build steps (such as signing or modifyi
 bundle) must be executed before the plugin can be loaded. In such cases, you should set
 `VST3_AUTO_MANIFEST FALSE`, use `add_custom_command(TARGET POST_BUILD)` to add your own post-build
 steps, and then finally call `juce_enable_vst3_manifest_step`.
+
+#### `juce_enable_lv2_manifest_step`
+
+    juce_enable_lv2_manifest_step(<target>)
+
+You may call this function to manually enable LV2 manifest generation on a plugin. The argument to
+this function should be a target previously created with `juce_add_plugin`. If that target was
+configured without the LV2 format, this function does nothing, so it is safe to call
+unconditionally in projects that only enable LV2 on some platforms.
+
+`LV2_AUTO_MANIFEST TRUE` will cause the LV2 manifest to be generated immediately after building.
+This is not always appropriate, if extra build steps (such as signing or modifying the plugin
+bundle) must be executed before the plugin can be loaded. In such cases, you should set
+`LV2_AUTO_MANIFEST FALSE`, use `add_custom_command(TARGET POST_BUILD)` to add your own post-build
+steps, and then finally call `juce_enable_lv2_manifest_step`.
 
 #### `juce_set_<kind>_sdk_path`
 
