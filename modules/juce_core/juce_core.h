@@ -197,6 +197,24 @@
  #define JUCE_ENABLE_ALLOCATION_HOOKS 0
 #endif
 
+/** Config: JUCE_ALLOW_DIRECT2D_UNDER_WINE
+    On Windows, JUCE falls back to the software renderer when it detects that it is
+    running under Wine, because stock Wine does not implement the Direct2D and
+    DirectComposition surface that the Direct2D renderer needs. Wine remains an
+    unsupported platform either way.
+
+    Some Wine builds do implement that surface. Enabling this tells JUCE to use the
+    Direct2D renderer there anyway; you then own whatever follows. It can also be
+    enabled at run time by setting the JUCE_ALLOW_DIRECT2D_UNDER_WINE environment
+    variable to something other than "0", which lets a Wine distribution turn it on
+    for binaries it did not build itself.
+
+    This has no effect anywhere except under Wine.
+*/
+#ifndef JUCE_ALLOW_DIRECT2D_UNDER_WINE
+ #define JUCE_ALLOW_DIRECT2D_UNDER_WINE 0
+#endif
+
 #ifndef JUCE_STRING_UTF_TYPE
  #define JUCE_STRING_UTF_TYPE 8
 #endif

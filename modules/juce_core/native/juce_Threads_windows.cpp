@@ -306,6 +306,41 @@ bool juce_isRunningInWine()
     return ntdll != nullptr && GetProcAddress (ntdll, "wine_get_version") != nullptr;
 }
 
+/*  Whether the Direct2D render path should be avoided because we are on Wine.
+
+    Wine is not a supported platform, and by default this returns true for every
+    Wine build, which is what selects the software fallback. Some Wine builds do
+    implement the Direct2D 1.3 and DirectComposition surface that JUCE needs, and
+    on those the fallback is not wanted. Rather than requiring those users to
+    patch JUCE, they can opt back in and take responsibility for the result:
+
+      - define JUCE_ALLOW_DIRECT2D_UNDER_WINE=1 when building, or
+      - set the JUCE_ALLOW_DIRECT2D_UNDER_WINE environment variable to something
+        other than "0", which lets a Wine distribution enable it for binaries it
+        did not build.
+
+    Neither makes Wine supported; both are off unless explicitly requested, so the
+    default behaviour is unchanged.
+*/
+bool juce_shouldAvoidDirect2DUnderWine();
+bool juce_shouldAvoidDirect2DUnderWine()
+{
+    if (! juce_isRunningInWine())
+        return false;
+
+   #if JUCE_ALLOW_DIRECT2D_UNDER_WINE
+    return false;
+   #else
+    static const bool optedIn = []
+    {
+        const auto v = SystemStats::getEnvironmentVariable ("JUCE_ALLOW_DIRECT2D_UNDER_WINE", {}).trim();
+        return v.isNotEmpty() && v != "0";
+    }();
+
+    return ! optedIn;
+   #endif
+}
+
 //==============================================================================
 bool DynamicLibrary::open (const String& name)
 {
