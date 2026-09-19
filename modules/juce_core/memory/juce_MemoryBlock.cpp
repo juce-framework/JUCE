@@ -118,8 +118,10 @@ bool MemoryBlock::operator!= (const MemoryBlock& other) const noexcept
 
 bool MemoryBlock::matches (const void* dataToCompare, size_t dataSize) const noexcept
 {
+    // A block of no bytes has no address to hand memcmp, which may not be given
+    // a null pointer even when there is nothing at all to compare.
     return size == dataSize
-            && memcmp (data, dataToCompare, size) == 0;
+            && (size == 0 || memcmp (data, dataToCompare, size) == 0);
 }
 
 //==============================================================================
