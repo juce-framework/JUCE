@@ -314,9 +314,13 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
                     if (indentationLevel >= 0 && ! lastWasTextNode)
                         outputStream << newLineChars;
 
-                    child->writeElementAsText (outputStream,
-                                               lastWasTextNode ? 0 : (indentationLevel + (indentationLevel >= 0 ? 2 : 0)), lineWrapLength,
-                                               newLineChars);
+                    // An indentation level below zero says that there are no line endings
+                    // to write, and newLineChars is then null, so a child must not be
+                    // given a level of its own that would ask for one.
+                    const auto childIndentation = indentationLevel < 0 ? -1
+                                                : (lastWasTextNode ? 0 : indentationLevel + 2);
+
+                    child->writeElementAsText (outputStream, childIndentation, lineWrapLength, newLineChars);
                     lastWasTextNode = false;
                 }
             }
