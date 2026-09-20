@@ -290,7 +290,9 @@ bool MessageManager::Lock::exclusiveTryAcquire (bool lockIsMandatory) const noex
 
     const auto result = tryAcquire (lockIsMandatory);
 
-    if (! result)
+    if (result)
+        entryHeld = true;
+    else
         entryMutex.exit();
 
     return result;
@@ -362,18 +364,22 @@ bool MessageManager::Lock::tryAcquire (bool lockIsMandatory) const noexcept
 
 void MessageManager::Lock::exit() const noexcept
 {
+    // The entry mutex is released whether or not the lock was acquired. A thread
+    // which already had exclusive access to the MessageManager gained the mutex and
+    // acquired nothing, and the mutex would otherwise be held still when this object
+    // is destroyed, which is undefined behaviour.
+    if (! std::exchange (entryHeld, false))
+        return;
+
+    const ScopeGuard unlocker { [&] { entryMutex.exit(); } };
+
     const auto wasAcquired = [&]
     {
         const std::scoped_lock lock { mutex };
         return acquired;
     }();
 
-    if (! wasAcquired)
-        return;
-
-    const ScopeGuard unlocker { [&] { entryMutex.exit(); } };
-
-    if (blockingMessage == nullptr)
+    if (! wasAcquired || blockingMessage == nullptr)
         return;
 
     if (auto* mm = MessageManager::instance)

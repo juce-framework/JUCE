@@ -386,6 +386,12 @@ public:
         mutable ReferenceCountedObjectPtr<BlockingMessage> blockingMessage;
         mutable std::condition_variable condvar;
         mutable bool abortWait = false, acquired = false;
+
+        // Whether the entry mutex above was gained and has still to be released. This
+        // is not the same as acquired: a thread which already has exclusive access to
+        // the MessageManager gains the entry mutex and acquires nothing. Only the
+        // thread holding the entry mutex touches this.
+        mutable bool entryHeld = false;
     };
 
     //==============================================================================
