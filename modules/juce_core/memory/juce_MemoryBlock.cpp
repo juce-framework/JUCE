@@ -118,8 +118,18 @@ bool MemoryBlock::operator!= (const MemoryBlock& other) const noexcept
 
 bool MemoryBlock::matches (const void* dataToCompare, size_t dataSize) const noexcept
 {
-    return size == dataSize
-            && memcmp (data, dataToCompare, size) == 0;
+    jassert (dataToCompare != nullptr || dataSize == 0);
+
+    if (size != dataSize)
+        return false;
+
+    if (size == 0)
+        return true;
+
+    if (dataToCompare == nullptr)
+        return false;
+
+    return memcmp (data, dataToCompare, size) == 0;
 }
 
 //==============================================================================
