@@ -429,4 +429,54 @@ bool MemoryBlock::fromBase64Encoding (StringRef s)
     return true;
 }
 
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class MemoryBlockTest final : public UnitTest
+{
+public:
+    MemoryBlockTest()
+        : UnitTest ("MemoryBlock", UnitTestCategories::memory) {}
+
+    void runTest() final
+    {
+        testCase ("Empty blocks compare equal", [&]
+        {
+            const MemoryBlock a, b;
+
+            expect (a == b);
+            expect (! (a != b));
+            expect (a.matches (nullptr, 0));
+            expect (a.matches (b.getData(), b.getSize()));
+        });
+
+        testCase ("An empty block does not match a populated one", [&]
+        {
+            const MemoryBlock empty;
+            const MemoryBlock populated { "abc", 3 };
+
+            expect (empty != populated);
+            expect (populated != empty);
+            expect (! empty.matches (populated.getData(), populated.getSize()));
+            expect (! populated.matches (nullptr, 0));
+        });
+
+        testCase ("Blocks with matching contents compare equal", [&]
+        {
+            const MemoryBlock a { "abc", 3 };
+            const MemoryBlock b { "abc", 3 };
+            const MemoryBlock c { "abd", 3 };
+
+            expect (a == b);
+            expect (a != c);
+            expect (a.matches (b.getData(), b.getSize()));
+            expect (! a.matches (c.getData(), c.getSize()));
+        });
+    }
+};
+
+static MemoryBlockTest memoryBlockTest;
+
+#endif
+
 } // namespace juce
