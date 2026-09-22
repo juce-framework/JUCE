@@ -996,7 +996,7 @@ namespace IconConverters
                 // mask contains an alpha channel.
 
                 HeapBlock<bool> opacityMask (numPixels);
-                memset (bitmapImageData, 0, numColourComponents);
+                zeromem (bitmapImageData, numColourComponents);
                 ::DrawIconEx (dc, 0, 0, icon, bm.bmWidth, bm.bmHeight, 0, nullptr, DI_MASK);
 
                 for (int i = 0; i < numPixels; ++i)
@@ -1005,7 +1005,7 @@ namespace IconConverters
                 Image result = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true, SoftwareImageType{});
                 Image::BitmapData imageData (result, Image::BitmapData::readWrite);
 
-                memset (bitmapImageData, 0, numColourComponents);
+                zeromem (bitmapImageData, numColourComponents);
                 ::DrawIconEx (dc, 0, 0, icon, bm.bmWidth, bm.bmHeight, 0, nullptr, DI_NORMAL);
                 memcpy (imageData.data, bitmapImageData, numColourComponents);
 
