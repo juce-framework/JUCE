@@ -507,14 +507,28 @@ public:
 
         beginTest ("Lambda thread");
         {
-            WaitableEvent threadLaunched;
+            std::condition_variable condvar;
+            std::mutex mutex;
+            bool run = false;
 
-            LambdaThread thread ([&] { threadLaunched.signal(); });
+            LambdaThread thread ([&]
+            {
+                std::unique_lock lock { mutex };
+                run = true;
+                condvar.notify_one();
+                expect (condvar.wait_for (lock, maximumTimeout, [&] { return ! run; }));
+            });
             expect (! thread.isThreadRunning());
 
             expect (thread.startThread());
             expect (thread.isThreadRunning());
-            expect (threadLaunched.wait (maximumTimeout));
+
+            {
+                std::unique_lock lock { mutex };
+                expect (condvar.wait_for (lock, maximumTimeout, [&] { return run; }));
+                run = false;
+                condvar.notify_one();
+            }
 
             expect (thread.stopThread (maximumTimeout));
             expect (! thread.isThreadRunning());
