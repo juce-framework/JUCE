@@ -262,12 +262,11 @@ namespace XmlOutputFunctions
 }
 
 void XmlElement::writeElementAsText (OutputStream& outputStream,
-                                     int indentationLevel,
-                                     int lineWrapLength,
-                                     const char* newLineChars) const
+                                     std::optional<LineFormat> lineFormat,
+                                     int lineWrapLength) const
 {
-    if (indentationLevel >= 0)
-        XmlOutputFunctions::writeSpaces (outputStream, (size_t) indentationLevel);
+    if (lineFormat.has_value())
+        XmlOutputFunctions::writeSpaces (outputStream, (size_t) lineFormat->indentationLevel);
 
     if (! isTextElement())
     {
@@ -275,15 +274,14 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
         outputStream << tagName;
 
         {
-            auto attIndent = (size_t) (indentationLevel + tagName.length() + 1);
             int lineLen = 0;
 
             for (const auto& [name, value] : getAttributeIterator())
             {
-                if (lineLen > lineWrapLength && indentationLevel >= 0)
+                if (lineLen > lineWrapLength && lineFormat.has_value())
                 {
-                    outputStream << newLineChars;
-                    XmlOutputFunctions::writeSpaces (outputStream, attIndent);
+                    outputStream << lineFormat->newLineChars;
+                    XmlOutputFunctions::writeSpaces (outputStream, (size_t) (lineFormat->indentationLevel + tagName.length() + 1));
                     lineLen = 0;
                 }
 
@@ -311,20 +309,23 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
                 }
                 else
                 {
-                    if (indentationLevel >= 0 && ! lastWasTextNode)
-                        outputStream << newLineChars;
+                    if (lineFormat.has_value() && ! lastWasTextNode)
+                        outputStream << lineFormat->newLineChars;
 
                     child->writeElementAsText (outputStream,
-                                               lastWasTextNode ? 0 : (indentationLevel + (indentationLevel >= 0 ? 2 : 0)), lineWrapLength,
-                                               newLineChars);
+                                               lineFormat.has_value()
+                                                   ? std::optional (lastWasTextNode ? lineFormat->unindented()
+                                                                                    : lineFormat->indented())
+                                                   : std::nullopt,
+                                               lineWrapLength);
                     lastWasTextNode = false;
                 }
             }
 
-            if (indentationLevel >= 0 && ! lastWasTextNode)
+            if (lineFormat.has_value() && ! lastWasTextNode)
             {
-                outputStream << newLineChars;
-                XmlOutputFunctions::writeSpaces (outputStream, (size_t) indentationLevel);
+                outputStream << lineFormat->newLineChars;
+                XmlOutputFunctions::writeSpaces (outputStream, (size_t) lineFormat->indentationLevel);
             }
 
             outputStream.write ("</", 2);
@@ -405,9 +406,11 @@ void XmlElement::writeTo (OutputStream& output, const TextFormat& options) const
             output << options.newLineChars;
     }
 
-    writeElementAsText (output, options.newLineChars == nullptr ? -1 : 0,
-                        options.lineWrapLength,
-                        options.newLineChars);
+    writeElementAsText (output,
+                        options.newLineChars != nullptr
+                            ? std::optional (LineFormat { options.newLineChars, 0 })
+                            : std::nullopt,
+                        options.lineWrapLength);
 
     if (options.newLineChars != nullptr)
         output << options.newLineChars;

@@ -910,9 +910,18 @@ private:
     LinkedListPointer<XmlAttributeNode> attributes;
     String tagName;
 
+    struct LineFormat
+    {
+        const char* newLineChars;
+        int indentationLevel;
+
+        LineFormat indented() const    { return { newLineChars, indentationLevel + 2 }; }
+        LineFormat unindented() const  { return { newLineChars, 0 }; }
+    };
+
     XmlElement (int) noexcept;
     void copyChildrenAndAttributesFrom (const XmlElement&);
-    void writeElementAsText (OutputStream&, int, int, const char*) const;
+    void writeElementAsText (OutputStream&, std::optional<LineFormat>, int) const;
     void getChildElementsAsArray (XmlElement**) const noexcept;
     void reorderChildElements (XmlElement**, int) noexcept;
     const XmlAttribute* getAttribute (StringRef) const noexcept;
