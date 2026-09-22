@@ -1019,9 +1019,8 @@ public:
 
     void runTest() override
     {
+        testCase ("Float formatting", [&]
         {
-            beginTest ("Float formatting");
-
             auto element = std::make_unique<XmlElement> ("test");
             Identifier number ("number");
 
@@ -1046,7 +1045,387 @@ public:
                 element->setAttribute (number, test.first);
                 expectEquals (element->getStringAttribute (number), test.second);
             }
-        }
+        });
+
+        testCase ("Single-line output contains no line endings or indentation", [&]
+        {
+            expectSingleLineOutputIsUnchanged ("<a>t<b><c/></b></a>");
+            expectSingleLineOutputIsUnchanged ("<a>t<b><c/></b><d/></a>");
+            expectSingleLineOutputIsUnchanged ("<a><b>t<c><d/></c></b></a>");
+            expectSingleLineOutputIsUnchanged ("<a>t<b/></a>");
+            expectSingleLineOutputIsUnchanged ("<a>t<b>x</b></a>");
+            expectSingleLineOutputIsUnchanged ("<a><b><c/></b></a>");
+        });
+
+        testCase ("Nested elements are indented by two spaces per level", [&]
+        {
+            XmlElement root { "a" };
+            root.createNewChildElement ("b")->createNewChildElement ("c");
+
+            expectEquals (root.toString (XmlElement::TextFormat{}.withoutHeader()),
+                          String ("<a>\r\n  <b>\r\n    <c/>\r\n  </b>\r\n</a>\r\n"));
+        });
+
+        testCase ("A default header is written unless it is suppressed", [&]
+        {
+            const XmlElement root { "a" };
+
+            expectEquals (root.toString(),
+                          String ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n\r\n<a/>\r\n"));
+            expectEquals (root.toString (XmlElement::TextFormat{}.withoutHeader()),
+                          String ("<a/>\r\n"));
+            expectEquals (root.toString (XmlElement::TextFormat{}.singleLine()),
+                          String ("<?xml version=\"1.0\" encoding=\"UTF-8\"?> <a/>"));
+        });
+
+        testCase ("A custom header, encoding and DTD can be supplied", [&]
+        {
+            const XmlElement root { "a" };
+
+            auto encoded = XmlElement::TextFormat{};
+            encoded.customEncoding = "UTF-16";
+            expectEquals (root.toString (encoded),
+                          String ("<?xml version=\"1.0\" encoding=\"UTF-16\"?>\r\n\r\n<a/>\r\n"));
+
+            auto custom = XmlElement::TextFormat{};
+            custom.customHeader = "<?header?>";
+            custom.customEncoding = "UTF-16";
+            custom.dtd = "<!DOCTYPE a>";
+            expectEquals (root.toString (custom),
+                          String ("<?header?>\r\n\r\n<!DOCTYPE a>\r\n<a/>\r\n"));
+        });
+
+        testCase ("Attributes are wrapped once the line wrap length is passed", [&]
+        {
+            XmlElement root { "e" };
+            root.setAttribute ("a", "1234567890");
+            root.setAttribute ("b", "x");
+
+            // the wrapped attribute is indented to line up under the first one,
+            // which is the tag name plus the angle bracket and separating space
+            auto format = XmlElement::TextFormat{}.withoutHeader();
+            format.lineWrapLength = 10;
+            expectEquals (root.toString (format), String ("<e a=\"1234567890\"\r\n   b=\"x\"/>\r\n"));
+
+            format.lineWrapLength = 100;
+            expectEquals (root.toString (format), String ("<e a=\"1234567890\" b=\"x\"/>\r\n"));
+        });
+
+        testCase ("Illegal characters are escaped", [&]
+        {
+            XmlElement root { "a" };
+            root.setAttribute ("v", "\"&<>");
+            root.addTextElement ("\"&<>");
+
+            // quotes are escaped in text content as well as in attribute values
+            expectEquals (root.toString (XmlElement::TextFormat{}.singleLine().withoutHeader()),
+                          String ("<a v=\"&quot;&amp;&lt;&gt;\">&quot;&amp;&lt;&gt;</a>"));
+        });
+
+        testCase ("Newlines are escaped in attributes but kept in text", [&]
+        {
+            XmlElement root { "a" };
+            root.setAttribute ("v", "x\ny");
+            root.addTextElement ("x\ny");
+
+            expectEquals (root.toString (XmlElement::TextFormat{}.singleLine().withoutHeader()),
+                          String ("<a v=\"x&#10;y\">x\ny</a>"));
+        });
+
+        testCase ("A document survives a round-trip through parseXML", [&]
+        {
+            XmlElement root { "a" };
+            root.setAttribute ("one", 1);
+            root.setAttribute ("two", "<&\">");
+            auto* child = root.createNewChildElement ("b");
+            child->setAttribute ("three", 2.5);
+            child->addTextElement ("some text");
+            root.createNewChildElement ("c");
+
+            for (const auto& format : { XmlElement::TextFormat{},
+                                        XmlElement::TextFormat{}.singleLine() })
+            {
+                const auto parsed = parseXML (root.toString (format));
+                expect (parsed != nullptr);
+
+                if (parsed != nullptr)
+                    expect (parsed->isEquivalentTo (&root, false));
+            }
+        });
+
+        testCase ("Attributes can be read back as strings, ints, doubles and bools", [&]
+        {
+            XmlElement root { "a" };
+            root.setAttribute ("str", "hello");
+            root.setAttribute ("int", 42);
+            root.setAttribute ("dbl", 0.5);
+
+            expect (root.hasAttribute ("str"));
+            expect (! root.hasAttribute ("missing"));
+            expectEquals (root.getNumAttributes(), 3);
+            expectEquals (root.getAttributeName (0), String ("str"));
+            expectEquals (root.getAttributeValue (0), String ("hello"));
+
+            expectEquals (root.getStringAttribute ("str"), String ("hello"));
+            expectEquals (root.getStringAttribute ("missing", "fallback"), String ("fallback"));
+            expectEquals (root.getIntAttribute ("int"), 42);
+            expectEquals (root.getIntAttribute ("missing", -1), -1);
+            expectEquals (root.getDoubleAttribute ("dbl"), 0.5);
+            expectEquals (root.getDoubleAttribute ("missing", -1.0), -1.0);
+
+            expect (  root.compareAttribute ("str", "hello"));
+            expect (! root.compareAttribute ("str", "HELLO"));
+            expect (  root.compareAttribute ("str", "HELLO",  true));
+            expect (! root.compareAttribute ("str", "HELLO!", true));
+
+            // getBoolAttribute only looks at the first non-whitespace character
+            for (const auto* trueValue : { "1", "t", "true", "y", "yes", "T", "Y" })
+            {
+                root.setAttribute ("bool", trueValue);
+                expect (root.getBoolAttribute ("bool"));
+            }
+
+            for (const auto* falseValue : { "0", "f", "false", "n", "no", "F", "N", "" })
+            {
+                root.setAttribute ("bool", falseValue);
+                expect (! root.getBoolAttribute ("bool"));
+            }
+
+            expect (root.getBoolAttribute ("missing", true));
+        });
+
+        testCase ("Attributes can be removed", [&]
+        {
+            XmlElement root { "a" };
+            root.setAttribute ("one", 1);
+            root.setAttribute ("two", 2);
+
+            root.removeAttribute ("one");
+            expect (! root.hasAttribute ("one"));
+            expect (root.hasAttribute ("two"));
+            expectEquals (root.getNumAttributes(), 1);
+
+            root.removeAttribute ("missing");
+            expectEquals (root.getNumAttributes(), 1);
+
+            root.removeAllAttributes();
+            expectEquals (root.getNumAttributes(), 0);
+        });
+
+        testCase ("Setting an attribute twice replaces the value and keeps its position", [&]
+        {
+            XmlElement root { "a" };
+            root.setAttribute ("one", 1);
+            root.setAttribute ("two", 2);
+            root.setAttribute ("one", 3);
+
+            expectEquals (root.getNumAttributes(), 2);
+            expectEquals (root.getAttributeName (0), String ("one"));
+            expectEquals (root.getIntAttribute ("one"), 3);
+        });
+
+        testCase ("Child elements can be added, inserted, replaced and removed", [&]
+        {
+            XmlElement root { "a" };
+            root.addChildElement (new XmlElement ("second"));
+            root.prependChildElement (new XmlElement ("first"));
+            root.insertChildElement (new XmlElement ("third"), 2);
+            root.insertChildElement (new XmlElement ("last"), -1);
+
+            expectEquals (root.getNumChildElements(), 4);
+            expectEquals (root.getChildElement (0)->getTagName(), String ("first"));
+            expectEquals (root.getChildElement (1)->getTagName(), String ("second"));
+            expectEquals (root.getChildElement (2)->getTagName(), String ("third"));
+            expectEquals (root.getChildElement (3)->getTagName(), String ("last"));
+            expect (root.getChildElement (4) == nullptr);
+
+            auto* second = root.getChildElement (1);
+            expect (root.containsChildElement (second));
+            expect (root.findParentElementOf (second) == &root);
+            expect (root.replaceChildElement (second, new XmlElement ("replaced")));
+            expectEquals (root.getChildElement (1)->getTagName(), String ("replaced"));
+
+            root.removeChildElement (root.getChildElement (0), true);
+            expectEquals (root.getNumChildElements(), 3);
+            expectEquals (root.getChildElement (0)->getTagName(), String ("replaced"));
+
+            root.deleteAllChildElements();
+            expectEquals (root.getNumChildElements(), 0);
+            expect (root.getFirstChildElement() == nullptr);
+        });
+
+        testCase ("Child elements can be found by name and by attribute", [&]
+        {
+            XmlElement root { "a" };
+            root.createNewChildElement ("b")->setAttribute ("id", "1");
+            root.createNewChildElement ("c")->setAttribute ("id", "2");
+            root.createNewChildElement ("b")->setAttribute ("id", "3");
+
+            auto* firstB = root.getChildByName ("b");
+            expect (firstB != nullptr);
+
+            if (firstB != nullptr)
+            {
+                expectEquals (firstB->getStringAttribute ("id"), String ("1"));
+
+                auto* nextB = firstB->getNextElementWithTagName ("b");
+                expect (nextB != nullptr);
+
+                if (nextB != nullptr)
+                    expectEquals (nextB->getStringAttribute ("id"), String ("3"));
+            }
+
+            expect (root.getChildByName ("missing") == nullptr);
+
+            auto* byAttribute = root.getChildByAttribute ("id", "2");
+            expect (byAttribute != nullptr);
+
+            if (byAttribute != nullptr)
+                expectEquals (byAttribute->getTagName(), String ("c"));
+
+            expect (root.getChildByAttribute ("id", "missing") == nullptr);
+
+            root.deleteAllChildElementsWithTagName ("b");
+            expectEquals (root.getNumChildElements(), 1);
+            expectEquals (root.getChildElement (0)->getTagName(), String ("c"));
+        });
+
+        testCase ("Text elements can be read, replaced and removed", [&]
+        {
+            XmlElement root { "a" };
+            root.addTextElement ("one ");
+            root.createNewChildElement ("b")->addTextElement ("two");
+            root.addTextElement (" three");
+
+            expect (! root.isTextElement());
+            expectEquals (root.getAllSubText(), String ("one two three"));
+            expectEquals (root.getChildElementAllSubText ("b", "fallback"), String ("two"));
+            expectEquals (root.getChildElementAllSubText ("missing", "fallback"), String ("fallback"));
+
+            root.deleteAllTextElements();
+            expectEquals (root.getNumChildElements(), 1);
+            expectEquals (root.getAllSubText(), String ("two"));
+
+            const std::unique_ptr<XmlElement> text { XmlElement::createTextElement ("content") };
+            expect (text->isTextElement());
+            expectEquals (text->getText(), String ("content"));
+
+            // setText() is only valid on a text element
+            text->setText ("replaced");
+            expectEquals (text->getText(), String ("replaced"));
+        });
+
+        testCase ("isEquivalentTo compares tag names, attributes and children", [&]
+        {
+            const auto build = [] (const String& tag, const String& firstAttribute)
+            {
+                auto e = std::make_unique<XmlElement> (tag);
+                e->setAttribute (Identifier (firstAttribute), 1);
+                e->setAttribute ("other", 2);
+                e->createNewChildElement ("child");
+                return e;
+            };
+
+            const auto a = build ("tag", "one");
+            const auto b = build ("tag", "one");
+            const auto differentTag = build ("other", "one");
+
+            expect (a->isEquivalentTo (a.get(), false));
+            expect (a->isEquivalentTo (b.get(), false));
+            expect (! a->isEquivalentTo (differentTag.get(), false));
+            expect (! a->isEquivalentTo (nullptr, false));
+
+            // the same attributes in a different order
+            XmlElement reordered { "tag" };
+            reordered.setAttribute ("other", 2);
+            reordered.setAttribute ("one", 1);
+            reordered.createNewChildElement ("child");
+
+            expect (! a->isEquivalentTo (&reordered, false));
+            expect (a->isEquivalentTo (&reordered, true));
+
+            // an extra child makes them differ
+            b->createNewChildElement ("extra");
+            expect (! a->isEquivalentTo (b.get(), false));
+        });
+
+        testCase ("Child elements can be sorted", [&]
+        {
+            struct TagNameComparator
+            {
+                int compareElements (const XmlElement* first, const XmlElement* second) const
+                {
+                    return first->getTagName().compare (second->getTagName());
+                }
+            };
+
+            XmlElement root { "a" };
+
+            for (const auto* tag : { "c", "a", "b" })
+                root.createNewChildElement (tag);
+
+            TagNameComparator comparator;
+            root.sortChildElements (comparator);
+
+            expectEquals (root.getChildElement (0)->getTagName(), String ("a"));
+            expectEquals (root.getChildElement (1)->getTagName(), String ("b"));
+            expectEquals (root.getChildElement (2)->getTagName(), String ("c"));
+        });
+
+        testCase ("Tag names can be tested and changed", [&]
+        {
+            XmlElement root { "ns:tag" };
+
+            expect (root.hasTagName ("ns:tag"));
+            expect (! root.hasTagName ("tag"));
+            expect (root.hasTagNameIgnoringNamespace ("tag"));
+            expectEquals (root.getTagNameWithoutNamespace(), String ("tag"));
+
+            root.setTagName ("other");
+            expectEquals (root.getTagName(), String ("other"));
+            expectEquals (root.getTagNameWithoutNamespace(), String ("other"));
+        });
+
+        testCase ("isValidXmlName rejects names XML does not allow", [&]
+        {
+            expect (XmlElement::isValidXmlName ("tag"));
+            expect (XmlElement::isValidXmlName ("_tag-1.2"));
+            expect (XmlElement::isValidXmlName ("ns:tag"));
+
+            expect (! XmlElement::isValidXmlName (""));
+            expect (! XmlElement::isValidXmlName ("1tag"));
+            expect (! XmlElement::isValidXmlName ("-tag"));
+            expect (! XmlElement::isValidXmlName ("has space"));
+            expect (! XmlElement::isValidXmlName ("has\"quote"));
+        });
+
+        testCase ("An element following text is written inline, and its children indent from column zero", [&]
+        {
+            XmlElement root { "a" };
+            auto* b = root.createNewChildElement ("b");
+            b->addTextElement ("t");
+            b->createNewChildElement ("c")->createNewChildElement ("d");
+
+            expectEquals (root.toString (XmlElement::TextFormat{}.withoutHeader()),
+                          String ("<a>\r\n"
+                                  "  <b>t<c>\r\n"
+                                  "  <d/>\r\n"
+                                  "</c>\r\n"
+                                  "  </b>\r\n"
+                                  "</a>\r\n"));
+        });
+    }
+
+private:
+    void expectSingleLineOutputIsUnchanged (const String& text)
+    {
+        const auto parsed = parseXML (text);
+        expect (parsed != nullptr);
+
+        if (parsed == nullptr)
+            return;
+
+        expectEquals (parsed->toString (XmlElement::TextFormat{}.singleLine().withoutHeader()), text);
     }
 };
 
