@@ -86,7 +86,9 @@ MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other)
     if (this != &other)
     {
         setSize (other.size, false);
-        memcpy (data, other.data, size);
+
+        if (size > 0)
+            memcpy (data, other.data, size);
     }
 
     return *this;
@@ -182,7 +184,8 @@ void MemoryBlock::swapWith (MemoryBlock& other) noexcept
 //==============================================================================
 void MemoryBlock::fillWith (uint8 value) noexcept
 {
-    memset (data, (int) value, size);
+    if (data != nullptr)
+        memset (data, (int) value, size);
 }
 
 void MemoryBlock::append (const void* srcData, size_t numBytes)

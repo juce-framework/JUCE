@@ -37,7 +37,13 @@ namespace juce
 
 //==============================================================================
 /** Fills a block of memory with zeros. */
-inline void zeromem (void* memory, size_t numBytes) noexcept        { memset (memory, 0, numBytes); }
+inline void zeromem (void* memory, size_t numBytes) noexcept
+{
+    if (memory != nullptr)
+        memset (memory, 0, numBytes);
+    else
+        jassert (numBytes == 0);
+}
 
 /** Overwrites a structure or object with zeros. */
 template <typename Type>

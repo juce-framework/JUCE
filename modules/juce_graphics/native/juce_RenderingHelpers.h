@@ -663,11 +663,14 @@ namespace EdgeTableFillers
 
         forcedinline void replaceLine (PixelRGB* dest, PixelARGB colour, int width) const noexcept
         {
+            jassert (dest != nullptr);
+
             if (destPixelStrideIsPixelSize)
             {
                 if (areRGBComponentsEqual)
                 {
-                    memset ((void*) dest, colour.getRed(), (size_t) width * 3);   // if all the component values are the same, we can cheat
+                    // if all the component values are the same, we can cheat
+                    memset ((void*) dest, colour.getRed(), (size_t) width * 3);
                     return;
                 }
 
@@ -682,6 +685,8 @@ namespace EdgeTableFillers
 
         forcedinline void replaceLine (PixelAlpha* dest, const PixelARGB colour, int width) const noexcept
         {
+            jassert (dest != nullptr);
+
             const auto alpha = colour.getAlpha();
 
             if (destPixelStrideIsPixelSize)
