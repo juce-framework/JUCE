@@ -82,8 +82,6 @@ namespace juce
 class JucePluginCompatibility final : public Steinberg::IPluginCompatibility
 {
 public:
-    virtual ~JucePluginCompatibility() = default;
-
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
     Steinberg::tresult PLUGIN_API getCompatibilityJSON (Steinberg::IBStream* stream) override

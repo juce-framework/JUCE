@@ -2496,7 +2496,6 @@ private:
  {
  public:
     JuceARAFactory() = default;
-    virtual ~JuceARAFactory() = default;
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
