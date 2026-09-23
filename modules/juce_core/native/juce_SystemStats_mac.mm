@@ -201,11 +201,7 @@ String SystemStats::getDeviceManufacturer()
 
 bool SystemStats::isOperatingSystem64Bit()
 {
-   #if JUCE_IOS
-    return false;
-   #else
     return true;
-   #endif
 }
 
 int SystemStats::getMemorySizeInMegabytes()

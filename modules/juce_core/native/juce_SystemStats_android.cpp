@@ -91,6 +91,15 @@ namespace AndroidStatsHelpers
         return juceString (LocalRef<jstring> ((jstring) getEnv()->GetStaticObjectField (
                             AndroidBuild, getEnv()->GetStaticFieldID (AndroidBuild, fieldName, "Ljava/lang/String;"))));
     }
+
+    static bool supports64BitAbis()
+    {
+        auto* env = getEnv();
+        const auto fieldId = env->GetStaticFieldID (AndroidBuild, "SUPPORTED_64_BIT_ABIS", "[Ljava/lang/String;");
+        const LocalRef<jobjectArray> abis { (jobjectArray) env->GetStaticObjectField (AndroidBuild, fieldId) };
+
+        return abis != nullptr && env->GetArrayLength (abis) > 0;
+    }
 }
 
 //==============================================================================
@@ -117,11 +126,7 @@ String SystemStats::getDeviceManufacturer()
 
 bool SystemStats::isOperatingSystem64Bit()
 {
-   #if JUCE_64BIT
-    return true;
-   #else
-    return false;
-   #endif
+    return AndroidStatsHelpers::supports64BitAbis();
 }
 
 String SystemStats::getCpuVendor()

@@ -75,7 +75,13 @@ bool SystemStats::isOperatingSystem64Bit()
    #if JUCE_64BIT
     return true;
    #else
-    return false;
+    struct utsname info{};
+
+    if (uname (&info) != 0)
+        return false;
+
+    // A 32-bit process on a 64-bit kernel still sees the kernel's own machine name, e.g. "x86_64" or "aarch64".
+    return std::strstr (info.machine, "64") != nullptr;
    #endif
 }
 

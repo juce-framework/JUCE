@@ -105,7 +105,12 @@ public:
     */
     static String getOperatingSystemName();
 
-    /** Returns true if the OS is 64-bit, or false for a 32-bit OS. */
+    /** Returns true if the operating system is 64-bit, or false for a 32-bit OS.
+
+        This describes the OS rather than the current process, so a 32-bit build
+        running on a 64-bit OS will return true. To find out whether the current
+        process is 64-bit, use the JUCE_64BIT and JUCE_32BIT macros.
+    */
     static bool isOperatingSystem64Bit();
 
     /** Returns an environment variable.

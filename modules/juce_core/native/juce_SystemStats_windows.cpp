@@ -347,29 +347,38 @@ bool SystemStats::isOperatingSystem64Bit()
    #if JUCE_64BIT
     return true;
    #else
-    using LPFN_ISWOW64PROCESS = BOOL (WINAPI*) (HANDLE, PBOOL);
+    auto* kernel32 = ::GetModuleHandleA ("kernel32");
+
+    if (kernel32 == nullptr)
+        return false;
 
     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type")
 
-    static const auto fnIsWow64Process = std::invoke ([]() -> LPFN_ISWOW64PROCESS
-    {
-        if (auto* moduleHandle = ::GetModuleHandleA ("kernel32"))
-            if (auto* result = (LPFN_ISWOW64PROCESS) ::GetProcAddress (moduleHandle, "IsWow64Process"))
-                return result;
+    // Available from Windows 10 1709 and is correct for 32-bit processes on ARM64.
+    using IsWow64Process2Fn = BOOL (WINAPI*) (HANDLE, USHORT*, USHORT*);
 
-        // Unable to locate function! Please let the JUCE team know your current platform/environment
-        // so that we can fix this issue.
-        jassertfalse;
-        return {};
-    });
+    if (auto* fn = (IsWow64Process2Fn) ::GetProcAddress (kernel32, "IsWow64Process2"))
+    {
+        USHORT processMachine = IMAGE_FILE_MACHINE_UNKNOWN;
+        USHORT nativeMachine  = IMAGE_FILE_MACHINE_UNKNOWN;
+
+        if (fn (GetCurrentProcess(), &processMachine, &nativeMachine))
+            return nativeMachine == IMAGE_FILE_MACHINE_AMD64
+                || nativeMachine == IMAGE_FILE_MACHINE_ARM64;
+    }
+
+    using IsWow64ProcessFn = BOOL (WINAPI*) (HANDLE, PBOOL);
+
+    if (auto* fn = (IsWow64ProcessFn) ::GetProcAddress (kernel32, "IsWow64Process"))
+    {
+        BOOL isWow64 = FALSE;
+        return fn (GetCurrentProcess(), &isWow64) && isWow64 != FALSE;
+    }
 
     JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-    BOOL isWow64 = FALSE;
-
-    return fnIsWow64Process != nullptr
-            && fnIsWow64Process (GetCurrentProcess(), &isWow64)
-            && isWow64 != FALSE;
+    jassertfalse;
+    return false;
    #endif
 }
 

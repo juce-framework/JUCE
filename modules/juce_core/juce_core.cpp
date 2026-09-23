@@ -99,6 +99,7 @@
   #include <langinfo.h>
   #include <ifaddrs.h>
   #include <sys/resource.h>
+  #include <sys/utsname.h>
 
   #if JUCE_USE_CURL
    #include <curl/curl.h>
