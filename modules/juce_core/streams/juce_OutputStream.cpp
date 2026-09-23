@@ -376,7 +376,11 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const cha
 
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char* const text)
 {
-    stream.write (text, strlen (text));
+    if (text != nullptr)
+        stream.write (text, strlen (text));
+    else
+        jassertfalse;
+
     return stream;
 }
 
