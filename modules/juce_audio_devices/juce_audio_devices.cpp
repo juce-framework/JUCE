@@ -286,3 +286,7 @@ namespace juce
 
  #include "native/juce_Midi_windows.cpp"
 #endif
+
+#if JUCE_UNIT_TESTS
+ #include "midi_io/juce_ScheduledEventThread_test.cpp"
+#endif
