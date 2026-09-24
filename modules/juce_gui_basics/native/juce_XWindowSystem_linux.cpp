@@ -4083,7 +4083,8 @@ void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer* peer, XClientM
         }
         else if (atom == atoms.protocolList [XWindowSystemUtilities::Atoms::DELETE_WINDOW])
         {
-            peer->handleUserClosingWindow();
+            if (! peer->getComponent().isCurrentlyBlockedByAnotherModalComponent())
+                peer->handleUserClosingWindow();
         }
     }
     else if (clientMsg.message_type == atoms.XdndEnter)
