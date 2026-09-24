@@ -441,26 +441,15 @@ public:
         using ScopedTryLockType = GenericScopedTryLock<Lock>;
 
     private:
-        struct BlockingMessage;
-        friend class ReferenceCountedObjectPtr<BlockingMessage>;
+        class LockingMessage;
 
-        bool exclusiveTryAcquire (bool) const noexcept;
-        bool tryAcquire (bool) const noexcept;
+        bool attemptLock (bool canAbort) const noexcept;
+        bool attemptLockWithMessage (std::unique_lock<std::mutex>, MessageManager&, bool canAbort) const noexcept;
 
-        void setAcquired (bool success) const noexcept;
-
-        //==============================================================================
-        // This mutex is used to make this lock type behave like a normal mutex.
-        // If multiple threads call enter() simultaneously, only one will succeed in gaining
-        // this mutex. The mutex is released again in exit().
-        mutable CriticalSection entryMutex;
-
-        // This mutex protects the other data members of the lock from concurrent access, which
-        // happens when the BlockingMessage calls setAcquired to indicate that the lock was gained.
         mutable std::mutex mutex;
-        mutable ReferenceCountedObjectPtr<BlockingMessage> blockingMessage;
-        mutable std::condition_variable condvar;
-        mutable bool abortWait = false, acquired = false;
+        mutable std::vector<ReferenceCountedObjectPtr<LockingMessage>> messages;
+        mutable bool shouldAbort = false;
+        mutable int depth = 0;
     };
 
     //==============================================================================
@@ -485,6 +474,9 @@ private:
     std::atomic<bool> quitMessagePosted { false }, quitMessageReceived { false };
     Thread::ThreadID messageThreadId;
     std::atomic<Thread::ThreadID> threadWithLock;
+    MessageBase::Ptr lockingMessage;
+    int lockCount = 0;
+
     mutable std::mutex messageThreadIdMutex;
 
     template <typename Function>
