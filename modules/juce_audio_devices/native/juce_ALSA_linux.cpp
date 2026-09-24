@@ -75,6 +75,24 @@ static void getDeviceSampleRates (snd_pcm_t* handle, Array<double>& rates)
     }
 }
 
+struct LibraryCloser
+{
+    void operator() (void* lib) const { dlclose (lib); }
+};
+
+static bool loadedPipeWireHasChannelMixCrash()
+{
+    if (const std::unique_ptr<void, LibraryCloser> lib { dlopen ("libpipewire-0.3.so.0", RTLD_NOW | RTLD_NOLOAD) })
+    {
+        using CheckVersionFn = bool (*) (int, int, int);
+
+        if (auto* checkVersion = reinterpret_cast<CheckVersionFn> (dlsym (lib.get(), "pw_check_library_version")))
+            return checkVersion (1, 6, 0) && ! checkVersion (1, 6, 3);
+    }
+
+    return false;
+}
+
 static void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, unsigned int* maxChans)
 {
     snd_pcm_hw_params_t *params;
@@ -87,8 +105,16 @@ static void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, uns
 
         JUCE_ALSA_LOG ("getDeviceNumChannels: " << (int) *minChans << " " << (int) *maxChans);
 
-        // some virtual devices (dmix for example) report 10000 channels , we have to clamp these values
-        *maxChans = jmin (*maxChans, 256u);
+        // Plugin PCMs advertise channel counts that no real device backs, e.g. the plug
+        // plugin (plughw, and default on a plain ALSA system) reports 10000, so clamp them.
+        // PipeWire's ALSA plugin is an ioplug PCM that reports 128, but affected PipeWire
+        // versions crash when trying to use more than 64. A plug PCM wrapping the PipeWire
+        // PCM reports the plug type, so it isn't limited here.
+        const auto limit = snd_pcm_type (handle) == SND_PCM_TYPE_IOPLUG && loadedPipeWireHasChannelMixCrash()
+                         ? 64u
+                         : 256u;
+
+        *maxChans = jmin (*maxChans, limit);
         *minChans = jmin (*minChans, *maxChans);
     }
     else
