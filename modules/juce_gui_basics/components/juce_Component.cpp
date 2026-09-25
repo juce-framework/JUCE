@@ -2612,6 +2612,13 @@ void Component::internalMouseUp (SafePointer<Component> target,
 
 void Component::internalMouseDrag (SafePointer<Component> target, MouseInputSource source, const detail::PointerState& relativePointerState, Time time)
 {
+    // If the mouse-down that started this drag was blocked by a modal component, the
+    // rest of the gesture shouldn't be delivered either, even if the modal component
+    // has since been dismissed - the target never received the mouse-down that these
+    // drag events would continue.
+    if (target->flags.mouseDownWasBlocked)
+        return;
+
     if (! target->isCurrentlyBlockedByAnotherModalComponent())
     {
         const auto me = makeMouseEvent (source,
