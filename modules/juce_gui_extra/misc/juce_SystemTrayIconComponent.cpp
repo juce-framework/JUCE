@@ -39,7 +39,7 @@ namespace juce
 
 SystemTrayIconComponent::SystemTrayIconComponent()
 {
-    addToDesktop (0);
+    addToDesktop (ComponentPeer::windowRequiresX11);
 }
 
 SystemTrayIconComponent::~SystemTrayIconComponent()

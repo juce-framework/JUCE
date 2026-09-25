@@ -1,0 +1,793 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
+
+   JUCE is an open source framework subject to commercial or open source
+   licensing.
+
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
+
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
+
+  ==============================================================================
+*/
+
+namespace juce
+{
+
+class X11ComponentPeer final : public ComponentPeer,
+                               private XWindowSystemUtilities::XSettings::Listener
+{
+public:
+    X11ComponentPeer (Component& comp, int windowStyleFlags, ::Window parentToAddTo)
+        : ComponentPeer (comp, windowStyleFlags),
+          isAlwaysOnTop (comp.isAlwaysOnTop())
+    {
+        // it's dangerous to create a window on a thread other than the message thread
+        JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
+        auto* instance = XWindowSystem::getInstance();
+
+        if (! instance->isX11Available())
+            return;
+
+        if (isAlwaysOnTop)
+            ++WindowUtilsInternal::numAlwaysOnTopPeers;
+
+        repainter = std::make_unique<X11RepaintManager> (*this);
+
+        windowH = instance->createWindow (parentToAddTo, this);
+        parentWindow = parentToAddTo;
+
+        setTitle (component.getName());
+
+        if (auto* xSettings = instance->getXSettings())
+            xSettings->addListener (this);
+
+        getNativeRealtimeModifiers = [] { return getLinuxRealtimeModifiers (LinuxInputBackend::x11); };
+
+        updateVBlankTimer();
+    }
+
+    ~X11ComponentPeer() override
+    {
+        // it's dangerous to delete a window on a thread other than the message thread
+        JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
+        auto* instance = XWindowSystem::getInstance();
+
+        // The X server sends no leave for a destroyed window, so the devices it holds are forgotten
+        // here. Any window now under the pointer or given the focus receives its own enter.
+        if (containsPointer)
+            LinuxInputState::get().pointerLeft (LinuxInputBackend::x11);
+
+        if (focused)
+            LinuxInputState::get().keyboardLeft (LinuxInputBackend::x11);
+
+        repainter = nullptr;
+        instance->destroyWindow (windowH);
+
+        if (auto* xSettings = instance->getXSettings())
+            xSettings->removeListener (this);
+
+        if (isAlwaysOnTop)
+            --WindowUtilsInternal::numAlwaysOnTopPeers;
+    }
+
+    ::Window getWindowHandle() const noexcept
+    {
+        return windowH;
+    }
+
+    //==============================================================================
+    void* getNativeHandle() const override
+    {
+        return reinterpret_cast<void*> (getWindowHandle());
+    }
+
+    //==============================================================================
+    void forceSetBoundsPhysical (const Rectangle<int>& physicalBoundsIn, bool isNowFullScreen)
+    {
+        const auto position = getMultimonitorPositionOverride().value_or (physicalBoundsIn.getPosition());
+        const auto correctedNewBounds = physicalBoundsIn.withSize (jmax (1, physicalBoundsIn.getWidth()),
+                                                                   jmax (1, physicalBoundsIn.getHeight()))
+                                                        .withPosition (position);
+
+        if (correctedNewBounds == physicalBounds && isNowFullScreen == fullScreen)
+            return;
+
+        updateScaleFactorFromNewBounds (correctedNewBounds, true);
+        physicalBounds = correctedNewBounds;
+        fullScreen = isNowFullScreen;
+
+        const WeakReference deletionChecker (&component);
+
+        // If we are in a ConfigureNotify handler then forceSetBounds is being called as a
+        // consequence of X11 telling us what the window size is. There's no need to report this
+        // size back again to X11. By this we are avoiding a pitfall, when we get many subsequent
+        // ConfigureNotify events, many of which has stale size information. By not calling
+        // XWindowSystem::setBounds we are not actualising these old, incorrect sizes.
+        if (! inConfigureNotifyHandler)
+        {
+            const auto optionalSerial = XWindowSystem::getInstance()->setBounds (windowH,
+                                                                                 physicalBounds,
+                                                                                 isNowFullScreen);
+            moveResizeSerial = jmax (moveResizeSerial, optionalSerial.value_or (0));
+        }
+
+        if (deletionChecker != nullptr)
+        {
+            updateBorderSize();
+            handleMovedOrResized();
+        }
+    }
+
+    void forceSetBounds (const Rectangle<int>& correctedNewBounds, bool isNowFullScreen)
+    {
+        updateScaleFactorFromNewBounds (correctedNewBounds, false);
+        const auto scaled = correctedNewBounds.toFloat() * getPlatformScaleFactor();
+
+        using SH = detail::ScalingHelpers;
+        const auto physical = SH::convertLogicalScreenPointToPhysical (correctedNewBounds.getPosition().toFloat());
+
+        forceSetBoundsPhysical ((parentWindow == 0 ? scaled.withPosition (physical)
+                                                   : scaled).toNearestInt(),
+                                isNowFullScreen);
+    }
+
+    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
+    {
+        forceSetBounds (newBounds, isNowFullScreen);
+    }
+
+    void setBoundsPhysical (const Rectangle<int>& newBounds)
+    {
+        forceSetBoundsPhysical (newBounds, false);
+    }
+
+    Rectangle<int> getBounds() const override
+    {
+        return (physicalBounds.toFloat() / getPlatformScaleFactor()).toNearestInt();
+    }
+
+    OptionalBorderSize getFrameSizeIfPresent() const override
+    {
+        return windowBorder;
+    }
+
+    BorderSize<int> getFrameSize() const override
+    {
+        const auto optionalBorderSize = getFrameSizeIfPresent();
+        return optionalBorderSize ? (*optionalBorderSize) : BorderSize<int>();
+    }
+
+    Point<float> localToMultimonitor (Point<float> x) override
+    {
+        return localToMultimonitor (*this, x);
+    }
+
+    Point<float> multimonitorToLocal (Point<float> x) override
+    {
+        return multimonitorToLocal (*this, x);
+    }
+
+    Point<float> localToGlobal (Point<float> x) override
+    {
+        return localToGlobal (*this, x);
+    }
+
+    Point<float> globalToLocal (Point<float> x) override
+    {
+        return globalToLocal (*this, x);
+    }
+
+    using ComponentPeer::localToGlobal;
+    using ComponentPeer::globalToLocal;
+
+    //==============================================================================
+    StringArray getAvailableRenderingEngines() override
+    {
+        return { "Software Renderer" };
+    }
+
+    void setVisible (bool shouldBeVisible) override
+    {
+        XWindowSystem::getInstance()->setVisible (windowH, shouldBeVisible);
+    }
+
+    void setTitle (const String& title) override
+    {
+        XWindowSystem::getInstance()->setTitle (windowH, title);
+    }
+
+    void setMinimised (bool shouldBeMinimised) override
+    {
+        if (shouldBeMinimised)
+            XWindowSystem::getInstance()->setMinimised (windowH, shouldBeMinimised);
+        else
+            setVisible (true);
+    }
+
+    bool isMinimised() const override
+    {
+        return XWindowSystem::getInstance()->isMinimised (windowH);
+    }
+
+    bool isShowing() const override
+    {
+        return ! XWindowSystem::getInstance()->isMinimised (windowH);
+    }
+
+    void setFullScreen (bool shouldBeFullScreen) override
+    {
+        auto r = lastNonFullscreenBounds; // (get a copy of this before de-minimising)
+
+        setMinimised (false);
+
+        if (fullScreen != shouldBeFullScreen)
+        {
+            const auto usingNativeTitleBar = ((getStyleFlags() & windowHasTitleBar) != 0);
+
+            if (usingNativeTitleBar)
+                XWindowSystem::getInstance()->setMaximised (windowH, shouldBeFullScreen);
+
+            if (shouldBeFullScreen)
+                r = usingNativeTitleBar ? XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow)
+                                        : Desktop::getInstance().getDisplays().getDisplayForRect (physicalBounds, true)->userBounds.getSmallestIntegerContainer();
+
+            if (! r.isEmpty())
+                setBounds (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
+
+            component.repaint();
+        }
+    }
+
+    bool isFullScreen() const override
+    {
+        return fullScreen;
+    }
+
+    bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
+    {
+        if (! getBounds().withZeroOrigin().contains (localPos))
+            return false;
+
+        for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
+        {
+            auto* c = Desktop::getInstance().getComponent (i);
+
+            if (c == &component)
+                break;
+
+            if (! c->isVisible())
+                continue;
+
+            if (auto* peer = dynamic_cast<X11ComponentPeer*> (c->getPeer()))
+                if (peer->contains (globalToLocal (*peer, localToGlobal (*this, localPos.toFloat())).roundToInt(), true))
+                    return false;
+        }
+
+        if (trueIfInAChildWindow)
+            return true;
+
+        return XWindowSystem::getInstance()->contains (windowH, localPos * getPlatformScaleFactor());
+    }
+
+    void toFront (bool makeActive) override
+    {
+        if (makeActive)
+        {
+            setVisible (true);
+            grabFocus();
+        }
+
+        XWindowSystem::getInstance()->toFront (windowH, makeActive);
+        handleBroughtToFront();
+    }
+
+    void toBehind (ComponentPeer* other) override
+    {
+        if (auto* otherPeer = dynamic_cast<X11ComponentPeer*> (other))
+        {
+            if (otherPeer->getStyleFlags() & windowIsTemporary)
+                return;
+
+            setMinimised (false);
+            XWindowSystem::getInstance()->toBehind (windowH, otherPeer->windowH);
+        }
+        else if (dynamic_cast<WaylandComponentPeer*> (other) != nullptr)
+        {
+            // Can't reorder relative to wayland peers!
+        }
+        else
+        {
+            jassertfalse; // wrong type of window?
+        }
+    }
+
+    bool isFocused() const override
+    {
+        return XWindowSystem::getInstance()->isFocused (windowH);
+    }
+
+    void grabFocus() override
+    {
+        if (XWindowSystem::getInstance()->grabFocus (windowH))
+            isActiveApplication = true;
+    }
+
+    //==============================================================================
+    void repaint (const Rectangle<int>& area) override
+    {
+        if (repainter != nullptr)
+            repainter->repaint (area.getIntersection (getBounds().withZeroOrigin()));
+    }
+
+    void performAnyPendingRepaintsNow() override
+    {
+        if (repainter != nullptr)
+            repainter->performAnyPendingRepaintsNow();
+    }
+
+    void setIcon (const Image& newIcon) override
+    {
+        XWindowSystem::getInstance()->setIcon (windowH, newIcon);
+    }
+
+    double getPlatformScaleFactor() const noexcept override
+    {
+        return scaleFactorOverride.value_or (currentScaleFactor);
+    }
+
+    void setCustomPlatformScaleFactor (std::optional<double> scaleIn) override
+    {
+        const auto prev = getPlatformScaleFactor();
+        scaleFactorOverride = scaleIn;
+        const auto next = getPlatformScaleFactor();
+
+        if (approximatelyEqual (prev, next))
+            return;
+
+        scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (next); });
+    }
+
+    std::optional<double> getCustomPlatformScaleFactor() const override
+    {
+        return scaleFactorOverride;
+    }
+
+    void setAlpha (float) override                                  {}
+    bool setAlwaysOnTop (bool) override                             { return false; }
+    void textInputRequired (Point<int>, TextInputTarget&) override  {}
+
+    //==============================================================================
+    void addOpenGLRepaintListener (Component* dummy)
+    {
+        if (dummy != nullptr)
+            glRepaintListeners.addIfNotAlreadyThere (dummy);
+    }
+
+    void removeOpenGLRepaintListener (Component* dummy)
+    {
+        if (dummy != nullptr)
+            glRepaintListeners.removeAllInstancesOf (dummy);
+    }
+
+    void repaintOpenGLContexts()
+    {
+        for (auto* c : glRepaintListeners)
+            c->handleCommandMessage (0);
+    }
+
+    //==============================================================================
+    ::Window getParentWindow()                         { return parentWindow; }
+    void setParentWindow (::Window newParent)          { parentWindow = newParent; }
+
+    //==============================================================================
+    bool isConstrainedNativeWindow() const
+    {
+        return constrainer != nullptr
+            && (getStyleFlags() & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable)
+            && ! isKioskMode();
+    }
+
+    void updateWindowBounds()
+    {
+        if (windowH == 0)
+        {
+            jassertfalse;
+            return;
+        }
+
+        if (isConstrainedNativeWindow())
+            XWindowSystem::getInstance()->updateConstraints (windowH);
+
+        physicalBounds = XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow);
+        fullScreen = XWindowSystem::getInstance()->isFullScreen (windowH);
+        updateScaleFactorFromNewBounds (physicalBounds, true);
+
+        updateVBlankTimer();
+    }
+
+    void updateBorderSize()
+    {
+        if ((getStyleFlags() & windowHasTitleBar) == 0)
+        {
+            windowBorder = OptionalBorderSize { BorderSize<int>() };
+        }
+        else if (! windowBorder
+                 || ((*windowBorder).getTopAndBottom() == 0 && (*windowBorder).getLeftAndRight() == 0))
+        {
+            windowBorder = std::invoke ([&]
+            {
+                if (auto unscaledBorderSize = XWindowSystem::getInstance()->getBorderSize (windowH))
+                    return OptionalBorderSize { (*unscaledBorderSize).multipliedBy (1.0 / getPlatformScaleFactor()) };
+
+                return OptionalBorderSize{};
+            });
+        }
+    }
+
+    bool setWindowAssociation (::Window windowIn)
+    {
+        clearWindowAssociation();
+        association = { this, windowIn };
+        return association.isValid();
+    }
+
+    void clearWindowAssociation() { association = {}; }
+
+    void startHostManagedResize (Point<int>, ResizableBorderComponent::Zone zone) override
+    {
+        XWindowSystem::getInstance()->startHostManagedResize (windowH, zone);
+    }
+
+    //==============================================================================
+    static bool isActiveApplication;
+    bool focused = false;
+    bool containsPointer = false;
+    bool inConfigureNotifyHandler = false;
+
+    unsigned long getMoveResizeSerial() const
+    {
+        return moveResizeSerial;
+    }
+
+private:
+    //==============================================================================
+    class X11RepaintManager
+    {
+    public:
+        X11RepaintManager (X11ComponentPeer& p)
+            : peer (p),
+              isSemiTransparentWindow ((peer.getStyleFlags() & ComponentPeer::windowIsSemiTransparent) != 0)
+        {
+        }
+
+        void dispatchDeferredRepaints()
+        {
+            XWindowSystem::getInstance()->processPendingPaintsForWindow (peer.windowH);
+
+            if (XWindowSystem::getInstance()->getNumPaintsPendingForWindow (peer.windowH) > 0)
+                return;
+
+            if (! regionsNeedingRepaint.isEmpty())
+                performAnyPendingRepaintsNow();
+            else if (Time::getApproximateMillisecondCounter() > lastTimeImageUsed + 3000)
+                image = Image();
+        }
+
+        void repaint (Rectangle<int> area)
+        {
+            regionsNeedingRepaint.add (area * peer.getPlatformScaleFactor());
+        }
+
+        void performAnyPendingRepaintsNow()
+        {
+            if (XWindowSystem::getInstance()->getNumPaintsPendingForWindow (peer.windowH) > 0)
+                return;
+
+            auto originalRepaintRegion = regionsNeedingRepaint;
+            regionsNeedingRepaint.clear();
+            auto totalArea = originalRepaintRegion.getBounds();
+
+            if (! totalArea.isEmpty())
+            {
+                const auto wasImageNull = image.isNull();
+
+                if (wasImageNull || image.getWidth() < totalArea.getWidth()
+                     || image.getHeight() < totalArea.getHeight())
+                {
+                    image = XWindowSystem::getInstance()->createImage (isSemiTransparentWindow,
+                                                                       totalArea.getWidth(), totalArea.getHeight(),
+                                                                       useARGBImagesForRendering);
+                    if (wasImageNull)
+                    {
+                        // After calling createImage() XWindowSystem::getWindowBounds() will return
+                        // changed coordinates that look like the result of some position
+                        // defaulting mechanism. If we handle a configureNotifyEvent after
+                        // createImage() and before we would issue new, valid coordinates, we will
+                        // apply these default, unwanted coordinates to our window. To avoid that
+                        // we immediately send another positioning message to guarantee that the
+                        // next configureNotifyEvent will read valid values.
+                        //
+                        // This issue only occurs right after peer creation, when the image is
+                        // null. Updating when only the width or height is changed would lead to
+                        // incorrect behaviour.
+                        using SH = detail::ScalingHelpers;
+                        const auto unscaled = SH::scaledScreenPosToUnscaled (peer.component,
+                                                                             peer.component.getBoundsInParent());
+                        peer.forceSetBounds (unscaled, peer.isFullScreen());
+                    }
+                }
+
+                RectangleList<int> adjustedList (originalRepaintRegion);
+                adjustedList.offsetAll (-totalArea.getX(), -totalArea.getY());
+
+                if (XWindowSystem::getInstance()->canUseARGBImages())
+                    for (auto& i : originalRepaintRegion)
+                        image.clear (i - totalArea.getPosition());
+
+                {
+                    auto context = peer.getComponent().getLookAndFeel()
+                                     .createGraphicsContext (image, -totalArea.getPosition(), adjustedList);
+
+                    context->addTransform (AffineTransform::scale ((float) peer.getPlatformScaleFactor()));
+                    peer.handlePaint (*context);
+                }
+
+                for (auto& i : originalRepaintRegion)
+                   XWindowSystem::getInstance()->blitToWindow (peer.windowH, image, i, totalArea);
+            }
+
+            lastTimeImageUsed = Time::getApproximateMillisecondCounter();
+        }
+
+    private:
+        X11ComponentPeer& peer;
+        const bool isSemiTransparentWindow;
+        Image image;
+        uint32 lastTimeImageUsed = 0;
+        RectangleList<int> regionsNeedingRepaint;
+
+        bool useARGBImagesForRendering = XWindowSystem::getInstance()->canUseARGBImages();
+
+        JUCE_DECLARE_NON_COPYABLE (X11RepaintManager)
+    };
+
+    template <typename This>
+    static Point<float> localToMultimonitor (This& t, Point<float> x)
+    {
+        const auto localPhysical = x * t.getPlatformScaleFactor();
+        const auto multimonitor = localPhysical + t.getPhysicalScreenPosition().toFloat();
+        return multimonitor;
+    }
+
+    template <typename This>
+    static Point<float> multimonitorToLocal (This& t, Point<float> x)
+    {
+        const auto localPhysical = x - t.getPhysicalScreenPosition().toFloat();
+        const auto local = localPhysical / t.getPlatformScaleFactor();
+        return local;
+    }
+
+    template <typename This>
+    static Point<float> localToGlobal (This& t, Point<float> relativePosition)
+    {
+        return detail::ScalingHelpers::convertPhysicalScreenPointToLogical (localToMultimonitor (t, relativePosition));
+    }
+
+    template <typename This>
+    static Point<float> globalToLocal (This& t, Point<float> screenPosition)
+    {
+        return multimonitorToLocal (t, detail::ScalingHelpers::convertLogicalScreenPointToPhysical (screenPosition));
+    }
+
+    Point<int> getPhysicalScreenPosition() const
+    {
+        const auto physicalParentPosition = XWindowSystem::getInstance()->getPhysicalParentScreenPosition();
+        return parentWindow == 0 ? physicalBounds.getTopLeft()
+                                 : physicalBounds.getTopLeft().translated (physicalParentPosition.x, physicalParentPosition.y);
+    }
+
+    //==============================================================================
+    void settingChanged (const XWindowSystemUtilities::XSetting& settingThatHasChanged) override
+    {
+        static StringArray possibleSettings { XWindowSystem::getWindowScalingFactorSettingName(),
+                                              "Gdk/UnscaledDPI",
+                                              "Xft/DPI" };
+
+        if (possibleSettings.contains (settingThatHasChanged.name))
+            forceDisplayUpdate();
+    }
+
+    void updateScaleFactorFromNewBounds (const Rectangle<int>& newBounds, bool isPhysical)
+    {
+        const auto translationScale = isPhysical ? 1.0f : getPlatformScaleFactor();
+        const auto translation = (parentWindow != 0 ? (getPhysicalScreenPosition().toFloat() / translationScale).roundToInt() : Point<int>());
+        const auto& desktop = Desktop::getInstance();
+
+        const auto prev = getPlatformScaleFactor();
+
+        if (auto* display = desktop.getDisplays().getDisplayForRect (newBounds.translated (translation.x, translation.y),
+                                                                     isPhysical))
+        {
+            currentScaleFactor = display->scale / desktop.getGlobalScaleFactor();
+        }
+
+        const auto next = getPlatformScaleFactor();
+
+        if (approximatelyEqual (prev, next))
+            return;
+
+        scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (next); });
+    }
+
+    void onVBlank()
+    {
+        const auto timestampSec = Time::getMillisecondCounterHiRes() / 1000.0;
+        callVBlankListeners (timestampSec);
+
+        if (repainter != nullptr)
+            repainter->dispatchDeferredRepaints();
+    }
+
+    void updateVBlankTimer()
+    {
+        if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (physicalBounds, true))
+        {
+            // Some systems fail to set an explicit refresh rate, or ask for a refresh rate of 0
+            // (observed on Raspbian Bullseye over VNC). In these situations, use a fallback value.
+            const auto reportedHz = display->verticalFrequencyHz.value_or (0.0);
+            const auto frequencyToUse = reportedHz > 0.0 ? reportedHz : 100.0;
+            const auto periodMs = jmax (1, (int) (1000.0 / frequencyToUse));
+
+            if (vBlankManager.getTimerInterval() != periodMs)
+                vBlankManager.startTimer (periodMs);
+        }
+    }
+
+    //==============================================================================
+    std::unique_ptr<X11RepaintManager> repainter;
+    TimedCallback vBlankManager { [this]() { onVBlank(); } };
+
+    ::Window windowH = {}, parentWindow = {};
+    Rectangle<int> physicalBounds;
+    ComponentPeer::OptionalBorderSize windowBorder;
+    bool fullScreen = false, isAlwaysOnTop = false;
+    std::optional<double> scaleFactorOverride;
+    double currentScaleFactor = 1.0;
+    Array<Component*> glRepaintListeners;
+    ScopedWindowAssociation association;
+    unsigned long moveResizeSerial = 0;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (X11ComponentPeer)
+};
+
+bool X11ComponentPeer::isActiveApplication = false;
+
+static ComponentPeer* createX11ComponentPeer (Component& component, int styleFlags, void* nativeWindowToAttachTo)
+{
+    return new X11ComponentPeer (component, styleFlags, (::Window) nativeWindowToAttachTo);
+}
+
+static bool isX11ApplicationActive()
+{
+    return X11ComponentPeer::isActiveApplication;
+}
+
+//==============================================================================
+class X11MouseCursor final
+{
+public:
+    explicit X11MouseCursor (MouseCursor::StandardCursorType type)
+        : cursor (XWindowSystem::getInstance()->createStandardMouseCursor (type)) {}
+
+    explicit X11MouseCursor (const detail::CustomMouseCursorInfo& info)
+        : cursor (createHandle (info)) {}
+
+    ~X11MouseCursor()
+    {
+        if (cursor != Cursor{})
+            if (auto* windowSystem = XWindowSystem::getInstanceWithoutCreating())
+                windowSystem->deleteMouseCursor (cursor);
+    }
+
+    static void showInWindow (const X11MouseCursor* handle, ComponentPeer& peer)
+    {
+        if (auto* x11Peer = dynamic_cast<X11ComponentPeer*> (&peer))
+            XWindowSystem::getInstance()->showCursor (x11Peer->getWindowHandle(), handle != nullptr ? handle->cursor : Cursor{});
+    }
+
+private:
+    static Cursor createHandle (const detail::CustomMouseCursorInfo& info)
+    {
+        const auto image = info.image.getImage();
+        return XWindowSystem::getInstance()->createCustomMouseCursorInfo (image.rescaled ((int) (image.getWidth()  / info.image.getScale()),
+                                                                                          (int) (image.getHeight() / info.image.getScale())), info.hotspot);
+    }
+
+    Cursor cursor{};
+
+    JUCE_DECLARE_NON_COPYABLE (X11MouseCursor)
+    JUCE_DECLARE_NON_MOVEABLE (X11MouseCursor)
+};
+
+//==============================================================================
+class X11DarkModeChangeDetector final : private XWindowSystemUtilities::XSettings::Listener
+{
+public:
+    explicit X11DarkModeChangeDetector (std::function<void()> onChangeIn)
+        : onChange (std::move (onChangeIn))
+    {
+        const auto* windowSystem = XWindowSystem::getInstance();
+
+        if (auto* xSettings = windowSystem->getXSettings())
+            xSettings->addListener (this);
+
+        darkModeEnabled = windowSystem->isDarkModeActive();
+    }
+
+    ~X11DarkModeChangeDetector() override
+    {
+        if (auto* windowSystem = XWindowSystem::getInstanceWithoutCreating())
+            if (auto* xSettings = windowSystem->getXSettings())
+                xSettings->removeListener (this);
+    }
+
+    bool isDarkModeEnabled() const noexcept { return darkModeEnabled; }
+
+private:
+    void settingChanged (const XWindowSystemUtilities::XSetting& settingThatHasChanged) override
+    {
+        if (settingThatHasChanged.name == XWindowSystem::getThemeNameSettingName())
+        {
+            const auto wasDarkModeEnabled = std::exchange (darkModeEnabled, XWindowSystem::getInstance()->isDarkModeActive());
+
+            if (darkModeEnabled != wasDarkModeEnabled)
+                NullCheckedInvocation::invoke (onChange);
+        }
+    }
+
+    std::function<void()> onChange;
+    bool darkModeEnabled = false;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (X11DarkModeChangeDetector)
+};
+
+void juce_LinuxAddRepaintListener (ComponentPeer* peer, Component* dummy);
+void juce_LinuxAddRepaintListener (ComponentPeer* peer, Component* dummy)
+{
+    if (auto* x11Peer = dynamic_cast<X11ComponentPeer*> (peer))
+        x11Peer->addOpenGLRepaintListener (dummy);
+}
+
+void juce_LinuxRemoveRepaintListener (ComponentPeer* peer, Component* dummy);
+void juce_LinuxRemoveRepaintListener (ComponentPeer* peer, Component* dummy)
+{
+    if (auto* x11Peer = dynamic_cast<X11ComponentPeer*> (peer))
+        x11Peer->removeOpenGLRepaintListener (dummy);
+}
+
+} // namespace juce

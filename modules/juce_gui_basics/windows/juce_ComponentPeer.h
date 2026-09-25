@@ -84,6 +84,10 @@ public:
                                                                            asynchronous Core Graphics drawing operations. Use this if there
                                                                            are issues with regions not being redrawn at the expected time
                                                                            (macOS and iOS only). */
+        windowRequiresX11                               = (1 << 12),  /**< Indicates that the window must be an X11 window even when the
+                                                                           application otherwise uses Wayland. Use this for a window that
+                                                                           will embed X11 windows, such as a hosted plugin's editor, since
+                                                                           a Wayland window cannot contain them (Linux and BSD only). */
         windowIsSemiTransparent                         = (1 << 30)   /**< Not intended for public use - makes a window transparent. */
 
     };
@@ -291,7 +295,7 @@ public:
     void setConstrainer (ComponentBoundsConstrainer* newConstrainer) noexcept;
 
     /** Asks the window-manager to begin resizing this window, on platforms where this is useful
-        (currently just Linux/X11).
+        (currently just Linux).
 
         @param mouseDownPosition    The position of the mouse event that started the resize in
                                     unscaled peer coordinates
@@ -524,8 +528,8 @@ public:
     /** Used to receive callbacks on every vertical blank event of the display that the peer
         currently belongs to.
 
-        On Linux this is currently limited to receiving callbacks from a timer approximately at
-        display refresh rate.
+        On Linux, X11 windows use a timer that runs at approximately the display refresh rate,
+        while Wayland windows use surface frame callbacks delivered by the compositor.
 
         This is a low-level facility used by the peer implementations. If you wish to synchronise
         Component events with the display refresh, you should probably use the VBlankAttachment,
@@ -547,10 +551,24 @@ public:
     };
 
     /** Adds a VBlankListener. */
-    void addVBlankListener (VBlankListener* listenerToAdd)       { vBlankListeners.add (listenerToAdd); }
+    void addVBlankListener (VBlankListener* listenerToAdd)
+    {
+        const auto wasEmpty = vBlankListeners.isEmpty();
+        vBlankListeners.add (listenerToAdd);
+
+        if (wasEmpty != vBlankListeners.isEmpty())
+            vBlankListenerPresenceChanged();
+    }
 
     /** Removes a VBlankListener. */
-    void removeVBlankListener (VBlankListener* listenerToRemove) { vBlankListeners.remove (listenerToRemove); }
+    void removeVBlankListener (VBlankListener* listenerToRemove)
+    {
+        const auto wasEmpty = vBlankListeners.isEmpty();
+        vBlankListeners.remove (listenerToRemove);
+
+        if (wasEmpty != vBlankListeners.isEmpty())
+            vBlankListenerPresenceChanged();
+    }
 
     //==============================================================================
     /** On Windows and Linux this will return the OS scaling factor currently being applied
@@ -700,6 +718,10 @@ protected:
 private:
     //==============================================================================
     virtual void appStyleChanged() {}
+
+    // Called after the first VBlankListener is added or the last one is removed.
+    // This may be called from inside a VBlankListener callback.
+    virtual void vBlankListenerPresenceChanged() {}
 
     /** Tells the window that text input may be required at the given position.
         This may cause things like a virtual on-screen keyboard to appear, depending

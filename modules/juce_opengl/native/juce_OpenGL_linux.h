@@ -35,18 +35,6 @@
 namespace juce
 {
 
-struct XFreeDeleter
-{
-    void operator() (void* ptr) const
-    {
-        if (ptr != nullptr)
-            X11Symbols::getInstance()->xFree (ptr);
-    }
-};
-
-template <typename Data>
-std::unique_ptr<Data, XFreeDeleter> makeXFreePtr (Data* raw) { return std::unique_ptr<Data, XFreeDeleter> (raw); }
-
 //==============================================================================
 // Defined in juce_Windowing_linux.cpp
 void juce_LinuxAddRepaintListener (ComponentPeer*, Component* dummy);
@@ -56,35 +44,6 @@ bool OpenGLHelpers::isOpenGLES()
 {
     return eglQueryAPI() == EGL_OPENGL_ES_API;
 }
-
-class PeerListener : private ComponentMovementWatcher
-{
-public:
-    PeerListener (Component& comp, Window embeddedWindow)
-        : ComponentMovementWatcher (&comp),
-          window (embeddedWindow),
-          association (comp.getPeer(), window) {}
-
-private:
-    using ComponentMovementWatcher::componentMovedOrResized,
-          ComponentMovementWatcher::componentVisibilityChanged;
-
-    void componentMovedOrResized (bool, bool) override {}
-    void componentVisibilityChanged() override {}
-
-    void componentPeerChanged() override
-    {
-        // This should not be rewritten as a ternary expression or similar.
-        // The old association must be destroyed before the new one is created.
-        association = {};
-
-        if (auto* comp = getComponent())
-            association = ScopedWindowAssociation (comp->getPeer(), window);
-    }
-
-    Window window{};
-    ScopedWindowAssociation association;
-};
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 static constexpr EGLContext nullContext = EGL_NO_CONTEXT;
@@ -130,18 +89,39 @@ public:
           version (versionIn),
           profile (profileIn)
     {
+        auto* peer = component.getPeer();
+
+        if (peer == nullptr)
+        {
+            // Attach an OpenGL context only after the component has a native peer.
+            jassertfalse;
+            return;
+        }
+
+        const auto usesWayland = isWaylandComponentPeer (peer);
         const auto* ext = eglQueryString (nullDisplay, EGL_EXTENSIONS);
 
         if (ext == nullptr)
         {
-            // JUCE needs the EGL implementation to support at least the X11
-            // platform extension.
+            // The EGL implementation must report its client extensions before JUCE can
+            // select a native display type.
             jassertfalse;
             return;
         }
 
         const auto platformDisplayToken = std::invoke ([&]() -> std::optional<EGLenum>
         {
+            if (usesWayland)
+            {
+                if (strstr (ext, "EGL_KHR_platform_wayland") != nullptr)
+                    return EGL_PLATFORM_WAYLAND_KHR;
+
+                if (strstr (ext, "EGL_EXT_platform_wayland") != nullptr)
+                    return EGL_PLATFORM_WAYLAND_EXT;
+
+                return {};
+            }
+
             if (strstr (ext, "EGL_KHR_platform_x11") != nullptr)
                 return EGL_PLATFORM_X11_KHR;
 
@@ -153,20 +133,38 @@ public:
 
         if (! platformDisplayToken.has_value())
         {
-            // At the moment JUCE can only create a GL context under X11.
-            // If this EGL implementation doesn't support X11, things would break
-            // when we tried to pass an X11 display/window/etc. into EGL functions.
+            // The EGL implementation must support the platform used by the component peer.
             jassertfalse;
             return;
         }
 
-        display = XWindowSystem::getInstance()->getDisplay();
+        std::unique_ptr<WaylandOpenGLSurface> waylandSurface;
+        std::optional<XWindowSystemUtilities::ScopedXLock> xLock;
+        void* nativeDisplay = nullptr;
+        ::Display* xDisplay = nullptr;
 
-        XWindowSystemUtilities::ScopedXLock xLock;
+        if (usesWayland)
+        {
+            waylandSurface = createWaylandOpenGLSurface (component);
 
-        X11Symbols::getInstance()->xSync (display, False);
+            if (waylandSurface == nullptr)
+                return;
 
-        eglDisplay = eglGetPlatformDisplay (*platformDisplayToken, display, nullptr);
+            nativeDisplay = waylandSurface->getDisplay();
+        }
+        else
+        {
+            xDisplay = XWindowSystem::getInstance()->getDisplay();
+
+            if (xDisplay == nullptr)
+                return;
+
+            xLock.emplace();
+            X11Symbols::getInstance()->xSync (xDisplay, False);
+            nativeDisplay = xDisplay;
+        }
+
+        eglDisplay = eglGetPlatformDisplay (*platformDisplayToken, nativeDisplay, nullptr);
 
         if (eglDisplay == nullDisplay)
             return;
@@ -187,60 +185,23 @@ public:
         if (! tryChooseConfig (cPixelFormat, optionalAttribs) && ! tryChooseConfig (cPixelFormat, {}))
             return;
 
-        EGLint nativeVisualId = 0;
-        eglGetConfigAttrib (eglDisplay, eglConfig, EGL_NATIVE_VISUAL_ID, &nativeVisualId);
+        xLock.reset();
 
-        auto* peer = component.getPeer();
-        jassert (peer != nullptr);
-
-        auto windowH = (Window) peer->getNativeHandle();
-
-        auto [visual, depth] = std::invoke ([this, nativeVisualId]() -> std::tuple<Visual*, int>
+        if (usesWayland)
         {
-            XVisualInfo visualInfo{};
-            visualInfo.visualid = (VisualID) nativeVisualId;
-            int numVisuals = 0;
-            auto xVisualInfo = makeXFreePtr (X11Symbols::getInstance()->xGetVisualInfo (display,
-                                                                                        VisualIDMask,
-                                                                                        &visualInfo,
-                                                                                        &numVisuals));
+            auto& window = nativeWindow.emplace<WaylandOpenGLWindow> (std::move (waylandSurface));
 
-            if (xVisualInfo != nullptr && numVisuals > 0)
-                return { xVisualInfo->visual,
-                         xVisualInfo->depth };
+            if (! window.isValid())
+                return;
+        }
+        else
+        {
+            auto& window = nativeWindow.emplace<X11OpenGLWindow> (component, *peer, xDisplay,
+                                                                  eglDisplay, eglConfig);
 
-            return { DefaultVisual (display, DefaultScreen (display)),
-                     DefaultDepth  (display, DefaultScreen (display)) };
-        });
-
-        auto colourMap = X11Symbols::getInstance()->xCreateColormap (display, windowH, visual, AllocNone);
-
-        XSetWindowAttributes swa;
-        swa.colormap = colourMap;
-        swa.border_pixel = 0;
-        swa.event_mask = embeddedWindowEventMask;
-
-        const auto physicalBounds = getPhysicalBounds();
-
-        embeddedWindow = X11Symbols::getInstance()->xCreateWindow (display,
-                                                                   windowH,
-                                                                   physicalBounds.getX(),
-                                                                   physicalBounds.getY(),
-                                                                   (unsigned int) jmax (1, physicalBounds.getWidth()),
-                                                                   (unsigned int) jmax (1, physicalBounds.getHeight()),
-                                                                   0,
-                                                                   depth,
-                                                                   InputOutput,
-                                                                   visual,
-                                                                   CWBorderPixel | CWColormap | CWEventMask,
-                                                                   &swa);
-
-        peerListener.emplace (component, embeddedWindow);
-
-        X11Symbols::getInstance()->xMapWindow (display, embeddedWindow);
-        X11Symbols::getInstance()->xFreeColormap (display, colourMap);
-
-        X11Symbols::getInstance()->xSync (display, False);
+            if (! window.isValid())
+                return;
+        }
 
         juce_LinuxAddRepaintListener (peer, &dummy);
 
@@ -256,26 +217,7 @@ public:
             eglTerminate (eglDisplay);
 
         if (auto* peer = component.getPeer())
-        {
             juce_LinuxRemoveRepaintListener (peer, &dummy);
-
-            if (embeddedWindow != 0)
-            {
-                XWindowSystemUtilities::ScopedXLock xLock;
-
-                X11Symbols::getInstance()->xUnmapWindow (display, embeddedWindow);
-                X11Symbols::getInstance()->xDestroyWindow (display, embeddedWindow);
-                X11Symbols::getInstance()->xSync (display, False);
-
-                XEvent event;
-                while (X11Symbols::getInstance()->xCheckWindowEvent (display,
-                                                                     embeddedWindow,
-                                                                     embeddedWindowEventMask,
-                                                                     &event) == True)
-                {
-                }
-            }
-        }
     }
 
     InitResult initialiseOnRenderThread (OpenGLContext& c)
@@ -287,7 +229,7 @@ public:
 
         eglSurface = PtrEGLSurface { eglCreatePlatformWindowSurface (eglDisplay,
                                                                      eglConfig,
-                                                                     &embeddedWindow,
+                                                                     getNativeWindow(),
                                                                      nullptr),
                                      eglDisplay };
 
@@ -329,32 +271,43 @@ public:
 
     void swapBuffers()
     {
-        eglSwapBuffers (eglDisplay, eglSurface.get());
-    }
+        auto* wayland = std::get_if<WaylandOpenGLWindow> (&nativeWindow);
 
-    Rectangle<int> getPhysicalBounds() const
-    {
-        if (auto* peer = component.getPeer())
+        if (wayland == nullptr)
         {
-            const auto peerBounds = peer->getAreaCoveredBy (component);
-            const auto physicalBounds = peerBounds.toDouble() * peer->getPlatformScaleFactor();
-            return physicalBounds.toNearestInt();
+            eglSwapBuffers (eglDisplay, eglSurface.get());
+            return;
         }
 
-        return component.getBounds();
+        const std::scoped_lock lock { waylandWindowMutex };
+
+        if (! wayland->prepareForSwap (swapFrames > 0))
+            return;
+
+        eglSwapBuffers (eglDisplay, eglSurface.get());
+
+        // Request a frame for the new size on the message thread.
+        if (wayland->finishSwap())
+            dummy.postCommandMessage (0);
     }
 
     void updateWindowPosition()
     {
-        const auto physicalBounds = getPhysicalBounds();
+        if (auto* x11 = std::get_if<X11OpenGLWindow> (&nativeWindow))
+        {
+            x11->updateBounds();
+        }
+        else if (auto* wayland = std::get_if<WaylandOpenGLWindow> (&nativeWindow))
+        {
+            const auto becameVisible = std::invoke ([&]
+            {
+                const std::scoped_lock lock { waylandWindowMutex };
+                return wayland->updateBounds();
+            });
 
-        XWindowSystemUtilities::ScopedXLock xLock;
-        X11Symbols::getInstance()->xMoveResizeWindow (display,
-                                                      embeddedWindow,
-                                                      physicalBounds.getX(),
-                                                      physicalBounds.getY(),
-                                                      (unsigned int) jmax (1, physicalBounds.getWidth()),
-                                                      (unsigned int) jmax (1, physicalBounds.getHeight()));
+            if (becameVisible)
+                triggerRepaint();
+        }
     }
 
     bool setSwapInterval (int numFramesPerSwap)
@@ -362,9 +315,40 @@ public:
         if (numFramesPerSwap == swapFrames)
             return true;
 
+        if (std::holds_alternative<WaylandOpenGLWindow> (nativeWindow) && numFramesPerSwap > 1)
+            return false;
+
         swapFrames = numFramesPerSwap;
-        eglSwapInterval (eglDisplay, numFramesPerSwap);
+
+        if (std::holds_alternative<WaylandOpenGLWindow> (nativeWindow))
+        {
+            // JUCE throttles Wayland rendering with wl_surface.frame callbacks, so disable
+            // EGL throttling to prevent hidden surfaces from blocking the render thread.
+            eglSwapInterval (eglDisplay, 0);
+        }
+        else
+        {
+            eglSwapInterval (eglDisplay, numFramesPerSwap);
+        }
+
         return true;
+    }
+
+    bool isReadyForRender()
+    {
+        if (auto* wayland = std::get_if<WaylandOpenGLWindow> (&nativeWindow))
+        {
+            const std::scoped_lock lock { waylandWindowMutex };
+            return wayland->isReadyForRender (swapFrames > 0);
+        }
+
+        return true;
+    }
+
+    void setFrameReadyCallback (std::function<void()> callback)
+    {
+        if (auto* wayland = std::get_if<WaylandOpenGLWindow> (&nativeWindow))
+            wayland->setFrameReadyCallback (std::move (callback));
     }
 
     int getSwapInterval() const                 { return swapFrames; }
@@ -385,6 +369,17 @@ public:
     };
 
 private:
+    void* getNativeWindow()
+    {
+        if (auto* x11 = std::get_if<X11OpenGLWindow> (&nativeWindow))
+            return x11->getNativeWindow();
+
+        if (auto* wayland = std::get_if<WaylandOpenGLWindow> (&nativeWindow))
+            return wayland->getNativeWindow();
+
+        return nullptr;
+    }
+
     bool tryChooseConfig (const OpenGLPixelFormat& format, Span<const EGLint> optionalAttribs)
     {
         std::vector<EGLint> allAttribs
@@ -407,18 +402,15 @@ private:
         return eglChooseConfig (eglDisplay, allAttribs.data(), &eglConfig, 1, &numConfigs) && numConfigs > 0;
     }
 
-    static constexpr int embeddedWindowEventMask = ExposureMask | StructureNotifyMask;
-
     CriticalSection mutex;
+    std::mutex waylandWindowMutex;
     Component& component;
 
     EGLDisplay eglDisplay = nullDisplay;
     PtrEGLContext renderContext;
     PtrEGLSurface eglSurface;
 
-    Window embeddedWindow = {};
-
-    std::optional<PeerListener> peerListener;
+    std::variant<std::monostate, X11OpenGLWindow, WaylandOpenGLWindow> nativeWindow;
 
     int swapFrames = 0;
     EGLConfig eglConfig = nullptr;
@@ -426,8 +418,6 @@ private:
 
     OpenGLContext* context = nullptr;
     DummyComponent dummy;
-
-    ::Display* display = nullptr;
 
     API api{};
     Version version{};

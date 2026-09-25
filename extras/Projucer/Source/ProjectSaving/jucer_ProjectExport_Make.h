@@ -145,11 +145,10 @@ public:
         {
             StringArray result;
 
+            result.add ("-fvisibility=hidden");
+
             if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle || type == SharedCodeTarget)
-            {
                 result.add ("-fPIC");
-                result.add ("-fvisibility=hidden");
-            }
 
             return result;
         }

@@ -112,6 +112,37 @@ public:
         return reinterpret_cast<Fn*> (getFunction (functionName));
     }
 
+    /** Looks up a named symbol and assigns it to the supplied pointer.
+
+        This is a convenience for binding a table of function or interface pointers from
+        the currently-open DLL. Since each call reports whether the symbol was found, they
+        can be chained so that loading stops at the first one that is missing:
+
+        @code
+        const auto ok = lib.loadInto (fnA, "function_a")
+                     && lib.loadInto (fnB, "function_b")
+                     && lib.loadInto (fnC, "function_c");
+        @endcode
+
+        As with getFunction(), it is the caller's responsibility to ensure that the target
+        type matches the symbol actually exported by the library. Passing a mismatched type
+        will result in undefined behaviour.
+
+        @returns true if the symbol was found and assigned, false otherwise.
+        @see getFunction
+    */
+    template <typename PointerType>
+    bool loadInto (PointerType& target, const String& functionName) noexcept
+    {
+        if (auto* symbol = getFunction (functionName))
+        {
+            target = reinterpret_cast<PointerType> (symbol);
+            return true;
+        }
+
+        return false;
+    }
+
     /** Returns true if the library was successfully found and opened. */
     bool isOpen() const noexcept { return handle != nullptr; }
 

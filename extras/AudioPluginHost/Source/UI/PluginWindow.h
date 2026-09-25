@@ -175,10 +175,13 @@ public:
                   KeyListener* keyListener)
         : DocumentWindow (n->getProcessor()->getName() + getFormatSuffix (n->getProcessor()),
                           LookAndFeel::getDefaultLookAndFeel().findColour (backgroundColourId),
-                          minimiseButton | closeButton),
+                          minimiseButton | closeButton,
+                          false),
           activeWindowList (windowList),
           node (n), type (t)
     {
+        // Defer peer creation until virtual calls can reach our getDesktopWindowStyleFlags() override.
+        addToDesktop();
         setSize (400, 300);
 
         if (auto* ui = createProcessorEditor (*node->getProcessor(), type))
@@ -189,7 +192,7 @@ public:
 
         setConstrainer (&constrainer);
 
-       #if JUCE_IOS || JUCE_ANDROID
+#if JUCE_IOS || JUCE_ANDROID
         const auto screenBounds = Desktop::getInstance().getDisplays().getTotalBounds (true).toFloat();
         const auto scaleFactor = jmin ((screenBounds.getWidth()  - 50.0f) / (float) getWidth(),
                                        (screenBounds.getHeight() - 50.0f) / (float) getHeight());
@@ -202,8 +205,12 @@ public:
 
         setTopLeftPosition (20, 20);
        #else
-        setTopLeftPosition (node->properties.getWithDefault (getLastXProp (type), Random::getSystemRandom().nextInt (500)),
-                            node->properties.getWithDefault (getLastYProp (type), Random::getSystemRandom().nextInt (500)));
+        const auto parentPosition = getParentMonitorArea().getPosition();
+        const auto defaultPosition = parentPosition
+                                   + Point { Random::getSystemRandom().nextInt (500),
+                                             Random::getSystemRandom().nextInt (500) };
+        setTopLeftPosition (node->properties.getWithDefault (getLastXProp (type), defaultPosition.x),
+                            node->properties.getWithDefault (getLastYProp (type), defaultPosition.y));
        #endif
 
         node->properties.set (getOpenProp (type), true);
@@ -248,7 +255,26 @@ public:
        #endif
     }
 
+    int getDesktopWindowStyleFlags() const override
+    {
+       #if JUCE_LINUX || JUCE_BSD
+        // A Wayland window cannot contain an X11 plugin editor
+        if (type == Type::normal && ! isInternalPlugin (*node->getProcessor()))
+            return DocumentWindow::getDesktopWindowStyleFlags() | ComponentPeer::windowRequiresX11;
+       #endif
+
+        return DocumentWindow::getDesktopWindowStyleFlags();
+    }
+
 private:
+    static bool isInternalPlugin (const AudioProcessor& processor)
+    {
+        if (auto* instance = dynamic_cast<const AudioPluginInstance*> (&processor))
+            return instance->getPluginDescription().pluginFormatName == "Internal";
+
+        return true;
+    }
+
     class DecoratorConstrainer final : public BorderedComponentBoundsConstrainer
     {
     public:

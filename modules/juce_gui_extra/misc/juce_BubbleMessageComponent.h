@@ -53,9 +53,10 @@ public:
     //==============================================================================
     /** Creates a bubble component.
 
-        After creating one a BubbleComponent, do the following:
-        - add it to an appropriate parent component, or put it on the
-          desktop with Component::addToDesktop (0).
+        After creating a BubbleMessageComponent, do the following:
+        - add it to an appropriate parent component, or put it on the desktop
+          with Component::addToDesktop(), using the style flags recommended in
+          the BubbleComponent class description.
         - use the showAt() method to show a message.
         - it will make itself invisible after it times-out (and can optionally
           also delete itself), or you can reuse it somewhere else by calling

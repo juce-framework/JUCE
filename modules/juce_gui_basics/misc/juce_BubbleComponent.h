@@ -45,8 +45,15 @@ namespace juce
     that draws a text message.
 
     To use it, create your subclass, then either add it to a parent component or
-    put it on the desktop with addToDesktop (0), use setPosition() to
-    resize and position it, then make it visible.
+    put it on the desktop:
+
+    @code
+    bubble.addToDesktop (ComponentPeer::windowIsTemporary
+                         | ComponentPeer::windowIgnoresMouseClicks
+                         | ComponentPeer::windowIgnoresKeyPresses);
+    @endcode
+
+    Then use setPosition() to resize and position it, and make it visible.
 
     @see BubbleMessageComponent
 

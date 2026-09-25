@@ -114,7 +114,7 @@ void SystemTrayIconComponent::setIconImage (const Image& colourImage, const Imag
     if (colourImage.isValid())
     {
         if (! isOnDesktop())
-            addToDesktop (0);
+            addToDesktop (ComponentPeer::windowRequiresX11);
 
         pimpl.reset (new Pimpl (colourImage, (Window) getWindowHandle()));
 

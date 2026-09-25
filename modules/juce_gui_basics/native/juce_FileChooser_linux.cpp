@@ -53,6 +53,12 @@ static bool isSet (int flags, int toCheck)
     return (flags & toCheck) != 0;
 }
 
+static bool selectsDirectoriesOnly (int flags)
+{
+    return isSet (flags, FileBrowserComponent::canSelectDirectories)
+        && ! isSet (flags, FileBrowserComponent::canSelectFiles);
+}
+
 class FileChooser::Native final : public FileChooser::Pimpl,
                                   private Timer
 {
@@ -61,7 +67,7 @@ public:
         : owner (fileChooser),
           // kdialog/zenity only support opening either files or directories.
           // Files should take precedence, if requested.
-          isDirectory         (isSet (flags, FileBrowserComponent::canSelectDirectories) && ! isSet (flags, FileBrowserComponent::canSelectFiles)),
+          isDirectory         (selectsDirectoriesOnly (flags)),
           isSave              (isSet (flags, FileBrowserComponent::saveMode)),
           selectMultipleFiles (isSet (flags, FileBrowserComponent::canSelectMultipleItems)),
           warnAboutOverwrite  (isSet (flags, FileBrowserComponent::warnAboutOverwriting))
@@ -315,19 +321,110 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Native)
 };
 
+//==============================================================================
+class FileChooser::Portal final : public FileChooser::Pimpl
+{
+public:
+    Portal (FileChooser& fileChooser, int flags)
+        : owner (fileChooser),
+          parentWindow (owner.parent),
+          options (makeOptions (owner, flags))
+    {}
+
+    void launch() override
+    {
+        const auto flag = completionFlag;
+        const auto finish = [this, flag] (Array<URL> urls)
+        {
+            *flag = true;
+            owner.finished (urls);
+        };
+
+        request = XdgDesktopPortal::getInstance()->openFileChooser (parentWindow, options, finish);
+
+        if (request == nullptr)
+            finish ({});
+    }
+
+    void runModally() override
+    {
+       #if JUCE_MODAL_LOOPS_PERMITTED
+        const auto flag = completionFlag;
+
+        launch();
+
+        // owner.finished may destroy this pimpl mid-loop, so the loop checks the local copy of the flag.
+        while (! *flag)
+            if (! MessageManager::getInstance()->runDispatchLoopUntil (20))
+                break;
+
+        // The dispatch loop can stop before the portal answers (app shutdown). Complete with
+        // no selection so the owner destroys this pimpl, cancelling the request with it.
+        if (! *flag)
+            owner.finished ({});
+       #else
+        jassertfalse;
+       #endif
+    }
+
+private:
+    static XdgDesktopPortal::FileChooserOptions makeOptions (FileChooser& chooser, int flags)
+    {
+        XdgDesktopPortal::FileChooserOptions result;
+        result.title = chooser.title;
+        result.filters = chooser.filters;
+        result.startingFile = chooser.startingFile;
+        result.isSave = isSet (flags, FileBrowserComponent::saveMode);
+        result.isDirectory = selectsDirectoriesOnly (flags);
+        result.selectMultiple = isSet (flags, FileBrowserComponent::canSelectMultipleItems);
+        return result;
+    }
+
+    FileChooser& owner;
+    XdgDesktopPortal::ParentWindow parentWindow;
+    XdgDesktopPortal::FileChooserOptions options;
+    std::unique_ptr<XdgDesktopPortal::Request> request;
+    std::shared_ptr<bool> completionFlag = std::make_shared<bool> (false);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Portal)
+};
+
+//==============================================================================
+static bool canShowXdgPortalFileChooser (bool needsDirectory)
+{
+    auto* portal = XdgDesktopPortal::getInstance();
+
+    if (! portal->isFileChooserAvailable())
+        return false;
+
+    // Directory selection needs FileChooser portal version 3.
+    return ! needsDirectory || portal->getFileChooserVersion() >= 3;
+}
+
+static bool canShowNativeFileChooser()
+{
+    static const bool canUseNativeBox = exeIsAvailable ("zenity") || exeIsAvailable ("kdialog");
+    return canUseNativeBox;
+}
+
 bool FileChooser::isPlatformDialogAvailable()
 {
    #if JUCE_DISABLE_NATIVE_FILECHOOSERS
     return false;
    #else
-    static bool canUseNativeBox = exeIsAvailable ("zenity") || exeIsAvailable ("kdialog");
-    return canUseNativeBox;
+    return XdgDesktopPortal::getInstance()->isFileChooserAvailable() || canShowNativeFileChooser();
    #endif
 }
 
 std::shared_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser& owner, int flags, FilePreviewComponent*)
 {
-    return std::make_shared<Native> (owner, flags);
+    if (canShowXdgPortalFileChooser (selectsDirectoriesOnly (flags)))
+        return std::make_shared<Portal> (owner, flags);
+
+    if (canShowNativeFileChooser())
+        return std::make_shared<Native> (owner, flags);
+
+    return nullptr;
 }
 
 } // namespace juce

@@ -287,6 +287,9 @@ JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglCreateContextAttribsARB)
 
 #elif JUCE_LINUX || JUCE_BSD
  #include <juce_gui_basics/native/juce_ScopedWindowAssociation_linux.h>
+ #include <juce_gui_basics/native/juce_WaylandOpenGLSurface_linux.h>
+ #include "native/juce_X11OpenGLWindow_linux.h"
+ #include "native/juce_WaylandOpenGLWindow_linux.h"
  #include "native/juce_OpenGL_linux.h"
 
 #elif JUCE_ANDROID

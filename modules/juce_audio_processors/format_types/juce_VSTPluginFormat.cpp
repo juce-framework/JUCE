@@ -716,7 +716,7 @@ private:
          DesktopComponent()
          {
              setOpaque (true);
-             addToDesktop (0);
+             addToDesktop (ComponentPeer::windowRequiresX11);
          }
 
          void paint (Graphics& g) override

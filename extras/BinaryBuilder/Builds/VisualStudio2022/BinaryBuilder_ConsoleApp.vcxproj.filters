@@ -220,6 +220,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_CommonFile_linux.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_DBusSymbols_linux.cpp">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Files_android.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
@@ -736,6 +739,9 @@
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_ComSmartPtr_windows.h">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_DBusSymbols_linux.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_IPAddress_posix.h">

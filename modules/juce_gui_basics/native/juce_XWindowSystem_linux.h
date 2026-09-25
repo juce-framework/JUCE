@@ -176,13 +176,13 @@ namespace XWindowSystemUtilities
 }
 
 //==============================================================================
-class LinuxComponentPeer;
+class X11ComponentPeer;
 
 class XWindowSystem  : public DeletedAtShutdown
 {
 public:
     //==============================================================================
-    ::Window createWindow (::Window parentWindow, LinuxComponentPeer*);
+    ::Window createWindow (::Window parentWindow, X11ComponentPeer*);
     void destroyWindow    (::Window);
 
     void setTitle (::Window, const String&) const;
@@ -240,8 +240,8 @@ public:
     ::Window createKeyProxy (::Window);
     void deleteKeyProxy (::Window) const;
 
-    bool externalDragFileInit (LinuxComponentPeer*, const StringArray& files, bool canMove, std::function<void()>&& callback) const;
-    bool externalDragTextInit (LinuxComponentPeer*, const String& text, std::function<void()>&& callback) const;
+    bool externalDragFileInit (ComponentPeer*, const StringArray& files, bool canMove, std::function<void()>&& callback) const;
+    bool externalDragTextInit (ComponentPeer*, const String& text, std::function<void()>&& callback) const;
 
     void copyTextToClipboard (const String&);
     String getTextFromClipboard() const;
@@ -260,7 +260,7 @@ public:
     static String getThemeNameSettingName()            { return "Net/ThemeName"; }
 
     //==============================================================================
-    void handleWindowMessage (LinuxComponentPeer*, XEvent&) const;
+    void handleWindowMessage (X11ComponentPeer*, XEvent&) const;
     bool isParentWindowOf (::Window, ::Window possibleChild) const;
 
     //==============================================================================
@@ -315,35 +315,35 @@ private:
     void initialiseXSettings();
 
     //==============================================================================
-    void handleKeyPressEvent        (LinuxComponentPeer*, XKeyEvent&) const;
-    void handleKeyReleaseEvent      (LinuxComponentPeer*, const XKeyEvent&) const;
-    void handleWheelEvent           (LinuxComponentPeer*, int64, Point<float>, float) const;
-    void handleButtonPressEvent     (LinuxComponentPeer*, int64, Point<float>, int) const;
-    void handleButtonPressEvent     (LinuxComponentPeer*, int, int, ::Time, Point<double>) const;
-    void handleButtonPressEvent     (LinuxComponentPeer*, const XButtonPressedEvent&) const;
-    void handleButtonReleaseEvent   (LinuxComponentPeer*, int, int, ::Time, Point<double>) const;
-    void handleButtonReleaseEvent   (LinuxComponentPeer*, const XButtonReleasedEvent&) const;
-    void handleMotionNotifyEvent    (LinuxComponentPeer*, int, ::Time, Point<double>) const;
-    void handleMotionNotifyEvent    (LinuxComponentPeer*, const XPointerMovedEvent&) const;
-    void handleEnterNotifyEvent     (LinuxComponentPeer*, const XEnterWindowEvent&) const;
-    void handleLeaveNotifyEvent     (LinuxComponentPeer*, const XLeaveWindowEvent&) const;
-    void handleFocusInEvent         (LinuxComponentPeer*) const;
-    void handleFocusOutEvent        (LinuxComponentPeer*) const;
-    void handleExposeEvent          (LinuxComponentPeer*, XExposeEvent&) const;
-    void handleConfigureNotifyEvent (LinuxComponentPeer*, XConfigureEvent&) const;
-    void handleGravityNotify        (LinuxComponentPeer*) const;
-    void propertyNotifyEvent        (LinuxComponentPeer*, const XPropertyEvent&) const;
+    void handleKeyPressEvent        (X11ComponentPeer*, XKeyEvent&) const;
+    void handleKeyReleaseEvent      (X11ComponentPeer*, const XKeyEvent&) const;
+    void handleWheelEvent           (X11ComponentPeer*, int64, Point<float>, float) const;
+    void handleButtonPressEvent     (X11ComponentPeer*, int64, Point<float>, int) const;
+    void handleButtonPressEvent     (X11ComponentPeer*, int, int, ::Time, Point<double>) const;
+    void handleButtonPressEvent     (X11ComponentPeer*, const XButtonPressedEvent&) const;
+    void handleButtonReleaseEvent   (X11ComponentPeer*, int, int, ::Time, Point<double>) const;
+    void handleButtonReleaseEvent   (X11ComponentPeer*, const XButtonReleasedEvent&) const;
+    void handleMotionNotifyEvent    (X11ComponentPeer*, int, ::Time, Point<double>) const;
+    void handleMotionNotifyEvent    (X11ComponentPeer*, const XPointerMovedEvent&) const;
+    void handleEnterNotifyEvent     (X11ComponentPeer*, const XEnterWindowEvent&) const;
+    void handleLeaveNotifyEvent     (X11ComponentPeer*, const XLeaveWindowEvent&) const;
+    void handleFocusInEvent         (X11ComponentPeer*) const;
+    void handleFocusOutEvent        (X11ComponentPeer*) const;
+    void handleExposeEvent          (X11ComponentPeer*, XExposeEvent&) const;
+    void handleConfigureNotifyEvent (X11ComponentPeer*, XConfigureEvent&) const;
+    void handleGravityNotify        (X11ComponentPeer*) const;
+    void propertyNotifyEvent        (X11ComponentPeer*, const XPropertyEvent&) const;
     void handleMappingNotify        (XMappingEvent&) const;
-    void handleClientMessageEvent   (LinuxComponentPeer*, XClientMessageEvent&, XEvent&) const;
-    void handleXEmbedMessage        (LinuxComponentPeer*, XClientMessageEvent&) const;
+    void handleClientMessageEvent   (X11ComponentPeer*, XClientMessageEvent&, XEvent&) const;
+    void handleXEmbedMessage        (X11ComponentPeer*, XClientMessageEvent&) const;
 
    #if JUCE_USE_XINPUT
-    void handleXIDeviceEvent        (LinuxComponentPeer*, int, XIDeviceEvent&) const;
+    void handleXIDeviceEvent        (X11ComponentPeer*, int, XIDeviceEvent&) const;
     void updateXInputDevices        () const;
    #endif
 
-    void dismissBlockingModals      (LinuxComponentPeer*) const;
-    void dismissBlockingModals      (LinuxComponentPeer*, const XConfigureEvent&) const;
+    void dismissBlockingModals      (X11ComponentPeer*) const;
+    void dismissBlockingModals      (X11ComponentPeer*, const XConfigureEvent&) const;
     void updateConstraints          (::Window, ComponentPeer&) const;
 
     ::Window findTopLevelWindowOf (::Window) const;

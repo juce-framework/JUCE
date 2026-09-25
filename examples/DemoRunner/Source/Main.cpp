@@ -135,10 +135,12 @@ private:
             desktop.setOrientationsEnabled (Desktop::allOrientations);
             desktop.setKioskModeComponent (this);
            #else
-            setBounds ((int) (0.1f * (float) getParentWidth()),
-                       (int) (0.1f * (float) getParentHeight()),
-                       jmax (850, (int) (0.5f * (float) getParentWidth())),
-                       jmax (600, (int) (0.7f * (float) getParentHeight())));
+            const auto parentArea = getParentMonitorArea();
+            const Rectangle area { jmax (850.0f, 0.5f * (float) parentArea.getWidth()),
+                                   jmax (600.0f, 0.7f * (float) parentArea.getHeight()) };
+            const auto position = parentArea.getPosition().toFloat()
+                                + Point { parentArea.getWidth(), parentArea.getHeight() }.toFloat() * 0.1f;
+            setBounds (area.withPosition (position).getSmallestIntegerContainer());
            #endif
 
             setContentOwned (new MainComponent(), false);

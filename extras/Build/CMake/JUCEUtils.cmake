@@ -1655,10 +1655,7 @@ function(_juce_configure_plugin_targets target)
 
     set_target_properties(${target} PROPERTIES
         POSITION_INDEPENDENT_CODE TRUE
-        INTERFACE_POSITION_INDEPENDENT_CODE TRUE
-        VISIBILITY_INLINES_HIDDEN TRUE
-        C_VISIBILITY_PRESET hidden
-        CXX_VISIBILITY_PRESET hidden)
+        INTERFACE_POSITION_INDEPENDENT_CODE TRUE)
 
     # A convenience target for building all plugin variations at once
     add_custom_target(${target}_All)
@@ -2158,6 +2155,12 @@ function(_juce_initialise_target target)
         ARCHIVE_OUTPUT_DIRECTORY "${products_folder}"
         LIBRARY_OUTPUT_DIRECTORY "${products_folder}"
         RUNTIME_OUTPUT_DIRECTORY "${products_folder}")
+
+    # Statically linked third-party code such as libpng must not be visible to dynamically loaded system libraries
+    set_target_properties(${target} PROPERTIES
+        VISIBILITY_INLINES_HIDDEN TRUE
+        C_VISIBILITY_PRESET hidden
+        CXX_VISIBILITY_PRESET hidden)
 
     if(JUCE_ARG_ICON_BIG)
         _juce_make_absolute_and_check(JUCE_ARG_ICON_BIG)

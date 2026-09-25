@@ -224,19 +224,78 @@
  #include "native/juce_FileChooser_windows.cpp"
 
 #elif JUCE_LINUX || JUCE_BSD
+ #include <fcntl.h>
+ #include <poll.h>
+ #include <signal.h>
+ #include <sys/mman.h>
+ #include <sys/syscall.h>
+ #include <unistd.h>
+
  #include "native/juce_XSymbols_linux.cpp"
+ #include "native/juce_KeySymTranslation_linux.h"
+ #include "native/juce_LinuxInputState_linux.h"
+
+ #include <juce_core/detail/juce_FunctionPointerDestructor.h>
+ #include "native/wayland/juce_WaylandProtocol_linux.h"
+ #include "native/juce_WaylandSymbols_linux.h"
+ #include "native/juce_LibdecorAPI_linux.h"
+ #include "native/juce_LibdecorSymbols_linux.h"
+ #if ! JUCE_WAYLAND_PEER_DIAGNOSTICS
+  #include "native/juce_WaylandPeerDiagnostics_linux.h"
+ #endif
+ #include "native/juce_WaylandShmBuffer_linux.h"
+ #include "native/juce_WaylandSurfaceScale_linux.h"
+ #include "native/juce_WaylandRepaintManager_linux.h"
+ #include "native/juce_WaylandSurfaceOutputs_linux.h"
+ #include "native/juce_WaylandCursor_linux.h"
+ #include "native/juce_WaylandPopup_linux.h"
+ #include "native/juce_WaylandInput_linux.h"
+ #include "native/juce_WaylandDataDevice_linux.h"
+ #include "native/juce_WaylandTextInput_linux.h"
+ #include "native/juce_WaylandWindowSystem_linux.h"
+ #include "native/juce_WaylandSubsurface_linux.h"
+ #include "native/juce_WaylandSurfacePositionHistory_linux.h"
+ #include "native/juce_WaylandOpenGLSurface_linux.h"
+ #include "native/juce_WaylandToplevel_linux.h"
+ #include "native/juce_WaylandToplevelRelationship_linux.h"
+ #include "native/juce_LibdecorSymbols_linux.cpp"
+ #include "native/juce_LibdecorAPI_linux.cpp"
+ #include "native/wayland/juce_WaylandProtocolTypes_linux.h"
+ #include "native/wayland/juce_WaylandProtocol_linux.cpp"
+ #include "native/juce_WaylandDataDevice_linux.cpp"
+ #include "native/juce_WaylandTextInput_linux.cpp"
+ #include "native/juce_WaylandShmBuffer_linux.cpp"
+ #include "native/juce_WaylandSurfaceScale_linux.cpp"
+ #include "native/juce_WaylandRepaintManager_linux.cpp"
+ #include "native/juce_WaylandSurfaceOutputs_linux.cpp"
+ #include "native/juce_WaylandCursor_linux.cpp"
+ #include "native/juce_WaylandWindowSystem_linux.cpp"
+ #include "native/juce_WaylandSubsurface_linux.cpp"
+ #include "native/juce_WaylandSurfacePositionHistory_linux.cpp"
+ #include "native/juce_WaylandPopup_linux.cpp"
+ #include "native/juce_WaylandToplevel_linux.cpp"
+ #include "native/juce_WaylandToplevelRelationship_linux.cpp"
+ #include "native/juce_Windowing_wayland_linux.cpp"
+ #include "native/juce_WaylandInput_linux.cpp"
+
  #include "native/juce_DragAndDrop_linux.cpp"
+ #include "native/juce_LinuxInputState_linux.cpp"
 
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 
  #include "native/juce_ScopedWindowAssociation_linux.h"
  #include "native/juce_WindowUtils_linux.cpp"
+ #include "native/juce_Windowing_x11_linux.cpp"
  #include "native/juce_Windowing_linux.cpp"
+
  #include "native/juce_NativeMessageBox_linux.cpp"
  #include "native/juce_XWindowSystem_linux.cpp"
 
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
+ #include <juce_core/native/juce_DBusSymbols_linux.h>
+ #include "native/juce_XdgDesktopPortal_linux.h"
+ #include "native/juce_XdgDesktopPortal_linux.cpp"
  #include "native/juce_FileChooser_linux.cpp"
 
 #elif JUCE_ANDROID

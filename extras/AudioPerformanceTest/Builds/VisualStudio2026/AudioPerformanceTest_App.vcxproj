@@ -1845,6 +1845,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_CommonFile_linux.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_DBusSymbols_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Files_android.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -3552,6 +3555,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_AccessibilityTextHelpers_test.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\wayland\juce_WaylandProtocol_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_ContentSharer_android.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -3576,6 +3582,15 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_FileChooser_windows.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_LibdecorAPI_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_LibdecorSymbols_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_LinuxInputState_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_NativeMessageBox_android.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -3591,13 +3606,61 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_VBlank_windows.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandCursor_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandDataDevice_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandInput_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandPopup_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandRepaintManager_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandShmBuffer_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandSubsurface_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandSurfaceOutputs_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandSurfacePositionHistory_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandSurfaceScale_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandTextInput_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandToplevel_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandToplevelRelationship_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandWindowSystem_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_Windowing_android.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_Windowing_linux.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_Windowing_wayland_linux.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_Windowing_windows.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_Windowing_x11_linux.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WindowsHooks_windows.cpp">
@@ -3610,6 +3673,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_WindowUtils_windows.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_XdgDesktopPortal_linux.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_XSymbols_linux.cpp">
@@ -4584,6 +4650,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_BasicNativeHeaders.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_CFHelpers_mac.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_ComSmartPtr_windows.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_DBusSymbols_linux.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_IPAddress_posix.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_JNIHelpers_android.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_ObjCHelpers_mac.h"/>
@@ -5553,15 +5620,39 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_UIAValueProvider_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_UIAWindowProvider_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_WindowsUIAWrapper_windows.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\wayland\juce_WaylandProtocol_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\wayland\juce_WaylandProtocolTypes_linux.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_CGMetalLayerRenderer_mac.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_Direct2DHwndContext_windows.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_KeySymTranslation_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_LibdecorAPI_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_LibdecorSymbols_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_LinuxInputState_linux.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_MultiTouchMapper.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_NativeModalWrapperComponent_ios.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_PerScreenDisplayLinks_mac.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_ScopedDPIAwarenessDisabler.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_ScopedThreadDPIAwarenessSetter_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_ScopedWindowAssociation_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandCursor_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandDataDevice_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandInput_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandOpenGLSurface_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandPeerDiagnostics_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandPopup_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandRepaintManager_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandShmBuffer_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandSubsurface_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandSurfaceOutputs_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandSurfacePositionHistory_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandSurfaceScale_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandSymbols_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandTextInput_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandToplevel_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandToplevelRelationship_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WaylandWindowSystem_linux.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_WindowsHooks_windows.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_XdgDesktopPortal_linux.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_XSymbols_linux.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_XWindowSystem_linux.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\positioning\juce_MarkerList.h"/>

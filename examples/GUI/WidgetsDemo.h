@@ -1613,7 +1613,9 @@ void showBubbleMessage (Component& targetComponent, const String& textToShow,
     else if (Desktop::canUseSemiTransparentWindows())
     {
         bmc->setAlwaysOnTop (true);
-        bmc->addToDesktop (0);
+        bmc->addToDesktop (ComponentPeer::windowIsTemporary
+                           | ComponentPeer::windowIgnoresMouseClicks
+                           | ComponentPeer::windowIgnoresKeyPresses);
     }
     else
     {

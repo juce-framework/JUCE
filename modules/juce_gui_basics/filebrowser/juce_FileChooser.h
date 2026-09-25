@@ -318,6 +318,7 @@ public:
     //==============================================================================
     /** @cond */
     class Native;
+    class Portal;
     /** @endcond */
 
 private:
@@ -351,6 +352,7 @@ private:
     class NonNative;
     friend class NonNative;
     friend class Native;
+    friend class Portal;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileChooser)
 };

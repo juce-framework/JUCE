@@ -78,6 +78,13 @@
  #define JUCE_ENABLE_REPAINT_DEBUGGING 0
 #endif
 
+/** Config: JUCE_WAYLAND_PEER_DIAGNOSTICS
+    Enables an internal hook that reports Wayland peer state for debugging.
+*/
+#ifndef JUCE_WAYLAND_PEER_DIAGNOSTICS
+ #define JUCE_WAYLAND_PEER_DIAGNOSTICS 0
+#endif
+
 /** Config: JUCE_USE_XRANDR
     Enables Xrandr multi-monitor support (Linux only).
     Unless you specifically want to disable this, it's best to leave this option turned on.
@@ -398,6 +405,10 @@ namespace juce
 
   #include "native/juce_XWindowSystem_linux.h"
   #include "native/juce_XSymbols_linux.h"
+ #endif
+
+ #if JUCE_WAYLAND_PEER_DIAGNOSTICS
+  #include "native/juce_WaylandPeerDiagnostics_linux.h"
  #endif
 #endif
 

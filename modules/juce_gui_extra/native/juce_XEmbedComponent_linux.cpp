@@ -37,6 +37,7 @@ namespace juce
 
 ::Window juce_createKeyProxyWindow (ComponentPeer*);
 void juce_deleteKeyProxyWindow (::Window);
+ComponentPeer* getPeerFor (::Window);
 
 //==============================================================================
 enum
@@ -455,6 +456,11 @@ private:
         return {};
     }
 
+    static bool isX11Peer (const ComponentPeer& peer)
+    {
+        return getPeerFor (reinterpret_cast<Window> (peer.getNativeHandle())) == &peer;
+    }
+
     Display* getDisplay()   { return XWindowSystem::getInstance()->getDisplay(); }
 
     //==============================================================================
@@ -534,6 +540,14 @@ private:
 
     void peerChanged (ComponentPeer* newPeer)
     {
+        if (newPeer != nullptr && ! isX11Peer (*newPeer))
+        {
+            // This component was added to a Wayland window, which cannot contain an X11 window.
+            // Create the window with the ComponentPeer::windowRequiresX11 style flag.
+            jassertfalse;
+            newPeer = nullptr;
+        }
+
         if (newPeer != lastPeer)
         {
             if (lastPeer != nullptr)

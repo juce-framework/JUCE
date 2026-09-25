@@ -229,13 +229,136 @@ static bool isFileExecutable (const String& filename)
             && access (filename.toUTF8(), X_OK) == 0;
 }
 
+static bool looksLikeNonFileUri (const String& fileName)
+{
+    const auto colon = fileName.indexOfChar (':');
+
+    if (colon <= 0)
+        return false;
+
+    const auto scheme = fileName.substring (0, colon);
+
+    if (! CharacterFunctions::isLetter (scheme[0]))
+        return false;
+
+    for (int i = 0; i < scheme.length(); ++i)
+    {
+        const auto c = scheme[i];
+
+        if (! (CharacterFunctions::isLetterOrDigit (c) || c == '+' || c == '-' || c == '.'))
+            return false;
+    }
+
+    return ! scheme.equalsIgnoreCase ("file");
+}
+
+static bool openDocumentViaXdgPortal (const String& fileName)
+{
+    auto* symbols = DBusSymbols::getInstance();
+
+    if (! symbols->loadAllSymbols())
+        return false;
+
+    static CriticalSection connectionLock;
+    const ScopedLock lock (connectionLock);
+
+    // OpenURI returns before the open actually happens, and the portal cancels any
+    // still-pending open (like an app chooser dialog) if the connection that asked
+    // goes away. Keep one connection alive for the whole process.
+    static DBusConnectionHandle connection;
+    ScopedDBusError error;
+
+    if (connection == nullptr)
+    {
+        connection.reset (symbols->dbusBusGetPrivate (DBusConstants::busSession, error.get()));
+
+        if (connection == nullptr || error.isSet())
+            return false;
+
+        symbols->dbusConnectionSetExitOnDisconnect (connection.get(), 0);
+    }
+
+    const auto appendEmptyOptions = [&] (DBusMessageIter* args)
+    {
+        DBusMessageIter options;
+        symbols->dbusMessageIterOpenContainer (args, DBusConstants::typeArray, "{sv}", &options);
+        symbols->dbusMessageIterCloseContainer (args, &options);
+    };
+
+    const char* const destination   = "org.freedesktop.portal.Desktop";
+    const char* const objectPath    = "/org/freedesktop/portal/desktop";
+    const char* const interfaceName = "org.freedesktop.portal.OpenURI";
+    const char* const parent        = "";
+
+    DBusMessageHandle message;
+
+    if (looksLikeNonFileUri (fileName))
+    {
+        message.reset (symbols->dbusMessageNewMethodCall (destination, objectPath, interfaceName, "OpenURI"));
+
+        if (message == nullptr)
+            return false;
+
+        DBusMessageIter args;
+        symbols->dbusMessageIterInitAppend (message.get(), &args);
+        symbols->dbusMessageIterAppendBasic (&args, DBusConstants::typeString, &parent);
+
+        const char* uri = fileName.toRawUTF8();
+        symbols->dbusMessageIterAppendBasic (&args, DBusConstants::typeString, &uri);
+        appendEmptyOptions (&args);
+    }
+    else
+    {
+        const auto file = fileName.startsWithIgnoreCase ("file:") ? URL (fileName).getLocalFile()
+                                                                  : File::createFileWithoutCheckingPath (fileName);
+
+        if (! file.exists())
+            return false;
+
+        const auto fd = open (file.getFullPathName().toRawUTF8(), O_RDONLY | O_CLOEXEC);
+
+        if (fd < 0)
+            return false;
+
+        const ScopeGuard closeFd { [fd] { close (fd); } };
+        message.reset (symbols->dbusMessageNewMethodCall (destination, objectPath, interfaceName, "OpenFile"));
+
+        if (message == nullptr)
+            return false;
+
+        DBusMessageIter args;
+        symbols->dbusMessageIterInitAppend (message.get(), &args);
+        symbols->dbusMessageIterAppendBasic (&args, DBusConstants::typeString, &parent);
+        symbols->dbusMessageIterAppendBasic (&args, DBusConstants::typeUnixFd, &fd);
+        appendEmptyOptions (&args);
+    }
+
+    const DBusMessageHandle reply { symbols->dbusConnectionSendWithReplyAndBlock (connection.get(), message.get(), 5000, error.get()) };
+
+    if (reply == nullptr)
+    {
+        connection.reset();
+        return false;
+    }
+
+    if (error.isSet())
+        return false;
+
+    return symbols->dbusMessageGetType (reply.get()) == DBusConstants::messageTypeMethodReturn;
+}
+
 bool Process::openDocument (const String& fileName, const String& parameters)
 {
+    const auto isViewableDocument = fileName.startsWithIgnoreCase ("file:")
+                                     || File::createFileWithoutCheckingPath (fileName).isDirectory()
+                                     || ! isFileExecutable (fileName);
+
+    if (isViewableDocument && openDocumentViaXdgPortal (fileName))
+        return true;
+
     const auto cmdString = [&]
     {
-        if (fileName.startsWithIgnoreCase ("file:")
-            || File::createFileWithoutCheckingPath (fileName).isDirectory()
-            || ! isFileExecutable (fileName))
+        if (isViewableDocument)
         {
             const auto singleCommand = fileName.trim().quoted();
 

@@ -459,6 +459,11 @@ private:
 
     void attachPluginWindow()
     {
+        const auto supported = view->isPlatformTypeSupported (defaultVST3WindowType);
+
+        if (supported != kResultTrue)
+            return;
+
         if (pluginHandle == HandleFormat{})
         {
             #if JUCE_WINDOWS
@@ -621,7 +626,7 @@ public:
             return true;
 
         VSTComSmartPtr view { tryCreatingView(), IncrementRef::no };
-        return view != nullptr;
+        return view != nullptr && view->isPlatformTypeSupported (defaultVST3WindowType) == kResultTrue;
     }
 
     VST3PluginWindow* createEditor() override

@@ -229,7 +229,8 @@ std::shared_ptr<FileChooser::Pimpl> FileChooser::createPimpl (int flags, FilePre
     if (useNativeDialogBox)
    #endif
     {
-        return showPlatformDialog (*this, flags, previewComp);
+        if (auto nativeDialog = showPlatformDialog (*this, flags, previewComp))
+            return nativeDialog;
     }
 
     return std::make_unique<NonNative> (*this, flags, previewComp);
