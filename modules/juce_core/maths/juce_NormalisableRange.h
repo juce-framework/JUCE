@@ -258,7 +258,13 @@ private:
 
     static ValueType clampTo0To1 (ValueType value)
     {
-        auto clampedValue = jlimit (static_cast<ValueType> (0), static_cast<ValueType> (1), value);
+        // A value that is no number is not between nought and one either, and
+        // jlimit hands it back: every comparison with it is false. What it
+        // reaches is audio, as a sample that is no number, and the integer
+        // parameters, where converting it to an int is undefined. A proportion
+        // of nought, the bottom of the range, is the nearest value to it.
+        auto clampedValue = std::isnan (value) ? static_cast<ValueType> (0)
+                                              : jlimit (static_cast<ValueType> (0), static_cast<ValueType> (1), value);
 
         // If you hit this assertion then either your normalisation function is not working
         // correctly or your input is out of the expected bounds.
