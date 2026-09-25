@@ -234,7 +234,15 @@ void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float* const*
 {
     const ScopedLock sl (lock);
 
-    jassert (currentDevice != nullptr);
+    // A device may deliver a trailing callback after audioDeviceStopped(), at which
+    // point the buffers below are no longer sized to hold the processor's channels.
+    if (currentDevice == nullptr)
+    {
+        for (int i = 0; i < numOutputChannels; ++i)
+            FloatVectorOperations::clear (outputChannelData[i], numSamples);
+
+        return;
+    }
 
     // These should have been prepared by audioDeviceAboutToStart()...
     jassert (sampleRate > 0 && blockSize > 0);
