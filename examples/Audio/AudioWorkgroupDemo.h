@@ -187,13 +187,21 @@ public:
         jassert (options.workgroup);
        #endif
 
-        startRealtimeThread (RealtimeOptions{}.withApproximateAudioProcessingTime (options.numSamples, options.sampleRate));
+        if (! startRealtimeThread (RealtimeOptions{}.withApproximateAudioProcessingTime (options.numSamples, options.sampleRate))
+            && ! startThread (Priority::high))
+        {
+            state = State::exit;
+        }
     }
 
     ~AudioWorkerThread() final
     {
-        signalThreadShouldExit();
-        workReady.signal();
+        {
+            const std::scoped_lock lock { mutex };
+            state = State::exit;
+            condvar.notify_one();
+        }
+
         stopThread (-1);
     }
 
@@ -213,12 +221,19 @@ public:
 
     void signalWorkReady()
     {
-        workReady.signal();
+        const std::scoped_lock lock { mutex };
+
+        if (state == State::exit)
+            return;
+
+        state = State::workInQueue;
+        condvar.notify_one();
     }
 
     void blockUntilCycleDone()
     {
-        workDone.wait();
+        std::unique_lock lock { mutex };
+        condvar.wait (lock, [&] { return state == State::idle || state == State::exit; });
     }
 
 private:
@@ -230,10 +245,15 @@ private:
 
         while (true)
         {
-            workReady.wait();
+            {
+                std::unique_lock lock { mutex };
+                condvar.wait (lock, [&] { return state != State::idle; });
 
-            if (threadShouldExit())
-                return;
+                if (state == State::exit)
+                    return;
+
+                state = State::active;
+            }
 
             const auto jobs = jobQueueFifo.read (jobQueueFifo.getNumReady());
             lastJobCount = jobs.blockSize1 + jobs.blockSize2;
@@ -242,9 +262,24 @@ private:
                               jobQueue[(size_t) srcIndex]->run();
                           });
 
-            workDone.signal();
+            {
+                const std::scoped_lock lock { mutex };
+
+                if (state == State::active)
+                    state = State::idle;
+
+                condvar.notify_one();
+            }
         }
     }
+
+    enum class State
+    {
+        idle,
+        workInQueue,
+        active,
+        exit,
+    };
 
     static constexpr auto numJobs = 128;
 
@@ -252,8 +287,10 @@ private:
     std::array<Voice*, numJobs> jobQueue;
     AbstractFifo jobQueueFifo { numJobs };
     std::atomic<int> lastJobCount = 0;
-    WaitableEvent workReady;
-    WaitableEvent workDone;
+
+    std::mutex mutex;
+    std::condition_variable condvar;
+    State state = State::idle;
 
     JUCE_DECLARE_NON_COPYABLE (AudioWorkerThread)
     JUCE_DECLARE_NON_MOVEABLE (AudioWorkerThread)
@@ -369,6 +406,8 @@ public:
         // You could also do some of the work on this thread instead of waiting.
         for (int i = 0; i < (int) activeVoices.size();)
         {
+            const auto initialCount = i;
+
             for (auto worker : workers)
             {
                 if (i >= (int) activeVoices.size())
@@ -377,6 +416,10 @@ public:
                 const auto jobCount = jmin (jobsPerThread, (int) activeVoices.size() - i);
                 i += worker->queueAudioJobs ({ activeVoices.data() + i, (size_t) jobCount });
             }
+
+            // All voice input fifos are full, so drop additional work
+            if (i == initialCount)
+                break;
         }
 
         // kick off the work.
