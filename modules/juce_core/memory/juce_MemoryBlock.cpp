@@ -96,14 +96,14 @@ MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other)
 
 MemoryBlock::MemoryBlock (MemoryBlock&& other) noexcept
     : data (std::move (other.data)),
-      size (other.size)
+      size (std::exchange (other.size, 0))
 {
 }
 
 MemoryBlock& MemoryBlock::operator= (MemoryBlock&& other) noexcept
 {
-    data = std::move (other.data);
-    size = other.size;
+    MemoryBlock tmp { std::move (other) };
+    swapWith (tmp);
     return *this;
 }
 
