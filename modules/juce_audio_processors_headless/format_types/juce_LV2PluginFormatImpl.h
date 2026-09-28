@@ -4240,8 +4240,10 @@ public:
 
         if (File::isAbsolutePath (identifier))
         {
-            world->loadBundle (world->newFileUri (nullptr, File::addTrailingSeparator (identifier).toRawUTF8()));
-            findPluginsByFile (identifier, plugins);
+            // Constructing a File expands a leading '~', which lilv would otherwise treat as a relative path
+            const File bundle { identifier };
+            world->loadBundle (world->newFileUri (nullptr, File::addTrailingSeparator (bundle.getFullPathName()).toRawUTF8()));
+            findPluginsByFile (bundle, plugins);
         }
 
         for (const auto* plugin : plugins)
