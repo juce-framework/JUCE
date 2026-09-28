@@ -159,8 +159,18 @@ bool Thread::createNativeThread (Priority priority)
         return nullptr;
     });
 
-    return threadId != nullptr
-        && threadData.started.get_future().get();
+    if (threadId == nullptr)
+        return false;
+
+    if (! threadData.started.get_future().get())
+    {
+        // The thread exited without reaching juce_threadEntryPoint, which is
+        // what normally closes the handle.
+        closeThreadHandle();
+        return false;
+    }
+
+    return true;
 }
 
 void Thread::killThread()
