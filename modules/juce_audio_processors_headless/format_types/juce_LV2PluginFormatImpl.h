@@ -4567,7 +4567,9 @@ private:
 
     static bool hasUriScheme (const String& s)
     {
-        return serd_uri_string_has_scheme (reinterpret_cast<const uint8_t*> (s.toRawUTF8()));
+        // A Windows drive letter followed by a colon also satisfies serd's definition of a scheme
+        return ! File::isAbsolutePath (s)
+            && serd_uri_string_has_scheme (reinterpret_cast<const uint8_t*> (s.toRawUTF8()));
     }
 
     const LilvPlugin* findPluginByUri (const String& s)
