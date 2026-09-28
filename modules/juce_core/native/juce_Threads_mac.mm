@@ -140,7 +140,7 @@ bool Thread::createNativeThread (Priority priority)
 
     ThreadData threadData { *this, {} };
 
-    threadId = threadHandle = makeThreadHandle (attribute, &threadData, [] (void* userData) -> void*
+    auto* handle = makeThreadHandle (attribute, &threadData, [] (void* userData) -> void*
     {
         auto& data { *static_cast<ThreadData*> (userData) };
         auto& thread = data.thread;
@@ -159,8 +159,11 @@ bool Thread::createNativeThread (Priority priority)
         return nullptr;
     });
 
-    return threadId != nullptr
-        && threadData.started.get_future().get();
+    if (handle == nullptr || ! threadData.started.get_future().get())
+        return false;
+
+    threadId = threadHandle = handle;
+    return true;
 }
 
 void Thread::killThread()
