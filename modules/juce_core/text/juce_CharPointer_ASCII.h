@@ -51,6 +51,13 @@ class CharPointer_ASCII  final
 public:
     using CharType = char;
 
+    // Standard iterator traits for compatibility with STL algorithms
+    using difference_type   = std::ptrdiff_t;
+    using value_type        = juce_wchar;
+    using pointer           = juce_wchar*;
+    using reference         = juce_wchar;  // Returns by value since operator*() decodes to juce_wchar
+    using iterator_category = std::input_iterator_tag;
+
     explicit CharPointer_ASCII (const CharType* rawPointer) noexcept
         : data (const_cast<CharType*> (rawPointer))
     {

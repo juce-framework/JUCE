@@ -48,6 +48,13 @@ class CharPointer_UTF8  final
 public:
     using CharType = char;
 
+    // Standard iterator traits for compatibility with STL algorithms
+    using value_type = juce_wchar;
+    using pointer = juce_wchar*;
+    using reference = juce_wchar;  // Note: returns by value since this is a proxy iterator
+    using iterator_category = std::input_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+
     explicit CharPointer_UTF8 (const CharType* rawPointer) noexcept
         : data (const_cast<CharType*> (rawPointer))
     {

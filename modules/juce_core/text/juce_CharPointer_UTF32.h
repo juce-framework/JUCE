@@ -48,6 +48,13 @@ class CharPointer_UTF32  final
 public:
     using CharType = juce_wchar;
 
+    // Standard iterator traits for compatibility with STL algorithms
+    using difference_type   = std::ptrdiff_t;
+    using value_type        = juce_wchar;
+    using pointer           = juce_wchar*;
+    using reference         = juce_wchar;  // Returns by value for consistency across CharPointer types
+    using iterator_category = std::input_iterator_tag;
+
     explicit CharPointer_UTF32 (const CharType* rawPointer) noexcept
         : data (const_cast<CharType*> (rawPointer))
     {
