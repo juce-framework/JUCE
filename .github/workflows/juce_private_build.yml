@@ -87,7 +87,7 @@ jobs:
       triggerer: *triggerer
     secrets: inherit
   deploy:
-    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && contains(fromJSON('["success", "skipped"]'), needs.build.result) && contains(fromJSON('["master", "develop", "juce9"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && contains(fromJSON('["success", "skipped"]'), needs.build.result) && contains(fromJSON('["master", "develop", "wayland"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
     needs: [setup, build]
     name: Deploy
     uses: juce-framework/JUCE-utils/.github/workflows/deploy.yml@master
