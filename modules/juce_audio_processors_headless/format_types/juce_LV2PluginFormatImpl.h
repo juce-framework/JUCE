@@ -4233,7 +4233,10 @@ public:
     void findAllTypesForFile (OwnedArray<PluginDescription>& result,
                               const String& identifier)
     {
-        std::vector<const LilvPlugin*> plugins { findPluginByUri (identifier) };
+        std::vector<const LilvPlugin*> plugins;
+
+        if (auto* plugin = findPluginByUri (identifier))
+            plugins.push_back (plugin);
 
         if (File::isAbsolutePath (identifier))
         {
@@ -4241,13 +4244,9 @@ public:
             findPluginsByFile (identifier, plugins);
         }
 
-        for (const auto& plugin : plugins)
-        {
+        for (const auto* plugin : plugins)
             if (auto desc = getDescription (plugin); desc.fileOrIdentifier.isNotEmpty())
-            {
                 result.add (std::make_unique<PluginDescription> (desc));
-            }
-        }
     }
 
     bool fileMightContainThisPluginType (const String& file) const
