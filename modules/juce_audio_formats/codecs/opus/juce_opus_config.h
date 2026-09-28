@@ -48,6 +48,11 @@
  #define OPUS_BUILD 1
  #define USE_ALLOCA 1
 
+ // libopus requires that FLOAT_APPROX is defined when building with __FAST_MATH__
+ #if defined (__FAST_MATH__) && ! defined (FLOAT_APPROX)
+  #define FLOAT_APPROX 1
+ #endif
+
  #if ! JUCE_MSVC
   #define HAVE_LRINT 1
   #define HAVE_LRINTF 1
