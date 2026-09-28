@@ -4233,11 +4233,13 @@ public:
     void findAllTypesForFile (OwnedArray<PluginDescription>& result,
                               const String& identifier)
     {
-        if (File::isAbsolutePath (identifier))
-            world->loadBundle (world->newFileUri (nullptr, File::addTrailingSeparator (identifier).toRawUTF8()));
-
         std::vector<const LilvPlugin*> plugins { findPluginByUri (identifier) };
-        findPluginsByFile (identifier, plugins);
+
+        if (File::isAbsolutePath (identifier))
+        {
+            world->loadBundle (world->newFileUri (nullptr, File::addTrailingSeparator (identifier).toRawUTF8()));
+            findPluginsByFile (identifier, plugins);
+        }
 
         for (const auto& plugin : plugins)
         {
@@ -4251,11 +4253,7 @@ public:
     bool fileMightContainThisPluginType (const String& file) const
     {
         // If the string looks like a URI, then it could be a valid LV2 identifier
-        const auto* data = file.toRawUTF8();
-        const auto numBytes = file.getNumBytesAsUTF8();
-        std::vector<uint8_t> vec (numBytes + 1, 0);
-        std::copy (data, data + numBytes, vec.begin());
-        return serd_uri_string_has_scheme (vec.data()) || file.endsWith (".lv2");
+        return hasUriScheme (file) || file.endsWith (".lv2");
     }
 
     String getNameOfPluginFromIdentifier (const String& identifier)
@@ -4566,8 +4564,17 @@ private:
     struct Free { void operator() (char* ptr) const noexcept { free (ptr); } };
     using StringPtr = std::unique_ptr<char, Free>;
 
+    static bool hasUriScheme (const String& s)
+    {
+        return serd_uri_string_has_scheme (reinterpret_cast<const uint8_t*> (s.toRawUTF8()));
+    }
+
     const LilvPlugin* findPluginByUri (const String& s)
     {
+        // Passing a bundle path to lilv_new_uri makes sord print "attempt to map invalid URI" on stderr.
+        if (! hasUriScheme (s))
+            return nullptr;
+
         return world->getAllPlugins().getByUri (world->newUri (s.toRawUTF8()));
     }
 
