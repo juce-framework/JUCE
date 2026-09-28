@@ -3,6 +3,17 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 9.0.3
+
+  - Added support for reading and writing Opus files
+  - Added support for WebP image files
+  - Updated Windows MIDI Services support to the in-box preview 7 API
+  - Fixed multiple Linux ALSA sample rate and channel issues
+  - Fixed Windows window placement and focus issues
+  - Fixed cancelling blocking network requests on macOS
+  - Fixed some OpenGLFrameBuffer issues
+  - Allowed recursive scanning for LV2 plug-ins
+
 ## Version 9.0.2
 
   - Enabled MP3AudioFormat by default

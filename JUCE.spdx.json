@@ -2,8 +2,8 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "JUCE-9.0.2",
-  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.2-6cb183b029be",
+  "name": "JUCE-9.0.3",
+  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.3-416896ee6bff",
   "creationInfo": {
     "created": "2026-09-04T00:00:00Z",
     "creators": [
@@ -15,7 +15,7 @@
     {
       "name": "JUCE",
       "SPDXID": "SPDXRef-JUCE",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -26,7 +26,7 @@
     {
       "name": "juce_analytics",
       "SPDXID": "SPDXRef-juce-analytics",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -38,7 +38,7 @@
     {
       "name": "juce_animation",
       "SPDXID": "SPDXRef-juce-animation",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -50,7 +50,7 @@
     {
       "name": "juce_audio_basics",
       "SPDXID": "SPDXRef-juce-audio-basics",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -62,7 +62,7 @@
     {
       "name": "juce_audio_devices",
       "SPDXID": "SPDXRef-juce-audio-devices",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -74,7 +74,7 @@
     {
       "name": "juce_audio_formats",
       "SPDXID": "SPDXRef-juce-audio-formats",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -86,7 +86,7 @@
     {
       "name": "juce_audio_plugin_client",
       "SPDXID": "SPDXRef-juce-audio-plugin-client",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -98,7 +98,7 @@
     {
       "name": "juce_audio_processors",
       "SPDXID": "SPDXRef-juce-audio-processors",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -110,7 +110,7 @@
     {
       "name": "juce_audio_processors_headless",
       "SPDXID": "SPDXRef-juce-audio-processors-headless",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -122,7 +122,7 @@
     {
       "name": "juce_audio_utils",
       "SPDXID": "SPDXRef-juce-audio-utils",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -134,7 +134,7 @@
     {
       "name": "juce_box2d",
       "SPDXID": "SPDXRef-juce-box2d",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -146,7 +146,7 @@
     {
       "name": "juce_core",
       "SPDXID": "SPDXRef-juce-core",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -158,7 +158,7 @@
     {
       "name": "juce_cryptography",
       "SPDXID": "SPDXRef-juce-cryptography",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -170,7 +170,7 @@
     {
       "name": "juce_data_structures",
       "SPDXID": "SPDXRef-juce-data-structures",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -182,7 +182,7 @@
     {
       "name": "juce_dsp",
       "SPDXID": "SPDXRef-juce-dsp",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -194,7 +194,7 @@
     {
       "name": "juce_events",
       "SPDXID": "SPDXRef-juce-events",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -206,7 +206,7 @@
     {
       "name": "juce_graphics",
       "SPDXID": "SPDXRef-juce-graphics",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -218,7 +218,7 @@
     {
       "name": "juce_gui_basics",
       "SPDXID": "SPDXRef-juce-gui-basics",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -230,7 +230,7 @@
     {
       "name": "juce_gui_extra",
       "SPDXID": "SPDXRef-juce-gui-extra",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -242,7 +242,7 @@
     {
       "name": "juce_javascript",
       "SPDXID": "SPDXRef-juce-javascript",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -254,7 +254,7 @@
     {
       "name": "juce_midi_ci",
       "SPDXID": "SPDXRef-juce-midi-ci",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -266,7 +266,7 @@
     {
       "name": "juce_opengl",
       "SPDXID": "SPDXRef-juce-opengl",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -278,7 +278,7 @@
     {
       "name": "juce_osc",
       "SPDXID": "SPDXRef-juce-osc",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -290,7 +290,7 @@
     {
       "name": "juce_product_unlocking",
       "SPDXID": "SPDXRef-juce-product-unlocking",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -302,7 +302,7 @@
     {
       "name": "juce_video",
       "SPDXID": "SPDXRef-juce-video",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -314,7 +314,7 @@
     {
       "name": "examples",
       "SPDXID": "SPDXRef-examples",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -326,7 +326,7 @@
     {
       "name": "extras",
       "SPDXID": "SPDXRef-extras",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
@@ -338,7 +338,7 @@
     {
       "name": "build-system",
       "SPDXID": "SPDXRef-build-system",
-      "versionInfo": "9.0.2",
+      "versionInfo": "9.0.3",
       "supplier": "Organization: Raw Material Software Limited",
       "downloadLocation": "git+https://github.com/juce-framework/JUCE.git",
       "filesAnalyzed": false,
