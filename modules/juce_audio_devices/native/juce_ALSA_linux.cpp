@@ -700,7 +700,10 @@ public:
 
             const int callbacksToStop = numCallbacks;
 
-            if ((! waitForThreadToExit (400)) && audioIoInProgress && numCallbacks == callbacksToStop)
+            const auto ioPeriodMs = sampleRate > 0.0 ? (int) (1000.0 * bufferSize / sampleRate) : 0;
+            const auto audioCallbackTimeoutMs = 400 + jmin (2000, ioPeriodMs);
+
+            if ((! waitForThreadToExit (audioCallbackTimeoutMs)) && audioIoInProgress && numCallbacks == callbacksToStop)
             {
                 JUCE_ALSA_LOG ("Thread is stuck in i/o. Is pulseaudio suspended?");
 
