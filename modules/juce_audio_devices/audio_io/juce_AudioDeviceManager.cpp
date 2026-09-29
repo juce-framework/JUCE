@@ -104,12 +104,22 @@ public:
     void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
                                            [[maybe_unused]] int numInputChannels,
                                            float* const* outputChannelData,
-                                           [[maybe_unused]] int numOutputChannels,
+                                           int numOutputChannels,
                                            int numSamples,
                                            const AudioIODeviceCallbackContext& context) override
     {
         jassert ((int) storedInputChannels.size()  == numInputChannels);
         jassert ((int) storedOutputChannels.size() == numOutputChannels);
+
+        // During device reconfiguration JACK can transiently report a buffer size of 0.
+        if (maximumSize <= 0)
+        {
+            for (int i = 0; i < numOutputChannels; ++i)
+                if (auto* channel = outputChannelData[i])
+                    zeromem (channel, (size_t) numSamples * sizeof (*channel));
+
+            return;
+        }
 
         int position = 0;
 
