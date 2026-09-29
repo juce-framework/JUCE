@@ -64,7 +64,8 @@ static std::shared_ptr<ump::Session> getLegacySession()
     return nullptr;
 }
 
-class MidiInput::Impl : private ump::Consumer
+class MidiInput::Impl : private ump::Consumer,
+                        private ump::DisconnectionListener
 {
 public:
     void start()
@@ -133,8 +134,21 @@ public:
         return connection.getEndpointId();
     }
 
+    void addDisconnectionListener (DisconnectionListener& l)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        disconnectionListeners.add (&l);
+    }
+
+    void removeDisconnectionListener (DisconnectionListener& l)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        disconnectionListeners.remove (&l);
+    }
+
     ~Impl() override
     {
+        connection.removeDisconnectionListener (*this);
         connection.removeConsumer (*this);
     }
 
@@ -153,6 +167,7 @@ private:
           owner (o)
     {
         connection.addConsumer (*this);
+        connection.addDisconnectionListener (*this);
     }
 
     void consume (ump::Iterator b, ump::Iterator e, double time) override
@@ -179,12 +194,18 @@ private:
         }
     }
 
+    void disconnected() override
+    {
+        disconnectionListeners.call ([&] (auto& l) { l.disconnected(); });
+    }
+
     std::shared_ptr<ump::Session> session;
     ump::LegacyVirtualInput virtualEndpoint;
     std::optional<String> customName;
     ump::Input connection;
     MidiDeviceInfo storedInfo;
     ump::ToBytestreamConverter converter { 4096 };
+    ListenerList<DisconnectionListener> disconnectionListeners;
     WaitFreeListeners<MidiInputCallback> callbacks;
     uint8_t group{};
     MidiInput* owner = nullptr;
@@ -326,6 +347,16 @@ void MidiInput::removeCallback (MidiInputCallback& callback)
     pimpl->removeCallback (callback);
 }
 
+void MidiInput::addDisconnectionListener (ump::DisconnectionListener& l)
+{
+    pimpl->addDisconnectionListener (l);
+}
+
+void MidiInput::removeDisconnectionListener (ump::DisconnectionListener& l)
+{
+    pimpl->removeDisconnectionListener (l);
+}
+
 //==============================================================================
 MidiOutput::MidiOutput (std::shared_ptr<ump::Session> s,
                         ump::Output x,
@@ -339,6 +370,12 @@ MidiOutput::MidiOutput (std::shared_ptr<ump::Session> s,
       group (g)
 {
     mainPackets.reserve (2048);
+    connection.addDisconnectionListener (*this);
+}
+
+MidiOutput::~MidiOutput()
+{
+    connection.removeDisconnectionListener (*this);
 }
 
 Array<MidiDeviceInfo> MidiOutput::getAvailableDevices()
