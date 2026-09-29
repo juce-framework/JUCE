@@ -2589,7 +2589,7 @@ struct WindowsMidiHelpers
 
             bool isFinished() const
             {
-                return (hdr.dwFlags & WHDR_DONE) != 0;
+                return (hdr.dwFlags & MHDR_DONE) != 0;
             }
 
         private:
@@ -2644,11 +2644,15 @@ struct WindowsMidiHelpers
                 if (deviceHandle == nullptr)
                     return;
 
-                midiInStop (deviceHandle);
-                midiInReset (deviceHandle);
+                const auto stopResult = midiInStop (deviceHandle);
+                const auto resetResult = midiInReset (deviceHandle);
+                const auto stopSuccess = stopResult == MMSYSERR_NOERROR && resetResult == MMSYSERR_NOERROR;
 
-                for (auto& header : headers)
-                    header.unprepare (deviceHandle);
+                if (stopSuccess)
+                {
+                    for (auto& header : headers)
+                        header.unprepare (deviceHandle);
+                }
 
                 for (int count = 5; --count >= 0;)
                 {
