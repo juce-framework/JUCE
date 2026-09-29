@@ -361,6 +361,9 @@ void ComponentPeer::handleMovedOrResized()
 
 void ComponentPeer::handleFocusGain()
 {
+    if (component.hasKeyboardFocus (true))
+        return;
+
     if (component.isParentOf (lastFocusedComponent)
           && lastFocusedComponent->isShowing()
           && lastFocusedComponent->getWantsKeyboardFocus())
