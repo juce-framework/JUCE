@@ -400,10 +400,8 @@ private:
             // context. You'll need to create this object in one of the OpenGLContext's callbacks.
             jassert (OpenGLHelpers::isContextActive());
 
-           #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
-            if (gl::glGenFramebuffers == nullptr)
+            if (! OpenGLHelpers::isFunctionAvailable (gl::glGenFramebuffers))
                 return;
-           #endif
 
             gl::glGenFramebuffers (1, &frameBufferID);
             bind();

@@ -623,6 +623,16 @@ static bool isCurlEnabled (Project& project)
             && project.isConfigFlagEnabled ("JUCE_USE_CURL", true));
 }
 
+static bool isOpenGLESEnabled (const ProjectExporter& exporter)
+{
+    static String openGLModule ("juce_opengl");
+    const auto& project = exporter.getProject();
+
+    return (project.getEnabledModules().isModuleEnabled (openGLModule)
+            && (project.isConfigFlagEnabled ("JUCE_OPENGL_ES", false)
+                || exporter.getAllPreprocessorDefs().getValue ("JUCE_OPENGL_ES", "0").getIntValue() != 0));
+}
+
 static bool isLoadCurlSymbolsLazilyEnabled (Project& project)
 {
     static String juceCoreModule ("juce_core");
@@ -644,6 +654,12 @@ std::vector<PackageDependency> ProjectExporter::getLinuxPackages (PackageDepende
     {
         packages.add ("gtk+-x11-3.0");
         dependencies.push_back (PackageDependency { "webkit2gtk-4.1", "webkit2gtk-4.0" });
+    }
+
+    if (isOpenGLESEnabled (*this))
+    {
+        packages.removeString ("gl");
+        packages.add ("glesv2");
     }
 
     packages.removeEmptyStrings();

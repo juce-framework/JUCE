@@ -69,8 +69,35 @@
 #undef JUCE_OPENGL
 #define JUCE_OPENGL 1
 
+//==============================================================================
+// iOS and Android only provide OpenGL ES
 #if JUCE_IOS || JUCE_ANDROID
- #define JUCE_OPENGL_ES 1
+ #ifndef JUCE_OPENGL_ES
+  #define JUCE_OPENGL_ES 1
+ #endif
+#endif
+
+/** Config: JUCE_OPENGL_ES
+    Builds juce_opengl against OpenGL ES rather than desktop OpenGL.
+
+    This is only a choice on Linux and BSD, for systems whose graphics drivers only
+    provide OpenGL ES, such as many embedded Arm boards. It is always enabled on iOS
+    and Android and cannot be enabled on macOS or Windows.
+
+    Building against OpenGL ES requires linking libGLESv2 rather than libGL. With
+    CMake, enable it with the NEEDS_OPENGL_ES target option rather than by defining
+    this macro, since that option also links the right libraries. In the Projucer,
+    enable the module flag, or add JUCE_OPENGL_ES=1 to the preprocessor definitions
+    of a Linux exporter when the project also targets other platforms.
+*/
+#ifndef JUCE_OPENGL_ES
+ #define JUCE_OPENGL_ES 0
+#endif
+
+#if (JUCE_IOS || JUCE_ANDROID) && ! JUCE_OPENGL_ES
+ #error "OpenGL ES is the only OpenGL API available on this platform"
+#elif (JUCE_MAC || JUCE_WINDOWS) && JUCE_OPENGL_ES
+ #error "OpenGL ES is not available on this platform"
 #endif
 
 #if JUCE_OPENGL_ES

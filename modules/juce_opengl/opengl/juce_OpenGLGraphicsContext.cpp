@@ -494,9 +494,7 @@ struct Target
 
     void makeActive() const noexcept
     {
-       #if JUCE_WINDOWS
-        if (context.extensions.glBindFramebuffer != nullptr)
-       #endif
+        if (OpenGLHelpers::isFunctionAvailable (context.extensions.glBindFramebuffer))
             context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
 
         glViewport (0, viewportYOffset, bounds.getWidth(), bounds.getHeight());
@@ -2144,9 +2142,7 @@ struct NonShaderContext final : public LowLevelGraphicsSoftwareRenderer
                                     false);
         glBindTexture (GL_TEXTURE_2D, 0);
 
-       #if JUCE_WINDOWS
-        if (target.context.extensions.glBindFramebuffer != nullptr)
-       #endif
+        if (OpenGLHelpers::isFunctionAvailable (target.context.extensions.glBindFramebuffer))
             target.context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, previousFrameBufferTarget);
 
         JUCE_CHECK_OPENGL_ERROR

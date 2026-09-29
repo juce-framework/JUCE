@@ -59,9 +59,9 @@ Compiled JUCE applications will dynamically load whichever library version is
 available during runtime.
 
 #### juce_opengl
-- libglu1-mesa-dev
-- mesa-common-dev
 - libegl-dev
+- libglu1-mesa-dev and mesa-common-dev (unless `JUCE_OPENGL_ES=1`)
+- libgles-dev (if `JUCE_OPENGL_ES=1`)
 
 The full command is as follows:
 
@@ -72,4 +72,5 @@ The full command is as follows:
         libfreetype-dev libfontconfig1-dev \
         libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libxi-dev \
         libwebkit2gtk-4.1-dev \
-        libglu1-mesa-dev mesa-common-dev libegl-dev
+        libegl-dev \
+        libglu1-mesa-dev mesa-common-dev
