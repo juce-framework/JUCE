@@ -578,16 +578,12 @@ public:
         if (context.actualProfile == OpenGLProfile::compatibility)
             glEnable (GL_TEXTURE_2D);
 
-       #if JUCE_WINDOWS
         // some old drivers are missing this function, so try to at least avoid a crash here,
         // but if you hit this assertion you may want to have your own version check before using the
         // component rendering stuff on such old drivers.
-        jassert (context.extensions.glActiveTexture != nullptr);
-        if (context.extensions.glActiveTexture != nullptr)
-       #endif
-        {
+        jassert (OpenGLHelpers::isFunctionAvailable (context.extensions.glActiveTexture));
+        if (OpenGLHelpers::isFunctionAvailable (context.extensions.glActiveTexture))
             context.extensions.glActiveTexture (GL_TEXTURE0);
-        }
 
         glBindTexture (GL_TEXTURE_2D, cachedImageFrameBuffer.getTextureID());
 
@@ -672,7 +668,7 @@ public:
         gl::loadFunctions();
 
        #if JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS
-        if (getOpenGLVersion() >= Version { 4, 3 } && glDebugMessageCallback != nullptr)
+        if (getOpenGLVersion() >= Version { 4, 3 } && OpenGLHelpers::isFunctionAvailable (glDebugMessageCallback))
         {
             glEnable (GL_DEBUG_OUTPUT);
             glEnable (GL_DEBUG_OUTPUT_SYNCHRONOUS);

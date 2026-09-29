@@ -106,6 +106,7 @@ endfunction()
 
 if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
     _juce_create_pkgconfig_target(JUCE_CURL_LINUX_DEPS libcurl)
+    _juce_create_pkgconfig_target(JUCE_GLES_LINUX_DEPS egl glesv2)
     _juce_available_pkgconfig_module_or_else(webkit_package_name webkit2gtk-4.1 webkit2gtk-4.0)
 
     # All browser related libs are loaded dynamically only if they are available during runtime
@@ -262,13 +263,19 @@ function(_juce_link_optional_libraries target)
     if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
         get_target_property(needs_curl ${target} JUCE_NEEDS_CURL)
         get_target_property(needs_browser ${target} JUCE_NEEDS_WEB_BROWSER)
+        get_target_property(needs_opengl_es ${target} JUCE_NEEDS_OPENGL_ES)
 
         target_compile_definitions(${target} PRIVATE
             JUCE_USE_CURL=$<BOOL:${needs_curl}>
-            JUCE_WEB_BROWSER=$<BOOL:${needs_browser}>)
+            JUCE_WEB_BROWSER=$<BOOL:${needs_browser}>
+            JUCE_OPENGL_ES=$<BOOL:${needs_opengl_es}>)
 
         if(needs_curl)
             target_link_libraries(${target} PRIVATE juce::pkgconfig_JUCE_CURL_LINUX_DEPS)
+        endif()
+
+        if(needs_opengl_es)
+            target_link_libraries(${target} PRIVATE juce::pkgconfig_JUCE_GLES_LINUX_DEPS)
         endif()
 
         if(needs_browser)
@@ -2083,6 +2090,7 @@ function(_juce_initialise_target target)
         COMPANY_EMAIL
         NEEDS_CURL                      # Set this true if you want to link curl on Linux
         NEEDS_WEB_BROWSER               # Set this true if you want to link webkit on Linux
+        NEEDS_OPENGL_ES                 # Set this true if you want to use OpenGL ES rather than OpenGL on Linux
         NEEDS_WEBVIEW2                  # Set this true if you want to link WebView2 statically on Windows
         NEEDS_STORE_KIT                 # Set this true if you want in-app-purchases on Mac
         NEEDS_WINDOWS_MIDI_SERVICES     # Set this true If you want to support the newest Windows MIDI backend

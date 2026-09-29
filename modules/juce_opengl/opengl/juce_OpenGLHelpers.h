@@ -63,6 +63,20 @@ public:
     /** Returns the address of a named GL extension function */
     static void* getExtensionFunction (const char* functionName);
 
+    /** Returns true if the given function pointer is not null.
+
+        This can be used to check whether a function from the juce::gl namespace is
+        available before calling it. Functions that are resolved at runtime may be missing,
+        but when a function is linked statically, comparing it against nullptr directly
+        triggers compiler warnings. Passing it through a pointer parameter keeps the check
+        well-formed in both situations.
+    */
+    template <typename Fn>
+    static bool isFunctionAvailable (Fn* fn) noexcept
+    {
+        return fn != nullptr;
+    }
+
     /** Returns a version string such as "#version 150" suitable for prefixing a GLSL
         shader on this platform.
     */
