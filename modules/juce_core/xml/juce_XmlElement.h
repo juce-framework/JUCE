@@ -910,13 +910,25 @@ private:
     LinkedListPointer<XmlAttributeNode> attributes;
     String tagName;
 
-    struct LineFormat
+    class LineFormat
     {
-        const char* newLineChars;
-        int indentationLevel;
+    public:
+        explicit LineFormat (const char* x)
+            : newLineChars (x)
+        {
+            jassert (x != nullptr);
+        }
 
-        LineFormat indented() const    { return { newLineChars, indentationLevel + 2 }; }
-        LineFormat unindented() const  { return { newLineChars, 0 }; }
+        LineFormat indented() const
+        {
+            return withMember (*this, &LineFormat::indentation, indentation + 2);
+        }
+
+        void writeNewLineAndIndent (OutputStream&) const;
+
+    private:
+        const char* newLineChars{};
+        size_t indentation{};
     };
 
     XmlElement (int) noexcept;
