@@ -261,13 +261,16 @@ namespace XmlOutputFunctions
     }
 }
 
+void XmlElement::LineFormat::writeNewLineAndIndent (OutputStream& out) const
+{
+    out << newLineChars;
+    XmlOutputFunctions::writeSpaces (out, (size_t) indentation);
+}
+
 void XmlElement::writeElementAsText (OutputStream& outputStream,
                                      std::optional<LineFormat> lineFormat,
                                      int lineWrapLength) const
 {
-    if (lineFormat.has_value())
-        XmlOutputFunctions::writeSpaces (outputStream, (size_t) lineFormat->indentationLevel);
-
     if (! isTextElement())
     {
         outputStream.writeByte ('<');
@@ -280,8 +283,8 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
             {
                 if (lineLen > lineWrapLength && lineFormat.has_value())
                 {
-                    outputStream << lineFormat->newLineChars;
-                    XmlOutputFunctions::writeSpaces (outputStream, (size_t) (lineFormat->indentationLevel + tagName.length() + 1));
+                    lineFormat->writeNewLineAndIndent (outputStream);
+                    XmlOutputFunctions::writeSpaces (outputStream, (size_t) tagName.length() + 1);
                     lineLen = 0;
                 }
 
@@ -300,6 +303,10 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
             outputStream.writeByte ('>');
             bool lastWasTextNode = false;
 
+            const auto childLineFormat = lineFormat.has_value()
+                                             ? std::optional (lineFormat->indented())
+                                             : std::nullopt;
+
             for (; child != nullptr; child = child->nextListItem)
             {
                 if (child->isTextElement())
@@ -309,24 +316,18 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
                 }
                 else
                 {
-                    if (lineFormat.has_value() && ! lastWasTextNode)
-                        outputStream << lineFormat->newLineChars;
+                    if (childLineFormat.has_value() && ! lastWasTextNode)
+                        childLineFormat->writeNewLineAndIndent (outputStream);
 
                     child->writeElementAsText (outputStream,
-                                               lineFormat.has_value()
-                                                   ? std::optional (lastWasTextNode ? lineFormat->unindented()
-                                                                                    : lineFormat->indented())
-                                                   : std::nullopt,
+                                               childLineFormat,
                                                lineWrapLength);
                     lastWasTextNode = false;
                 }
             }
 
             if (lineFormat.has_value() && ! lastWasTextNode)
-            {
-                outputStream << lineFormat->newLineChars;
-                XmlOutputFunctions::writeSpaces (outputStream, (size_t) lineFormat->indentationLevel);
-            }
+                lineFormat->writeNewLineAndIndent (outputStream);
 
             outputStream.write ("</", 2);
             outputStream << tagName;
@@ -408,7 +409,7 @@ void XmlElement::writeTo (OutputStream& output, const TextFormat& options) const
 
     writeElementAsText (output,
                         options.newLineChars != nullptr
-                            ? std::optional (LineFormat { options.newLineChars, 0 })
+                            ? std::optional (LineFormat { options.newLineChars })
                             : std::nullopt,
                         options.lineWrapLength);
 
@@ -1063,7 +1064,74 @@ public:
             root.createNewChildElement ("b")->createNewChildElement ("c");
 
             expectEquals (root.toString (XmlElement::TextFormat{}.withoutHeader()),
-                          String ("<a>\r\n  <b>\r\n    <c/>\r\n  </b>\r\n</a>\r\n"));
+                          String ("<a>\r\n"
+                                  "  <b>\r\n"
+                                  "    <c/>\r\n"
+                                  "  </b>\r\n"
+                                  "</a>\r\n"));
+        });
+
+        testCase ("An element following text stays on that line, and its children keep their indent", [&]
+        {
+            XmlElement root { "a" };
+            auto* b = root.createNewChildElement ("b");
+            b->addTextElement ("t");
+            b->createNewChildElement ("c")->createNewChildElement ("d");
+
+            expectEquals (root.toString (XmlElement::TextFormat{}.withoutHeader()),
+                          String ("<a>\r\n"
+                                  "  <b>t<c>\r\n"
+                                  "      <d/>\r\n"
+                                  "    </c>\r\n"
+                                  "  </b>\r\n"
+                                  "</a>\r\n"));
+        });
+
+        testCase ("Line breaks inside text are preserved, and the closing tag breaks only when the last child is an element", [&]
+        {
+            XmlElement p { "p" };
+            p.addTextElement ("One, ");
+            expectEquals (p.toString (XmlElement::TextFormat{}.withoutHeader()),
+                          String ("<p>One, </p>\r\n"));
+
+            // </p> starts a new line because the last child is an element
+            auto* b = p.createNewChildElement ("b");
+            b->addTextElement ("two");
+            expectEquals (p.toString (XmlElement::TextFormat{}.withoutHeader()),
+                          String ("<p>One, <b>two</b>\r\n</p>\r\n"));
+
+            // the line break before </p> is the one stored in the text
+            p.addTextElement (", three, \r\n");
+            expectEquals (p.toString (XmlElement::TextFormat{}.withoutHeader()),
+                          String ("<p>One, <b>two</b>, three, \r\n</p>\r\n"));
+
+            // <i> follows that stored break immediately, and </p> starts a new
+            // line because the last child is an element
+            auto* i = p.createNewChildElement ("i");
+            i->addTextElement ("four");
+            expectEquals (p.toString (XmlElement::TextFormat{}.withoutHeader()),
+                          String ("<p>One, <b>two</b>, three, \r\n<i>four</i>\r\n</p>\r\n"));
+
+            // </p> stays on the same line because the last child is text
+            p.addTextElement (", five!");
+            expectEquals (p.toString (XmlElement::TextFormat{}.withoutHeader()),
+                          String ("<p>One, <b>two</b>, three, \r\n<i>four</i>, five!</p>\r\n"));
+        });
+
+        testCase ("Wrapped attributes on a nested element keep the parent indent", [&]
+        {
+            XmlElement root { "a" };
+            auto* child = root.createNewChildElement ("e");
+            child->setAttribute ("a", "1234567890");
+            child->setAttribute ("b", "x");
+
+            auto format = XmlElement::TextFormat{}.withoutHeader();
+            format.lineWrapLength = 10;
+            expectEquals (root.toString (format),
+                          String ("<a>\r\n"
+                                  "  <e a=\"1234567890\"\r\n"
+                                  "     b=\"x\"/>\r\n"
+                                  "</a>\r\n"));
         });
 
         testCase ("A default header is written unless it is suppressed", [&]
@@ -1397,22 +1465,6 @@ public:
             expect (! XmlElement::isValidXmlName ("-tag"));
             expect (! XmlElement::isValidXmlName ("has space"));
             expect (! XmlElement::isValidXmlName ("has\"quote"));
-        });
-
-        testCase ("An element following text is written inline, and its children indent from column zero", [&]
-        {
-            XmlElement root { "a" };
-            auto* b = root.createNewChildElement ("b");
-            b->addTextElement ("t");
-            b->createNewChildElement ("c")->createNewChildElement ("d");
-
-            expectEquals (root.toString (XmlElement::TextFormat{}.withoutHeader()),
-                          String ("<a>\r\n"
-                                  "  <b>t<c>\r\n"
-                                  "  <d/>\r\n"
-                                  "</c>\r\n"
-                                  "  </b>\r\n"
-                                  "</a>\r\n"));
         });
     }
 
