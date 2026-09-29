@@ -2650,17 +2650,35 @@ struct WindowsMidiHelpers
 
                 if (stopSuccess)
                 {
-                    for (auto& header : headers)
+                    for (auto& header : *headers)
                         header.unprepare (deviceHandle);
                 }
 
-                for (int count = 5; --count >= 0;)
+                const auto closed = std::invoke ([&]
                 {
-                    if (midiInClose (deviceHandle) == MMSYSERR_NOERROR)
-                        break;
+                    for (int count = 5; --count >= 0;)
+                    {
+                        if (midiInClose (deviceHandle) == MMSYSERR_NOERROR)
+                            return true;
 
-                    Sleep (20);
-                }
+                        // If we were unable to stop and reset the device, it could well be because the
+                        // device went away, so closing is also likely to fail. In this situation,
+                        // attempt to close once to be a good citizen, but avoid retrying to keep
+                        // our program responsive.
+                        if (! stopSuccess)
+                            return false;
+
+                        Sleep (20);
+                    }
+
+                    return false;
+                });
+
+                // If the device couldn't be closed, the driver may still hold pointers to the
+                // headers and their buffers. Leaking them is safer than freeing memory that the
+                // driver might still write to.
+                if (! closed)
+                    headers.release();
             }
 
             ump::EndpointId getEndpointId() const
@@ -2715,7 +2733,7 @@ struct WindowsMidiHelpers
 
                 result->deviceHandle = handle;
 
-                for (auto& header : result->headers)
+                for (auto& header : *result->headers)
                 {
                     header.prepare (handle);
                     header.write (handle);
@@ -2730,7 +2748,7 @@ struct WindowsMidiHelpers
                     {
                         WaitForSingleObject (self->event.get(), INFINITE);
 
-                        for (auto& header : self->headers)
+                        for (auto& header : *self->headers)
                             if (header.isFinished())
                                 header.write (self->deviceHandle);
                     }
@@ -2842,7 +2860,7 @@ struct WindowsMidiHelpers
 
             ump::EndpointId endpointId;
             HMIDIIN deviceHandle = nullptr;
-            std::array<MidiHeader, 32> headers;
+            std::unique_ptr<std::array<MidiHeader, 32>> headers = std::make_unique<std::array<MidiHeader, 32>>();
             double startTime = Time::getMillisecondCounterHiRes();
             WaitFreeListeners<ump::Consumer> consumers;
             ListenerList<ump::DisconnectionListener> disconnectListeners;
