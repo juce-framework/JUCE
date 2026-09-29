@@ -4276,7 +4276,13 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
                     case ButtonPress:
                     case ButtonRelease:
                     case MotionNotify:
-                        return;
+                        // Events with send_event set were synthesised by another client, such as GNOME
+                        // Shell forwarding a click to a tray icon. They have no XInput counterpart, so
+                        // they must be handled here.
+                        if (! event.xany.send_event)
+                            return;
+
+                        break;
                 }
 
                 if (event.xcookie.type == GenericEvent && event.xcookie.extension == xInputOpcode)
