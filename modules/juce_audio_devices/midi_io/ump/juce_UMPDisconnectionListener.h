@@ -41,7 +41,7 @@ namespace juce::universal_midi_packets
 
     @tags{Audio}
 */
-struct DisconnectionListener
+struct JUCE_API DisconnectionListener
 {
     DisconnectionListener() = default;
 

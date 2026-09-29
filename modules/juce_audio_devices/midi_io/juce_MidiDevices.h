@@ -242,6 +242,12 @@ public:
     /** Removed an input listener. */
     void removeCallback (MidiInputCallback&);
 
+    /** Adds a listener, which will be notified if the device gets disconnected. */
+    void addDisconnectionListener (ump::DisconnectionListener&);
+
+    /** Removes a previously-added disconnection listener. */
+    void removeDisconnectionListener (ump::DisconnectionListener&);
+
 private:
     class Impl;
     MidiInput();
@@ -311,9 +317,12 @@ public:
 
     @tags{Audio}
 */
-class JUCE_API  MidiOutput  final
+class JUCE_API  MidiOutput  final : private ump::DisconnectionListener
 {
 public:
+    /** Destructor */
+    ~MidiOutput() override;
+
     //==============================================================================
     /** Returns a list of the available midi output devices.
 
@@ -447,12 +456,31 @@ public:
     */
     bool isBackgroundThreadRunning() const  { return outputThread.isRunning(); }
 
+    /** Adds a listener, which will be notified if the device gets disconnected. */
+    void addDisconnectionListener (DisconnectionListener& l)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        disconnectionListeners.add (&l);
+    }
+
+    /** Removes a previously-added disconnection listener. */
+    void removeDisconnectionListener (DisconnectionListener& l)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        disconnectionListeners.remove (&l);
+    }
+
 private:
     MidiOutput (std::shared_ptr<ump::Session>,
                 ump::Output,
                 uint8_t,
                 const MidiDeviceInfo&,
                 ump::LegacyVirtualOutput);
+
+    void disconnected() override
+    {
+        disconnectionListeners.call ([&] (auto& l) { l.disconnected(); });
+    }
 
     template <typename Range>
     bool convertAndSend (ump::Packets& packets, Range&& range)
@@ -478,6 +506,7 @@ private:
     MidiDeviceInfo storedInfo;
     ump::Packets mainPackets, backgroundPackets;
     uint8_t group{};
+    ListenerList<DisconnectionListener> disconnectionListeners;
     ScheduledEventThread<MidiMessage> outputThread { [this] (const MidiMessage& message)
     {
         convertAndSend (backgroundPackets, Span { &message, 1 });
