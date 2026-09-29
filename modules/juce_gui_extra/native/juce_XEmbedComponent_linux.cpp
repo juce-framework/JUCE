@@ -417,6 +417,10 @@ private:
                                                          InputOutput, CopyFromParent,
                                                          CWEventMask | CWBorderPixel | CWBackPixmap | CWOverrideRedirect,
                                                          &swa);
+
+        // The window id is handed to the embedded client, which may create its own window inside it
+        // on another X connection, so the window must exist on the server before the id escapes.
+        X11Symbols::getInstance()->xSync (dpy, False);
     }
 
     void removeClient()
