@@ -186,7 +186,7 @@ void Endpoints::addListener (EndpointsListener& x)
 void Endpoints::removeListener (EndpointsListener& x)
 {
     if (impl != nullptr)
-        impl->addListener (x);
+        impl->removeListener (x);
 }
 
 Session Endpoints::makeSession (const String& x) const
