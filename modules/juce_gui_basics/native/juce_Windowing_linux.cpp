@@ -410,12 +410,16 @@ public:
             return;
         }
 
-        if (isConstrainedNativeWindow())
-            XWindowSystem::getInstance()->updateConstraints (windowH);
-
         physicalBounds = XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow);
         fullScreen = XWindowSystem::getInstance()->isFullScreen (windowH);
         updateScaleFactorFromNewBounds (physicalBounds, true);
+
+        // After the bounds and scale factor have been refreshed, not before:
+        // the hints restate the window's geometry as well as its size limits
+        // (they share one property -- see XWindowSystem::updateSizeHints), and
+        // both are derived from the values just read back.
+        if (isConstrainedNativeWindow())
+            XWindowSystem::getInstance()->updateSizeHints (windowH, *this, physicalBounds);
 
         updateVBlankTimer();
     }
