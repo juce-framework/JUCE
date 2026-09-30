@@ -76,6 +76,13 @@ static bool canBeTriggered (const Item& item) noexcept
         && (item.customComponent == nullptr || item.customComponent->isTriggeredAutomatically());
 }
 
+static bool canBeHighlightedByKeyboard (const Item& item) noexcept
+{
+    return item.isEnabled
+        && item.itemID != 0
+        && ! item.isSectionHeader;
+}
+
 static bool hasActiveSubMenu (const Item& item) noexcept
 {
     return item.isEnabled
@@ -204,6 +211,14 @@ struct ItemComponent final : public Component
 
             repaint();
         }
+    }
+
+    bool customComponentKeyPressed (const KeyPress& key)
+    {
+        return item.isEnabled
+            && customComp != nullptr
+            && ! customComp->isTriggeredAutomatically()
+            && customComp->keyPressed (key);
     }
 
     static bool isAccessibilityHandlerRequired (const Item& item)
@@ -679,6 +694,9 @@ struct MenuWindow final : public Component, private AsyncUpdater
     //==============================================================================
     bool keyPressed (const KeyPress& key) override
     {
+        if (currentChild != nullptr && currentChild->customComponentKeyPressed (key))
+            return true;
+
         if (key.isKeyCode (KeyPress::downKey))
         {
             selectNextItem (MenuSelectionDirection::forwards);
@@ -1382,7 +1400,7 @@ struct MenuWindow final : public Component, private AsyncUpdater
 
             if (auto* mic = items.getUnchecked ((start + items.size()) % items.size()))
             {
-                if (canBeTriggered (mic->item) || hasActiveSubMenu (mic->item))
+                if (canBeHighlightedByKeyboard (mic->item) || hasActiveSubMenu (mic->item))
                 {
                     setCurrentlyHighlightedChild (mic);
                     return;
