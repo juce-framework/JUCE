@@ -643,16 +643,14 @@ struct CoreMidiHelpers
         static void enableSimulatorMidiSession()
         {
            #if TARGET_OS_SIMULATOR
-            static bool hasEnabledNetworkSession = false;
+            static std::once_flag hasEnabledNetworkSession;
 
-            if (! hasEnabledNetworkSession)
+            std::call_once (hasEnabledNetworkSession, []
             {
                 MIDINetworkSession* session = [MIDINetworkSession defaultSession];
                 session.enabled = YES;
                 session.connectionPolicy = MIDINetworkConnectionPolicy_Anyone;
-
-                hasEnabledNetworkSession = true;
-            }
+            });
            #endif
         }
 
