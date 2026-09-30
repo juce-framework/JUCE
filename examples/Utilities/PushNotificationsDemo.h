@@ -528,7 +528,7 @@ private:
 
         paramControls.accentColourSelector = accentColourSelector.get();
 
-        CallOutBox::launchAsynchronously (std::move (accentColourSelector), paramControls.accentColourButton.getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (std::move (accentColourSelector), paramControls.accentColourButton, nullptr);
     }
 
     void setupLedColour()
@@ -544,7 +544,7 @@ private:
 
         paramControls.ledColourSelector = ledColourSelector.get();
 
-        CallOutBox::launchAsynchronously (std::move (ledColourSelector), paramControls.accentColourButton.getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (std::move (ledColourSelector), paramControls.accentColourButton, nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override

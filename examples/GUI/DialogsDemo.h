@@ -311,7 +311,7 @@ private:
             colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
             colourSelector->setSize (300, 400);
 
-            CallOutBox::launchAsynchronously (std::move (colourSelector), button.getScreenBounds(), nullptr);
+            CallOutBox::launchAsynchronously (std::move (colourSelector), button, nullptr);
         }
         else if (type == extraComponentsAlertWindow)
         {

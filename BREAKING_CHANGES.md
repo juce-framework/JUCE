@@ -1,5 +1,60 @@
 # JUCE breaking changes
 
+# `develop` branch
+
+## Change
+
+An AlertWindow created with an associated component is now associated with
+that component using TopLevelWindow::setAssociatedComponent(). This includes
+the alert windows shown by AlertWindow::showAsync() and the other static
+AlertWindow functions.
+
+**Possible Issues**
+
+The alert window is now kept above the window containing the component, and
+is minimised and restored with it. It also moves with that window, where a
+window can position itself. On macOS it takes that window's level, so it may be
+covered by an always-on-top window that would previously have been below it.
+
+**Workaround**
+
+Don't pass an associated component, or call setAssociatedComponent (nullptr)
+on an AlertWindow that you construct yourself.
+
+**Rationale**
+
+An alert should stay with the window it belongs to. This is the only way to
+keep it in front of that window on Wayland, where a window cannot be raised,
+and it matches the behaviour of native alerts on other platforms.
+
+
+## Change
+
+Component::createNewPeer() now takes a DesktopWindowOptions instead
+of separate style flags and native window arguments. Component::addToDesktop()
+is no longer virtual.
+
+**Possible Issues**
+
+Code that overrides createNewPeer() or addToDesktop() will fail to compile.
+
+**Workaround**
+
+Update the createNewPeer() override to take a const DesktopWindowOptions&, and
+read the style flags and native parent from it with getStyleFlags() and the
+getter for the platform's parent type, such as getParentHWND(). Replace an
+addToDesktop() override with an override of the new protected
+Component::createDesktopWindow(), which both addToDesktop() overloads call.
+
+**Rationale**
+
+A desktop window can now be created with the component it was opened from, so
+that temporary windows such as menus and tooltips can be parented to the right
+window. Describing the window with a DesktopWindowOptions needed a second
+addToDesktop() overload, and a single customisation point with its own name
+avoids having two virtual overloads that can hide or call each other.
+
+
 # Version 9.0.3
 
 ## Change

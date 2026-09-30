@@ -236,13 +236,12 @@ void AudioProcessorEditor::setScaleFactor (float newScale)
 typedef ComponentPeer* (*createUnityPeerFunctionType) (Component&);
 createUnityPeerFunctionType juce_createUnityPeerFn = nullptr;
 
-ComponentPeer* AudioProcessorEditor::createNewPeer ([[maybe_unused]] int styleFlags,
-                                                    [[maybe_unused]] void* nativeWindow)
+ComponentPeer* AudioProcessorEditor::createNewPeer (const DesktopWindowOptions& options)
 {
     if (juce_createUnityPeerFn != nullptr)
         return juce_createUnityPeerFn (*this);
 
-    return Component::createNewPeer (styleFlags, nativeWindow);
+    return Component::createNewPeer (options);
 }
 
 bool AudioProcessorEditor::wantsLayerBackedView() const

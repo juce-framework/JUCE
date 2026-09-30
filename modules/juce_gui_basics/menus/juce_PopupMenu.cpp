@@ -388,15 +388,10 @@ struct MenuWindow final : public Component, private AsyncUpdater
         }
         else
         {
-            const auto shouldDisableAccessibility = std::invoke ([this]
-            {
-                const auto* compToCheck = parent != nullptr ? parent
-                                                            : options.getTargetComponent();
+            auto* openedFrom = parent != nullptr ? static_cast<Component*> (parent)
+                                                 : options.getTargetComponent();
 
-                return compToCheck != nullptr && ! compToCheck->isAccessible();
-            });
-
-            if (shouldDisableAccessibility)
+            if (openedFrom != nullptr && ! openedFrom->isAccessible())
                 setAccessible (false);
 
             const auto windowsMultiTouchFlag = std::invoke ([&]
@@ -408,9 +403,10 @@ struct MenuWindow final : public Component, private AsyncUpdater
                 return false;
             });
 
-            addToDesktop (ComponentPeer::windowIsTemporary
-                          | ComponentPeer::windowIgnoresKeyPresses
-                          | lf.getMenuWindowFlags());
+            addToDesktop (DesktopWindowOptions().withStyleFlags (ComponentPeer::windowIsTemporary
+                                                                 | ComponentPeer::windowIgnoresKeyPresses
+                                                                 | lf.getMenuWindowFlags())
+                                                .withAssociatedComponent (openedFrom));
 
             if (auto* peer = getPeer())
                 peer->setWindowsCanUseMultiTouch (windowsMultiTouchFlag);

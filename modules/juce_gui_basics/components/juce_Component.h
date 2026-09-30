@@ -154,6 +154,10 @@ public:
         will first be removed from that parent. Likewise if a component is on the desktop
         and is subsequently added to another component, it'll be removed from the desktop.
 
+        If the component is already on the desktop, its window is recreated with the new flags
+        and keeps the associated component it was given, if any. To change that, use the
+        overload taking a DesktopWindowOptions.
+
         @param windowStyleFlags             a combination of the flags specified in the
                                             ComponentPeer::StyleFlags enum, which define the
                                             window's characteristics.
@@ -166,8 +170,19 @@ public:
              getPeer, ComponentPeer::setMinimised, ComponentPeer::StyleFlags,
              ComponentPeer::getStyleFlags, ComponentPeer::setFullScreen
     */
-    virtual void addToDesktop (int windowStyleFlags,
-                               void* nativeWindowToAttachTo = nullptr);
+    void addToDesktop (int windowStyleFlags,
+                       void* nativeWindowToAttachTo = nullptr);
+
+    /** Makes this component appear as a window on the desktop.
+
+        This does the same as the overload taking style flags, but describes the window with a
+        DesktopWindowOptions, which can also name the component that the window is opened from.
+        Calling it again with different options, such as an associated component in a different
+        window, recreates the window.
+
+        @see DesktopWindowOptions, createDesktopWindow, removeFromDesktop, isOnDesktop
+    */
+    void addToDesktop (const DesktopWindowOptions& options);
 
     /** If the component is currently showing on the desktop, this will hide it.
 
@@ -243,7 +258,11 @@ public:
     void toBack();
 
     /** Changes this component's z-order so that it's just behind another component.
-        @see toFront, toBack
+
+        For desktop windows, a window is never placed behind the window it is associated with:
+        asking for that puts it at the back of the other windows associated with the same window.
+
+        @see toFront, toBack, DesktopWindowOptions::withAssociatedComponent
     */
     void toBehind (Component* other);
 
@@ -2758,10 +2777,21 @@ private:
 protected:
     //==============================================================================
     /** @internal */
-    virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
+    virtual ComponentPeer* createNewPeer (const DesktopWindowOptions& options);
     /** @internal */
     static std::unique_ptr<AccessibilityHandler> createIgnoredAccessibilityHandler (Component&);
     /** @endcond */
+
+    //==============================================================================
+    /** Creates this component's desktop window, or recreates it if the options have changed.
+
+        Both addToDesktop() overloads call this. Override it to respond to, or to adjust,
+        every request to put the component on the desktop, and call the base class
+        implementation to do the work.
+
+        @see addToDesktop, DesktopWindowOptions
+    */
+    virtual void createDesktopWindow (const DesktopWindowOptions& options);
 };
 
 } // namespace juce

@@ -212,6 +212,7 @@ namespace juce
 #include "components/juce_ModalComponentManager.h"
 #include "components/juce_ComponentListener.h"
 #include "components/juce_CachedComponentImage.h"
+#include "desktop/juce_DesktopWindowOptions.h"
 #include "components/juce_Component.h"
 #include "layout/juce_ComponentAnimator.h"
 #include "desktop/juce_Desktop.h"

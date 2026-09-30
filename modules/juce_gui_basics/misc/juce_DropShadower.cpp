@@ -58,9 +58,10 @@ public:
            #endif
 
             setSize (1, 1); // to keep the OS happy by not having zero-size windows
-            addToDesktop (ComponentPeer::windowIgnoresMouseClicks
-                            | ComponentPeer::windowIsTemporary
-                            | ComponentPeer::windowIgnoresKeyPresses);
+            addToDesktop (DesktopWindowOptions().withStyleFlags (ComponentPeer::windowIgnoresMouseClicks
+                                                                 | ComponentPeer::windowIsTemporary
+                                                                 | ComponentPeer::windowIgnoresKeyPresses)
+                                                .withAssociatedComponent (comp));
 
             if (auto* compPeer = comp->getPeer())
                 if (auto* selfPeer = getPeer())

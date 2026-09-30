@@ -1752,6 +1752,26 @@ void XWindowSystem::destroyWindow (::Window windowH)
 }
 
 //==============================================================================
+void XWindowSystem::setTransientFor (::Window windowH, ::Window parentWindow) const
+{
+    jassert (windowH != 0);
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    if (parentWindow != 0)
+        X11Symbols::getInstance()->xSetTransientForHint (display, windowH, parentWindow);
+    else
+        X11Symbols::getInstance()->xDeleteProperty (display, windowH, XA_WM_TRANSIENT_FOR);
+}
+
+::Window XWindowSystem::getTransientFor (::Window windowH) const
+{
+    jassert (windowH != 0);
+    XWindowSystemUtilities::ScopedXLock xLock;
+    XWindowSystemUtilities::GetXProperty prop (display, windowH, XA_WM_TRANSIENT_FOR, 0, 1, false, XA_WINDOW);
+
+    return prop.success && prop.numItems > 0 ? *reinterpret_cast<const ::Window*> (prop.data) : 0;
+}
+
 void XWindowSystem::setTitle (::Window windowH, const String& title) const
 {
     jassert (windowH != 0);
@@ -2139,6 +2159,20 @@ Rectangle<int> XWindowSystem::getWindowBounds (::Window windowH, ::Window parent
 Point<int> XWindowSystem::getPhysicalParentScreenPosition() const
 {
     return parentScreenPosition;
+}
+
+Point<int> XWindowSystem::getScreenPosition (::Window windowH) const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    const auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
+    int x = 0, y = 0;
+    Window child;
+
+    if (! X11Symbols::getInstance()->xTranslateCoordinates (display, windowH, root, 0, 0, &x, &y, &child))
+        return {};
+
+    return { x, y };
 }
 
 void XWindowSystem::setMinimised (::Window windowH, bool shouldBeMinimised) const
@@ -3070,6 +3104,41 @@ String XWindowSystem::getTextFromClipboard() const
     return findTopLevelWindowOf (parent);
 }
 
+// The window manager marks the top-level windows it manages with WM_STATE, which distinguishes a
+// client window from the frame it may have been reparented into.
+::Window XWindowSystem::findTopLevelClientWindowOf (::Window w) const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    for (auto current = w; current != 0;)
+    {
+        if (atoms.state != None)
+        {
+            XWindowSystemUtilities::GetXProperty prop (display, current, atoms.state, 0, 2, false, atoms.state);
+
+            if (prop.success && prop.numItems > 0)
+                return current;
+        }
+
+        Window* windowList = nullptr;
+        uint32 windowListSize = 0;
+        Window parent, root;
+
+        const auto result = X11Symbols::getInstance()->xQueryTree (display, current, &root, &parent, &windowList, &windowListSize);
+        const auto deleter = makeXFreePtr (windowList);
+
+        if (result == 0)
+            return w;
+
+        if (parent == root)
+            return current;
+
+        current = parent;
+    }
+
+    return w;
+}
+
 bool XWindowSystem::isParentWindowOf (::Window windowH, ::Window possibleChild) const
 {
     if (windowH == 0 || possibleChild == 0)
@@ -3997,6 +4066,7 @@ void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer* peer, XConfi
     peer->updateWindowBounds();
     peer->updateBorderSize();
     peer->handleMovedOrResized();
+    peer->moveTransientWindows();
 
     // if the native title bar is dragged, need to tell any active menus, etc.
     if ((peer->getStyleFlags() & ComponentPeer::windowHasTitleBar) != 0)
@@ -4387,6 +4457,13 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
             for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
                 instance->dismissBlockingModals (dynamic_cast<LinuxComponentPeer*> (ComponentPeer::getPeer (i)),
                                                  event.xconfigure);
+
+            // Moving a window runs application code, which may close windows
+            for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
+                if (i < ComponentPeer::getNumPeers())
+                    if (auto* peer = dynamic_cast<LinuxComponentPeer*> (ComponentPeer::getPeer (i)))
+                        if (peer->getParentWindow() != 0 && instance->isParentWindowOf (event.xconfigure.window, peer->getWindowHandle()))
+                            peer->hostWindowMoved();
         }
     }
     else if (event.xany.type == KeymapNotify)

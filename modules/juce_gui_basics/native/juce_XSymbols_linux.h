@@ -490,6 +490,10 @@ public:
                                          (::Display*, Atom, ::Window, ::Time),
                                          void)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSetTransientForHint, xSetTransientForHint,
+                                         (::Display*, ::Window, ::Window),
+                                         int)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSetWMHints, xSetWMHints,
                                          (::Display*, ::Window, XWMHints*),
                                          void)
