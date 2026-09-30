@@ -186,6 +186,9 @@ public:
     void destroyWindow    (::Window);
 
     void setTitle (::Window, const String&) const;
+    void setTransientFor (::Window, ::Window parentWindow) const;
+    ::Window getTransientFor (::Window) const;
+    ::Window findTopLevelClientWindowOf (::Window) const;
     void setIcon (::Window , const Image&) const;
     void setVisible (::Window, bool shouldBeVisible) const;
     [[nodiscard]] std::optional<unsigned long> setBounds (::Window, Rectangle<int>, bool fullScreen) const;
@@ -194,6 +197,7 @@ public:
     ComponentPeer::OptionalBorderSize getBorderSize (::Window) const;
     Rectangle<int> getWindowBounds (::Window, ::Window parentWindow);
     Point<int> getPhysicalParentScreenPosition() const;
+    Point<int> getScreenPosition (::Window) const;
 
     bool contains (::Window, Point<int> localPos) const;
 

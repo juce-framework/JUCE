@@ -60,22 +60,29 @@ static LinuxInputBackend getKeyboardBackend()
 }
 
 //==============================================================================
-ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)
+ComponentPeer* Component::createNewPeer (const DesktopWindowOptions& options)
 {
+    const auto styleFlags = options.getStyleFlags();
+    auto* associated = options.getAssociatedComponent();
+
+    // The legacy addToDesktop() overload stores its native parent as an X11 window, but on a
+    // Wayland backend the same value may be the wl_surface of another peer.
+    auto* nativeWindowToAttachTo = (void*) (pointer_sized_uint) options.getParentX11Window();
+
     if (isUsingWaylandBackend() && (styleFlags & ComponentPeer::windowRequiresX11) == 0)
     {
         if (nativeWindowToAttachTo == nullptr)
-            return createWaylandComponentPeer (*this, styleFlags, nullptr);
+            return createWaylandComponentPeer (*this, styleFlags, associated, nullptr);
 
         if ((styleFlags & ComponentPeer::windowIsTemporary) != 0)
-            if (auto* peer = createWaylandComponentPeer (*this, styleFlags, nativeWindowToAttachTo))
+            if (auto* peer = createWaylandComponentPeer (*this, styleFlags, associated, nativeWindowToAttachTo))
                 return peer;
 
         // An X11 parent needs ComponentPeer::windowRequiresX11 in the style flags.
         jassertfalse;
     }
 
-    return createX11ComponentPeer (*this, styleFlags, nativeWindowToAttachTo);
+    return createX11ComponentPeer (*this, styleFlags, associated, nativeWindowToAttachTo);
 }
 
 //==============================================================================

@@ -38,9 +38,10 @@ namespace juce
 static uint32 lastUniquePeerID = 1;
 
 //==============================================================================
-ComponentPeer::ComponentPeer (Component& comp, int flags)
+ComponentPeer::ComponentPeer (Component& comp, int flags, Component* associated)
     : component (comp),
       styleFlags (flags),
+      associatedComponent (associated),
       uniqueID (lastUniquePeerID += 2) // increment by 2 so that this can never hit 0
 {
     auto& desktop = Desktop::getInstance();
@@ -54,6 +55,24 @@ ComponentPeer::~ComponentPeer()
     desktop.removeFocusChangeListener (this);
     desktop.peers.removeFirstMatchingValue (this);
     desktop.triggerFocusCallback();
+}
+
+bool ComponentPeer::setAssociatedComponent (Component* newAssociatedComponent)
+{
+    const auto findWindow = [] (Component* c) { return c != nullptr ? c->getPeer() : nullptr; };
+
+    if (findWindow (newAssociatedComponent) != findWindow (getAssociatedComponent()))
+        return false;
+
+    if (newAssociatedComponent != getAssociatedComponent())
+    {
+        // Both components are in the same window now, but the previous one may have been in
+        // another window when this window was attached to it.
+        associatedComponent = newAssociatedComponent;
+        associationChanged();
+    }
+
+    return true;
 }
 
 //==============================================================================

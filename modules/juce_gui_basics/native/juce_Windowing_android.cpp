@@ -1307,8 +1307,8 @@ class AndroidComponentPeer final : public ComponentPeer,
                                    private ActivityLifecycleCallbacks
 {
 public:
-    AndroidComponentPeer (Component& comp, int windowStyleFlags, void* nativeViewHandle)
-        : ComponentPeer (comp, windowStyleFlags)
+    AndroidComponentPeer (Component& comp, int windowStyleFlags, Component* associated, void* nativeViewHandle)
+        : ComponentPeer (comp, windowStyleFlags, associated)
     {
         auto* env = getEnv();
 
@@ -2556,9 +2556,12 @@ private:
 };
 
 //==============================================================================
-ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindow)
+ComponentPeer* Component::createNewPeer (const DesktopWindowOptions& options)
 {
-    return new AndroidComponentPeer (*this, styleFlags, nativeWindow);
+    auto* activity = options.getParentAndroidActivity();
+
+    return new AndroidComponentPeer (*this, options.getStyleFlags(), options.getAssociatedComponent(),
+                                     activity != nullptr ? activity : options.getParentAndroidViewGroup());
 }
 
 //==============================================================================

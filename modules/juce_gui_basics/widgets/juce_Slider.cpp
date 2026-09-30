@@ -1070,9 +1070,10 @@ public:
             if (parentForPopupDisplay != nullptr)
                 parentForPopupDisplay->addChildComponent (popupDisplay.get());
             else
-                popupDisplay->addToDesktop (ComponentPeer::windowIsTemporary
-                                            | ComponentPeer::windowIgnoresKeyPresses
-                                            | ComponentPeer::windowIgnoresMouseClicks);
+                popupDisplay->addToDesktop (DesktopWindowOptions().withStyleFlags (ComponentPeer::windowIsTemporary
+                                                                                   | ComponentPeer::windowIgnoresKeyPresses
+                                                                                   | ComponentPeer::windowIgnoresMouseClicks)
+                                                                  .withAssociatedComponent (&owner));
 
             updatePopupDisplay();
             popupDisplay->setVisible (true);

@@ -623,22 +623,78 @@ void* Component::getWindowHandle() const
 }
 
 //==============================================================================
+static DesktopWindowOptions withPlatformParent (const DesktopWindowOptions& options,
+                                                [[maybe_unused]] void* nativeWindowToAttachTo)
+{
+   #if JUCE_WINDOWS
+    return options.withParentHWND (nativeWindowToAttachTo);
+   #elif JUCE_MAC
+    return options.withParentNSView (nativeWindowToAttachTo);
+   #elif JUCE_IOS
+    return options.withParentUIView (nativeWindowToAttachTo);
+   #elif JUCE_ANDROID
+    // The object may be an Activity or a ViewGroup, and the peer checks which
+    return options.withParentAndroidViewGroup (nativeWindowToAttachTo);
+   #elif JUCE_LINUX || JUCE_BSD
+    return options.withParentX11Window ((uint64_t) (pointer_sized_uint) nativeWindowToAttachTo);
+   #else
+    return options;
+   #endif
+}
+
 void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
+{
+    // A window that is recreated with only its style flags keeps the component it was opened from.
+    auto* peer = ComponentPeer::getPeerFor (this);
+
+    addToDesktop (withPlatformParent (DesktopWindowOptions().withStyleFlags (styleWanted), nativeWindowToAttachTo)
+                      .withAssociatedComponent (peer != nullptr ? peer->getAssociatedComponent() : nullptr));
+}
+
+void Component::addToDesktop (const DesktopWindowOptions& options)
+{
+    createDesktopWindow (options);
+}
+
+void Component::createDesktopWindow (const DesktopWindowOptions& optionsIn)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
-    if (isOpaque())
-        styleWanted &= ~ComponentPeer::windowIsSemiTransparent;
-    else
-        styleWanted |= ComponentPeer::windowIsSemiTransparent;
+    const auto options = optionsIn.withAssociatedComponent (std::invoke ([&]() -> Component*
+    {
+        // Following the windows that the associated component's window was opened from must not
+        // lead back to this window, which also covers a component inside this window.
+        for (auto* opener = optionsIn.getAssociatedComponent(); opener != nullptr;)
+        {
+            auto* window = opener->getTopLevelComponent();
+
+            if (window == this)
+            {
+                // This window is being associated with a component that is inside it, or inside
+                // a window that was opened from it.
+                jassertfalse;
+                return nullptr;
+            }
+
+            auto* windowPeer = window->getPeer();
+            opener = windowPeer != nullptr ? windowPeer->getAssociatedComponent() : nullptr;
+        }
+
+        return optionsIn.getAssociatedComponent();
+    }));
+
+    const auto styleWanted = isOpaque() ? options.getStyleFlags() & ~ComponentPeer::windowIsSemiTransparent
+                                        : options.getStyleFlags() |  ComponentPeer::windowIsSemiTransparent;
 
     // don't use getPeer(), so that we only get the peer that's specifically
     // for this comp, and not for one of its parents.
     auto* peer = ComponentPeer::getPeerFor (this);
 
-    if (peer == nullptr || styleWanted != peer->getStyleFlags())
+    if (peer == nullptr
+        || styleWanted != peer->getStyleFlags()
+        || ! peer->setAssociatedComponent (options.getAssociatedComponent()))
     {
         const WeakReference<Component> safePointer (this);
 
@@ -688,7 +744,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
         {
             flags.hasHeavyweightPeerFlag = true;
 
-            peer = createNewPeer (styleWanted, nativeWindowToAttachTo);
+            peer = createNewPeer (options.withStyleFlags (styleWanted));
 
             Desktop::getInstance().addDesktopComponent (this);
 
@@ -735,6 +791,10 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
            #endif
 
             internalHierarchyChanged();
+
+            for (auto* other : Desktop::getInstance().findComponentsAssociatedWith (*peer))
+                if (auto* otherPeer = other->getPeer())
+                    otherPeer->associationChanged();
 
             if (auto* handler = getAccessibilityHandler())
                 detail::AccessibilityHelpers::notifyAccessibilityEvent (*handler, detail::AccessibilityHelpers::Event::windowOpened);

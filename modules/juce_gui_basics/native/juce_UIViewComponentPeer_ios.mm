@@ -393,7 +393,7 @@ class UIViewComponentPeer final : public ComponentPeer,
                                   private WindowSceneTrackerListener
 {
 public:
-    UIViewComponentPeer (Component&, int windowStyleFlags, id viewToAttachTo);
+    UIViewComponentPeer (Component&, int windowStyleFlags, Component* associated, id viewToAttachTo);
     ~UIViewComponentPeer() override;
 
     //==============================================================================
@@ -1821,8 +1821,9 @@ struct ChangeRegistrationTrait
 //==============================================================================
 UIViewComponentPeer::UIViewComponentPeer (Component& comp,
                                           int windowStyleFlags,
+                                          Component* associated,
                                           id viewToAttachTo)
-    : ComponentPeer (comp, windowStyleFlags),
+    : ComponentPeer (comp, windowStyleFlags, associated),
       isSharedWindow (viewToAttachTo != nil),
       isAppex (SystemStats::isRunningInAppExtensionSandbox())
 {
@@ -2466,9 +2467,10 @@ void UIViewComponentPeer::performAnyPendingRepaintsNow()
 {
 }
 
-ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
+ComponentPeer* Component::createNewPeer (const DesktopWindowOptions& options)
 {
-    return new UIViewComponentPeer (*this, styleFlags, (id) windowToAttachTo);
+    return new UIViewComponentPeer (*this, options.getStyleFlags(), options.getAssociatedComponent(),
+                                    (id) options.getParentUIView());
 }
 
 //==============================================================================

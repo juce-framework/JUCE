@@ -482,6 +482,7 @@ private:
     void addDesktopComponent (Component*);
     void removeDesktopComponent (Component*);
     void componentBroughtToFront (Component*);
+    Array<Component*> findComponentsAssociatedWith (const ComponentPeer&) const;
 
     void setKioskComponent (Component*, bool shouldBeEnabled, bool allowMenusAndBars);
 

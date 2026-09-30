@@ -39,8 +39,8 @@ class X11ComponentPeer final : public ComponentPeer,
                                private XWindowSystemUtilities::XSettings::Listener
 {
 public:
-    X11ComponentPeer (Component& comp, int windowStyleFlags, ::Window parentToAddTo)
-        : ComponentPeer (comp, windowStyleFlags),
+    X11ComponentPeer (Component& comp, int windowStyleFlags, Component* associated, ::Window parentToAddTo)
+        : ComponentPeer (comp, windowStyleFlags, associated),
           isAlwaysOnTop (comp.isAlwaysOnTop())
     {
         // it's dangerous to create a window on a thread other than the message thread
@@ -59,7 +59,11 @@ public:
         windowH = instance->createWindow (parentToAddTo, this);
         parentWindow = parentToAddTo;
 
+        if (parentWindow != 0)
+            hostScreenPosition = instance->getScreenPosition (parentWindow);
+
         setTitle (component.getName());
+        updateTransientFor();
 
         if (auto* xSettings = instance->getXSettings())
             xSettings->addListener (this);
@@ -84,6 +88,14 @@ public:
         if (focused)
             LinuxInputState::get().keyboardLeft (LinuxInputBackend::x11);
 
+        // The windows opened from this one would otherwise be left transient for a destroyed window.
+        // The association is checked natively, since the associated component may already be gone.
+        if (windowH != 0)
+            for (int i = 0; i < getNumPeers(); ++i)
+                if (auto* other = dynamic_cast<X11ComponentPeer*> (getPeer (i)))
+                    if (other != this && other->windowH != 0 && instance->getTransientFor (other->windowH) == windowH)
+                        instance->setTransientFor (other->windowH, 0);
+
         repainter = nullptr;
         instance->destroyWindow (windowH);
 
@@ -97,6 +109,92 @@ public:
     ::Window getWindowHandle() const noexcept
     {
         return windowH;
+    }
+
+    //==============================================================================
+    // A window opened from another window is transient for that window's top-level window, which
+    // window managers keep above it, minimise with it, and leave off the taskbar. A window embedded
+    // in a host is transient for the host's top-level window.
+    void updateTransientFor()
+    {
+        if (windowH == 0 || parentWindow != 0)
+            return;
+
+        const auto transientParent = std::invoke ([this]() -> ::Window
+        {
+            if (auto* associated = getAssociatedComponent())
+            {
+                if (auto* associatedPeer = dynamic_cast<X11ComponentPeer*> (associated->getPeer());
+                    associatedPeer != nullptr && associatedPeer != this)
+                {
+                    if (associatedPeer->parentWindow == 0)
+                        return associatedPeer->windowH;
+
+                    return XWindowSystem::getInstance()->findTopLevelClientWindowOf (associatedPeer->parentWindow);
+                }
+            }
+
+            return 0;
+        });
+
+        XWindowSystem::getInstance()->setTransientFor (windowH, transientParent);
+    }
+
+    void associationChanged() override
+    {
+        updateTransientFor();
+    }
+
+    // The window manager keeps a transient window above its parent, but doesn't move it when
+    // the parent is moved, as macOS does for a child window. A move leaves the size of the
+    // window unchanged, which distinguishes it from a resize that changes the position too.
+    void moveTransientWindows()
+    {
+        const auto oldBounds = std::exchange (boundsForTransientWindows, physicalBounds);
+
+        if (windowH == 0
+            || parentWindow != 0
+            || ! oldBounds.has_value()
+            || oldBounds->getWidth() != physicalBounds.getWidth()
+            || oldBounds->getHeight() != physicalBounds.getHeight())
+        {
+            return;
+        }
+
+        moveWindowsTransientFor (windowH, physicalBounds.getPosition() - oldBounds->getPosition());
+    }
+
+    // A window embedded in a host isn't told when the host's window is moved, but a move of the
+    // host's top-level window is seen on the root window. The position this window reports is
+    // brought up to date from here, and the windows that are transient for the host are moved
+    // with it.
+    void hostWindowMoved()
+    {
+        if (windowH == 0 || parentWindow == 0)
+            return;
+
+        auto* instance = XWindowSystem::getInstance();
+        const auto newPosition = instance->getScreenPosition (parentWindow);
+        const auto oldPosition = std::exchange (hostScreenPosition, newPosition);
+
+        if (! oldPosition.has_value() || newPosition == *oldPosition)
+            return;
+
+        updateWindowBounds();
+        moveWindowsTransientFor (instance->findTopLevelClientWindowOf (parentWindow), newPosition - *oldPosition);
+    }
+
+    void moveWindowsTransientFor (::Window transientParent, Point<int> delta)
+    {
+        if (delta.isOrigin())
+            return;
+
+        auto* instance = XWindowSystem::getInstance();
+
+        for (int i = 0; i < getNumPeers(); ++i)
+            if (auto* other = dynamic_cast<X11ComponentPeer*> (getPeer (i)))
+                if (other != this && other->windowH != 0 && ! other->fullScreen && instance->getTransientFor (other->windowH) == transientParent)
+                    other->forceSetBoundsPhysical (other->physicalBounds + delta, false);
     }
 
     //==============================================================================
@@ -140,6 +238,9 @@ public:
             updateBorderSize();
             handleMovedOrResized();
         }
+
+        if (isValidPeer (this))
+            moveTransientWindows();
     }
 
     void forceSetBounds (const Rectangle<int>& correctedNewBounds, bool isNowFullScreen)
@@ -608,9 +709,18 @@ private:
 
     Point<int> getPhysicalScreenPosition() const
     {
+        if (parentWindow == 0)
+            return physicalBounds.getTopLeft();
+
+        // A child window isn't notified when its parent is moved, so the position of a parent
+        // in this process is taken from the parent's peer.
+        for (int i = 0; i < getNumPeers(); ++i)
+            if (auto* parent = dynamic_cast<const X11ComponentPeer*> (getPeer (i)))
+                if (parent != this && parent->windowH == parentWindow)
+                    return parent->getPhysicalScreenPosition() + physicalBounds.getTopLeft();
+
         const auto physicalParentPosition = XWindowSystem::getInstance()->getPhysicalParentScreenPosition();
-        return parentWindow == 0 ? physicalBounds.getTopLeft()
-                                 : physicalBounds.getTopLeft().translated (physicalParentPosition.x, physicalParentPosition.y);
+        return physicalBounds.getTopLeft().translated (physicalParentPosition.x, physicalParentPosition.y);
     }
 
     //==============================================================================
@@ -676,6 +786,8 @@ private:
 
     ::Window windowH = {}, parentWindow = {};
     Rectangle<int> physicalBounds;
+    std::optional<Rectangle<int>> boundsForTransientWindows;
+    std::optional<Point<int>> hostScreenPosition;
     ComponentPeer::OptionalBorderSize windowBorder;
     bool fullScreen = false, isAlwaysOnTop = false;
     std::optional<double> scaleFactorOverride;
@@ -690,9 +802,9 @@ private:
 
 bool X11ComponentPeer::isActiveApplication = false;
 
-static ComponentPeer* createX11ComponentPeer (Component& component, int styleFlags, void* nativeWindowToAttachTo)
+static ComponentPeer* createX11ComponentPeer (Component& component, int styleFlags, Component* associated, void* nativeWindowToAttachTo)
 {
-    return new X11ComponentPeer (component, styleFlags, (::Window) nativeWindowToAttachTo);
+    return new X11ComponentPeer (component, styleFlags, associated, (::Window) nativeWindowToAttachTo);
 }
 
 static bool isX11ApplicationActive()

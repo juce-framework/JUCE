@@ -93,7 +93,11 @@ public:
     */
     [[nodiscard]] MessageBoxOptions withButton (const String& text) const                 { auto copy = *this; copy.buttons.add (text); return copy; }
 
-    /** The component that the dialog box should be associated with. */
+    /** The component that the dialog box should be associated with.
+
+        An AlertWindow is kept above the window containing this component.
+        See TopLevelWindow::setAssociatedComponent().
+    */
     [[nodiscard]] MessageBoxOptions withAssociatedComponent (Component* component) const  { return withMember (*this, &MessageBoxOptions::associatedComponent, component); }
 
     /** The component that will contain the message box (e.g. the AudioProcessorEditor in a plugin).

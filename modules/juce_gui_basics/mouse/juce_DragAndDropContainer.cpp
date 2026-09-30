@@ -504,8 +504,9 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
         if (! Desktop::canUseSemiTransparentWindows())
             dragImageComponent->setOpaque (true);
 
-        dragImageComponent->addToDesktop (ComponentPeer::windowIgnoresMouseClicks
-                                          | ComponentPeer::windowIsTemporary);
+        dragImageComponent->addToDesktop (DesktopWindowOptions().withStyleFlags (ComponentPeer::windowIgnoresMouseClicks
+                                                                                 | ComponentPeer::windowIsTemporary)
+                                                                .withAssociatedComponent (sourceComponent));
     }
     else
     {

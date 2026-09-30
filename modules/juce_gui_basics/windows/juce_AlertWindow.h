@@ -61,8 +61,10 @@ public:
                         headline
         @param iconType the type of icon to display
         @param associatedComponent   if this is non-null, it specifies the component that the
-                        alert window should be associated with. Depending on the look
-                        and feel, this might be used for positioning of the alert window.
+                        alert window should be associated with. The alert window is kept
+                        above the window containing this component, and depending on the
+                        look and feel, this might be used for positioning of the alert window.
+                        See TopLevelWindow::setAssociatedComponent().
     */
     AlertWindow (const String& title,
                  const String& message,
