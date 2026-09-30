@@ -491,51 +491,49 @@ void MessageManager::Lock::abort() const noexcept
 
 //==============================================================================
 MessageManagerLock::MessageManagerLock (Thread* threadToCheck)
-    : locked (attemptLock (threadToCheck, nullptr))
+    : locked (attemptLock (threadToCheck))
 {}
 
 MessageManagerLock::MessageManagerLock (ThreadPoolJob* jobToCheck)
-    : locked (attemptLock (nullptr, jobToCheck))
+    : locked (attemptLock (jobToCheck))
 {}
 
-bool MessageManagerLock::attemptLock (Thread* threadToCheck, ThreadPoolJob* jobToCheck)
+template <typename ThreadOrThreadPoolJob>
+bool MessageManagerLock::attemptLock (ThreadOrThreadPoolJob* threadOrJobToCheck)
 {
-    jassert (threadToCheck == nullptr || jobToCheck == nullptr);
+    const auto shouldExit = [&]
+    {
+        if (threadOrJobToCheck == nullptr)
+            return false;
 
-    if (threadToCheck != nullptr)
-        threadToCheck->addListener (this);
+        if constexpr (std::is_same_v<ThreadOrThreadPoolJob, Thread>)
+            return threadOrJobToCheck->threadShouldExit();
+        else
+            return threadOrJobToCheck->shouldExit();
+    };
 
-    if (jobToCheck != nullptr)
-        jobToCheck->addListener (this);
+    if (threadOrJobToCheck != nullptr)
+        threadOrJobToCheck->addListener (this);
 
-    // tryEnter may have a spurious abort (return false) so keep checking the condition
-    while ((threadToCheck == nullptr || ! threadToCheck->threadShouldExit())
-             && (jobToCheck == nullptr || ! jobToCheck->shouldExit()))
+    const ScopeGuard removeListener { [&]
+    {
+        if (threadOrJobToCheck != nullptr)
+            threadOrJobToCheck->removeListener (this);
+    } };
+
+    while (! shouldExit())
     {
         if (mmLock.tryEnter())
-            break;
+            return true;
     }
 
-    if (threadToCheck != nullptr)
-    {
-        threadToCheck->removeListener (this);
-
-        if (threadToCheck->threadShouldExit())
-            return false;
-    }
-
-    if (jobToCheck != nullptr)
-    {
-        jobToCheck->removeListener (this);
-
-        if (jobToCheck->shouldExit())
-            return false;
-    }
-
-    return true;
+    return false;
 }
 
-MessageManagerLock::~MessageManagerLock()  { mmLock.exit(); }
+MessageManagerLock::~MessageManagerLock()
+{
+    mmLock.exit();
+}
 
 void MessageManagerLock::exitSignalSent()
 {
