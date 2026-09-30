@@ -862,7 +862,12 @@ public:
 
             If isTriggeredAutomatically is true, then the menu will automatically detect
             a mouse-click on this component and use that to invoke the menu item. If it's
-            false, then it's up to your class to manually trigger the item when it wants to.
+            false, then it's up to your class to manually trigger the item when it wants
+            to. In that case, while the item is highlighted, key presses received by the
+            menu are passed to your component's keyPressed() method first, so that it can
+            call triggerMenuItem() in response to the keyboard too. Returning true from
+            keyPressed() stops the menu from handling that key itself, so only consume the
+            keys your component acts on.
 
             If isTriggeredAutomatically is true, then an accessibility handler 'wrapper'
             will be created for the item that allows pressing, focusing, and toggling.
