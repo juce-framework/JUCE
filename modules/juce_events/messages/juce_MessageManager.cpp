@@ -243,31 +243,33 @@ void MessageManager::deregisterBroadcastListener (ActionListener* const listener
 //==============================================================================
 bool MessageManager::isThisTheMessageThread() const noexcept
 {
-    const std::lock_guard<std::mutex> lock { messageThreadIdMutex };
-
-    return Thread::getCurrentThreadId() == messageThreadId;
+    return Thread::getCurrentThreadId() == messageThreadId.load (std::memory_order_relaxed);
 }
 
 void MessageManager::setCurrentThreadAsMessageThread()
 {
-    auto thisThread = Thread::getCurrentThreadId();
+    const auto thisThread = Thread::getCurrentThreadId();
 
-    const std::lock_guard<std::mutex> lock { messageThreadIdMutex };
+    if (messageThreadId.exchange (thisThread, std::memory_order_release) == thisThread)
+        return;
 
-    if (std::exchange (messageThreadId, thisThread) != thisThread)
-    {
-       #if JUCE_WINDOWS
-        // This is needed on windows to make sure the message window is created by this thread
-        doPlatformSpecificShutdown();
-        doPlatformSpecificInitialisation();
-       #endif
-    }
+    // If another thread has locked the message manager it means the old thread
+    // is blocked and therefore still pumping messages from the queue. Make sure
+    // the old thread has completed before assigning a new thread!
+    jassert (threadWithLock == Thread::ThreadID{});
+
+   #if JUCE_WINDOWS
+    doPlatformSpecificShutdown();
+    doPlatformSpecificInitialisation();
+   #endif
 }
 
 bool MessageManager::currentThreadHasLockedMessageManager() const noexcept
 {
-    auto thisThread = Thread::getCurrentThreadId();
-    return thisThread == messageThreadId || thisThread == threadWithLock;
+    const auto thisThread = Thread::getCurrentThreadId();
+
+    return thisThread == messageThreadId.load (std::memory_order_relaxed)
+        || thisThread == threadWithLock.load (std::memory_order_relaxed);
 }
 
 bool MessageManager::existsAndIsLockedByCurrentThread() noexcept
