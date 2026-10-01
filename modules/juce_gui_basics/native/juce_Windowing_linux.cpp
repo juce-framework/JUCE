@@ -398,7 +398,7 @@ public:
     bool isConstrainedNativeWindow() const
     {
         return constrainer != nullptr
-            && (getStyleFlags() & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable)
+            && (getStyleFlags() & windowIsResizable) != 0
             && ! isKioskMode();
     }
 
@@ -450,7 +450,10 @@ public:
 
     void startHostManagedResize (Point<int>, ResizableBorderComponent::Zone zone) override
     {
-        XWindowSystem::getInstance()->startHostManagedResize (windowH, zone);
+        // The window manager won't resize a window with fixed size hints, so keep the pointer grab
+        // and let the resizer component handle the drag.
+        if ((getStyleFlags() & windowIsResizable) != 0)
+            XWindowSystem::getInstance()->startHostManagedResize (windowH, zone);
     }
 
     //==============================================================================
