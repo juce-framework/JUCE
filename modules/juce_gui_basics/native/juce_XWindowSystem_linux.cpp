@@ -617,20 +617,6 @@ enum
              if (std::tuple (major, minor) < std::tuple (2, 2))
                  return {};
 
-             unsigned char maskData[XIMaskLen (XI_LASTEVENT)] = {};
-             XISetMask (maskData, XI_HierarchyChanged);
-
-             XIEventMask eventMask;
-             eventMask.deviceid = XIAllDevices;
-             eventMask.mask_len = sizeof (maskData);
-             eventMask.mask = maskData;
-
-             X11Symbols::getInstance()->xiSelectEvents (display,
-                                                        X11Symbols::getInstance()->xDefaultRootWindow (display),
-                                                        &eventMask,
-                                                        1);
-             X11Symbols::getInstance()->xFlush (display);
-
              return xinputOpcode;
          });
 
@@ -650,62 +636,41 @@ enum
              return true;
          });
 
-         int numDevices = 0;
-         auto* info = X11Symbols::getInstance()->xiQueryDevice (display, XIAllDevices, &numDevices);
+         // The slave devices behind a master pointer can report buttons and motion separately, as
+         // they do under Xwayland. Selecting on the master devices means that the implicit grab
+         // from a button press also covers the motion that follows it.
+         unsigned char maskData[XIMaskLen (XI_LASTEVENT)] = {};
+         XISetMask (maskData, XI_Motion);
 
-         if (info == nullptr)
-             return;
-
-         const ScopeGuard scope { [info] { X11Symbols::getInstance()->xiFreeDeviceInfo (info); } };
-
-         for (auto& deviceInfo : makeRange (info, info + numDevices))
+         if (shouldHandleMouseClicks)
          {
-             if (deviceInfo.use != XISlavePointer)
-                continue;
-
-             unsigned char maskData[XIMaskLen (XI_LASTEVENT)] = {};
-
-             if (shouldHandleMouseClicks)
-             {
-                 const auto isTouchCapable = std::any_of (deviceInfo.classes,
-                                                          deviceInfo.classes + deviceInfo.num_classes,
-                                                          [] (const auto& x) { return x->type == XITouchClass; });
-
-                 if (isTouchCapable)
-                 {
-                    XISetMask (maskData, XI_TouchBegin);
-                    XISetMask (maskData, XI_TouchUpdate);
-                    XISetMask (maskData, XI_TouchEnd);
-                 }
-             }
-
-             const auto isButtonCapable = std::any_of (deviceInfo.classes,
-                                                       deviceInfo.classes + deviceInfo.num_classes,
-                                                       [] (const auto& x) { return x->type == XIButtonClass; });
-
-             if (isButtonCapable)
-             {
-                 XISetMask (maskData, XI_Motion);
-
-                 if (shouldHandleMouseClicks)
-                 {
-                    XISetMask (maskData, XI_ButtonPress);
-                    XISetMask (maskData, XI_ButtonRelease);
-                 }
-             }
-
-             XIEventMask eventMask;
-             eventMask.deviceid = deviceInfo.deviceid;
-             eventMask.mask_len = sizeof (maskData);
-             eventMask.mask = maskData;
-
-             X11Symbols::getInstance()->xiSelectEvents (display,
-                                                        windowH,
-                                                        &eventMask,
-                                                        1);
+             XISetMask (maskData, XI_ButtonPress);
+             XISetMask (maskData, XI_ButtonRelease);
+             XISetMask (maskData, XI_TouchBegin);
+             XISetMask (maskData, XI_TouchUpdate);
+             XISetMask (maskData, XI_TouchEnd);
          }
 
+         XIEventMask eventMask;
+         eventMask.deviceid = XIAllMasterDevices;
+         eventMask.mask_len = sizeof (maskData);
+         eventMask.mask = maskData;
+
+         X11Symbols::getInstance()->xiSelectEvents (display, windowH, &eventMask, 1);
          X11Symbols::getInstance()->xFlush (display);
+     }
+
+     static std::optional<int> getClientPointer (::Display* display)
+     {
+         if (! setupXI2 (display))
+             return {};
+
+         int deviceId = 0;
+
+         if (! X11Symbols::getInstance()->xiGetClientPointer (display, None, &deviceId))
+             return {};
+
+         return deviceId;
      }
  }
 #endif
@@ -1736,8 +1701,6 @@ static int getAllEventsMask (bool ignoresMouseClicks)
     unsigned long info[2] = { 0, 1 };
     xchangeProperty (windowH, atoms.XembedInfo, atoms.XembedInfo, 32, (unsigned char*) info, 2);
 
-    windowHandles.push_back (windowH);
-
    #if JUCE_USE_XINPUT
     XInputHelpers::registerForXI2Events (display, windowH);
    #endif
@@ -1747,12 +1710,6 @@ static int getAllEventsMask (bool ignoresMouseClicks)
 
 void XWindowSystem::destroyWindow (::Window windowH)
 {
-    if (auto it = std::find (windowHandles.begin(), windowHandles.end(), windowH);
-        it != windowHandles.end())
-    {
-        windowHandles.erase (it);
-    }
-
     auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH));
 
     if (peer == nullptr)
@@ -1935,7 +1892,7 @@ void XWindowSystem::startHostManagedResize (::Window windowH,
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
-    X11Symbols::getInstance()->xUngrabPointer (display, CurrentTime);
+    ungrabPointer();
 
     const auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
     const auto mouseDown = getCurrentMousePosition();
@@ -1985,6 +1942,57 @@ void XWindowSystem::startHostManagedResize (::Window windowH,
                                            false,
                                            SubstructureRedirectMask | SubstructureNotifyMask,
                                            unalignedPointerCast<XEvent*> (&clientMsg));
+}
+
+bool XWindowSystem::grabPointerForExternalDrag (::Window windowH, Cursor cursor) const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+   #if JUCE_USE_XINPUT
+    // The X server refuses a core grab while the pointer has an XInput grab, and a button press
+    // delivered as an XInput event creates one.
+    if (const auto pointer = XInputHelpers::getClientPointer (display))
+    {
+        unsigned char maskData[XIMaskLen (XI_LASTEVENT)] = {};
+        XISetMask (maskData, XI_Motion);
+        XISetMask (maskData, XI_ButtonRelease);
+
+        XIEventMask eventMask;
+        eventMask.deviceid = *pointer;
+        eventMask.mask_len = sizeof (maskData);
+        eventMask.mask = maskData;
+
+        // All events go to the grabbing window, so that the drag also tracks the pointer and ends
+        // correctly over this application's other windows.
+        return X11Symbols::getInstance()->xiGrabDevice (display, *pointer, windowH, CurrentTime, cursor,
+                                                        GrabModeAsync, GrabModeAsync, False, &eventMask) == GrabSuccess;
+    }
+   #endif
+
+    const auto eventMask = (unsigned int) (Button1MotionMask | ButtonReleaseMask);
+
+    if (X11Symbols::getInstance()->xGrabPointer (display, windowH, True, eventMask,
+                                                 GrabModeAsync, GrabModeAsync, None, None, CurrentTime) != GrabSuccess)
+        return false;
+
+    // No other method of changing the pointer seems to work, this call is needed from this very context
+    X11Symbols::getInstance()->xChangeActivePointerGrab (display, eventMask, cursor, CurrentTime);
+    return true;
+}
+
+void XWindowSystem::ungrabPointer() const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+   #if JUCE_USE_XINPUT
+    if (const auto pointer = XInputHelpers::getClientPointer (display))
+    {
+        X11Symbols::getInstance()->xiUngrabDevice (display, *pointer, CurrentTime);
+        return;
+    }
+   #endif
+
+    X11Symbols::getInstance()->xUngrabPointer (display, CurrentTime);
 }
 
 void XWindowSystem::updateSizeHints (::Window windowH, ComponentPeer& peer, Rectangle<int> physicalBounds) const
@@ -4217,12 +4225,6 @@ void XWindowSystem::handleXIDeviceEvent (LinuxComponentPeer* peer, int eventType
     if (eventType == XI_TouchEnd)
         sendTouchEvent (MouseInputSource::offscreenMousePos, modsToSend.withoutMouseButtons());
 }
-
-void XWindowSystem::updateXInputDevices() const
-{
-    for (auto wh : windowHandles)
-        XInputHelpers::registerForXI2Events (display, wh);
-}
 #endif
 
 //==============================================================================
@@ -4292,8 +4294,10 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
 
                     switch (event.xcookie.evtype)
                     {
-                        case XI_HierarchyChanged:
-                            instance->updateXInputDevices();
+                        case XI_Enter:
+                        case XI_Leave:
+                            // A grab on a master device reports pointer crossings as XInput events
+                            // too. The core events for the same crossings are the ones handled.
                             break;
 
                         case XI_ButtonPress:

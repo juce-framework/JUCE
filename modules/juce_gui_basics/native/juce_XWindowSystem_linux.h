@@ -256,6 +256,9 @@ public:
     void startHostManagedResize (::Window window,
                                  ResizableBorderComponent::Zone zone);
 
+    bool grabPointerForExternalDrag (::Window, Cursor) const;
+    void ungrabPointer() const;
+
     static String getWindowScalingFactorSettingName()  { return "Gdk/WindowScalingFactor"; }
     static String getThemeNameSettingName()            { return "Net/ThemeName"; }
 
@@ -339,7 +342,6 @@ private:
 
    #if JUCE_USE_XINPUT
     void handleXIDeviceEvent        (LinuxComponentPeer*, int, XIDeviceEvent&) const;
-    void updateXInputDevices        () const;
    #endif
 
     void dismissBlockingModals      (LinuxComponentPeer*) const;
@@ -351,8 +353,6 @@ private:
 
     //==============================================================================
     bool xIsAvailable = false;
-
-    std::vector<::Window> windowHandles;
 
     XWindowSystemUtilities::Atoms atoms;
     ::Display* display = nullptr;
