@@ -9657,6 +9657,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\desktop\juce_Desktop.h">
       <Filter>JUCE Modules\juce_gui_basics\desktop</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\desktop\juce_DesktopWindowOptions.h">
+      <Filter>JUCE Modules\juce_gui_basics\desktop</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\desktop\juce_Displays.h">
       <Filter>JUCE Modules\juce_gui_basics\desktop</Filter>
     </ClInclude>
