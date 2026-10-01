@@ -2105,10 +2105,27 @@ void XWindowSystem::updateSizeHints (::Window windowH, ComponentPeer& peer, Rect
                 return jmax (1, (int) scaled - border);
             };
 
-            hints->min_width  = scaledLimit (c->getMinimumWidth(),  leftAndRight);
-            hints->max_width  = scaledLimit (c->getMaximumWidth(),  leftAndRight);
-            hints->min_height = scaledLimit (c->getMinimumHeight(), topAndBottom);
-            hints->max_height = scaledLimit (c->getMaximumHeight(), topAndBottom);
+            // The window manager can't call the constrainer during a resize, so find the limits
+            // by checking out-of-range sizes. This accounts for constrainers that wrap another
+            // constrainer.
+            const auto current = windowBorder.addedTo ((physicalBounds.toDouble() / factor).toNearestInt());
+            const auto largeExtent = 0x00ffffff;
+            const Rectangle<int> unlimited { -largeExtent, -largeExtent, 4 * largeExtent, 4 * largeExtent };
+
+            const auto constrainedSize = [&] (int extent)
+            {
+                auto bounds = current.withSize (extent, extent);
+                c->checkBounds (bounds, current, unlimited, false, false, true, true);
+                return bounds;
+            };
+
+            const auto smallest = constrainedSize (0);
+            const auto largest  = constrainedSize (largeExtent);
+
+            hints->min_width  = scaledLimit (smallest.getWidth(),  leftAndRight);
+            hints->max_width  = scaledLimit (largest.getWidth(),   leftAndRight);
+            hints->min_height = scaledLimit (smallest.getHeight(), topAndBottom);
+            hints->max_height = scaledLimit (largest.getHeight(),  topAndBottom);
             hints->flags |= PMinSize | PMaxSize;
         }
 

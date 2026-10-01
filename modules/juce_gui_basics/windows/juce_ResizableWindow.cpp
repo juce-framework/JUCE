@@ -79,11 +79,8 @@ int ResizableWindow::getDesktopWindowStyleFlags() const
 {
     const auto styleFlags = TopLevelWindow::getDesktopWindowStyleFlags();
 
-    if (isResizable()
-        && (isUsingNativeTitleBar() || Desktop::getInstance().supportsBorderlessNonClientResize()))
-    {
+    if (isResizable())
         return styleFlags | ComponentPeer::windowIsResizable;
-    }
 
     return styleFlags;
 }
@@ -285,10 +282,13 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
         resizableBorder.reset();
     }
 
+    // Adding or removing the resizable border changes the border thickness, so fit the window to
+    // its content before a new peer can lay out the content inside the old window bounds.
+    childBoundsChanged (contentComponent);
+
     if (isOnDesktop())
         recreateDesktopWindow();
 
-    childBoundsChanged (contentComponent);
     resized();
 }
 
