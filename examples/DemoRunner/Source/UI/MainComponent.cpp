@@ -140,11 +140,23 @@ public:
         addAndMakeVisible (demos);
         demos.setModel (this);
         demos.setRowHeight (40);
+
+        if (JUCEDemos::getCategories().empty())
+        {
+            noDemosMessage.setText ("No demos could be found.\n\n"
+                                    "The DemoRunner looks for the JUCE examples directory relative to its own location. "
+                                    "Run it from somewhere inside the examples directory, or place a copy of the "
+                                    "examples directory next to the executable.",
+                                    dontSendNotification);
+            noDemosMessage.setJustificationType (Justification::centredTop);
+            addAndMakeVisible (noDemosMessage);
+        }
     }
 
     void resized() override
     {
         demos.setBounds (getLocalBounds());
+        noDemosMessage.setBounds (getLocalBounds().reduced (10));
     }
 
     //==============================================================================
@@ -275,6 +287,7 @@ private:
 
     DemoContentComponent& demoHolder;
     ListBox demos;
+    Label noDemosMessage;
 };
 
 //==============================================================================
