@@ -637,7 +637,13 @@ public:
         processor->setNonRealtime (ports.isFreeWheeling());
 
         for (auto i = 0, end = processor->getTotalNumInputChannels(); i < end; ++i)
-            audio.copyFrom (i, 0, ports.getBufferForAudioInput (i), audio.getNumSamples());
+        {
+            // Ports outside the main bus are lv2:connectionOptional, so the host may leave them unconnected.
+            if (const auto* src = ports.getBufferForAudioInput (i))
+                audio.copyFrom (i, 0, src, audio.getNumSamples());
+            else
+                audio.clear (i, 0, audio.getNumSamples());
+        }
 
         jassert (countNaNs (audio) == 0);
 
@@ -649,7 +655,9 @@ public:
                 for (auto i = 0, end = processor->getTotalNumOutputChannels(); i < end; ++i)
                 {
                     const auto ptr = ports.getBufferForAudioOutput (i);
-                    std::fill (ptr, ptr + numSteps, 0.0f);
+
+                    if (ptr != nullptr)
+                        std::fill (ptr, ptr + numSteps, 0.0f);
                 }
             }
             else
