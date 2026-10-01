@@ -703,7 +703,10 @@ static RangedValues<Font> resolveFontsWithFallback (Span<const juce_wchar> strin
 
         for (const auto [subRange, font] : rf)
         {
-            resolved.set (subRange + r.getStart(), font, ops, MergeEqualItemsNo{});
+            resolved.set (subRange + r.getStart(),
+                          GraphicsFontHelpers::withPinnedTypeface (font),
+                          ops,
+                          MergeEqualItemsNo{});
             ops.clear();
         }
     }
