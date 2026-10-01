@@ -708,6 +708,15 @@ public:
 private:
     //==============================================================================
     static bool compare (const Font&, const Font&) noexcept;
+
+    /*  Pins the underlying TypefacePtr, if any, instead of the name and style of the Font. A font
+        with a placeholder name e.g. "<Sans-Serif>" can resolve to different TypefacePtrs during
+        the lifetime of the application.
+
+        This function allows us to store an "unchanging" font that is always safe to use with the
+        glyph numbers resolved during shaping.
+    */
+    static Font withPinnedTypeface (Font f);
     static StringArray findAllTypefaceNamesImpl();
     static StringArray findAllTypefaceStylesImpl (const String&);
 

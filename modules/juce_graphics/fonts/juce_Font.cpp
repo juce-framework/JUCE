@@ -319,6 +319,8 @@ public:
 
     bool getDirect2DHinting() const { return options.getDirect2DHinting(); }
 
+    bool hasPinnedTypeface() const { return options.getTypeface() != nullptr; }
+
     /*  This shared state may be shared between two or more Font instances that are being
         read/modified from multiple threads.
         Before modifying a shared instance you *must* call dupeInternalIfShared to
@@ -504,6 +506,20 @@ bool Font::operator!= (const Font& other) const noexcept
 bool Font::compare (const Font& a, const Font& b) noexcept
 {
     return *a.font < *b.font;
+}
+
+Font Font::withPinnedTypeface (Font f)
+{
+    if (f.font->hasPinnedTypeface())
+        return f;
+
+    if (auto typeface = f.getTypefacePtr())
+    {
+        f.dupeInternalIfShared();
+        f.font->setTypeface (typeface);
+    }
+
+    return f;
 }
 
 void Font::dupeInternalIfShared()

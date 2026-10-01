@@ -37,6 +37,7 @@ namespace juce
     struct GraphicsFontHelpers
     {
         static auto compareFont (const Font& a, const Font& b) { return Font::compare (a, b); }
+        static auto withPinnedTypeface (Font f) { return Font::withPinnedTypeface (f); }
     };
 }
 
