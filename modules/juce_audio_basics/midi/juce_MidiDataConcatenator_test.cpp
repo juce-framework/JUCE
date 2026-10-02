@@ -45,16 +45,16 @@ public:
 
     void runTest() override
     {
-        beginTest ("Passing empty buffer while no message is in progress does nothing");
+        testCase ("Passing empty buffer while no message is in progress does nothing", [&]
         {
             BytestreamSysexExtractor extractor;
             bool called = false;
             extractor.push ({}, [&] (auto&&...) { called = true; });
 
             expect (! called);
-        }
+        });
 
-        beginTest ("Passing sysex with no payload reports an empty message");
+        testCase ("Passing sysex with no payload reports an empty message", [&]
         {
             BytestreamSysexExtractor extractor;
             bool called = false;
@@ -67,9 +67,9 @@ public:
             });
 
             expect (called);
-        }
+        });
 
-        beginTest ("Sending only the sysex starting byte reports an ongoing message");
+        testCase ("Sending only the sysex starting byte reports an ongoing message", [&]
         {
             BytestreamSysexExtractor extractor;
             int numCalls = 0;
@@ -92,9 +92,9 @@ public:
             });
 
             expect (numCalls == 2);
-        }
+        });
 
-        beginTest ("Sending sysex interspersed with realtime messages filters out the realtime messages");
+        testCase ("Sending sysex interspersed with realtime messages filters out the realtime messages", [&]
         {
             BytestreamSysexExtractor extractor;
             const std::byte message[] { std::byte (0xf0),
@@ -109,9 +109,9 @@ public:
             expect (vectors == std::vector { std::vector { std::byte (0xf0), std::byte (0x50) },
                                              std::vector { std::byte (0xfe) },
                                              std::vector { std::byte (0x60), std::byte (0x70), std::byte (0xf7) } });
-        }
+        });
 
-        beginTest ("Sending a second f0 byte during an ongoing sysex terminates the previous sysex");
+        testCase ("Sending a second f0 byte during an ongoing sysex terminates the previous sysex", [&]
         {
             BytestreamSysexExtractor extractor;
             const std::byte message[] { std::byte (0xf0), // start of first sysex
@@ -126,9 +126,9 @@ public:
 
             expect (vectors == std::vector { std::vector { std::byte (0xf0), std::byte (0x00), std::byte (0x01) },
                                              std::vector { std::byte (0xf0), std::byte (0x02), std::byte (0x03) } });
-        }
+        });
 
-        beginTest ("Status bytes truncate ongoing sysex");
+        testCase ("Status bytes truncate ongoing sysex", [&]
         {
             BytestreamSysexExtractor extractor;
             const std::byte message[] { std::byte (0xf0), // start of first sysex
@@ -144,9 +144,9 @@ public:
 
             expect (vectors == std::vector { std::vector { std::byte (0xf0), std::byte (0x10), std::byte (0x20), std::byte (0x30) },
                                              std::vector { std::byte (0x80), std::byte (0x00), std::byte (0x00) } });
-        }
+        });
 
-        beginTest ("Running status is preserved between calls");
+        testCase ("Running status is preserved between calls", [&]
         {
             BytestreamSysexExtractor extractor;
             const std::byte message[] { std::byte (0x90), // note on
@@ -168,9 +168,9 @@ public:
             expect (vectors == std::vector { std::vector { std::byte (0x90), std::byte (0x10), std::byte (0x20) },
                                              std::vector { std::byte (0x90), std::byte (0x30), std::byte (0x40) },
                                              std::vector { std::byte (0x90), std::byte (0x50), std::byte (0x60) } });
-        }
+        });
 
-        beginTest ("Realtime messages can intersperse bytes of non-sysex messages");
+        testCase ("Realtime messages can intersperse bytes of non-sysex messages", [&]
         {
             BytestreamSysexExtractor extractor;
             const std::byte message[] { std::byte (0xd0),   // channel pressure
@@ -193,9 +193,9 @@ public:
                                              std::vector { std::byte (0xd0), std::byte (0x60) },
                                              std::vector { std::byte (0xfe) },
                                              std::vector { std::byte (0xd0), std::byte (0x50) } });
-        }
+        });
 
-        beginTest ("Non-status bytes with no associated running status are ignored");
+        testCase ("Non-status bytes with no associated running status are ignored", [&]
         {
             BytestreamSysexExtractor extractor;
             const std::byte message[] { std::byte (0x10),
@@ -218,7 +218,94 @@ public:
 
             expect (vectors == std::vector { std::vector { std::byte (0x80), std::byte (0x0e), std::byte (0x00) },
                                              std::vector { std::byte (0xf0), std::byte (0xf7) } });
-        }
+        });
+
+        testCase ("Realtime messages after a single-byte system common message do not repeat it", [&]
+        {
+            BytestreamSysexExtractor extractor;
+            const std::byte message[] { std::byte (0xf6),
+                                        std::byte (0xf8),
+                                        std::byte (0xfa),
+                                        std::byte (0xfe) };
+
+            {
+                std::vector<std::vector<std::byte>> vectors;
+                extractor.push (message, [&] (auto, auto bytes)
+                {
+                    vectors.emplace_back (bytes.begin(), bytes.end());
+                });
+
+                expect (vectors == std::vector { std::vector { std::byte (0xf6) },
+                                                 std::vector { std::byte (0xf8) },
+                                                 std::vector { std::byte (0xfa) },
+                                                 std::vector { std::byte (0xfe) } });
+            }
+
+            {
+                std::vector<std::vector<std::byte>> vectors;
+
+                for (const auto byte : message)
+                {
+                    const std::byte singleByte[] { byte };
+                    extractor.push (singleByte, [&] (auto, auto bytes)
+                    {
+                        vectors.emplace_back (bytes.begin(), bytes.end());
+                    });
+                }
+
+                expect (vectors == std::vector { std::vector { std::byte (0xf6) },
+                                                 std::vector { std::byte (0xf8) },
+                                                 std::vector { std::byte (0xfa) },
+                                                 std::vector { std::byte (0xfe) } });
+            }
+        });
+
+        testCase ("Realtime messages after a system reset message do not repeat it", [&]
+        {
+            BytestreamSysexExtractor extractor;
+            const std::byte message[] { std::byte (0xff),
+                                        std::byte (0xf8),
+                                        std::byte (0xfa),
+                                        std::byte (0xfe) };
+
+            std::vector<std::vector<std::byte>> vectors;
+            extractor.push (message, [&] (auto, auto bytes)
+            {
+                vectors.emplace_back (bytes.begin(), bytes.end());
+            });
+
+            expect (vectors == std::vector { std::vector { std::byte (0xff) },
+                                             std::vector { std::byte (0xf8) },
+                                             std::vector { std::byte (0xfa) },
+                                             std::vector { std::byte (0xfe) } });
+        });
+
+        testCase ("System common messages cancel running status", [&]
+        {
+            BytestreamSysexExtractor extractor;
+            const std::byte message[] { std::byte (0x90),   // set running status
+                                        std::byte (0xf8),   // realtime byte does no interrupt running status
+                                        std::byte (0x00),
+                                        std::byte (0x00),
+                                        std::byte (0xf3),   // system common clears running status
+                                        std::byte (0x05),
+                                        std::byte (0x07),   // this byte has no status
+                                        std::byte (0x08),   // this byte has no status
+                                        std::byte (0x90),   // set running status
+                                        std::byte (0x00),
+                                        std::byte (0x00) };
+
+            std::vector<std::vector<std::byte>> vectors;
+            extractor.push (message, [&] (auto, auto bytes)
+            {
+                vectors.emplace_back (bytes.begin(), bytes.end());
+            });
+
+            expect (vectors == std::vector<std::vector<std::byte>> { std::vector { std::byte (0xf8) },
+                                                                     std::vector { std::byte (0x90), std::byte(), std::byte() },
+                                                                     std::vector { std::byte (0xf3), std::byte (0x05) },
+                                                                     std::vector { std::byte (0x90), std::byte(), std::byte() } });
+        });
     }
 };
 

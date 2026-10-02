@@ -53,7 +53,7 @@ public:
     template <typename Callback>
     void push (Span<const std::byte> bytes, Callback&& callback)
     {
-        for (const auto pair : enumerate (bytes))
+        for (const auto pair : enumerate (bytes, size_t{}))
         {
             const auto index = pair.index;
             const auto byte = pair.value;
@@ -62,24 +62,26 @@ public:
             {
                 if (auto* inSysex = std::get_if<InSysex> (&state))
                 {
+                    const auto offset = jmin (index, inSysex->numBytes);
+
                     if (byte == std::byte { 0xf0 })
                     {
                         callback (SysexExtractorCallbackKind::lastSysex,
-                                  Span { bytes.data() + index - inSysex->numBytes, inSysex->numBytes });
+                                  Span { bytes.data() + index - offset, offset });
                         return InSysex { 1 };
                     }
 
                     if (byte == std::byte { 0xf7 })
                     {
                         callback (SysexExtractorCallbackKind::lastSysex,
-                                  Span { bytes.data() + index - inSysex->numBytes, inSysex->numBytes + 1 });
+                                  Span { bytes.data() + index - offset, offset + 1 });
                         return RunningStatus{};
                     }
 
                     if (isRealtimeMessage (byte))
                     {
                         callback (SysexExtractorCallbackKind::ongoingSysex,
-                                  Span { bytes.data() + index - inSysex->numBytes, inSysex->numBytes });
+                                  Span { bytes.data() + index - offset, offset });
                         callback (SysexExtractorCallbackKind::notSysex,
                                   Span { bytes.data() + index, 1 });
                         return InSysex{};
@@ -88,7 +90,7 @@ public:
                     if (isStatusByte (byte))
                     {
                         callback (SysexExtractorCallbackKind::lastSysex,
-                                  Span { bytes.data() + index - inSysex->numBytes, inSysex->numBytes });
+                                  Span { bytes.data() + index - offset, offset });
                         return RunningStatus { 1, { byte } };
                     }
 
@@ -100,15 +102,17 @@ public:
                     if (byte == std::byte { 0xf0 })
                         return InSysex { 1 };
 
+                    if (isRealtimeMessage (byte))
+                    {
+                        // Realtime messages don't affect the running status, so return directly
+                        // to avoid emitting a stored single-byte message for a second time
+                        callback (SysexExtractorCallbackKind::notSysex,
+                                  Span { bytes.data() + index, 1 });
+                        return *runningStatus;
+                    }
+
                     const auto nextRunningStatus = std::invoke ([&]
                     {
-                        if (isRealtimeMessage (byte))
-                        {
-                            callback (SysexExtractorCallbackKind::notSysex,
-                                      Span { bytes.data() + index, 1 });
-                            return *runningStatus;
-                        }
-
                         if (isInitialByte (byte))
                             return RunningStatus{}.withAppendedByte (byte);
 
@@ -122,9 +126,10 @@ public:
 
                     if (const auto completeMessage = nextRunningStatus.getCompleteMessage(); ! completeMessage.empty())
                     {
-                        callback (SysexExtractorCallbackKind::notSysex,
-                                  completeMessage);
-                        return RunningStatus{}.withAppendedByte (nextRunningStatus.data[0]);
+                        callback (SysexExtractorCallbackKind::notSysex, completeMessage);
+                        return isCommon (nextRunningStatus.data[0])
+                             ? RunningStatus{}
+                             : RunningStatus{}.withAppendedByte (nextRunningStatus.data[0]);
                     }
 
                     return nextRunningStatus;
@@ -146,6 +151,7 @@ public:
 
 private:
     static bool isRealtimeMessage (std::byte byte)  { return std::byte (0xf8) <= byte && byte <= std::byte (0xfe); }
+    static bool isCommon          (std::byte byte)  { return std::byte (0xf1) <= byte && byte <= std::byte (0xf7); }
     static bool isStatusByte      (std::byte byte)  { return std::byte (0x80) <= byte; }
     static bool isInitialByte     (std::byte byte)  { return isStatusByte (byte) && byte != std::byte (0xf7); }
 
