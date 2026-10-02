@@ -472,10 +472,10 @@ private:
 
     std::unique_ptr<ActionBroadcaster> broadcaster;
     std::atomic<bool> quitMessagePosted { false }, quitMessageReceived { false };
-    std::atomic<Thread::ThreadID> messageThreadId;
-    std::atomic<Thread::ThreadID> threadWithLock;
-    MessageBase::Ptr lockingMessage;
-    int lockCount = 0;
+    std::atomic<Thread::ThreadID> messageThreadId{};
+    std::atomic<Thread::ThreadID> threadWithLock{};
+    MessageBase::Ptr lockingMessage{};
+    int lockCount { 0 };
 
     template <typename Function>
     static auto transformResult (Function&& f)
