@@ -368,6 +368,7 @@ TableListBox::TableListBox (const String& name, TableListBoxModel* const m)
 
 TableListBox::~TableListBox()
 {
+    ListBox::assignModelPtr (nullptr);
 }
 
 void TableListBox::setModel (TableListBoxModel* newModel)
