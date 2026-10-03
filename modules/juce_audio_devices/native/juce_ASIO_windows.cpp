@@ -499,6 +499,9 @@ public:
             JUCE_ASIO_LOG_ERROR ("create buffers 2", err);
 
             asioObject->disposeBuffers();
+            err = asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans);
+            jassert (err == ASE_OK);
+            totalBuffers = resetBuffers (inputChannels, outputChannels);
             err = asioObject->createBuffers (bufferInfos, totalBuffers, currentBlockSizeSamples, &callbacks);
         }
 
