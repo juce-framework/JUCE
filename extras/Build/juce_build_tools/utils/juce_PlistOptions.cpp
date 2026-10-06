@@ -374,7 +374,9 @@ namespace juce::build_tools
         plistEntry.createNewChildElement ("key")->addTextElement ("NSExtensionAttributes");
 
         auto* dict = plistEntry.createNewChildElement ("dict");
-        addPlistDictionaryKey (*dict, "AudioComponentBundle", auv3FrameworkBundle);
+
+        if (auv3FrameworkBundle.isNotEmpty())
+            addPlistDictionaryKey (*dict, "AudioComponentBundle", auv3FrameworkBundle);
 
         dict->createNewChildElement ("key")->addTextElement ("AudioComponents");
         auto* componentArray = dict->createNewChildElement ("array");
