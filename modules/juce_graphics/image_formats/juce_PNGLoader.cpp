@@ -54,13 +54,7 @@ namespace PNGHelpers
 
     static void JUCE_CDECL errorCallback (png_structp p, png_const_charp)
     {
-        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4611)
-       #ifdef PNG_SETJMP_SUPPORTED
-        setjmp (png_jmpbuf (p));
-       #else
-        longjmp (*(jmp_buf*) p->error_ptr, 1);
-       #endif
-        JUCE_END_IGNORE_WARNINGS_MSVC
+        longjmp (*(jmp_buf*) png_get_error_ptr (p), 1);
     }
 
     static void JUCE_CDECL warningCallback (png_structp, png_const_charp) {}
