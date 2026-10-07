@@ -348,6 +348,9 @@ private:
     void dismissBlockingModals      (LinuxComponentPeer*, const XConfigureEvent&) const;
 
     ::Window findTopLevelWindowOf (::Window) const;
+    Point<int> queryPointerPosition() const;
+    void clickForwarded (const XButtonEvent&);
+    void pointerSeenByServer();
 
     static void windowMessageReceive (XEvent&);
 
@@ -368,6 +371,25 @@ private:
     String localClipboardContent;
 
     Point<int> parentScreenPosition;
+
+    // A click that another client forwards to one of our windows carries its position on the
+    // screen, but the X server hasn't seen the pointer there. Under Xwayland the server only
+    // sees the pointer while it is over an X window, and reports the position where it last saw
+    // it until then. That report is the only sign of the pointer moving over another client's
+    // window, so the click is kept until the report changes, not only until the next pointer
+    // event.
+    struct ForwardedClick
+    {
+        Point<int> screenPosition;
+        Point<int> positionReportedByServer;
+
+        bool isCurrent (Point<int> currentReportedPosition) const
+        {
+            return currentReportedPosition == positionReportedByServer;
+        }
+    };
+
+    std::optional<ForwardedClick> lastForwardedClick;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XWindowSystem)

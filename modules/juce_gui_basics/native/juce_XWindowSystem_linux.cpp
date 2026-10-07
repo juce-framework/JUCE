@@ -2441,7 +2441,7 @@ void XWindowSystem::setScreenSaverEnabled (bool enabled) const
     NullCheckedInvocation::invoke (xScreenSaverSuspend, display, ! enabled);
 }
 
-Point<float> XWindowSystem::getCurrentMousePosition() const
+Point<int> XWindowSystem::queryPointerPosition() const
 {
     Window root, child;
     int x, y, winx, winy;
@@ -2458,7 +2458,27 @@ Point<float> XWindowSystem::getCurrentMousePosition() const
         x = y = -1;
     }
 
-    return { (float) x, (float) y };
+    return { x, y };
+}
+
+Point<float> XWindowSystem::getCurrentMousePosition() const
+{
+    const auto reportedPosition = queryPointerPosition();
+
+    if (lastForwardedClick.has_value() && lastForwardedClick->isCurrent (reportedPosition))
+        return lastForwardedClick->screenPosition.toFloat();
+
+    return reportedPosition.toFloat();
+}
+
+void XWindowSystem::clickForwarded (const XButtonEvent& buttonEvent)
+{
+    lastForwardedClick = ForwardedClick { { buttonEvent.x_root, buttonEvent.y_root }, queryPointerPosition() };
+}
+
+void XWindowSystem::pointerSeenByServer()
+{
+    lastForwardedClick.reset();
 }
 
 void XWindowSystem::setMousePosition (Point<float> pos) const
@@ -4265,6 +4285,21 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
        #endif
         {
             auto* instance = getInstance();
+
+            // A client that hosts one of our windows, such as a system tray, forwards a click
+            // to it as a synthesised ButtonPress when the pointer is over the host's own surface
+            // rather than over the window. Any other pointer event comes from the X server
+            // having seen the pointer.
+            if (event.xany.send_event)
+            {
+                if (event.xany.type == ButtonPress)
+                    instance->clickForwarded (event.xbutton);
+            }
+            else if (event.xany.type == ButtonPress || event.xany.type == ButtonRelease
+                     || event.xany.type == MotionNotify || event.xany.type == EnterNotify)
+            {
+                instance->pointerSeenByServer();
+            }
 
             if (auto* xSettings = instance->getXSettings())
             {
