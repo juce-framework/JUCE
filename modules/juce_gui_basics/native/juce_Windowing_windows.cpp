@@ -1355,6 +1355,23 @@ public:
                                  info.rcWindow.right - info.rcClient.right };
     }
 
+    std::optional<BorderSize<int>> getPhysicalBorderSizeAtDpi (int dpi) const
+    {
+        if (const auto custom = getCustomBorderSize())
+            return *custom;
+
+        RECT rect{};
+
+        if (! AdjustWindowRectExForDpi (&rect,
+                                        (DWORD) GetWindowLongPtr (hwnd, GWL_STYLE),
+                                        FALSE,
+                                        (DWORD) GetWindowLongPtr (hwnd, GWL_EXSTYLE),
+                                        (UINT) dpi))
+            return {};
+
+        return BorderSize<int> { -rect.top, -rect.left, rect.bottom, rect.right };
+    }
+
     void setBounds (const Rectangle<int>& bounds, bool isNowFullScreen) override
     {
         // If we try to set new bounds while handling an existing position change,
@@ -1370,13 +1387,29 @@ public:
         if (isNowFullScreen)
             return;
 
-        setBoundsPhysical (std::invoke ([&]
+        const auto getPhysicalBounds = [&]
         {
             ScopedThreadDPIAwarenessSetter setter { hwnd };
             using SH = detail::ScalingHelpers;
-            const auto pos = SH::convertLogicalScreenPointToPhysical (bounds.getPosition().toFloat());
-            return (bounds.toFloat() * getPlatformScaleFactor()).withPosition (pos).toNearestInt();
-        }));
+            const auto scaled = bounds.toFloat() * getPlatformScaleFactor();
+
+            // A child window's position is relative to its parent, so it takes the parent's scale
+            // rather than that of the display which has the same point on the screen.
+            if (parentToAddTo != nullptr)
+                return scaled.toNearestInt();
+
+            return scaled.withPosition (SH::convertLogicalScreenPointToPhysical (bounds.getPosition().toFloat())).toNearestInt();
+        };
+
+        const auto scaleBefore = getPlatformScaleFactor();
+        setBoundsPhysical (getPhysicalBounds());
+
+        // Moving the window onto a display with a different scale changes the scale of the window
+        // during the call above, which leaves it at the position that Windows suggested for the
+        // new scale rather than the one requested. Setting the bounds again puts it where it was
+        // asked to go.
+        if (isValidPeer (this) && ! approximatelyEqual (getPlatformScaleFactor(), scaleBefore))
+            setBoundsPhysical (getPhysicalBounds());
     }
 
     Rectangle<int> getBounds() const override
@@ -3326,12 +3359,28 @@ private:
                                   right);
 
         const auto modifiedLogicalClient = logicalBorder.subtractedFrom (modifiedLogicalBounds);
-        const auto unscaledClient = SH::scaledScreenPosToUnscaled (component, modifiedLogicalClient);
-        const auto modifiedPhysicalClient = unscaledClient.toFloat() * getPlatformScaleFactor();
 
-        const auto closestIntegralSize = modifiedPhysicalClient
-                .withPosition (requestedPhysicalClient.getPosition().toFloat())
-                .getLargestIntegerWithin();
+        const auto closestIntegralSize = std::invoke ([&]
+        {
+            // Converting the requested size to logical coordinates and back again is lossy at
+            // fractional scales, so a window being dragged between displays could lose a logical
+            // pixel here after each DPI change. The requested physical size is kept when the window
+            // is only being moved and the constrainer hasn't changed its logical size.
+            const auto resizing = top || left || bottom || right;
+
+            if (! resizing
+                && modifiedLogicalClient.getWidth()  == requestedLogicalClient.getWidth()
+                && modifiedLogicalClient.getHeight() == requestedLogicalClient.getHeight())
+            {
+                return requestedPhysicalClient;
+            }
+
+            const auto unscaledClient = SH::scaledScreenPosToUnscaled (component, modifiedLogicalClient);
+            const auto modifiedPhysicalClient = unscaledClient.toFloat() * getPlatformScaleFactor();
+
+            return modifiedPhysicalClient.withPosition (requestedPhysicalClient.getPosition().toFloat())
+                                         .getLargestIntegerWithin();
+        });
 
         const auto withSnappedPosition = std::invoke ([&]
         {
@@ -3422,16 +3471,42 @@ private:
         if (approximatelyEqual (scaleFactor, newScale))
             return 0;
 
+        const auto logicalBounds = getBounds();
         scaleFactor = newScale;
 
         {
             const ScopedValueSetter<bool> setter (inDpiChange, true);
+
+            const auto newBounds = std::invoke ([&]
+            {
+                const auto suggested = D2DUtilities::toRectangle (newRect);
+
+                if (IsZoomed (hwnd) || isMinimised() || isFullScreen())
+                    return suggested;
+
+                const auto border = getPhysicalBorderSizeAtDpi (newDPI);
+
+                if (! border.has_value())
+                    return suggested;
+
+                // The rectangle that Windows suggests is the old one scaled as a whole, frame
+                // included, which can leave the client area a logical pixel away from its old size.
+                // The window keeps its logical size instead, which also stops the size drifting when
+                // it is moved between displays repeatedly.
+                // getBounds() rounds the logical size of the client area up, so the physical size is
+                // rounded down here to make the two conversions cancel out: the result is
+                // always within one logical pixel below the original size.
+                const auto client = (logicalBounds.withZeroOrigin().toFloat() * getPlatformScaleFactor()).getLargestIntegerWithin();
+                const auto window = border->addedTo (client);
+                return suggested.withSize (window.getWidth(), window.getHeight());
+            });
+
             SetWindowPos (hwnd,
                           nullptr,
-                          newRect.left,
-                          newRect.top,
-                          newRect.right  - newRect.left,
-                          newRect.bottom - newRect.top,
+                          newBounds.getX(),
+                          newBounds.getY(),
+                          newBounds.getWidth(),
+                          newBounds.getHeight(),
                           SWP_NOZORDER | SWP_NOACTIVATE);
         }
 
@@ -3453,6 +3528,16 @@ private:
         scaleFactorListeners.call ([this] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (scaleFactor); });
 
         return 0;
+    }
+
+    void handleParentDPIChanged()
+    {
+        if (parentToAddTo == nullptr)
+            return;
+
+        updateBounds();
+        InvalidateRect (hwnd, nullptr, FALSE);
+        scaleFactorListeners.call ([this] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (getPlatformScaleFactor()); });
     }
 
     //==============================================================================
@@ -3958,6 +4043,10 @@ private:
 
             case WM_DPICHANGED:
                 return handleDPIChanging ((int) HIWORD (wParam), *(RECT*) lParam);
+
+            case WM_DPICHANGED_AFTERPARENT:
+                handleParentDPIChanged();
+                break;
 
             case WM_WINDOWPOSCHANGED:
             {
