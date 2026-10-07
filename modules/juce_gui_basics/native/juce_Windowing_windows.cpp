@@ -4382,9 +4382,9 @@ private:
         auto newBounds = borderSize.addedTo (bounds);
 
         const auto oldBounds = D2DUtilities::toRectangle (getWindowRectInParent (hwnd));
-        const bool hasMoved = (oldBounds.getPosition() != bounds.getPosition());
-        const bool hasResized = (oldBounds.getWidth() != bounds.getWidth()
-                                  || oldBounds.getHeight() != bounds.getHeight());
+        const bool hasMoved = (oldBounds.getPosition() != newBounds.getPosition());
+        const bool hasResized = (oldBounds.getWidth() != newBounds.getWidth()
+                                  || oldBounds.getHeight() != newBounds.getHeight());
 
         DWORD flags = SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED;
         if (! hasMoved)    flags |= SWP_NOMOVE;
