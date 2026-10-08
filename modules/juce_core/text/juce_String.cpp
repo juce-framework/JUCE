@@ -86,31 +86,19 @@ public:
         return CharPointerType (unalignedPointerCast<CharType*> (bytes + offsetof (StringHolder, text)));
     }
 
-    template <class CharPointer>
-    static CharPointerType createFromCharPointer (const CharPointer text)
+    template <typename CharPointer, typename ShouldContinueFn>
+    static CharPointerType createFromCharPointerWhile (const CharPointer text, ShouldContinueFn&& shouldContinueFn)
     {
         if (text.getAddress() == nullptr || text.isEmpty())
             return CharPointerType (emptyString.text);
 
-        auto bytesNeeded = sizeof (CharType) + CharPointerType::getBytesRequiredFor (text);
-        auto dest = createUninitialisedBytes (bytesNeeded);
-        CharPointerType (dest).writeAll (text);
-        return dest;
-    }
-
-    template <class CharPointer>
-    static CharPointerType createFromCharPointer (const CharPointer text, size_t maxChars)
-    {
-        if (text.getAddress() == nullptr || text.isEmpty() || maxChars == 0)
-            return CharPointerType (emptyString.text);
-
-        auto end = text;
+        auto pos = text;
         size_t numChars = 0;
         size_t bytesNeeded = sizeof (CharType);
 
-        while (numChars < maxChars && ! end.isEmpty())
+        while (shouldContinueFn (pos, numChars) && ! pos.isEmpty())
         {
-            bytesNeeded += CharPointerType::getBytesRequiredFor (end.getAndAdvance());
+            bytesNeeded += CharPointerType::getBytesRequiredFor (pos.getAndAdvance());
             ++numChars;
         }
 
@@ -120,24 +108,24 @@ public:
     }
 
     template <class CharPointer>
-    static CharPointerType createFromCharPointer (const CharPointer start, const CharPointer end)
+    static CharPointerType createFromCharPointer (const CharPointer text)
     {
-        if (start.getAddress() == nullptr || start.isEmpty())
+        return createFromCharPointer (text, std::numeric_limits<size_t>::max());
+    }
+
+    template <class CharPointer>
+    static CharPointerType createFromCharPointer (const CharPointer text, size_t maxChars)
+    {
+        if (maxChars == 0)
             return CharPointerType (emptyString.text);
 
-        auto e = start;
-        int numChars = 0;
-        auto bytesNeeded = sizeof (CharType);
+        return createFromCharPointerWhile (text, [maxChars] (auto, size_t numChars) { return numChars < maxChars; });
+    }
 
-        while (e < end && ! e.isEmpty())
-        {
-            bytesNeeded += CharPointerType::getBytesRequiredFor (e.getAndAdvance());
-            ++numChars;
-        }
-
-        auto dest = createUninitialisedBytes (bytesNeeded);
-        CharPointerType (dest).writeWithCharLimit (start, numChars + 1);
-        return dest;
+    template <class CharPointer>
+    static CharPointerType createFromCharPointer (const CharPointer start, const CharPointer end)
+    {
+        return createFromCharPointerWhile (start, [end] (auto pos, size_t) { return pos < end; });
     }
 
     static CharPointerType createFromCharPointer (const CharPointerType start, const CharPointerType end)
@@ -155,9 +143,8 @@ public:
 
     static CharPointerType createFromFixedLength (const char* const src, const size_t numChars)
     {
-        auto dest = createUninitialisedBytes (numChars * sizeof (CharType) + sizeof (CharType));
-        CharPointerType (dest).writeWithCharLimit (CharPointer_UTF8 (src), (int) (numChars + 1));
-        return dest;
+        const auto end = CharPointer_UTF8 (src + numChars);
+        return createFromCharPointerWhile (CharPointer_UTF8 (src), [end] (auto pos, size_t) { return pos < end; });
     }
 
     //==============================================================================
@@ -3050,6 +3037,48 @@ public:
         {
             constexpr char buffer[] = "glass \xBD full";
             expect (expectedString == String::createStringFromData (buffer, sizeof (buffer)));
+        }
+
+        beginTest ("Constructing from malformed UTF-8 does not overrun the allocation");
+        {
+            // The allocation size and the copy must agree on malformed input, otherwise a
+            // String constructed from invalid UTF-8 writes past the end of its heap block.
+            std::string overlong;
+
+            for (int i = 0; i < 16; ++i)
+                overlong += "\xF0\x80\x80\x80";
+
+            overlong += "trailing";
+
+            std::string lone (16, '\x80');
+            lone += "trailing";
+
+            const auto isValid = [] (const String& s)
+            {
+                return CharPointer_UTF8::isValidString (s.toRawUTF8(), std::numeric_limits<int>::max());
+            };
+
+            // Constructors that decode and re-encode replace malformed input with the
+            // replacement character, so the result is always well-formed UTF-8.
+            for (const auto& s : { String::fromUTF8 (overlong.data(), -1),
+                                   String (CharPointer_UTF8 (overlong.data())),
+                                   String (CharPointer_UTF8 (overlong.data()), overlong.size()),
+                                   String (overlong),
+                                   String (lone) })
+            {
+                expect (isValid (s));
+                expect (s.endsWith ("trailing"));
+            }
+
+            // The explicit-length overloads copy the source bytes verbatim. They must still
+            // allocate enough room for the bytes they copy, and must preserve the trailing
+            // data rather than overrun it.
+            for (const auto& s : { String::fromUTF8 (overlong.data(), (int) overlong.size()),
+                                   String (CharPointer_UTF8 (overlong.data()),
+                                           CharPointer_UTF8 (overlong.data() + overlong.size())) })
+            {
+                expect (s.endsWith ("trailing"));
+            }
         }
     }
 };
