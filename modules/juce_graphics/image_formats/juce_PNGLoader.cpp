@@ -54,13 +54,7 @@ namespace PNGHelpers
 
     static void JUCE_CDECL errorCallback (png_structp p, png_const_charp)
     {
-        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4611)
-       #ifdef PNG_SETJMP_SUPPORTED
-        setjmp (png_jmpbuf (p));
-       #else
-        longjmp (*(jmp_buf*) p->error_ptr, 1);
-       #endif
-        JUCE_END_IGNORE_WARNINGS_MSVC
+        longjmp (*(jmp_buf*) png_get_error_ptr (p), 1);
     }
 
     static void JUCE_CDECL warningCallback (png_structp, png_const_charp) {}
@@ -68,7 +62,10 @@ namespace PNGHelpers
     #if ! JUCE_USING_COREIMAGE_LOADER
     static void JUCE_CDECL readCallback (png_structp png, png_bytep data, png_size_t length)
     {
-        static_cast<InputStream*> (png_get_io_ptr (png))->read (data, (int) length);
+        const auto numRead = static_cast<InputStream*> (png_get_io_ptr (png))->read (data, (int) length);
+
+        if (numRead != (int) length)
+            png_error (png, "Read Error");
     }
 
     struct PNGErrorStruct {};
@@ -264,16 +261,6 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     if (pngWriteStruct == nullptr)
         return false;
 
-    jmp_buf errorJumpBuf;
-    png_set_error_fn (pngWriteStruct, &errorJumpBuf, PNGHelpers::errorCallback, PNGHelpers::warningCallback);
-
-    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4611)
-
-    if (setjmp (errorJumpBuf) != 0)
-        return false;
-
-    JUCE_END_IGNORE_WARNINGS_MSVC
-
     auto pngInfoStruct = png_create_info_struct (pngWriteStruct);
 
     if (pngInfoStruct == nullptr)
@@ -281,6 +268,19 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
         png_destroy_write_struct (&pngWriteStruct, nullptr);
         return false;
     }
+
+    jmp_buf errorJumpBuf;
+    png_set_error_fn (pngWriteStruct, &errorJumpBuf, PNGHelpers::errorCallback, PNGHelpers::warningCallback);
+
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4611)
+
+    if (setjmp (errorJumpBuf) != 0)
+    {
+        png_destroy_write_struct (&pngWriteStruct, &pngInfoStruct);
+        return false;
+    }
+
+    JUCE_END_IGNORE_WARNINGS_MSVC
 
     png_set_write_fn (pngWriteStruct, &out, PNGHelpers::writeDataCallback, nullptr);
 
