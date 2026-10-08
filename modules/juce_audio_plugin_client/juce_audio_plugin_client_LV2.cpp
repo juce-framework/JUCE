@@ -637,7 +637,12 @@ public:
         processor->setNonRealtime (ports.isFreeWheeling());
 
         for (auto i = 0, end = processor->getTotalNumInputChannels(); i < end; ++i)
-            audio.copyFrom (i, 0, ports.getBufferForAudioInput (i), audio.getNumSamples());
+        {
+            if (const auto* src = ports.getBufferForAudioInput (i))
+                audio.copyFrom (i, 0, src, audio.getNumSamples());
+            else
+                audio.clear (i, 0, audio.getNumSamples());
+        }
 
         jassert (countNaNs (audio) == 0);
 
@@ -647,10 +652,8 @@ public:
             if (processor->isSuspended())
             {
                 for (auto i = 0, end = processor->getTotalNumOutputChannels(); i < end; ++i)
-                {
-                    const auto ptr = ports.getBufferForAudioOutput (i);
-                    std::fill (ptr, ptr + numSteps, 0.0f);
-                }
+                    if (auto* ptr = ports.getBufferForAudioOutput (i))
+                        std::fill (ptr, ptr + numSteps, 0.0f);
             }
             else
             {
