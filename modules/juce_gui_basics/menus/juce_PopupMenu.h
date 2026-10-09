@@ -137,6 +137,7 @@ public:
 
         /** The menu item's name. */
         String text;
+        String tooltipText = "";
 
         /** The menu item's ID.
             This must not be 0 if you want the item to be triggerable, but if you're attaching
