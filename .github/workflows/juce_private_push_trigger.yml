@@ -7,7 +7,6 @@ on:
       - bugfix/**
       - feature/**
       - wayland
-      - security-patches/**
 jobs:
   run-ci:
     if: github.repository == 'juce-framework/JUCE-dev'
