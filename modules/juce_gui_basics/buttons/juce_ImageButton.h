@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -58,9 +58,6 @@ public:
         @param name                 the name to give the component
     */
     explicit ImageButton (const String& name = String());
-
-    /** Destructor. */
-    ~ImageButton() override;
 
     //==============================================================================
     /** Sets up the images to draw in various states.
@@ -146,6 +143,15 @@ public:
                                       const Colour& overlayColour, float imageOpacity, ImageButton&) = 0;
     };
 
+    /** Sets the resampling quality to use when drawing the image.
+
+        This will have the most noticeable effect when the ImageButton size does not match the
+        image size.
+
+        Defaults to highResamplingQuality.
+    */
+    void setImageResamplingQuality (Graphics::ResamplingQuality newQuality);
+
 protected:
     //==============================================================================
     /** @internal */
@@ -161,6 +167,7 @@ private:
     Image normalImage, overImage, downImage;
     float normalOpacity, overOpacity, downOpacity;
     Colour normalOverlay, overOverlay, downOverlay;
+    Graphics::ResamplingQuality resamplingQuality = Graphics::ResamplingQuality::highResamplingQuality;
 
     Image getCurrentImage() const;
 

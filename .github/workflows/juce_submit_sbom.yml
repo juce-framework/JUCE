@@ -1,0 +1,25 @@
+name: JUCE Submit SBOM
+
+# Uploads the committed software bill of materials (JUCE.spdx.json) to GitHub's
+# dependency submission API, so that the vendored third-party code appears in
+# the repository's dependency graph and in GitHub's own SBOM export.
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  submit-sbom:
+    if: github.repository_owner == 'juce-framework'
+    name: Submit SBOM to the dependency graph
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - name: Check that the committed document is up to date
+        run: python3 extras/SBOM/generate_sbom.py . --check
+      - name: Submit the dependency snapshot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 extras/SBOM/submit_dependency_snapshot.py .

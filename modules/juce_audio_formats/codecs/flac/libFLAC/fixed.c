@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2023  Xiph.Org Foundation
+ * Copyright (C) 2011-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,7 +39,7 @@
 #include "../compat.h"
 #include "include/private/bitmath.h"
 #include "include/private/fixed.h"
-
+#include "include/private/macros.h"
 #include "../assert.h"
 
 #ifdef local_abs
@@ -357,7 +357,7 @@ uint32_t FLAC__fixed_compute_best_predictor_wide(const FLAC__int32 data[], uint3
 if(order_##macro_order##_is_valid && total_error_##macro_order < smallest_error) { \
 	order = macro_order;				\
 	smallest_error = total_error_##macro_order ;	\
-	residual_bits_per_sample[ macro_order ] = (float)((total_error_0 > 0) ? log(M_LN2 * (double)total_error_0 / (double)data_len) / M_LN2 : 0.0); \
+	residual_bits_per_sample[ macro_order ] = (float)((total_error_##macro_order > 0) ? log(M_LN2 * (double)total_error_##macro_order / (double)data_len) / M_LN2 : 0.0); \
 }							\
 else							\
 	residual_bits_per_sample[ macro_order ] = 34.0f;

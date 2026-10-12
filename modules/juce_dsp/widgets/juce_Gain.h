@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -71,6 +71,9 @@ public:
 
     /** Returns the ramp duration in seconds. */
     double getRampDurationSeconds() const noexcept              { return rampDurationSeconds; }
+
+    /** Returns the number of samples remaining to reach the target value */
+    int getNumSamplesToReachTarget() const noexcept       { return gain.getNumSamplesToReachTarget(); }
 
     /** Returns true if the current value is currently being interpolated. */
     bool isSmoothing() const noexcept                           { return gain.isSmoothing(); }

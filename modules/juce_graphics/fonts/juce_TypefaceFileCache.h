@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -57,13 +57,27 @@ public:
     template <typename Fn>
     Typeface::Ptr get (const TypefaceFileAndIndex& key, Fn&& getTypeface)
     {
-        return cachedTypefaces.get (key, std::forward<Fn> (getTypeface));
+        {
+            std::scoped_lock lock{mutex};
+
+            if (auto result = cache[key])
+                return result;
+        }
+
+        if (const auto loaded = getTypeface (key))
+        {
+            std::scoped_lock lock{mutex};
+            return cache[key] = loaded;
+        }
+
+        return nullptr;
     }
 
     JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (TypefaceFileCache)
 
 private:
-    LruCache<TypefaceFileAndIndex, Typeface::Ptr> cachedTypefaces;
+    std::mutex mutex;
+    std::map<TypefaceFileAndIndex, Typeface::Ptr> cache;
 };
 
 } // namespace juce

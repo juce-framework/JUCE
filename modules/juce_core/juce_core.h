@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -44,7 +44,7 @@
 
   ID:                 juce_core
   vendor:             juce
-  version:            8.0.13
+  version:            9.0.4
   name:               JUCE core classes
   description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:            http://www.juce.com/juce
@@ -239,6 +239,8 @@ namespace juce
 #include "misc/juce_EnumHelpers.h"
 #include "misc/juce_OrderedContainerHelpers.h"
 #include "memory/juce_Memory.h"
+#include "misc/juce_Functional.h"
+#include "containers/juce_Span.h"
 #include "maths/juce_MathsFunctions.h"
 #include "memory/juce_ByteOrder.h"
 #include "memory/juce_Atomic.h"
@@ -277,8 +279,6 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "containers/juce_ElementComparator.h"
 #include "containers/juce_ArrayAllocationBase.h"
 #include "containers/juce_ArrayBase.h"
-#include "misc/juce_Functional.h"
-#include "containers/juce_Span.h"
 #include "containers/juce_Array.h"
 #include "containers/juce_LinkedListPointer.h"
 #include "misc/juce_ScopeGuard.h"
@@ -348,6 +348,8 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "threads/juce_Thread.h"
 #include "threads/juce_HighResolutionTimer.h"
 #include "threads/juce_ThreadLocalValue.h"
+#include "threads/juce_ThreadPoolJob.h"
+#include "detail/juce_ThreadPoolLambdaJob.h"
 #include "threads/juce_ThreadPool.h"
 #include "threads/juce_TimeSliceThread.h"
 #include "threads/juce_ReadWriteLock.h"

@@ -1,0 +1,96 @@
+Upstream: https://github.com/sammycage/lunasvg
+
+The files in this directory are from the LunaSVG 3.5.0 release downloaded in a tarball from
+https://github.com/sammycage/lunasvg/releases/tag/v3.5.0
+
+First a script was used to modify them as little as possible to enable us building them in the
+JUCE module structure, as well as to hide the LunaSVG symbols and rename the PlutoVG symbols. The
+latter modification is needed to allow JUCE projects to use LunaSVG as a separate dependency. The
+script is shown at the end of this file.
+
+In separate commits a number of manual changes were added that allow us to replace LunaSVG's
+built-in renderer and use a JUCE Drawable hierarchy instead. These changes are in commits with the
+"lunasvg:" prefix.
+
+In a commit with "lunasvg:" prefix, a fix was applied to allow compilation with Xcode 12.4.
+
+In a commit with the "plutovg:" prefix, we turned off the optimisations for
+the `juce_plutovg_font_face_cache_load_file` function under MSVC. Without this change an internal
+compiler error occurs when building the file in Release mode.
+
+```
+#!/bin/bash
+
+# During a lunasvg version bump, this script must be placed in the
+# drawables/lunasvg directory and executed.
+
+if [[ "$(uname)" != "Darwin" ]]; then
+    echo "This script only works on macOS."
+    exit 1
+fi
+
+SELF_DIR="$(cd "$(dirname "$0")" && pwd)" || { echo "Error: cannot determine script directory" >&2; exit 1; }
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Wrap lunasvg code in an anonymous namespace
+find "$SELF_DIR/source" -type f \( -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \) | while read -r file; do
+    last_include=$(grep -n '#include' "$file" | tail -1 | cut -d: -f1)
+
+    if [ -z "$last_include" ]; then
+        echo "Skipping $file (no #include found)"
+        continue
+    fi
+
+    closing_line=$(grep -n '} // namespace lunasvg' "$file" | tail -1 | cut -d: -f1)
+
+    if [ -z "$closing_line" ]; then
+        echo "Skipping $file (no '} // namespace lunasvg' found)"
+        continue
+    fi
+
+    sed -i '' "${last_include}a\\
+namespace {
+" "$file"
+
+    closing_line=$((closing_line + 1))
+
+    sed -i '' "${closing_line}a\\
+}
+" "$file"
+
+    echo "Processed $file"
+done
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Wrap lunasvg.h public namespace in an anonymous namespace
+file="$SELF_DIR/include/lunasvg.h"
+
+first_namespace=$(grep -n 'namespace lunasvg {' "$file" | head -1 | cut -d: -f1)
+last_closing=$(grep -n '} // namespace lunasvg' "$file" | tail -1 | cut -d: -f1)
+
+if [ -n "$first_namespace" ] && [ -n "$last_closing" ]; then
+    sed -i '' "${first_namespace}i\\
+namespace {
+" "$file"
+
+    last_closing=$((last_closing + 1))
+
+    sed -i '' "${last_closing}a\\
+}
+" "$file"
+
+    echo "Processed $file"
+else
+    echo "Skipping $file (namespace markers not found)"
+fi
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Prefix all plutovg symbols with juce_ to avoid collisions
+find "$SELF_DIR" -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \) | while read -r file; do
+    sed -i '' 's/plutovg_/juce_plutovg_/g; s/PLUTOVG_/JUCE_PLUTOVG_/g' "$file"
+    echo "Replaced plutovg_ in $file"
+done
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+```

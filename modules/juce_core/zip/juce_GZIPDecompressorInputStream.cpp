@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -35,92 +35,6 @@
 namespace juce
 {
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4244 4309 4305 4365 6385 6326 6340)
-
-namespace zlibNamespace
-{
- #if JUCE_INCLUDE_ZLIB_CODE
-  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
-                                       "-Wsign-conversion",
-                                       "-Wshadow",
-                                       "-Wdeprecated-register",
-                                       "-Wswitch-enum",
-                                       "-Wswitch-default",
-                                       "-Wredundant-decls",
-                                       "-Wimplicit-fallthrough",
-                                       "-Wzero-as-null-pointer-constant",
-                                       "-Wcomma",
-                                       "-Wcast-align",
-                                       "-Wkeyword-macro",
-                                       "-Wmissing-prototypes")
-
-  #pragma push_macro ("register")
-  #define register
-
-  #pragma push_macro ("MIN")
-  #undef MIN
-
-  #pragma push_macro ("read")
-  #pragma push_macro ("write")
-  #pragma push_macro ("open")
-  #pragma push_macro ("close")
-
-  #undef OS_CODE
-  #undef fdopen
-  #define ZLIB_INTERNAL
-  #define NO_DUMMY_DECL
-  #include "zlib/adler32.c"
-  #include "zlib/compress.c"
-  #undef DO1
-  #undef DO8
-  #include "zlib/crc32.c"
-  #undef N
-  #include "zlib/deflate.c"
-  #include "zlib/inffast.c"
-  #undef PULLBYTE
-  #undef LOAD
-  #undef RESTORE
-  #undef INITBITS
-  #undef NEEDBITS
-  #undef DROPBITS
-  #undef BYTEBITS
-  #undef GZIP
-  #include "zlib/inflate.c"
-  #include "zlib/inftrees.c"
-  #include "zlib/trees.c"
-  #include "zlib/zutil.c"
-  #undef Byte
-  #undef fdopen
-  #undef local
-  #undef Freq
-  #undef Code
-  #undef Dad
-  #undef Len
-
-  #pragma pop_macro ("close")
-  #pragma pop_macro ("open")
-  #pragma pop_macro ("write")
-  #pragma pop_macro ("read")
-  #pragma pop_macro ("MIN")
-  #pragma pop_macro ("register")
-
-  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
- #else
-  #include JUCE_ZLIB_INCLUDE_PATH
- #endif
-
-#ifndef z_uInt
- #ifdef uInt
-  #define z_uInt uInt
- #else
-  #define z_uInt unsigned int
- #endif
-#endif
-
-}
-
-JUCE_END_IGNORE_WARNINGS_MSVC
-
 //==============================================================================
 // internal helper object that holds the zlib structures so they don't have to be
 // included publicly.
@@ -129,7 +43,6 @@ class GZIPDecompressorInputStream::GZIPDecompressHelper
 public:
     GZIPDecompressHelper (Format f)
     {
-        using namespace zlibNamespace;
         zerostruct (stream);
         streamIsValid = (inflateInit2 (&stream, getBitsForFormat (f)) == Z_OK);
         finished = error = ! streamIsValid;
@@ -138,7 +51,7 @@ public:
     ~GZIPDecompressHelper()
     {
         if (streamIsValid)
-            zlibNamespace::inflateEnd (&stream);
+            inflateEnd (&stream);
     }
 
     bool needsInput() const noexcept        { return dataSize <= 0; }
@@ -151,14 +64,12 @@ public:
 
     int doNextBlock (uint8* const dest, const unsigned int destSize)
     {
-        using namespace zlibNamespace;
-
         if (streamIsValid && data != nullptr && ! finished)
         {
             stream.next_in  = data;
             stream.next_out = dest;
-            stream.avail_in  = (z_uInt) dataSize;
-            stream.avail_out = (z_uInt) destSize;
+            stream.avail_in  = (decltype (stream.avail_in)) dataSize;
+            stream.avail_out = (decltype (stream.avail_out)) destSize;
 
             switch (inflate (&stream, Z_PARTIAL_FLUSH))
             {
@@ -167,7 +78,7 @@ public:
                 JUCE_FALLTHROUGH
             case Z_OK:
                 data += dataSize - stream.avail_in;
-                dataSize = (z_uInt) stream.avail_in;
+                dataSize = (decltype (dataSize)) stream.avail_in;
                 return (int) (destSize - stream.avail_out);
 
             case Z_NEED_DICT:
@@ -206,7 +117,7 @@ public:
     enum { gzipDecompBufferSize = 32768 };
 
 private:
-    zlibNamespace::z_stream stream;
+    z_stream stream;
     uint8* data = nullptr;
     size_t dataSize = 0;
 

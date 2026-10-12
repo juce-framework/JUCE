@@ -1232,7 +1232,7 @@ private:
         std::make_shared<ComplexPathComponent<false>>(),
         std::make_shared<ComplexPathComponent<true>>(),
         std::make_shared<ComplexPathWithRoundedCornersComponent>(),
-       #if JUCE_DEMO_RUNNER
+      #if JUCE_DEMO_RUNNER
         std::make_shared<AnimationAppDemo>(),
         std::make_shared<AnimationEasingDemo>(),
        #if ! JUCE_ANDROID
@@ -1258,9 +1258,11 @@ private:
         std::make_shared<GraphicsDemoWrapper<LinesDemo>>(),
         std::make_shared<GraphicsDemoWrapper<ShapesDemo>>(),
         std::make_shared<LookAndFeelDemo>(),
+       #if JUCE_WEB_BROWSER
         std::make_shared<WebBrowserDemo>(),
-        std::make_shared<WidgetsDemo>()
        #endif
+        std::make_shared<WidgetsDemo>()
+      #endif
     };
 
     ComboBox comboBox;

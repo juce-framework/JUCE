@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -4203,7 +4203,7 @@ class LV2PluginFormatHeadless::Pimpl
 public:
     Pimpl()
     {
-        loadAllPluginsFromPaths (getDefaultLocationsToSearch());
+        loadAllPluginsFromPaths (getDefaultLocationsToSearch(), Recursive::yes);
 
         const auto tempFile = lv2ResourceFolder.getFile();
 
@@ -4233,29 +4233,28 @@ public:
     void findAllTypesForFile (OwnedArray<PluginDescription>& result,
                               const String& identifier)
     {
+        std::vector<const LilvPlugin*> plugins;
+
+        if (auto* plugin = findPluginByUri (identifier))
+            plugins.push_back (plugin);
+
         if (File::isAbsolutePath (identifier))
-            world->loadBundle (world->newFileUri (nullptr, File::addTrailingSeparator (identifier).toRawUTF8()));
-
-        std::vector<const LilvPlugin*> plugins { findPluginByUri (identifier) };
-        findPluginsByFile (identifier, plugins);
-
-        for (const auto& plugin : plugins)
         {
-            if (auto desc = getDescription (plugin); desc.fileOrIdentifier.isNotEmpty())
-            {
-                result.add (std::make_unique<PluginDescription> (desc));
-            }
+            // Constructing a File expands a leading '~', which lilv would otherwise treat as a relative path
+            const File bundle { identifier };
+            world->loadBundle (world->newFileUri (nullptr, File::addTrailingSeparator (bundle.getFullPathName()).toRawUTF8()));
+            findPluginsByFile (bundle, plugins);
         }
+
+        for (const auto* plugin : plugins)
+            if (auto desc = getDescription (plugin); desc.fileOrIdentifier.isNotEmpty())
+                result.add (std::make_unique<PluginDescription> (desc));
     }
 
     bool fileMightContainThisPluginType (const String& file) const
     {
         // If the string looks like a URI, then it could be a valid LV2 identifier
-        const auto* data = file.toRawUTF8();
-        const auto numBytes = file.getNumBytesAsUTF8();
-        std::vector<uint8_t> vec (numBytes + 1, 0);
-        std::copy (data, data + numBytes, vec.begin());
-        return serd_uri_string_has_scheme (vec.data()) || file.endsWith (".lv2");
+        return hasUriScheme (file) || file.endsWith (".lv2");
     }
 
     String getNameOfPluginFromIdentifier (const String& identifier)
@@ -4275,9 +4274,15 @@ public:
         return findPluginByUri (description.fileOrIdentifier) != nullptr;
     }
 
-    StringArray searchPathsForPlugins (const FileSearchPath& paths, bool, bool)
+    enum class Recursive
     {
-        loadAllPluginsFromPaths (paths);
+        no,
+        yes,
+    };
+
+    StringArray searchPathsForPlugins (const FileSearchPath& paths, Recursive recursive)
+    {
+        loadAllPluginsFromPaths (paths, recursive);
 
         StringArray result;
 
@@ -4298,8 +4303,9 @@ public:
                      "/usr/local/lib/lv2;"
                      "/usr/lib/lv2;" };
           #elif JUCE_WINDOWS
-            return { "%APPDATA%\\LV2;"
-                     "%COMMONPROGRAMFILES%\\LV2" };
+            const auto localAppData = File::getSpecialLocation (File::userApplicationDataDirectory).getFullPathName();
+            const auto programFiles = File::getSpecialLocation (File::windowsProgramFilesCommon).getFullPathName();
+            return { localAppData + "\\LV2;" + programFiles + "\\LV2" };
           #else
            #if JUCE_64BIT
             if (File ("/usr/lib64/lv2").exists() || File ("/usr/local/lib64/lv2").exists())
@@ -4515,17 +4521,63 @@ public:
     }
 
 private:
-    void loadAllPluginsFromPaths (const FileSearchPath& path)
+    void recursiveFileSearch (std::set<String>& results, const File& dir)
     {
-        const auto joined = path.toStringWithSeparator (LILV_PATH_SEP);
+        for (const auto& iter : RangedDirectoryIterator (dir, false, "*", File::findFilesAndDirectories))
+        {
+            auto f = iter.getFile();
+
+            if (fileMightContainThisPluginType (f.getFullPathName()))
+                results.insert (f.getParentDirectory().getFullPathName());
+            else if (f.isDirectory())
+                recursiveFileSearch (results, f);
+        }
+    }
+
+    void loadAllPluginsFromPaths (const FileSearchPath& path, Recursive recursive)
+    {
+        const auto joined = std::invoke ([&]
+        {
+            if (recursive == Recursive::no)
+                return path.toStringWithSeparator (LILV_PATH_SEP);
+
+            std::set<String> searchResults;
+
+            for (int j = 0; j < path.getNumPaths(); ++j)
+                recursiveFileSearch (searchResults, path[j]);
+
+            String result;
+
+            for (auto it = searchResults.begin(); it != searchResults.end(); ++it)
+            {
+                if (it != searchResults.begin())
+                    result << LILV_PATH_SEP;
+
+                result << *it;
+            }
+
+            return result;
+        });
+
         world->loadAllFromPaths (world->newString (joined.toRawUTF8()));
     }
 
     struct Free { void operator() (char* ptr) const noexcept { free (ptr); } };
     using StringPtr = std::unique_ptr<char, Free>;
 
+    static bool hasUriScheme (const String& s)
+    {
+        // A Windows drive letter followed by a colon also satisfies serd's definition of a scheme
+        return ! File::isAbsolutePath (s)
+            && serd_uri_string_has_scheme (reinterpret_cast<const uint8_t*> (s.toRawUTF8()));
+    }
+
     const LilvPlugin* findPluginByUri (const String& s)
     {
+        // Passing a bundle path to lilv_new_uri makes sord print "attempt to map invalid URI" on stderr.
+        if (! hasUriScheme (s))
+            return nullptr;
+
         return world->getAllPlugins().getByUri (world->newUri (s.toRawUTF8()));
     }
 
@@ -4582,6 +4634,24 @@ private:
         result.pluginFormatName     = LV2PluginFormatHeadless::getFormatName();
         result.numInputChannels     = static_cast<int> (numInputs);
         result.numOutputChannels    = static_cast<int> (numOutputs);
+
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
+        const auto getValue = [&] (const char* propertyName)
+        {
+            for (const auto* item : wrapped.getValue (world->newUri (propertyName).get()))
+                return lv2_host::lilvNodeToString (item);
+
+            return String{};
+        };
+        JUCE_END_IGNORE_WARNINGS_MSVC
+
+        result.version = std::invoke ([&]
+        {
+            StringArray versionComponents { getValue (LV2_CORE__minorVersion),
+                                            getValue (LV2_CORE__microVersion) };
+            versionComponents.removeEmptyStrings();
+            return versionComponents.joinIntoString (".");
+        });
 
         const auto classPtr     = wrapped.getClass();
         const auto classes      = collectPluginClassUris (classPtr);

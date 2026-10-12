@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_formats
   vendor:             juce
-  version:            8.0.13
+  version:            9.0.4
   name:               JUCE audio file format codecs
   description:        Classes for reading and writing various audio file formats.
   website:            http://www.juce.com/juce
@@ -75,6 +75,24 @@
  #define JUCE_USE_FLAC 1
 #endif
 
+/** Config: JUCE_INCLUDE_FLAC_CODE
+    This can be used to disable Juce's embedded 3rd-party flaclib code.
+    You might need to tweak this if you're linking to an external flaclib library in your app,
+    but for normal apps, this option should be left alone.
+
+    If you disable this, you might also want to set a value for JUCE_FLAC_INCLUDE_PATH, to
+    specify the path where your flaclib headers live.
+
+    This config option only has an effect when JUCE_USE_FLAC is enabled.
+*/
+#ifndef JUCE_INCLUDE_FLAC_CODE
+ #define JUCE_INCLUDE_FLAC_CODE 1
+#endif
+
+#ifndef JUCE_FLAC_INCLUDE_PATH
+ #define JUCE_FLAC_INCLUDE_PATH <FLAC/all.h>
+#endif
+
 /** Config: JUCE_USE_OGGVORBIS
     Enables the Ogg-Vorbis audio codec classes (available on all platforms).
     If your app doesn't need to read Ogg-Vorbis files, you might want to disable this to
@@ -84,20 +102,37 @@
  #define JUCE_USE_OGGVORBIS 1
 #endif
 
+/** Config: JUCE_USE_OPUS
+    Enables the Opus audio codec classes (available on all platforms).
+    If your app doesn't need to read or write Opus files, you might want to disable this to
+    reduce the size of your codebase and build time.
+*/
+#ifndef JUCE_USE_OPUS
+ #define JUCE_USE_OPUS 1
+#endif
+
+/** Config: JUCE_INCLUDE_OPUS_CODE
+    This can be used to disable Juce's embedded 3rd-party opus, opusfile and libopusenc code.
+    You might need to tweak this if you're linking to external copies of these libraries in
+    your app, but for normal apps, this option should be left alone.
+
+    The embedded libogg is compiled when this option or JUCE_INCLUDE_OGGVORBIS_CODE is
+    enabled. If only one of them is, it may collide with the libogg that the external
+    library depends on.
+
+    This config option only has an effect with JUCE_USE_OPUS is enabled.
+*/
+#ifndef JUCE_INCLUDE_OPUS_CODE
+ #define JUCE_INCLUDE_OPUS_CODE 1
+#endif
+
 /** Config: JUCE_USE_MP3AUDIOFORMAT
     Enables the software-based MP3AudioFormat class.
-    IMPORTANT DISCLAIMER: By choosing to enable the JUCE_USE_MP3AUDIOFORMAT flag and to compile
-    this MP3 code into your software, you do so AT YOUR OWN RISK! By doing so, you are agreeing
-    that Raw Material Software Limited is in no way responsible for any patent, copyright, or other
-    legal issues that you may suffer as a result.
-
-    The code in juce_MP3AudioFormat.cpp is NOT guaranteed to be free from infringements of 3rd-party
-    intellectual property. If you wish to use it, please seek your own independent advice about the
-    legality of doing so. If you are not willing to accept full responsibility for the consequences
-    of using this code, then do not enable this setting.
+    If your app doesn't need to read MP3 files, you might want to disable this to
+    reduce the size of your codebase and build time.
 */
 #ifndef JUCE_USE_MP3AUDIOFORMAT
- #define JUCE_USE_MP3AUDIOFORMAT 0
+ #define JUCE_USE_MP3AUDIOFORMAT 1
 #endif
 
 /** Config: JUCE_USE_LAME_AUDIO_FORMAT
@@ -135,6 +170,7 @@
 #include "codecs/juce_LAMEEncoderAudioFormat.h"
 #include "codecs/juce_MP3AudioFormat.h"
 #include "codecs/juce_OggVorbisAudioFormat.h"
+#include "codecs/juce_OpusAudioFormat.h"
 #include "codecs/juce_WavAudioFormat.h"
 #include "codecs/juce_WindowsMediaAudioFormat.h"
 #include "sampler/juce_Sampler.h"

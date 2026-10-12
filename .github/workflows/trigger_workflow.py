@@ -14,6 +14,11 @@ input_json = loads(input_string)
 for key, value in input_json.items():
     if not isinstance(value, str):
         input_json[key] = dumps(value)
+
+commit_message = getenv('TRIGGER_COMMIT_MESSAGE', '').strip()
+if commit_message:
+    subject = commit_message.splitlines()[0]
+    input_json['commit-message'] = subject[:69] + '...' if len(subject) > 72 else subject
 logger.debug(f'Stringified input: {input_json}')
 
 api_path_prefix = 'actions/workflows'

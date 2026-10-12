@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -63,6 +63,12 @@
 
 #elif JUCE_LINUX || JUCE_BSD
  #include <unistd.h>
+#elif JUCE_WINDOWS
+ #include <shellscalingapi.h>
+
+ #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+  #pragma comment(lib, "shcore.lib")
+ #endif
 #endif
 
 //==============================================================================
@@ -97,6 +103,7 @@
 #elif JUCE_WINDOWS
  #include "native/juce_RunningInUnity.h"
  #include "native/juce_Messaging_windows.cpp"
+ #include "native/juce_HiddenMessageWindow_windows.cpp"
  #if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER
   #include "native/juce_WinRTWrapper_windows.cpp"
  #endif

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -412,6 +412,20 @@ public:
     ComSmartPtr<ID2D1Image> getDeviceContextTarget() const override
     {
         return swap.getBuffer();
+    }
+
+    ComSmartPtr<IDWriteRenderingParams> getDefaultTextRenderingParams() const override
+    {
+        if (auto monitor = MonitorFromWindow (hwnd, MONITOR_DEFAULTTONULL))
+        {
+            ComSmartPtr<IDWriteRenderingParams> result;
+            getDirectWriteFactory()->CreateMonitorRenderingParams (monitor, result.resetAndGetPointerAddress());
+
+            if (result != nullptr)
+                return result;
+        }
+
+        return Pimpl::getDefaultTextRenderingParams();
     }
 
     void setSize (Rectangle<int> size)

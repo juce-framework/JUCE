@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -111,6 +111,12 @@ struct TypefaceMetrics
         May be inf if the font ascent and descent overrides have both been set to 0!
     */
     float heightToPoints{};
+
+    /** This value reflects the font designer's intent when laying out multiple lines of text. It is
+        a proportion of the typeface's height that should be used in addition to the ascent and
+        descent between successive lines.
+    */
+    float lineGap{};
 };
 
 //==============================================================================
@@ -273,6 +279,25 @@ public:
     */
     virtual Typeface::Ptr createSystemFallback (const String& text, const String& language) const = 0;
 
+    //==============================================================================
+    /** Creates and returns a copy of this typeface configured with the specified variable font settings.
+
+        Variable fonts (also known as OpenType Font Variations) allow a single font file to contain
+        multiple design variations along one or more axes, such as weight, width, slant, optical size,
+        and custom axes defined by the font designer. This method creates a new typeface instance with
+        the specified axis values applied. Any variable settings applied to the original typeface will
+        be replaced in the returned instance.
+
+        This method does not check or cache typefaces, calling this twice with the same settings will
+        return a unique pointer.
+
+        @param settings     the variable settings to apply to configure the new typeface instance.
+        @returns            A unique Typeface::Ptr or nullptr if this typeface is not a variable typeface.
+
+        @see getSupportedVariables, getRangeForVariable, getDefaultValueForVariable
+    */
+    [[nodiscard]] virtual Typeface::Ptr cloneWithVariableSettings (Span<const FontVariableSetting> settings) const = 0;
+
     /** Returns the system's default UI font.
 
         This will differ depending on the platform.
@@ -309,9 +334,69 @@ public:
         small caps, stylistic alternates, etc.) that are available in the current
         typeface.
 
-        @see FontFeatureTag, FontFeatureSetting, FontOptions, Font
-     */
+        @see FontFeatureTag, FontFeatureSetting
+    */
     std::vector<FontFeatureTag> getSupportedFeatures() const;
+
+    //==============================================================================
+    /** Returns the OpenType variable settings supported by this typeface.
+
+        The returned tags are in sorted order.
+
+        @see FontFeatureTag, FontFeatureSetting, cloneWithVariableSettings
+    */
+    [[nodiscard]] Span<const FontFeatureTag> getSupportedVariables() const&;
+    [[nodiscard]] Span<const FontFeatureTag> getSupportedVariables() const&& = delete;
+
+    /** Returns the default value for a specific variable font axis, or std::nullopt if the variable
+        is not supported by this font.
+
+        Variable fonts define a default value for each axis, which represents the normal or
+        regular style of the typeface. For example, a variable font's 'wght' (weight) axis
+        might have a default value of 400 (Regular weight).
+
+        @see getSupportedVariables, getRangeForVariable, cloneWithVariableSettings
+    */
+    [[nodiscard]] std::optional<float> getDefaultValueForVariable (FontFeatureTag variableTag) const;
+
+    /** Returns the valid range for a specific variable font axis, or std::nullopt if the variable
+        is not supported by this font.
+
+        @see getSupportedVariables, getDefaultValueForVariable, cloneWithVariableSettings
+    */
+    [[nodiscard]] std::optional<Range<float>> getRangeForVariable (FontFeatureTag variableTag) const;
+
+    /** Returns the predefined named instances supported by this variable typeface. */
+    [[nodiscard]] Span<const String> getInstanceNames() const&;
+    [[nodiscard]] Span<const String> getInstanceNames() const&& = delete;
+
+    /** Returns the variable font axis settings for a specific named instance.
+
+        Many variable fonts include predefined named instances that represent common design
+        variations, such as "Bold", "Light", "Condensed", etc. Each named instance is a
+        collection of axis values that together define a specific style.
+
+        Named instances provide a convenient way to access commonly-used variations without
+        needing to know the specific axis values.
+
+        @param instanceName  The name of the instance to query. Use getInstanceNames() to get
+                             the available instance names for this typeface.
+
+        @returns A span of FontVariableSetting objects that define the axis values for this
+                 named instance. The settings will be sorted by tag. Returns an empty span
+                 if the instance name is not found or if this is not a variable font.
+
+        @see getInstanceNames, getSupportedVariables, cloneWithVariableSettings
+    */
+    [[nodiscard]] Span<const FontVariableSetting> getNamedInstanceConfiguration (StringRef instanceName) const&;
+    [[nodiscard]] Span<const FontVariableSetting> getNamedInstanceConfiguration (StringRef instanceName) const&& = delete;
+
+    /** Returns the OpenType variable settings this typeface was configured with.
+
+        The returned variables will be sorted by tag.
+    */
+    [[nodiscard]] Span<const FontVariableSetting> getConfiguredVariables() const&;
+    [[nodiscard]] Span<const FontVariableSetting> getConfiguredVariables() const&& = delete;
 
     /** @internal */
     class Native;
@@ -324,6 +409,9 @@ protected:
     Typeface (const String&, const String&);
 
 private:
+    static Ptr createFromDataImpl (Span<const std::byte>);
+    static Ptr createFromFontImpl (const Font&);
+
     //==============================================================================
     String name;
     String style;

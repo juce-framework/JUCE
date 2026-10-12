@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -43,7 +43,7 @@ public:
     static Typeface::Ptr getDefaultPlatformTypefaceForFont (const Font&);
 };
 
-using GetTypefaceForFont = Typeface::Ptr (*)(const Font&);
+using GetTypefaceForFont = Typeface::Ptr (*) (const Font&);
 GetTypefaceForFont juce_getTypefaceForFont = nullptr;
 
 float Font::getDefaultMinimumHorizontalScaleFactor() noexcept                { return FontValues::minimumHorizontalScale; }
@@ -82,7 +82,8 @@ public:
 
     Typeface::Ptr findTypefaceFor (const Font& font)
     {
-        const Key key { font.getTypefaceName(), font.getTypefaceStyle() };
+        const Key key { font.getTypefaceName(),
+                        font.getTypefaceStyle() };
 
         jassert (key.name.isNotEmpty());
 
@@ -200,7 +201,31 @@ public:
         const ScopedLock lock (mutex);
 
         if (typeface == nullptr)
-            typeface = options.getTypeface() != nullptr ? options.getTypeface() : TypefaceCache::getInstance()->findTypefaceFor (f);
+        {
+            if (! f.getVariableSettings().empty())
+            {
+                jassert (options.getTypeface() == nullptr);
+
+                if (auto masterTypeface = TypefaceCache::getInstance()->findTypefaceFor (FontOptions{}.withName (f.getTypefaceName()));
+                    masterTypeface != nullptr)
+                {
+                    typeface = masterTypeface->cloneWithVariableSettings (f.getVariableSettings());
+
+                    if (typeface != nullptr)
+                        options = options.withVariableSettings (typeface->getConfiguredVariables());
+                }
+            }
+            else if (auto userTypeface = options.getTypeface(); userTypeface != nullptr)
+            {
+                typeface = userTypeface;
+            }
+
+            if (typeface == nullptr)
+                typeface = TypefaceUtils::StoredMemoryFonts::get().find (f.getTypefaceName(), f.getTypefaceStyle());
+
+            if (typeface == nullptr)
+                typeface = TypefaceCache::getInstance()->findTypefaceFor (f);
+        }
 
         return typeface;
     }
@@ -215,7 +240,7 @@ public:
         return {};
     }
 
-    TypefaceAscentDescent getAscentDescent (const Font& f)
+    TypefaceVerticalMetrics getAscentDescent (const Font& f)
     {
         const ScopedLock lock (mutex);
 
@@ -259,21 +284,42 @@ public:
     bool getFallbackEnabled() const              { return options.getFallbackEnabled(); }
     TypefaceMetricsKind getMetricsKind() const   { return options.getMetricsKind(); }
     auto getFeatureSettings() const              { return options.getFeatureSettings(); }
+    auto getVariableSettings() const             { return options.getVariableSettings(); }
 
     void setFeatureSetting (const FontFeatureSetting& feature)
     {
         jassert (getReferenceCount() == 1);
         options = options.withFeatureSetting (feature);
+        resetTypeface();
     }
 
     void removeFeatureSetting (FontFeatureTag feature)
     {
         jassert (getReferenceCount() == 1);
         options = options.withFeatureRemoved (feature);
+        resetTypeface();
+    }
+
+    void setVariableSettings (Span<const FontVariableSetting> variables)
+    {
+        jassert (getReferenceCount() == 1);
+        options = options.withVariableSettings (variables);
+        resetTypeface();
+    }
+
+    void removeVariableSetting (FontFeatureTag tag)
+    {
+        jassert (getReferenceCount() == 1);
+        options = options.withVariableRemoved (tag);
+        resetTypeface();
     }
 
     std::optional<float> getAscentOverride() const  { return options.getAscentOverride(); }
     std::optional<float> getDescentOverride() const { return options.getDescentOverride(); }
+
+    bool getDirect2DHinting() const { return options.getDirect2DHinting(); }
+
+    bool hasPinnedTypeface() const { return options.getTypeface() != nullptr; }
 
     /*  This shared state may be shared between two or more Font instances that are being
         read/modified from multiple threads.
@@ -288,7 +334,10 @@ public:
         typeface = newTypeface;
 
         if (typeface != nullptr)
-            options = options.withTypeface (nullptr).withName ("").withStyle ("");
+            options = options.withTypeface (nullptr)
+                             .withName ("")
+                             .withStyle ("")
+                             .withVariableSettings ({});
 
         options = options.withTypeface (typeface);
     }
@@ -339,6 +388,12 @@ public:
     {
         jassert (getReferenceCount() == 1);
         options = options.withDescentOverride (x);
+    }
+
+    void setDirect2DHinting (bool x)
+    {
+        jassert (getReferenceCount() == 1);
+        options = options.withDirect2DHinting (x);
     }
 
     void setUnderline (bool x)
@@ -453,6 +508,20 @@ bool Font::compare (const Font& a, const Font& b) noexcept
     return *a.font < *b.font;
 }
 
+Font Font::withPinnedTypeface (Font f)
+{
+    if (f.font->hasPinnedTypeface())
+        return f;
+
+    if (auto typeface = f.getTypefacePtr())
+    {
+        f.dupeInternalIfShared();
+        f.font->setTypeface (typeface);
+    }
+
+    return f;
+}
+
 void Font::dupeInternalIfShared()
 {
     if (font->getReferenceCount() > 1)
@@ -523,7 +592,10 @@ Font Font::withTypefaceStyle (const String& newStyle) const
 
 StringArray Font::getAvailableStyles() const
 {
-    return findAllTypefaceStyles (getTypefacePtr()->getName());
+    if (auto ptr = getTypefacePtr())
+        return findAllTypefaceStyles (ptr->getName());
+
+    return {};
 }
 
 void Font::setPreferredFallbackFamilies (const StringArray& fallbacks)
@@ -746,6 +818,17 @@ void Font::setDescentOverride (std::optional<float> x)
     font->setDescentOverride (x);
 }
 
+void Font::setDirect2DHinting (bool x)
+{
+    dupeInternalIfShared();
+    font->setDirect2DHinting (x);
+}
+
+bool Font::getDirect2DHinting() const noexcept
+{
+    return font->getDirect2DHinting();
+}
+
 Font Font::boldened() const                 { return withStyle (getStyleFlags() | bold); }
 Font Font::italicised() const               { return withStyle (getStyleFlags() | italic); }
 
@@ -770,6 +853,30 @@ void Font::removeFeatureSetting (FontFeatureTag featureToRemove)
 {
     dupeInternalIfShared();
     font->removeFeatureSetting (featureToRemove);
+}
+
+void Font::setVariableSettings (Span<const FontVariableSetting> variables)
+{
+    dupeInternalIfShared();
+    font->setVariableSettings (variables);
+}
+
+void Font::removeVariableSetting (FontFeatureTag variableToRemove)
+{
+    dupeInternalIfShared();
+    font->removeVariableSetting (variableToRemove);
+}
+
+Font Font::withVariableSettings (Span<const FontVariableSetting> variables) const
+{
+    Font f { *this };
+    f.setVariableSettings (variables);
+    return f;
+}
+
+Span<const FontVariableSetting> Font::getVariableSettings() const&
+{
+    return font->getVariableSettings();
 }
 
 void Font::setBold (const bool shouldBeBold)
@@ -826,6 +933,7 @@ float Font::getHeightInPoints() const
 
 float Font::getAscentInPoints() const       { return font->getAscentDescent (*this).ascent  * getHeightInPoints(); }
 float Font::getDescentInPoints() const      { return font->getAscentDescent (*this).descent * getHeightInPoints(); }
+float Font::getLineGapInPoints() const      { return font->getAscentDescent (*this).lineGap * getHeightInPoints(); }
 
 void Font::findFonts (Array<Font>& destArray)
 {
@@ -997,7 +1105,7 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 class FontTests : public UnitTest
 {
 public:
-    FontTests() : UnitTest ("Font", UnitTestCategories::graphics) {}
+    FontTests() : UnitTest ("Font", UnitTestCategories::fonts) {}
 
     void runTest() override
     {
@@ -1085,6 +1193,367 @@ public:
 };
 
 static FontTests fontTests;
+
+
+class VariableFontTests : public UnitTest
+{
+    struct CompareWrapper
+    {
+        bool operator== (const CompareWrapper& other) const
+        {
+            return std::equal (value.begin(),
+                               value.end(),
+                               other.value.begin(),
+                               other.value.end(),
+                               [] (auto a, auto b)
+            {
+                return a.tag == b.tag && approximatelyEqual (a.value, b.value);
+            });
+        }
+
+        operator String() const
+        {
+            StringArray strings;
+
+            for (auto setting : value)
+            {
+                String string;
+                string << setting.tag.toString().quoted()
+                       << " - "
+                       << setting.value;
+
+                strings.add (string);
+            }
+
+            return "{ " + strings.joinIntoString (", ") + " }";
+        }
+
+        Span<const FontVariableSetting> value;
+    };
+
+public:
+    VariableFontTests() : UnitTest ("Variable Fonts", UnitTestCategories::fonts) {}
+
+    void runTest() override
+    {
+        auto variableFonts = std::invoke ([]
+        {
+            Array<Font> fonts;
+            Font::findFonts (fonts);
+
+            fonts.removeIf ([] (Font font)
+            {
+                return font.getTypefacePtr()->getSupportedVariables().empty();
+            });
+
+            return fonts;
+        });
+
+        if (variableFonts.isEmpty())
+        {
+            logMessage ("No variable font exists on this system, we can't run these tests");
+            return;
+        }
+
+        const auto baseFont = variableFonts.getReference (0);
+
+        logMessage ("Using font: " + baseFont.getTypefaceName());
+
+        beginTest ("Cloning typeface with variable settings creates new instance with same name");
+        {
+            auto baseTypeface = baseFont.getTypefacePtr();
+
+            auto settings = generateVariableSettings (baseTypeface, GenerationMode::sanitised);
+            auto varTypeface = baseTypeface->cloneWithVariableSettings (settings);
+
+            expectEquals (baseTypeface->getName(), varTypeface->getName());
+            expect (baseTypeface != varTypeface);
+        }
+
+        beginTest ("Creating variable font through FontOptions API produces distinct typeface instance");
+        {
+            auto settings = generateVariableSettings (baseFont.getTypefacePtr(),
+                                                      GenerationMode::sanitised);
+
+            auto options = FontOptions{}.withName (baseFont.getTypefaceName())
+                                        .withStyle ("")
+                                        .withVariableSettings (settings);
+
+            Font varFont { options };
+            expectEquals (baseFont.getTypefacePtr()->getName(), varFont.getTypefacePtr()->getName());
+            expect (baseFont.getTypefacePtr() != varFont.getTypefacePtr());
+        }
+
+        beginTest ("Configured variables are accurately preserved after typeface cloning");
+        {
+            auto settings = generateVariableSettings (baseFont.getTypefacePtr(),
+                                                      GenerationMode::sanitised);
+
+            auto clonedTypeface = baseFont.getTypefacePtr()->cloneWithVariableSettings (settings);
+            const auto result = clonedTypeface->getConfiguredVariables();
+
+            expectEquals (CompareWrapper { settings }, CompareWrapper { result });
+        }
+
+        beginTest ("Variable values exceeding valid range are clamped to bounds");
+        {
+            auto settings = generateVariableSettings (baseFont.getTypefacePtr(),
+                                                      GenerationMode::outOfBoundsValues);
+
+            auto typeface = baseFont.getTypefacePtr()->cloneWithVariableSettings (settings);
+
+            for (auto setting : typeface->getConfiguredVariables())
+            {
+                auto range = typeface->getRangeForVariable (setting.tag);
+                jassert (range.has_value());
+
+                expectGreaterOrEqual (setting.value, range->getStart());
+                expectLessOrEqual (setting.value, range->getEnd());
+            }
+        }
+
+        beginTest ("Unsupported tags are ignored during configuration");
+        {
+            auto settings = generateVariableSettings (baseFont.getTypefacePtr(),
+                                                      GenerationMode::unsupportedTags);
+
+            auto typeface = baseFont.getTypefacePtr()->cloneWithVariableSettings (settings);
+            expect (typeface->getConfiguredVariables().empty());
+        }
+
+        beginTest ("Typeface::getRangeForVariable and Typeface::getDefaultValueForVariable return "
+                   "valid ranges and defaults for supported tags");
+        {
+            auto typeface = baseFont.getTypefacePtr();
+            auto supportedVars = typeface->getSupportedVariables();
+
+            for (auto varTag : supportedVars)
+            {
+                auto range = typeface->getRangeForVariable (varTag);
+                auto defaultValue = typeface->getDefaultValueForVariable (varTag);
+
+                expect (range.has_value());
+                expect (defaultValue.has_value());
+            }
+        }
+
+        beginTest ("Below-minimum variable values are clamped to lower bound");
+        {
+            auto typeface = baseFont.getTypefacePtr();
+            auto settings = generateVariableSettings (typeface,
+                                                      GenerationMode::minValues);
+
+            typeface = typeface->cloneWithVariableSettings (settings);
+            jassert (typeface);
+
+            auto configuredVariables = typeface->getConfiguredVariables();
+            expect (! configuredVariables.empty());
+
+            for (auto var : configuredVariables)
+            {
+                expectWithinAbsoluteError (var.value,
+                                           typeface->getRangeForVariable (var.tag)->getStart(),
+                                           1.0f);
+            }
+        }
+
+        beginTest ("Above-maximum variable values are clamped to upper bound");
+        {
+            auto typeface = baseFont.getTypefacePtr();
+            auto settings = generateVariableSettings (typeface,
+                                                      GenerationMode::maxValues);
+
+            typeface = typeface->cloneWithVariableSettings (settings);
+            jassert (typeface);
+
+            auto configuredVariables = typeface->getConfiguredVariables();
+            expect (! configuredVariables.empty());
+
+            for (auto var : configuredVariables)
+            {
+                expectWithinAbsoluteError (var.value,
+                                           typeface->getRangeForVariable (var.tag)->getEnd(),
+                                           1.0f);
+            }
+        }
+
+        beginTest ("Variable font settings modify glyph shapes and text layout");
+        {
+            bool anyLayoutEffected = false;
+            bool anyGlyphEffected = false;
+
+            for (auto font : variableFonts)
+            {
+                auto typeface = font.getTypefacePtr();
+
+                static constexpr auto text = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
+                const auto settings = generateVariableSettings (typeface, GenerationMode::sanitised);
+                auto cloned = typeface->cloneWithVariableSettings (settings);
+                auto baseGa = makeGlyphArrangement (text, font);
+                auto testGa = makeGlyphArrangement (text, FontOptions {}.withName ("")
+                                                                        .withStyle ("")
+                                                                        .withTypeface (cloned));
+
+                const auto layoutIsDifferent = ! compareLayout (baseGa, testGa);
+                const auto glyphIsDifferent = ! compareGlyphs (baseGa, testGa);
+
+                String message = "Variable font ";
+                message << cloned->getName() << "...\n";
+                message << "\tEffects layout: " << (layoutIsDifferent ? "true" : "false");
+                message << "\n";
+                message << "\tEffects glyphs: " << (glyphIsDifferent ? "true" : "false");
+
+                logMessage (message);
+
+                anyLayoutEffected |= layoutIsDifferent;
+                anyGlyphEffected |= glyphIsDifferent;
+
+                if (anyLayoutEffected && anyGlyphEffected)
+                    break;
+            }
+
+            expect (anyLayoutEffected && anyGlyphEffected,
+                    "Expected the layout and glyphs to have been modified by at least one of the variables");
+        }
+
+        beginTest ("Invalid named instance returns empty configuration");
+        {
+            auto typeface = baseFont.getTypefacePtr();
+            auto config = typeface->getNamedInstanceConfiguration ("ReallyHopeThisDoesntExist_JUCE");
+            expect (config.empty());
+        }
+
+        beginTest ("Empty variable settings on Font clears existing variables");
+        {
+            auto typeface = baseFont.getTypefacePtr();
+            auto settings = generateVariableSettings (typeface, GenerationMode::sanitised);
+
+            Font font { FontOptions{}.withName (baseFont.getTypefaceName())
+                                     .withStyle ("")
+                                     .withVariableSettings (settings) };
+
+            expect (! font.getVariableSettings().empty());
+
+            font.setVariableSettings ({});
+            expect (font.getVariableSettings().empty());
+        }
+    }
+
+private:
+    [[nodiscard]] static GlyphArrangement makeGlyphArrangement (const String& text, const Font& font)
+    {
+        GlyphArrangement ga;
+        ga.addLineOfText (font, text, 0, 0);
+        return ga;
+    }
+
+    static bool compareLayout (const GlyphArrangement& a, const GlyphArrangement& b)
+    {
+        jassert (a.getNumGlyphs() == b.getNumGlyphs());
+
+        for (int i = 0; i < a.getNumGlyphs(); i++)
+            if (a.getGlyph (i).getBounds().getPosition() != b.getGlyph (i).getBounds().getPosition())
+                return false;
+
+        return true;
+    }
+
+    static bool compareGlyphs (const GlyphArrangement& a, const GlyphArrangement& b)
+    {
+        jassert (a.getNumGlyphs() == b.getNumGlyphs());
+
+        for (int i = 0; i < a.getNumGlyphs(); i++)
+        {
+            Path pa, pb;
+
+            a.getGlyph (i).createPath (pa);
+            b.getGlyph (i).createPath (pb);
+
+            if (pa != pb)
+                return false;
+        }
+
+        return true;
+    }
+
+    enum class GenerationMode
+    {
+        sanitised,          // Generates a random but within range set of variables
+        minValues,          // Generates a set of variables with values set to their min
+        maxValues,          // Generates a set of variables with values set to their max
+        outOfBoundsValues,  // Purposefully generates out of range variables
+        unsupportedTags     // Generates tags that the typeface doesn't support
+    };
+
+    [[nodiscard]] static std::vector<FontVariableSetting> generateVariableSettings (Typeface::Ptr tf,
+                                                                                    GenerationMode mode)
+    {
+        std::vector<FontVariableSetting> settings;
+
+        if (mode != GenerationMode::unsupportedTags)
+        {
+            for (auto variableTag : tf->getSupportedVariables())
+            {
+                const auto randVal = Random::getSystemRandom().nextFloat();
+                const auto range = tf->getRangeForVariable (variableTag);
+
+                const auto value = std::invoke ([=]
+                {
+                    switch (mode)
+                    {
+                        case GenerationMode::sanitised:
+                            return jmap (randVal, range->getStart(), range->getEnd());
+
+                        case GenerationMode::minValues:
+                            return range->getStart();
+
+                        case GenerationMode::maxValues:
+                            return range->getEnd();
+
+                        case GenerationMode::outOfBoundsValues:
+                            return range->getEnd() + 10;
+
+                        case GenerationMode::unsupportedTags:
+                        default: break;
+                    }
+
+                    jassertfalse;
+                    return 0.0f;
+                });
+
+                settings.push_back (FontVariableSetting { variableTag, value });
+            }
+        }
+        else
+        {
+            const auto supported = tf->getSupportedVariables();
+
+            auto nextChar = []
+            {
+                return (char) Random::getSystemRandom().nextInt ({ (int) 'a', (int) 'z' });
+            };
+
+            for (int i = 0; i < 1000; ++i)
+            {
+                const char tag[] = { nextChar(), nextChar(), nextChar(), nextChar(), '\0' };
+
+                auto isFound = OrderedContainerHelpers::contains (supported, FontFeatureTag { tag });
+
+                if (! isFound)
+                {
+                    settings.push_back (FontVariableSetting { tag, 0 });
+
+                    if (settings.size() >= 4)
+                        break;
+                }
+            }
+        }
+
+        return settings;
+    }
+};
+
+static VariableFontTests variableFontTests;
 
 #endif
 

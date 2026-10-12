@@ -1,0 +1,8 @@
+Upstream: https://github.com/Tracktion/choc
+Commit: 123d322c7ed4de8f0db2c30edea07b248dfe14c4
+
+The exceptions are javascript/choc_javascript_QuickJS.h, which was later
+updated to match upstream commit 3638a6023e434fd2044af7d0b84115c0a96c2a6a,
+and JUCE modifications to choc_Value.h, choc_MathHelpers.h, and
+choc_DisableAllWarnings.h (portable alloca handling and additional warning
+suppressions).

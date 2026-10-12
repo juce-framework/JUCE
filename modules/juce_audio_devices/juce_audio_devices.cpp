@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -69,6 +69,8 @@
 #include "midi_io/ump/juce_UMPLegacyVirtualOutput.cpp"
 #include "midi_io/ump/juce_UMPVirtualEndpoint.cpp"
 #include "midi_io/ump/juce_UMPSession.cpp"
+#include "midi_io/ump/juce_UMPEndpoint.cpp"
+#include "midi_io/ump/juce_UMPStaticDeviceInfo.cpp"
 #include "midi_io/ump/juce_UMPEndpoints.cpp"
 #include "midi_io/ump/juce_UMPEndpointId.cpp"
 
@@ -105,6 +107,12 @@
 
 //==============================================================================
 #elif JUCE_WINDOWS
+ #include <cfgmgr32.h>
+
+ #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+  #pragma comment (lib, "cfgmgr32.lib")
+ #endif
+
  #if JUCE_WASAPI
   #include <mmreg.h>
   #include "native/juce_WASAPI_windows.cpp"
@@ -200,7 +208,8 @@ namespace juce
                                         "-Wshadow-field-in-constructor",
                                         "-Wshadow-field",
                                         "-Wsign-conversion",
-                                        "-Wswitch-enum")
+                                        "-Wswitch-enum",
+                                        "-Wshorten-64-to-32")
    #include <oboe/Oboe.h>
    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
@@ -261,16 +270,23 @@ namespace juce
  #include "native/juce_CoreMidi_mac.mm"
 #elif JUCE_WINDOWS
  #if JUCE_USE_WINDOWS_MIDI_SERVICES
+  static_assert (JUCE_CXX20_IS_AVAILABLE, "Make sure C++20 is enabled to use Windows MIDI Services");
+
   JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4265)
   #include <winrt/Windows.Foundation.h>
   #include <winrt/Windows.Foundation.Collections.h>
   #include <winrt/Windows.Devices.Enumeration.h>
 
-  #include <winrt/Microsoft.Windows.Devices.Midi2.h>
-  #include <winrt/Microsoft.Windows.Devices.Midi2.Endpoints.Virtual.h>
-  #include <winmidi/init/Microsoft.Windows.Devices.Midi2.Initialization.hpp>
+  #include <WindowsMidiServicesAppSdkComExtensions.h>
+  #include <winrt/Windows.Devices.Midi2.h>
+  #include <winrt/Windows.Devices.Midi2.Enumeration.h>
+  #include <winrt/Windows.Devices.Midi2.Transports.Virtual.h>
   JUCE_END_IGNORE_WARNINGS_MSVC
  #endif
 
  #include "native/juce_Midi_windows.cpp"
+#endif
+
+#if JUCE_UNIT_TESTS
+ #include "midi_io/juce_ScheduledEventThread_test.cpp"
 #endif

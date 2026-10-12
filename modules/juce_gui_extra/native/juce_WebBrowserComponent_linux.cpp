@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -223,6 +223,12 @@ public:
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (g_object_unref, juce_g_object_unref,
                                          (gpointer), void)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (g_object_get_data, juce_g_object_get_data,
+                                         (GObject*, const gchar*), gpointer)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (gtk_widget_add_events, juce_gtk_widget_add_events,
+                                         (GtkWidget*, gint), void)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (g_memory_input_stream_new, juce_g_memory_input_stream_new,
                                          (), GInputStream*)
 
@@ -397,6 +403,8 @@ private:
                             makeSymbolBinding (juce_g_unix_fd_add,                        "g_unix_fd_add"),
                             makeSymbolBinding (juce_g_object_ref,                         "g_object_ref"),
                             makeSymbolBinding (juce_g_object_unref,                       "g_object_unref"),
+                            makeSymbolBinding (juce_g_object_get_data,                    "g_object_get_data"),
+                            makeSymbolBinding (juce_gtk_widget_add_events,                "gtk_widget_add_events"),
                             makeSymbolBinding (juce_g_bytes_new,                          "g_bytes_new"),
                             makeSymbolBinding (juce_g_bytes_unref,                        "g_bytes_unref"),
                             makeSymbolBinding (juce_g_signal_connect_data,                "g_signal_connect_data"),
@@ -449,15 +457,15 @@ private:
     //==============================================================================
     DylibHandle webkitLib, jsLib, soupLib;
 
-    DylibHandle gtkLib    { "libgtk-3.so" },
-                glib      { "libglib-2.0.so" };
+    DylibHandle gtkLib    { "libgtk-3.so.0" },
+                glib      { "libglib-2.0.so.0" };
 
-    const bool webKitIsAvailable =    (   openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.1.so",
-                                                                              "libjavascriptcoregtk-4.1.so",
-                                                                              "libsoup-3.0.so" })
-                                       || openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.0.so",
-                                                                              "libjavascriptcoregtk-4.0.so",
-                                                                              "libsoup-2.4.so" }))
+    const bool webKitIsAvailable =    (   openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.1.so.0",
+                                                                              "libjavascriptcoregtk-4.1.so.0",
+                                                                              "libsoup-3.0.so.0" })
+                                       || openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.0.so.37",
+                                                                              "libjavascriptcoregtk-4.0.so.18",
+                                                                              "libsoup-2.4.so.1" }))
                                    && loadWebkitSymbols()
                                    && loadGtkSymbols()
                                    && loadJsLibSymbols()
@@ -625,7 +633,8 @@ private:
         if (responder == nullptr)
             return;
 
-        const auto object = JSON::fromString (String (buffer.getData(), lengthsBuffer.getJsonLength()));
+        const auto object = JSON::fromString (String { CharPointer_UTF8 { buffer.getData() },
+                                                       lengthsBuffer.getJsonLength() });
 
         if (object.isVoid())
             return;
@@ -664,9 +673,11 @@ window.__JUCE__ = {
 struct InitialisationData
 {
     bool nativeIntegrationsEnabled;
+    bool nativeZoomGestureEnabled;
     String userAgent;
     String userScript;
     String allowedOrigin;
+    float pinchTranslationSensitivity;
 
     static constexpr std::optional<int> marshallingVersion = std::nullopt;
 
@@ -674,9 +685,11 @@ struct InitialisationData
     static void serialise (Archive& archive, Item& item)
     {
         archive (named ("nativeIntegrationsEnabled", item.nativeIntegrationsEnabled),
+                 named ("nativeZoomGestureEnabled", item.nativeZoomGestureEnabled),
                  named ("userAgent", item.userAgent),
                  named ("userScript", item.userScript),
-                 named ("allowedOrigin", item.allowedOrigin));
+                 named ("allowedOrigin", item.allowedOrigin),
+                 named ("pinchTranslationSensitivity", item.pinchTranslationSensitivity));
     }
 };
 
@@ -824,6 +837,21 @@ public:
         auto* webviewWidget = WebKitSymbols::getInstance()->juce_webkit_web_view_new_with_settings (settings);
         webview = (WebKitWebView*) webviewWidget;
 
+        if (! initialisationData->nativeZoomGestureEnabled)
+        {
+            // Enable touchpad gesture events on the webview widget
+            wk.juce_gtk_widget_add_events (webviewWidget, GDK_TOUCHPAD_GESTURE_MASK);
+
+            // Translate touchpad pinch gestures to JS wheel events
+            juce_g_signal_connect (webview,
+                                   "event",
+                                   G_CALLBACK (+[] (GtkWidget*, GdkEvent* event, gpointer arg)
+                                   {
+                                       return static_cast<GtkChildProcess*> (arg)->touchpadGestureHandler (event);
+                                   }),
+                                   this);
+        }
+
         if (initialisationData->nativeIntegrationsEnabled)
         {
             manager = wk.juce_webkit_web_view_get_user_content_manager (webview);
@@ -887,6 +915,52 @@ public:
 
         WebKitSymbols::getInstance()->deleteInstance();
         return 0;
+    }
+
+    gboolean touchpadGestureHandler (GdkEvent* event)
+    {
+        if (event->type == GDK_TOUCHPAD_PINCH)
+        {
+            GdkEventTouchpadPinch* pinch = reinterpret_cast<GdkEventTouchpadPinch*> (event);
+
+            const auto currentPinchDistance = -std::log (pinch->scale);
+            const auto deltaY = currentPinchDistance - std::exchange (lastPinchDistance, currentPinchDistance);
+
+            if (pinch->phase == GDK_TOUCHPAD_GESTURE_PHASE_UPDATE && ! approximatelyEqual (deltaY, 0.0))
+            {
+                char script[512];
+
+                snprintf (script,
+                          sizeof(script),
+                          "var target = document.elementFromPoint(%f, %f) || document.body;"
+                          "target.dispatchEvent(new WheelEvent('wheel', { "
+                          "clientX: %f, clientY: %f, deltaY: %f, ctrlKey: true, bubbles: true }));",
+                          pinch->x,
+                          pinch->y,
+                          pinch->x,
+                          pinch->y,
+                          deltaY * initialisationData->pinchTranslationSensitivity);
+
+                WebKitSymbols::getInstance()->juce_webkit_web_view_run_javascript (webview,
+                                                                                   script,
+                                                                                   nullptr,
+                                                                                   nullptr,
+                                                                                   nullptr);
+            }
+
+            return TRUE;
+        }
+
+        // Block standard CTRL + Scroll wheel zooming
+        if (event->type == GDK_SCROLL)
+        {
+            GdkEventScroll* scroll = reinterpret_cast<GdkEventScroll*> (event);
+
+            if (scroll->state & GDK_CONTROL_MASK)
+                return TRUE;
+        }
+
+        return FALSE;
     }
 
     void invokeCallback (WebKitJavascriptResult* r)
@@ -1358,6 +1432,7 @@ private:
     WebKitUserContentManager* manager = nullptr;
     std::optional<InitialisationData> initialisationData;
     RequestIds requestIds;
+    double lastPinchDistance = 0.0;
 };
 
 //==============================================================================
@@ -1373,9 +1448,11 @@ public:
     {
         webKitIsAvailable = WebKitSymbols::getInstance()->isWebKitAvailable();
         init (InitialisationData { optionsIn.getNativeIntegrationsEnabled(),
+                                   optionsIn.getLinuxWkWebViewOptions().getAllowNativeZoomGesture(),
                                    userAgent,
                                    userStrings.joinIntoString ("\n"),
-                                   optionsIn.getAllowedOrigin() ? *optionsIn.getAllowedOrigin() : "" });
+                                   optionsIn.getAllowedOrigin() ? *optionsIn.getAllowedOrigin() : "",
+                                   optionsIn.getLinuxWkWebViewOptions().getPinchTranslationSensitivity() });
     }
 
     ~Platform() override

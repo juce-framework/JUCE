@@ -2,7 +2,7 @@
  * jdmarker.c
  *
  * Copyright (C) 1991-1998, Thomas G. Lane.
- * Modified 2009-2019 by Guido Vollbeding.
+ * Modified 2009-2025 by Guido Vollbeding.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -18,7 +18,7 @@
 #include "jpeglib.h"
 
 
-/*typedef enum {
+typedef enum {			/* JPEG marker codes */
   M_SOF0  = 0xc0,
   M_SOF1  = 0xc1,
   M_SOF2  = 0xc2,
@@ -84,7 +84,7 @@
   M_TEM   = 0x01,
 
   M_ERROR = 0x100
-} JPEG_MARKER;*/
+} JPEG_MARKER;
 
 
 /* Private state */
@@ -200,7 +200,7 @@ get_soi (j_decompress_ptr cinfo)
 /* Process an SOI marker */
 {
   int i;
-
+  
   TRACEMS(cinfo, 1, JTRC_SOI);
 
   if (cinfo->marker->saw_SOI)
@@ -419,7 +419,7 @@ get_dac (j_decompress_ptr cinfo)
 
   INPUT_2BYTES(cinfo, length, return FALSE);
   length -= 2;
-
+  
   while (length > 0) {
     INPUT_BYTE(cinfo, index, return FALSE);
     INPUT_BYTE(cinfo, val, return FALSE);
@@ -468,12 +468,12 @@ get_dht (j_decompress_ptr cinfo)
 
   INPUT_2BYTES(cinfo, length, return FALSE);
   length -= 2;
-
+  
   while (length > 16) {
     INPUT_BYTE(cinfo, index, return FALSE);
 
     TRACEMS1(cinfo, 1, JTRC_DHT, index);
-
+      
     bits[0] = 0;
     count = 0;
     for (i = 1; i <= 16; i++) {
@@ -513,7 +513,7 @@ get_dht (j_decompress_ptr cinfo)
 
     if (*htblptr == NULL)
       *htblptr = jpeg_alloc_huff_table((j_common_ptr) cinfo);
-
+  
     MEMCOPY((*htblptr)->bits, bits, SIZEOF((*htblptr)->bits));
     if (count > 0)
       MEMCOPY((*htblptr)->huffval, huffval, count * SIZEOF(UINT8));
@@ -551,7 +551,7 @@ get_dqt (j_decompress_ptr cinfo)
 
     if (n >= NUM_QUANT_TBLS)
       ERREXIT1(cinfo, JERR_DQT_INDEX, n);
-
+      
     if (cinfo->quant_tbl_ptrs[n] == NULL)
       cinfo->quant_tbl_ptrs[n] = jpeg_alloc_quant_table((j_common_ptr) cinfo);
     quant_ptr = cinfo->quant_tbl_ptrs[n];
@@ -626,7 +626,7 @@ get_dri (j_decompress_ptr cinfo)
   INPUT_VARS(cinfo);
 
   INPUT_2BYTES(cinfo, length, return FALSE);
-
+  
   if (length != 4)
     ERREXIT(cinfo, JERR_BAD_LENGTH);
 
@@ -664,7 +664,7 @@ get_lse (j_decompress_ptr cinfo)
   if (tmp != 0x0D)	/* ID inverse transform specification */
     ERREXIT1(cinfo, JERR_UNKNOWN_MARKER, cinfo->unread_marker);
   INPUT_2BYTES(cinfo, tmp, return FALSE);
-  if (tmp != MAXJSAMPLE) goto bad;		/* MAXTRANS */
+  cinfo->LSE_maxtrans = (UINT16) tmp;		/* MAXTRANS */
   INPUT_BYTE(cinfo, tmp, return FALSE);
   if (tmp != 3) goto bad;			/* Nt=3 */
   INPUT_BYTE(cinfo, cid, return FALSE);
@@ -983,7 +983,7 @@ skip_variable (j_decompress_ptr cinfo)
 
   INPUT_2BYTES(cinfo, length, return FALSE);
   length -= 2;
-
+  
   TRACEMS2(cinfo, 1, JTRC_MISC_MARKER, cinfo->unread_marker, (int) length);
 
   INPUT_SYNC(cinfo);		/* do before skip_input_data */
@@ -1339,10 +1339,10 @@ jpeg_resync_to_restart (j_decompress_ptr cinfo, int desired)
 {
   int marker = cinfo->unread_marker;
   int action = 1;
-
+  
   /* Always put up a warning. */
   WARNMS2(cinfo, JWRN_MUST_RESYNC, marker, desired);
-
+  
   /* Outer loop handles repeated decision after scanning forward. */
   for (;;) {
     if (marker < (int) M_SOF0)

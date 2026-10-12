@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -955,6 +955,10 @@ public:
         A plug-in can override this function to return a parameter which controls your
         plug-in's bypass. You should always check the value of this parameter in your
         processBlock callback and bypass any effects if it is non-zero.
+
+        If you return a custom parameter here, make sure that its state is saved and
+        restored like any other parameter within getStateInformation() and
+        setStateInformation().
     */
     virtual AudioProcessorParameter* getBypassParameter() const        { return nullptr; }
 
@@ -1143,6 +1147,9 @@ public:
 
         This must copy any info about the processor's state into the block of memory provided,
         so that the host can store this and later restore it using setStateInformation().
+        The resulting state should generally include all parameter values.
+        If you have implemented getBypassParameter(), ensure that the value of the bypass parameter
+        is included in the resulting state.
 
         Note that there's also a getCurrentProgramStateInformation() method, which only
         stores the current program, not the state of the entire processor.
@@ -1155,6 +1162,10 @@ public:
 
     /** The host will call this method if it wants to save the state of just the processor's
         current program.
+
+        The resulting state should generally include all parameter values.
+        If you have implemented getBypassParameter(), ensure that the value of the bypass parameter
+        is included in the resulting state.
 
         Unlike getStateInformation, this should only return the current program's state.
 
@@ -1185,6 +1196,9 @@ public:
         setStateInformation(), and that function should return the parameter mapping from the most
         recently-loaded state.
 
+        If you've implemented getBypassParameter(), make sure you remember to update the bypass
+        parameter value using the incoming state.
+
         @see setCurrentProgramStateInformation, VST3ClientExtensions::getCompatibleParameterIds
     */
     virtual void setStateInformation (const void* data, int sizeInBytes) = 0;
@@ -1195,6 +1209,9 @@ public:
         Not all hosts support this, and if you don't implement it, the base class
         method just calls setStateInformation() instead. If you do implement it, be
         sure to also implement getCurrentProgramStateInformation.
+
+        If you've implemented getBypassParameter(), make sure you remember to update the bypass
+        parameter value using the incoming state.
 
         @see setStateInformation, getCurrentProgramStateInformation
     */

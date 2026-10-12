@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -139,7 +139,7 @@ public:
         {
             uiaWrapper->disconnectProvider (provider);
 
-            if (providerCount == 0 && JUCEApplicationBase::isStandaloneApp())
+            if (providerCount == 0)
                 uiaWrapper->disconnectAllProviders();
         }
     }
@@ -251,6 +251,16 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
 
     if (eventType == AccessibilityEvent::valueChanged)
     {
+        if (getCurrentState().isCheckable())
+        {
+            VARIANT newValue;
+            VariantHelpers::setInt (getCurrentState().isChecked() ? ToggleState_On
+                                                                  : ToggleState_Off,
+                                    &newValue);
+
+            sendAccessibilityPropertyChangedEvent (*this, UIA_ToggleToggleStatePropertyId, newValue);
+        }
+
         if (auto* valueInterface = getValueInterface())
         {
             const auto propertyType = getRole() == AccessibilityRole::slider ? UIA_RangeValueValuePropertyId

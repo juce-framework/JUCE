@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -39,7 +39,7 @@ void MessageManager::runDispatchLoop()
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
-    while (quitMessagePosted.get() == 0)
+    while (! quitMessagePosted)
     {
         JUCE_AUTORELEASEPOOL
         {
@@ -67,7 +67,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
         uint32 startTime = Time::getMillisecondCounter();
         NSDate* endDate = [NSDate dateWithTimeIntervalSinceNow: millisecondsToRunFor * 0.001];
 
-        while (quitMessagePosted.get() == 0)
+        while (! quitMessagePosted)
         {
             JUCE_AUTORELEASEPOOL
             {
@@ -80,7 +80,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
             }
         }
 
-        return quitMessagePosted.get() == 0;
+        return ! quitMessagePosted;
     }
 }
 #endif

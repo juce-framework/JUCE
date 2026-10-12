@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -129,12 +129,14 @@ bool X11Symbols::loadAllSymbols()
                        makeSymbolBinding (xFree,                       "XFree"),
                        makeSymbolBinding (xFreeCursor,                 "XFreeCursor"),
                        makeSymbolBinding (xFreeColormap,               "XFreeColormap"),
+                       makeSymbolBinding (xFreeEventData,              "XFreeEventData"),
                        makeSymbolBinding (xFreeGC,                     "XFreeGC"),
                        makeSymbolBinding (xFreeModifiermap,            "XFreeModifiermap"),
                        makeSymbolBinding (xFreePixmap,                 "XFreePixmap"),
                        makeSymbolBinding (xGetAtomName,                "XGetAtomName"),
                        makeSymbolBinding (xGetErrorDatabaseText,       "XGetErrorDatabaseText"),
                        makeSymbolBinding (xGetErrorText,               "XGetErrorText"),
+                       makeSymbolBinding (xGetEventData,               "XGetEventData"),
                        makeSymbolBinding (xGetGeometry,                "XGetGeometry"),
                        makeSymbolBinding (xGetImage,                   "XGetImage"),
                        makeSymbolBinding (xGetInputFocus,              "XGetInputFocus"),
@@ -239,6 +241,16 @@ bool X11Symbols::loadAllSymbols()
                  makeSymbolBinding (xShmGetEventBase,            "XShmGetEventBase"),
                  makeSymbolBinding (xShmPutImage,                "XShmPutImage"),
                  makeSymbolBinding (xShmQueryVersion,            "XShmQueryVersion"));
+   #endif
+   #if JUCE_USE_XINPUT
+    loadSymbols (xinputLib,
+                 makeSymbolBinding (xiQueryVersion,              "XIQueryVersion"),
+                 makeSymbolBinding (xiQueryDevice,               "XIQueryDevice"),
+                 makeSymbolBinding (xiFreeDeviceInfo,            "XIFreeDeviceInfo"),
+                 makeSymbolBinding (xiSelectEvents,              "XISelectEvents"),
+                 makeSymbolBinding (xiGetClientPointer,          "XIGetClientPointer"),
+                 makeSymbolBinding (xiGrabDevice,                "XIGrabDevice"),
+                 makeSymbolBinding (xiUngrabDevice,              "XIUngrabDevice"));
    #endif
 
     return true;

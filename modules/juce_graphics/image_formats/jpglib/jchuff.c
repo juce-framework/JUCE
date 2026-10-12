@@ -2,7 +2,7 @@
  * jchuff.c
  *
  * Copyright (C) 1991-1997, Thomas G. Lane.
- * Modified 2006-2023 by Guido Vollbeding.
+ * Modified 2006-2025 by Guido Vollbeding.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -26,9 +26,9 @@
 
 
 /* The legal range of a DCT coefficient is
- *  -1024 .. +1023  for 8-bit sample data precision;
- * -16384 .. +16383 for 12-bit sample data precision.
- * Hence the magnitude should always fit in sample data precision + 2 bits.
+ *  -1024 .. +1023  for 8-bit JPEG data precision;
+ * -16384 .. +16383 for 12-bit JPEG data precision.
+ * Hence the magnitude should always fit in JPEG data precision + 2 bits.
  */
 
 /* Derived data constructed for each Huffman table */

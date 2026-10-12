@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2023  Xiph.Org Foundation
+ * Copyright (C) 2011-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,7 +42,7 @@
 #include "../alloc.h"
 #include "../compat.h"
 #include "include/private/format.h"
-
+#include "include/private/macros.h"
 
 #if (defined GIT_COMMIT_HASH && defined GIT_COMMIT_DATE)
 # ifdef GIT_COMMIT_TAG
@@ -55,7 +55,7 @@ FLAC_API const char *FLAC__VENDOR_STRING = "reference libFLAC git-" GIT_COMMIT_H
 #else
 /* PACKAGE_VERSION should come from configure */
 FLAC_API const char *FLAC__VERSION_STRING = PACKAGE_VERSION;
-FLAC_API const char *FLAC__VENDOR_STRING = "reference libFLAC " PACKAGE_VERSION " 20230623";
+FLAC_API const char *FLAC__VENDOR_STRING = "reference libFLAC " PACKAGE_VERSION " 20250211";
 #endif
 
 FLAC_API const FLAC__byte FLAC__STREAM_SYNC_STRING[4] = { 'f','L','a','C' };
@@ -592,9 +592,9 @@ FLAC__bool FLAC__format_entropy_coding_method_partitioned_rice_contents_ensure_s
 	FLAC__ASSERT(0 != object);
 
 	if(object->capacity_by_order < max_partition_order || object->parameters == NULL || object->raw_bits == NULL) {
-		if(0 == (object->parameters = (uint32_t*) safe_realloc_(object->parameters, sizeof(uint32_t)*(1 << max_partition_order))))
+		if(0 == (object->parameters = safe_realloc_(object->parameters, sizeof(uint32_t)*(1 << max_partition_order))))
 			return false;
-		if(0 == (object->raw_bits = (uint32_t*) safe_realloc_(object->raw_bits, sizeof(uint32_t)*(1 << max_partition_order))))
+		if(0 == (object->raw_bits = safe_realloc_(object->raw_bits, sizeof(uint32_t)*(1 << max_partition_order))))
 			return false;
 		memset(object->raw_bits, 0, sizeof(uint32_t)*(1 << max_partition_order));
 		object->capacity_by_order = max_partition_order;

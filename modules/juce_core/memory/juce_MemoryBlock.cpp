@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -86,7 +86,9 @@ MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other)
     if (this != &other)
     {
         setSize (other.size, false);
-        memcpy (data, other.data, size);
+
+        if (size > 0)
+            memcpy (data, other.data, size);
     }
 
     return *this;
@@ -94,14 +96,14 @@ MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other)
 
 MemoryBlock::MemoryBlock (MemoryBlock&& other) noexcept
     : data (std::move (other.data)),
-      size (other.size)
+      size (std::exchange (other.size, 0))
 {
 }
 
 MemoryBlock& MemoryBlock::operator= (MemoryBlock&& other) noexcept
 {
-    data = std::move (other.data);
-    size = other.size;
+    MemoryBlock tmp { std::move (other) };
+    swapWith (tmp);
     return *this;
 }
 
@@ -118,8 +120,18 @@ bool MemoryBlock::operator!= (const MemoryBlock& other) const noexcept
 
 bool MemoryBlock::matches (const void* dataToCompare, size_t dataSize) const noexcept
 {
-    return size == dataSize
-            && memcmp (data, dataToCompare, size) == 0;
+    jassert (dataToCompare != nullptr || dataSize == 0);
+
+    if (size != dataSize)
+        return false;
+
+    if (size == 0)
+        return true;
+
+    if (dataToCompare == nullptr)
+        return false;
+
+    return memcmp (data, dataToCompare, size) == 0;
 }
 
 //==============================================================================
@@ -172,7 +184,8 @@ void MemoryBlock::swapWith (MemoryBlock& other) noexcept
 //==============================================================================
 void MemoryBlock::fillWith (uint8 value) noexcept
 {
-    memset (data, (int) value, size);
+    if (data != nullptr)
+        memset (data, (int) value, size);
 }
 
 void MemoryBlock::append (const void* srcData, size_t numBytes)
@@ -346,9 +359,9 @@ void MemoryBlock::loadFromHexString (StringRef hex)
             {
                 auto c = t.getAndAdvance();
 
-                if (c >= '0' && c <= '9')    { byte |= c - '0';        break; }
-                if (c >= 'a' && c <= 'z')    { byte |= c - ('a' - 10); break; }
-                if (c >= 'A' && c <= 'Z')    { byte |= c - ('A' - 10); break; }
+                if ('0' <= c && c <= '9')    { byte |= c - '0';        break; }
+                if ('a' <= c && c <= 'f')    { byte |= c - ('a' - 10); break; }
+                if ('A' <= c && c <= 'F')    { byte |= c - ('A' - 10); break; }
 
                 if (c == 0)
                 {
@@ -418,5 +431,55 @@ bool MemoryBlock::fromBase64Encoding (StringRef s)
 
     return true;
 }
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class MemoryBlockTest final : public UnitTest
+{
+public:
+    MemoryBlockTest()
+        : UnitTest ("MemoryBlock", UnitTestCategories::memory) {}
+
+    void runTest() final
+    {
+        testCase ("Empty blocks compare equal", [&]
+        {
+            const MemoryBlock a, b;
+
+            expect (a == b);
+            expect (! (a != b));
+            expect (a.matches (nullptr, 0));
+            expect (a.matches (b.getData(), b.getSize()));
+        });
+
+        testCase ("An empty block does not match a populated one", [&]
+        {
+            const MemoryBlock empty;
+            const MemoryBlock populated { "abc", 3 };
+
+            expect (empty != populated);
+            expect (populated != empty);
+            expect (! empty.matches (populated.getData(), populated.getSize()));
+            expect (! populated.matches (nullptr, 0));
+        });
+
+        testCase ("Blocks with matching contents compare equal", [&]
+        {
+            const MemoryBlock a { "abc", 3 };
+            const MemoryBlock b { "abc", 3 };
+            const MemoryBlock c { "abd", 3 };
+
+            expect (a == b);
+            expect (a != c);
+            expect (a.matches (b.getData(), b.getSize()));
+            expect (! a.matches (c.getData(), c.getSize()));
+        });
+    }
+};
+
+static MemoryBlockTest memoryBlockTest;
+
+#endif
 
 } // namespace juce

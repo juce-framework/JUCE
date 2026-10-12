@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -89,6 +89,9 @@ static bool setPriorityInternal (bool isRealtime, HANDLE handle, Thread::Priorit
 
 bool Thread::createNativeThread (Priority priority)
 {
+    if (threadHandle != nullptr)
+        closeThreadHandle();
+
     unsigned int newThreadId;
     threadHandle = (void*) _beginthreadex (nullptr, (unsigned int) threadStackSize,
                                            &threadEntryProc, this, CREATE_SUSPENDED,
@@ -206,6 +209,11 @@ struct SleepEvent
 };
 
 static SleepEvent sleepEvent;
+
+void JUCE_CALLTYPE Thread::sleep (Milliseconds duration)
+{
+    sleep (roundToInt (duration.count()));
+}
 
 void JUCE_CALLTYPE Thread::sleep (const int millisecs)
 {

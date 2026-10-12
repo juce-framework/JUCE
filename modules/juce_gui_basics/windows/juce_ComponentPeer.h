@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -426,6 +426,8 @@ public:
 
         You shouldn't ever really need to use this, it's mainly for special purposes
         like supporting audio plugins where the host's event loop is out of our control.
+
+        This has no effect on Android and iOS where the OS schedules all window painting.
     */
     virtual void performAnyPendingRepaintsNow() = 0;
 
@@ -674,6 +676,12 @@ public:
 
     /** @internal */
     auto getMultimonitorPositionOverride() const { return multimonitorPositionOverride; }
+
+    /** @internal */
+    virtual void setWindowsCanUseMultiTouch (bool) {}
+
+    /** @internal */
+    virtual bool canWindowsUseMultiTouch() const noexcept { return false; }
 
 protected:
     //==============================================================================

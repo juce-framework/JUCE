@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -162,6 +162,7 @@ namespace Ids
     DECLARE_ID (iconComposerIcon);
     DECLARE_ID (prebuildCommand);
     DECLARE_ID (postbuildCommand);
+    DECLARE_ID (postSignCommand);
     DECLARE_ID (useRuntimeLibDLL);
     DECLARE_ID (multiProcessorCompilation);
     DECLARE_ID (enableIncrementalLinking);
@@ -369,6 +370,7 @@ namespace Ids
     DECLARE_ID (pluginProducesMidiOut);
     DECLARE_ID (pluginIsMidiEffectPlugin);
     DECLARE_ID (pluginEditorRequiresKeys);
+    DECLARE_ID (pluginLV2PluginClass);
     DECLARE_ID (pluginVSTCategory);
     DECLARE_ID (pluginVST3Category);
     DECLARE_ID (pluginAUExportPrefix);

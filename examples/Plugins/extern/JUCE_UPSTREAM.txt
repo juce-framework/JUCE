@@ -1,0 +1,5 @@
+Upstream: https://github.com/justinfrankel/reaper-sdk
+Commit: ec0c1dc1655eb6a192fa7a22c2258a38a5ebbe9c
+
+reaper_plugin_fx_embed.h and reaper_vst3_interfaces.h are unmodified from
+the commit above, apart from CRLF line endings.

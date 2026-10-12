@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -557,7 +557,9 @@ private:
                 return windowSceneTracker->getWindowScene() != currentScene;
             }
 
-            return false;
+            // If we're on iOS 12 (or lower), this will only get called when setting up
+            // the peer, in which case we still want to handle the initial setup of the window.
+            return true;
         });
 
         if (! sceneDidChange)
@@ -2121,6 +2123,16 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEv
             mask = UIEventButtonMaskPrimary;
 
         updateButtonMask (mask);
+    }
+    else
+    {
+        // iOS 12, we only have 'primary button' clicks
+        const auto newFlags = isUp (mouseEventFlags)
+                            ? 0
+                            : ModifierKeys::leftButtonModifier;
+        ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers()
+                                            .withoutMouseButtons()
+                                            .withFlags (newFlags);
     }
 
     NSArray* touches = [[event touchesForView: view] allObjects];

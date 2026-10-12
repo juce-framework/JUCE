@@ -15,7 +15,7 @@
 #  framework to you, and you must discontinue the installation or download
 #  process and cease use of the JUCE framework.
 #
-#  JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+#  JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
 #  JUCE Privacy Policy: https://juce.com/juce-privacy-policy
 #  JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 #
@@ -43,10 +43,6 @@
 
 include_guard(GLOBAL)
 cmake_minimum_required(VERSION 3.22)
-
-if(NOT CMAKE_C_COMPILE_OBJECT)
-    message(FATAL_ERROR "A C compiler is required to build JUCE. Add 'C' to your project's LANGUAGES.")
-endif()
 
 # ==================================================================================================
 
@@ -582,6 +578,15 @@ function(juce_add_module module_path)
         target_link_libraries(${module_name} INTERFACE EGL $<IF:${platform_supports_gl3},GLESv3,GLESv2>)
     endif()
 
+    if(${module_name} STREQUAL "juce_gui_extra")
+        set(webview_interop_package_json "${module_path}/native/typescript/webview-interop/package.json")
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${webview_interop_package_json}")
+        file(READ "${webview_interop_package_json}" webview_interop_package_json_contents)
+        string(JSON webview_interop_version GET "${webview_interop_package_json_contents}" version)
+        target_compile_definitions(${module_name} INTERFACE
+            JUCE_WEBVIEW_INTEROP_LIBRARY_VERSION="${webview_interop_version}")
+    endif()
+
     _juce_extract_metadata_block(JUCE_MODULE_DECLARATION "${module_path}/${module_header_name}" metadata_dict)
 
     _juce_get_metadata("${metadata_dict}" minimumCppStandard module_cpp_standard)
@@ -691,4 +696,13 @@ function(_juce_fixup_module_source_groups)
             set_source_files_properties(${header_files} PROPERTIES HEADER_FILE_ONLY TRUE)
         endforeach()
     endif()
+endfunction()
+
+function(_juce_fixup_unity_property)
+    get_property(all_modules GLOBAL PROPERTY _juce_module_names)
+
+    foreach(module_name IN LISTS all_modules)
+        get_target_property(source_files ${module_name} INTERFACE_JUCE_MODULE_SOURCES)
+        set_source_files_properties(${source_files} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+    endforeach()
 endfunction()

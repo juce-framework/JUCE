@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -346,11 +346,11 @@ public:
     TaskToken() = default;
 
     explicit TaskToken (NSURLRequest* request, SessionListener* l)
-        : task ([&]
+        : task (std::invoke ([&]
                 {
                     SharedResourcePointer<SharedSession> session;
                     return session->addTask (request, l);
-                }())
+                }))
     {
         if (auto* t = task.get())
             [t resume];
@@ -396,6 +396,8 @@ public:
     {
         const std::scoped_lock lock { mutex };
         token.cancel();
+        state = State::cancelled;
+        condvar.notify_one();
     }
 
     int64 getContentLength() const noexcept
@@ -436,7 +438,11 @@ public:
             }
         }
 
-        return true;
+        if (state != State::cancelled)
+            return true;
+
+        token.cancel();
+        return false;
     }
 
     int read (char* dest, int numBytes)
@@ -448,7 +454,10 @@ public:
             std::unique_lock lock { mutex };
 
             const auto getNumAvailable = [&] { return jmin (numBytes, (int) [data.get() length]); };
-            condvar.wait (lock, [&] { return getNumAvailable() > 0 || state == State::requestFinished; });
+            condvar.wait (lock, [&] { return getNumAvailable() > 0 || state == State::requestFinished || state == State::cancelled; });
+
+            if (state == State::cancelled)
+                break;
 
             const auto available = getNumAvailable();
 
@@ -529,7 +538,8 @@ private:
     {
         beforeStart,
         started,
-        requestFinished
+        requestFinished,
+        cancelled,
     };
 
     mutable std::mutex mutex;
@@ -841,14 +851,7 @@ public:
 
     bool connect (WebInputStream::Listener* webInputListener, [[maybe_unused]] int numRetries = 0)
     {
-        {
-            const ScopedLock lock (createConnectionLock);
-
-            if (hasBeenCancelled)
-                return false;
-
-            createConnection();
-        }
+        createConnection();
 
         if (! connection.has_value())
             return false;
@@ -970,6 +973,11 @@ private:
 
     void createConnection()
     {
+        const ScopedLock lock (createConnectionLock);
+
+        if (hasBeenCancelled)
+            return;
+
         jassert (! connection.has_value());
 
         NSUniquePtr<NSURL> nsURL { [[NSURL URLWithString: juceStringToNS (url.toString (! addParametersToRequestBody))] retain] };
@@ -977,13 +985,13 @@ private:
         if (nsURL == nullptr)
             return;
 
-        const auto timeOutSeconds = [this]
+        const auto timeOutSeconds = std::invoke ([this]
         {
             if (timeOutMs > 0)
                 return timeOutMs / 1000.0;
 
             return timeOutMs < 0 ? std::numeric_limits<double>::infinity() : 60.0;
-        }();
+        });
 
         NSUniquePtr<NSMutableURLRequest> req { [[NSMutableURLRequest requestWithURL: nsURL.get()
                                                                         cachePolicy: NSURLRequestReloadIgnoringLocalCacheData

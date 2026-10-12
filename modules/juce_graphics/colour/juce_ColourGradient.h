@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -46,17 +46,22 @@ namespace juce
 class JUCE_API  ColourGradient  final
 {
 public:
+    /** Specifies how the gradient range outside [0, 1] should be mapped onto the colours.
+        Follows the SVG/CSS terminology.
+    */
+    enum class SpreadMethod
+    {
+        pad,
+        reflect,
+        repeat
+    };
+
     /** Creates an uninitialised gradient.
 
         If you use this constructor instead of the other one, be sure to set all the
         object's public member variables before using it!
     */
     ColourGradient() noexcept;
-
-    ColourGradient (const ColourGradient&);
-    ColourGradient (ColourGradient&&) noexcept;
-    ColourGradient& operator= (const ColourGradient&);
-    ColourGradient& operator= (ColourGradient&&) noexcept;
 
     //==============================================================================
     /** Creates a gradient object.
@@ -217,6 +222,24 @@ public:
         If false, the gradient is linear between the two points.
     */
     bool isRadial;
+
+    /** When isRadial is true, and this value is set to a non-negative value, point2 becomes the
+        centre of the gradient's end circle, and endRadius defines its radius. point1 then becomes
+        the centre of the gradient's start circle, and startRadius defines its radius.
+
+        Otherwise, point1 is the centre of both the start and end circles, and point2 defines a
+        point on the circumference. The end radius is then calculated as the distance between
+        point1 and point2.
+    */
+    float endRadius = -1.0f;
+
+    /** If isRadial is true, and endRadius is set to a non-negative value, this specifies the radius
+        of the gradient's start circle.
+    */
+    float startRadius = 0.0f;
+
+    /** @see SpreadMethod */
+    SpreadMethod spreadMethod = SpreadMethod::pad;
 
     bool operator== (const ColourGradient&) const noexcept;
     bool operator!= (const ColourGradient&) const noexcept;

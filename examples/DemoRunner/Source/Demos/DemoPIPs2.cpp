@@ -47,6 +47,7 @@
 #include "../../../GUI/FlexBoxDemo.h"
 #include "../../../GUI/FontsDemo.h"
 #include "../../../GUI/FontFeaturesDemo.h"
+#include "../../../GUI/FontVariablesDemo.h"
 #include "../../../GUI/GraphicsDemo.h"
 #include "../../../GUI/GridDemo.h"
 #include "../../../GUI/ImagesDemo.h"
@@ -92,6 +93,7 @@ void registerDemos_Two() noexcept
     REGISTER_DEMO (FlexBoxDemo,               GUI, false)
     REGISTER_DEMO (FontsDemo,                 GUI, false)
     REGISTER_DEMO (FontFeaturesDemo,          GUI, false)
+    REGISTER_DEMO (FontVariablesDemo,         GUI, false)
     REGISTER_DEMO (GraphicsDemo,              GUI, false)
     REGISTER_DEMO (GridDemo,                  GUI, false)
     REGISTER_DEMO (ImagesDemo,                GUI, false)

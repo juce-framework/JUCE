@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -497,6 +497,37 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
         lowest = mn;
         highest = mx;
     }
+}
+
+/** Returns the value in the provided sorted span that is nearest to the target.
+
+    If the provided span is empty this returns a default constructed value.
+ */
+template <typename Type, size_t Extent>
+std::remove_cv_t<Type> findNearestValue (Span<Type, Extent> values, std::remove_cv_t<Type> target)
+{
+    static_assert (std::is_arithmetic_v<Type>);
+
+    const auto begin = values.begin();
+    const auto end = values.end();
+
+    if (begin == end)
+        return {};
+
+    jassert (std::is_sorted (begin, end));
+
+    const auto it = std::lower_bound (begin, end, target);
+
+    if (it == begin)
+        return *it;
+
+    if (it == end)
+        return *(it - 1);
+
+    const auto upper = *it;
+    const auto lower = *(it - 1);
+
+    return std::abs (target - lower) < std::abs (target - upper) ? lower : upper;
 }
 
 //==============================================================================

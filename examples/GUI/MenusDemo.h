@@ -185,6 +185,7 @@ public:
        #endif
 
         commandManager.setFirstCommandTarget (nullptr);
+        setApplicationCommandManagerToWatch (nullptr);
     }
 
     void resized() override

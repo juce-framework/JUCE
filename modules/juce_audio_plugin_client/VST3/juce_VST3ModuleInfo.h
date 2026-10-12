@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -82,8 +82,6 @@ namespace juce
 class JucePluginCompatibility final : public Steinberg::IPluginCompatibility
 {
 public:
-    virtual ~JucePluginCompatibility() = default;
-
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
     Steinberg::tresult PLUGIN_API getCompatibilityJSON (Steinberg::IBStream* stream) override

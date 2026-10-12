@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -44,7 +44,7 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            8.0.13
+  version:            9.0.4
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
@@ -120,6 +120,16 @@
 */
 #ifndef JUCE_USE_XCURSOR
  #define JUCE_USE_XCURSOR 1
+#endif
+
+/** Config: JUCE_USE_XINPUT
+    Uses XInput (v2.2+) to allow multitouch on Linux. This is best left turned on unless you
+    have a good reason to disable it.
+    The availability of XInput v2.2+ is queried at runtime so your users do not need to have
+    XInput installed for your JUCE app to run.
+*/
+#ifndef JUCE_USE_XINPUT
+ #define JUCE_USE_XINPUT 1
 #endif
 
 /** Config: JUCE_WIN_PER_MONITOR_DPI_AWARE
@@ -228,6 +238,8 @@ namespace juce
 #include "commands/juce_KeyPressMappingSet.h"
 #include "buttons/juce_Button.h"
 #include "buttons/juce_ArrowButton.h"
+#include "misc/juce_DrawableComponent.h"
+#include "misc/juce_OwningDrawableComponent.h"
 #include "buttons/juce_DrawableButton.h"
 #include "buttons/juce_HyperlinkButton.h"
 #include "buttons/juce_ImageButton.h"
@@ -258,7 +270,6 @@ namespace juce
 #include "accessibility/enums/juce_AccessibilityRole.h"
 #include "accessibility/juce_AccessibilityState.h"
 #include "accessibility/juce_AccessibilityHandler.h"
-#include "drawables/juce_Drawable.h"
 #include "layout/juce_Viewport.h"
 #include "menus/juce_PopupMenu.h"
 #include "menus/juce_MenuBarModel.h"
@@ -270,12 +281,6 @@ namespace juce
 #include "positioning/juce_RelativeCoordinatePositioner.h"
 #include "positioning/juce_RelativeParallelogram.h"
 #include "positioning/juce_RelativePointPath.h"
-#include "drawables/juce_DrawableShape.h"
-#include "drawables/juce_DrawableComposite.h"
-#include "drawables/juce_DrawableImage.h"
-#include "drawables/juce_DrawablePath.h"
-#include "drawables/juce_DrawableRectangle.h"
-#include "drawables/juce_DrawableText.h"
 #include "widgets/juce_TextEditor.h"
 #include "widgets/juce_Label.h"
 #include "widgets/juce_ComboBox.h"
@@ -381,6 +386,11 @@ namespace juce
   #if JUCE_USE_XCURSOR
    // If you're missing this header, you need to install the libxcursor-dev package
    #include <X11/Xcursor/Xcursor.h>
+  #endif
+
+  #if JUCE_USE_XINPUT
+   // If you're missing this header, you need to install the libxi-dev package
+   #include <X11/extensions/XInput2.h>
   #endif
 
   #undef SIZEOF

@@ -15,7 +15,7 @@
 #  framework to you, and you must discontinue the installation or download
 #  process and cease use of the JUCE framework.
 #
-#  JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+#  JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
 #  JUCE Privacy Policy: https://juce.com/juce-privacy-policy
 #  JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 #
@@ -38,7 +38,7 @@ else()
     set(initial_search_dir "$ENV{USERPROFILE}/AppData/Local/PackageManagement/NuGet/Packages")
 endif()
 
-file(GLOB subdirs "${initial_search_dir}/Microsoft.Windows.Devices.Midi2.*")
+file(GLOB subdirs "${initial_search_dir}/Windows.Devices.Midi2.*")
 
 if(subdirs)
     list(GET subdirs 0 search_dir)
@@ -48,8 +48,8 @@ if(subdirs)
         message(WARNING "Multiple Windows MIDI Services packages found in the local NuGet folder. Proceeding with ${search_dir}.")
     endif()
 
-    find_path(WindowsMIDIServices_root_dir ref/native/Microsoft.Windows.Devices.Midi2.winmd HINTS ${search_dir})
-    set(WindowsMIDIServices_winmd "${WindowsMIDIServices_root_dir}/ref/native/Microsoft.Windows.Devices.Midi2.winmd")
+    find_path(WindowsMIDIServices_root_dir ref/native/Windows.Devices.Midi2.winmd HINTS ${search_dir})
+    set(WindowsMIDIServices_winmd "${WindowsMIDIServices_root_dir}/ref/native/Windows.Devices.Midi2.winmd")
 elseif(NOT WindowsMIDIServices_FIND_QUIETLY)
     message(WARNING
             "Windows MIDI Services wasn't found in the the local NuGet folder."

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -44,7 +44,7 @@
 
   ID:                 juce_opengl
   vendor:             juce
-  version:            8.0.13
+  version:            9.0.4
   name:               JUCE OpenGL classes
   description:        Classes for rendering OpenGL in a JUCE window.
   website:            http://www.juce.com/juce
@@ -54,7 +54,7 @@
   dependencies:       juce_gui_extra
   OSXFrameworks:      OpenGL
   iOSFrameworks:      OpenGLES
-  linuxPackages:      gl
+  linuxPackages:      egl gl
 
  END_JUCE_MODULE_DECLARATION
 
@@ -69,11 +69,41 @@
 #undef JUCE_OPENGL
 #define JUCE_OPENGL 1
 
+//==============================================================================
+// iOS and Android only provide OpenGL ES
 #if JUCE_IOS || JUCE_ANDROID
- #define JUCE_OPENGL_ES 1
- #include "opengl/juce_gles2.h"
+ #ifndef JUCE_OPENGL_ES
+  #define JUCE_OPENGL_ES 1
+ #endif
+#endif
+
+/** Config: JUCE_OPENGL_ES
+    Builds juce_opengl against OpenGL ES rather than desktop OpenGL.
+
+    This is only a choice on Linux and BSD, for systems whose graphics drivers only
+    provide OpenGL ES, such as many embedded Arm boards. It is always enabled on iOS
+    and Android and cannot be enabled on macOS or Windows.
+
+    Building against OpenGL ES requires linking libGLESv2 rather than libGL. With
+    CMake, enable it with the NEEDS_OPENGL_ES target option rather than by defining
+    this macro, since that option also links the right libraries. In the Projucer,
+    enable the module flag, or add JUCE_OPENGL_ES=1 to the preprocessor definitions
+    of a Linux exporter when the project also targets other platforms.
+*/
+#ifndef JUCE_OPENGL_ES
+ #define JUCE_OPENGL_ES 0
+#endif
+
+#if (JUCE_IOS || JUCE_ANDROID) && ! JUCE_OPENGL_ES
+ #error "OpenGL ES is the only OpenGL API available on this platform"
+#elif (JUCE_MAC || JUCE_WINDOWS) && JUCE_OPENGL_ES
+ #error "OpenGL ES is not available on this platform"
+#endif
+
+#if JUCE_OPENGL_ES
+#include "opengl/juce_gles2.h"
 #else
- #include "opengl/juce_gl.h"
+#include "opengl/juce_gl.h"
 #endif
 
 #include <juce_gui_extra/juce_gui_extra.h>

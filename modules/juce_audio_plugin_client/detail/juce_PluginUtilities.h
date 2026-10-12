@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -44,21 +44,40 @@ struct PluginUtilities
 {
     PluginUtilities() = delete;
 
-    static int getDesktopFlags (const AudioProcessorEditor& editor)
+    struct FlagsAndWindowsMultiTouch
     {
-        return editor.wantsLayerBackedView()
-             ? 0
-             : ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering;
+        FlagsAndWindowsMultiTouch (int d, bool w)
+            : desktopFlags (d),
+              windowsUsesMultiTouch (w)
+        {
+        }
+
+        int desktopFlags{};
+        bool windowsUsesMultiTouch{};
+    };
+
+    static FlagsAndWindowsMultiTouch getDesktopFlagsAndWindowsMultiTouchMode (const AudioProcessorEditor& editor)
+    {
+        auto flags = editor.wantsLayerBackedView()
+                   ? 0
+                   : ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering;
+
+        return { flags, editor.usesWindowsMultiTouch() };
     }
 
-    static int getDesktopFlags (const AudioProcessorEditor* editor)
+    static FlagsAndWindowsMultiTouch getDesktopFlagsAndWindowsMultiTouchMode (const AudioProcessorEditor* editor)
     {
-        return editor != nullptr ? getDesktopFlags (*editor) : 0;
+        return editor != nullptr ? getDesktopFlagsAndWindowsMultiTouchMode (*editor)
+                                 : FlagsAndWindowsMultiTouch { 0, false };
     }
 
     static void addToDesktop (AudioProcessorEditor& editor, void* parent)
     {
-        editor.addToDesktop (getDesktopFlags (editor), parent);
+        const auto [flags, usesWindowsMultiTouch] = getDesktopFlagsAndWindowsMultiTouchMode (editor);
+        editor.addToDesktop (flags, parent);
+
+        if (auto* peer = editor.getPeer())
+            peer->setWindowsCanUseMultiTouch (usesWindowsMultiTouch);
     }
 
     static const PluginHostType& getHostType()

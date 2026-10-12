@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -91,8 +91,17 @@ public:
 
     void runTest() override
     {
-        const auto pipeName = "TestPipe" + String ((intptr_t) Thread::getCurrentThreadId());
+        const auto pid =
+       #if JUCE_WINDOWS
+            _getpid();
+       #else
+            getpid();
+       #endif
 
+        const auto pipeName = "TestPipe-"
+                            + String::toHexString (pid)
+                            + "-"
+                            + String::toHexString (Time::currentTimeMillis());
         beginTest ("Pre test cleanup");
         {
             NamedPipe pipe;

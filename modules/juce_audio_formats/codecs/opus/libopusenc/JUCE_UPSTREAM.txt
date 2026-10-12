@@ -1,0 +1,7 @@
+Upstream: https://github.com/xiph/libopusenc.git
+Version:  0.3 (tag v0.3, commit 0dba1bea736ab8bb811409dce80c994a00a2ced9)
+
+Vendored by vendor.py in the parent directory; rerun it to update. It copies
+the .c files the unity translation units compile and every header reachable
+from them, and rewrites their includes as paths relative to the including
+file.

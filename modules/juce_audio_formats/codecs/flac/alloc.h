@@ -1,6 +1,6 @@
 /* alloc - Convenience routines for safely allocating memory
  * Copyright (C) 2007-2009  Josh Coalson
- * Copyright (C) 2011-2023  Xiph.Org Foundation
+ * Copyright (C) 2011-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,14 +41,11 @@
  * before #including this file,  otherwise SIZE_MAX might not be defined
  */
 
-// JUCE: removed as JUCE already includes standard headers and including
-// these in FlacNamespace will cause problems
-
-//#include <limits.h> /* for SIZE_MAX */
-//#if HAVE_STDINT_H
-//#include <stdint.h> /* for SIZE_MAX in case limits.h didn't get it */
-//#endif
-//#include <stdlib.h> /* for size_t, malloc(), etc */
+#include <limits.h> /* for SIZE_MAX */
+#ifdef HAVE_STDINT_H
+#include <stdint.h> /* for SIZE_MAX in case limits.h didn't get it */
+#endif
+#include <stdlib.h> /* for size_t, malloc(), etc */
 #include "compat.h"
 
 #ifndef SIZE_MAX
@@ -67,15 +64,19 @@
 #endif
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-extern int alloc_check_threshold, alloc_check_counter;
 
-static inline int alloc_check() {
+extern int alloc_check_threshold, alloc_check_counter, alloc_check_keep_failing;
+
+static inline int alloc_check(void) {
 	if(alloc_check_threshold == INT32_MAX)
 		return 0;
 	else if(alloc_check_counter++ == alloc_check_threshold)
 		return 1;
-	else
+	else if(alloc_check_keep_failing && (alloc_check_counter > alloc_check_threshold))
+		return 1;
+	else {
 		return 0;
+	}
 }
 
 #endif

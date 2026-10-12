@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -398,22 +398,40 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     AttributedString attributedText;
     attributedText.append (getName(), lf.getAlertWindowTitleFont());
 
+    auto numLinesInAttributedText = 1;
+
     if (text.isNotEmpty())
+    {
         attributedText.append ("\n\n" + text, messageFont);
+        numLinesInAttributedText += 2;
+    }
 
     attributedText.setColour (findColour (textColourId));
 
     if (alertIconType == NoIcon)
     {
         attributedText.setJustification (Justification::centredTop);
-        textLayout.createLayoutWithBalancedLineLengths (attributedText, (float) w);
     }
     else
     {
         attributedText.setJustification (Justification::topLeft);
-        textLayout.createLayoutWithBalancedLineLengths (attributedText, (float) w);
         iconSpace = iconWidth;
     }
+
+    textLayout = std::invoke ([&]
+    {
+        TextLayout layout;
+
+        layout.createLayout (attributedText, (float) w);
+
+        if (layout.getNumLines() > numLinesInAttributedText)
+        {
+            layout = TextLayout{};
+            layout.createLayoutWithBalancedLineLengths (attributedText, (float) w);
+        }
+
+        return layout;
+     });
 
     w = jmax (350, (int) textLayout.getWidth() + iconSpace + edgeGap * 4);
     w = jmin (w, (int) ((float) getParentWidth() * 0.7f));

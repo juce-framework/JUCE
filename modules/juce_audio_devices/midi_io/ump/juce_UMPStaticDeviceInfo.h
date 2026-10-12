@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -96,7 +96,12 @@ public:
     Span<const String, 16> getLegacyIdentifiersDst() const&& = delete;
     Span<const String, 16> getLegacyIdentifiers (IOKind) const&& = delete;
 
+    bool operator== (const StaticDeviceInfo&) const;
+    bool operator!= (const StaticDeviceInfo& other) const { return ! operator== (other); }
+
 private:
+    auto tie() const;
+
     std::array<String, 16> identifierSrc, identifierDst;
     String name;                        ///< The full human-readable name of this device
     String manufacturer;                ///< The name of the organisation that produced this device

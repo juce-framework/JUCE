@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -2469,14 +2469,14 @@ Button* LookAndFeel_V2::createTabBarExtrasButton()
     dp.setFill (Colour (0x59000000));
 
     DrawableComposite normalImage;
-    normalImage.addAndMakeVisible (ellipse.createCopy().release());
-    normalImage.addAndMakeVisible (dp.createCopy().release());
+    normalImage.addChild (ellipse.createCopy());
+    normalImage.addChild (dp.createCopy());
 
     dp.setFill (Colour (0xcc000000));
 
     DrawableComposite overImage;
-    overImage.addAndMakeVisible (ellipse.createCopy().release());
-    overImage.addAndMakeVisible (dp.createCopy().release());
+    overImage.addChild (ellipse.createCopy());
+    overImage.addChild (dp.createCopy());
 
     auto db = new DrawableButton (TRANS ("Additional Items"), DrawableButton::ImageFitted);
     db->setImages (&normalImage, &overImage, nullptr);
@@ -2820,9 +2820,7 @@ void LookAndFeel_V2::layoutFileBrowserComponent (FileBrowserComponent& browserCo
 //==============================================================================
 static std::unique_ptr<Drawable> createDrawableFromSVG (const char* data)
 {
-    auto xml = parseXML (data);
-    jassert (xml != nullptr);
-    return Drawable::createFromSVG (*xml);
+    return Drawable::createFromSVGString (data);
 }
 
 const Drawable* LookAndFeel_V2::getDefaultFolderImage()

@@ -1,0 +1,9 @@
+Upstream: https://github.com/steinbergmedia/vst3sdk
+
+The SDK has been modified in two places where warnings from clang-tidy 22 could
+not be suppressed:
+
+    public.sdk/source/common/commonstringconvert.cpp
+    public.sdk/source/vst/utility/stringconvert.cpp
+
+Both modifications are marked with a `// JUCE MODIFICATION` comment.

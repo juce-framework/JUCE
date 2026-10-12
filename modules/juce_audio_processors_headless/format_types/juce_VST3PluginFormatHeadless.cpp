@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -74,7 +74,7 @@ void VST3PluginFormatHeadless::findAllTypesForFile (OwnedArray<PluginDescription
         if (pluginFactory == nullptr)
             continue;
 
-        VSTComSmartPtr host { new VST3HostContextHeadless(), IncrementRef::yes };
+        VSTComSmartPtr host { new VST3HostContextHeadless(), IncrementRef::no };
 
         for (const auto& d : DescriptionLister::findDescriptionsSlow (*host, *pluginFactory, File (file)))
             results.add (new PluginDescription (d));
@@ -150,9 +150,9 @@ FileSearchPath VST3PluginFormatHeadless::getDefaultLocationsToSearch()
     auto defaults = std::invoke ([]() -> FileSearchPath
     {
       #if JUCE_WINDOWS
-        const auto localAppData = File::getSpecialLocation (File::windowsLocalAppData)        .getFullPathName();
-        const auto programFiles = File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName();
-        return { localAppData + "\\Programs\\Common\\VST3;" + programFiles + "\\Common Files\\VST3" };
+        const auto localAppData = File::getSpecialLocation (File::windowsLocalAppData).getFullPathName();
+        const auto programFiles = File::getSpecialLocation (File::windowsProgramFilesCommon).getFullPathName();
+        return { localAppData + "\\Programs\\Common\\VST3;" + programFiles + "\\VST3" };
       #elif JUCE_MAC
         return { "~/Library/Audio/Plug-Ins/VST3;/Library/Audio/Plug-Ins/VST3" };
       #else

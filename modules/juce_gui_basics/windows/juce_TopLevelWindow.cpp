@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -88,6 +88,11 @@ bool TopLevelWindow::isUsingNativeTitleBar() const noexcept
     return useNativeTitleBar && (isOnDesktop() || ! isShowing());
 }
 
+bool TopLevelWindow::isUsingWindowsMultiTouch() const noexcept
+{
+    return canUseWindowsMultiTouch && (isOnDesktop() || ! isShowing());
+}
+
 void TopLevelWindow::visibilityChanged()
 {
     if (isShowing())
@@ -151,11 +156,23 @@ void TopLevelWindow::setUsingNativeTitleBar (const bool shouldUseNativeTitleBar)
     }
 }
 
+void TopLevelWindow::setUsingWindowsMultiTouch (bool shouldUseMultiTouch)
+{
+    canUseWindowsMultiTouch = shouldUseMultiTouch;
+
+    if (auto* peer = getPeer())
+        peer->setWindowsCanUseMultiTouch (canUseWindowsMultiTouch);
+}
+
 void TopLevelWindow::recreateDesktopWindow()
 {
     if (isOnDesktop())
     {
         Component::addToDesktop (getDesktopWindowStyleFlags());
+
+        if (auto* peer = getPeer())
+            peer->setWindowsCanUseMultiTouch (canUseWindowsMultiTouch);
+
         toFront (true);
     }
 }
@@ -164,6 +181,10 @@ void TopLevelWindow::addToDesktop()
 {
     shadower = nullptr;
     Component::addToDesktop (getDesktopWindowStyleFlags());
+
+    if (auto* peer = getPeer())
+        peer->setWindowsCanUseMultiTouch (canUseWindowsMultiTouch);
+
     setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary
 }
 

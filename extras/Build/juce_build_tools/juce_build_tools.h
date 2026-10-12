@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -43,13 +43,13 @@
 
   ID:                 juce_build_tools
   vendor:             juce
-  version:            8.0.13
+  version:            9.0.4
   name:               JUCE Build Tools
   description:        Classes for generating intermediate files for JUCE projects.
   website:            http://www.juce.com/juce
   license:            AGPLv3/Commercial
 
-  dependencies:       juce_gui_basics
+  dependencies:       juce_graphics
 
  END_JUCE_MODULE_DECLARATION
 
@@ -62,7 +62,7 @@
 #pragma once
 #define JUCE_BUILD_TOOLS_H_INCLUDED
 
-#include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_graphics/juce_graphics.h>
 
 #include "utils/juce_ProjectType.h"
 #include "utils/juce_BuildHelperFunctions.h"

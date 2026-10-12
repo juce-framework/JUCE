@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -45,6 +45,7 @@ namespace juce::UnitTestCategories
     static const String cryptography               { "Cryptography" };
     static const String dsp                        { "DSP" };
     static const String files                      { "Files" };
+    static const String fonts                      { "Fonts" };
     static const String graphics                   { "Graphics" };
     static const String gui                        { "GUI" };
     static const String javascript                 { "Javascript" };

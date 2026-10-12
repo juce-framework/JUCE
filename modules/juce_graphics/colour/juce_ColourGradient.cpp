@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -43,33 +43,6 @@ ColourGradient::ColourGradient() noexcept  : isRadial (false)
    #else
     #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED
    #endif
-}
-
-ColourGradient::ColourGradient (const ColourGradient& other)
-    : point1 (other.point1), point2 (other.point2), isRadial (other.isRadial), colours (other.colours)
-{}
-
-ColourGradient::ColourGradient (ColourGradient&& other) noexcept
-    : point1 (other.point1), point2 (other.point2), isRadial (other.isRadial),
-      colours (std::move (other.colours))
-{}
-
-ColourGradient& ColourGradient::operator= (const ColourGradient& other)
-{
-    point1 = other.point1;
-    point2 = other.point2;
-    isRadial = other.isRadial;
-    colours = other.colours;
-    return *this;
-}
-
-ColourGradient& ColourGradient::operator= (ColourGradient&& other) noexcept
-{
-    point1 = other.point1;
-    point2 = other.point2;
-    isRadial = other.isRadial;
-    colours = std::move (other.colours);
-    return *this;
 }
 
 ColourGradient::ColourGradient (Colour colour1, float x1, float y1,
@@ -234,14 +207,19 @@ void ColourGradient::createLookupTable (PixelARGB* const lookupTable, const int 
     JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED // Trying to use this object without setting its coordinates?
     jassert (colours.size() >= 2);
     jassert (numEntries > 0);
-    jassert (approximatelyEqual (colours.getReference (0).position, 0.0)); // The first colour specified has to go at position 0
+
+    auto paddedColours = colours;
+    const auto colour0 = colours.getReference (0);
+
+    if (! approximatelyEqual (colour0.position, 0.0))
+        paddedColours.insert (0, { 0.0, colour0.colour });
 
     int index = 0;
 
-    for (int j = 0; j < colours.size() - 1; ++j)
+    for (int j = 0; j < paddedColours.size() - 1; ++j)
     {
-        const auto& o = colours.getReference (j + 0);
-        const auto& p = colours.getReference (j + 1);
+        const auto& o = paddedColours.getReference (j + 0);
+        const auto& p = paddedColours.getReference (j + 1);
         const auto numToDo = roundToInt (p.position * (numEntries - 1)) - index;
         const auto pix1 = o.colour.getNonPremultipliedPixelARGB();
         const auto pix2 = p.colour.getNonPremultipliedPixelARGB();
@@ -257,7 +235,7 @@ void ColourGradient::createLookupTable (PixelARGB* const lookupTable, const int 
         }
     }
 
-    std::fill (lookupTable + index, lookupTable + numEntries, colours.getLast().colour.getPixelARGB());
+    std::fill (lookupTable + index, lookupTable + numEntries, paddedColours.getLast().colour.getPixelARGB());
 }
 
 int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlock<PixelARGB>& lookupTable) const
@@ -265,9 +243,26 @@ int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlo
     JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED // Trying to use this object without setting its coordinates?
     jassert (colours.size() >= 2);
 
-    auto numEntries = jlimit (1, jmax (1, (colours.size() - 1) << 8),
-                              3 * (int) point1.transformedBy (transform)
-                                              .getDistanceFrom (point2.transformedBy (transform)));
+    const auto maxExtent = std::invoke ([&]
+    {
+        if (! isRadial)
+        {
+            return 3 * (int) point1.transformedBy (transform)
+                                   .getDistanceFrom (point2.transformedBy (transform));
+        }
+
+        detail::RadialGradientView rg { this };
+
+        // If the transform is skewed the maximum extent could be in any direction
+        const auto r = rg.getEndCircle().r;
+        Point<float> extentX { r, 0.0f };
+        Point<float> extentY { 0.0f, r };
+
+        return roundToInt (jmax (extentX.transformedBy (transform).getDistanceFromOrigin(),
+                                 extentY.transformedBy (transform).getDistanceFromOrigin()));
+    });
+
+    const auto numEntries = jlimit (1, jmax (1, (colours.size() - 1) << 8), 3 * (int) maxExtent);
     lookupTable.malloc (numEntries);
     createLookupTable (lookupTable, numEntries);
     return numEntries;

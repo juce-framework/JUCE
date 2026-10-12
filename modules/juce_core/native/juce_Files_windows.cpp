@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -723,6 +723,7 @@ File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
         case commonDocumentsDirectory:          csidlType = CSIDL_COMMON_DOCUMENTS;     break;
         case globalApplicationsDirectory:       csidlType = CSIDL_PROGRAM_FILES;        break;
         case globalApplicationsDirectoryX86:    csidlType = CSIDL_PROGRAM_FILESX86;     break;
+        case windowsProgramFilesCommon:         csidlType = CSIDL_PROGRAM_FILES_COMMON; break;
         case windowsLocalAppData:               csidlType = CSIDL_LOCAL_APPDATA;        break;
         case userMusicDirectory:                csidlType = 0x0d; /*CSIDL_MYMUSIC*/     break;
         case userMoviesDirectory:               csidlType = 0x0e; /*CSIDL_MYVIDEO*/     break;

@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2023  Xiph.Org Foundation
+ * Copyright (C) 2011-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -70,4 +70,46 @@ uint32_t FLAC__bitmath_silog2(FLAC__int64 v)
 
 	v = (v < 0) ? (-(v+1)) : v;
 	return FLAC__bitmath_ilog2_wide(v)+2;
+}
+
+/* An example of what FLAC__bitmath_extra_mulbits_unsigned() computes:
+ *
+ * extra_mulbits_unsigned( 0) = 0
+ * extra_mulbits_unsigned( 1) = 0
+ * extra_mulbits_unsigned( 2) = 1
+ * extra_mulbits_unsigned( 3) = 2
+ * extra_mulbits_unsigned( 4) = 2
+ * extra_mulbits_unsigned( 5) = 3
+ * extra_mulbits_unsigned( 6) = 3
+ * extra_mulbits_unsigned( 7) = 3
+ * extra_mulbits_unsigned( 8) = 3
+ * extra_mulbits_unsigned( 9) = 4
+ * extra_mulbits_unsigned(10) = 4
+ * extra_mulbits_unsigned(11) = 4
+ * extra_mulbits_unsigned(12) = 4
+ * extra_mulbits_unsigned(13) = 4
+ * extra_mulbits_unsigned(14) = 4
+ * extra_mulbits_unsigned(15) = 4
+ * extra_mulbits_unsigned(16) = 4
+ * extra_mulbits_unsigned(17) = 5
+ * extra_mulbits_unsigned(18) = 5
+ *
+ * The intent of this is to calculate how many extra bits multiplication
+ * by a certain number requires. So, if a signal fits in a certain number
+ * of bits (for example 16) than multiplying by a number (for example 1024)
+ * grows that storage requirement (to 26 in this example). In effect this is
+ * is the log2 rounded up.
+ */
+uint32_t FLAC__bitmath_extra_mulbits_unsigned(FLAC__uint32 v)
+{
+	uint32_t ilog2;
+	if(v == 0)
+		return 0;
+	ilog2 = FLAC__bitmath_ilog2(v);
+	if(((v >> ilog2) << ilog2) == v)
+		/* v is power of 2 */
+		return ilog2;
+	else
+		/* v is not a power of 2, return one higher */
+		return ilog2 + 1;
 }

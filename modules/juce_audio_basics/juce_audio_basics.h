@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_basics
   vendor:             juce
-  version:            8.0.13
+  version:            9.0.4
   name:               JUCE audio and MIDI data classes
   description:        Classes for audio buffer manipulation, midi message handling, synthesis, etc.
   website:            http://www.juce.com/juce
@@ -68,28 +68,6 @@
 //==============================================================================
 #undef Complex  // apparently some C libraries actually define these symbols (!)
 #undef Factor
-
-//==============================================================================
-#ifndef JUCE_USE_SSE_INTRINSICS
- #define JUCE_USE_SSE_INTRINSICS 1
-#endif
-
-#if ! JUCE_INTEL
- #undef JUCE_USE_SSE_INTRINSICS
-#endif
-
-#ifndef JUCE_USE_ARM_NEON
- #if (__ARM_NEON || __ARM_NEON__) && ! JUCE_USE_VDSP_FRAMEWORK
-  #define JUCE_USE_ARM_NEON 1
- #endif
-#endif
-
-#if TARGET_IPHONE_SIMULATOR
- #ifdef JUCE_USE_ARM_NEON
-  #undef JUCE_USE_ARM_NEON
- #endif
- #define JUCE_USE_ARM_NEON 0
-#endif
 
 //==============================================================================
 #include "buffers/juce_AudioDataConverters.h"

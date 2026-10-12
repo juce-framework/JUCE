@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -44,6 +44,8 @@ namespace juce
 class JUCE_API  OpenGLHelpers
 {
 public:
+    static bool isOpenGLES();
+
     /** Clears the GL error state. */
     static void resetErrorState();
 
@@ -60,6 +62,20 @@ public:
 
     /** Returns the address of a named GL extension function */
     static void* getExtensionFunction (const char* functionName);
+
+    /** Returns true if the given function pointer is not null.
+
+        This can be used to check whether a function from the juce::gl namespace is
+        available before calling it. Functions that are resolved at runtime may be missing,
+        but when a function is linked statically, comparing it against nullptr directly
+        triggers compiler warnings. Passing it through a pointer parameter keeps the check
+        well-formed in both situations.
+    */
+    template <typename Fn>
+    static bool isFunctionAvailable (Fn* fn) noexcept
+    {
+        return fn != nullptr;
+    }
 
     /** Returns a version string such as "#version 150" suitable for prefixing a GLSL
         shader on this platform.

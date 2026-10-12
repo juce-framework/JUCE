@@ -1,0 +1,9 @@
+Upstream: https://chromium.googlesource.com/webm/libwebp
+Version:  1.6.0 (tag v1.6.0, commit 4fa21912338357f89e4fd51cf2368325b59e9bd9)
+
+Vendored by vendor.py in this directory; rerun it to update. It copies the
+files upstream compiles into libwebp and libsharpyuv on x86 and Arm and every
+header reachable from them, rewrites their includes as paths relative to the
+JUCE modules directory, and applies two fixes to src/dsp/cpu.h: one keeping
+the x86 SIMD paths off ARM64EC targets, and one shimming the AVX2 intrinsics
+missing from GCC before version 11.

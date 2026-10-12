@@ -24,9 +24,9 @@ the user's' project will include. The module may have as many other internal sou
 it needs, but these must all be inside sub-folders!
 
 
-### Master header file
+### Main header file
 
-In this root folder there must be ONE master header file, which includes all the necessary
+In this root folder there must be ONE main header file, which includes all the necessary
 header files for the module. This header must have the same name as the module, with
 a .h/.hpp/.hxx suffix. E.g.
 
@@ -36,10 +36,10 @@ IMPORTANT! All code within a module that includes other files from within its ow
 must do so using RELATIVE paths!
 A module must be entirely relocatable on disk, and it must not rely on the user's project
 having any kind of include path set up correctly for it to work. Even if the user has no
-include paths whatsoever and includes the module's master header via an absolute path,
+include paths whatsoever and includes the module's main header via an absolute path,
 it must still correctly find all of its internally included sub-files.
 
-This master header file must also contain a comment with a BEGIN_JUCE_MODULE_DECLARATION
+This main header file must also contain a comment with a BEGIN_JUCE_MODULE_DECLARATION
 block which defines the module's requirements - the syntax for this is described later on..
 
 
@@ -48,7 +48,7 @@ block which defines the module's requirements - the syntax for this is described
 A module consists of a single header file and zero or more .cpp files. Fewer is better!
 
 Ideally, a module could be header-only module, so that a project can use it by simply
-including the master header file.
+including the main header file.
 
 For various reasons it's usually necessary or preferable to have a simpler header and
 some .cpp files that the user's project should compile as stand-alone compile units.
@@ -71,7 +71,7 @@ then the filename can be suffixed with one of the following (case insensitive) s
     _mac or _osx    <- compiled for macOS and OSX platforms only
     _windows        <- compiled for Windows platforms only
     _linux          <- compiled for Linux and FreeBSD platforms only
-    _andoid         <- compiled for Android platforms only
+    _android        <- compiled for Android platforms only
     _ios            <- compiled for iOS platforms only
 
 e.g.

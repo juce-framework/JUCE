@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -365,7 +365,7 @@ public:
         Array<double> newRates;
 
         if (asioObject != nullptr)
-            for (const auto rate : SampleRateHelpers::getAllSampleRates())
+            for (const auto rate : SampleRateHelpers::getCommonSampleRates())
                 if (asioObject->canSampleRate (rate) == 0)
                     newRates.add (rate);
 
@@ -1224,81 +1224,77 @@ private:
         if (getName().isEmpty())
             return error;
 
-        long err = 0;
-
-        if (loadDriver())
+        const auto [errorText, errorCode] = std::invoke ([&]() -> std::tuple<String, long>
         {
-            if ((error = initDriver()).isEmpty())
+            if (! loadDriver())
+                return { "No such device", 0 };
+
+            if (const auto init = initDriver(); init.isNotEmpty())
+                return { init, 0 };
+
+            numActiveInputChans = 0;
+            numActiveOutputChans = 0;
+            totalNumInputChans = 0;
+            totalNumOutputChans = 0;
+
+            if (asioObject == nullptr)
+                return { "Can't open device", 0 };
+
+             if (const auto err = asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans); err != 0)
+                 return { "Can't detect asio channels", err };
+
+            JUCE_ASIO_LOG (String ((int) totalNumInputChans) + " in, " + String ((int) totalNumOutputChans) + " out");
+
+            const int chansToAllocate = totalNumInputChans + totalNumOutputChans + 4;
+            bufferInfos.calloc (chansToAllocate);
+            inBuffers.calloc (chansToAllocate);
+            outBuffers.calloc (chansToAllocate);
+            inputFormat.calloc (chansToAllocate);
+            outputFormat.calloc (chansToAllocate);
+
+            if (const auto err = refreshBufferSizes(); err != 0)
+                return { "Can't detect buffer sizes", 0 };
+
+            auto currentRate = getSampleRate();
+
+            if (currentRate < 1.0 || currentRate > 192001.0)
             {
-                numActiveInputChans = 0;
-                numActiveOutputChans = 0;
-                totalNumInputChans = 0;
-                totalNumOutputChans = 0;
+                JUCE_ASIO_LOG ("setting default sample rate");
+                const auto err = asioObject->setSampleRate (44100.0);
+                JUCE_ASIO_LOG_ERROR ("setting sample rate", err);
 
-                if (asioObject != nullptr
-                     && (err = asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans)) == 0)
-                {
-                    JUCE_ASIO_LOG (String ((int) totalNumInputChans) + " in, " + String ((int) totalNumOutputChans) + " out");
-
-                    const int chansToAllocate = totalNumInputChans + totalNumOutputChans + 4;
-                    bufferInfos.calloc (chansToAllocate);
-                    inBuffers.calloc (chansToAllocate);
-                    outBuffers.calloc (chansToAllocate);
-                    inputFormat.calloc (chansToAllocate);
-                    outputFormat.calloc (chansToAllocate);
-
-                    if ((err = refreshBufferSizes()) == 0)
-                    {
-                        auto currentRate = getSampleRate();
-
-                        if (currentRate < 1.0 || currentRate > 192001.0)
-                        {
-                            JUCE_ASIO_LOG ("setting default sample rate");
-                            err = asioObject->setSampleRate (44100.0);
-                            JUCE_ASIO_LOG_ERROR ("setting sample rate", err);
-
-                            currentRate = getSampleRate();
-                        }
-
-                        currentSampleRate = currentRate;
-                        postOutput = (asioObject->outputReady() == 0);
-
-                        if (postOutput)
-                            JUCE_ASIO_LOG ("outputReady true");
-
-                        updateSampleRates();
-                        readLatencies();                          // doing these steps because cubase does so at this stage
-                        createDummyBuffers (preferredBufferSize); // in initialisation, and some devices fail if we don't
-                        readLatencies();
-
-                        // start and stop because cubase does it
-                        err = asioObject->start();
-                        // ignore an error here, as it might start later after setting other stuff up
-                        JUCE_ASIO_LOG_ERROR ("start", err);
-
-                        Thread::sleep (80);
-                        asioObject->stop();
-                    }
-                    else
-                    {
-                        error = "Can't detect buffer sizes";
-                    }
-                }
-                else
-                {
-                    error = "Can't detect asio channels";
-                }
+                currentRate = getSampleRate();
             }
-        }
-        else
-        {
-            error = "No such device";
-        }
 
-        if (error.isNotEmpty())
+            currentSampleRate = currentRate;
+            postOutput = (asioObject->outputReady() == 0);
+
+            if (postOutput)
+                JUCE_ASIO_LOG ("outputReady true");
+
+            updateSampleRates();
+            readLatencies();                          // doing these steps because cubase does so at this stage
+            createDummyBuffers (preferredBufferSize); // in initialisation, and some devices fail if we don't
+
+            const ScopeGuard disposeBuffers { [&] { asioObject->disposeBuffers(); } };
+
+            readLatencies();
+
+            // start and stop because cubase does it
+            const auto err = asioObject->start();
+            // ignore an error here, as it might start later after setting other stuff up
+            JUCE_ASIO_LOG_ERROR ("start", err);
+
+            const ScopeGuard stop { [&] { asioObject->stop(); } };
+
+            Thread::sleep (80);
+
+            return {};
+        });
+
+        if (errorText.isNotEmpty())
         {
-            JUCE_ASIO_LOG_ERROR (error, err);
-            disposeBuffers();
+            JUCE_ASIO_LOG_ERROR (errorText, errorCode);
 
             if (! removeCurrentDriver())
                 JUCE_ASIO_LOG ("** Driver crashed while being closed");
@@ -1311,7 +1307,7 @@ private:
         deviceIsOpen = false;
         needToReset = false;
         stopTimer();
-        return error;
+        return errorText;
     }
 
     void disposeBuffers()

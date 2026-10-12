@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -246,6 +246,15 @@ public:
         set this function to return true in all situations.
     */
     virtual bool wantsLayerBackedView() const;
+
+    /** The plugin wrapper will call this function to decide whether the editor is capable of
+        handling multi-touch events on Windows. This is disabled by default.
+
+        Editors and Windows that opt in to handling multi-touch events will have the built-in
+        Windows gesture recognition features disabled, and will not receive callbacks to
+        Component::mouseMagnify().
+    */
+    virtual bool usesWindowsMultiTouch() const;
 
 private:
     //==============================================================================

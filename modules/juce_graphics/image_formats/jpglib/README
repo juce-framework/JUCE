@@ -1,7 +1,7 @@
 The Independent JPEG Group's JPEG software
 ==========================================
 
-README for release 9f of 14-Jan-2024
+README for release 10 of 25-Jan-2026
 ====================================
 
 This distribution contains the ninth public release of the Independent JPEG
@@ -116,7 +116,7 @@ with respect to this software, its quality, accuracy, merchantability, or
 fitness for a particular purpose.  This software is provided "AS IS", and you,
 its user, assume the entire risk as to its quality and accuracy.
 
-This software is copyright (C) 1991-2024, Thomas G. Lane, Guido Vollbeding.
+This software is copyright (C) 1991-2026, Thomas G. Lane, Guido Vollbeding.
 All Rights Reserved except as specified below.
 
 Permission is hereby granted to use, copy, modify, and distribute this
@@ -240,9 +240,9 @@ The "official" archive site for this software is www.ijg.org.
 The most recent released version can always be found there in
 directory "files".  This particular version will be archived
 in Windows-compatible "zip" archive format as
-https://www.ijg.org/files/jpegsr9f.zip, and
+https://www.ijg.org/files/jpegsr10.zip, and
 in Unix-compatible "tar.gz" archive format as
-https://www.ijg.org/files/jpegsrc.v9f.tar.gz.
+https://www.ijg.org/files/jpegsrc.v10.tar.gz.
 
 The JPEG FAQ (Frequently Asked Questions) article is a source of some
 general information about JPEG.
@@ -366,9 +366,9 @@ is currently prepared and will be published later.
 TO DO
 =====
 
-Version 9 is the second release of a new generation JPEG standard
+Version 10 is the third release of a new generation JPEG standard
 to overcome the limitations of the original JPEG specification,
-and is the first true source reference JPEG codec.
+and is a true source reference JPEG codec.
 More features are being prepared for coming releases...
 
 Please send bug reports, offers of help, etc. to jpeg-info@ijg.org.

@@ -3,6 +3,77 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 9.0.4
+
+  - Added a MIDI device disconnection listener API
+  - Fixed multiple Windows MIDI device disconnection issues
+  - Fixed several MessageManagerLock issues
+  - Fixed Windows window placement when the display scale changes
+  - Fixed multiple Linux windowing and system tray issues
+  - Fixed some LV2 hosting issues
+  - Fixed XmlElement whitespace handling
+  - Added a NEEDS_OPENGL_ES CMake option for Linux
+  - Added protection against malformed String input
+
+## Version 9.0.3
+
+  - Added support for reading and writing Opus files
+  - Added support for WebP image files
+  - Updated Windows MIDI Services support to the in-box preview 7 API
+  - Fixed multiple Linux ALSA sample rate and channel issues
+  - Fixed Windows window placement and focus issues
+  - Fixed cancelling blocking network requests on macOS
+  - Fixed some OpenGLFrameBuffer issues
+  - Allowed recursive scanning for LV2 plug-ins
+
+## Version 9.0.2
+
+  - Enabled MP3AudioFormat by default
+  - Fixed reading MP3 VBR files with padding after the ID3v2 header
+  - Fixed parsing WAV files with a missing final pad byte
+  - Improved OpenGL rendering performance
+  - Fixed CoreAudio default sample rate and buffer size selection
+  - Fixed CoreAudio Multi-Output device handling
+  - Fixed some VST3 hosting issues
+  - Fixed a UMP sysex7 timestamp issue
+  - Fixed Projucer weak-linking of frameworks in multi-target Xcode projects
+  - Added a SECURITY.md and a software bill of materials
+
+## Version 9.0.1
+
+  - Added a new TypeScript npm package for WebView integrarion
+  - Added protection against malformed AudioFormat input
+  - Fixed iOS builds with Xcode 12.4
+  - Fixed Freetype compilation on older Linux distros
+  - Fixed missing macOS icons for associated documents
+  - Fixed unresponsive Linux GUIs
+  - Fixed a macOS CoreAudio compilation issue
+
+## Version 9.0.0
+
+  - Added a new SVG parser
+  - Added support for variable fonts
+  - Added a new macOS CoreAudio implementation
+  - Improved the performance of the software renderer
+  - Added OpenGL ES support to Linux
+  - Improved multi-touch support on Linux and Windows
+  - Improved the CMake build system for headless environments
+
+## Version 8.0.15
+
+  - Fixed the behaviour of loadFromHexString
+  - Fixed multiple Windows GUI scaling issues
+  - Updated Oboe to 1.10.0
+  - Improved handling of OpenGL textures
+  - Fixed a DropShadow issue with a tiny radius
+
+## Version 8.0.14
+
+  - Reduced the build tree depth to avoid Windows limits
+  - Fixed some MIDI issues
+  - Fixed some Projucer macOS code signing issues
+  - Fixed an iOS sample rate testing issue
+
 ## Version 8.0.13
 
   - Improved the compile time of the juce_gui_basics module

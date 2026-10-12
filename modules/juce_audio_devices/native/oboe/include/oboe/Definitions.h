@@ -152,6 +152,41 @@ namespace oboe {
         * Available since API 34 (U).
         */
         IEC61937 = 5, // AAUDIO_FORMAT_IEC61937
+
+        /**
+         * This format is used for audio compressed in MP3 format.
+         */
+        MP3 = 6, // AAUDIO_FORMAT_MP3
+
+        /**
+         * This format is used for audio compressed in AAC LC format.
+         */
+        AAC_LC, // AAUDIO_FORMAT_AAC_LC
+
+        /**
+         * This format is used for audio compressed in AAC HE V1 format.
+         */
+        AAC_HE_V1, // AAUDIO_FORMAT_AAC_HE_V1,
+
+        /**
+         * This format is used for audio compressed in AAC HE V2 format.
+         */
+        AAC_HE_V2, // AAUDIO_FORMAT_AAC_HE_V2
+
+        /**
+         * This format is used for audio compressed in AAC ELD format.
+         */
+        AAC_ELD, // AAUDIO_FORMAT_AAC_ELD
+
+        /**
+         * This format is used for audio compressed in AAC XHE format.
+         */
+        AAC_XHE, // AAUDIO_FORMAT_AAC_XHE
+
+        /**
+         * This format is used for audio compressed in OPUS.
+         */
+        OPUS, // AAUDIO_FORMAT_OPUS
     };
 
     /**
@@ -246,6 +281,16 @@ namespace oboe {
          * Reducing latency is most important.
          */
         LowLatency = 12, // AAUDIO_PERFORMANCE_MODE_LOW_LATENCY
+
+        /**
+         * Extending battery life is more important than low latency.
+         *
+         * This mode is not supported in input streams.
+         * This mode will play through the offloaded audio path to save battery life.
+         * With the offload playback, the default data callback size will be large and it
+         * allows data feeding thread to sleep longer time after sending enough data.
+         */
+        PowerSavingOffloaded = 13, // AAUDIO_PERFORMANCE_MODE_POWER_SAVING_OFFLOADED
     };
 
     /**
@@ -832,6 +877,281 @@ namespace oboe {
          * See ALLOW_CAPTURE_BY_NONE in the AudioAttributes Java API
          */
         None = 3,
+    };
+
+    /**
+     * Audio device type.
+     *
+     * Note that these match the device types defined in android/media/AudioDeviceInfo.java
+     * and the definitions of AAudio_DeviceType in AAudio.h.
+     *
+     * Added in API level 36 for AAudio.
+     */
+    enum class DeviceType : int32_t {
+        /**
+         * A device type describing the attached earphone speaker.
+         */
+        BuiltinEarpiece = 1,
+
+        /**
+         * A device type describing the speaker system (i.e. a mono speaker or stereo speakers)
+         * built in a device.
+         */
+        BuiltinSpeaker = 2,
+
+        /**
+         * A device type describing a headset, which is the combination of a headphones and
+         * microphone.
+         */
+        WiredHeadset = 3,
+
+        /**
+         * A device type describing a pair of wired headphones.
+         */
+        WiredHeadphones = 4,
+
+        /**
+         * A device type describing an analog line-level connection.
+         */
+        LineAnalog = 5,
+
+        /**
+         * A device type describing a digital line connection (e.g. SPDIF).
+         */
+        LineDigital = 6,
+
+        /**
+         * A device type describing a Bluetooth device typically used for telephony.
+         */
+        BluetoothSco = 7,
+
+        /**
+         * A device type describing a Bluetooth device supporting the A2DP profile.
+         */
+        BluetoothA2dp = 8,
+
+        /**
+         * A device type describing an HDMI connection .
+         */
+        Hdmi = 9,
+
+        /**
+         * A device type describing the Audio Return Channel of an HDMI connection.
+         */
+        HdmiArc = 10,
+
+        /**
+         * A device type describing a USB audio device.
+         */
+        UsbDevice = 11,
+
+        /**
+         * A device type describing a USB audio device in accessory mode.
+         */
+        UsbAccessory = 12,
+
+        /**
+         * A device type describing the audio device associated with a dock.
+         */
+        Dock = 13,
+
+        /**
+         * A device type associated with the transmission of audio signals over FM.
+         */
+        FM = 14,
+
+        /**
+         * A device type describing the microphone(s) built in a device.
+         */
+        BuiltinMic = 15,
+
+        /**
+         * A device type for accessing the audio content transmitted over FM.
+         */
+        FMTuner = 16,
+
+        /**
+         * A device type for accessing the audio content transmitted over the TV tuner system.
+         */
+        TVTuner = 17,
+
+        /**
+         * A device type describing the transmission of audio signals over the telephony network.
+         */
+        Telephony = 18,
+
+        /**
+         * A device type describing the auxiliary line-level connectors.
+         */
+        AuxLine = 19,
+
+        /**
+         * A device type connected over IP.
+         */
+        IP = 20,
+
+        /**
+         * A type-agnostic device used for communication with external audio systems.
+         */
+        Bus = 21,
+
+        /**
+         * A device type describing a USB audio headset.
+         */
+        UsbHeadset = 22,
+
+        /**
+         * A device type describing a Hearing Aid.
+         */
+        HearingAid = 23,
+
+        /**
+         * A device type describing the speaker system (i.e. a mono speaker or stereo speakers)
+         * built in a device, that is specifically tuned for outputting sounds like notifications
+         * and alarms (i.e. sounds the user couldn't necessarily anticipate).
+         * <p>Note that this physical audio device may be the same as {@link #TYPE_BUILTIN_SPEAKER}
+         * but is driven differently to safely accommodate the different use case.</p>
+         */
+        BuiltinSpeakerSafe = 24,
+
+        /**
+         * A device type for rerouting audio within the Android framework between mixes and
+         * system applications.
+         */
+        RemoteSubmix = 25,
+        /**
+         * A device type describing a Bluetooth Low Energy (BLE) audio headset or headphones.
+         * Headphones are grouped with headsets when the device is a sink:
+         * the features of headsets and headphones with regard to playback are the same.
+         */
+        BleHeadset = 26,
+
+        /**
+         * A device type describing a Bluetooth Low Energy (BLE) audio speaker.
+         */
+        BleSpeaker = 27,
+
+        /**
+         * A device type describing the Enhanced Audio Return Channel of an HDMI connection.
+         */
+        HdmiEarc = 29,
+
+        /**
+         * A device type describing a Bluetooth Low Energy (BLE) broadcast group.
+         */
+        BleBroadcast = 30,
+
+        /**
+         * A device type describing the audio device associated with a dock using an
+         * analog connection.
+         */
+        DockAnalog = 31
+    };
+
+    /**
+     * MMAP policy is defined to describe how aaudio MMAP will be used.
+     *
+     * Added in API level 36.
+     */
+    enum class MMapPolicy : int32_t {
+        /**
+         * When MMAP policy is not specified or the querying API is not supported.
+         */
+        Unspecified = kUnspecified,
+
+        /**
+         * AAudio MMAP is disabled and never used.
+         */
+        Never = 1,
+
+        /**
+         * AAudio MMAP support depends on device's availability. It will be used
+         * when it is possible or fallback to the normal path, where the audio data
+         * will be delivered via audio framework data pipeline.
+         */
+        Auto,
+
+        /**
+         * AAudio MMAP must be used or fail.
+         */
+        Always
+    };
+
+    /**
+     * The values are defined to be used for the accuracy requirement when calling
+     * AudioStream.flushFromFrame.
+     */
+    enum class FlushFromAccuracy : int32_t {
+        /**
+         * There is not requirement for frame accuracy when flushing, it is up to the OS
+         * to select a right position to flush from.
+         */
+        Undefined = 0, // AAUDIO_FLUSH_FROM_ACCURACY_UNDEFINED
+
+        /**
+         * The stream must be flushed from the requested position. If it is not possible to flush
+         * from the requested position, the stream must not be flushed.
+         */
+        Accurate = 1, // AAUDIO_FLUSH_FROM_ACCURACY_ACCURATE
+    };
+
+    /**
+     * Behavior when the values for speed and / or pitch are out of the applicable range.
+     */
+    enum class FallbackMode : int32_t {
+        /**
+         * It is up to the system to choose best handling.
+         */
+        Default = 0, // AAUDIO_FALLBACK_MODE_DEFAULT
+        /**
+         * Play silence for parameter values that are out of range.
+         */
+        Mute = 1, // AAUDIO_FALLBACK_MODE_MUTE
+        /**
+         * When the requested speed and or pitch is out of range, processing will be
+         * stopped and an error will be returned.
+         */
+        Fail = 2, // AAUDIO_FALLBACK_MODE_FAIL
+    };
+
+    /**
+     * Algorithms used for time-stretching (preserving pitch while playing audio
+     * content at different speed).
+     */
+    enum class StretchMode : int32_t {
+        /**
+         * Time-stretching algorithm is selected by the system.
+         */
+        Default = 0, // AAUDIO_STRETCH_MODE_DEFAULT
+        /**
+         * Selects time-stretch algorithm best suitable for voice (speech) content.
+         */
+        Voice = 1, // AAUDIO_STRETCH_MODE_VOICE
+    };
+
+    /**
+     * Structure for common playback params.
+     */
+    struct PlaybackParameters {
+        /**
+         * See `FallbackMode`.
+         */
+        FallbackMode fallbackMode;
+        /**
+         * See `StretchMode`.
+         */
+        StretchMode stretchMode;
+        /**
+         * Increases or decreases the tonal frequency of the audio content.
+         * It is expressed as a multiplicative factor, where normal pitch is 1.0f.
+         * The pitch must be in range of [0.25f, 4.0f].
+         */
+        float pitch;
+        /**
+         * Increases or decreases the time to play back a set of audio frames.
+         * Normal speed is 1.0f. The speed must in range of [0.01f, 20.0f].
+         */
+        float speed;
     };
 
     /**

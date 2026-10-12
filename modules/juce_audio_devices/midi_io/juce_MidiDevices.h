@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -242,6 +242,12 @@ public:
     /** Removed an input listener. */
     void removeCallback (MidiInputCallback&);
 
+    /** Adds a listener, which will be notified if the device gets disconnected. */
+    void addDisconnectionListener (ump::DisconnectionListener&);
+
+    /** Removes a previously-added disconnection listener. */
+    void removeDisconnectionListener (ump::DisconnectionListener&);
+
 private:
     class Impl;
     MidiInput();
@@ -311,9 +317,12 @@ public:
 
     @tags{Audio}
 */
-class JUCE_API  MidiOutput  final
+class JUCE_API  MidiOutput  final : private ump::DisconnectionListener
 {
 public:
+    /** Destructor */
+    ~MidiOutput() override;
+
     //==============================================================================
     /** Returns a list of the available midi output devices.
 
@@ -378,15 +387,15 @@ public:
 
     //==============================================================================
     /** Sends out a MIDI message immediately. */
-    void sendMessageNow (const MidiMessage& message)
+    bool sendMessageNow (const MidiMessage& message)
     {
-        convertAndSend (mainPackets, Span { &message, 1 });
+        return convertAndSend (mainPackets, Span { &message, 1 });
     }
 
     /** Sends out a sequence of MIDI messages immediately. */
-    void sendBlockOfMessagesNow (const MidiBuffer& buffer)
+    bool sendBlockOfMessagesNow (const MidiBuffer& buffer)
     {
-        convertAndSend (mainPackets, buffer);
+        return convertAndSend (mainPackets, buffer);
     }
 
     /** This lets you supply a block of messages that will be sent out at some point
@@ -447,6 +456,20 @@ public:
     */
     bool isBackgroundThreadRunning() const  { return outputThread.isRunning(); }
 
+    /** Adds a listener, which will be notified if the device gets disconnected. */
+    void addDisconnectionListener (DisconnectionListener& l)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        disconnectionListeners.add (&l);
+    }
+
+    /** Removes a previously-added disconnection listener. */
+    void removeDisconnectionListener (DisconnectionListener& l)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        disconnectionListeners.remove (&l);
+    }
+
 private:
     MidiOutput (std::shared_ptr<ump::Session>,
                 ump::Output,
@@ -454,8 +477,13 @@ private:
                 const MidiDeviceInfo&,
                 ump::LegacyVirtualOutput);
 
+    void disconnected() override
+    {
+        disconnectionListeners.call ([&] (auto& l) { l.disconnected(); });
+    }
+
     template <typename Range>
-    void convertAndSend (ump::Packets& packets, Range&& range)
+    bool convertAndSend (ump::Packets& packets, Range&& range)
     {
         packets.clear();
 
@@ -467,7 +495,7 @@ private:
             });
         });
 
-        connection.send (packets.begin(), packets.end());
+        return connection.send (packets.begin(), packets.end());
     }
 
     //==============================================================================
@@ -478,6 +506,7 @@ private:
     MidiDeviceInfo storedInfo;
     ump::Packets mainPackets, backgroundPackets;
     uint8_t group{};
+    ListenerList<DisconnectionListener> disconnectionListeners;
     ScheduledEventThread<MidiMessage> outputThread { [this] (const MidiMessage& message)
     {
         convertAndSend (backgroundPackets, Span { &message, 1 });

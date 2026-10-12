@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -43,4 +43,8 @@
 
 #if JUCE_INTERNAL_HAS_LV2
  #include <juce_audio_processors_headless/format_types/juce_LV2SupportLibs.cpp>
+#else
+ // To get around 'has no symbols' warnings emitted by libtool
+ void juce_audioProcessorsHeadlessLv2LibsPlaceholder();
+ void juce_audioProcessorsHeadlessLv2LibsPlaceholder() {}
 #endif

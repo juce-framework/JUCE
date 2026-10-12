@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -80,16 +80,25 @@ namespace AndroidStatsHelpers
         auto* env = getEnv();
         LocalRef<jobject> locale (env->CallStaticObjectMethod (JavaLocale, JavaLocale.getDefault));
 
-        auto stringResult = isRegion ? env->CallObjectMethod (locale.get(), JavaLocale.getCountry)
-                                     : env->CallObjectMethod (locale.get(), JavaLocale.getLanguage);
+        LocalRef stringResult { isRegion ? (jstring) env->CallObjectMethod (locale.get(), JavaLocale.getCountry)
+                                         : (jstring) env->CallObjectMethod (locale.get(), JavaLocale.getLanguage) };
 
-        return juceString (LocalRef<jstring> ((jstring) stringResult));
+        return juceString (stringResult);
     }
 
     static String getAndroidOsBuildValue (const char* fieldName)
     {
         return juceString (LocalRef<jstring> ((jstring) getEnv()->GetStaticObjectField (
                             AndroidBuild, getEnv()->GetStaticFieldID (AndroidBuild, fieldName, "Ljava/lang/String;"))));
+    }
+
+    static bool supports64BitAbis()
+    {
+        auto* env = getEnv();
+        const auto fieldId = env->GetStaticFieldID (AndroidBuild, "SUPPORTED_64_BIT_ABIS", "[Ljava/lang/String;");
+        const LocalRef<jobjectArray> abis { (jobjectArray) env->GetStaticObjectField (AndroidBuild, fieldId) };
+
+        return abis != nullptr && env->GetArrayLength (abis) > 0;
     }
 }
 
@@ -117,11 +126,7 @@ String SystemStats::getDeviceManufacturer()
 
 bool SystemStats::isOperatingSystem64Bit()
 {
-   #if JUCE_64BIT
-    return true;
-   #else
-    return false;
-   #endif
+    return AndroidStatsHelpers::supports64BitAbis();
 }
 
 String SystemStats::getCpuVendor()

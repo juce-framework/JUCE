@@ -65,6 +65,10 @@ public:
             : mValue(value)
             , mError(oboe::Result::OK) {}
 
+    ResultWithValue(T value, oboe::Result error)
+            : mValue(value)
+            , mError(error) {}
+
     /**
      * Get the result.
      *

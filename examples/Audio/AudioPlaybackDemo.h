@@ -76,7 +76,7 @@ public:
         scrollbar.addListener (this);
 
         currentPositionMarker.setFill (Colours::white.withAlpha (0.85f));
-        addAndMakeVisible (currentPositionMarker);
+        addAndMakeVisible (currentPositionMarkerComponent);
     }
 
     ~DemoThumbnailComp() override
@@ -212,6 +212,7 @@ private:
     URL lastFileDropped;
 
     DrawableRectangle currentPositionMarker;
+    DrawableComponent currentPositionMarkerComponent { currentPositionMarker };
 
     float timeToX (const double time) const
     {
@@ -248,10 +249,10 @@ private:
 
     void updateCursorPosition()
     {
-        currentPositionMarker.setVisible (transportSource.isPlaying() || isMouseButtonDown());
+        currentPositionMarkerComponent.setVisible (transportSource.isPlaying() || isMouseButtonDown());
 
         currentPositionMarker.setRectangle (Rectangle<float> (timeToX (transportSource.getCurrentPosition()) - 0.75f, 0,
-                                                              1.5f, (float) (getHeight() - scrollbar.getHeight())));
+                                                               1.5f, (float) (getHeight() - scrollbar.getHeight())));
     }
 };
 

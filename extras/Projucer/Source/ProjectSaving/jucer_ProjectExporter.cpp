@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -218,7 +218,8 @@ ProjectExporter::ProjectExporter (Project& p, const ValueTree& state)
       extraPPDefsValue           (settings, Ids::extraDefs,                 getUndoManager()),
       paceProtectionValue        (settings, Ids::paceProtectionEnabled,     getUndoManager()),
       paceConfigurationFileValue (settings, Ids::paceConfigurationLocation, getUndoManager(), "pacefusion.toml"),
-      paceBuildSourceRootValue   (settings, Ids::paceBuildSourceRootFolder, getUndoManager(), ".")
+      paceBuildSourceRootValue   (settings, Ids::paceBuildSourceRootFolder, getUndoManager(), "."),
+      paceUseSharableTargetNames (settings, Ids::paceUsingSharableTargetNames,     getUndoManager())
 {
     projectCompilerFlagSchemesValue = project.getProjectValue (Ids::compilerFlagSchemes);
     projectCompilerFlagSchemesValue.addListener (this);
@@ -622,6 +623,16 @@ static bool isCurlEnabled (Project& project)
             && project.isConfigFlagEnabled ("JUCE_USE_CURL", true));
 }
 
+static bool isOpenGLESEnabled (const ProjectExporter& exporter)
+{
+    static String openGLModule ("juce_opengl");
+    const auto& project = exporter.getProject();
+
+    return (project.getEnabledModules().isModuleEnabled (openGLModule)
+            && (project.isConfigFlagEnabled ("JUCE_OPENGL_ES", false)
+                || exporter.getAllPreprocessorDefs().getValue ("JUCE_OPENGL_ES", "0").getIntValue() != 0));
+}
+
 static bool isLoadCurlSymbolsLazilyEnabled (Project& project)
 {
     static String juceCoreModule ("juce_core");
@@ -643,6 +654,12 @@ std::vector<PackageDependency> ProjectExporter::getLinuxPackages (PackageDepende
     {
         packages.add ("gtk+-x11-3.0");
         dependencies.push_back (PackageDependency { "webkit2gtk-4.1", "webkit2gtk-4.0" });
+    }
+
+    if (isOpenGLESEnabled (*this))
+    {
+        packages.removeString ("gl");
+        packages.add ("glesv2");
     }
 
     packages.removeEmptyStrings();

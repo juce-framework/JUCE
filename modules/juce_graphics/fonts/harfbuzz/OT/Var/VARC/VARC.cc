@@ -3,7 +3,6 @@
 #ifndef HB_NO_VAR_COMPOSITES
 
 #include "../../../hb-draw.hh"
-#include "../../../hb-geometry.hh"
 #include "../../../hb-ot-layout-common.hh"
 #include "../../../hb-ot-layout-gdef-table.hh"
 
@@ -12,9 +11,11 @@ namespace OT {
 //namespace Var {
 
 
+#ifndef HB_NO_DRAW
+
 struct hb_transforming_pen_context_t
 {
-  hb_transform_t transform;
+  hb_transform_t<> transform;
   hb_draw_funcs_t *dfuncs;
   void *data;
   hb_draw_state_t *st;
@@ -127,24 +128,19 @@ hb_transforming_pen_get_funcs ()
   return static_transforming_pen_funcs.get_unconst ();
 }
 
-
 hb_ubytes_t
-VarComponent::get_path_at (hb_font_t *font,
+VarComponent::get_path_at (const hb_varc_context_t &c,
 			   hb_codepoint_t parent_gid,
-			   hb_draw_session_t &draw_session,
 			   hb_array_t<const int> coords,
+			   hb_transform_t<> total_transform,
 			   hb_ubytes_t total_record,
-			   hb_set_t *visited,
-			   signed *edges_left,
-			   signed depth_left,
-			   VarRegionList::cache_t *cache) const
+			   hb_scalar_cache_t *cache) const
 {
   const unsigned char *end = total_record.arrayZ + total_record.length;
   const unsigned char *record = total_record.arrayZ;
 
-  auto &VARC = *font->face->table.VARC;
+  auto &VARC = *c.font->face->table.VARC->table;
   auto &varStore = &VARC+VARC.varStore;
-  auto instancer = MultiItemVarStoreInstancer(&varStore, nullptr, coords, cache);
 
 #define READ_UINT32VAR(name) \
   HB_STMT_START { \
@@ -187,22 +183,25 @@ VarComponent::get_path_at (hb_font_t *font,
     unsigned conditionIndex;
     READ_UINT32VAR (conditionIndex);
     const auto &condition = (&VARC+VARC.conditionList)[conditionIndex];
+    auto instancer = MultiItemVarStoreInstancer(&varStore, nullptr, coords, cache);
     show = condition.evaluate (coords.arrayZ, coords.length, &instancer);
   }
 
   // Axis values
 
-  hb_vector_t<unsigned> axisIndices;
-  hb_vector_t<float> axisValues;
+  auto &axisIndices = c.scratch.axisIndices;
+  axisIndices.clear ();
+  auto &axisValues = c.scratch.axisValues;
+  axisValues.clear ();
   if (flags & (unsigned) flags_t::HAVE_AXES)
   {
     unsigned axisIndicesIndex;
     READ_UINT32VAR (axisIndicesIndex);
-    axisIndices = (&VARC+VARC.axisIndicesList)[axisIndicesIndex];
+    axisIndices.extend ((&VARC+VARC.axisIndicesList)[axisIndicesIndex]);
     axisValues.resize (axisIndices.length);
     const HBUINT8 *p = (const HBUINT8 *) record;
     TupleValues::decompile (p, axisValues, (const HBUINT8 *) end);
-    record += (const unsigned char *) p - record;
+    record = (const unsigned char *) p;
   }
 
   // Apply variations if any
@@ -219,7 +218,7 @@ VarComponent::get_path_at (hb_font_t *font,
    * limit on the max number of coords for now. */
   if ((flags & (unsigned) flags_t::RESET_UNSPECIFIED_AXES) ||
       coords.length > HB_VAR_COMPOSITE_MAX_AXES)
-    component_coords = hb_array<int> (font->coords, font->num_coords);
+    component_coords = hb_array (c.font->coords, c.font->num_coords);
 
   // Transform
 
@@ -229,21 +228,21 @@ VarComponent::get_path_at (hb_font_t *font,
 
 #define PROCESS_TRANSFORM_COMPONENTS \
 	HB_STMT_START { \
-	PROCESS_TRANSFORM_COMPONENT (FWORD, HAVE_TRANSLATE_X, translateX); \
-	PROCESS_TRANSFORM_COMPONENT (FWORD, HAVE_TRANSLATE_Y, translateY); \
-	PROCESS_TRANSFORM_COMPONENT (F4DOT12, HAVE_ROTATION, rotation); \
-	PROCESS_TRANSFORM_COMPONENT (F6DOT10, HAVE_SCALE_X, scaleX); \
-	PROCESS_TRANSFORM_COMPONENT (F6DOT10, HAVE_SCALE_Y, scaleY); \
-	PROCESS_TRANSFORM_COMPONENT (F4DOT12, HAVE_SKEW_X, skewX); \
-	PROCESS_TRANSFORM_COMPONENT (F4DOT12, HAVE_SKEW_Y, skewY); \
-	PROCESS_TRANSFORM_COMPONENT (FWORD, HAVE_TCENTER_X, tCenterX); \
-	PROCESS_TRANSFORM_COMPONENT (FWORD, HAVE_TCENTER_Y, tCenterY); \
+	PROCESS_TRANSFORM_COMPONENT ( 0, FWORD, HAVE_TRANSLATE_X, translateX); \
+	PROCESS_TRANSFORM_COMPONENT ( 0, FWORD, HAVE_TRANSLATE_Y, translateY); \
+	PROCESS_TRANSFORM_COMPONENT (12, F4DOT12, HAVE_ROTATION, rotation); \
+	PROCESS_TRANSFORM_COMPONENT (10, F6DOT10, HAVE_SCALE_X, scaleX); \
+	PROCESS_TRANSFORM_COMPONENT (10, F6DOT10, HAVE_SCALE_Y, scaleY); \
+	PROCESS_TRANSFORM_COMPONENT (12, F4DOT12, HAVE_SKEW_X, skewX); \
+	PROCESS_TRANSFORM_COMPONENT (12, F4DOT12, HAVE_SKEW_Y, skewY); \
+	PROCESS_TRANSFORM_COMPONENT ( 0, FWORD, HAVE_TCENTER_X, tCenterX); \
+	PROCESS_TRANSFORM_COMPONENT ( 0, FWORD, HAVE_TCENTER_Y, tCenterY); \
 	} HB_STMT_END
 
-  hb_transform_decomposed_t transform;
+  hb_transform_decomposed_t<> transform;
 
   // Read transform components
-#define PROCESS_TRANSFORM_COMPONENT(type, flag, name) \
+#define PROCESS_TRANSFORM_COMPONENT(shift, type, flag, name) \
 	if (flags & (unsigned) flags_t::flag) \
 	{ \
 	  static_assert (type::static_size == HBINT16::static_size, ""); \
@@ -271,9 +270,8 @@ VarComponent::get_path_at (hb_font_t *font,
   {
     // Only use coord_setter if there's actually any axis overrides.
     coord_setter_t coord_setter (axisIndices ? component_coords : hb_array<int> ());
-    // Go backwards, to reduce coord_setter vector reallocations.
-    for (unsigned i = axisIndices.length; i; i--)
-      coord_setter[axisIndices[i - 1]] = axisValues[i - 1];
+    for (unsigned i = 0; i < axisIndices.length; i++)
+      coord_setter[axisIndices[i]] = roundf (axisValues[i]);
     if (axisIndices)
       component_coords = coord_setter.get_coords ();
 
@@ -282,14 +280,14 @@ VarComponent::get_path_at (hb_font_t *font,
     {
       float transformValues[9];
       unsigned numTransformValues = 0;
-#define PROCESS_TRANSFORM_COMPONENT(type, flag, name) \
+#define PROCESS_TRANSFORM_COMPONENT(shift, type, flag, name) \
 	  if (flags & (unsigned) flags_t::flag) \
 	    transformValues[numTransformValues++] = transform.name;
       PROCESS_TRANSFORM_COMPONENTS;
 #undef PROCESS_TRANSFORM_COMPONENT
       varStore.get_delta (transformVarIdx, coords, hb_array (transformValues, numTransformValues), cache);
       numTransformValues = 0;
-#define PROCESS_TRANSFORM_COMPONENT(type, flag, name) \
+#define PROCESS_TRANSFORM_COMPONENT(shift, type, flag, name) \
 	  if (flags & (unsigned) flags_t::flag) \
 	    transform.name = transformValues[numTransformValues++];
       PROCESS_TRANSFORM_COMPONENTS;
@@ -297,41 +295,30 @@ VarComponent::get_path_at (hb_font_t *font,
     }
 
     // Divide them by their divisors
-#define PROCESS_TRANSFORM_COMPONENT(type, flag, name) \
-	  if (flags & (unsigned) flags_t::flag) \
-	  { \
-	    HBINT16 int_v; \
-	    int_v = roundf (transform.name); \
-	    type typed_v = * (const type *) &int_v; \
-	    float float_v = (float) typed_v; \
-	    transform.name = float_v; \
-	  }
+#define PROCESS_TRANSFORM_COMPONENT(shift, type, flag, name) \
+	  if (shift && (flags & (unsigned) flags_t::flag)) \
+	     transform.name *= 1.f / (1 << shift);
     PROCESS_TRANSFORM_COMPONENTS;
 #undef PROCESS_TRANSFORM_COMPONENT
 
     if (!(flags & (unsigned) flags_t::HAVE_SCALE_Y))
       transform.scaleY = transform.scaleX;
 
-    // Scale the transform by the font's scale
-    float x_scale = font->x_multf;
-    float y_scale = font->y_multf;
-    transform.translateX *= x_scale;
-    transform.translateY *= y_scale;
-    transform.tCenterX *= x_scale;
-    transform.tCenterY *= y_scale;
+    transform.rotation *= HB_PI;
+    transform.skewX *= HB_PI;
+    transform.skewY *= HB_PI;
 
-    // Build a transforming pen to apply the transform.
-    hb_draw_funcs_t *transformer_funcs = hb_transforming_pen_get_funcs ();
-    hb_transforming_pen_context_t context {transform.to_transform (),
-					   draw_session.funcs,
-					   draw_session.draw_data,
-					   &draw_session.st};
-    hb_draw_session_t transformer_session {transformer_funcs, &context};
+    total_transform.transform (transform.to_transform ());
 
-    VARC.get_path_at (font, gid,
-		      transformer_session, component_coords,
+    bool same_coords = component_coords.length == coords.length &&
+		       component_coords.arrayZ == coords.arrayZ;
+
+    c.depth_left--;
+    VARC.get_path_at (c, gid,
+		      component_coords, total_transform,
 		      parent_gid,
-		      visited, edges_left, depth_left - 1);
+		      same_coords ? cache : nullptr);
+    c.depth_left++;
   }
 
 #undef PROCESS_TRANSFORM_COMPONENTS
@@ -339,6 +326,94 @@ VarComponent::get_path_at (hb_font_t *font,
 
   return hb_ubytes_t (record, end - record);
 }
+
+bool
+VARC::get_path_at (const hb_varc_context_t &c,
+		   hb_codepoint_t glyph,
+		   hb_array_t<const int> coords,
+		   hb_transform_t<> transform,
+		   hb_codepoint_t parent_glyph,
+		   hb_scalar_cache_t *parent_cache) const
+{
+  // Don't recurse on the same glyph.
+  unsigned idx = glyph == parent_glyph ?
+		 NOT_COVERED :
+		 (this+coverage).get_coverage (glyph);
+  if (idx == NOT_COVERED)
+  {
+    if (c.draw_session)
+    {
+      hb_transform_t<> leaf_transform = transform;
+      leaf_transform.x0 *= c.font->x_multf;
+      leaf_transform.y0 *= c.font->y_multf;
+
+      // Build a transforming pen to apply the transform.
+      hb_draw_funcs_t *transformer_funcs = hb_transforming_pen_get_funcs ();
+      hb_transforming_pen_context_t context {leaf_transform,
+					     c.draw_session->funcs,
+					     c.draw_session->draw_data,
+					     &c.draw_session->st};
+      hb_draw_session_t transformer_session {transformer_funcs, &context};
+      hb_draw_session_t &shape_draw_session = leaf_transform.is_identity () ? *c.draw_session : transformer_session;
+
+      if (c.font->face->table.glyf->get_path_at (c.font, glyph, shape_draw_session, coords, c.scratch.glyf_scratch)) return true;
+#ifndef HB_NO_CFF
+      if (c.font->face->table.cff2->get_path_at (c.font, glyph, shape_draw_session, coords)) return true;
+      if (c.font->face->table.cff1->get_path (c.font, glyph, shape_draw_session)) return true; // Doesn't have variations
+#endif
+      return false;
+    }
+    else if (c.extents)
+    {
+      hb_glyph_extents_t glyph_extents;
+      if (!c.font->face->table.glyf->get_extents_at (c.font, glyph, &glyph_extents, coords))
+#ifndef HB_NO_CFF
+      if (!c.font->face->table.cff2->get_extents_at (c.font, glyph, &glyph_extents, coords))
+      if (!c.font->face->table.cff1->get_extents (c.font, glyph, &glyph_extents)) // Doesn't have variations
+#endif
+	return false;
+
+      hb_extents_t<> comp_extents (glyph_extents);
+      hb_transform_t<> leaf_transform = transform;
+      leaf_transform.x0 *= c.font->x_multf;
+      leaf_transform.y0 *= c.font->y_multf;
+      leaf_transform.transform_extents (comp_extents);
+      c.extents->union_ (comp_extents);
+    }
+    return true;
+  }
+
+  if (c.depth_left <= 0)
+    return true;
+
+  if (c.edges_left <= 0)
+    return true;
+  (c.edges_left)--;
+
+  hb_decycler_node_t node (c.decycler);
+  if (unlikely (!node.visit (glyph)))
+    return true;
+
+  hb_ubytes_t record = (this+glyphRecords)[idx];
+
+  hb_scalar_cache_t static_cache;
+  hb_scalar_cache_t *cache = parent_cache ?
+				  parent_cache :
+				  (this+varStore).create_cache (&static_cache);
+
+  VarCompositeGlyph::get_path_at (c,
+				  glyph,
+				  coords, transform,
+				  record,
+				  cache);
+
+  if (cache != parent_cache)
+    (this+varStore).destroy_cache (cache, &static_cache);
+
+  return true;
+}
+
+#endif
 
 //} // namespace Var
 } // namespace OT

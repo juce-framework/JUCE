@@ -238,7 +238,8 @@ public:
 
     void setStateInformation (const void* data, int sizeInBytes) final
     {
-        apvts.replaceState (ValueTree::fromXml (*getXmlFromBinary (data, sizeInBytes)));
+        if (auto xml = getXmlFromBinary (data, sizeInBytes))
+            apvts.replaceState (ValueTree::fromXml (*xml));
     }
 
     int getCurrentIRSize() const { return irSize; }

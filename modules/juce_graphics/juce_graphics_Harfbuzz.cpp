@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -34,7 +34,7 @@
 
 #include <juce_core/system/juce_CompilerWarnings.h>
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 4127 4189 4244 4245 4265 4267 4309 4310 4312 4456 4457 4458 4459 4701 4702 4706 6001 6011 6239 6244 6246 6262 6297 6313 6319 6326 6336 6385 6386 28251)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 4127 4189 4244 4245 4265 4267 4309 4310 4312 4456 4457 4458 4459 4701 4702 4706 6001 6011 6239 6244 6246 6262 6297 6313 6319 6326 6336 6385 6386 28251 28199 6237)
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type",
                                      "-Wsign-conversion",
@@ -54,7 +54,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type",
                                      "-Wformat-overflow",
                                      "-Woverflow",
                                      "-Wnontrivial-memcall",
-                                     "-Wimplicit-fallthrough")
+                                     "-Wimplicit-fallthrough",
+                                     "-Wdeprecated-copy-with-user-provided-dtor")
 
 JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 

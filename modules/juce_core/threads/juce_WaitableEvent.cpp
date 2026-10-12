@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -40,29 +40,40 @@ WaitableEvent::WaitableEvent (bool manualReset) noexcept
 {
 }
 
-bool WaitableEvent::wait (double timeOutMilliseconds) const
+void WaitableEvent::wait() const
 {
     std::unique_lock<std::mutex> lock (mutex);
 
     if (! triggered)
-    {
-        if (timeOutMilliseconds < 0.0)
-        {
-            condition.wait (lock, [this] { return triggered == true; });
-        }
-        else
-        {
-            if (! condition.wait_for (lock, std::chrono::duration<double, std::milli> { timeOutMilliseconds },
-                                      [this] { return triggered == true; }))
-            {
-                return false;
-            }
-        }
-    }
+        condition.wait (lock, [this] { return triggered == true; });
+
+    if (! useManualReset)
+        reset();
+}
+
+bool WaitableEvent::wait (Seconds timeOut) const
+{
+    // Unlike wait (double), a negative timeout is not supported. To wait
+    // indefinitely, call wait() with no arguments.
+    jassert (timeOut >= Seconds { 0.0 });
+
+    std::unique_lock<std::mutex> lock (mutex);
+
+    if (! triggered && ! condition.wait_for (lock, timeOut, [this] { return triggered == true; }))
+        return false;
 
     if (! useManualReset)
         reset();
 
+    return true;
+}
+
+bool WaitableEvent::wait (double timeOutMilliseconds) const
+{
+    if (timeOutMilliseconds >= 0.0)
+        return wait (Milliseconds { timeOutMilliseconds });
+
+    wait();
     return true;
 }
 

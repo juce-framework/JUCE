@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -59,12 +59,14 @@ struct InAppPurchases::Pimpl
       #if JUCE_IOS
         int64 getContentLength()   const override  { return download.contentLength; }
       #else
-        int64 getContentLength()   const override
+        int64 getContentLength() const override
         {
             if (@available (macOS 10.15, *))
                 return download.expectedContentLength;
 
+            JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
             return download.contentLength.longLongValue;
+            JUCE_END_IGNORE_DEPRECATION_WARNINGS
         }
       #endif
 
@@ -275,8 +277,7 @@ struct InAppPurchases::Pimpl
         auto orderId      = nsStringToJuce (transaction.transactionIdentifier);
         auto packageName  = nsStringToJuce ([[NSBundle mainBundle] bundleIdentifier]);
         auto productId    = nsStringToJuce (transaction.payment.productIdentifier);
-        auto purchaseTime = Time (1000 * (int64) transaction.transactionDate.timeIntervalSince1970)
-                              .toString (true, true, true, true);
+        Time purchaseTime { 1000 * (int64) transaction.transactionDate.timeIntervalSince1970 };
 
         Purchase purchase { orderId, productId, packageName, purchaseTime, {} };
 
@@ -500,7 +501,7 @@ struct InAppPurchases::Pimpl
                                 purchases.add ({ { nsStringToJuce (transactionId),
                                                    nsStringToJuce (productId),
                                                    nsStringToJuce (bundleId),
-                                                   Time (purchaseTime).toString (true, true, true, true),
+                                                   Time (purchaseTime),
                                                    {} }, {} });
                             }
                         }

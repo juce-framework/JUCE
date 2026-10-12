@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -157,7 +157,7 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "8.13"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "8.14.5"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
           gradleClangTidy                      (settings, Ids::gradleClangTidy,                      getUndoManager(), false),
           androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "8.13.2"),
@@ -936,7 +936,12 @@ private:
             mo << "        implementation(files('libs/" << File (d).getFileName() << "'))" << newLine;
 
         if (isInAppBillingEnabled())
-            mo << "        implementation('com.android.billingclient:billing:7.0.0')" << newLine;
+        {
+            mo << "        implementation('com.android.billingclient:billing:9.1.0') {" << newLine;
+            mo << "            exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'" << newLine;
+            mo << "            exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'" << newLine;
+            mo << "        }" << newLine;
+        }
 
         if (areRemoteNotificationsEnabled())
         {

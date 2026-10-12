@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -135,12 +135,7 @@ public:
         // Note: This method used to update the contents of the existing menu in-place, but that caused
         // weird side-effects which messed-up keyboard focus when switching between windows. By creating
         // a new menu and replacing the old one with it, that problem seems to be avoided..
-        NSMenu* menu = [[NSMenu alloc] initWithTitle: juceStringToNS (name)];
-
-        for (PopupMenu::MenuItemIterator iter (menuToCopy); iter.next();)
-            addMenuItem (iter, menu, menuId, topLevelIndex);
-
-        [menu update];
+        NSMenu* menu = createMenu (menuToCopy, name, menuId, topLevelIndex, true);
 
         removeItemRecursive ([parentItem submenu]);
         [parentItem setSubmenu: menu];

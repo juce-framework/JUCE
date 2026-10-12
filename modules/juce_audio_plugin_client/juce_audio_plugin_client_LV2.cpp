@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -307,7 +307,55 @@ public:
     {
     }
 
-    void invalidate() { info = nullopt; }
+    void invalidate()
+    {
+        info.reset();
+        barBeat.reset();
+    }
+
+    /*  Returns true if the playhead was moved by the requested number of samples.
+        Returns false on failure, e.g. if there's no existing playhead to move.
+    */
+    bool incrementByNumSamples (int numSamples)
+    {
+        if (! info.has_value())
+        {
+            return false;
+        }
+
+        if (const auto oldSampleTime = info->getTimeInSamples())
+        {
+            const auto newSampleTime = *oldSampleTime + numSamples;
+            info->setTimeInSamples (newSampleTime);
+            info->setTimeInSeconds ((double) newSampleTime / sampleRate);
+        }
+
+        const auto bpm = info->getBpm();
+        const auto sig = info->getTimeSignature();
+
+        if (bpm.hasValue() && sig.hasValue())
+        {
+            const auto timeDeltaS = (double) numSamples / sampleRate;
+            const auto bps = (double) *bpm / 60.0;
+            const auto beatDelta = bps * timeDeltaS;
+
+            if (barBeat.has_value())
+            {
+                barBeat = (float) ((double) *barBeat + beatDelta);
+
+                const auto numBarsElapsed = (int64_t) std::floor (*barBeat / (double) sig->numerator);
+                barBeat = (float) ((double) *barBeat - (double) numBarsElapsed * (double) sig->numerator);
+
+                if (const auto oldBarCount = info->getBarCount())
+                {
+                    const auto newBarCount = *oldBarCount + numBarsElapsed;
+                    info->setBarCount (newBarCount);
+                }
+            }
+        }
+
+        return true;
+    }
 
     void readNewInfo (const LV2_Atom_Event* event)
     {
@@ -323,6 +371,7 @@ public:
         const LV2_Atom* atomSpeed          = nullptr;
         const LV2_Atom* atomBar            = nullptr;
         const LV2_Atom* atomBeat           = nullptr;
+        const LV2_Atom* atomBarBeat        = nullptr;
         const LV2_Atom* atomBeatUnit       = nullptr;
         const LV2_Atom* atomBeatsPerBar    = nullptr;
         const LV2_Atom* atomBeatsPerMinute = nullptr;
@@ -331,6 +380,7 @@ public:
                                         { mLV2_TIME__speed,             &atomSpeed },
                                         { mLV2_TIME__bar,               &atomBar },
                                         { mLV2_TIME__beat,              &atomBeat },
+                                        { mLV2_TIME__barBeat,           &atomBarBeat },
                                         { mLV2_TIME__beatUnit,          &atomBeatUnit },
                                         { mLV2_TIME__beatsPerBar,       &atomBeatsPerBar },
                                         { mLV2_TIME__beatsPerMinute,    &atomBeatsPerMinute },
@@ -350,9 +400,9 @@ public:
             info->setTimeSignature (TimeSignature { (int) *numerator, (int) *denominator });
 
         info->setBpm (parser.parseNumericAtom<float> (atomBeatsPerMinute));
-        info->setPpqPosition (parser.parseNumericAtom<double> (atomBeat));
         info->setIsPlaying (! approximatelyEqual (parser.parseNumericAtom<float> (atomSpeed).value_or (0.0f), 0.0f));
         info->setBarCount (parser.parseNumericAtom<int64_t> (atomBar));
+        barBeat = parser.parseNumericAtom<float> (atomBarBeat);
 
         if (const auto parsed = parser.parseNumericAtom<int64_t> (atomFrame))
         {
@@ -368,20 +418,22 @@ public:
 
 private:
     lv2_shared::NumericAtomParser parser;
-    Optional<PositionInfo> info;
+    std::optional<PositionInfo> info;
+    std::optional<float> barBeat;
     double sampleRate;
 
    #define X(str) const LV2_URID m##str = parser.map (str);
     X (LV2_ATOM__Blank)
     X (LV2_ATOM__Object)
     X (LV2_TIME__Position)
+    X (LV2_TIME__bar)
+    X (LV2_TIME__barBeat)
     X (LV2_TIME__beat)
     X (LV2_TIME__beatUnit)
     X (LV2_TIME__beatsPerBar)
     X (LV2_TIME__beatsPerMinute)
     X (LV2_TIME__frame)
     X (LV2_TIME__speed)
-    X (LV2_TIME__bar)
    #undef X
 
     JUCE_LEAK_DETECTOR (PlayHead)
@@ -517,7 +569,10 @@ public:
         ports.connect ((int) port, data);
     }
 
-    void activate() {}
+    void activate()
+    {
+        playHead.invalidate();
+    }
 
     template<typename UnaryFunction>
     static void iterateAudioBuffer (AudioBuffer<float>& ab, UnaryFunction fn)
@@ -547,7 +602,11 @@ public:
         jassert (static_cast<int> (numSteps) <= processor->getBlockSize());
 
         midi.clear();
-        playHead.invalidate();
+
+        // At the end of this render cycle, attempt to estimate the next playhead position, just in
+        // case the host decides not to send a new one.
+        const ScopeGuard incrementPlayHead { [&] { playHead.incrementByNumSamples ((int) numSteps); } };
+
         audio.setSize (audio.getNumChannels(), static_cast<int> (numSteps), true, false, true);
 
         ports.forEachInputEvent ([&] (const LV2_Atom_Event* event)
@@ -578,7 +637,12 @@ public:
         processor->setNonRealtime (ports.isFreeWheeling());
 
         for (auto i = 0, end = processor->getTotalNumInputChannels(); i < end; ++i)
-            audio.copyFrom (i, 0, ports.getBufferForAudioInput (i), audio.getNumSamples());
+        {
+            if (const auto* src = ports.getBufferForAudioInput (i))
+                audio.copyFrom (i, 0, src, audio.getNumSamples());
+            else
+                audio.clear (i, 0, audio.getNumSamples());
+        }
 
         jassert (countNaNs (audio) == 0);
 
@@ -588,10 +652,8 @@ public:
             if (processor->isSuspended())
             {
                 for (auto i = 0, end = processor->getTotalNumOutputChannels(); i < end; ++i)
-                {
-                    const auto ptr = ports.getBufferForAudioOutput (i);
-                    std::fill (ptr, ptr + numSteps, 0.0f);
-                }
+                    if (auto* ptr = ports.getBufferForAudioOutput (i))
+                        std::fill (ptr, ptr + numSteps, 0.0f);
             }
             else
             {
@@ -679,7 +741,10 @@ public:
         ports.writeLatency (processor->getLatencySamples());
     }
 
-    void deactivate() {}
+    void deactivate()
+    {
+        playHead.invalidate();
+    }
 
     LV2_State_Status store (LV2_State_Store_Function storeFn,
                             LV2_State_Handle handle,
@@ -1170,11 +1235,7 @@ private:
         const auto microVersion = getVersionOrZero (1);
 
         os << "\ta "
-             #if JucePlugin_IsSynth
-              "lv2:InstrumentPlugin"
-             #else
-              "lv2:Plugin"
-             #endif
+              "lv2:" JUCE_STRINGIFY (JucePlugin_LV2PluginClass)
               " ;\n"
               "\tdoap:name \"" JucePlugin_Name "\" ;\n"
               "\tdoap:description \"" JucePlugin_Desc "\" ;\n"
@@ -1566,7 +1627,12 @@ public:
         setOpaque (true);
         setVisible (false);
         removeFromDesktop();
-        addToDesktop (detail::PluginUtilities::getDesktopFlags (editor.get()), parent);
+
+        const auto [desktopFlags, windowsUsesMultiTouch] = detail::PluginUtilities::getDesktopFlagsAndWindowsMultiTouchMode (editor.get());
+        addToDesktop (desktopFlags, parent);
+
+        if (auto* peer = getPeer())
+            peer->setWindowsCanUseMultiTouch (windowsUsesMultiTouch);
 
         *widget = getWindowHandle();
 

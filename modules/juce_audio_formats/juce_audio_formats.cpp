@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -74,6 +74,7 @@
 #include "codecs/juce_FlacAudioFormat.cpp"
 #include "codecs/juce_MP3AudioFormat.cpp"
 #include "codecs/juce_OggVorbisAudioFormat.cpp"
+#include "codecs/juce_OpusAudioFormat.cpp"
 #include "codecs/juce_WavAudioFormat.cpp"
 #include "codecs/juce_LAMEEncoderAudioFormat.cpp"
 

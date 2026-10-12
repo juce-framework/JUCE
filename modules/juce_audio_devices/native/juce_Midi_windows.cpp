@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -43,9 +43,9 @@ namespace juce
 
 #if JUCE_USE_WINDOWS_MIDI_SERVICES
 
-namespace wm2 = winrt::Microsoft::Windows::Devices::Midi2;
-namespace wm2v = wm2::Endpoints::Virtual;
-namespace mwdmi = Microsoft::Windows::Devices::Midi2::Initialization;
+namespace wm2 = winrt::Windows::Devices::Midi2;
+namespace wm2e = wm2::Enumeration;
+namespace wm2v = wm2::Transports::Virtual;
 
 class MidiServices
 {
@@ -56,6 +56,12 @@ public:
     }
 
 private:
+    enum class UseComApiInput
+    {
+        no,
+        yes,
+    };
+
     /*  For both input and output.
         It's most resource-efficient to have only one connection to each endpoint.
         Therefore, we keep track of endpoints we've opened, and share the endpoints between
@@ -67,6 +73,7 @@ private:
         template <typename... Args>
         static std::unique_ptr<SharedConnection> make (const wm2::MidiSession& session,
                                                        const winrt::param::hstring& id,
+                                                       UseComApiInput useComApi,
                                                        Args&&... args)
         {
             auto connection = session.CreateEndpointConnection (id);
@@ -77,19 +84,28 @@ private:
             setUpConnection (connection, args...);
 
             auto result = rawToUniquePtr (new SharedConnection (session, std::move (connection)));
-            result->inputToken = result->connection.MessageReceived ([self = result.get()] (const auto&, const wm2::MidiMessageReceivedEventArgs& args)
+
+            if (useComApi == UseComApiInput::yes)
             {
-                std::array<uint32_t, 4> words{};
-                args.FillWordArray (0, words);
+                if (auto raw = result->rawConnection)
+                    raw->SetMessagesReceivedCallback (result->inputCallback.get());
+            }
+            else
+            {
+                result->inputToken = result->connection.MessageReceived ([self = result.get()] (const auto&, const wm2::MidiMessageReceivedEventArgs& args)
+                {
+                    std::array<uint32_t, 4> words{};
+                    args.FillWordArray (0, words);
 
-                const ump::Iterator begin { words.data(), words.size() };
-                const auto end = std::next (begin);
+                    const ump::Iterator begin { words.data(), words.size() };
+                    const auto end = std::next (begin);
 
-                const auto elapsedTime = args.Timestamp() - self->startTimeNative;
-                const auto juceTimeMillis = self->startTimeMillis + wm2::MidiClock::ConvertTimestampTicksToMilliseconds (elapsedTime);
+                    const auto elapsedTime = args.Timestamp() - self->startTimeNative;
+                    const auto juceTimeMillis = self->startTimeMillis + wm2::MidiClock::ConvertTimestampTicksToMilliseconds (elapsedTime);
 
-                self->consumers.call ([&] (auto& c) { c.consume (begin, end, juceTimeMillis * 0.001); });
-            });
+                    self->consumers.call ([&] (auto& c) { c.consume (begin, end, juceTimeMillis * 0.001); });
+                });
+            }
 
             result->disconnectToken = result->connection.EndpointDeviceDisconnected ([self = result.get()] (auto&&...)
             {
@@ -104,6 +120,11 @@ private:
 
         ~SharedConnection()
         {
+            if (rawConnection != nullptr)
+            {
+                rawConnection->RemoveMessagesReceivedCallback();
+            }
+
             connection.MessageReceived (inputToken);
             connection.EndpointDeviceDisconnected (disconnectToken);
 
@@ -141,14 +162,79 @@ private:
 
         bool send (ump::Iterator b, ump::Iterator e)
         {
-            const auto result = connection.SendMultipleMessagesWordArray (0,
-                                                                          0,
-                                                                          (uint32_t) std::distance (b->data(), e->data()),
-                                                                          { b->data(), e->data() });
-            return wm2::MidiSendMessageResults::Succeeded == result;
+            const ScopedLock lock { mutex };
+
+            if (rawConnection == nullptr)
+                return false;
+
+            const auto maxWordsPerSend = rawConnection->GetSupportedMaxMidiWordsPerTransmission();
+
+            for (auto it = b; it != e;)
+            {
+                // Find the first packet with an end that falls outside the max num words
+                const auto chunkEnd = std::find_if (it, e, [&] (auto view)
+                {
+                    return maxWordsPerSend < std::distance (it->data(), view.data() + view.size());
+                });
+
+                // Check if we're unable to send a single packet (seems unlikely...)
+                if (chunkEnd == it)
+                    return false;
+
+                const auto sendResult = rawConnection->SendMidiMessagesRaw (wm2::MidiClock::TimestampConstantSendImmediately(),
+                                                                            (uint32_t) std::distance (it->data(), chunkEnd->data()),
+                                                                            it->data());
+
+                if (FAILED (sendResult))
+                    return false;
+
+                it = chunkEnd;
+            }
+
+            return true;
         }
 
     private:
+        struct InputCallback : public IMidiEndpointConnectionMessagesReceivedCallback
+        {
+            explicit InputCallback (SharedConnection& s)
+                : self (s)
+            {
+            }
+
+            HRESULT QueryInterface (const IID&, void**) { return E_NOTIMPL; }
+
+            ULONG AddRef() override
+            {
+                return ++refCount;
+            }
+
+            ULONG Release() override
+            {
+                const auto result = --refCount;
+
+                if (refCount == 0)
+                    delete this;
+
+                return result;
+            }
+
+            HRESULT MessagesReceived (GUID, GUID, UINT64 timestamp, UINT32 size, const UINT32* data) override
+            {
+                const ump::Iterator begin { data, size };
+                const ump::Iterator end { data + size, 0 };
+
+                const auto elapsedTime = timestamp - self.startTimeNative;
+                const auto juceTimeMillis = self.startTimeMillis + wm2::MidiClock::ConvertTimestampTicksToMilliseconds (elapsedTime);
+
+                self.consumers.call ([&] (auto& c) { c.consume (begin, end, juceTimeMillis * 0.001); });
+                return S_OK;
+            }
+
+            std::atomic<ULONG> refCount { 1 };
+            SharedConnection& self;
+        };
+
         SharedConnection (wm2::MidiSession s, wm2::MidiEndpointConnection c)
             : session (std::move (s)), connection (std::move (c)) {}
 
@@ -171,11 +257,15 @@ private:
         const uint64_t startTimeNative = wm2::MidiClock::Now();
         const uint32_t startTimeMillis = Time::getMillisecondCounter();
 
+        ComSmartPtr<InputCallback> inputCallback { new InputCallback { *this }, IncrementRef::no };
         wm2::MidiSession session;
         wm2::MidiEndpointConnection connection;
+        ComSmartPtr<IMidiEndpointConnectionRaw> rawConnection { connection.as<IMidiEndpointConnectionRaw>().detach(), IncrementRef::no };
         WaitFreeListeners<ump::Consumer> consumers;
         ListenerList<ump::DisconnectionListener> disconnectListeners;
         winrt::event_token inputToken, disconnectToken;
+
+        CriticalSection mutex;
     };
 
     class InputImplNative : public ump::Input::Impl::Native,
@@ -405,14 +495,14 @@ private:
                                                                 ump::PacketProtocol p,
                                                                 ump::Consumer& consumer) override
         {
-            const auto strong = findOrOpenConnection (id.src.toWideCharPointer());
+            const auto strong = findOrOpenConnection (id.src.toWideCharPointer(), UseComApiInput::yes);
             return InputImplNative::make (strong, listener, p, consumer);
         }
 
         std::unique_ptr<ump::Output::Impl::Native> connectOutput (ump::DisconnectionListener& listener,
                                                                   const ump::EndpointId& id) override
         {
-            const auto strong = findOrOpenConnection (id.dst.toWideCharPointer());
+            const auto strong = findOrOpenConnection (id.dst.toWideCharPointer(), UseComApiInput::yes);
             return OutputImplNative::make (strong, listener);
         }
 
@@ -457,19 +547,19 @@ private:
                                                                                     Span<const ump::Block> blocks,
                                                                                     ump::BlocksAreStatic areStatic)
         {
-            wm2::MidiDeclaredEndpointInfo e;
-            e.Name = name.toWideCharPointer();
-            e.HasStaticFunctionBlocks = areStatic == ump::BlocksAreStatic::yes;
-            e.DeclaredFunctionBlockCount = (uint8_t) blocks.size();
-            e.ProductInstanceId = productInstance.toWideCharPointer();
-            e.SupportsMidi10Protocol = protocol == ump::PacketProtocol::MIDI_1_0;
-            e.SupportsMidi20Protocol = protocol == ump::PacketProtocol::MIDI_2_0;
-            e.SpecificationVersionMajor = 1;
-            e.SpecificationVersionMinor = 1;
-            e.SupportsReceivingJitterReductionTimestamps = false;
-            e.SupportsSendingJitterReductionTimestamps = false;
+            wm2e::MidiDeclaredEndpointInfo e;
+            e.Name (name.toWideCharPointer());
+            e.HasStaticFunctionBlocks (areStatic == ump::BlocksAreStatic::yes);
+            e.DeclaredFunctionBlockCount ((uint8_t) blocks.size());
+            e.ProductInstanceId (productInstance.toWideCharPointer());
+            e.SupportsMidi10Protocol (protocol == ump::PacketProtocol::MIDI_1_0);
+            e.SupportsMidi20Protocol (protocol == ump::PacketProtocol::MIDI_2_0);
+            e.SpecificationVersionMajor (1);
+            e.SpecificationVersionMinor (1);
+            e.SupportsReceivingJitterReductionTimestamps (false);
+            e.SupportsSendingJitterReductionTimestamps (false);
 
-            wm2v::MidiVirtualDeviceCreationConfig config { e.Name,
+            wm2v::MidiVirtualDeviceCreationConfig config { e.Name(),
                                                            ump::Endpoints::Impl::getGlobalMidiClientName().toWideCharPointer(),
                                                            L"",
                                                            e,
@@ -485,7 +575,7 @@ private:
 
             // In order to function, the device needs a client plugin installed, which in turn
             // requires opening a connection to the endpoint.
-            auto connection = findOrOpenConnection (device.DeviceEndpointDeviceId(), device);
+            auto connection = findOrOpenConnection (device.DeviceEndpointDeviceId(), UseComApiInput::no, device);
 
             if (connection == nullptr)
                 return {};
@@ -538,47 +628,47 @@ private:
         wm2::MidiSession session;
     };
 
-    static wm2::MidiFunctionBlock makeBlock (uint8_t index, const ump::Block& b)
+    static wm2e::MidiFunctionBlock makeBlock (uint8_t index, const ump::Block& b)
     {
         const auto direction = std::invoke ([&]
         {
             switch (b.getDirection())
             {
-                case ump::BlockDirection::bidirectional: return wm2::MidiFunctionBlockDirection::Bidirectional;
-                case ump::BlockDirection::sender:        return wm2::MidiFunctionBlockDirection::BlockOutput;
-                case ump::BlockDirection::receiver:      return wm2::MidiFunctionBlockDirection::BlockInput;
-                case ump::BlockDirection::unknown:       return wm2::MidiFunctionBlockDirection::Undefined;
+                case ump::BlockDirection::bidirectional: return wm2e::MidiFunctionBlockDirection::Bidirectional;
+                case ump::BlockDirection::sender:        return wm2e::MidiFunctionBlockDirection::BlockOutput;
+                case ump::BlockDirection::receiver:      return wm2e::MidiFunctionBlockDirection::BlockInput;
+                case ump::BlockDirection::unknown:       return wm2e::MidiFunctionBlockDirection::Undefined;
             }
 
-            return wm2::MidiFunctionBlockDirection{};
+            return wm2e::MidiFunctionBlockDirection{};
         });
 
         const auto hint = std::invoke ([&]
         {
             switch (b.getUiHint())
             {
-                case ump::BlockUiHint::bidirectional:   return wm2::MidiFunctionBlockUIHint::Bidirectional;
-                case ump::BlockUiHint::sender:          return wm2::MidiFunctionBlockUIHint::Sender;
-                case ump::BlockUiHint::receiver:        return wm2::MidiFunctionBlockUIHint::Receiver;
-                case ump::BlockUiHint::unknown:         return wm2::MidiFunctionBlockUIHint::Unknown;
+                case ump::BlockUiHint::bidirectional:   return wm2e::MidiFunctionBlockUIHint::Bidirectional;
+                case ump::BlockUiHint::sender:          return wm2e::MidiFunctionBlockUIHint::Sender;
+                case ump::BlockUiHint::receiver:        return wm2e::MidiFunctionBlockUIHint::Receiver;
+                case ump::BlockUiHint::unknown:         return wm2e::MidiFunctionBlockUIHint::Unknown;
             }
 
-            return wm2::MidiFunctionBlockUIHint{};
+            return wm2e::MidiFunctionBlockUIHint{};
         });
 
         const auto proxy = std::invoke ([&]
         {
             switch (b.getMIDI1ProxyKind())
             {
-                case ump::BlockMIDI1ProxyKind::inapplicable:                return wm2::MidiFunctionBlockRepresentsMidi10Connection::Not10;
-                case ump::BlockMIDI1ProxyKind::restrictedBandwidth:         return wm2::MidiFunctionBlockRepresentsMidi10Connection::YesBandwidthRestricted;
-                case ump::BlockMIDI1ProxyKind::unrestrictedBandwidth:       return wm2::MidiFunctionBlockRepresentsMidi10Connection::YesBandwidthUnrestricted;
+                case ump::BlockMIDI1ProxyKind::inapplicable:                return wm2e::MidiFunctionBlockRepresentsMidi10Connection::Not10;
+                case ump::BlockMIDI1ProxyKind::restrictedBandwidth:         return wm2e::MidiFunctionBlockRepresentsMidi10Connection::YesBandwidthRestricted;
+                case ump::BlockMIDI1ProxyKind::unrestrictedBandwidth:       return wm2e::MidiFunctionBlockRepresentsMidi10Connection::YesBandwidthUnrestricted;
             }
 
-            return wm2::MidiFunctionBlockRepresentsMidi10Connection{};
+            return wm2e::MidiFunctionBlockRepresentsMidi10Connection{};
         });
 
-        wm2::MidiFunctionBlock result;
+        wm2e::MidiFunctionBlock result;
         result.Name (b.getName().toWideCharPointer());
         result.Number (index);
         result.IsActive (b.isEnabled());
@@ -598,7 +688,7 @@ private:
         ump::Block block;
     };
 
-    static IndexedBlock makeBlock (const wm2::MidiFunctionBlock& b)
+    static IndexedBlock makeBlock (const wm2e::MidiFunctionBlock& b)
     {
         const auto index = b.Number();
 
@@ -606,10 +696,10 @@ private:
         {
             switch (b.Direction())
             {
-                case wm2::MidiFunctionBlockDirection::Bidirectional: return ump::BlockDirection::bidirectional;
-                case wm2::MidiFunctionBlockDirection::BlockOutput:   return ump::BlockDirection::sender;
-                case wm2::MidiFunctionBlockDirection::BlockInput:    return ump::BlockDirection::receiver;
-                case wm2::MidiFunctionBlockDirection::Undefined:     return ump::BlockDirection::unknown;
+                case wm2e::MidiFunctionBlockDirection::Bidirectional: return ump::BlockDirection::bidirectional;
+                case wm2e::MidiFunctionBlockDirection::BlockOutput:   return ump::BlockDirection::sender;
+                case wm2e::MidiFunctionBlockDirection::BlockInput:    return ump::BlockDirection::receiver;
+                case wm2e::MidiFunctionBlockDirection::Undefined:     return ump::BlockDirection::unknown;
             }
 
             return ump::BlockDirection{};
@@ -619,10 +709,10 @@ private:
         {
             switch (b.UIHint())
             {
-                case wm2::MidiFunctionBlockUIHint::Bidirectional:   return ump::BlockUiHint::bidirectional;
-                case wm2::MidiFunctionBlockUIHint::Sender:          return ump::BlockUiHint::sender;
-                case wm2::MidiFunctionBlockUIHint::Receiver:        return ump::BlockUiHint::receiver;
-                case wm2::MidiFunctionBlockUIHint::Unknown:         return ump::BlockUiHint::unknown;
+                case wm2e::MidiFunctionBlockUIHint::Bidirectional:   return ump::BlockUiHint::bidirectional;
+                case wm2e::MidiFunctionBlockUIHint::Sender:          return ump::BlockUiHint::sender;
+                case wm2e::MidiFunctionBlockUIHint::Receiver:        return ump::BlockUiHint::receiver;
+                case wm2e::MidiFunctionBlockUIHint::Unknown:         return ump::BlockUiHint::unknown;
             }
 
             return ump::BlockUiHint{};
@@ -632,10 +722,10 @@ private:
         {
             switch (b.RepresentsMidi10Connection())
             {
-                case wm2::MidiFunctionBlockRepresentsMidi10Connection::Not10:                    return ump::BlockMIDI1ProxyKind::inapplicable;
-                case wm2::MidiFunctionBlockRepresentsMidi10Connection::YesBandwidthRestricted:   return ump::BlockMIDI1ProxyKind::restrictedBandwidth;
-                case wm2::MidiFunctionBlockRepresentsMidi10Connection::YesBandwidthUnrestricted: return ump::BlockMIDI1ProxyKind::unrestrictedBandwidth;
-                case wm2::MidiFunctionBlockRepresentsMidi10Connection::Reserved:                 break;
+                case wm2e::MidiFunctionBlockRepresentsMidi10Connection::Not10:                    return ump::BlockMIDI1ProxyKind::inapplicable;
+                case wm2e::MidiFunctionBlockRepresentsMidi10Connection::YesBandwidthRestricted:   return ump::BlockMIDI1ProxyKind::restrictedBandwidth;
+                case wm2e::MidiFunctionBlockRepresentsMidi10Connection::YesBandwidthUnrestricted: return ump::BlockMIDI1ProxyKind::unrestrictedBandwidth;
+                case wm2e::MidiFunctionBlockRepresentsMidi10Connection::Reserved:                 break;
             }
 
             return ump::BlockMIDI1ProxyKind{};
@@ -653,46 +743,41 @@ private:
         return { index, block };
     }
 
-    static wm2::MidiDeclaredDeviceIdentity makeDeviceInfo (ump::DeviceInfo x)
+    static wm2e::MidiDeclaredDeviceIdentity makeDeviceInfo (ump::DeviceInfo x)
     {
-        wm2::MidiDeclaredDeviceIdentity result{};
+        wm2e::MidiDeclaredDeviceIdentity result{};
 
-        result.SystemExclusiveIdByte1 = (uint8_t) x.manufacturer[0];
-        result.SystemExclusiveIdByte2 = (uint8_t) x.manufacturer[1];
-        result.SystemExclusiveIdByte3 = (uint8_t) x.manufacturer[2];
-
-        result.DeviceFamilyLsb = (uint8_t) x.family[0];
-        result.DeviceFamilyMsb = (uint8_t) x.family[1];
-
-        result.DeviceFamilyModelNumberLsb = (uint8_t) x.modelNumber[0];
-        result.DeviceFamilyModelNumberMsb = (uint8_t) x.modelNumber[1];
-
-        result.SoftwareRevisionLevelByte1 = (uint8_t) x.revision[0];
-        result.SoftwareRevisionLevelByte2 = (uint8_t) x.revision[1];
-        result.SoftwareRevisionLevelByte3 = (uint8_t) x.revision[2];
-        result.SoftwareRevisionLevelByte4 = (uint8_t) x.revision[3];
+        std::apply ([&] (auto&&... args) { result.SetSystemExclusiveId ((uint8_t) args...); }, x.manufacturer);
+        std::apply ([&] (auto&&... args) { result.SetDeviceFamily ((uint8_t) args...); }, x.family);
+        std::apply ([&] (auto&&... args) { result.SetDeviceFamilyModelNumber ((uint8_t) args...); }, x.modelNumber);
+        std::apply ([&] (auto&&... args) { result.SetSoftwareRevisionLevel ((uint8_t) args...); }, x.revision);
 
         return result;
     }
 
-    static ump::DeviceInfo makeDeviceInfo (const wm2::MidiDeclaredDeviceIdentity& x)
+    static std::optional<ump::DeviceInfo> makeDeviceInfo (const wm2e::MidiDeclaredDeviceIdentity& x)
     {
+        if (x == nullptr)
+        {
+            return {};
+        }
+
+        const auto byteArrayFromComArray = [] <auto... Ix> (const winrt::com_array<unsigned char>& array, std::index_sequence<Ix...>)
+        {
+            return std::array { (std::byte) array[Ix]... };
+        };
+
         return ump::DeviceInfo
         {
-            { std::byte (x.SystemExclusiveIdByte1),
-              std::byte (x.SystemExclusiveIdByte2),
-              std::byte (x.SystemExclusiveIdByte3) },
+            byteArrayFromComArray (x.SystemExclusiveId(), std::make_index_sequence<3>()),
 
-            { std::byte (x.DeviceFamilyLsb),
-              std::byte (x.DeviceFamilyMsb) },
+            { std::byte (x.DeviceFamilyLsb()),
+              std::byte (x.DeviceFamilyMsb()) },
 
-            { std::byte (x.DeviceFamilyModelNumberLsb),
-              std::byte (x.DeviceFamilyModelNumberMsb) },
+            { std::byte (x.DeviceFamilyModelNumberLsb()),
+              std::byte (x.DeviceFamilyModelNumberMsb()) },
 
-            { std::byte (x.SoftwareRevisionLevelByte1),
-              std::byte (x.SoftwareRevisionLevelByte2),
-              std::byte (x.SoftwareRevisionLevelByte3),
-              std::byte (x.SoftwareRevisionLevelByte4) },
+            byteArrayFromComArray (x.SoftwareRevisionLevel(), std::make_index_sequence<4>()),
         };
     }
 
@@ -771,7 +856,7 @@ private:
                 return {};
             }
 
-            auto watcher = wm2::MidiEndpointDeviceWatcher::Create();
+            auto watcher = wm2e::MidiEndpointDeviceWatcher::Create();
 
             if (! watcher)
                 return {};
@@ -780,10 +865,10 @@ private:
         }
 
     private:
-        EndpointsImplNative (wm2::MidiEndpointDeviceWatcher w, ump::EndpointsListener& l)
+        EndpointsImplNative (wm2e::MidiEndpointDeviceWatcher w, ump::EndpointsListener& l)
             : listener (l), watcher (w)
         {
-            watcher.Added ([this] (auto&, const wm2::MidiEndpointDeviceInformationAddedEventArgs& args)
+            watcher.Added ([this] (auto&, const wm2e::MidiEndpointDeviceInformationAddedEventArgs& args)
             {
                 const auto device = args.AddedDevice();
                 const auto id = toString (device.EndpointDeviceId());
@@ -798,11 +883,12 @@ private:
                 triggerAsyncUpdate();
             });
 
-            watcher.Updated ([this] (auto&, const wm2::MidiEndpointDeviceInformationUpdatedEventArgs& args)
+            watcher.Updated ([this] (auto&, const wm2e::MidiEndpointDeviceInformationUpdatedEventArgs& args)
             {
-                const auto id = toString (args.EndpointDeviceId());
+                const auto plainId = args.UpdatedDevice().EndpointDeviceId();
+                const auto id = toString (plainId);
 
-                if (const auto info = wm2::MidiEndpointDeviceInformation::CreateFromEndpointDeviceId (args.EndpointDeviceId()))
+                if (const auto info = wm2e::MidiEndpointDeviceInformation::CreateFromEndpointDeviceId (plainId))
                 {
                     const auto endpoint = makeEndpoint (info);
 
@@ -816,9 +902,9 @@ private:
                 }
             });
 
-            watcher.Removed ([this] (auto&, const wm2::MidiEndpointDeviceInformationRemovedEventArgs& args)
+            watcher.Removed ([this] (auto&, const wm2e::MidiEndpointDeviceInformationRemovedEventArgs& args)
             {
-                const auto id = toString (args.EndpointDeviceId());
+                const auto id = toString (args.RemovedDevice().EndpointDeviceId());
 
                 const std::scoped_lock lock { mutex };
                 pendingWork.push_back ([this, id]
@@ -875,13 +961,13 @@ private:
             listener.endpointsChanged();
         }
 
-        static ump::EndpointAndStaticInfo makeEndpoint (const wm2::MidiEndpointDeviceInformation& info)
+        static ump::EndpointAndStaticInfo makeEndpoint (const wm2e::MidiEndpointDeviceInformation& info)
         {
             const auto transport = std::invoke ([&]
             {
-                const auto t = info.GetTransportSuppliedInfo().NativeDataFormat;
+                const auto t = info.GetTransportSuppliedInfo().NativeDataFormat();
 
-                if (t == wm2::MidiEndpointNativeDataFormat::Midi1ByteFormat)
+                if (t == wm2e::MidiEndpointNativeDataFormat::Midi1ByteFormat)
                     return ump::Transport::bytestream;
 
                 return ump::Transport::ump;
@@ -889,9 +975,9 @@ private:
 
             const auto itemProtocol = std::invoke ([&]
             {
-                const auto p = info.GetDeclaredStreamConfiguration().Protocol;
+                const auto p = info.GetDeclaredStreamConfiguration().Protocol();
 
-                if (p == wm2::MidiProtocol::Midi1 || transport == ump::Transport::bytestream)
+                if (p == wm2e::MidiProtocol::Midi1 || transport == ump::Transport::bytestream)
                     return ump::PacketProtocol::MIDI_1_0;
 
                 return ump::PacketProtocol::MIDI_2_0;
@@ -933,28 +1019,28 @@ private:
             const auto endpoint = ump::Endpoint{}.withName (toString (info.Name()))
                                                  .withProtocol (itemProtocol)
                                                  .withBlocks (blocks)
-                                                 .withDeviceInfo (deviceInfo)
-                                                 .withProductInstanceId (toString (info.GetDeclaredEndpointInfo().ProductInstanceId))
-                                                 .withUMPVersion (e.SpecificationVersionMajor, e.SpecificationVersionMinor)
-                                                 .withMidi1Support (e.SupportsMidi10Protocol)
-                                                 .withMidi2Support (e.SupportsMidi20Protocol)
-                                                 .withStaticBlocks (e.HasStaticFunctionBlocks)
-                                                 .withReceiveJRSupport (e.SupportsReceivingJitterReductionTimestamps)
-                                                 .withTransmitJRSupport (e.SupportsSendingJitterReductionTimestamps);
+                                                 .withDeviceInfo (deviceInfo.value_or ({}))
+                                                 .withProductInstanceId (toString (info.GetDeclaredEndpointInfo().ProductInstanceId()))
+                                                 .withUMPVersion (e.SpecificationVersionMajor(), e.SpecificationVersionMinor())
+                                                 .withMidi1Support (e.SupportsMidi10Protocol())
+                                                 .withMidi2Support (e.SupportsMidi20Protocol())
+                                                 .withStaticBlocks (e.HasStaticFunctionBlocks())
+                                                 .withReceiveJRSupport (e.SupportsReceivingJitterReductionTimestamps())
+                                                 .withTransmitJRSupport (e.SupportsSendingJitterReductionTimestamps());
 
             const auto hasBlockDirection = [&] (auto direction)
             {
-                const auto blockCanUseDirection = [&] (const wm2::MidiFunctionBlock& x)
+                const auto blockCanUseDirection = [&] (const wm2e::MidiFunctionBlock& x)
                 {
                     const auto d = x.Direction();
-                    return d == wm2::MidiFunctionBlockDirection::Bidirectional || d == direction;
+                    return d == wm2e::MidiFunctionBlockDirection::Bidirectional || d == direction;
                 };
 
                 const auto fb = info.GetDeclaredFunctionBlocks();
                 const auto gt = info.GetGroupTerminalBlocks();
 
                 return std::any_of (fb.begin(), fb.end(), blockCanUseDirection)
-                    || std::any_of (gt.begin(), gt.end(), [&] (const wm2::MidiGroupTerminalBlock& x)
+                    || std::any_of (gt.begin(), gt.end(), [&] (const wm2e::MidiGroupTerminalBlock& x)
                        {
                            return blockCanUseDirection (x.AsEquivalentFunctionBlock());
                        });
@@ -963,8 +1049,8 @@ private:
             const auto staticInfo = ump::StaticDeviceInfo{}.withName (toString (info.Name()))
                                                            .withManufacturer (toString (winrt::unbox_value_or<winrt::hstring> (manufacturer, L"")))
                                                            .withProduct (toString (winrt::unbox_value_or<winrt::hstring> (product, L"")))
-                                                           .withHasSource (hasBlockDirection (wm2::MidiFunctionBlockDirection::BlockOutput))
-                                                           .withHasDestination (hasBlockDirection (wm2::MidiFunctionBlockDirection::BlockInput))
+                                                           .withHasSource (hasBlockDirection (wm2e::MidiFunctionBlockDirection::BlockOutput))
+                                                           .withHasDestination (hasBlockDirection (wm2e::MidiFunctionBlockDirection::BlockInput))
                                                            .withLegacyIdentifiersSrc (legacyIds)
                                                            .withLegacyIdentifiersDst (legacyIds)
                                                            .withTransport (transport);
@@ -977,36 +1063,26 @@ private:
         public:
             SdkInitialiser() = default;
 
-            bool isValid() const { return ptr != nullptr; }
+            bool isValid() const { return initialised; }
 
         private:
-            ComSmartPtr<mwdmi::IMidiClientInitializer> ptr = std::invoke ([]() -> ComSmartPtr<mwdmi::IMidiClientInitializer>
+            bool initialised = std::invoke ([]()
             {
                 try
                 {
                     winrt::init_apartment (winrt::apartment_type::single_threaded);
+                    return wm2::MidiApi::EnsureServiceAvailable();
+                }
+                catch (const winrt::hresult_error& e)
+                {
+                    DBG ("winrt threw hresult: " << e.message().c_str());
                 }
                 catch (...)
                 {
                     // We tried...
                 }
 
-                ComSmartPtr<mwdmi::IMidiClientInitializer> result;
-
-                if (FAILED (CoCreateInstance (__uuidof (mwdmi::MidiClientInitializerUuid),
-                                              nullptr,
-                                              CLSCTX::CLSCTX_INPROC_SERVER | CLSCTX::CLSCTX_FROM_DEFAULT_CONTEXT,
-                                              __uuidof (mwdmi::IMidiClientInitializer),
-                                              (void**) result.resetAndGetPointerAddress())))
-                    return {};
-
-                if (result == nullptr)
-                    return {};
-
-                if (FAILED (result->EnsureServiceAvailable()))
-                    return {};
-
-                return result;
+                return false;
             });
         };
 
@@ -1018,7 +1094,7 @@ private:
         ump::EndpointsListener& listener;
         std::map<ump::EndpointId, ump::EndpointAndStaticInfo> cachedEndpoints;
         std::map<ump::EndpointId, std::weak_ptr<VirtualEndpoint>> virtualEndpoints;
-        wm2::MidiEndpointDeviceWatcher watcher;
+        wm2e::MidiEndpointDeviceWatcher watcher;
     };
 
     static String toString (const winrt::hstring& str)
@@ -2485,19 +2561,24 @@ struct WindowsMidiHelpers
                 hdr.lpData = data.data();
                 hdr.dwBufferLength = (DWORD) data.size();
 
-                midiInPrepareHeader (device, &hdr, sizeof (hdr));
+                [[maybe_unused]] const auto result = midiInPrepareHeader (device, &hdr, sizeof (hdr));
+                jassert (result == MMSYSERR_NOERROR);
             }
 
             void unprepare (HMIDIIN device)
             {
-                if ((hdr.dwFlags & WHDR_DONE) != 0)
+                for (auto i = 0; i < 10; ++i)
                 {
-                    int c = 10;
-                    while (--c >= 0 && midiInUnprepareHeader (device, &hdr, sizeof (hdr)) == MIDIERR_STILLPLAYING)
-                        Thread::sleep (20);
+                    const auto result = midiInUnprepareHeader (device, &hdr, sizeof (hdr));
 
-                    jassert (c >= 0);
+                    if (result != MIDIERR_STILLPLAYING)
+                        return;
+
+                    Thread::sleep (20);
                 }
+
+                // Failed to unprepare after several tries
+                jassertfalse;
             }
 
             void write (HMIDIIN device)
@@ -2506,10 +2587,9 @@ struct WindowsMidiHelpers
                 midiInAddBuffer (device, &hdr, sizeof (hdr));
             }
 
-            void writeIfFinished (HMIDIIN device)
+            bool isFinished() const
             {
-                if ((hdr.dwFlags & WHDR_DONE) != 0)
-                    write (device);
+                return (hdr.dwFlags & MHDR_DONE) != 0;
             }
 
         private:
@@ -2554,23 +2634,51 @@ struct WindowsMidiHelpers
 
             ~InputDevice() override
             {
+                inDestructor = true;
+                SetEvent (event.get());
+
+                blockQueueThread.join();
+
                 allInputs().remove (*this);
 
                 if (deviceHandle == nullptr)
                     return;
 
-                unprepareAllHeaders();
+                const auto stopResult = midiInStop (deviceHandle);
+                const auto resetResult = midiInReset (deviceHandle);
+                const auto stopSuccess = stopResult == MMSYSERR_NOERROR && resetResult == MMSYSERR_NOERROR;
 
-                midiInReset (deviceHandle);
-                midiInStop (deviceHandle);
-
-                for (int count = 5; --count >= 0;)
+                if (stopSuccess)
                 {
-                    if (midiInClose (deviceHandle) == MMSYSERR_NOERROR)
-                        break;
-
-                    Sleep (20);
+                    for (auto& header : *headers)
+                        header.unprepare (deviceHandle);
                 }
+
+                const auto closed = std::invoke ([&]
+                {
+                    for (int count = 5; --count >= 0;)
+                    {
+                        if (midiInClose (deviceHandle) == MMSYSERR_NOERROR)
+                            return true;
+
+                        // If we were unable to stop and reset the device, it could well be because the
+                        // device went away, so closing is also likely to fail. In this situation,
+                        // attempt to close once to be a good citizen, but avoid retrying to keep
+                        // our program responsive.
+                        if (! stopSuccess)
+                            return false;
+
+                        Sleep (20);
+                    }
+
+                    return false;
+                });
+
+                // If the device couldn't be closed, the driver may still hold pointers to the
+                // headers and their buffers. Leaking them is safer than freeing memory that the
+                // driver might still write to.
+                if (! closed)
+                    headers.release();
             }
 
             ump::EndpointId getEndpointId() const
@@ -2585,7 +2693,7 @@ struct WindowsMidiHelpers
 
             void removeConsumer (ump::Consumer& c)
             {
-                consumers.add (c);
+                consumers.remove (c);
             }
 
             void addDisconnectListener (ump::DisconnectionListener& l)
@@ -2625,7 +2733,7 @@ struct WindowsMidiHelpers
 
                 result->deviceHandle = handle;
 
-                for (auto& header : result->headers)
+                for (auto& header : *result->headers)
                 {
                     header.prepare (handle);
                     header.write (handle);
@@ -2633,6 +2741,18 @@ struct WindowsMidiHelpers
 
                 if (midiInStart (handle) != MMSYSERR_NOERROR)
                     return {};
+
+                result->blockQueueThread = std::thread { [self = result.get()]
+                {
+                    while (! self->inDestructor)
+                    {
+                        WaitForSingleObject (self->event.get(), INFINITE);
+
+                        for (auto& header : *self->headers)
+                            if (header.isFinished())
+                                header.write (self->deviceHandle);
+                    }
+                } };
 
                 return result;
             }
@@ -2655,9 +2775,9 @@ struct WindowsMidiHelpers
                         const auto e = std::next (b);
                         consumers.call ([&] (ump::Consumer& c) { c.consume (b, e, timestamp); });
                     });
-
-                    writeFinishedBlocks();
                 }
+
+                SetEvent (event.get());
             }
 
             void handleSysEx (MIDIHDR* hdr, uint32 timeStamp)
@@ -2671,9 +2791,9 @@ struct WindowsMidiHelpers
                         const auto e = std::next (b);
                         consumers.call ([&] (ump::Consumer& c) { c.consume (b, e, timestamp); });
                     });
-
-                    writeFinishedBlocks();
                 }
+
+                SetEvent (event.get());
             }
 
             void disconnected()
@@ -2684,18 +2804,6 @@ struct WindowsMidiHelpers
             void handleAsyncUpdate() override
             {
                 disconnectListeners.call ([] (auto& x) { x.disconnected(); });
-            }
-
-            void writeFinishedBlocks()
-            {
-                for (auto& header : headers)
-                    header.writeIfFinished (deviceHandle);
-            }
-
-            void unprepareAllHeaders()
-            {
-                for (auto& header : headers)
-                    header.unprepare (deviceHandle);
             }
 
             double convertTimeStamp (uint32 timeStamp)
@@ -2752,7 +2860,7 @@ struct WindowsMidiHelpers
 
             ump::EndpointId endpointId;
             HMIDIIN deviceHandle = nullptr;
-            std::array<MidiHeader, 32> headers;
+            std::unique_ptr<std::array<MidiHeader, 32>> headers = std::make_unique<std::array<MidiHeader, 32>>();
             double startTime = Time::getMillisecondCounterHiRes();
             WaitFreeListeners<ump::Consumer> consumers;
             ListenerList<ump::DisconnectionListener> disconnectListeners;
@@ -2760,17 +2868,137 @@ struct WindowsMidiHelpers
             // their own converters.
             ump::BytestreamToUMPDispatcher dispatcher { 0, ump::PacketProtocol::MIDI_1_0, 4096 };
 
+            struct EventDestructor
+            {
+                void operator() (HANDLE h) const
+                {
+                    if (h != nullptr)
+                        CloseHandle (h);
+                }
+            };
+
+            std::atomic<bool> inDestructor { false };
+            std::unique_ptr<void, EventDestructor> event { CreateEvent (nullptr, false, false, nullptr) };
+            std::thread blockQueueThread;
+
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputDevice)
         };
 
-        class OutputDevice : private AsyncUpdater
+        class SysexOutputHandle
         {
         public:
-            ~OutputDevice() override
+            ~SysexOutputHandle()
+            {
+                // This output handle is still in use, missing call to clear()?
+                jassert ((midihdr.dwFlags & MHDR_PREPARED) == 0);
+            }
+
+            SysexOutputHandle() = default;
+
+            SysexOutputHandle (const SysexOutputHandle&) = delete;
+            SysexOutputHandle (SysexOutputHandle&&) = delete;
+
+            SysexOutputHandle& operator= (const SysexOutputHandle&) = delete;
+            SysexOutputHandle& operator= (SysexOutputHandle&&) = delete;
+
+            /*  Returns true if this object can be reused, or false otherwise.
+                Failure implies that the driver might still be holding onto a pointer to the
+                MIDIHDR, which in turn holds a pointer to the stored sysex buffer, so this
+                object should not be destroyed (yet). Call clear() later on to force the driver
+                to give up references to the buffer.
+            */
+            bool trySend (HMIDIOUT handle, Span<const std::byte> message)
+            {
+                storage.assign (message.begin(), message.end());
+
+                midihdr.lpData = (char*) storage.data();
+                midihdr.dwBytesRecorded = midihdr.dwBufferLength = (DWORD) storage.size();
+
+                if (midiOutPrepareHeader (handle, &midihdr, sizeof (MIDIHDR)) != MMSYSERR_NOERROR)
+                    return true;
+
+                if (midiOutLongMsg (handle, &midihdr, sizeof (MIDIHDR)) == MMSYSERR_NOERROR)
+                {
+                    const auto timeoutMs = (uint32) (5000 + storage.size());
+                    const auto start = Time::getMillisecondCounter();
+
+                    while ((midihdr.dwFlags & MHDR_DONE) == 0)
+                    {
+                        if (Time::getMillisecondCounter() - start >= timeoutMs)
+                            return false;
+
+                        Sleep (1);
+                    }
+                }
+
+                return unprepare (handle);
+            }
+
+            /*  If this buffer is in use, forces the driver to stop using it and unprepares the
+                buffer. This should be called at some point before this object is destroyed.
+                Calls midiOutReset internally.
+
+                According to the docs, we must call midiOutputUnprepareHeader before destroying
+                the MIDIHDR and buffer, and we're not allowed to unprepare the header until
+                midiOutLongMsg is done with it. midiOutLongMsg might take a long time, or fail
+                completely in some cases.
+
+                midiOutReset can be used to force the device to give up references to pending
+                buffers, but it also has the side-effect of sending all-notes-off messages, which
+                is probably unwanted, so it should only be used as a last resort.
+            */
+            void clear (HMIDIOUT handle)
+            {
+                if ((midihdr.dwFlags & MHDR_PREPARED) == 0)
+                    return;
+
+                if ((midihdr.dwFlags & MHDR_DONE) == 0)
+                {
+                    [[maybe_unused]] const auto didReset = midiOutReset (handle) == MMSYSERR_NOERROR;
+                    // If this is hit, we failed to reset the output so the driver might still hold
+                    // a pointer to our storage buffer. Possible undefined behaviour after this point.
+                    jassert (didReset);
+                }
+
+                [[maybe_unused]] const auto didUnprepare = unprepare (handle);
+                // The driver doesn't want to give up references to the MIDI buffer, even though we
+                // just called midiOutReset, which is supposed to force the driver to do that.
+                jassert (didUnprepare);
+            }
+
+            const MIDIHDR* getKey() const { return &midihdr; }
+
+            bool done() const
+            {
+                return (midihdr.dwFlags & MHDR_DONE) != 0;
+            }
+
+        private:
+            bool unprepare (HMIDIOUT handle)
+            {
+                for (auto i = 0; i < 500; ++i)
+                {
+                    if (midiOutUnprepareHeader (handle, &midihdr, sizeof (MIDIHDR)) != MIDIERR_STILLPLAYING)
+                        return true;
+
+                    Sleep (2);
+                }
+
+                return false;
+            }
+
+            MIDIHDR midihdr{};
+            std::vector<std::byte> storage = std::vector<std::byte> (2048);
+        };
+
+        class OutputDevice
+        {
+        public:
+            ~OutputDevice()
             {
                 allOutputs().remove (*this);
 
-                cancelPendingUpdate();
+                sysexOutputHandle->clear (handle);
 
                 if (handle != nullptr)
                     midiOutClose (handle);
@@ -2789,15 +3017,18 @@ struct WindowsMidiHelpers
 
             bool send (ump::Iterator b, ump::Iterator e)
             {
+                const ScopedLock lock { mutex };
+                bool sendSucceeded = true;
+
                 for (const auto& view : makeRange (b, e))
                 {
                     toBytestream.convert (view, 0, [&] (ump::BytesOnGroup bytesView, double)
                     {
-                        sendBytestream (bytesView.bytes);
+                        sendSucceeded &= sendBytestream (bytesView.bytes);
                     });
                 }
 
-                return true;
+                return sendSucceeded;
             }
 
             void addDisconnectListener (ump::DisconnectionListener& l)
@@ -2811,6 +3042,132 @@ struct WindowsMidiHelpers
             }
 
         private:
+            class DisconnectUpdater : private AsyncUpdater
+            {
+            public:
+                explicit DisconnectUpdater (OutputDevice& x)
+                    : owner (x)
+                {
+                }
+
+                ~DisconnectUpdater() override
+                {
+                    cancelPendingUpdate();
+                }
+
+                using AsyncUpdater::triggerAsyncUpdate;
+
+            private:
+                void handleAsyncUpdate() override
+                {
+                    owner.disconnectListeners.call ([] (auto& x) { x.disconnected(); });
+                }
+
+                OutputDevice& owner;
+            };
+
+            class DoneUpdater : private AsyncUpdater
+            {
+            public:
+                explicit DoneUpdater (OutputDevice& x)
+                    : owner (x)
+                {
+                }
+
+                ~DoneUpdater() override
+                {
+                    for (auto& sysexOutput : timedOutHandles)
+                        sysexOutput.second->clear (owner.handle);
+
+                    cancelPendingUpdate();
+                }
+
+                /*  Called when a sysex buffer times out during sending.
+                    Although this might be called by a high-priority thread, we're not overly
+                    worried about locking/allocating here since the thread will already have been
+                    blocked waiting for the timeout.
+                */
+                void timeOut (std::unique_ptr<SysexOutputHandle> x)
+                {
+                    const auto* key = x->getKey();
+                    const ScopedLock lock { timedOutMutex };
+                    timedOutHandles.emplace (key, std::move (x));
+                }
+
+                /*  Called, potentially on a high priority thread, when a buffer is no longer in use. */
+                void done (const MIDIHDR* x)
+                {
+                    if (MessageManager::getInstance()->isThisTheMessageThread())
+                    {
+                        erase (x);
+                        return;
+                    }
+
+                    if (fifo.getFreeSpace() == 0)
+                        overflow = true;
+                    else
+                        fifo.write (1).forEach ([&] (auto index) { headerPtrs[(size_t) index] = x; });
+
+                    triggerAsyncUpdate();
+                }
+
+            private:
+                void handleAsyncUpdate() override
+                {
+                    if (overflow.exchange (false))
+                    {
+                        // If the queue overflowed, we dropped an update, so scan
+                        // through all timed-out buffers, and drain the queue so that we can
+                        // try to take the fast path next time.
+
+                        fifo.reset();
+
+                        const ScopedLock lock { timedOutMutex };
+
+                        for (auto it = timedOutHandles.begin(); it != timedOutHandles.end();)
+                        {
+                            it = std::invoke ([&]
+                            {
+                                if (it->second->done())
+                                {
+                                    it->second->clear (owner.handle);
+                                    return timedOutHandles.erase (it);
+                                }
+
+                                return std::next (it);
+                            });
+                        }
+                    }
+                    else
+                    {
+                        fifo.read (fifo.getNumReady()).forEach ([&] (auto index)
+                        {
+                            erase (headerPtrs[(size_t) index]);
+                        });
+                    }
+                }
+
+                void erase (const MIDIHDR* key)
+                {
+                    const ScopedLock lock { timedOutMutex };
+
+                    const auto iter = timedOutHandles.find (key);
+
+                    if (iter == timedOutHandles.end() || ! iter->second->done())
+                        return;
+
+                    iter->second->clear (owner.handle);
+                    timedOutHandles.erase (iter);
+                }
+
+                OutputDevice& owner;
+                std::map<const MIDIHDR*, std::unique_ptr<SysexOutputHandle>> timedOutHandles;
+                std::vector<const MIDIHDR*> headerPtrs = std::vector<const MIDIHDR*> (128);
+                AbstractFifo fifo { (int) headerPtrs.size() };
+                std::atomic<bool> overflow = false;
+                CriticalSection timedOutMutex;
+            };
+
             static std::unique_ptr<OutputDevice> openInternal (const ump::EndpointId& id)
             {
                 std::vector<ump::EndpointAndStaticInfo> endpoints;
@@ -2823,34 +3180,20 @@ struct WindowsMidiHelpers
                     return {};
 
                 const auto deviceID = std::distance (endpoints.begin(), iter);
+                auto result = rawToUniquePtr (new OutputDevice (id));
 
-                for (auto i = 0; i < 4; ++i)
-                {
-                    auto result = rawToUniquePtr (new OutputDevice (id));
+                HMIDIOUT h = nullptr;
+                auto res = midiOutOpen (&h,
+                                        (UINT) deviceID,
+                                        (DWORD_PTR) &midiOutCallback,
+                                        (DWORD_PTR) result.get(),
+                                        CALLBACK_FUNCTION);
 
-                    HMIDIOUT h = nullptr;
-                    auto res = midiOutOpen (&h,
-                                            (UINT) deviceID,
-                                            (DWORD_PTR) &midiOutCallback,
-                                            (DWORD_PTR) result.get(),
-                                            CALLBACK_FUNCTION);
+                if (res != MMSYSERR_NOERROR)
+                    return {};
 
-                    switch (res)
-                    {
-                        case MMSYSERR_NOERROR:
-                            result->handle = h;
-                            return result;
-
-                        case MMSYSERR_ALLOCATED:
-                            Sleep (100);
-                            break;
-
-                        default:
-                            return {};
-                    }
-                }
-
-                return {};
+                result->handle = h;
+                return result;
             }
 
             explicit OutputDevice (const ump::EndpointId& x)
@@ -2859,72 +3202,35 @@ struct WindowsMidiHelpers
                 allOutputs().add (*this);
             }
 
-            void sendBytestream (Span<const std::byte> message)
+            [[nodiscard]] bool sendBytestream (Span<const std::byte> message)
             {
                 if (message.empty())
-                    return;
+                    return true;
 
                 if (message.size() > 3 || message[0] == std::byte { 0xf0 })
                 {
-                    MIDIHDR h = {};
+                    // If the sysex buffer can't be reclaimed, that implies it's still in use after
+                    // reaching a timeout. Although the line below allocates from a high-priority
+                    // thread, it'll only happen if the thread has already been blocked for a long
+                    // time, so it's acceptable under the circumstances.
+                    if (! sysexOutputHandle->trySend (handle, message))
+                        doneUpdater.timeOut (std::exchange (sysexOutputHandle, std::make_unique<SysexOutputHandle>()));
 
-                    h.lpData = (char*) message.data();
-                    h.dwBytesRecorded = h.dwBufferLength  = (DWORD) message.size();
-
-                    if (midiOutPrepareHeader (handle, &h, sizeof (MIDIHDR)) == MMSYSERR_NOERROR)
-                    {
-                        auto res = midiOutLongMsg (handle, &h, sizeof (MIDIHDR));
-
-                        if (res == MMSYSERR_NOERROR)
-                        {
-                            while ((h.dwFlags & MHDR_DONE) == 0)
-                                Sleep (1);
-
-                            int count = 500; // 1 sec timeout
-
-                            while (--count >= 0)
-                            {
-                                res = midiOutUnprepareHeader (handle, &h, sizeof (MIDIHDR));
-
-                                if (res == MIDIERR_STILLPLAYING)
-                                    Sleep (2);
-                                else
-                                    break;
-                            }
-                        }
-                    }
+                    return true;
                 }
-                else
-                {
-                    const auto msg = ByteOrder::makeInt (0 < message.size() ? (uint8_t) message[0] : 0,
-                                                         1 < message.size() ? (uint8_t) message[1] : 0,
-                                                         2 < message.size() ? (uint8_t) message[2] : 0,
-                                                         0);
 
-                    for (int i = 0; i < 50; ++i)
-                    {
-                        if (midiOutShortMsg (handle, msg) != MIDIERR_NOTREADY)
-                            break;
+                const auto msg = ByteOrder::makeInt (0 < message.size() ? (uint8_t) message[0] : 0,
+                                                     1 < message.size() ? (uint8_t) message[1] : 0,
+                                                     2 < message.size() ? (uint8_t) message[2] : 0,
+                                                     0);
 
-                        Sleep (1);
-                    }
-                }
-            }
-
-            void disconnected()
-            {
-                triggerAsyncUpdate();
-            }
-
-            void handleAsyncUpdate() override
-            {
-                disconnectListeners.call ([] (auto& x) { x.disconnected(); });
+                return midiOutShortMsg (handle, msg) == MMSYSERR_NOERROR;
             }
 
             static void CALLBACK midiOutCallback (HMIDIOUT,
                                                   UINT wMsg,
                                                   DWORD_PTR dwInstance,
-                                                  DWORD_PTR,
+                                                  DWORD_PTR param1,
                                                   DWORD_PTR)
             {
                 auto* collector = reinterpret_cast<OutputDevice*> (dwInstance);
@@ -2937,7 +3243,11 @@ struct WindowsMidiHelpers
                     switch (wMsg)
                     {
                         case MOM_CLOSE:
-                            l.disconnected();
+                            l.disconnectUpdater.triggerAsyncUpdate();
+                            break;
+
+                        case MOM_DONE:
+                            l.doneUpdater.done ((const MIDIHDR*) param1);
                             break;
                     }
                 });
@@ -2953,6 +3263,11 @@ struct WindowsMidiHelpers
             HMIDIOUT handle = nullptr;
             ListenerList<ump::DisconnectionListener> disconnectListeners;
             ump::ToBytestreamConverter toBytestream { 4096 };
+            std::unique_ptr<SysexOutputHandle> sysexOutputHandle = std::make_unique<SysexOutputHandle>();
+            DisconnectUpdater disconnectUpdater { *this };
+            DoneUpdater doneUpdater { *this };
+
+            CriticalSection mutex;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutputDevice)
         };
@@ -3063,7 +3378,81 @@ struct WindowsMidiHelpers
             String name;
         };
 
-        class EndpointsImplNative : public ump::Endpoints::Impl::Native
+        struct MidiDeviceChangeDetectorDelegate
+        {
+            virtual ~MidiDeviceChangeDetectorDelegate() = default;
+            virtual void onMidiDeviceListChanged() = 0;
+        };
+
+        class MidiDeviceChangeDetector : private AsyncUpdater
+        {
+        public:
+            explicit MidiDeviceChangeDetector (MidiDeviceChangeDetectorDelegate& d)
+                : delegate (d)
+            {
+                constexpr GUID deviceInterfaceMidiInput  { 0x504be32c, 0xccf6, 0x4d2c, { 0xb7, 0x3f, 0x6f, 0x8b, 0x37, 0x47, 0xe2, 0x2b } };
+                constexpr GUID deviceInterfaceMidiOutput { 0x6dc23320, 0xab33, 0x4ce4, { 0x80, 0xd4, 0xbb, 0xb3, 0xeb, 0xbf, 0x28, 0x14 } };
+
+                for (const auto& midiInterface : { deviceInterfaceMidiInput, deviceInterfaceMidiOutput })
+                {
+                    CM_NOTIFY_FILTER filter{};
+                    filter.cbSize = sizeof (filter);
+                    filter.Flags = 0;
+                    filter.FilterType = CM_NOTIFY_FILTER_TYPE_DEVICEINTERFACE;
+                    filter.Reserved = 0;
+                    filter.u.DeviceInterface.ClassGuid = midiInterface;
+
+                    if (HCMNOTIFICATION notification{}; CM_Register_Notification (&filter, this, callback, &notification) == CR_SUCCESS)
+                    {
+                        notifications.push_back (notification);
+                    }
+                }
+            }
+
+            ~MidiDeviceChangeDetector() override
+            {
+                for (const auto& notification : notifications)
+                    CM_Unregister_Notification (notification);
+
+                cancelPendingUpdate();
+            }
+
+        private:
+            static __callback DWORD CALLBACK callback (HCMNOTIFICATION, PVOID context, CM_NOTIFY_ACTION, PCM_NOTIFY_EVENT_DATA, DWORD)
+            {
+                auto* self = static_cast<MidiDeviceChangeDetector*> (context);
+                self->triggerAsyncUpdate();
+                return ERROR_SUCCESS;
+            }
+
+            void handleAsyncUpdate() override
+            {
+                static constexpr auto totalNumExtraChecks = 4;
+                static constexpr auto initialIntervalMs = 500;
+
+                std::tie (numChecksRemaining, currentIntervalMs) = std::tuple (totalNumExtraChecks, initialIntervalMs);
+                timer.startTimer (currentIntervalMs);
+            }
+
+            MidiDeviceChangeDetectorDelegate& delegate;
+            std::vector<HCMNOTIFICATION> notifications;
+            int numChecksRemaining = 0;
+            int currentIntervalMs = 0;
+            TimedCallback timer { [this]
+            {
+                timer.stopTimer();
+
+                delegate.onMidiDeviceListChanged();
+
+                if (--numChecksRemaining <= 0)
+                    return;
+
+                timer.startTimer (currentIntervalMs *= 2);
+            } };
+        };
+
+        class EndpointsImplNative : public ump::Endpoints::Impl::Native,
+                                    private MidiDeviceChangeDetectorDelegate
         {
         public:
             ump::Backend getBackend() const override
@@ -3143,13 +3532,18 @@ struct WindowsMidiHelpers
                 jassert (cachedEndpoints.size() == buffer.size());
             }
 
+            void onMidiDeviceListChanged() override
+            {
+                const auto old = cachedEndpoints;
+                updateCachedEndpoints();
+
+                if (old != cachedEndpoints)
+                    listener.endpointsChanged();
+            }
+
             ump::EndpointsListener& listener;
             std::map<ump::EndpointId, ump::EndpointAndStaticInfo> cachedEndpoints;
-            DeviceChangeDetector detector { L"JuceMidiDeviceDetector_", [&]
-            {
-                updateCachedEndpoints();
-                listener.endpointsChanged();
-            } };
+            MidiDeviceChangeDetector detector { *this };
         };
     };
 };

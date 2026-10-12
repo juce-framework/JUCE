@@ -113,7 +113,7 @@ struct hb_wasm_shape_plan_t {
 struct hb_wasm_face_data_t {
   hb_blob_t *wasm_blob;
   wasm_module_t wasm_module;
-  mutable hb_atomic_ptr_t<hb_wasm_shape_plan_t> plan;
+  mutable hb_atomic_t<hb_wasm_shape_plan_t *> plan;
 };
 
 static bool
@@ -169,40 +169,35 @@ _hb_wasm_shaper_face_data_create (hb_face_t *face)
 {
   char error[128];
   hb_wasm_face_data_t *data = nullptr;
-  hb_blob_t *wasm_blob = nullptr;
   wasm_module_t wasm_module = nullptr;
 
-  wasm_blob = hb_face_reference_table (face, HB_WASM_TAG_WASM);
+  hb_unique_ptr_t<hb_blob_t> wasm_blob (hb_face_reference_table (face, HB_WASM_TAG_WASM));
+
   unsigned length = hb_blob_get_length (wasm_blob);
   if (!length)
-    goto fail;
+    return nullptr;
 
   if (!_hb_wasm_init ())
-    goto fail;
+    return nullptr;
 
   wasm_module = wasm_runtime_load ((uint8_t *) hb_blob_get_data_writable (wasm_blob, nullptr),
 				   length, error, sizeof (error));
   if (unlikely (!wasm_module))
   {
     DEBUG_MSG (WASM, nullptr, "Load wasm module failed: %s", error);
-    goto fail;
+    return nullptr;
   }
+  auto module_guard = hb_make_scope_guard ([&]() { wasm_runtime_unload (wasm_module); });
 
   data = (hb_wasm_face_data_t *) hb_calloc (1, sizeof (hb_wasm_face_data_t));
   if (unlikely (!data))
-    goto fail;
+    return nullptr;
 
-  data->wasm_blob = wasm_blob;
+  data->wasm_blob = wasm_blob.release ();
   data->wasm_module = wasm_module;
 
+  module_guard.release ();
   return data;
-
-fail:
-  if (wasm_module)
-      wasm_runtime_unload (wasm_module);
-  hb_blob_destroy (wasm_blob);
-  hb_free (data);
-  return nullptr;
 }
 
 static hb_wasm_shape_plan_t *
@@ -217,30 +212,27 @@ acquire_shape_plan (hb_face_t *face,
     return plan;
 
   plan = (hb_wasm_shape_plan_t *) hb_calloc (1, sizeof (hb_wasm_shape_plan_t));
-
-  wasm_module_inst_t module_inst = nullptr;
-  wasm_exec_env_t exec_env = nullptr;
-  wasm_function_inst_t func = nullptr;
+  auto plan_guard = hb_make_scope_guard ([&]() { hb_free (plan); });
 
   constexpr uint32_t stack_size = 32 * 1024, heap_size = 2 * 1024 * 1024;
 
-  module_inst = plan->module_inst = wasm_runtime_instantiate (face_data->wasm_module,
-							      stack_size, heap_size,
-							      error, sizeof (error));
+  wasm_module_inst_t module_inst = plan->module_inst = wasm_runtime_instantiate (
+      face_data->wasm_module, stack_size, heap_size, error, sizeof (error));
   if (unlikely (!module_inst))
   {
     DEBUG_MSG (WASM, face_data, "Create wasm module instance failed: %s", error);
-    goto fail;
+    return nullptr;
   }
+  auto module_guard = hb_make_scope_guard ([&]() { wasm_runtime_deinstantiate (module_inst); });
 
-  exec_env = plan->exec_env = wasm_runtime_create_exec_env (module_inst,
-							    stack_size);
+  wasm_exec_env_t exec_env = plan->exec_env = wasm_runtime_create_exec_env (module_inst, stack_size);
   if (unlikely (!exec_env)) {
     DEBUG_MSG (WASM, face_data, "Create wasm execution environment failed.");
-    goto fail;
+    return nullptr;
   }
+  auto exec_guard = hb_make_scope_guard ([&]() { wasm_runtime_destroy_exec_env (exec_env); });
 
-  func = wasm_runtime_lookup_function (module_inst, "shape_plan_create");
+  wasm_function_inst_t func = wasm_runtime_lookup_function (module_inst, "shape_plan_create");
   if (func)
   {
     wasm_val_t results[1];
@@ -250,7 +242,7 @@ acquire_shape_plan (hb_face_t *face,
     if (unlikely (!faceref))
     {
       DEBUG_MSG (WASM, face_data, "Failed to register face object.");
-      goto fail;
+      return nullptr;
     }
 
     results[0].kind = WASM_I32;
@@ -264,21 +256,15 @@ acquire_shape_plan (hb_face_t *face,
     {
       DEBUG_MSG (WASM, module_inst, "Calling shape_plan_create() failed: %s",
 		 wasm_runtime_get_exception (module_inst));
-      goto fail;
+      return nullptr;
     }
     plan->wasm_shape_planptr = results[0].of.i32;
   }
 
+  plan_guard.release ();
+  module_guard.release ();
+  exec_guard.release ();
   return plan;
-
-fail:
-
-  if (exec_env)
-    wasm_runtime_destroy_exec_env (exec_env);
-  if (module_inst)
-    wasm_runtime_deinstantiate (module_inst);
-  hb_free (plan);
-  return nullptr;
 }
 
 static void

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -569,36 +569,67 @@ public:
     template <typename CharPointerType1, typename CharPointerType2>
     static int compare (CharPointerType1 s1, CharPointerType2 s2) noexcept
     {
-        for (;;)
+        using Char1 = typename CharPointerType1::CharType;
+        using Char2 = typename CharPointerType2::CharType;
+
+        if constexpr (std::is_same_v<Char1, char> && std::is_same_v<Char2, char>)
         {
-            auto c1 = s1.getAndAdvance();
-
-            if (auto diff = compare (c1, s2.getAndAdvance()))
-                return diff;
-
-            if (c1 == 0)
-                break;
+            return strcmp (s1.getAddress(), s2.getAddress());
         }
+        else if constexpr (std::is_same_v<Char1, wchar_t> && std::is_same_v<Char2, wchar_t>)
+        {
+            return wcscmp (s1.getAddress(), s2.getAddress());
+        }
+        else
+        {
+            for (;;)
+            {
+                auto c1 = s1.getAndAdvance();
 
-        return 0;
+                if (auto diff = compare (c1, s2.getAndAdvance()))
+                    return diff;
+
+                if (c1 == 0)
+                    break;
+            }
+
+            return 0;
+        }
     }
 
     /** Compares two null-terminated character strings, up to a given number of characters. */
     template <typename CharPointerType1, typename CharPointerType2>
     static int compareUpTo (CharPointerType1 s1, CharPointerType2 s2, int maxChars) noexcept
     {
-        while (--maxChars >= 0)
+        // Must not be negative!
+        jassert (maxChars >= 0);
+
+        using Char1 = typename CharPointerType1::CharType;
+        using Char2 = typename CharPointerType2::CharType;
+
+        if constexpr (std::is_same_v<Char1, char> && std::is_same_v<Char2, char>)
         {
-            auto c1 = s1.getAndAdvance();
-
-            if (auto diff = compare (c1, s2.getAndAdvance()))
-                return diff;
-
-            if (c1 == 0)
-                break;
+            return std::strncmp (s1.getAddress(), s2.getAddress(), (size_t) maxChars);
         }
+        else if constexpr (std::is_same_v<Char1, wchar_t> && std::is_same_v<Char2, wchar_t>)
+        {
+            return std::wcsncmp (s1.getAddress(), s2.getAddress(), (size_t) maxChars);
+        }
+        else
+        {
+            while (--maxChars >= 0)
+            {
+                auto c1 = s1.getAndAdvance();
 
-        return 0;
+                if (auto diff = compare (c1, s2.getAndAdvance()))
+                    return diff;
+
+                if (c1 == 0)
+                    break;
+            }
+
+            return 0;
+        }
     }
 
     /** Compares two characters, using a case-independant match. */

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -304,7 +304,13 @@ public:
         juce::jack_on_shutdown (client, shutdownCallback, this);
         juce::jack_on_info_shutdown (client, infoShutdownCallback, this);
         juce::jack_set_xrun_callback (client, xrunCallback, this);
-        juce::jack_activate (client);
+
+        if (juce::jack_activate (client) != 0)
+        {
+            lastError = "Failed to activate JACK client";
+            return lastError;
+        }
+
         deviceIsOpen = true;
 
         if (! inputChannels.isZero())

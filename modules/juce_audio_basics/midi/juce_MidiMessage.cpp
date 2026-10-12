@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -1015,6 +1015,20 @@ MidiMessage MidiMessage::midiMachineControlCommand (MidiMessage::MidiMachineCont
 //==============================================================================
 bool MidiMessage::isMidiMachineControlGoto (int& hours, int& minutes, int& seconds, int& frames) const noexcept
 {
+    const auto opt = getMidiMachineControlGoto();
+
+    if (! opt.has_value())
+        return false;
+
+    hours = opt->hours;
+    minutes = opt->minutes;
+    seconds = opt->seconds;
+    frames = opt->frames;
+    return true;
+}
+
+auto MidiMessage::getMidiMachineControlGoto() const noexcept -> std::optional<MidiMachineControlGoto>
+{
     auto data = getRawData();
 
     if (size >= 12
@@ -1025,20 +1039,30 @@ bool MidiMessage::isMidiMachineControlGoto (int& hours, int& minutes, int& secon
          && data[5] == 0x06
          && data[6] == 0x01)
     {
-        hours = data[7] % 24;   // (that some machines send out hours > 24)
-        minutes = data[8];
-        seconds = data[9];
-        frames  = data[10];
-
-        return true;
+        return MidiMachineControlGoto { data[2],
+                                        (uint8_t) (data[7] % 24),
+                                        (uint8_t) data[8],
+                                        (uint8_t) data[9],
+                                        (uint8_t) data[10],
+                                        (uint8_t) data[11] };
     }
 
-    return false;
+    return {};
 }
 
 MidiMessage MidiMessage::midiMachineControlGoto (int hours, int minutes, int seconds, int frames)
 {
-    return { 0xf0, 0x7f, 0, 6, 0x44, 6, 1, hours, minutes, seconds, frames, 0xf7 };
+    MidiMachineControlGoto x{};
+    x.hours = (uint8_t) hours;
+    x.minutes = (uint8_t) minutes;
+    x.seconds = (uint8_t) seconds;
+    x.frames = (uint8_t) frames;
+    return midiMachineControlGoto (x);
+}
+
+MidiMessage MidiMessage::midiMachineControlGoto (MidiMachineControlGoto x)
+{
+    return { 0xf0, 0x7f, x.deviceId, 6, 0x44, 6, 1, x.hours, x.minutes, x.seconds, x.frames, x.subframes, 0xf7 };
 }
 
 //==============================================================================

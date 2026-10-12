@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -41,6 +41,19 @@
 LibraryModule::LibraryModule (const ModuleDescription& d)
     : moduleDescription (d)
 {
+}
+
+String LibraryModule::getWebviewInteropLibraryVersion() const
+{
+    if (getID() != "juce_gui_extra")
+        return {};
+
+    auto packageJsonFile = getFolder().getChildFile ("native")
+                                      .getChildFile ("typescript")
+                                      .getChildFile ("webview-interop")
+                                      .getChildFile ("package.json");
+
+    return JSON::parse (packageJsonFile).getProperty ("version", {}).toString();
 }
 
 void LibraryModule::writeIncludes (ProjectSaver& projectSaver, OutputStream& out)

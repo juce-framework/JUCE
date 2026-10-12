@@ -27,6 +27,8 @@ contents.xcworkspacedata
 .svn
 .deps
 .dirstamp
+*.pyc
+*.swp
 profile
 **/MacOSX/build
 **/iOS/build

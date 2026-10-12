@@ -15,7 +15,7 @@
 #  framework to you, and you must discontinue the installation or download
 #  process and cease use of the JUCE framework.
 #
-#  JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+#  JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
 #  JUCE Privacy Policy: https://juce.com/juce-privacy-policy
 #  JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 #
@@ -106,6 +106,7 @@ endfunction()
 
 if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
     _juce_create_pkgconfig_target(JUCE_CURL_LINUX_DEPS libcurl)
+    _juce_create_pkgconfig_target(JUCE_GLES_LINUX_DEPS egl glesv2)
     _juce_available_pkgconfig_module_or_else(webkit_package_name webkit2gtk-4.1 webkit2gtk-4.0)
 
     # All browser related libs are loaded dynamically only if they are available during runtime
@@ -261,12 +262,21 @@ endfunction()
 function(_juce_link_optional_libraries target)
     if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
         get_target_property(needs_curl ${target} JUCE_NEEDS_CURL)
+        get_target_property(needs_browser ${target} JUCE_NEEDS_WEB_BROWSER)
+        get_target_property(needs_opengl_es ${target} JUCE_NEEDS_OPENGL_ES)
+
+        target_compile_definitions(${target} PRIVATE
+            JUCE_USE_CURL=$<BOOL:${needs_curl}>
+            JUCE_WEB_BROWSER=$<BOOL:${needs_browser}>
+            JUCE_OPENGL_ES=$<BOOL:${needs_opengl_es}>)
 
         if(needs_curl)
             target_link_libraries(${target} PRIVATE juce::pkgconfig_JUCE_CURL_LINUX_DEPS)
         endif()
 
-        get_target_property(needs_browser ${target} JUCE_NEEDS_WEB_BROWSER)
+        if(needs_opengl_es)
+            target_link_libraries(${target} PRIVATE juce::pkgconfig_JUCE_GLES_LINUX_DEPS)
+        endif()
 
         if(needs_browser)
             target_link_libraries(${target} PRIVATE juce::pkgconfig_JUCE_BROWSER_LINUX_DEPS)
@@ -279,6 +289,9 @@ function(_juce_link_optional_libraries target)
         endif()
     elseif(APPLE)
         get_target_property(needs_storekit ${target} JUCE_NEEDS_STORE_KIT)
+
+        target_compile_definitions(${target} PRIVATE
+            JUCE_IN_APP_PURCHASES=$<BOOL:${needs_storekit}>)
 
         if(needs_storekit)
             _juce_link_frameworks("${target}" PRIVATE StoreKit)
@@ -397,6 +410,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content PLUGIN_DESCRIPTION                   ${target} JUCE_DESCRIPTION)
     _juce_append_target_property(file_content PLUGIN_AU_EXPORT_PREFIX              ${target} JUCE_AU_EXPORT_PREFIX)
     _juce_append_target_property(file_content PLUGIN_AU_MAIN_TYPE                  ${target} JUCE_AU_MAIN_TYPE_CODE)
+    _juce_append_target_property(file_content PLUGIN_AU_FRAMEWORK_BUNDLE_ID        ${target} JUCE_AU_FRAMEWORK_BUNDLE_ID)
     _juce_append_target_property(file_content IS_AU_SANDBOX_SAFE                   ${target} JUCE_AU_SANDBOX_SAFE)
     _juce_append_target_property(file_content IS_PLUGIN_SYNTH                      ${target} JUCE_IS_SYNTH)
     _juce_append_target_property(file_content IS_PLUGIN_ARA_EFFECT                 ${target} JUCE_IS_ARA_EFFECT)
@@ -652,17 +666,6 @@ function(_juce_generate_icon source_target dest_target)
     get_filename_component(icon_composer_icon_name "${juce_property_icon_composer_bundle}" NAME_WE)
 
     if(juce_property_icon_composer_bundle AND (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS"))
-        set_source_files_properties("${juce_property_icon_composer_bundle}"
-            PROPERTIES
-                MACOSX_PACKAGE_LOCATION Resources
-                XCODE_EXPLICIT_FILE_TYPE folder.iconcomposer.icon
-        )
-
-        target_sources(${dest_target} PRIVATE "${juce_property_icon_composer_bundle}")
-
-        set_target_properties(${dest_target} PROPERTIES
-            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "${icon_composer_icon_name}")
-
         if((CMAKE_SYSTEM_NAME STREQUAL "Darwin") AND (NOT CMAKE_GENERATOR STREQUAL "Xcode"))
             add_custom_command(TARGET ${target} POST_BUILD
                 COMMAND "${CMAKE_COMMAND}"
@@ -670,6 +673,17 @@ function(_juce_generate_icon source_target dest_target)
                     "-Dicon_path=${juce_property_icon_composer_bundle}"
                     "-P" "${JUCE_CMAKE_UTILS_DIR}/generateXcassetsFromIcon.cmake"
                 VERBATIM)
+        else()
+            set_source_files_properties("${juce_property_icon_composer_bundle}"
+                PROPERTIES
+                    MACOSX_PACKAGE_LOCATION Resources
+                    XCODE_EXPLICIT_FILE_TYPE folder.iconcomposer.icon
+            )
+
+            target_sources(${dest_target} PRIVATE "${juce_property_icon_composer_bundle}")
+
+            set_target_properties(${dest_target} PROPERTIES
+                XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "${icon_composer_icon_name}")
         endif()
     endif()
 
@@ -1083,7 +1097,7 @@ function(_juce_add_vst3_manifest_helper_target shared_code_target out_target out
     endif()
 
     get_target_property(juce_library_code "${shared_code_target}" JUCE_GENERATED_SOURCES_DIRECTORY)
-    set(build_dir "${juce_library_code}/vst3_helper")
+    set(build_dir "${CMAKE_BINARY_DIR}/vst3_helpers/${shared_code_target}")
     set(helper_name "vst3_helper")
 
     set(shared_defs_file "${build_dir}/shared_defs_$<CONFIG>.txt")
@@ -1093,10 +1107,6 @@ function(_juce_add_vst3_manifest_helper_target shared_code_target out_target out
     file(GENERATE OUTPUT "${shared_incs_file}" CONTENT "$<TARGET_PROPERTY:${shared_code_target},INCLUDE_DIRECTORIES>")
 
     set(PASSTHROUGH_ARGS "")
-
-    if(CMAKE_C_COMPILER)
-        list(APPEND PASSTHROUGH_ARGS "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-    endif()
 
     if(CMAKE_CXX_COMPILER)
         list(APPEND PASSTHROUGH_ARGS "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
@@ -1451,8 +1461,22 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Android")
         add_library(${target_name} SHARED)
-    elseif((kind STREQUAL "Standalone") OR (kind STREQUAL "AUv3"))
+    elseif(kind STREQUAL "Standalone")
         add_executable(${target_name} WIN32 MACOSX_BUNDLE)
+    elseif(kind STREQUAL "AUv3")
+        if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+            add_library(${target_name}_Framework SHARED)
+            get_target_property(framework_bundle_id ${shared_code_target} JUCE_AU_FRAMEWORK_BUNDLE_ID)
+            set_target_properties(${target_name}_Framework PROPERTIES
+                FRAMEWORK TRUE
+                MACOSX_FRAMEWORK_IDENTIFIER ${framework_bundle_id})
+            add_executable(${target_name} MACOSX_BUNDLE)
+            target_link_libraries(${target_name} PRIVATE ${target_name}_Framework)
+            target_sources(${target_name} PRIVATE ${JUCE_CMAKE_UTILS_DIR}/bundleplaceholder.mm)
+            _juce_link_frameworks(${target_name} PUBLIC Foundation)
+        else()
+            add_executable(${target_name} MACOSX_BUNDLE)
+        endif()
     else()
         add_library(${target_name} MODULE)
     endif()
@@ -1467,9 +1491,18 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
     target_include_directories(${target_name} PRIVATE
         $<TARGET_PROPERTY:${shared_code_target},INCLUDE_DIRECTORIES>)
 
-    target_link_libraries(${target_name} PRIVATE
-        ${shared_code_target}
-        juce::juce_audio_plugin_client_${kind})
+    if("${kind};${CMAKE_SYSTEM_NAME}" STREQUAL "AUv3;Darwin")
+        target_include_directories(${target_name}_Framework PRIVATE
+            $<TARGET_PROPERTY:${shared_code_target},INCLUDE_DIRECTORIES>)
+
+        target_link_libraries(${target_name}_Framework PRIVATE
+            ${shared_code_target}
+            juce::juce_audio_plugin_client_${kind})
+    else()
+        target_link_libraries(${target_name} PRIVATE
+            ${shared_code_target}
+            juce::juce_audio_plugin_client_${kind})
+    endif()
 
     _juce_set_output_name(${target_name} $<TARGET_PROPERTY:${shared_code_target},JUCE_PRODUCT_NAME>)
 
@@ -1604,6 +1637,7 @@ function(_juce_configure_plugin_targets target)
         JucePlugin_VersionCode=${project_version_hex}
         JucePlugin_VSTUniqueID=JucePlugin_PluginCode
         JucePlugin_VSTCategory=$<TARGET_PROPERTY:${target},JUCE_VST2_CATEGORY>
+        JucePlugin_LV2PluginClass=$<TARGET_PROPERTY:${target},JUCE_LV2_PLUGIN_CLASS>
         JucePlugin_Vst3Category="${vst3_category_string}"
         JucePlugin_AUMainType=$<TARGET_PROPERTY:${target},JUCE_AU_MAIN_TYPE_CODE>
         JucePlugin_AUSubType=JucePlugin_PluginCode
@@ -1660,6 +1694,11 @@ function(_juce_configure_plugin_targets target)
         add_dependencies(${target}_Standalone ${target}_AUv3)
         set_target_properties(${target}_Standalone PROPERTIES
             XCODE_EMBED_APP_EXTENSIONS ${target}_AUv3)
+
+        if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+            set_target_properties(${target}_Standalone PROPERTIES
+                XCODE_EMBED_FRAMEWORKS ${target}_AUv3_Framework)
+        endif()
     endif()
 
     get_target_property(wants_copy "${target}" JUCE_COPY_PLUGIN_AFTER_BUILD)
@@ -1816,6 +1855,7 @@ function(_juce_set_fallback_properties target)
 
     get_target_property(bundle_id ${target} JUCE_BUNDLE_ID)
     _juce_set_property_if_not_set(${target} AAX_IDENTIFIER ${bundle_id})
+    _juce_set_property_if_not_set(${target} AU_FRAMEWORK_BUNDLE_ID ${bundle_id}.internal)
 
     _juce_set_property_if_not_set(${target} VST_NUM_MIDI_INS 16)
     _juce_set_property_if_not_set(${target} VST_NUM_MIDI_OUTS 16)
@@ -1845,6 +1885,13 @@ function(_juce_set_fallback_properties target)
     else()
         _juce_set_property_if_not_set(${target} VST2_CATEGORY kPlugCategEffect)
     endif()
+
+    # LV2 Plugin Class
+    if(is_synth)
+        _juce_set_property_if_not_set(${target} LV2_PLUGIN_CLASS InstrumentPlugin)
+    endif()
+
+    _juce_set_property_if_not_set(${target} LV2_PLUGIN_CLASS Plugin)
 
     get_target_property(is_midi_effect ${target} JUCE_IS_MIDI_EFFECT)
     get_target_property(needs_midi_input ${target} JUCE_NEEDS_MIDI_INPUT)
@@ -2043,6 +2090,7 @@ function(_juce_initialise_target target)
         COMPANY_EMAIL
         NEEDS_CURL                      # Set this true if you want to link curl on Linux
         NEEDS_WEB_BROWSER               # Set this true if you want to link webkit on Linux
+        NEEDS_OPENGL_ES                 # Set this true if you want to use OpenGL ES rather than OpenGL on Linux
         NEEDS_WEBVIEW2                  # Set this true if you want to link WebView2 statically on Windows
         NEEDS_STORE_KIT                 # Set this true if you want in-app-purchases on Mac
         NEEDS_WINDOWS_MIDI_SERVICES     # Set this true If you want to support the newest Windows MIDI backend
@@ -2068,6 +2116,7 @@ function(_juce_initialise_target target)
         VST_NUM_MIDI_INS
         VST_NUM_MIDI_OUTS
         VST2_CATEGORY
+        LV2_PLUGIN_CLASS
         AU_MAIN_TYPE
         AU_EXPORT_PREFIX
         AU_SANDBOX_SAFE
@@ -2174,6 +2223,7 @@ function(_juce_initialise_target target)
     _juce_write_generate_time_info(${target})
     _juce_link_optional_libraries(${target})
     _juce_fixup_module_source_groups()
+    _juce_fixup_unity_property()
 endfunction()
 
 # ==================================================================================================
@@ -2326,6 +2376,10 @@ function(juce_add_pip header)
 
     if("JUCE_PLUGINHOST_AU=1" IN_LIST pip_moduleflags)
         list(APPEND extra_target_args PLUGINHOST_AU TRUE)
+    endif()
+
+    if("JUCE_USE_WINDOWS_MIDI_SERVICES=1" IN_LIST pip_moduleflags)
+        list(APPEND extra_target_args NEEDS_WINDOWS_MIDI_SERVICES TRUE)
     endif()
 
     if("JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1" IN_LIST pip_moduleflags)

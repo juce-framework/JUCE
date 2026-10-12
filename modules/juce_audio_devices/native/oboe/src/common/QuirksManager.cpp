@@ -16,6 +16,7 @@
 
 #include <oboe/AudioStreamBuilder.h>
 #include <oboe/Oboe.h>
+#include <oboe/Utilities.h>
 
 #include "OboeDebug.h"
 #include "QuirksManager.h"
@@ -201,10 +202,17 @@ bool QuirksManager::isConversionNeeded(
     const bool isInput = builder.getDirection() == Direction::Input;
     const bool isFloat = builder.getFormat() == AudioFormat::Float;
     const bool isIEC61937 = builder.getFormat() == AudioFormat::IEC61937;
+    const bool isCompressed = isCompressedFormat(builder.getFormat());
 
     // There should be no conversion for IEC61937. Sample rates and channel counts must be set explicitly.
     if (isIEC61937) {
         LOGI("QuirksManager::%s() conversion not needed for IEC61937", __func__);
+        return false;
+    }
+
+    if (isCompressed) {
+        LOGI("QuirksManager::%s() conversion not needed for compressed format %d",
+             __func__, builder.getFormat());
         return false;
     }
 

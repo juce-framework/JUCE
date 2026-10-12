@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -94,12 +94,12 @@ void Typeface::scanFolderForFonts (const File& folder)
     FTTypefaceList::getInstance()->scanFontPaths (StringArray (folder.getFullPathName()));
 }
 
-StringArray Font::findAllTypefaceNames()
+StringArray Font::findAllTypefaceNamesImpl()
 {
     return FTTypefaceList::getInstance()->findAllFamilyNames();
 }
 
-StringArray Font::findAllTypefaceStyles (const String& family)
+StringArray Font::findAllTypefaceStylesImpl (const String& family)
 {
     return FTTypefaceList::getInstance()->findAllTypefaceStyles (family);
 }

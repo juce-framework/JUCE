@@ -19,8 +19,8 @@
 #include "oboe/Oboe.h"
 
 #include "common/OboeDebug.h"
+#include "oboe/AudioClock.h"
 #include "opensles/AudioStreamBuffered.h"
-#include "common/AudioClock.h"
 
 namespace oboe {
 

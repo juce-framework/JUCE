@@ -534,7 +534,7 @@ public:
         soundNames = purchases.getVoiceNames();
 
        #if JUCE_ANDROID || JUCE_IOS
-        auto screenBounds = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userBounds.getSmallestIntegerContainer()
+        auto screenBounds = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userBounds.getSmallestIntegerContainer();
         setSize (screenBounds.getWidth(), screenBounds.getHeight());
        #else
         setSize (800, 600);

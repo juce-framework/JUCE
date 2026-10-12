@@ -52,6 +52,7 @@
 #pragma once
 
 #include "../Assets/DemoUtilities.h"
+#include "../Assets/FontListComponent.h"
 
 static const std::map<FontFeatureTag, std::pair<const char*, const char*>> featureDescriptionMap
 {
@@ -161,71 +162,6 @@ static const std::map<FontFeatureTag, std::pair<const char*, const char*>> featu
     { "flac", { "Flattened accent components",          "\xc3\xa9" } }
 };
 
-
-class FontsListModel : public ListBoxModel
-{
-public:
-    FontsListModel()
-    {
-        Font::findFonts (fonts);
-
-        fonts.removeIf ([] (const Font& f)
-        {
-            return f.getTypefacePtr()->getSupportedFeatures().empty();
-        });
-    }
-
-    std::function<void()> onFontSelected;
-
-    int getNumRows() override
-    {
-        return fonts.size();
-    }
-
-    void paintListBoxItem (int rowNumber,
-                           Graphics& g,
-                           int width,
-                           int height,
-                           bool rowIsSelected) override
-    {
-        if (rowIsSelected)
-            g.fillAll (Colours::lightblue);
-
-        const Font options { FontOptions { getFaceForRow (rowNumber) } };
-
-        AttributedString s;
-        s.setWordWrap (AttributedString::none);
-        s.setJustification (Justification::centredLeft);
-        s.append (getNameForRow (rowNumber),
-                  options.withPointHeight ((float) height * 0.7f),
-                  Colours::black);
-
-        s.append ("   " + getNameForRow (rowNumber),
-                  FontOptions{}.withPointHeight ((float) height * 0.5f).withStyle ("Italic"),
-                  Colours::grey);
-
-        s.draw (g, Rectangle (width, height).expanded (-4, 50).toFloat());
-    }
-
-    void selectedRowsChanged (int) override
-    {
-        NullCheckedInvocation::invoke (onFontSelected);
-    }
-
-    Typeface::Ptr getFaceForRow (int rowNumber) const
-    {
-        return fonts.getReference (rowNumber).getTypefacePtr();
-    }
-
-    String getNameForRow (int rowNumber) override
-    {
-        return fonts.getReference (rowNumber).getTypefaceName();
-    }
-
-private:
-    Array<Font> fonts;
-};
-
 class FeatureListModel : public ListBoxModel
 {
     struct Feature
@@ -309,6 +245,9 @@ public:
                            int height,
                            bool /*rowIsSelected*/) override
     {
+        if (rowNumber >= (int) features.size())
+            return;
+
         auto feature = features[(size_t) rowNumber];
         const Font baseLineFont { FontOptions { currentFace }.withFeatureDisabled (feature.tag) };
         const Font exampleFont { FontOptions { currentFace }.withFeatureEnabled (feature.tag) };
@@ -486,24 +425,25 @@ public:
     FontFeaturesDemo()
     {
         setName ("Font features demo");
-        fontsListBox.setTitle ("Fonts");
-        fontsListBox.setRowHeight (20);
-        fontsListBox.setColour (ListBox::textColourId, Colours::black);
-        fontsListBox.setColour (ListBox::backgroundColourId, Colours::white);
 
-        fontsListModel.onFontSelected = [this]
+        fontListComponent.onFontSelected = [this]
         {
-            featureListBox.setFont (fontsListModel.getFaceForRow (fontsListBox.getSelectedRow()));
+            featureListBox.setFont (fontListComponent.getFaceForRow (fontListComponent.getSelectedRow()));
         };
 
-        fontsListBox.selectRow (0);
+        fontListComponent.rescanAndRemoveIf ([] (const Font& font)
+        {
+            return font.getTypefacePtr()->getSupportedFeatures().empty();
+        });
+
+        fontListComponent.selectRow (0);
 
         infoLabel.setFont (FontOptions{}.withPointHeight (16));
         infoLabel.setText ("Supported Features - "
                            "(Greyed out items are supported but not affected by the example)",
                            dontSendNotification);
 
-        addAndMakeVisible (fontsListBox);
+        addAndMakeVisible (fontListComponent);
         addAndMakeVisible (infoLabel);
         addAndMakeVisible (featureListBox);
 
@@ -519,14 +459,13 @@ public:
     {
         auto bounds = getLocalBounds().reduced (5);
 
-        fontsListBox.setBounds (bounds.removeFromLeft (bounds.proportionOfWidth (0.3f)));
+        fontListComponent.setBounds (bounds.removeFromLeft (bounds.proportionOfWidth (0.3f)));
         infoLabel.setBounds (bounds.removeFromTop (30).reduced (5));
         featureListBox.setBounds (bounds);
     }
 
 private:
-    FontsListModel fontsListModel;
-    ListBox fontsListBox { {}, &fontsListModel };
+    FontListComponent fontListComponent;
     Label infoLabel;
     FeaturesListComponent featureListBox;
 

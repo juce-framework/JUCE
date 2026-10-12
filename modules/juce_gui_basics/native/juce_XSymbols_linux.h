@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -48,6 +48,10 @@ namespace ReturnHelpers
 #define JUCE_GENERATE_FUNCTION_WITH_DEFAULT(functionName, objectName, args, returnType) \
     using functionName      = returnType (*) args; \
     functionName objectName = [] args -> returnType  { return ReturnHelpers::returnDefaultConstructedAnyType<returnType>(); };
+
+#define JUCE_GENERATE_FUNCTION_WITH_DEFAULT_RESULT(functionName, objectName, args, returnType, defaultResult) \
+    using functionName      = returnType (*) args; \
+    functionName objectName = [] args -> returnType  { return defaultResult; };
 
 
 //==============================================================================
@@ -218,6 +222,10 @@ public:
                                          (::Display*, Colormap),
                                          void)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XFreeEventData, xFreeEventData,
+                                         (::Display*, XGenericEventCookie*),
+                                         void)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XFreeGC, xFreeGC,
                                          (::Display*, GC),
                                          void)
@@ -241,6 +249,10 @@ public:
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XGetErrorText, xGetErrorText,
                                          (::Display*, int, const char*, int),
                                          void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XGetEventData, xGetEventData,
+                                         (::Display*, XGenericEventCookie*),
+                                         Bool)
 
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XGetGeometry, xGetGeometry,
                                          (::Display*, ::Drawable, ::Window*, int*, int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*),
@@ -309,6 +321,38 @@ public:
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XInternAtom, xInternAtom,
                                          (::Display*, const char*, Bool),
                                          Atom)
+
+   #if JUCE_USE_XINPUT
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT_RESULT (XIQueryVersion, xiQueryVersion,
+                                                (::Display*, int*, int*),
+                                                Status,
+                                                BadRequest)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XIQueryDevice, xiQueryDevice,
+                                         (::Display*, int, int*),
+                                         XIDeviceInfo*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XIFreeDeviceInfo, xiFreeDeviceInfo,
+                                         (XIDeviceInfo*),
+                                         void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XISelectEvents, xiSelectEvents,
+                                         (::Display*, ::Window, XIEventMask*, int),
+                                         Status)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XIGetClientPointer, xiGetClientPointer,
+                                         (::Display*, ::Window, int*),
+                                         Bool)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT_RESULT (XIGrabDevice, xiGrabDevice,
+                                                (::Display*, int, ::Window, ::Time, Cursor, int, int, Bool, XIEventMask*),
+                                                Status,
+                                                BadRequest)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XIUngrabDevice, xiUngrabDevice,
+                                         (::Display*, int, ::Time),
+                                         Status)
+   #endif
 
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XkbKeycodeToKeysym, xkbKeycodeToKeysym,
                                          (::Display*, KeyCode, unsigned int, unsigned int),
@@ -624,6 +668,9 @@ private:
    #endif
    #if JUCE_USE_XRANDR
     DynamicLibrary xrandrLib   { "libXrandr.so.2" };
+   #endif
+   #if JUCE_USE_XINPUT
+    DynamicLibrary xinputLib   { "libXi.so.6" };
    #endif
 
     //==============================================================================

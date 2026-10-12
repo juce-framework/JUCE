@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -729,7 +729,7 @@ std::vector<AndroidDocumentPermission> AndroidDocumentPermission::getPersistedPe
         permission.time  = env->CallLongMethod    (uriPermission, AndroidUriPermission.getPersistedTime);
         permission.read  = env->CallBooleanMethod (uriPermission, AndroidUriPermission.isReadPermission);
         permission.write = env->CallBooleanMethod (uriPermission, AndroidUriPermission.isWritePermission);
-        permission.url = AndroidDocumentDetail::uriToUrl (env->CallObjectMethod  (uriPermission, AndroidUriPermission.getUri));
+        permission.url = AndroidDocumentDetail::uriToUrl (LocalRef { env->CallObjectMethod  (uriPermission, AndroidUriPermission.getUri) }.get());
 
         result.push_back (std::move (permission));
     }

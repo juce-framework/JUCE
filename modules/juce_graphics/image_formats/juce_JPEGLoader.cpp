@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -35,195 +35,17 @@
 namespace juce
 {
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 4127 4365 4996 5033 6240 6326 6386 6385 28182 28183 6387 6011 6001)
-
-namespace jpeglibNamespace
-{
-#if JUCE_INCLUDE_JPEGLIB_CODE || ! defined (JUCE_INCLUDE_JPEGLIB_CODE)
-     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
-                                          "-Wcast-align",
-                                          "-Wcomma",
-                                          "-Wdeprecated-declarations",
-                                          "-Wdeprecated-register",
-                                          "-Wformat-nonliteral",
-                                          "-Wimplicit-fallthrough",
-                                          "-Wredundant-decls",
-                                          "-Wregister",
-                                          "-Wshift-negative-value",
-                                          "-Wsign-conversion",
-                                          "-Wswitch-default",
-                                          "-Wswitch-enum",
-                                          "-Wunused-parameter",
-                                          "-Wzero-as-null-pointer-constant")
-
-    #define DONT_USE_EXTERN_C
-    #include "jpglib/jaricom.c"
-    #include "jpglib/jcapimin.c"
-    #include "jpglib/jcapistd.c"
-    #include "jpglib/jcarith.c"
-    #include "jpglib/jccoefct.c"
-    #include "jpglib/jccolor.c"
-
-    #undef FIX
-    #include "jpglib/jcdctmgr.c"
-    #include "jpglib/jcinit.c"
-    #include "jpglib/jcmainct.c"
-    #include "jpglib/jcmarker.c"
-    #include "jpglib/jcmaster.c"
-    #include "jpglib/jcomapi.c"
-    #include "jpglib/jcparam.c"
-    #include "jpglib/jcprepct.c"
-    #include "jpglib/jcsample.c"
-    #include "jpglib/jdapimin.c"
-    #include "jpglib/jdapistd.c"
-    #include "jpglib/jdatadst.c"
-    #include "jpglib/jdatasrc.c"
-    #include "jpglib/jddctmgr.c"
-    #include "jpglib/jdhuff.c"
-    #include "jpglib/jdinput.c"
-
-    #undef FIX
-    #include "jpglib/jdmerge.c"
-    #include "jpglib/jdpostct.c"
-
-    #undef FIX
-    #include "jpglib/jdtrans.c"
-    #include "jpglib/jerror.c"
-    #include "jpglib/jfdctflt.c"
-
-    #undef CONST_BITS
-    #include "jpglib/jfdctfst.c"
-
-    #undef CONST_BITS
-    #undef FIX_0_541196100
-    #undef MULTIPLY
-    #include "jpglib/jfdctint.c"
-    #include "jpglib/jidctflt.c"
-
-    #undef CONST_BITS
-    #undef FIX_1_847759065
-    #undef DEQUANTIZE
-    #undef MULTIPLY
-    #include "jpglib/jidctfst.c"
-
-    #undef CONST_BITS
-    #undef FIX_1_847759065
-    #undef DEQUANTIZE
-    #undef MULTIPLY
-    #include "jpglib/jidctint.c"
-    #include "jpglib/jquant1.c"
-    #include "jpglib/jutils.c"
-    #include "jpglib/jmemmgr.c"
-
-    #define savable_state           savable_state_jchuff
-    #define huff_entropy_ptr        huff_entropy_ptr_jchuff
-    #define encode_mcu_DC_first     encode_mcu_DC_first_jchuff
-    #define encode_mcu_AC_first     encode_mcu_AC_first_jchuff
-    #define encode_mcu_DC_refine    encode_mcu_DC_refine_jchuff
-    #define encode_mcu_AC_refine    encode_mcu_AC_refine_jchuff
-    #include "jpglib/jchuff.c"
-    #undef encode_mcu_DC_first
-    #undef encode_mcu_AC_first
-    #undef encode_mcu_DC_refine
-    #undef encode_mcu_AC_refine
-    #undef huff_entropy_ptr
-    #undef savable_state
-
-    #define arith_entropy_ptr       arith_entropy_ptr_jdarith
-    #define process_restart         process_restart_jdarith
-    #define start_pass              start_pass_jdarith
-    #define decode_mcu              decode_mcu_jdarith
-    #define decode_mcu_DC_first     decode_mcu_DC_first_jdarith
-    #define decode_mcu_AC_first     decode_mcu_AC_first_jdarith
-    #define decode_mcu_DC_refine    decode_mcu_DC_refine_jdarith
-    #define decode_mcu_AC_refine    decode_mcu_AC_refine_jdarith
-    #include "jpglib/jdarith.c"
-    #undef decode_mcu_AC_refine
-    #undef decode_mcu_DC_refine
-    #undef decode_mcu_AC_first
-    #undef decode_mcu_DC_first
-    #undef decode_mcu_AC_refine
-    #undef decode_mcu
-    #undef start_pass
-    #undef arith_entropy_ptr
-    #undef process_restart
-
-    #define my_coef_controller      my_coef_controller_jctrans
-    #define my_coef_ptr             my_coef_ptr_jctrans
-    #define start_iMCU_row          start_iMCU_row_jctrans
-    #define start_pass_coef         start_pass_coef_jctrans
-    #define compress_output         compress_output_jctrans
-    #include "jpglib/jctrans.c"
-    #undef my_coef_controller
-    #undef my_coef_ptr
-    #undef start_iMCU_row
-    #undef start_pass_coef
-    #undef compress_output
-
-    #define my_coef_controller      my_coef_controller_jdcoefct
-    #define my_coef_ptr             my_coef_ptr_jdcoefct
-    #define start_input_pass        start_input_pass_jdcoefct
-    #include "jpglib/jdcoefct.c"
-    #undef my_coef_controller
-    #undef my_coef_ptr
-    #undef start_input_pass
-
-    #undef FIX
-    #define my_cconvert_ptr         my_cconvert_ptr_jdcolor
-    #define build_ycc_rgb_table     build_ycc_rgb_table_jdcolor
-    #define build_bg_ycc_rgb_table  build_bc_ycc_rgb_table_jdcolor
-    #include "jpglib/jdcolor.c"
-    #undef my_cconvert_ptr
-    #undef build_ycc_rgb_table
-    #undef build_bg_ycc_rgb_table
-
-    #define my_main_controller      my_main_controller_jdmainct
-    #define my_main_ptr             my_main_ptr_jdmainct
-    #include "jpglib/jdmainct.c"
-
-    #define my_master_ptr           my_master_ptr_jdmainct
-    #include "jpglib/jdmaster.c"
-    #undef my_master_ptr
-
-    #define my_upsampler            my_upsampler_jdsample
-    #define my_upsample_ptr         my_upsampler_ptr_jdsample
-    #include "jpglib/jdsample.c"
-    #undef my_upsampler
-    #undef my_upsample_ptr
-
-    #define my_cquantizer           my_cquantizer_jquant2
-    #define my_cquantize_ptr        my_cquantize_ptr_jquant2
-    #include "jpglib/jquant2.c"
-    #undef my_cquantizer
-    #undef my_cquantize_ptr
-
-    #define my_marker_ptr           my_marker_ptr_jdmarker
-    #include "jpglib/jdmarker.c"
-    #undef my_marker_ptr
-
-    #include "jpglib/jmemnobs.c"
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+#if ! defined (JUCE_INCLUDE_JPEGLIB_CODE) || JUCE_INCLUDE_JPEGLIB_CODE
+#include "juce_graphics/image_formats/jpglib/jpeglib.h"
 #else
-    #define JPEG_INTERNALS
-    #undef FAR
-    #include <jpeglib.h>
-#endif
+extern "C"
+{
+#include JUCE_JPEGLIB_INCLUDE_PATH
 }
+#endif
 
-#undef max
-#undef min
-
-JUCE_END_IGNORE_WARNINGS_MSVC
-
-//==============================================================================
 namespace JPEGHelpers
 {
-    using namespace jpeglibNamespace;
-
-   #if ! (JUCE_WINDOWS && (JUCE_MSVC || JUCE_CLANG))
-    using jpeglibNamespace::boolean;
-   #endif
-
     static void fatalErrorHandler (j_common_ptr p)          { *((bool*) (p->client_data)) = true; }
     static void silentErrorCallback1 (j_common_ptr)         {}
     static void silentErrorCallback2 (j_common_ptr, int)    {}
@@ -336,7 +158,6 @@ Image JPEGImageFormat::decodeImage (InputStream& in)
    #if JUCE_USING_COREIMAGE_LOADER
     return juce_loadWithCoreImage (in);
    #else
-    using namespace jpeglibNamespace;
     using namespace JPEGHelpers;
 
     MemoryOutputStream mb;
@@ -443,7 +264,6 @@ Image JPEGImageFormat::decodeImage (InputStream& in)
 
 bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
 {
-    using namespace jpeglibNamespace;
     using namespace JPEGHelpers;
 
     jpeg_compress_struct jpegCompStruct;

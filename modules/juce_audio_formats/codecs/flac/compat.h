@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2012-2023  Xiph.Org Foundation
+ * Copyright (C) 2012-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -63,8 +63,15 @@
 #endif
 #endif
 #else
+#ifndef HAVE_FSEEKO
+#define fseeko fseek
+#define ftello ftell
+#define FLAC__off_t long
+#define FLAC__OFF_T_MAX LONG_MAX
+#else
 #define FLAC__off_t off_t
-#define FLAC__OFF_T_MAX OFF_T_MAX
+#define FLAC__OFF_T_MAX (sizeof(off_t) == sizeof(int64_t) ? INT64_MAX : sizeof(off_t) == sizeof(int32_t) ? INT32_MAX : -999999)
+#endif
 #endif
 
 
@@ -173,13 +180,10 @@
 #ifdef _WIN32
 /* All char* strings are in UTF-8 format. Added to support Unicode files on Windows */
 
-#if 0
 #include "win_utf8_io.h"
 #define flac_printf printf_utf8
 #define flac_fprintf fprintf_utf8
 #define flac_vfprintf vfprintf_utf8
-#endif
-
 #define flac_fopen fopen_utf8
 #define flac_chmod chmod_utf8
 #define flac_utime utime_utf8

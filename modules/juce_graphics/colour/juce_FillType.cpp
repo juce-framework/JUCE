@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -136,6 +136,17 @@ void FillType::setGradient (const ColourGradient& newGradient)
         gradient.reset (new ColourGradient (newGradient));
         colour = Colours::black;
     }
+}
+
+Image FillType::getSoftwareGradientImage (const Rectangle<int>& clip) const
+{
+    jassert (isGradient());
+
+    Image result (Image::ARGB, clip.getWidth(), clip.getHeight(), true, SoftwareImageType{});
+    Graphics g (result);
+    g.setFillType (transformed (AffineTransform::translation ((float) -clip.getX(), (float) -clip.getY())));
+    g.fillAll();
+    return result;
 }
 
 void FillType::setTiledImage (const Image& newImage, const AffineTransform& newTransform) noexcept

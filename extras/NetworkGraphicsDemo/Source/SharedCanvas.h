@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -301,7 +301,7 @@ private:
 class CanvasGeneratingContext final : public LowLevelGraphicsContext
 {
 public:
-    CanvasGeneratingContext (SharedCanvasDescription& c)  : canvas (c)
+    explicit CanvasGeneratingContext (SharedCanvasDescription& c)  : canvas (c)
     {
         stateStack.add (new SavedState());
     }
@@ -393,6 +393,7 @@ public:
     }
 
     void drawImage (const Image&, const AffineTransform&) override {}
+    void setImageBlendMode (BlendMode) override {}
 
     void drawLine (const Line<float>& line) override
     {

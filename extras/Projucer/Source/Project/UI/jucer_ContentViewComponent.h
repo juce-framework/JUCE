@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -101,8 +101,13 @@ private:
     private:
         std::unique_ptr<Drawable> logo = []() -> std::unique_ptr<Drawable>
         {
-            if (auto svg = parseXML (BinaryData::background_logo_svg))
-                return Drawable::createFromSVG (*svg);
+
+            if (const auto s = String::createStringFromData (BinaryData::background_logo_svg,
+                                                             BinaryData::background_logo_svgSize);
+                s.contains ("<svg"))
+            {
+                return Drawable::createFromSVGString (s);
+            }
 
             jassertfalse;
             return {};

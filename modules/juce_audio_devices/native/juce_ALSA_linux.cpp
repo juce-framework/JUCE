@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -65,7 +65,7 @@ static void getDeviceSampleRates (snd_pcm_t* handle, Array<double>& rates)
     snd_pcm_hw_params_t* hwParams;
     snd_pcm_hw_params_alloca (&hwParams);
 
-    for (const auto rateToTry : SampleRateHelpers::getAllSampleRates())
+    for (const auto rateToTry : SampleRateHelpers::getCommonSampleRates())
     {
         if (snd_pcm_hw_params_any (handle, hwParams) >= 0
              && snd_pcm_hw_params_test_rate (handle, hwParams, (unsigned int) rateToTry, 0) == 0)
@@ -73,6 +73,24 @@ static void getDeviceSampleRates (snd_pcm_t* handle, Array<double>& rates)
             rates.addIfNotAlreadyThere (rateToTry);
         }
     }
+}
+
+struct LibraryCloser
+{
+    void operator() (void* lib) const { dlclose (lib); }
+};
+
+static bool loadedPipeWireHasChannelMixCrash()
+{
+    if (const std::unique_ptr<void, LibraryCloser> lib { dlopen ("libpipewire-0.3.so.0", RTLD_NOW | RTLD_NOLOAD) })
+    {
+        using CheckVersionFn = bool (*) (int, int, int);
+
+        if (auto* checkVersion = reinterpret_cast<CheckVersionFn> (dlsym (lib.get(), "pw_check_library_version")))
+            return checkVersion (1, 6, 0) && ! checkVersion (1, 6, 3);
+    }
+
+    return false;
 }
 
 static void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, unsigned int* maxChans)
@@ -87,8 +105,16 @@ static void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, uns
 
         JUCE_ALSA_LOG ("getDeviceNumChannels: " << (int) *minChans << " " << (int) *maxChans);
 
-        // some virtual devices (dmix for example) report 10000 channels , we have to clamp these values
-        *maxChans = jmin (*maxChans, 256u);
+        // Plugin PCMs advertise channel counts that no real device backs, e.g. the plug
+        // plugin (plughw, and default on a plain ALSA system) reports 10000, so clamp them.
+        // PipeWire's ALSA plugin is an ioplug PCM that reports 128, but affected PipeWire
+        // versions crash when trying to use more than 64. A plug PCM wrapping the PipeWire
+        // PCM reports the plug type, so it isn't limited here.
+        const auto limit = snd_pcm_type (handle) == SND_PCM_TYPE_IOPLUG && loadedPipeWireHasChannelMixCrash()
+                         ? 64u
+                         : 256u;
+
+        *maxChans = jmin (*maxChans, limit);
         *minChans = jmin (*minChans, *maxChans);
     }
     else
@@ -136,9 +162,7 @@ static void getDeviceProperties (const String& deviceID,
         if (JUCE_CHECKED_RESULT (snd_pcm_open (&pcmHandle, deviceID.toUTF8(), SND_PCM_STREAM_CAPTURE, SND_PCM_NONBLOCK) >= 0))
         {
             getDeviceNumChannels (pcmHandle, &minChansIn, &maxChansIn);
-
-            if (rates.size() == 0)
-                getDeviceSampleRates (pcmHandle, rates);
+            getDeviceSampleRates (pcmHandle, rates);
 
             snd_pcm_close (pcmHandle);
         }
@@ -520,6 +544,15 @@ public:
         sampleRate = newSampleRate;
         bufferSize = newBufferSize;
 
+        if (sampleRates.isEmpty() && maxChansIn > 0 && maxChansOut > 0)
+        {
+            error = "The input and output devices don't support a common sample rate";
+            return;
+        }
+
+        if (inputChannels.getHighestBit() >= 0)
+            ensureMinimumNumBitsSet (inputChannels, (int) minChansIn);
+
         int maxInputsRequested = inputChannels.getHighestBit() + 1;
         maxInputsRequested = jmax ((int) minChansIn, jmin ((int) maxChansIn, maxInputsRequested));
 
@@ -564,8 +597,6 @@ public:
                 inputDevice.reset();
                 return;
             }
-
-            ensureMinimumNumBitsSet (currentInputChans, (int) minChansIn);
 
             if (! inputDevice->setParameters ((unsigned int) sampleRate,
                                               jlimit ((int) minChansIn, (int) maxChansIn, currentInputChans.getHighestBit() + 1),
@@ -630,6 +661,17 @@ public:
         if (outputDevice != nullptr && JUCE_ALSA_FAILED (snd_pcm_prepare (outputDevice->handle)))
             return;
 
+        // When using snd_pcm_link the first read on the input device will also start the output
+        // device, immediately consuming the same number of samples from the output buffer.
+        if (outputDevice != nullptr && inputDevice != nullptr)
+        {
+            AudioBuffer<float> silence (outputChannelBuffer.getNumChannels(), outputLatency);
+            silence.clear();
+
+            if (! outputDevice->writeToOutputDevice (silence, outputLatency))
+                JUCE_ALSA_LOG ("Failed to pre-fill the output device buffer");
+        }
+
         startThread (Priority::high);
 
         int count = 1000;
@@ -658,7 +700,10 @@ public:
 
             const int callbacksToStop = numCallbacks;
 
-            if ((! waitForThreadToExit (400)) && audioIoInProgress && numCallbacks == callbacksToStop)
+            const auto ioPeriodMs = sampleRate > 0.0 ? (int) (1000.0 * bufferSize / sampleRate) : 0;
+            const auto audioCallbackTimeoutMs = 400 + jmin (2000, ioPeriodMs);
+
+            if ((! waitForThreadToExit (audioCallbackTimeoutMs)) && audioIoInProgress && numCallbacks == callbacksToStop)
             {
                 JUCE_ALSA_LOG ("Thread is stuck in i/o. Is pulseaudio suspended?");
 
@@ -835,8 +880,31 @@ private:
         maxChansIn = 0;
         unsigned int dummy = 0;
 
-        getDeviceProperties (inputId, dummy, dummy, minChansIn, maxChansIn, sampleRates, false, true);
-        getDeviceProperties (outputId, minChansOut, maxChansOut, dummy, dummy, sampleRates, true, false);
+        Array<double> inputRates, outputRates;
+        getDeviceProperties (inputId, dummy, dummy, minChansIn, maxChansIn, inputRates, false, true);
+        getDeviceProperties (outputId, minChansOut, maxChansOut, dummy, dummy, outputRates, true, false);
+
+        // When both input and output devices are specified only return the sample rates that both
+        // support. Otherwise, they could be opened silently at different rates leading to buffer
+        // overruns.
+        sampleRates = std::invoke ([&]
+        {
+            if (inputRates.isEmpty())
+                return outputRates;
+
+            if (outputRates.isEmpty())
+                return inputRates;
+
+            Array<double> commonRates;
+
+            for (const auto rate : inputRates)
+                if (outputRates.contains (rate))
+                    commonRates.add (rate);
+
+            return commonRates;
+        });
+
+        sampleRates.sort();
 
         for (unsigned int i = 0; i < maxChansOut; ++i)
             channelNamesOut.add ("channel " + String ((int) i + 1));
