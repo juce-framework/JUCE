@@ -3,6 +3,18 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 9.0.4
+
+  - Added a MIDI device disconnection listener API
+  - Fixed multiple Windows MIDI device disconnection issues
+  - Fixed several MessageManagerLock issues
+  - Fixed Windows window placement when the display scale changes
+  - Fixed multiple Linux windowing and system tray issues
+  - Fixed some LV2 hosting issues
+  - Fixed XmlElement whitespace handling
+  - Added a NEEDS_OPENGL_ES CMake option for Linux
+  - Added protection against malformed String input
+
 ## Version 9.0.3
 
   - Added support for reading and writing Opus files
