@@ -50,7 +50,8 @@
 static int addFile (const File& file,
                     const String& classname,
                     OutputStream& headerStream,
-                    OutputStream& cppStream)
+                    OutputStream& cppStream,
+                    bool writeCppHeader = false)
 {
     MemoryBlock mb;
     file.loadFileAsData (mb);
@@ -68,6 +69,10 @@ static int addFile (const File& file,
                  << (int) mb.getSize() << ";\r\n\r\n";
 
     static int tempNum = 0;
+
+    if (writeCppHeader)
+        cppStream << "/* (Auto-generated binary data file). */\r\n\r\n"
+                     "#include \"" << classname << ".h\"\r\n\r\n";
 
     cppStream << "static const unsigned char temp" << ++tempNum << "[] = {";
 
@@ -107,12 +112,16 @@ int main (int argc, char* argv[])
 {
     std::cout << std::endl << " BinaryBuilder!  Visit www.juce.com for more info." << std::endl;
 
-    if (argc < 4 || argc > 5)
+    if (argc < 4 || argc > 6)
     {
-        std::cout << " Usage: BinaryBuilder  sourcedirectory targetdirectory targetclassname [optional wildcard pattern]\n\n"
+        std::cout << " Usage: BinaryBuilder  sourcedirectory targetdirectory targetclassname [--split] [optional wildcard pattern]\n\n"
                      " BinaryBuilder will find all files in the source directory, and encode them\n"
                      " into two files called (targetclassname).cpp and (targetclassname).h, which it\n"
                      " will write into the target directory supplied.\n\n"
+                     " If --split is specified, one .cpp file is generated per source file instead\n"
+                     " of a single combined .cpp file. Each generated .cpp file is named\n"
+                     " (targetclassname)_(sourcefilename).cpp. The shared header file is still\n"
+                     " written as (targetclassname).h.\n\n"
                      " Any files in sub-directories of the source directory will be put into the\n"
                      " resultant class, but #ifdef'ed out using the name of the sub-directory (hard to\n"
                      " explain, but obvious when you try it...)\n";
@@ -146,16 +155,33 @@ int main (int argc, char* argv[])
     String className (argv[3]);
     className = className.trim();
 
+    // Parse optional --split flag and wildcard pattern (order-independent)
+    bool splitMode = false;
+    String wildcardPattern = "*";
+
+    for (int i = 4; i < argc; ++i)
+    {
+        if (String (argv[i]) == "--split")
+            splitMode = true;
+        else
+            wildcardPattern = String (argv[i]).unquoted();
+    }
+
     const File headerFile (destDirectory.getChildFile (className).withFileExtension (".h"));
     const File cppFile    (destDirectory.getChildFile (className).withFileExtension (".cpp"));
 
-    std::cout << "Creating " << headerFile.getFullPathName()
-              << " and " << cppFile.getFullPathName()
-              << " from files in " << sourceDirectory.getFullPathName()
-              << "..." << std::endl << std::endl;
+    if (splitMode)
+        std::cout << "Creating " << headerFile.getFullPathName()
+                  << " and individual .cpp files"
+                  << " from files in " << sourceDirectory.getFullPathName()
+                  << "..." << std::endl << std::endl;
+    else
+        std::cout << "Creating " << headerFile.getFullPathName()
+                  << " and " << cppFile.getFullPathName()
+                  << " from files in " << sourceDirectory.getFullPathName()
+                  << "..." << std::endl << std::endl;
 
-    auto files = sourceDirectory.findChildFiles (File::findFiles, true,
-                                                 (argc > 4) ? argv[4] : "*");
+    auto files = sourceDirectory.findChildFiles (File::findFiles, true, wildcardPattern);
 
     if (files.isEmpty())
     {
@@ -176,13 +202,18 @@ int main (int argc, char* argv[])
         return 0;
     }
 
-    std::unique_ptr<OutputStream> cpp (cppFile.createOutputStream());
+    std::unique_ptr<OutputStream> cpp;
 
-    if (cpp == nullptr)
+    if (! splitMode)
     {
-        std::cout << "Couldn't open "
-                  << cppFile.getFullPathName() << " for writing" << std::endl << std::endl;
-        return 0;
+        cpp = cppFile.createOutputStream();
+
+        if (cpp == nullptr)
+        {
+            std::cout << "Couldn't open "
+                      << cppFile.getFullPathName() << " for writing" << std::endl << std::endl;
+            return 0;
+        }
     }
 
     *header << "/* (Auto-generated binary data file). */\r\n\r\n"
@@ -190,8 +221,9 @@ int main (int argc, char* argv[])
                "namespace " << className << "\r\n"
                "{\r\n";
 
-    *cpp << "/* (Auto-generated binary data file). */\r\n\r\n"
-            "#include \"" << className << ".h\"\r\n\r\n";
+    if (! splitMode)
+        *cpp << "/* (Auto-generated binary data file). */\r\n\r\n"
+                "#include \"" << className << ".h\"\r\n\r\n";
 
     int totalBytes = 0;
 
@@ -202,19 +234,63 @@ int main (int argc, char* argv[])
         // avoid source control files and hidden files
         if (! isHiddenFile (file, sourceDirectory))
         {
-            if (file.getParentDirectory() != sourceDirectory)
+            if (splitMode)
             {
-                *header << "  #ifdef " << file.getParentDirectory().getFileName().toUpperCase() << "\r\n";
-                *cpp << "#ifdef " << file.getParentDirectory().getFileName().toUpperCase() << "\r\n";
+                // Build a safe name for the per-file .cpp using the relative path
+                // so that files with the same name in different subdirectories don't collide.
+                const String safeName (file.getRelativePathFrom (sourceDirectory)
+                                           .replaceCharacter ('/', '_')
+                                           .replaceCharacter ('\\', '_')
+                                           .replaceCharacter (' ', '_')
+                                           .replaceCharacter ('.', '_')
+                                           .retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"));
 
-                totalBytes += addFile (file, className, *header, *cpp);
+                const File splitCppFile (destDirectory.getChildFile (className + "_" + safeName)
+                                                      .withFileExtension (".cpp"));
 
-                *header << "  #endif\r\n";
-                *cpp << "#endif\r\n";
+                splitCppFile.deleteFile();
+                std::unique_ptr<OutputStream> splitCpp (splitCppFile.createOutputStream());
+
+                if (splitCpp == nullptr)
+                {
+                    std::cout << "Couldn't open "
+                              << splitCppFile.getFullPathName() << " for writing" << std::endl << std::endl;
+                    return 0;
+                }
+
+                if (file.getParentDirectory() != sourceDirectory)
+                {
+                    *header << "  #ifdef " << file.getParentDirectory().getFileName().toUpperCase() << "\r\n";
+                    *splitCpp << "#ifdef " << file.getParentDirectory().getFileName().toUpperCase() << "\r\n";
+
+                    totalBytes += addFile (file, className, *header, *splitCpp, true);
+
+                    *header << "  #endif\r\n";
+                    *splitCpp << "#endif\r\n";
+                }
+                else
+                {
+                    totalBytes += addFile (file, className, *header, *splitCpp, true);
+                }
+
+                std::cout << "  -> " << splitCppFile.getFileName() << std::endl;
             }
             else
             {
-                totalBytes += addFile (file, className, *header, *cpp);
+                if (file.getParentDirectory() != sourceDirectory)
+                {
+                    *header << "  #ifdef " << file.getParentDirectory().getFileName().toUpperCase() << "\r\n";
+                    *cpp << "#ifdef " << file.getParentDirectory().getFileName().toUpperCase() << "\r\n";
+
+                    totalBytes += addFile (file, className, *header, *cpp);
+
+                    *header << "  #endif\r\n";
+                    *cpp << "#endif\r\n";
+                }
+                else
+                {
+                    totalBytes += addFile (file, className, *header, *cpp);
+                }
             }
         }
     }
