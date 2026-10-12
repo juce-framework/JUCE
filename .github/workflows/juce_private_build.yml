@@ -65,7 +65,7 @@ jobs:
             post_response = json_github_api_request(f'statuses/{sha}', 'POST', data)
             print(post_response)
   build:
-    if: ${{ !cancelled() && (success() || needs.setup.result == 'skipped') && inputs.nightly-targets == '[]' && (inputs.cpp-std != '' || needs.setup.outputs.build == '1' || contains(fromJSON('["master"]'), github.ref_name) || startsWith(github.ref_name, 'security-patches/')) }}
+    if: ${{ !cancelled() && (success() || needs.setup.result == 'skipped') && inputs.nightly-targets == '[]' && (inputs.cpp-std != '' || needs.setup.outputs.build == '1' || contains(fromJSON('["master"]'), github.ref_name)) }}
     needs: [setup]
     name: .
     # Not having the ability to do a dynamic 'uses' call is a real pain. To
@@ -87,7 +87,7 @@ jobs:
       triggerer: *triggerer
     secrets: inherit
   deploy:
-    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && contains(fromJSON('["success", "skipped"]'), needs.build.result) && (contains(fromJSON('["master", "develop", "wayland"]'), github.ref_name) || startsWith(github.ref_name, 'security-patches/')) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && contains(fromJSON('["success", "skipped"]'), needs.build.result) && contains(fromJSON('["master", "develop", "wayland"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
     needs: [setup, build]
     name: Deploy
     uses: juce-framework/JUCE-utils/.github/workflows/deploy.yml@master
