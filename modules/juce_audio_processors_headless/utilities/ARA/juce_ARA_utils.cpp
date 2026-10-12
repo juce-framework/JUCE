@@ -32,7 +32,7 @@
   ==============================================================================
 */
 
-#if (JucePlugin_Enable_ARA || JUCE_INTERNAL_HAS_ARA) && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+#if (JucePlugin_Enable_ARA || JUCE_INTERNAL_HAS_ARA) && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS)
 namespace juce
 {
  #if ARA_ENABLE_INTERNAL_ASSERTS

@@ -44,7 +44,7 @@
    To prevent such problems it's easiest to have it in its own translation unit.
 */
 
-#if (JucePlugin_Enable_ARA || JUCE_INTERNAL_HAS_ARA) && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+#if (JucePlugin_Enable_ARA || JUCE_INTERNAL_HAS_ARA) && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS)
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments", "-Wmissing-prototypes")
  #include <ARA_Library/Debug/ARADebug.c>
