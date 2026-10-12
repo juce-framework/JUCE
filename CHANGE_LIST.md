@@ -3,6 +3,10 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.16
+
+  - Added protection against malformed String input
+
 ## Version 8.0.15
 
   - Fixed the behaviour of loadFromHexString
