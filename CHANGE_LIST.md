@@ -3,6 +3,10 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 7.0.13
+
+  - Added protection against malformed String input
+
 ## Version 7.0.12
 
   - Fixed an issue with timers in Pro Tools
