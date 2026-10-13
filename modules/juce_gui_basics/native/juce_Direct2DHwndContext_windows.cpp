@@ -400,8 +400,7 @@ private:
             return;
         }
 
-        if (hr == S_OK)
-            swap.didPresent();
+        swap.didPresent();
 
         JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintEnd, getFrameId());
     }
