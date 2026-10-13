@@ -2587,11 +2587,6 @@ struct WindowsMidiHelpers
                 midiInAddBuffer (device, &hdr, sizeof (hdr));
             }
 
-            bool isFinished() const
-            {
-                return (hdr.dwFlags & MHDR_DONE) != 0;
-            }
-
         private:
             MIDIHDR hdr{};
             std::array<char, 256> data{};
@@ -2634,11 +2629,6 @@ struct WindowsMidiHelpers
 
             ~InputDevice() override
             {
-                inDestructor = true;
-                SetEvent (event.get());
-
-                blockQueueThread.join();
-
                 allInputs().remove (*this);
 
                 if (deviceHandle == nullptr)
@@ -2742,18 +2732,6 @@ struct WindowsMidiHelpers
                 if (midiInStart (handle) != MMSYSERR_NOERROR)
                     return {};
 
-                result->blockQueueThread = std::thread { [self = result.get()]
-                {
-                    while (! self->inDestructor)
-                    {
-                        WaitForSingleObject (self->event.get(), INFINITE);
-
-                        for (auto& header : *self->headers)
-                            if (header.isFinished())
-                                header.write (self->deviceHandle);
-                    }
-                } };
-
                 return result;
             }
 
@@ -2776,8 +2754,6 @@ struct WindowsMidiHelpers
                         consumers.call ([&] (ump::Consumer& c) { c.consume (b, e, timestamp); });
                     });
                 }
-
-                SetEvent (event.get());
             }
 
             void handleSysEx (MIDIHDR* hdr, uint32 timeStamp)
@@ -2792,8 +2768,6 @@ struct WindowsMidiHelpers
                         consumers.call ([&] (ump::Consumer& c) { c.consume (b, e, timestamp); });
                     });
                 }
-
-                SetEvent (event.get());
             }
 
             void disconnected()
@@ -2822,34 +2796,45 @@ struct WindowsMidiHelpers
                 return t * 0.001;
             }
 
-            static void CALLBACK midiInCallback (HMIDIIN,
+            static void CALLBACK midiInCallback (HMIDIIN hMidiIn,
                                                  UINT uMsg,
                                                  DWORD_PTR dwInstance,
                                                  DWORD_PTR midiMessage,
                                                  DWORD_PTR timeStamp)
             {
-                auto* collector = reinterpret_cast<InputDevice*> (dwInstance);
+                auto* const collector = reinterpret_cast<InputDevice*> (dwInstance);
+                auto* const header = reinterpret_cast<MIDIHDR*> (midiMessage);
 
-                allInputs().call ([&] (auto& l)
+                switch (uMsg)
                 {
-                    if (collector != &l)
-                        return;
+                    case MIM_DATA:
+                        allInputs().call ([&] (auto& l)
+                        {
+                            if (collector == &l)
+                                l.handleMessage ((const uint8*) &midiMessage, (uint32) timeStamp);
+                        });
+                        break;
 
-                    switch (uMsg)
-                    {
-                        case MIM_DATA:
-                            l.handleMessage ((const uint8*) &midiMessage, (uint32) timeStamp);
-                            break;
+                    case MIM_LONGDATA:
+                    case MIM_LONGERROR:
+                        allInputs().call ([&] (auto& l)
+                        {
+                            if (collector == &l)
+                            {
+                                l.handleSysEx (header, (uint32) timeStamp);
+                                midiInAddBuffer (hMidiIn, header, sizeof (MIDIHDR));
+                            }
+                        });
+                        break;
 
-                        case MIM_LONGDATA:
-                            l.handleSysEx ((MIDIHDR*) midiMessage, (uint32) timeStamp);
-                            break;
-
-                        case MIM_CLOSE:
-                            l.disconnected();
-                            break;
-                    }
-                });
+                    case MIM_CLOSE:
+                        allInputs().call ([&] (auto& l)
+                        {
+                            if (collector == &l)
+                                l.disconnected();
+                        });
+                        break;
+                }
             }
 
             static WaitFreeListeners<InputDevice>& allInputs()
@@ -2867,19 +2852,6 @@ struct WindowsMidiHelpers
             // The shared input always converts to plain MIDI 1.0. Clients that want MIDI 2.0 have
             // their own converters.
             ump::BytestreamToUMPDispatcher dispatcher { 0, ump::PacketProtocol::MIDI_1_0, 4096 };
-
-            struct EventDestructor
-            {
-                void operator() (HANDLE h) const
-                {
-                    if (h != nullptr)
-                        CloseHandle (h);
-                }
-            };
-
-            std::atomic<bool> inDestructor { false };
-            std::unique_ptr<void, EventDestructor> event { CreateEvent (nullptr, false, false, nullptr) };
-            std::thread blockQueueThread;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputDevice)
         };
