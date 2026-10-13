@@ -832,7 +832,7 @@ public:
         if (usingCoreGraphics != (index > 0))
         {
             usingCoreGraphics = index > 0;
-            [view setNeedsDisplay: true];
+            component.repaint();
         }
        #endif
     }
@@ -1078,13 +1078,16 @@ public:
     }
 
     //==============================================================================
-    void drawRect (NSRect r)
+    void drawRect (NSRect dirty)
     {
-        if (r.size.width < 1.0f || r.size.height < 1.0f)
-            return;
-
         auto* cg = (CGContextRef) [[NSGraphicsContext currentContext] CGContext];
-        drawRectWithContext (cg, r);
+
+        deferredRepaints.subtract (Rectangle { dirty.origin.x,
+                                               dirty.origin.y,
+                                               dirty.size.width,
+                                               dirty.size.height }.toFloat());
+
+        drawRectWithContext (cg, dirty);
     }
 
     void drawRectWithContext (CGContextRef cg, NSRect r)
@@ -1141,6 +1144,9 @@ public:
 
     void renderRect (CGContextRef cg, NSRect r, float displayScale)
     {
+        CGContextSaveGState (cg);
+        const ScopeGuard pop { [&] { CGContextRestoreGState (cg); } };
+
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics)
         {
@@ -1158,6 +1164,9 @@ public:
 
             RectangleList<int> clip;
             getClipRects (clip, offset, clipW, clipH);
+
+            if (clip.isEmpty())
+                clip.add (Rectangle { r.size.width, r.size.height }.getSmallestIntegerContainer());
 
             if (! clip.isEmpty())
             {
@@ -1198,6 +1207,7 @@ public:
         // As a workaround for this, we use a RectangleList to do our own coalescing of regions before
         // asynchronously asking the OS to repaint them.
         deferredRepaints.add (area.toFloat());
+        setNeedsDisplayRectangles();
     }
 
     static bool shouldThrottleRepaint()
@@ -1228,18 +1238,10 @@ public:
         if (msSinceLastRepaint < minimumRepaintInterval && shouldThrottleRepaint())
             return;
 
-        const auto frameSize = view.frame.size;
-        const Rectangle currentBounds { (float) frameSize.width, (float) frameSize.height };
-
         for (auto& i : deferredRepaints)
             [view setNeedsDisplayInRect: makeCGRect (i)];
 
         lastRepaintTime = Time::getMillisecondCounter();
-
-       #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
-        if (metalRenderer == nullptr)
-       #endif
-            deferredRepaints.clear();
     }
 
     void performAnyPendingRepaintsNow() override
