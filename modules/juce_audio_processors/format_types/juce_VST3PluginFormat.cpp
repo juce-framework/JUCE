@@ -254,7 +254,6 @@ struct VST3PluginWindow final : public AudioProcessorEditor,
         warnOnFailure (view->setFrame (this));
         view->queryInterface (IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
 
-        setContentScaleFactor();
         resizeToFit();
 
         setResizable (view->canResize() == kResultTrue, false);
@@ -490,6 +489,11 @@ private:
 
             if (attachedResult == kResultOk)
                 attachedCalled = true;
+
+            if (auto* peer = getPeer())
+            {
+                nativeScaleFactor = (float) peer->getPlatformScaleFactor();
+            }
 
             updatePluginScale();
 
