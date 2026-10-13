@@ -5008,45 +5008,26 @@ public:
 
     void handlePaintMessage() override
     {
-        HRGN rgn = CreateRectRgn (0, 0, 0, 0);
-        const int regionType = GetUpdateRgn (peer.getHWND(), rgn, false);
+        updateRegion.findRECTAndValidate (peer.getHWND());
 
-        PAINTSTRUCT paintStruct;
-        HDC dc = BeginPaint (peer.getHWND(), &paintStruct); // Note this can immediately generate a WM_NCPAINT
-                                                            // message and become re-entrant, but that's OK
+        for (const auto& rect : updateRegion.getRects())
+            deferredRepaintsNext.add (D2DUtilities::toRectangle (rect));
 
-        // If something in a paint handler calls, e.g. a message box, this can become reentrant and
-        // corrupt the image it's using to paint into, so do a check here.
-        if (! reentrant)
-        {
-            const ScopedValueSetter setter (reentrant, true, false);
-
-            if (peer.dontRepaint)
-                peer.getComponent().handleCommandMessage (0); // (this triggers a repaint in the openGL context)
-            else
-                performPaint (dc, rgn, regionType, paintStruct);
-        }
-
-        DeleteObject (rgn);
-        EndPaint (peer.getHWND(), &paintStruct);
-
-       #if JUCE_MSVC
-        _fpreset(); // because some graphics cards can unmask FP exceptions
-       #endif
+        schedulePaintOnVblank = true;
     }
 
     void repaint (const Rectangle<int>& area) override
     {
         JUCE_TRACE_EVENT_INT_RECT (etw::repaint, etw::paintKeyword, area);
-        deferredRepaints.add (area);
+        deferredRepaintsNext.add (area);
+        auto r = D2DUtilities::toRECT (area);
+        InvalidateRect (peer.getHWND(), &r, FALSE);
     }
 
     void performAnyPendingRepaintsNow() override
     {
         if (! peer.getComponent().isVisible())
             return;
-
-        onVBlank();
 
         WeakReference localRef (&peer.getComponent());
         MSG m;
@@ -5057,6 +5038,9 @@ public:
             if (localRef != nullptr) // (the PeekMessage call can dispatch messages, which may delete this comp)
                 handlePaintMessage();
         }
+
+        if (localRef != nullptr)
+            onVBlank();
     }
 
     Image createSnapshot() override
@@ -5068,13 +5052,26 @@ public:
 
     void onVBlank() override
     {
-        for (auto deferredRect : deferredRepaints)
+        if (! std::exchange (schedulePaintOnVblank, false))
+            return;
+
+        auto dc = GetDC (peer.getHWND());
+
+        if (! reentrant)
         {
-            auto r = D2DUtilities::toRECT (deferredRect);
-            InvalidateRect (peer.getHWND(), &r, FALSE);
+            const ScopedValueSetter setter (reentrant, true, false);
+
+            if (peer.dontRepaint)
+                peer.getComponent().handleCommandMessage (0); // (this triggers a repaint in the openGL context)
+            else
+                performPaint (dc);
         }
 
-        deferredRepaints.clear();
+        ReleaseDC (peer.getHWND(), dc);
+
+       #if JUCE_MSVC
+        _fpreset(); // because some graphics cards can unmask FP exceptions
+       #endif
     }
 
     void handleShowWindow() override {}
@@ -5131,12 +5128,10 @@ private:
         return SoftwareImageType().convert (bitmap);
     }
 
-    void performPaint (HDC dc, HRGN rgn, int regionType, PAINTSTRUCT& paintStruct)
+    void performPaint (HDC dc)
     {
-        int x = paintStruct.rcPaint.left;
-        int y = paintStruct.rcPaint.top;
-        int w = paintStruct.rcPaint.right - x;
-        int h = paintStruct.rcPaint.bottom - y;
+        std::swap (deferredRepaintsNext, deferredRepaintsCurrent);
+        deferredRepaintsNext.clear();
 
         const auto perPixelTransparent = peer.getTransparencyKind() == HWNDComponentPeer::TransparencyKind::perPixel;
 
@@ -5145,105 +5140,78 @@ private:
             // it's not possible to have a transparent window with a title bar at the moment!
             jassert (! peer.hasTitleBar());
 
-            auto r = getWindowScreenRect (peer.getHWND());
-            x = y = 0;
-            w = r.right - r.left;
-            h = r.bottom - r.top;
+            deferredRepaintsCurrent.add (D2DUtilities::toRectangle (getWindowScreenRect (peer.getHWND())).withZeroOrigin());
         }
 
-        if (w > 0 && h > 0)
+        const auto uniformlyTransparent = peer.getTransparencyKind() == HWNDComponentPeer::TransparencyKind::constant;
+
+        if (uniformlyTransparent)
         {
-            Image& offscreenImage = offscreenImageGenerator.getImage (perPixelTransparent, w, h);
-
-            RectangleList<int> contextClip;
-            const Rectangle<int> clipBounds (w, h);
-
-            bool needToPaintAll = true;
-
-            if (regionType == COMPLEXREGION && ! perPixelTransparent)
+            const auto prevAlpha = std::invoke ([&]() -> std::optional<BYTE>
             {
-                HRGN clipRgn = CreateRectRgnIndirect (&paintStruct.rcPaint);
-                CombineRgn (rgn, rgn, clipRgn, RGN_AND);
-                DeleteObject (clipRgn);
+                BYTE alpha{};
 
-                alignas (RGNDATA) std::byte rgnData[8192];
-                const DWORD res = GetRegionData (rgn, sizeof (rgnData), (RGNDATA*) &rgnData);
+                if (GetLayeredWindowAttributes (peer.getHWND(), nullptr, &alpha, nullptr))
+                    return alpha;
 
-                if (res > 0 && res <= sizeof (rgnData))
-                {
-                    const RGNDATAHEADER* const hdr = &(((const RGNDATA*) &rgnData)->rdh);
+                return {};
+            });
 
-                    if (hdr->iType == RDH_RECTANGLES
-                        && hdr->rcBound.right - hdr->rcBound.left >= w
-                        && hdr->rcBound.bottom - hdr->rcBound.top >= h)
-                    {
-                        needToPaintAll = false;
+            const auto nextAlpha = (BYTE) (255.0f * peer.getComponent().getAlpha());
 
-                        auto rects = unalignedPointerCast<const RECT*> ((char*) &rgnData + sizeof (RGNDATAHEADER));
-
-                        for (int i = (int) ((RGNDATA*) &rgnData)->rdh.nCount; --i >= 0;)
-                        {
-                            if (rects->right <= x + w && rects->bottom <= y + h)
-                            {
-                                const int cx = jmax (x, (int) rects->left);
-                                contextClip.addWithoutMerging (Rectangle<int> (cx - x, rects->top - y,
-                                                                               rects->right - cx, rects->bottom - rects->top)
-                                                                       .getIntersection (clipBounds));
-                            }
-                            else
-                            {
-                                needToPaintAll = true;
-                                break;
-                            }
-
-                            ++rects;
-                        }
-                    }
-                }
-            }
-
-            if (needToPaintAll)
-            {
-                contextClip.clear();
-                contextClip.addWithoutMerging (Rectangle<int> (w, h));
-            }
-
-            ChildWindowClippingInfo childClipInfo = { dc, &peer, &contextClip, Point<int> (x, y), 0 };
-            EnumChildWindows (peer.getHWND(), clipChildWindowCallback, (LPARAM) &childClipInfo);
-
-            if (! contextClip.isEmpty())
-            {
-                if (perPixelTransparent)
-                    for (auto& i : contextClip)
-                        offscreenImage.clear (i);
-
-                {
-                    auto context = peer.getComponent()
-                                       .getLookAndFeel()
-                                       .createGraphicsContext (offscreenImage, { -x, -y }, contextClip);
-
-                    context->addTransform (AffineTransform::scale ((float) peer.getPlatformScaleFactor()));
-                    peer.handlePaint (*context);
-                }
-
-                auto* image = static_cast<WindowsBitmapImage*> (offscreenImage.getPixelData().get());
-
-                if (perPixelTransparent)
-                {
-                    image->updateLayeredWindow (peer.getHWND(), { x, y }, peer.getComponent().getAlpha());
-                }
-                else
-                {
-                    image->blitToDC (dc, x, y);
-
-                    if (peer.getTransparencyKind() == HWNDComponentPeer::TransparencyKind::constant)
-                        SetLayeredWindowAttributes (peer.getHWND(), {}, (BYTE) (255.0f * peer.getComponent().getAlpha()), LWA_ALPHA);
-                }
-            }
-
-            if (childClipInfo.savedDC != 0)
-                RestoreDC (dc, childClipInfo.savedDC);
+            if (nextAlpha != prevAlpha)
+                SetLayeredWindowAttributes (peer.getHWND(), {}, nextAlpha, LWA_ALPHA);
         }
+
+        auto clipBounds = deferredRepaintsCurrent.getBounds();
+        deferredRepaintsCurrent.transformAll (AffineTransform::translation (-clipBounds.getTopLeft()));
+
+        if (clipBounds.isEmpty())
+            return;
+
+        Image& offscreenImage = offscreenImageGenerator.getImage (perPixelTransparent, clipBounds.getWidth(), clipBounds.getHeight());
+
+        ChildWindowClippingInfo childClipInfo = { dc, &peer, &deferredRepaintsCurrent, clipBounds.getTopLeft(), 0 };
+        EnumChildWindows (peer.getHWND(), clipChildWindowCallback, (LPARAM) &childClipInfo);
+
+        if (perPixelTransparent)
+            for (auto& i : deferredRepaintsCurrent)
+                offscreenImage.clear (i);
+
+        {
+            auto context = peer.getComponent()
+                               .getLookAndFeel()
+                               .createGraphicsContext (offscreenImage, -clipBounds.getTopLeft(), deferredRepaintsCurrent);
+
+            context->addTransform (AffineTransform::scale ((float) peer.getPlatformScaleFactor()));
+            peer.handlePaint (*context);
+        }
+
+        auto* image = static_cast<WindowsBitmapImage*> (offscreenImage.getPixelData().get());
+
+        if (perPixelTransparent)
+        {
+            image->updateLayeredWindow (peer.getHWND(), clipBounds.getTopLeft(), peer.getComponent().getAlpha());
+        }
+        else
+        {
+            auto* clip = CreateRectRgn (0, 0, 0, 0);
+            const ScopeGuard deleteClip { [&] { DeleteObject (clip); } };
+
+            for (auto& r : deferredRepaintsCurrent)
+            {
+                auto rect = D2DUtilities::toRECT (r + clipBounds.getTopLeft());
+                auto* subregion = CreateRectRgnIndirect (&rect);
+                const ScopeGuard deleteSubregion { [&] { DeleteObject (subregion); } };
+                CombineRgn (clip, clip, subregion, RGN_OR);
+            }
+
+            SelectClipRgn (dc, clip);
+            image->blitToDC (dc, clipBounds.getX(), clipBounds.getY());
+        }
+
+        if (childClipInfo.savedDC != 0)
+            RestoreDC (dc, childClipInfo.savedDC);
     }
 
     struct ChildWindowClippingInfo
@@ -5307,8 +5275,10 @@ private:
 
     HWNDComponentPeer& peer;
     TemporaryImage offscreenImageGenerator;
-    RectangleList<int> deferredRepaints;
+    RectangleList<int> deferredRepaintsNext, deferredRepaintsCurrent;
+    UpdateRegion updateRegion;
     bool reentrant = false;
+    bool schedulePaintOnVblank = false;
 };
 
 class D2DRenderContext : public RenderContext
@@ -5349,6 +5319,7 @@ public:
 
     void repaint (const Rectangle<int>& area) override
     {
+        direct2DContext->addDeferredRepaint (area);
         auto r = D2DUtilities::toRECT (area);
         InvalidateRect (peer.getHWND(), &r, FALSE);
     }
@@ -5791,7 +5762,7 @@ void HWNDComponentPeer::setCurrentRenderingEngine (int e)
         // can only be created once per window.
         renderContext.reset();
         renderContext = contextDescriptors[e].construct (*this);
-        InvalidateRect (hwnd, nullptr, TRUE);
+        component.repaint();
     }
 }
 
