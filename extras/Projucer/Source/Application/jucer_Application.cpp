@@ -819,24 +819,27 @@ void ProjucerApplication::launchDemoRunner()
         auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
 
        #if JUCE_LINUX || JUCE_BSD
-        demoRunnerAlert.reset (lf.createAlertWindow ("Open Project",
-                                                     "Couldn't find a compiled version of the Demo Runner."
-                                                     " Please compile the Demo Runner project in the JUCE examples directory.",
-                                                     "OK", {}, {},
-                                                     MessageBoxIconType::WarningIcon, 1,
-                                                     mainWindowList.getFrontmostWindow (false)));
+        const auto opt = MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                            .withTitle ("Open Project")
+                                            .withMessage ("Couldn't find a compiled version of the Demo Runner."
+                                                          " Please compile the Demo Runner project in the JUCE examples directory.")
+                                            .withButton ("OK", 0)
+                                            .withAssociatedComponent (mainWindowList.getFrontmostWindow (false));
+        demoRunnerAlert = lf.createAlertWindowForOptions (opt);
         demoRunnerAlert->enterModalState (true, ModalCallbackFunction::create ([this] (int)
                                                 {
                                                     demoRunnerAlert.reset (nullptr);
                                                 }), false);
 
        #else
-        demoRunnerAlert.reset (lf.createAlertWindow ("Open Project",
-                                                     "Couldn't find a compiled version of the Demo Runner."
-                                                     " Do you want to open the project?",
-                                                     "Open project", "Cancel", {},
-                                                     MessageBoxIconType::QuestionIcon, 2,
-                                                     mainWindowList.getFrontmostWindow (false)));
+        const auto opt = MessageBoxOptions{}.withIconType (MessageBoxIconType::QuestionIcon)
+                                            .withTitle ("Open Project")
+                                            .withMessage ("Couldn't find a compiled version of the Demo Runner."
+                                                          " Do you want to open the project?")
+                                            .withButton ("Open project", 1)
+                                            .withButton ("Cancel", 0)
+                                            .withAssociatedComponent (mainWindowList.getFrontmostWindow (false));
+        demoRunnerAlert = lf.createAlertWindowForOptions (opt);
         demoRunnerAlert->enterModalState (true, ModalCallbackFunction::create ([this, demoRunnerFile] (int retVal)
                                                 {
                                                     demoRunnerAlert.reset (nullptr);

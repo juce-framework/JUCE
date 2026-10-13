@@ -109,7 +109,7 @@ public:
                                                                   .withIconType (MessageBoxIconType::InfoIcon)
                                                                   .withTitle ("Progress window")
                                                                   .withMessage (messageString)
-                                                                  .withButton ("OK"),
+                                                                  .withButton ("OK", 0),
                                                               nullptr);
         }
 
@@ -195,7 +195,7 @@ public:
                                                                 .withTitle ("Permissions warning")
                                                                 .withMessage ("External storage access permission not granted, some files"
                                                                               " may be inaccessible.")
-                                                                .withButton ("OK"),
+                                                                .withButton ("OK", 0),
                                                             nullptr);
         });
     }
@@ -241,7 +241,7 @@ private:
                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                     .withTitle ("Alert Box")
                                                                     .withMessage ("Result code: " + String (result))
-                                                                    .withButton ("OK"),
+                                                                    .withButton ("OK", 0),
                                                                 nullptr);
         };
     }
@@ -273,7 +273,7 @@ private:
                                                                 .withMessage ("Result code: " + String (result) + newLine
                                                                               + "Option index chosen: " + String (optionIndexChosen) + newLine
                                                                               + "Text: " + text)
-                                                                .withButton ("OK"),
+                                                                .withButton ("OK", 0),
                                                             nullptr);
         };
     }
@@ -296,10 +296,13 @@ private:
         }
         else if (type == yesNoCancelAlertWindow)
         {
-            auto options = MessageBoxOptions::makeOptionsYesNoCancel (MessageBoxIconType::QuestionIcon,
-                                                                      "This is a yes/no/cancel AlertWindow",
-                                                                      "And this is the AlertWindow's message. "
-                                                                      "Blah blah blah blah blah blah blah blah blah blah blah blah blah.");
+            auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::QuestionIcon)
+                                              .withTitle ("This is a yes/no/cancel AlertWindow")
+                                              .withMessage ("And this is the AlertWindow's message. "
+                                                            "Blah blah blah blah blah blah blah blah blah blah blah blah blah.")
+                                              .withButton (TRANS ("Yes"), 1)
+                                              .withButton (TRANS ("No"), 2)
+                                              .withButton (TRANS ("Cancel"), 0);
             messageBox = AlertWindow::showScopedAsync (options, getAlertBoxResultChosen());
         }
         else if (type == calloutBoxWindow)
@@ -357,7 +360,7 @@ private:
                                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                                     .withTitle ("File Chooser...")
                                                                                     .withMessage ("You picked: " + chosen)
-                                                                                    .withButton ("OK"),
+                                                                                    .withButton ("OK", 0),
                                                                                 nullptr);
                                  });
             }
@@ -384,7 +387,7 @@ private:
                                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                                     .withTitle ("File Chooser...")
                                                                                     .withMessage ("You picked: " + chosen)
-                                                                                    .withButton ("OK"),
+                                                                                    .withButton ("OK", 0),
                                                                                 nullptr);
                                  },
                                  &imagePreview);
@@ -438,7 +441,7 @@ private:
                                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                                     .withTitle ("File Chooser...")
                                                                                     .withMessage ("You picked: " + name)
-                                                                                    .withButton ("OK"),
+                                                                                    .withButton ("OK", 0),
                                                                                 nullptr);
                                  });
             }
@@ -460,7 +463,7 @@ private:
                                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                                     .withTitle ("File Chooser...")
                                                                                     .withMessage ("You picked: " + name)
-                                                                                    .withButton ("OK"),
+                                                                                    .withButton ("OK", 0),
                                                                                 nullptr);
                                  });
             }
@@ -478,7 +481,7 @@ private:
                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                     .withTitle ("Sharing Text Result")
                                                                     .withMessage ("Sharing text finished\nwith " + resultString)
-                                                                    .withButton ("OK"),
+                                                                    .withButton ("OK", 0),
                                                                 nullptr);
             });
         }
@@ -505,7 +508,7 @@ private:
                                                                         .withIconType (MessageBoxIconType::InfoIcon)
                                                                         .withTitle ("Sharing Files Result")
                                                                         .withMessage ("Sharing files finished\nwith " + resultString)
-                                                                        .withButton ("OK"),
+                                                                        .withButton ("OK", 0),
                                                                     nullptr);
                 });
 
@@ -539,7 +542,7 @@ private:
                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                     .withTitle ("Sharing Images Result")
                                                                     .withMessage ("Sharing images finished\nwith " + resultString)
-                                                                    .withButton ("OK"),
+                                                                    .withButton ("OK", 0),
                                                                 nullptr);
             });
         }

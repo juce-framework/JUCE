@@ -45,7 +45,7 @@ MessageBoxOptions MessageBoxOptions::makeOptionsOk (MessageBoxIconType iconType,
         .withIconType (iconType)
         .withTitle (title)
         .withMessage (message)
-        .withButton (buttonText.isEmpty() ? TRANS ("OK") : buttonText)
+        .withButton (buttonText.isEmpty() ? TRANS ("OK") : buttonText, 0)
         .withAssociatedComponent (associatedComponent);
 }
 
@@ -60,8 +60,8 @@ MessageBoxOptions MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType ico
         .withIconType (iconType)
         .withTitle (title)
         .withMessage (message)
-        .withButton (button1Text.isEmpty() ? TRANS ("OK") : button1Text)
-        .withButton (button2Text.isEmpty() ? TRANS ("Cancel") : button2Text)
+        .withButton (button1Text.isEmpty() ? TRANS ("OK") : button1Text, 1)
+        .withButton (button2Text.isEmpty() ? TRANS ("Cancel") : button2Text, 0)
         .withAssociatedComponent (associatedComponent);
 }
 
@@ -76,8 +76,8 @@ MessageBoxOptions MessageBoxOptions::makeOptionsYesNo (MessageBoxIconType iconTy
         .withIconType (iconType)
         .withTitle (title)
         .withMessage (message)
-        .withButton (button1Text.isEmpty() ? TRANS ("Yes") : button1Text)
-        .withButton (button2Text.isEmpty() ? TRANS ("No") : button2Text)
+        .withButton (button1Text.isEmpty() ? TRANS ("Yes") : button1Text, 1)
+        .withButton (button2Text.isEmpty() ? TRANS ("No") : button2Text, 0)
         .withAssociatedComponent (associatedComponent);
 }
 
@@ -93,9 +93,9 @@ MessageBoxOptions MessageBoxOptions::makeOptionsYesNoCancel (MessageBoxIconType 
         .withIconType (iconType)
         .withTitle (title)
         .withMessage (message)
-        .withButton (button1Text.isEmpty() ? TRANS ("Yes") : button1Text)
-        .withButton (button2Text.isEmpty() ? TRANS ("No") : button2Text)
-        .withButton (button3Text.isEmpty() ? TRANS ("Cancel") : button3Text)
+        .withButton (button1Text.isEmpty() ? TRANS ("Yes") : button1Text, 1)
+        .withButton (button2Text.isEmpty() ? TRANS ("No") : button2Text, 2)
+        .withButton (button3Text.isEmpty() ? TRANS ("Cancel") : button3Text, 0)
         .withAssociatedComponent (associatedComponent);
 }
 

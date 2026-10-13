@@ -43,13 +43,16 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
         explicit OSXMessageBox (const MessageBoxOptions& opts)
             : options (opts) {}
 
-        void runAsync (std::function<void (int)> recipient) override
+        void runAsync (std::function<void (std::optional<int>)> recipient) override
         {
-            makeAlert();
+            const auto resultCodes = makeAlert();
 
-            const auto onDone = [recipient] (NSModalResponse result)
+            const auto onDone = [resultCodes, recipient, opt = options] (NSModalResponse result)
             {
-                recipient (convertResult (result));
+                const auto index = convertResult (result);
+                const auto code = index.has_value() ? std::make_optional (resultCodes[*index]) : std::nullopt;
+
+                recipient (code);
             };
 
             if (auto* comp = options.getAssociatedComponent())
@@ -75,10 +78,12 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
             onDone (result);
         }
 
-        int runSync() override
+        std::optional<int> runSync() override
         {
-            makeAlert();
-            return convertResult ([alertWindow.get() runModal]);
+            const auto resultCodes = makeAlert();
+            const auto index = convertResult ([alertWindow.get() runModal]);
+
+            return index.has_value() ? std::make_optional (resultCodes[*index]) : std::nullopt;
         }
 
         void close() override
@@ -88,7 +93,7 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
         }
 
     private:
-        static int convertResult (NSModalResponse response)
+        static std::optional<int> convertResult (NSModalResponse response)
         {
             switch (response)
             {
@@ -98,17 +103,10 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                 default:                         break;
             }
 
-            jassertfalse;
-            return 0;
+            return {};
         }
 
-        static void addButton (NSAlert* alert, const String& button)
-        {
-            if (! button.isEmpty())
-                [alert addButtonWithTitle: juceStringToNS (button)];
-        }
-
-        void makeAlert()
+        Array<int> makeAlert()
         {
             NSAlert* alert = [[NSAlert alloc] init];
 
@@ -118,13 +116,25 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
             [alert setAlertStyle: options.getIconType() == MessageBoxIconType::WarningIcon ? NSAlertStyleCritical
                                                                                            : NSAlertStyleInformational];
 
-            const auto button1Text = options.getButtonText (0);
+            const String defaultButtonStrings[] { TRANS ("OK"), String{}, String{} };
+            Array<int> resultCodes;
 
-            addButton (alert, button1Text.isEmpty() ? "OK" : button1Text);
-            addButton (alert, options.getButtonText (1));
-            addButton (alert, options.getButtonText (2));
+            for (const auto [index, fallback] : enumerate (defaultButtonStrings, int{}))
+            {
+                const auto text = index < options.getNumButtons()
+                                ? options.getButtonText (index)
+                                : fallback;
+
+                if (text.isNotEmpty())
+                {
+                    [alert addButtonWithTitle: juceStringToNS (text)];
+                    resultCodes.add (index < options.getNumButtons() ? options.getButtonResultCode (index) : resultCodes.size());
+                }
+            }
 
             alertWindow.reset (alert);
+
+            return resultCodes;
         }
 
         NSUniquePtr<NSAlert> alertWindow;

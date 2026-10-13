@@ -272,19 +272,7 @@ public:
 
         @param options  the options to use when creating the dialog.
 
-        @returns the following result codes:
-        - One button:
-            - button[0] returns 0
-        - Two buttons:
-            - button[0] returns 1
-            - button[1] returns 0
-        - Three buttons:
-            - button[0] returns 1
-            - button[1] returns 2
-            - button[2] returns 0
-
-        Another way of expressing this is that, when there are N buttons, then the result code for
-        button X is equal to ((X + 1) % N).
+        @returns the result code associated with the button that was clicked
 
         @see MessageBoxOptions
     */
@@ -298,7 +286,7 @@ public:
 
         @param options   the options to use when creating the dialog.
         @param callback  if this is non-null, the callback will receive a call to its
-                         modalStateFinished() when the box is dismissed with the index of the
+                         modalStateFinished() when the box is dismissed with the result code of the
                          button that was clicked as its argument.
                          The callback object will be owned and deleted by the system, so make sure
                          that it works safely and doesn't keep any references to objects that might
@@ -316,7 +304,7 @@ public:
 
         @param options   the options to use when creating the dialog.
         @param callback  if this is non-null, the callback will be called when the box is
-                         dismissed with the index of the button that was clicked as its argument.
+                         dismissed with the result code of the button that was clicked as its argument.
 
         @see MessageBoxOptions
     */
@@ -388,6 +376,7 @@ public:
                  is not null, the method always returns false, and the user's choice is delivered
                  later by the callback.
     */
+    [[deprecated ("Prefer AlertWindow::showScopedAsync()")]]
     static bool JUCE_CALLTYPE showOkCancelBox (MessageBoxIconType iconType,
                                                const String& title,
                                                const String& message,
@@ -444,6 +433,7 @@ public:
                  - 1 if the first button was pressed (normally used for 'yes')
                  - 2 if the middle button was pressed (normally used for 'no')
     */
+    [[deprecated ("Prefer AlertWindow::showScopedAsync()")]]
     static int JUCE_CALLTYPE showYesNoCancelBox (MessageBoxIconType iconType,
                                                  const String& title,
                                                  const String& message,
@@ -481,7 +471,7 @@ public:
 
         @param options   the options to use when creating the dialog.
         @param callback  if this is non-null, the callback will receive a call to its
-                         modalStateFinished() when the box is dismissed with the index of the
+                         modalStateFinished() when the box is dismissed with the result code of the
                          button that was clicked as its argument.
                          The callback object will be owned and deleted by the system, so make sure
                          that it works safely and doesn't keep any references to objects that might
@@ -536,13 +526,14 @@ public:
     {
         virtual ~LookAndFeelMethods() = default;
 
+        virtual std::unique_ptr<AlertWindow> createAlertWindowForOptions (const MessageBoxOptions&) = 0;
         virtual AlertWindow* createAlertWindow (const String& title, const String& message,
                                                 const String& button1,
                                                 const String& button2,
                                                 const String& button3,
                                                 MessageBoxIconType iconType,
                                                 int numButtons,
-                                                Component* associatedComponent) = 0;
+                                                Component* associatedComponent) = delete;
 
         virtual void drawAlertBox (Graphics&, AlertWindow&, const Rectangle<int>& textArea, TextLayout&) = 0;
 
