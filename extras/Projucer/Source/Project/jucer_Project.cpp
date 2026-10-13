@@ -379,7 +379,7 @@ void Project::initialiseAudioPluginValues()
     pluginAUSandboxSafeValue.referTo         (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager(), false);
     pluginLV2PluginClassValue.referTo        (projectRoot, Ids::pluginLV2PluginClass,       getUndoManager(), getDefaultLV2PluginClass());
     pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(), getDefaultVSTCategories(),  ",");
-    pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
+    pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories());
     pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(),  ",");
 
     pluginEnableARA.referTo                  (projectRoot, Ids::enableARA,                  getUndoManager(), shouldEnableARA(), ",");
@@ -589,6 +589,16 @@ void Project::updatePluginCategories()
             pluginVSTCategoryValue = Array<var> (vstCategory);
         else
             pluginVSTCategoryValue.resetToDefault();
+    }
+
+    {
+        const auto oldString = projectRoot.getProperty (Ids::pluginVST3Category, {}).toString();
+        const auto newString = oldString.replaceCharacter (',', '|');
+
+        if (newString.isNotEmpty())
+            pluginVST3CategoryValue = newString;
+        else
+            pluginVST3CategoryValue.resetToDefault();
     }
 
     {
@@ -1604,16 +1614,14 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                    "For VST and VST3 plug-ins that produce MIDI, this allows you to configure the number of outputs.");
     }
 
-    {
-        Array<var> vst3CategoryVars;
-
-        for (auto s : getAllVST3CategoryStrings())
-            vst3CategoryVars.add (s);
-
-        props.add (new MultiChoicePropertyComponent (pluginVST3CategoryValue, "Plugin VST3 Category", getAllVST3CategoryStrings(), vst3CategoryVars),
-                   "VST3 category. Most hosts require either \"Fx\" or \"Instrument\" to be selected in order for the plugin to be recognised. "
-                   "If neither of these are selected, the appropriate one will be automatically added based on the \"Plugin is a synth\" option.");
-    }
+    props.add (new TextPropertyComponent (pluginVST3CategoryValue, "Plugin VST3 Category", 128, false),
+                "One or more of the following strings, separated by '|': "
+                "'Fx', 'Instrument', 'Analyzer', 'Delay', 'Distortion', 'Drum', 'Dynamics', 'EQ', "
+                "'External', 'Filter', 'Generator', 'Mastering', 'Modulation', 'Mono', 'Network', "
+                "'NoOfflineProcess', 'OnlyOfflineProcess', 'OnlyRT', 'Pitch Shift', 'Restoration', "
+                "'Reverb', 'Sampler', 'Spatial', 'Stereo', 'Surround', 'Synth', 'Tools', 'Up-Downmix'. "
+                "Most hosts require either \"Fx\" or \"Instrument\" to be included in order for the plugin to be recognised. "
+                "If neither of these are included, the appropriate one will be automatically added based on the \"Plugin is a synth\" option.");
 
     props.add (new MultiChoicePropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", getAllAAXCategoryStrings(), getAllAAXCategoryVars()),
                "AAX category.");
@@ -2331,41 +2339,31 @@ String Project::getLV2PluginClassString() const noexcept
     return pluginLV2PluginClassValue.get();
 }
 
-static String getVST3CategoryStringFromSelection (Array<var> selected, const Project& p) noexcept
+String Project::getVST3CategoryString() const noexcept
 {
-    StringArray categories;
-
-    for (auto& category : selected)
-        categories.add (category);
-
-    // One of these needs to be selected in order for the plug-in to be recognised in Cubase
-    if (! categories.contains ("Fx") && ! categories.contains ("Instrument"))
+    const auto tags = std::invoke ([&]
     {
-        categories.insert (0, p.isPluginSynth() ? "Instrument"
-                                                : "Fx");
-    }
-    else
-    {
-        // "Fx" and "Instrument" should come first and if both are present prioritise "Fx"
+        auto categories = StringArray::fromTokens (pluginVST3CategoryValue.get().toString().trim(), "|", "");
+        categories.removeEmptyStrings();
+        categories.trim();
+
+        // Special case where Fx is not the first tag
+        if (categories == StringArray { "Spatial", "Fx" })
+            return categories;
+
+        if (! categories.contains ("Fx") && ! categories.contains ("Instrument"))
+            categories.insert (0, isPluginSynth() ? "Instrument" : "Fx");
+
         if (categories.contains ("Instrument"))
             categories.move (categories.indexOf ("Instrument"), 0);
 
         if (categories.contains ("Fx"))
             categories.move (categories.indexOf ("Fx"), 0);
-    }
 
-    return categories.joinIntoString ("|");
-}
+        return categories;
+    });
 
-String Project::getVST3CategoryString() const noexcept
-{
-    auto v = pluginVST3CategoryValue.get();
-
-    if (auto* arr = v.getArray())
-        return getVST3CategoryStringFromSelection (*arr, *this);
-
-    jassertfalse;
-    return {};
+    return tags.joinIntoString ("|");
 }
 
 int Project::getAAXCategory() const noexcept
@@ -2522,21 +2520,12 @@ Array<var> Project::getDefaultVSTCategories() const noexcept
     return { "kPlugCategEffect" };
 }
 
-StringArray Project::getAllVST3CategoryStrings() noexcept
-{
-    static StringArray vst3CategoryStrings { "Fx", "Instrument", "Analyzer", "Delay", "Distortion", "Drum", "Dynamics", "EQ", "External", "Filter",
-                                             "Generator", "Mastering", "Modulation", "Mono", "Network", "NoOfflineProcess", "OnlyOfflineProcess", "OnlyRT",
-                                             "Pitch Shift", "Restoration", "Reverb", "Sampler", "Spatial", "Stereo", "Surround", "Synth", "Tools", "Up-Downmix" };
-
-    return vst3CategoryStrings;
-}
-
-Array<var> Project::getDefaultVST3Categories() const noexcept
+String Project::getDefaultVST3Categories() const noexcept
 {
     if (isPluginSynth())
-        return  { "Instrument", "Synth" };
+        return "Instrument|Synth";
 
-    return { "Fx" };
+    return "Fx";
 }
 
 StringArray Project::getAllAAXCategoryStrings() noexcept

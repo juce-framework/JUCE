@@ -379,8 +379,7 @@ public:
     static StringArray getAllVSTCategoryStrings() noexcept;
     Array<var> getDefaultVSTCategories() const noexcept;
 
-    static StringArray getAllVST3CategoryStrings() noexcept;
-    Array<var> getDefaultVST3Categories() const noexcept;
+    String getDefaultVST3Categories() const noexcept;
 
     static StringArray getAllAAXCategoryStrings() noexcept;
     static Array<var> getAllAAXCategoryVars() noexcept;
