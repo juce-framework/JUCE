@@ -1559,7 +1559,9 @@ function(_juce_get_vst3_category_string target out_var)
             list(INSERT vst3_categories 0 Instrument)
         endif()
 
-        if(Fx IN_LIST vst3_categories)
+        # Per the definitions in ivstaudioprocessor.h, if Fx is present, it
+        # should be first in the list unless the category is Spatial|Fx
+        if(Fx IN_LIST vst3_categories AND NOT (vst3_categories STREQUAL "Spatial;Fx"))
             list(REMOVE_ITEM vst3_categories Fx)
             list(INSERT vst3_categories 0 Fx)
         endif()
