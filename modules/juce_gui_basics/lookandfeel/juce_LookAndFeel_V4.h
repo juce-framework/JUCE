@@ -135,12 +135,7 @@ public:
     void changeToggleButtonWidthToFitText (ToggleButton&) override;
 
     //==============================================================================
-    AlertWindow* createAlertWindow (const String& title, const String& message,
-                                    const String& button1,
-                                    const String& button2,
-                                    const String& button3,
-                                    MessageBoxIconType iconType,
-                                    int numButtons, Component* associatedComponent) override;
+    std::unique_ptr<AlertWindow> createAlertWindowForOptions (const MessageBoxOptions&) override;
     void drawAlertBox (Graphics&, AlertWindow&, const Rectangle<int>& textArea, TextLayout&) override;
 
     int getAlertWindowButtonHeight() override;

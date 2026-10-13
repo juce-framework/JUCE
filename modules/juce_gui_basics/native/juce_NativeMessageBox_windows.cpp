@@ -43,43 +43,55 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
         explicit WindowsTaskDialog (const MessageBoxOptions& opts)
             : associatedComponent (opts.getAssociatedComponent()), options (opts) {}
 
-        void runAsync (std::function<void (int)> recipient) override
+        void runAsync (std::function<void (std::optional<int>)> recipient) override
         {
             future = std::async (std::launch::async, [showMessageBox = getShowMessageBox(), recipient]
             {
-                const auto initComResult = CoInitializeEx (nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+                const auto messageResult = std::invoke ([&]() -> std::optional<int>
+                {
+                    const auto initComResult = CoInitializeEx (nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
-                if (initComResult != S_OK)
-                    return;
+                    if (initComResult != S_OK)
+                        return {};
 
-                const ScopeGuard scope { [] { CoUninitialize(); } };
+                    const ScopeGuard scope { [] { CoUninitialize(); } };
 
-                const auto messageResult = showMessageBox != nullptr ? showMessageBox() : 0;
+                    return showMessageBox != nullptr ? showMessageBox() : std::nullopt;
+                });
+
                 NullCheckedInvocation::invoke (recipient, messageResult);
             });
         }
 
-        int runSync() override
+        std::optional<int> runSync() override
         {
             if (auto showMessageBox = getShowMessageBox())
                 return showMessageBox();
 
-            return 0;
+            return {};
         }
 
         void close() override
         {
-            if (auto* toClose = windowHandle.exchange (nullptr))
+            auto* toClose = std::invoke ([&]
+            {
+                const std::scoped_lock lock { mutex };
+                closed = true;
+                return std::exchange (windowHandle, nullptr);
+            });
+
+            if (toClose != nullptr)
                 EndDialog (toClose, 0);
         }
 
         void setDialogWindowHandle (HWND dialogHandle)
         {
+            const std::scoped_lock lock { mutex };
             windowHandle = dialogHandle;
         }
 
     private:
-        std::function<int()> getShowMessageBox()
+        std::function<std::optional<int>()> getShowMessageBox()
         {
             const auto parent = associatedComponent != nullptr ? (HWND) associatedComponent->getWindowHandle() : nullptr;
             return getShowMessageBoxForParent (parent);
@@ -94,11 +106,11 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
 
             'this' is guaranteed to be alive when the returned function is called.
         */
-        std::function<int()> getShowMessageBoxForParent (const HWND parent)
+        std::function<std::optional<int>()> getShowMessageBoxForParent (const HWND parent)
         {
             JUCE_ASSERT_MESSAGE_THREAD
 
-            return [this, parent]
+            return [this, parent]() -> std::optional<int>
             {
                 const auto title = options.getTitle();
                 const auto message = options.getMessage();
@@ -141,7 +153,7 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                 }
                 else
                 {
-                    config.pszMainIcon = [&]() -> LPWSTR
+                    config.pszMainIcon = std::invoke ([&]() -> LPWSTR
                     {
                         switch (options.getIconType())
                         {
@@ -154,15 +166,21 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                         }
 
                         return nullptr;
-                    }();
+                    });
                 }
 
                 std::vector<String> buttonStrings;
                 std::vector<TASKDIALOG_BUTTON> buttonLabels;
+                Array<int> resultCodes;
 
                 for (auto i = 0; i < options.getNumButtons(); ++i)
+                {
                     if (const auto buttonText = options.getButtonText (i); buttonText.isNotEmpty())
+                    {
                         buttonLabels.push_back ({ (int) buttonLabels.size(), buttonStrings.emplace_back (buttonText).toWideCharPointer() });
+                        resultCodes.add (options.getButtonResultCode (i));
+                    }
+                }
 
                 config.pButtons = buttonLabels.data();
                 config.cButtons = (UINT) buttonLabels.size();
@@ -170,14 +188,22 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                 int buttonIndex = 0;
                 TaskDialogIndirect (&config, &buttonIndex, nullptr, nullptr);
 
-                return buttonIndex;
+                const std::scoped_lock lock { mutex };
+
+                if (closed)
+                    return {};
+
+                return resultCodes[buttonIndex];
             };
         }
 
         Component::SafePointer<Component> associatedComponent;
-        std::atomic<HWND> windowHandle { nullptr };
         std::future<void> future;
         MessageBoxOptions options;
+
+        HWND windowHandle = nullptr;
+        bool closed = false;
+        std::mutex mutex;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsTaskDialog)
     };

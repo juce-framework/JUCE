@@ -42,7 +42,7 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
     public:
         explicit MessageBox (const MessageBoxOptions& opts) : options (opts) {}
 
-        void runAsync (std::function<void (int)> recipient) override
+        void runAsync (std::function<void (std::optional<int>)> recipient) override
         {
             auto* peerToUse = std::invoke ([&]() -> UIViewComponentPeer*
             {
@@ -76,7 +76,11 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                                                         style: UIAlertActionStyleDefault
                                                       handler: ^(UIAlertAction*)
                 {
-                    MessageManager::callAsync ([recipient, i] { NullCheckedInvocation::invoke (recipient, i); });
+                    MessageManager::callAsync ([recipient, i, opt = options]
+                    {
+                        const auto code = opt.getButtonResultCode (i);
+                        NullCheckedInvocation::invoke (recipient, code);
+                    });
                 }];
 
                 [alert.get() addAction: action];
@@ -90,15 +94,20 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                                               completion: nil];
         }
 
-        int runSync() override
+        std::optional<int> runSync() override
         {
-            int result = -1;
+            bool gotResult = false;
+            std::optional<int> result;
 
             JUCE_AUTORELEASEPOOL
             {
-                runAsync ([&result] (int r) { result = r; });
+                runAsync ([&gotResult, &result] (std::optional<int> r)
+                {
+                    gotResult = true;
+                    result = r;
+                });
 
-                while (result < 0)
+                while (! gotResult)
                 {
                     JUCE_AUTORELEASEPOOL
                     {

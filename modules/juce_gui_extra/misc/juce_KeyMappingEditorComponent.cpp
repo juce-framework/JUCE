@@ -173,15 +173,15 @@ public:
             }
             else
             {
-                auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                                       TRANS ("Change key-mapping"),
-                                                                       TRANS ("This key is already assigned to the command \"CMDN\"")
-                                                                           .replace ("CMDN", owner.getCommandManager().getNameOfCommand (previousCommand))
-                                                                         + "\n\n"
-                                                                         + TRANS ("Do you want to re-assign it to this new command instead?"),
-                                                                       TRANS ("Re-assign"),
-                                                                       TRANS ("Cancel"),
-                                                                       this);
+                auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                                  .withTitle (TRANS ("Change key-mapping"))
+                                                  .withMessage (TRANS ("This key is already assigned to the command \"CMDN\"")
+                                                                    .replace ("CMDN", owner.getCommandManager().getNameOfCommand (previousCommand))
+                                                                + "\n\n"
+                                                                + TRANS ("Do you want to re-assign it to this new command instead?"))
+                                                  .withButton (TRANS ("Re-assign"), 1)
+                                                  .withButton (TRANS ("Cancel"), 0)
+                                                  .withAssociatedComponent (this);
                 messageBox = AlertWindow::showScopedAsync (options, [this, newKey] (int result)
                 {
                     if (result != 0)
@@ -409,12 +409,12 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
 
         resetButton.onClick = [this]
         {
-            auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::QuestionIcon,
-                                                                   TRANS ("Reset to defaults"),
-                                                                   TRANS ("Are you sure you want to reset all the key-mappings to their default state?"),
-                                                                   TRANS ("Reset"),
-                                                                   {},
-                                                                   this);
+            auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::QuestionIcon)
+                                              .withTitle (TRANS ("Reset to defaults"))
+                                              .withMessage (TRANS ("Are you sure you want to reset all the key-mappings to their default state?"))
+                                              .withButton (TRANS ("Reset"), 1)
+                                              .withButton (TRANS ("Cancel"), 0)
+                                              .withAssociatedComponent (this);
             messageBox = AlertWindow::showScopedAsync (options, [this] (int result)
             {
                 if (result != 0)

@@ -2371,11 +2371,11 @@ private:
                                            "Since JUCE 4.2, this is instead done using \"AU/VST/VST2/AAX Binary Location\" in the Xcode (OS X) configuration settings.\n\n"
                                            "Click 'Update' to remove the script (otherwise your plug-in may not compile correctly).";
 
-            auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                                   "Project settings: " + project.getDocumentTitle(),
-                                                                   alertWindowText,
-                                                                   "Update",
-                                                                   "Cancel");
+            auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                              .withTitle ("Project settings: " + project.getDocumentTitle())
+                                              .withMessage (alertWindowText)
+                                              .withButton ("Update", 1)
+                                              .withButton ("Cancel", 0);
 
             messageBox = f (options, [this] (int result)
                             {
@@ -2395,11 +2395,11 @@ private:
                                      "For more information see Apple's IOKit User Client Class Temporary Exception documentation.\n\n"
                                      "Clicking 'Update' will remove the defunct setting from your project.";
 
-            auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                                   "Project settings: " + project.getDocumentTitle(),
-                                                                   alertWindowText,
-                                                                   "Update",
-                                                                   "Cancel");
+            auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                              .withTitle ("Project settings: " + project.getDocumentTitle())
+                                              .withMessage (alertWindowText)
+                                              .withButton ("Update", 1)
+                                              .withButton ("Cancel", 0);
 
             messageBox = f (std::move (options), [this] (int result)
                                                  {

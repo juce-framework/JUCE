@@ -35,58 +35,13 @@
 namespace juce
 {
 
-enum class ResultCodeMappingMode
-{
-    plainIndex,     // The result code is equal to the index of the selected button.
-                    // This is used for NativeMessageBox::show, showAsync, and showMessageBox.
-    alertWindow,    // The result code is mapped in the same way as AlertWindow, i.e. if there
-                    // are N buttons then button X will return ((X + 1) % N).
-};
-
-static std::unique_ptr<detail::ScopedMessageBoxInterface> makeNativeMessageBoxWithMappedResult (const MessageBoxOptions& opts,
-                                                                                                ResultCodeMappingMode mode)
-{
-    class Adapter final : public detail::ScopedMessageBoxInterface
-    {
-    public:
-        explicit Adapter (const MessageBoxOptions& options)
-            : inner (detail::ScopedMessageBoxInterface::create (options)),
-              numButtons (options.getNumButtons()) {}
-
-        void runAsync (std::function<void (int)> fn) override
-        {
-            inner->runAsync ([fn, n = numButtons] (int result)
-            {
-                fn (map (result, n));
-            });
-        }
-
-        int runSync() override
-        {
-            return map (inner->runSync(), numButtons);
-        }
-
-        void close() override
-        {
-            inner->close();
-        }
-
-    private:
-        static int map (int button, int numButtons) { return (button + 1) % numButtons; }
-
-        std::unique_ptr<detail::ScopedMessageBoxInterface> inner;
-        int numButtons = 0;
-    };
-
-    return mode == ResultCodeMappingMode::plainIndex ? detail::ScopedMessageBoxInterface::create (opts)
-                                                     : std::make_unique<Adapter> (opts);
-}
-
 static int showNativeBoxUnmanaged (const MessageBoxOptions& opts,
-                                   ModalComponentManager::Callback* cb,
-                                   ResultCodeMappingMode mode)
+                                   ModalComponentManager::Callback* cb)
 {
-    auto implementation = makeNativeMessageBoxWithMappedResult (opts, mode);
+    // If this is hit, your alert window has duplicate result codes!
+    jassert (opts.areAllResultCodesUnique());
+
+    auto implementation = detail::ScopedMessageBoxInterface::create (opts);
     return detail::ConcreteScopedMessageBoxImpl::showUnmanaged (std::move (implementation), cb);
 }
 
@@ -98,15 +53,14 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (MessageBoxIconType iconType
     showNativeBoxUnmanaged (MessageBoxOptions().withIconType (iconType)
                                                .withTitle (title)
                                                .withMessage (message)
-                                               .withButton (TRANS ("OK"))
+                                               .withButton (TRANS ("OK"), 0)
                                                .withAssociatedComponent (associatedComponent),
-                            nullptr,
-                            ResultCodeMappingMode::plainIndex);
+                            nullptr);
 }
 
-int JUCE_CALLTYPE NativeMessageBox::show (const MessageBoxOptions& options)
+int JUCE_CALLTYPE NativeMessageBox::showForOptions (const MessageBoxOptions& options)
 {
-    return showNativeBoxUnmanaged (options, nullptr, ResultCodeMappingMode::plainIndex);
+    return showNativeBoxUnmanaged (options, nullptr);
 }
 #endif
 
@@ -115,8 +69,12 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (MessageBoxIconType ico
                                                           Component* associatedComponent,
                                                           ModalComponentManager::Callback* callback)
 {
-    auto options = MessageBoxOptions::makeOptionsOk (iconType, title, message, {}, associatedComponent);
-    showNativeBoxUnmanaged (options, callback, ResultCodeMappingMode::alertWindow);
+    auto options = MessageBoxOptions{}.withIconType (iconType)
+                                      .withTitle (title)
+                                      .withMessage (message)
+                                      .withButton (TRANS ("OK"), 0)
+                                      .withAssociatedComponent (associatedComponent);
+    showNativeBoxUnmanaged (options, callback);
 }
 
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (MessageBoxIconType iconType,
@@ -124,8 +82,13 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (MessageBoxIconType iconTyp
                                                       Component* associatedComponent,
                                                       ModalComponentManager::Callback* callback)
 {
-    auto options = MessageBoxOptions::makeOptionsOkCancel (iconType, title, message, {}, {}, associatedComponent);
-    return showNativeBoxUnmanaged (options, callback, ResultCodeMappingMode::alertWindow) != 0;
+    auto options = MessageBoxOptions{}.withIconType (iconType)
+                                      .withTitle (title)
+                                      .withMessage (message)
+                                      .withButton (TRANS ("OK"), 1)
+                                      .withButton (TRANS ("Cancel"), 0)
+                                      .withAssociatedComponent (associatedComponent);
+    return showNativeBoxUnmanaged (options, callback) != 0;
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (MessageBoxIconType iconType,
@@ -133,8 +96,14 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (MessageBoxIconType iconT
                                                         Component* associatedComponent,
                                                         ModalComponentManager::Callback* callback)
 {
-    auto options = MessageBoxOptions::makeOptionsYesNoCancel (iconType, title, message, {}, {}, {}, associatedComponent);
-    return showNativeBoxUnmanaged (options, callback, ResultCodeMappingMode::alertWindow);
+    auto options = MessageBoxOptions{}.withIconType (iconType)
+                                      .withTitle (title)
+                                      .withMessage (message)
+                                      .withButton (TRANS ("Yes"), 1)
+                                      .withButton (TRANS ("No"), 2)
+                                      .withButton (TRANS ("Cancel"), 0)
+                                      .withAssociatedComponent (associatedComponent);
+    return showNativeBoxUnmanaged (options, callback);
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (MessageBoxIconType iconType,
@@ -142,25 +111,33 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (MessageBoxIconType iconType,
                                                   Component* associatedComponent,
                                                   ModalComponentManager::Callback* callback)
 {
-    auto options = MessageBoxOptions::makeOptionsYesNo (iconType, title, message, {}, {}, associatedComponent);
-    return showNativeBoxUnmanaged (options, callback, ResultCodeMappingMode::alertWindow);
+    auto options = MessageBoxOptions{}.withIconType (iconType)
+                                      .withTitle (title)
+                                      .withMessage (message)
+                                      .withButton (TRANS ("Yes"), 1)
+                                      .withButton (TRANS ("No"), 0)
+                                      .withAssociatedComponent (associatedComponent);
+    return showNativeBoxUnmanaged (options, callback);
 }
 
-void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
-                                                ModalComponentManager::Callback* callback)
+void JUCE_CALLTYPE NativeMessageBox::showForOptionsAsync (const MessageBoxOptions& options,
+                                                          ModalComponentManager::Callback* callback)
 {
-    showNativeBoxUnmanaged (options, callback, ResultCodeMappingMode::plainIndex);
+    showNativeBoxUnmanaged (options, callback);
 }
 
-void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
-                                                std::function<void (int)> callback)
+void JUCE_CALLTYPE NativeMessageBox::showForOptionsAsync (const MessageBoxOptions& options,
+                                                          std::function<void (int)> callback)
 {
-    showAsync (options, ModalCallbackFunction::create (callback));
+    showForOptionsAsync (options, ModalCallbackFunction::create (callback));
 }
 
 ScopedMessageBox NativeMessageBox::showScopedAsync (const MessageBoxOptions& options, std::function<void (int)> callback)
 {
-    auto implementation = makeNativeMessageBoxWithMappedResult (options, ResultCodeMappingMode::alertWindow);
+    // If this is hit, your alert window has duplicate result codes!
+    jassert (options.areAllResultCodesUnique());
+
+    auto implementation = detail::ScopedMessageBoxInterface::create (options);
     return detail::ConcreteScopedMessageBoxImpl::show (std::move (implementation), std::move (callback));
 }
 

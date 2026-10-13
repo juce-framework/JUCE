@@ -280,15 +280,15 @@ private:
 
             if (File::isAbsolutePath (f) && isUnsuitablePath (File (f)))
             {
-                auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                                       TRANS ("Plugin Scanning"),
-                                                                       TRANS ("If you choose to scan folders that contain non-plugin files, "
-                                                                              "then scanning may take a long time, and can cause crashes when "
-                                                                              "attempting to load unsuitable files.")
-                                                                         + newLine
-                                                                         + TRANS ("Are you sure you want to scan the folder \"XYZ\"?")
-                                                                            .replace ("XYZ", f),
-                                                                       TRANS ("Scan"));
+                auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                                  .withTitle (TRANS ("Plugin Scanning"))
+                                                  .withMessage (TRANS ("If you choose to scan folders that contain non-plugin files, "
+                                                                       "then scanning may take a long time, and can cause crashes when "
+                                                                       "attempting to load unsuitable files.")
+                                                                + newLine
+                                                                + TRANS ("Are you sure you want to scan the folder \"XYZ\"?").replace ("XYZ", f))
+                                                  .withButton (TRANS ("Scan"), 1)
+                                                  .withButton (TRANS ("Cancel"), 0);
                 messageBox = AlertWindow::showScopedAsync (options, [this, weakSelf] (int result)
                 {
                     if (result != 0)

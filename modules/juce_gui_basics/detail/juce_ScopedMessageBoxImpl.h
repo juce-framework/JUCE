@@ -60,7 +60,7 @@ public:
     {
        #if JUCE_MODAL_LOOPS_PERMITTED
         if (cb == nullptr)
-            return runSync (std::move (native));
+            return runSync (std::move (native)).value_or (0);
        #endif
 
         runAsync (std::move (native), rawToUniquePtr (cb));
@@ -90,10 +90,10 @@ private:
         return result;
     }
 
-    static int runSync (std::unique_ptr<ScopedMessageBoxInterface>&& p)
+    static std::optional<int> runSync (std::unique_ptr<ScopedMessageBoxInterface>&& p)
     {
         auto local = std::move (p);
-        return local != nullptr ? local->runSync() : 0;
+        return local != nullptr ? local->runSync() : std::nullopt;
     }
 
     explicit ConcreteScopedMessageBoxImpl (std::unique_ptr<ScopedMessageBoxInterface>&& p)
@@ -105,24 +105,24 @@ private:
 
     void handleAsyncUpdate() override
     {
-        nativeImplementation->runAsync ([weakRecipient = std::weak_ptr<ConcreteScopedMessageBoxImpl> (self)] (int result)
-                                        {
-                                            const auto notifyRecipient = [result, weakRecipient]
-                                            {
-                                                if (const auto locked = weakRecipient.lock())
-                                                {
-                                                    if (auto* cb = locked->callback.get())
-                                                        cb->modalStateFinished (result);
+        nativeImplementation->runAsync ([weakRecipient = std::weak_ptr<ConcreteScopedMessageBoxImpl> (self)] (std::optional<int> result)
+        {
+            const auto notifyRecipient = [result, weakRecipient]
+            {
+                if (const auto locked = weakRecipient.lock())
+                {
+                    if (auto* cb = locked->callback.get())
+                        cb->modalStateFinished (result.value_or (0));
 
-                                                    locked->self.reset();
-                                                }
-                                            };
+                    locked->self.reset();
+                }
+            };
 
-                                            if (MessageManager::getInstance()->isThisTheMessageThread())
-                                                notifyRecipient();
-                                            else
-                                                MessageManager::callAsync (notifyRecipient);
-                                        });
+            if (MessageManager::getInstance()->isThisTheMessageThread())
+                notifyRecipient();
+            else
+                MessageManager::callAsync (notifyRecipient);
+        });
     }
 
     std::unique_ptr<ModalComponentManager::Callback> callback;

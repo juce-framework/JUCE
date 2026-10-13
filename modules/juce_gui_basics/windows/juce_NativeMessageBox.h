@@ -68,11 +68,18 @@ public:
 
         @param options  the options to use when creating the dialog.
 
-        @returns  the index of the button that was clicked.
+        @returns  the result code of the button that was clicked.
 
         @see MessageBoxOptions
     */
-    static int JUCE_CALLTYPE show (const MessageBoxOptions& options);
+    static int JUCE_CALLTYPE showForOptions (const MessageBoxOptions& options);
+
+    /** This function is now called showForOptions().
+
+        When updating your code, make sure to check that your code correctly handles
+        the result codes that are specified in the MessageBoxOptions.
+    */
+    static int JUCE_CALLTYPE show (const MessageBoxOptions& options) = delete;
    #endif
 
     /** Shows a dialog box using the specified options.
@@ -82,7 +89,7 @@ public:
 
         @param options   the options to use when creating the dialog.
         @param callback  if this is non-null, the callback will receive a call to its
-                         modalStateFinished() when the box is dismissed with the index of the
+                         modalStateFinished() when the box is dismissed with the result code of the
                          button that was clicked as its argument.
                          The callback object will be owned and deleted by the system, so make sure
                          that it works safely and doesn't keep any references to objects that might
@@ -90,8 +97,16 @@ public:
 
         @see MessageBoxOptions
     */
+    static void JUCE_CALLTYPE showForOptionsAsync (const MessageBoxOptions& options,
+                                                   ModalComponentManager::Callback* callback);
+
+    /** This function is now called showForOptionsAsync().
+
+        When updating your code, make sure to check that your code correctly handles
+        the result codes that are specified in the MessageBoxOptions.
+    */
     static void JUCE_CALLTYPE showAsync (const MessageBoxOptions& options,
-                                         ModalComponentManager::Callback* callback);
+                                         ModalComponentManager::Callback* callback) = delete;
 
     /** Shows a dialog box using the specified options.
 
@@ -100,12 +115,20 @@ public:
 
         @param options   the options to use when creating the dialog.
         @param callback  if this is non-null, the callback will be called when the box is
-                         dismissed with the index of the button that was clicked as its argument.
+                         dismissed with the result code of the button that was clicked as its argument.
 
         @see MessageBoxOptions
     */
+    static void JUCE_CALLTYPE showForOptionsAsync (const MessageBoxOptions& options,
+                                                   std::function<void (int)> callback);
+
+    /** This function is now called showForOptionsAsync().
+
+        When updating your code, make sure to check that your code correctly handles
+        the result codes that are specified in the MessageBoxOptions.
+    */
     static void JUCE_CALLTYPE showAsync (const MessageBoxOptions& options,
-                                         std::function<void (int)> callback);
+                                         std::function<void (int)> callback) = delete;
 
     /** Shows a dialog box that just has a message and a single 'ok' button to close it.
 
@@ -164,6 +187,7 @@ public:
 
         @see ModalCallbackFunction
     */
+    [[deprecated ("Prefer NativeMessageBox::showScopedAsync()")]]
     static bool JUCE_CALLTYPE showOkCancelBox (MessageBoxIconType iconType,
                                                const String& title,
                                                const String& message,
@@ -210,6 +234,7 @@ public:
 
         @see ModalCallbackFunction
     */
+    [[deprecated ("Prefer NativeMessageBox::showScopedAsync()")]]
     static int JUCE_CALLTYPE showYesNoCancelBox (MessageBoxIconType iconType,
                                                  const String& title,
                                                  const String& message,
@@ -255,6 +280,7 @@ public:
 
         @see ModalCallbackFunction
     */
+    [[deprecated ("Prefer NativeMessageBox::showScopedAsync()")]]
     static int JUCE_CALLTYPE showYesNoBox (MessageBoxIconType iconType,
                                            const String& title,
                                            const String& message,
@@ -273,24 +299,9 @@ public:
 
         This function is always asynchronous, even if the callback is null.
 
-        For consistency with AlertWindow, the result codes returned by the alert window are as
-        follows.
-        - One button:
-            - button[0] returns 0
-        - Two buttons:
-            - button[0] returns 1
-            - button[1] returns 0
-        - Three buttons:
-            - button[0] returns 1
-            - button[1] returns 2
-            - button[2] returns 0
-
-        Another way of expressing this is that, when there are N buttons, then the result code for
-        button X is equal to ((X + 1) % N).
-
         @param options   the options to use when creating the dialog.
         @param callback  if this is non-null, the callback will receive a call to its
-                         modalStateFinished() when the box is dismissed with the index of the
+                         modalStateFinished() when the box is dismissed with the result code of the
                          button that was clicked as its argument.
                          The callback object will be owned and deleted by the system, so make sure
                          that it works safely and doesn't keep any references to objects that might

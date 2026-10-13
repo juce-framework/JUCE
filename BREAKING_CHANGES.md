@@ -4,6 +4,67 @@
 
 ## Change
 
+NativeMessageBox::show and NativeMessageBox::showAsync have been renamed
+to showForOptions and showForOptionsAsync respectively.
+
+**Possible Issues**
+
+Applications that call these functions will fail to compile.
+
+**Workaround**
+
+Adopt the new function names. When doing so, be aware that the native message box result codes
+will match the result codes specified in the MessageBoxOptions.
+Check the specified result codes in the options that you pass to these functions. Then, update
+your code that handles the message box result code to ensure that it behaves correctly. Instead
+of updating the handler code, you may instead choose to update the options object itself with
+different result codes.
+
+**Rationale**
+
+Previously, the results of NativeMessageBox::show and NativeMessageBox::showAsync indicated
+the index of the activated button. This differed from the behaviour of other functions that
+displayed message boxes and alert windows, such as the static functions in AlertWindow.
+The behaviour of all these functions has been made consistent; they will always return the
+result codes specified in the MessageBoxOptions. The function names have been changed to
+indicate to users that they need to audit their code as they adopt the new behaviour.
+
+
+## Change
+
+MessageBoxOptions::withButton() now requires an integer result-code argument.
+AlertWindow::LookAndFeelMethods::createAlertWindow() has been deleted and
+replaced with createAlertWindowForOptions, which accepts a single
+MessageBoxOptions argument.
+
+**Possible Issues**
+
+Applications that call or override these functions will fail to compile.
+
+**Workaround**
+
+Adapt to the new signature of withButton() by passing an explicit result code
+associated with each button.
+
+Adapt implementations of createAlertWindow() to retrieve button text and
+associated result codes from the MessageBoxOptions argument.
+
+When migrating existing code, be careful to check your result-code handler
+callbacks, and assign appropriate result codes to each button. The old
+convention for AlertWindow::showAsync, AlertWindow::showOkCancelBox, and
+AlertWindow::showYesNoCancelBox was for the button result code to be equal to
+(x + 1) % N, where "x" is the button index, and "N" is total button count. The
+old convention for NativeMessageBox::showAsync was to return the button index
+directly. This discrepancy was the main motivation for making this change.
+
+**Rationale**
+
+This change makes alert window result codes explicit, which in turn should
+make it easier to write callbacks that handle each button correctly.
+
+
+## Change
+
 An AlertWindow created with an associated component is now associated with
 that component using TopLevelWindow::setAssociatedComponent(). This includes
 the alert windows shown by AlertWindow::showAsync() and the other static
@@ -1320,7 +1381,7 @@ RFC 8259 states
 MUST be encoded using UTF-8 [RFC3629].
 >
 > Previous specifications of JSON have not required the use of UTF-8 when
-transmitting JSON text.  However, the vast majority of JSON-based software
+transmitting JSON text. However, the vast majority of JSON-based software
 implementations have chosen to use the UTF-8 encoding, to the extent that it is
 the only encoding that achieves interoperability.
 
@@ -3069,9 +3130,11 @@ overall latency does not change when enabling/disabling bypass.
 **Rationale**
 
 The documentation for AudioProcessor::getBypassParameter() says
+
 > if this method returns a non-null value, you should never call
-  processBlockBypassed but use the returned parameter to control the bypass
-  state instead.
+processBlockBypassed but use the returned parameter to control the bypass
+state instead.
+
 Some plugin wrappers were not following this rule. After this change, the
 behaviour of all plugin wrappers is consistent with the documented behaviour.
 

@@ -393,36 +393,48 @@ void LookAndFeel_V2::drawDrawableButton (Graphics& g, DrawableButton& button,
 }
 
 //==============================================================================
-AlertWindow* LookAndFeel_V2::createAlertWindow (const String& title, const String& message,
-                                                const String& button1, const String& button2, const String& button3,
-                                                MessageBoxIconType iconType,
-                                                int numButtons, Component* associatedComponent)
+std::unique_ptr<AlertWindow> LookAndFeel_V2::createAlertWindowForOptions (const MessageBoxOptions& opt)
 {
-    AlertWindow* aw = new AlertWindow (title, message, iconType, associatedComponent);
+    auto aw = std::make_unique<AlertWindow> (opt.getTitle(),
+                                             opt.getMessage(),
+                                             opt.getIconType(),
+                                             opt.getAssociatedComponent());
 
-    if (numButtons == 1)
+    if (opt.getNumButtons() == 0)
+        return aw;
+
+    // If this is hit, your alert window has duplicate result codes!
+    jassert (opt.areAllResultCodesUnique());
+
+    if (opt.getNumButtons() == 1)
     {
-        aw->addButton (button1, 0,
+        aw->addButton (opt.getButtonText (0),
+                       opt.getButtonResultCode (0),
                        KeyPress (KeyPress::escapeKey),
                        KeyPress (KeyPress::returnKey));
     }
     else
     {
-        const KeyPress button1ShortCut ((int) CharacterFunctions::toLowerCase (button1[0]), 0, 0);
-        KeyPress button2ShortCut ((int) CharacterFunctions::toLowerCase (button2[0]), 0, 0);
-        if (button1ShortCut == button2ShortCut)
-            button2ShortCut = KeyPress();
+        const auto button1 = 0 < opt.getNumButtons() ? opt.getButtonText (0) : String{};
+        const auto button2 = 1 < opt.getNumButtons() ? opt.getButtonText (1) : String{};
+        const auto button3 = 2 < opt.getNumButtons() ? opt.getButtonText (2) : String{};
 
-        if (numButtons == 2)
+        const auto button1Key = (int) CharacterFunctions::toLowerCase (button1[0]);
+        const auto button2Key = (int) CharacterFunctions::toLowerCase (button2[0]);
+
+        const KeyPress button1ShortCut (button1Key, 0, 0);
+        const auto button2ShortCut = button2Key != button1Key ? KeyPress (button2Key, 0, 0) : KeyPress{};
+
+        if (opt.getNumButtons() == 2)
         {
-            aw->addButton (button1, 1, KeyPress (KeyPress::returnKey), button1ShortCut);
-            aw->addButton (button2, 0, KeyPress (KeyPress::escapeKey), button2ShortCut);
+            aw->addButton (button1, opt.getButtonResultCode (0), KeyPress (KeyPress::returnKey), button1ShortCut);
+            aw->addButton (button2, opt.getButtonResultCode (1), KeyPress (KeyPress::escapeKey), button2ShortCut);
         }
-        else if (numButtons == 3)
+        else if (opt.getNumButtons() == 3)
         {
-            aw->addButton (button1, 1, button1ShortCut);
-            aw->addButton (button2, 2, button2ShortCut);
-            aw->addButton (button3, 0, KeyPress (KeyPress::escapeKey));
+            aw->addButton (button1, opt.getButtonResultCode (0), button1ShortCut);
+            aw->addButton (button2, opt.getButtonResultCode (1), button2ShortCut);
+            aw->addButton (button3, opt.getButtonResultCode (2), KeyPress (KeyPress::escapeKey));
         }
     }
 
