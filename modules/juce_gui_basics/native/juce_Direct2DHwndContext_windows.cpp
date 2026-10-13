@@ -368,6 +368,49 @@ private:
         return ready;
     }
 
+    void present()
+    {
+        JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (getMetrics(), present1Duration);
+
+        if (swap.getBuffer() == nullptr || deferredRepaints.isEmpty())
+            return;
+
+        auto const swapChainSize = swap.getSize();
+        DXGI_PRESENT_PARAMETERS params{};
+
+        if (! deferredRepaints.containsRectangle (swapChainSize))
+        {
+            // Allocate enough memory for the array of dirty rectangles
+            dirtyRectangles.resize ((size_t) deferredRepaints.getNumRectangles());
+
+            // Fill the array of dirty rectangles, intersecting each paint area with the swap chain buffer
+            params.pDirtyRects = dirtyRectangles.data();
+            params.DirtyRectsCount = 0;
+
+            for (const auto& area : deferredRepaints)
+            {
+                const auto intersection = area.getIntersection (swapChainSize);
+
+                if (! intersection.isEmpty())
+                    params.pDirtyRects[params.DirtyRectsCount++] = D2DUtilities::toRECT (intersection);
+            }
+        }
+
+        // Present the freshly painted buffer
+        const auto hr = swap.getChain()->Present1 (swap.presentSyncInterval,
+                                                   swap.presentFlags,
+                                                   &params);
+        jassertquiet (SUCCEEDED (hr));
+
+        if (FAILED (hr))
+            return;
+
+        // There's nothing waiting to be displayed in the backbuffer.
+        deferredRepaints.clear();
+
+        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintEnd, getFrameId());
+    }
+
     JUCE_DECLARE_WEAK_REFERENCEABLE (HwndPimpl)
 
 public:
@@ -474,49 +517,6 @@ public:
         present();
         lastFinishFrameTicks = Time::getHighResolutionTicks();
         return result;
-    }
-
-    void present()
-    {
-        JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (getMetrics(), present1Duration);
-
-        if (swap.getBuffer() == nullptr || deferredRepaints.isEmpty())
-            return;
-
-        auto const swapChainSize = swap.getSize();
-        DXGI_PRESENT_PARAMETERS params{};
-
-        if (! deferredRepaints.containsRectangle (swapChainSize))
-        {
-            // Allocate enough memory for the array of dirty rectangles
-            dirtyRectangles.resize ((size_t) deferredRepaints.getNumRectangles());
-
-            // Fill the array of dirty rectangles, intersecting each paint area with the swap chain buffer
-            params.pDirtyRects = dirtyRectangles.data();
-            params.DirtyRectsCount = 0;
-
-            for (const auto& area : deferredRepaints)
-            {
-                const auto intersection = area.getIntersection (swapChainSize);
-
-                if (! intersection.isEmpty())
-                    params.pDirtyRects[params.DirtyRectsCount++] = D2DUtilities::toRECT (intersection);
-            }
-        }
-
-        // Present the freshly painted buffer
-        const auto hr = swap.getChain()->Present1 (swap.presentSyncInterval,
-                                                   swap.presentFlags,
-                                                   &params);
-        jassertquiet (SUCCEEDED (hr));
-
-        if (FAILED (hr))
-            return;
-
-        // There's nothing waiting to be displayed in the backbuffer.
-        deferredRepaints.clear();
-
-        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintEnd, getFrameId());
     }
 
     Image createSnapshot() const
