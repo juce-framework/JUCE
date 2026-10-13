@@ -300,7 +300,7 @@ private:
     std::optional<CompositionTree> compositionTree;
 
     // Areas that must be repainted during the next paint call, between startFrame/endFrame
-    RectangleList<int> deferredRepaints;
+    RectangleList<int> deferredRepaintsCurrent, deferredRepaintsNext;
 
     std::vector<RECT> dirtyRectangles;
     int64 lastFinishFrameTicks = 0;
@@ -350,7 +350,7 @@ private:
 
     RectangleList<int> getPaintAreas() const override
     {
-        return deferredRepaints;
+        return deferredRepaintsNext;
     }
 
     bool checkPaintReady() override
@@ -372,22 +372,22 @@ private:
     {
         JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (getMetrics(), present1Duration);
 
-        if (swap.getBuffer() == nullptr || deferredRepaints.isEmpty())
+        if (swap.getBuffer() == nullptr || deferredRepaintsCurrent.isEmpty())
             return;
 
         auto const swapChainSize = swap.getSize();
         DXGI_PRESENT_PARAMETERS params{};
 
-        if (! deferredRepaints.containsRectangle (swapChainSize))
+        if (! deferredRepaintsCurrent.containsRectangle (swapChainSize))
         {
             // Allocate enough memory for the array of dirty rectangles
-            dirtyRectangles.resize ((size_t) deferredRepaints.getNumRectangles());
+            dirtyRectangles.resize ((size_t) deferredRepaintsCurrent.getNumRectangles());
 
             // Fill the array of dirty rectangles, intersecting each paint area with the swap chain buffer
             params.pDirtyRects = dirtyRectangles.data();
             params.DirtyRectsCount = 0;
 
-            for (const auto& area : deferredRepaints)
+            for (const auto& area : deferredRepaintsCurrent)
             {
                 const auto intersection = area.getIntersection (swapChainSize);
 
@@ -404,9 +404,6 @@ private:
 
         if (FAILED (hr))
             return;
-
-        // There's nothing waiting to be displayed in the backbuffer.
-        deferredRepaints.clear();
 
         JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintEnd, getFrameId());
     }
@@ -428,7 +425,7 @@ public:
         // that's not really spelled out in the documentation.
         // This method is called when the component peer receives WM_SHOWWINDOW
         prepare();
-        deferredRepaints = getClientRect();
+        deferredRepaintsNext = getClientRect();
     }
 
     Rectangle<int> getClientRect() const
@@ -477,7 +474,7 @@ public:
             return;
 
         // Require the entire window to be repainted
-        deferredRepaints = size;
+        deferredRepaintsNext = size;
 
         InvalidateRect (hwnd, nullptr, TRUE);
 
@@ -492,7 +489,7 @@ public:
 
     void addDeferredRepaint (Rectangle<int> deferredRepaint)
     {
-        deferredRepaints.add (deferredRepaint);
+        deferredRepaintsNext.add (deferredRepaint);
 
         JUCE_TRACE_EVENT_INT_RECT (etw::repaint, etw::paintKeyword, deferredRepaint);
     }
@@ -501,10 +498,16 @@ public:
     {
         setSize (getClientRect());
 
+        if (deferredRepaintsNext.isEmpty())
+            return nullptr;
+
         auto* savedState = Pimpl::startFrame();
 
         if (savedState == nullptr)
             return nullptr;
+
+        std::swap (deferredRepaintsNext, deferredRepaintsCurrent);
+        deferredRepaintsNext.clear();
 
         JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintStart, getFrameId());
 
