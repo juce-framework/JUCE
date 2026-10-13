@@ -324,7 +324,11 @@ private:
     {
         auto rect = componentToVST3Rect (bounds);
         auto constrainedRect = rect;
-        view->checkSizeConstraint (&constrainedRect);
+
+        if (view->canResize() == kResultTrue)
+            view->checkSizeConstraint (&constrainedRect);
+        else
+            view->getSize (&constrainedRect);
 
         // Prevent inadvertent window growth while dragging; see componentMovedOrResized below
         if (constrainedRect.getWidth() != rect.getWidth() || constrainedRect.getHeight() != rect.getHeight())
