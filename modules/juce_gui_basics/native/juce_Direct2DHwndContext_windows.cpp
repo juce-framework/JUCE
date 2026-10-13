@@ -35,27 +35,7 @@
 namespace juce
 {
 
-class WindowsScopedEvent
-{
-public:
-    explicit WindowsScopedEvent (HANDLE handleIn)
-        : handle (handleIn)
-    {
-    }
-
-    WindowsScopedEvent()
-        : WindowsScopedEvent (CreateEvent (nullptr, FALSE, FALSE, nullptr))
-    {
-    }
-
-    HANDLE getHandle() const noexcept
-    {
-        return handle.get();
-    }
-
-private:
-    std::unique_ptr<std::remove_pointer_t<HANDLE>, FunctionPointerDestructor<CloseHandle>> handle;
-};
+using WindowsScopedEvent = std::unique_ptr<std::remove_pointer_t<HANDLE>, FunctionPointerDestructor<CloseHandle>>;
 
 //==============================================================================
 class SwapChain
@@ -100,7 +80,6 @@ public:
             return hr;
         }
 
-        // Get the waitable swap chain presentation event and set the maximum frame latency
         ComSmartPtr<IDXGISwapChain2> chain2;
         if (const auto hr = chain.QueryInterface (chain2); FAILED (hr))
             return hr;
@@ -109,6 +88,7 @@ public:
             return E_FAIL;
 
         chain2->SetMaximumFrameLatency (1);
+        event.reset (chain2->GetFrameLatencyWaitableObject());
 
         createBuffer (adapter);
         return buffer != nullptr ? S_OK : E_FAIL;
@@ -176,6 +156,17 @@ public:
         return buffer;
     }
 
+    bool canPresent()
+    {
+        didWait = didWait || event == nullptr || (WaitForSingleObjectEx (event.get(), 0, true) == WAIT_OBJECT_0);
+        return didWait;
+    }
+
+    void didPresent()
+    {
+        didWait = false;
+    }
+
     static constexpr uint32 swapChainFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
     static constexpr uint32 presentSyncInterval = 1;
     static constexpr uint32 presentFlags = 0;
@@ -236,6 +227,8 @@ private:
     AssignableDirectX directX;
     ComSmartPtr<IDXGISwapChain1> chain;
     ComSmartPtr<ID2D1Bitmap1> buffer;
+    WindowsScopedEvent event;
+    bool didWait = false;
 };
 
 //==============================================================================
@@ -363,6 +356,7 @@ private:
 
         bool ready = Pimpl::checkPaintReady();
         ready &= swap.canPaint();
+        ready &= swap.canPresent();
         ready &= compositionTree.has_value();
 
         return ready;
@@ -400,10 +394,14 @@ private:
         const auto hr = swap.getChain()->Present1 (swap.presentSyncInterval,
                                                    swap.presentFlags,
                                                    &params);
-        jassertquiet (SUCCEEDED (hr));
-
         if (FAILED (hr))
+        {
+            jassertfalse;
             return;
+        }
+
+        if (hr == S_OK)
+            swap.didPresent();
 
         JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintEnd, getFrameId());
     }
