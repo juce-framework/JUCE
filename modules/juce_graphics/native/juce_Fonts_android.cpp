@@ -80,6 +80,7 @@ DECLARE_JNI_CLASS (JavaMessageDigest, "java/security/MessageDigest")
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD       (open,      "open",      "(Ljava/lang/String;)Ljava/io/InputStream;") \
+ METHOD       (list,      "list",      "(Ljava/lang/String;)[Ljava/lang/String;") \
 
 DECLARE_JNI_CLASS (AndroidAssetManager, "android/content/res/AssetManager")
 #undef JNI_CLASS_MEMBERS
@@ -807,9 +808,36 @@ private:
         if (assetManager == nullptr)
             return {};
 
+        const String fontsDirectory { "fonts" };
+        const LocalRef javaFileName { javaString (fontsDirectory + "/" + typefaceName) };
+        const LocalRef list { (jobjectArray) env->CallObjectMethod (assetManager,
+                                                                    AndroidAssetManager.list,
+                                                                    javaString (fontsDirectory).get()) };
+        jniCheckHasExceptionOccurredAndClear();
+
+        if (list == nullptr)
+            return {};
+
+        const auto anyMatch = std::invoke ([&]
+        {
+            for (jint i = 0, end = env->GetArrayLength (list); i < end; ++i)
+            {
+                if (const LocalRef name { (jstring) env->GetObjectArrayElement (list, i) })
+                {
+                    if (juceString (name.get()) == typefaceName)
+                        return true;
+                }
+            }
+
+            return false;
+        });
+
+        if (! anyMatch)
+            return {};
+
         const LocalRef inputStream { env->CallObjectMethod (assetManager,
                                                             AndroidAssetManager.open,
-                                                            javaString ("fonts/" + typefaceName).get()) };
+                                                            javaFileName.get()) };
 
         // Opening an input stream for an asset might throw if the asset isn't found
         jniCheckHasExceptionOccurredAndClear();
