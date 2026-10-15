@@ -76,6 +76,7 @@ public:
     void close() override
     {
         cancelPendingUpdate();
+        callback.reset();
         nativeImplementation->close();
         self.reset();
     }
