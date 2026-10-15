@@ -974,6 +974,13 @@ private:
         if (getAndroidSDKVersion() < 31)
             return {};
 
+        if (javaFont == nullptr)
+        {
+            // This API only works when the typeface has cached a copy of the native (Java) font,
+            // which should have happened on construction for a colour font.
+            return {};
+        }
+
         auto* env = getEnv();
 
         const auto extents = native->getGlyphExtents ((hb_codepoint_t) glyph);
