@@ -1024,12 +1024,12 @@ auto Direct2DPixelData::getNativeExtensions() -> NativeExtensions
     return NativeExtensions { Wrapped { this } };
 }
 
-extern bool juce_isRunningInWine();
+extern bool juce_shouldAvoidDirect2DUnderWine();
 
 //==============================================================================
 ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
-    if (! juce_isRunningInWine())
+    if (! juce_shouldAvoidDirect2DUnderWine())
     {
         SharedResourcePointer<DirectX> directX;
 
