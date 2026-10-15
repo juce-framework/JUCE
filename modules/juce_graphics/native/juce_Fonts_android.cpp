@@ -73,7 +73,7 @@ DECLARE_JNI_CLASS (AndroidRectF, "android/graphics/RectF")
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  STATICMETHOD (getInstance, "getInstance", "(Ljava/lang/String;)Ljava/security/MessageDigest;") \
- METHOD       (update,      "update",      "([B)V") \
+ METHOD       (update,      "update",      "([BII)V") \
  METHOD       (digest,      "digest",      "()[B")
 DECLARE_JNI_CLASS (JavaMessageDigest, "java/security/MessageDigest")
 #undef JNI_CLASS_MEMBERS
@@ -352,11 +352,10 @@ private:
         auto* env = getEnv();
 
         LocalRef<jbyteArray> bytes { env->NewByteArray ((jint) blob.size()) };
-        {
-            auto* elements = env->GetByteArrayElements (bytes, nullptr);
-            const ScopeGuard scope { [&] { env->ReleaseByteArrayElements (bytes, elements, 0); }};
-            std::transform (blob.begin(), blob.end(), elements, [] (auto x) { return (jbyte) x; });
-        }
+        env->SetByteArrayRegion (bytes.get(),
+                                 0,
+                                 (jsize) blob.size(),
+                                 reinterpret_cast<const jbyte*> (blob.data()));
 
         LocalRef<jobject> byteBuffer { env->CallStaticObjectMethod (JavaByteBuffer,
                                                                     JavaByteBuffer.allocateDirect,
@@ -865,15 +864,24 @@ private:
 
         const auto key = std::invoke ([&]
         {
+            constexpr size_t chunkSize = 16 * 1024;
+
             LocalRef digest (env->CallStaticObjectMethod (JavaMessageDigest, JavaMessageDigest.getInstance, javaString ("MD5").get()));
-            LocalRef bytes (env->NewByteArray ((int) data.size()));
+            LocalRef bytes (env->NewByteArray ((jint) chunkSize));
+            jboolean ignore{};
 
-            jboolean ignore;
-            auto* jbytes = env->GetByteArrayElements (bytes.get(), &ignore);
-            memcpy (jbytes, data.data(), data.size());
-            env->ReleaseByteArrayElements (bytes.get(), jbytes, 0);
+            for (size_t offset = 0; offset < data.size(); offset += chunkSize)
+            {
+                const auto bytesThisTime = std::min (chunkSize, data.size() - offset);
 
-            env->CallVoidMethod (digest.get(), JavaMessageDigest.update, bytes.get());
+                env->SetByteArrayRegion (bytes.get(),
+                                         0,
+                                         (jsize) bytesThisTime,
+                                         reinterpret_cast<const jbyte*> (data.data() + offset));
+
+                env->CallVoidMethod (digest.get(), JavaMessageDigest.update, bytes.get(), 0, (jint) bytesThisTime);
+            }
+
             LocalRef result ((jbyteArray) env->CallObjectMethod (digest.get(), JavaMessageDigest.digest));
             auto* md5Bytes = env->GetByteArrayElements (result.get(), &ignore);
             const ScopeGuard scope { [&] { env->ReleaseByteArrayElements (result.get(), md5Bytes, 0); } };
