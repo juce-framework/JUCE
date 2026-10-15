@@ -33,26 +33,72 @@
 #include "hb-aat-map.hh"
 
 
+HB_INTERNAL bool
+_hb_ot_layout_table_get_feature_variations_state (hb_face_t             *face,
+						   hb_tag_t               table_tag,
+						   const int             *coords,
+						   unsigned int           num_coords,
+						   unsigned int          *variations_index,
+						   hb_vector_t<unsigned> *lookup_variations);
+
 struct hb_ot_shape_plan_key_t
 {
   unsigned int variations_index[2];
+  hb_vector_t<unsigned> lookup_variations[2];
 
-  void init (hb_face_t *face,
+  bool init (hb_face_t *face,
 	     const int *coords,
 	     unsigned   num_coords)
   {
     for (unsigned int table_index = 0; table_index < 2; table_index++)
-      hb_ot_layout_table_find_feature_variations (face,
-						  table_tags[table_index],
-						  coords,
-						  num_coords,
-						  &variations_index[table_index]);
+      if (unlikely (!_hb_ot_layout_table_get_feature_variations_state (
+			face,
+			table_tags[table_index],
+			coords,
+			num_coords,
+			&variations_index[table_index],
+			&lookup_variations[table_index])))
+      {
+	for (auto &v : lookup_variations)
+	  v.fini ();
+	return false;
+      }
+    return true;
+  }
+
+  void fini ()
+  {
+    for (auto &v : lookup_variations)
+      v.fini ();
+  }
+
+  bool get_lookup_variations (unsigned int table_index,
+			      unsigned int feature_index,
+			      hb_array_t<const unsigned> &lookups) const
+  {
+    hb_array_t<const unsigned> state = lookup_variations[table_index].as_array ();
+    for (unsigned i = 0; i + 2 <= state.length;)
+    {
+      unsigned index = state[i++];
+      unsigned count = state[i++];
+      if (unlikely (count > state.length - i))
+	return false;
+      if (index == feature_index)
+      {
+	lookups = state.sub_array (i, count);
+	return true;
+      }
+      i += count;
+    }
+    return false;
   }
 
   bool equal (const hb_ot_shape_plan_key_t *other)
   {
     return variations_index[0] == other->variations_index[0] &&
-	   variations_index[1] == other->variations_index[1];
+	   variations_index[1] == other->variations_index[1] &&
+	   lookup_variations[0] == other->lookup_variations[0] &&
+	   lookup_variations[1] == other->lookup_variations[1];
   }
 };
 

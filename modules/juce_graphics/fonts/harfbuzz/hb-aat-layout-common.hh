@@ -49,6 +49,17 @@ struct ankr;
 
 using hb_aat_class_cache_t = hb_ot_layout_mapping_cache_t;
 
+/* The state-machine subtables' transition functions are called once per
+ * transition from the drive loop, but are big enough that the compiler
+ * declines to inline them, leaving a call in the hottest loop of AAT
+ * shaping.  Forcing them inline is worth 3-10% instructions on
+ * morx/kerx-heavy fonts, for about 16KB of code. */
+#ifndef HB_OPTIMIZE_SIZE
+#define HB_AAT_TRANSITION_INLINE HB_ALWAYS_INLINE
+#else
+#define HB_AAT_TRANSITION_INLINE
+#endif
+
 struct hb_aat_scratch_t
 {
   hb_aat_scratch_t () = default;
@@ -182,20 +193,26 @@ struct hb_aat_apply_context_t :
       buffer_glyph_set->add_array (glyphs, count);
     for (unsigned int i = 0; i < count; i++)
     {
+      bool at_end_of_text = buffer->idx == buffer->len;
+      if (at_end_of_text)
+	if (unlikely (!buffer->output_glyph (glyphs[i]))) return false;
+
+      hb_glyph_info_t &info = at_end_of_text ? buffer->prev () : buffer->cur ();
       if (glyphs[i] == DELETED_GLYPH)
       {
         buffer->scratch_flags |= HB_BUFFER_SCRATCH_FLAG_AAT_HAS_DELETED;
-	_hb_glyph_info_set_aat_deleted (&buffer->cur());
+	_hb_glyph_info_set_aat_deleted (&info);
       }
       else
       {
 #ifndef HB_NO_OT_LAYOUT
 	if (has_glyph_classes)
-	  _hb_glyph_info_set_glyph_props (&buffer->cur(),
+	  _hb_glyph_info_set_glyph_props (&info,
 					  gdef.get_glyph_props (glyphs[i]));
 #endif
       }
-      if (unlikely (!buffer->output_glyph (glyphs[i]))) return false;
+      if (!at_end_of_text)
+	if (unlikely (!buffer->output_glyph (glyphs[i]))) return false;
     }
     return true;
   }
@@ -797,7 +814,7 @@ struct Lookup
   public:
   DEFINE_SIZE_UNION (2, format.v);
 };
-DECLARE_NULL_NAMESPACE_BYTES_TEMPLATE1 (AAT, Lookup, 2);
+DECLARE_NULL_NAMESPACE_BYTES_TEMPLATE1 (AAT, Lookup, 13);
 
 /*
  * (Extended) State Table

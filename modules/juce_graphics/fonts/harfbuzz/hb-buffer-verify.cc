@@ -167,7 +167,7 @@ buffer_verify_unsafe_to_break (hb_buffer_t  *buffer,
 
     hb_buffer_append (fragment, text_buffer, text_start, text_end);
     if (!hb_shape_full (font, fragment, features, num_features, shapers) ||
-	fragment->successful)
+	!fragment->successful)
       return true;
     hb_buffer_append (reconstruction, fragment, 0, -1);
 

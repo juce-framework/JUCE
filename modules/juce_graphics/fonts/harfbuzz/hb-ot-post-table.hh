@@ -188,7 +188,7 @@ struct post
 
       if (unlikely (!gids))
       {
-	gids = (uint16_t *) hb_malloc (count * sizeof (gids[0]));
+	gids = (uint16_t *) hb_malloc2 (count, sizeof (gids[0]));
 	if (unlikely (!gids))
 	  return false; /* Anything better?! */
 

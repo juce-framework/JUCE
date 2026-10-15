@@ -295,17 +295,15 @@ struct hb_face_lazy_loader_t : hb_lazy_loader_t<T,
   hb_blob_t *get_blob () { return this->get ()->get_blob (); }
 };
 
-template <typename T, unsigned int WheresFace, bool core=false>
+template <typename T, unsigned int WheresFace>
 struct hb_table_lazy_loader_t : hb_lazy_loader_t<T,
-						 hb_table_lazy_loader_t<T, WheresFace, core>,
+						 hb_table_lazy_loader_t<T, WheresFace>,
 						 hb_face_t, WheresFace,
 						 hb_blob_t>
 {
   static hb_blob_t *create (hb_face_t *face)
   {
     hb_sanitize_context_t c;
-    if (core)
-      c.set_num_glyphs (0); // So we don't recurse ad infinitum, or doesn't need num_glyphs
     return c.reference_table<T> (face);
   }
   static void destroy (hb_blob_t *p) { hb_blob_destroy (p); }

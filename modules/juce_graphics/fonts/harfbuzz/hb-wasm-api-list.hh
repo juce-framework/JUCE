@@ -92,6 +92,8 @@ static NativeSymbol _hb_wasm_native_symbols[] =
 
   /* shape */
   NATIVE_SYMBOL ("(iiii$)i",	shape_with),
+  NATIVE_SYMBOL ("(iii)i",	feature_copy_contents),
+  NATIVE_SYMBOL ("(i)",		features_free),
 
   /* debug */
 #ifdef HB_DEBUG_WASM
