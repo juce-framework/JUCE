@@ -74,8 +74,8 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                 }
             }
 
-            const auto result = [alertWindow.get() runModal];
-            onDone (result);
+            const NSUniquePtr<NSAlert> alert { [alertWindow.get() retain] };
+            onDone ([alert.get() runModal]);
         }
 
         std::optional<int> runSync() override
@@ -88,8 +88,17 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
 
         void close() override
         {
-            if (auto* alert = alertWindow.get())
-                [[alert window] close];
+            if (alertWindow == nullptr)
+                return;
+
+            auto* window = [alertWindow.get() window];
+
+            if ([NSApp modalWindow] == window)
+                [NSApp stopModalWithCode: NSModalResponseAbort];
+            else if (auto* parent = [window sheetParent])
+                [parent endSheet: window returnCode: NSModalResponseAbort];
+
+            [window close];
         }
 
     private:
