@@ -6,14 +6,30 @@ namespace Layout {
 namespace GPOS_impl {
 
 
-typedef AnchorMatrix LigatureAttach;    /* component-major--
-                                         * in order of writing direction--,
-                                         * mark-minor--
-                                         * ordered by class--zero-based. */
-
 /* Array of LigatureAttach tables ordered by LigatureCoverage Index */
-struct LigatureArray : List16OfOffset16To<LigatureAttach>
+template <typename Types>
+struct LigatureArray :
+  Types::template ArrayOf<typename Types::template OffsetTo<AnchorMatrix<Types, HBUINT16>>>
 {
+  typedef AnchorMatrix<Types, HBUINT16> LigatureAttach;
+  typedef typename Types::template OffsetTo<LigatureAttach> LigatureAttachOffset;
+  typedef typename Types::template ArrayOf<LigatureAttachOffset> Super;
+
+  const LigatureAttach& operator [] (int i_) const
+  {
+    unsigned int i = (unsigned int) i_;
+    if (unlikely (i >= this->len)) return Null (LigatureAttach);
+    hb_barrier ();
+    return this+this->arrayZ[i];
+  }
+
+  template <typename ...Ts>
+  bool sanitize (hb_sanitize_context_t *c, Ts&&... ds) const
+  {
+    TRACE_SANITIZE (this);
+    return_trace (Super::sanitize (c, this, std::forward<Ts> (ds)...));
+  }
+
   template <typename Iterator,
             hb_requires (hb_is_iterator (Iterator))>
   bool subset (hb_subset_context_t *c,

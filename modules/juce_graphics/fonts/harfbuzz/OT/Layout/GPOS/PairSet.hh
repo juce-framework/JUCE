@@ -17,12 +17,13 @@ struct PairSet : ValueBase
   using PairValueRecord = GPOS_impl::PairValueRecord<Types>;
 
   protected:
-  HBUINT16              len;    /* Number of PairValueRecords */
+  typename Types::HBUINT
+                        len;    /* Number of PairValueRecords */
   PairValueRecord       firstPairValueRecord;
                                 /* Array of PairValueRecords--ordered
                                  * by GlyphID of the second glyph */
   public:
-  DEFINE_SIZE_MIN (2);
+  DEFINE_SIZE_MIN (Types::HBUINT::static_size);
 
   static size_t get_size (unsigned len1, unsigned len2)
   {
@@ -84,13 +85,22 @@ struct PairSet : ValueBase
     c->input->add_array (&record->secondGlyph, len, record_size);
   }
 
+  template <typename set_t>
+  void collect_second_glyphs (set_t *glyphs,
+			      const ValueFormat *valueFormats) const
+  {
+    unsigned record_size = get_size (valueFormats);
+    const PairValueRecord *record = &firstPairValueRecord;
+    glyphs->add_array (&record->secondGlyph, len, record_size);
+  }
+
   void collect_variation_indices (hb_collect_variation_indices_context_t *c,
                                   const ValueFormat *valueFormats) const
   {
     unsigned record_size = get_size (valueFormats);
 
     const PairValueRecord *record = &firstPairValueRecord;
-    unsigned count = len;
+    unsigned count = (unsigned) len;
     for (unsigned i = 0; i < count; i++)
     {
       if (c->glyph_set->has (record->secondGlyph))
@@ -112,7 +122,7 @@ struct PairSet : ValueBase
 
     const PairValueRecord *record = hb_bsearch (buffer->info[pos].codepoint,
                                                 &firstPairValueRecord,
-                                                len,
+                                                (unsigned) len,
                                                 record_size);
     if (record)
     {
@@ -143,6 +153,9 @@ struct PairSet : ValueBase
 
       if (applied_first || applied_second)
         buffer->unsafe_to_break (buffer->idx, pos + 1);
+      else
+        /* Even a zero-valued pair record is a concat hazard. */
+        buffer->unsafe_to_concat (buffer->idx, pos + 1);
 
       if (len2)
       {

@@ -731,6 +731,31 @@ hb_draw_close_path_default (hb_draw_funcs_t *dfuncs HB_UNUSED, void *draw_data,
   adaptor->draw_funcs->emit_close_path (adaptor->draw_data, *st);
 }
 
+static hb_bool_t
+hb_draw_set_budget_default (hb_draw_funcs_t *dfuncs HB_UNUSED, void *draw_data,
+			    int64_t budget,
+			    void *user_data HB_UNUSED)
+{
+  hb_font_draw_glyph_default_adaptor_t *adaptor = (hb_font_draw_glyph_default_adaptor_t *) draw_data;
+  return adaptor->draw_funcs->set_budget (adaptor->draw_data, budget);
+}
+
+static int64_t
+hb_draw_get_budget_default (hb_draw_funcs_t *dfuncs HB_UNUSED, void *draw_data,
+			    void *user_data HB_UNUSED)
+{
+  hb_font_draw_glyph_default_adaptor_t *adaptor = (hb_font_draw_glyph_default_adaptor_t *) draw_data;
+  return adaptor->draw_funcs->get_budget (adaptor->draw_data);
+}
+
+static int64_t *
+hb_draw_get_budget_remaining_default (hb_draw_funcs_t *dfuncs HB_UNUSED, void *draw_data,
+				      void *user_data HB_UNUSED)
+{
+  hb_font_draw_glyph_default_adaptor_t *adaptor = (hb_font_draw_glyph_default_adaptor_t *) draw_data;
+  return adaptor->draw_funcs->get_budget_remaining_ptr (adaptor->draw_data);
+}
+
 static const hb_draw_funcs_t _hb_draw_funcs_default = {
   HB_OBJECT_HEADER_STATIC,
 
@@ -1670,9 +1695,7 @@ hb_font_t::paint_glyph (hb_codepoint_t glyph,
     return;
 
   /* Fallback for outline glyph. */
-  paint_funcs->push_clip_glyph (paint_data, glyph, this);
-  paint_funcs->color (paint_data, true, foreground);
-  paint_funcs->pop_clip (paint_data);
+  paint_funcs->fill_glyph (paint_data, glyph, this, true, foreground);
 }
 
 
@@ -2500,9 +2523,9 @@ hb_font_get_face (hb_font_t *font)
 /**
  * hb_font_set_funcs:
  * @font: #hb_font_t to work upon
- * @klass: (closure font_data) (destroy destroy) (scope notified): The font-functions structure.
+ * @klass: The font-functions structure.
  * @font_data: Data to attach to @font
- * @destroy: (nullable): The function to call when @font_data is not needed anymore
+ * @destroy: (nullable) (scope async) (closure font_data): The function to call when @font_data is not needed anymore
  *
  * Replaces the font-functions structure attached to a font, updating
  * the font's user-data with @font-data and the @destroy callback.
@@ -2540,8 +2563,8 @@ hb_font_set_funcs (hb_font_t         *font,
 /**
  * hb_font_set_funcs_data:
  * @font: #hb_font_t to work upon
- * @font_data: (destroy destroy) (scope notified): Data to attach to @font
- * @destroy: (nullable): The function to call when @font_data is not needed anymore
+ * @font_data: Data to attach to @font
+ * @destroy: (nullable) (scope async) (closure font_data): The function to call when @font_data is not needed anymore
  *
  * Replaces the user data attached to a font, updating the font's
  * @destroy callback.

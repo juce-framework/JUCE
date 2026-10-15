@@ -668,10 +668,10 @@ hb_ot_tags_to_script_and_language (hb_tag_t       script_tag,
 					 primary_script_tag,
 					 nullptr, nullptr);
     *language = hb_ot_tag_to_language (language_tag);
-    if (script_count == 0 || primary_script_tag[0] != script_tag)
+    const char *lang_str = *language ? hb_language_to_string (*language) : nullptr;
+    if (lang_str && (script_count == 0 || primary_script_tag[0] != script_tag))
     {
       unsigned char *buf;
-      const char *lang_str = hb_language_to_string (*language);
       size_t len = strlen (lang_str);
       buf = (unsigned char *) hb_malloc (len + 16);
       if (unlikely (!buf))

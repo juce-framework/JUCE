@@ -12,7 +12,7 @@ struct SingleSubstFormat1_3
 {
   protected:
   HBUINT16      format;                 /* Format identifier--format = 1 */
-  typename Types::template OffsetTo<Coverage>
+  typename Types::template LOffsetTo<Coverage>
                 coverage;               /* Offset to Coverage table--from
                                          * beginning of Substitution table */
   typename Types::HBUINT
@@ -20,7 +20,7 @@ struct SingleSubstFormat1_3
                                          * substitute GlyphID, modulo 0x10000 */
 
   public:
-  DEFINE_SIZE_STATIC (2 + 2 * Types::size);
+  DEFINE_SIZE_STATIC (2 + Types::LOffset::static_size + Types::HBUINT::static_size);
 
   bool sanitize (hb_sanitize_context_t *c) const
   {
@@ -44,6 +44,23 @@ struct SingleSubstFormat1_3
 
   bool may_have_non_1to1 () const
   { return false; }
+
+  void depend (hb_depend_context_t *c) const
+  {
+    hb_codepoint_t d = deltaGlyphID;
+    hb_codepoint_t mask = get_mask ();
+    unsigned num_glyphs = c->face->get_num_glyphs ();
+
+    // Filter coverage by active glyphs (like closure does)
+    hb_set_t intersection;
+    (this+coverage).intersect_set (c->parent_active_glyphs (), intersection);
+
+    + hb_iter (intersection)
+    | hb_map ([&] (hb_codepoint_t _) { return hb_codepoint_pair_t (_, (_ + d) & mask); })
+    | hb_filter ([num_glyphs] (const hb_codepoint_pair_t &_) { return _.second < num_glyphs; })
+    | hb_apply ([&] (const hb_codepoint_pair_t &_) { c->depend_data->add_gsub_lookup(_.first, c->lookup_index, _.second); })
+    ;
+  }
 
   void closure (hb_closure_context_t *c) const
   {
@@ -109,7 +126,7 @@ struct SingleSubstFormat1_3
       return 0;
     }
 
-    if (alternate_count && *alternate_count)
+    if (alternate_count && *alternate_count && alternate_glyphs)
     {
       hb_codepoint_t d = deltaGlyphID;
       hb_codepoint_t mask = get_mask ();

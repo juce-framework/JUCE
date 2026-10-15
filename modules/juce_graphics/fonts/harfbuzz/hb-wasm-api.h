@@ -297,6 +297,21 @@ typedef struct
 #define FEATURE_GLOBAL_START	0
 #define FEATURE_GLOBAL_END	((uint32_t) -1)
 
+typedef struct
+{
+  uint32_t length;
+  ptr_t(feature_t) features;
+} features_t;
+#define FEATURES_INIT {0, 0}
+
+HB_WASM_API (bool_t, feature_copy_contents) (HB_WASM_EXEC_ENV
+					       ptr_d(const feature_t, features),
+					       uint32_t num_features,
+					       ptr_d(features_t, output));
+
+HB_WASM_API (void, features_free) (HB_WASM_EXEC_ENV
+				     ptr_d(features_t, features));
+
 HB_WASM_API (bool_t, shape_with) (HB_WASM_EXEC_ENV
 				  ptr_d(font_t, font),
 				  ptr_d(buffer_t, buffer),

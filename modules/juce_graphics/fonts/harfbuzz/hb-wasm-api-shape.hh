@@ -64,6 +64,52 @@ HB_WASM_INTERFACE (bool_t, shape_with) (HB_WASM_EXEC_ENV
 			shaper_list);
 }
 
+HB_WASM_API (bool_t, feature_copy_contents) (HB_WASM_EXEC_ENV
+					       ptr_d(const feature_t, features),
+					       uint32_t num_features,
+					       ptr_d(features_t, output))
+{
+  HB_PTR_PARAM (features_t, output);
+  if (unlikely (!output))
+    return false;
+
+  unsigned bytes;
+  if (unlikely (hb_unsigned_mul_overflows (num_features, sizeof (feature_t), &bytes)))
+    return false;
+
+  if (!num_features)
+  {
+    output->length = 0;
+    output->features = nullref;
+    return true;
+  }
+
+  HB_ARRAY_PARAM (const feature_t, features, num_features);
+  if (unlikely (!features))
+    return false;
+
+  feature_t *dst = nullptr;
+  uint32_t dstref = module_malloc (bytes, (void **) &dst);
+  if (unlikely (!dstref))
+    return false;
+
+  hb_memcpy (dst, features, bytes);
+  output->length = num_features;
+  output->features = dstref;
+  return true;
+}
+
+HB_WASM_API (void, features_free) (HB_WASM_EXEC_ENV
+				    ptr_d(features_t, features))
+{
+  HB_PTR_PARAM (features_t, features);
+  if (unlikely (!features))
+    return;
+
+  module_free (features->features);
+  features->features = nullref;
+  features->length = 0;
+}
 
 }}
 

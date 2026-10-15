@@ -12,7 +12,7 @@ struct PairPosFormat2_4 : ValueBase
 {
   protected:
   HBUINT16      format;                 /* Format identifier--format = 2 */
-  typename Types::template OffsetTo<Coverage>
+  typename Types::template LOffsetTo<Coverage>
                 coverage;               /* Offset to Coverage table--from
                                          * beginning of subtable */
   ValueFormat   valueFormat1;           /* ValueRecord definition--for the
@@ -21,11 +21,11 @@ struct PairPosFormat2_4 : ValueBase
   ValueFormat   valueFormat2;           /* ValueRecord definition--for the
                                          * second glyph of the pair--may be
                                          * zero (0) */
-  typename Types::template OffsetTo<ClassDef>
+  typename Types::template LOffsetTo<ClassDef>
                 classDef1;              /* Offset to ClassDef table--from
                                          * beginning of PairPos subtable--for
                                          * the first glyph of the pair */
-  typename Types::template OffsetTo<ClassDef>
+  typename Types::template LOffsetTo<ClassDef>
                 classDef2;              /* Offset to ClassDef table--from
                                          * beginning of PairPos subtable--for
                                          * the second glyph of the pair */
@@ -37,7 +37,7 @@ struct PairPosFormat2_4 : ValueBase
                                          * class1-major, class2-minor,
                                          * Each entry has value1 and value2 */
   public:
-  DEFINE_SIZE_ARRAY (10 + 3 * Types::size, values);
+  DEFINE_SIZE_ARRAY (10 + 3 * Types::LOffset::static_size, values);
 
   bool sanitize (hb_sanitize_context_t *c) const
   {
@@ -228,15 +228,15 @@ struct PairPosFormat2_4 : ValueBase
 
           if (!backward)
           {
-            dst1[i] += kern1;
-            dst2[i] += kern2;
-            dst2[i + 2] += kern2;
+            dst1[i] = hb_saturate_add (dst1[i], kern1);
+            dst2[i] = hb_saturate_add (dst2[i], kern2);
+            dst2[i + 2] = hb_saturate_add (dst2[i + 2], kern2);
           }
           else
           {
-            dst1[i] += kern1;
-            dst1[i + 2] += src[i + 2] - kern2;
-            dst2[i] += kern2;
+            dst1[i] = hb_saturate_add (dst1[i], kern1);
+            dst1[i + 2] = hb_clamp_to<hb_position_t> ((int64_t) dst1[i + 2] + src[i + 2] - kern2);
+            dst2[i] = hb_saturate_add (dst2[i], kern2);
           }
 
           applied_first = applied_second = kern != 0;

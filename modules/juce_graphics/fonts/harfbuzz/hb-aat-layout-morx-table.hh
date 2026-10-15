@@ -84,6 +84,7 @@ struct RearrangementSubtable
 	table (table_),
 	start (0), end (0) {}
 
+    HB_AAT_TRANSITION_INLINE
     void transition (hb_buffer_t *buffer,
 		     StateTableDriver<Types, EntryData, Flags> *driver,
 		     const Entry<EntryData> &entry)
@@ -243,6 +244,7 @@ struct ContextualSubtable
 	mark (0),
 	subs (table+table->substitutionTables) {}
 
+    HB_AAT_TRANSITION_INLINE
     void transition (hb_buffer_t *buffer,
 		     StateTableDriver<Types, EntryData, Flags> *driver,
 		     const Entry<EntryData> &entry)
@@ -490,6 +492,7 @@ struct LigatureSubtable
 	ligature (table+table->ligature),
 	match_length (0) {}
 
+    HB_AAT_TRANSITION_INLINE
     void transition (hb_buffer_t *buffer,
 		     StateTableDriver<Types, EntryData, Flags> *driver,
 		     const Entry<EntryData> &entry)
@@ -787,6 +790,7 @@ struct InsertionSubtable
 	mark (0),
 	insertionAction (table+table->insertionAction) {}
 
+    HB_AAT_TRANSITION_INLINE
     void transition (hb_buffer_t *buffer,
 		     StateTableDriver<Types, EntryData, Flags> *driver,
 		     const Entry<EntryData> &entry)
@@ -1078,11 +1082,11 @@ struct ChainSubtable
     unsigned int subtable_type = get_type ();
     TRACE_DISPATCH (this, subtable_type);
     switch (subtable_type) {
-    case Rearrangement:		return_trace (c->dispatch (u.rearrangement, std::forward<Ts> (ds)...));
-    case Contextual:		return_trace (c->dispatch (u.contextual, std::forward<Ts> (ds)...));
-    case Ligature:		return_trace (c->dispatch (u.ligature, std::forward<Ts> (ds)...));
-    case Noncontextual:		return_trace (c->dispatch (u.noncontextual, std::forward<Ts> (ds)...));
-    case Insertion:		return_trace (c->dispatch (u.insertion, std::forward<Ts> (ds)...));
+    case Rearrangement:		hb_barrier (); return_trace (c->dispatch (u.rearrangement, std::forward<Ts> (ds)...));
+    case Contextual:		hb_barrier (); return_trace (c->dispatch (u.contextual, std::forward<Ts> (ds)...));
+    case Ligature:		hb_barrier (); return_trace (c->dispatch (u.ligature, std::forward<Ts> (ds)...));
+    case Noncontextual:		hb_barrier (); return_trace (c->dispatch (u.noncontextual, std::forward<Ts> (ds)...));
+    case Insertion:		hb_barrier (); return_trace (c->dispatch (u.insertion, std::forward<Ts> (ds)...));
     default:			return_trace (c->default_return_value ());
     }
   }
