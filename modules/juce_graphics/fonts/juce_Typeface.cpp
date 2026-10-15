@@ -1021,11 +1021,12 @@ std::vector<GlyphLayer> Typeface::getLayersForGlyph (int glyphNumber, const Affi
     // Some fonts (e.g. Noto Color Emoji on Android) might only contain COLRv1 data, which we can't
     // easily display. In such cases, we can use system facilities to render the glyph into a
     // bitmap. If the face has colour info that wasn't already handled, try rendering to a bitmap.
-    if (getColourGlyphFormats() != 0)
-        if (auto layer = native->getFallbackColourGlyphLayers (glyphNumber, combinedTransform); ! layer.empty())
-            return layer;
+    if (auto layers = native->getFallbackColourGlyphLayers (glyphNumber, combinedTransform); ! layers.empty())
+        return layers;
 
-    // No colour info available for this glyph, so just get a simple monochromatic outline
+    // No colour info available for this glyph, so just get a simple monochromatic outline.
+    // Some glyphs may have no colour information, even if other glyphs in the same typeface
+    // do have colour information.
     auto path = TypefaceUtils::getGlyphPathInGlyphUnits ((hb_codepoint_t) glyphNumber, font);
 
     if (path.isEmpty())
