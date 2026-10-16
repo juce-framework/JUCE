@@ -118,6 +118,9 @@ private:
                                              if (! button.isEnabled())
                                                  return;
 
+                                             if (isRadioButton (button) && button.getToggleState())
+                                                 return;
+
                                              button.setToggleState (! button.getToggleState(), sendNotification);
                                          });
         }
