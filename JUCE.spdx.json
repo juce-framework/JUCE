@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "JUCE-9.0.5",
-  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.5-5c248b61fe04",
+  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.5-abac3e57d4ee",
   "creationInfo": {
     "created": "2026-09-04T00:00:00Z",
     "creators": [
@@ -374,24 +374,24 @@
     {
       "name": "HarfBuzz",
       "SPDXID": "SPDXRef-juce-graphics.harfbuzz",
-      "versionInfo": "14.2.1",
+      "versionInfo": "14.6.0",
       "supplier": "Organization: HarfBuzz Project",
       "downloadLocation": "https://harfbuzz.github.io",
       "filesAnalyzed": false,
       "licenseConcluded": "MIT-Modern-Variant",
       "licenseDeclared": "MIT-Modern-Variant",
       "copyrightText": "NOASSERTION",
-      "sourceInfo": "Vendored at modules/juce_graphics/fonts/harfbuzz in the JUCE source tree",
+      "sourceInfo": "Vendored at modules/juce_graphics/fonts/harfbuzz in the JUCE source tree; provenance and local modifications are documented in JUCE_UPSTREAM.txt",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:github/harfbuzz/harfbuzz@14.2.1"
+          "referenceLocator": "pkg:github/harfbuzz/harfbuzz@14.6.0"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:harfbuzz_project:harfbuzz:14.2.1:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:harfbuzz_project:harfbuzz:14.6.0:*:*:*:*:*:*:*"
         }
       ]
     },

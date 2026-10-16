@@ -70,10 +70,10 @@ _hb_ot_metrics_get_position_common (hb_font_t           *font,
 #define GET_VAR .0f
 #endif
 // Unused:
-//#define GET_METRIC_X(TABLE, ATTR) \
-//  (face->table.TABLE->has_data () && \
-//    ((void) (position && (*position = font->em_scalef_x (_fix_ascender_descender ( \
-//      face->table.TABLE->ATTR + GET_VAR, metrics_tag)))), true))
+#define GET_METRIC_X(TABLE, ATTR) \
+  (face->table.TABLE->has_data () && \
+    ((void) (position && (*position = font->em_scalef_x (_fix_ascender_descender ( \
+      face->table.TABLE->ATTR + GET_VAR, metrics_tag)))), true))
 #define GET_METRIC_Y(TABLE, ATTR) \
   (face->table.TABLE->has_data () && \
     ((void) (position && (*position = font->em_scalef_y (_fix_ascender_descender ( \
