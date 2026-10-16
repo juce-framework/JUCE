@@ -210,7 +210,12 @@ private:
 
             auto onPress = [&itemComponent]
             {
-                itemComponent.getRepresentedItem().itemClicked (generateMouseEvent (itemComponent, { ModifierKeys::leftButtonModifier }));
+                auto& treeItem = itemComponent.getRepresentedItem();
+
+                // A mouse click without modifiers always selects the item before calling
+                // itemClicked(), so a press action should do the same
+                treeItem.setSelected (true, true);
+                treeItem.itemClicked (generateMouseEvent (itemComponent, { ModifierKeys::leftButtonModifier }));
             };
 
             auto onShowMenu = [&itemComponent]
