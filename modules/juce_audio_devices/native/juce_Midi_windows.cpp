@@ -2497,28 +2497,29 @@ struct WindowsMidiHelpers
             static inline const auto isInput = false;
         };
 
-        template <typename Traits>
-        static void getAvailableDevices (const Traits&, std::vector<ump::EndpointAndStaticInfo>& result)
+        struct Device
         {
-            const auto deviceCaps = [&]
-            {
-                std::vector<typename Traits::Caps> devices;
+            UINT index;
+            ump::EndpointAndStaticInfo info;
+        };
 
-                const auto end = Traits::getNum();
-
-                for (auto i = (decltype (end)) 0; i < end; ++i)
-                    if (typename Traits::Caps mc{}; Traits::getCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                        devices.push_back (mc);
-
-                return devices;
-            }();
-
+        template <typename Traits>
+        static std::vector<Device> getDevices (const Traits&)
+        {
+            std::vector<UINT> indices;
             StringArray deviceIDs, deviceNames;
 
-            for (const auto [i, device] : enumerate (deviceCaps))
+            const auto end = Traits::getNum();
+
+            for (auto i = (decltype (end)) 0; i < end; ++i)
             {
-                const auto name = device.szPname;
-                const auto identifier = std::invoke ([index = i]() -> String
+                typename Traits::Caps mc{};
+
+                if (Traits::getCaps (i, &mc, sizeof (mc)) != MMSYSERR_NOERROR)
+                    continue;
+
+                const auto name = mc.szPname;
+                const auto identifier = std::invoke ([index = (size_t) i]() -> String
                 {
                     ULONG size = 0;
 
@@ -2536,6 +2537,7 @@ struct WindowsMidiHelpers
                     return interfaceName;
                 });
 
+                indices.push_back (i);
                 deviceNames.add (name);
                 deviceIDs.add (identifier.isNotEmpty() ? identifier : name);
             }
@@ -2545,11 +2547,19 @@ struct WindowsMidiHelpers
 
             constexpr auto direction = Traits::isInput ? ump::BlockDirection::sender : ump::BlockDirection::receiver;
 
+            std::vector<Device> result;
+
             for (auto [index, id] : enumerate (deviceIDs, int{}))
-            {
-                const auto fullInfo = ump::IOHelpers::makeProxyEndpoint ({ deviceNames[index], id }, direction);
-                result.push_back (fullInfo);
-            }
+                result.push_back ({ indices[(size_t) index], ump::IOHelpers::makeProxyEndpoint ({ deviceNames[index], id }, direction) });
+
+            return result;
+        }
+
+        template <typename Traits>
+        static void getAvailableDevices (const Traits& traits, std::vector<ump::EndpointAndStaticInfo>& result)
+        {
+            for (const auto& device : getDevices (traits))
+                result.push_back (device.info);
         }
 
         class MidiHeader
@@ -2699,21 +2709,19 @@ struct WindowsMidiHelpers
         private:
             static std::unique_ptr<InputDevice> openInternal (const ump::EndpointId& id)
             {
-                std::vector<ump::EndpointAndStaticInfo> endpoints;
-                getAvailableDevices (ITraits{}, endpoints);
-                const auto iter = std::find_if (endpoints.begin(),
-                                                endpoints.end(),
-                                                [&] (const auto& x) { return x.id == id; });
+                const auto devices = getDevices (ITraits{});
+                const auto iter = std::find_if (devices.begin(),
+                                                devices.end(),
+                                                [&] (const auto& x) { return x.info.id == id; });
 
-                if (iter == endpoints.end())
+                if (iter == devices.end())
                     return {};
 
-                const auto deviceID = std::distance (endpoints.begin(), iter);
                 auto result = rawToUniquePtr (new InputDevice { id });
 
                 HMIDIIN handle{};
                 const auto err = midiInOpen (&handle,
-                                             (UINT) deviceID,
+                                             iter->index,
                                              (DWORD_PTR) &midiInCallback,
                                              (DWORD_PTR) result.get(),
                                              CALLBACK_FUNCTION);
@@ -3142,21 +3150,19 @@ struct WindowsMidiHelpers
 
             static std::unique_ptr<OutputDevice> openInternal (const ump::EndpointId& id)
             {
-                std::vector<ump::EndpointAndStaticInfo> endpoints;
-                getAvailableDevices (OTraits{}, endpoints);
-                const auto iter = std::find_if (endpoints.begin(),
-                                                endpoints.end(),
-                                                [&] (const auto& x) { return x.id == id; });
+                const auto devices = getDevices (OTraits{});
+                const auto iter = std::find_if (devices.begin(),
+                                                devices.end(),
+                                                [&] (const auto& x) { return x.info.id == id; });
 
-                if (iter == endpoints.end())
+                if (iter == devices.end())
                     return {};
 
-                const auto deviceID = std::distance (endpoints.begin(), iter);
                 auto result = rawToUniquePtr (new OutputDevice (id));
 
                 HMIDIOUT h = nullptr;
                 auto res = midiOutOpen (&h,
-                                        (UINT) deviceID,
+                                        iter->index,
                                         (DWORD_PTR) &midiOutCallback,
                                         (DWORD_PTR) result.get(),
                                         CALLBACK_FUNCTION);
