@@ -101,11 +101,11 @@ XWindowSystemUtilities::ScopedXLock::~ScopedXLock()
 //==============================================================================
 XWindowSystemUtilities::Atoms::Atoms (::Display* display)
 {
-    protocols                    = getIfExists (display, "WM_PROTOCOLS");
-    protocolList [TAKE_FOCUS]    = getIfExists (display, "WM_TAKE_FOCUS");
-    protocolList [DELETE_WINDOW] = getIfExists (display, "WM_DELETE_WINDOW");
-    protocolList [PING]          = getIfExists (display, "_NET_WM_PING");
-    changeState                  = getIfExists (display, "WM_CHANGE_STATE");
+    protocols                    = getCreating (display, "WM_PROTOCOLS");
+    protocolList [TAKE_FOCUS]    = getCreating (display, "WM_TAKE_FOCUS");
+    protocolList [DELETE_WINDOW] = getCreating (display, "WM_DELETE_WINDOW");
+    protocolList [PING]          = getCreating (display, "_NET_WM_PING");
+    changeState                  = getCreating (display, "WM_CHANGE_STATE");
     state                        = getIfExists (display, "WM_STATE");
     userTime                     = getCreating (display, "_NET_WM_USER_TIME");
     activeWin                    = getCreating (display, "_NET_ACTIVE_WINDOW");
@@ -177,6 +177,11 @@ bool XWindowSystemUtilities::Atoms::isMimeTypeFile (::Display* display, Atom ato
 XWindowSystemUtilities::GetXProperty::GetXProperty (::Display* display, Window window, Atom atom,
                                                     long offset, long length, bool shouldDelete, Atom requestedType)
 {
+    jassert (window != None);
+
+    if (window == None || atom == None)
+        return;
+
     success = (X11Symbols::getInstance()->xGetWindowProperty (display, window, atom, offset, length,
                                                               (Bool) shouldDelete, requestedType, &actualType,
                                                               &actualFormat, &numItems, &bytesLeft, &data) == Success)
@@ -3112,13 +3117,10 @@ String XWindowSystem::getTextFromClipboard() const
 
     for (auto current = w; current != 0;)
     {
-        if (atoms.state != None)
-        {
-            XWindowSystemUtilities::GetXProperty prop (display, current, atoms.state, 0, 2, false, atoms.state);
+        XWindowSystemUtilities::GetXProperty prop (display, current, atoms.state, 0, 2, false, atoms.state);
 
-            if (prop.success && prop.numItems > 0)
-                return current;
-        }
+        if (prop.success && prop.numItems > 0)
+            return current;
 
         Window* windowList = nullptr;
         uint32 windowListSize = 0;
