@@ -421,6 +421,12 @@ public:
     */
     virtual void closeInputMethodContext();
 
+    /** Call this to indicate that the text editor selection/cursor has changed.
+        On Android, this will avoid restarting the IME session and will attempt to
+        move the cursor within the existing session.
+    */
+    virtual void updateInputMethodContextSelection();
+
     /** Alerts the peer that the current text input target has changed somehow.
 
         The peer may hide or show the virtual keyboard as a result of this call.
