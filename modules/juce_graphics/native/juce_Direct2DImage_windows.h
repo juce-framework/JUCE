@@ -141,6 +141,8 @@ public:
     /*  Creates new image storage with content matching the content of this image. */
     ImagePixelData::Ptr clone() override;
 
+    void clear (Rectangle<int>, Colour) override;
+
     std::unique_ptr<ImageType> createType() const override
     {
         return std::make_unique<NativeImageType>();
@@ -260,6 +262,7 @@ private:
     std::map<ComSmartPtr<ID2D1Device1>, Pages> pagesForDevice;
     State state;
     bool sync = true;
+    Context* activeContext = nullptr;
 
     JUCE_LEAK_DETECTOR (Direct2DPixelData)
 };
