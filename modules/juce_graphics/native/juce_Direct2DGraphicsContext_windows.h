@@ -180,6 +180,7 @@ protected:
     void resetPendingClipList();
     void applyPendingClipList();
     virtual void clearTargetBuffer() = 0;
+    void fillRectWithColour (Rectangle<int>, Colour);
 
     struct ScopedTransform
     {
