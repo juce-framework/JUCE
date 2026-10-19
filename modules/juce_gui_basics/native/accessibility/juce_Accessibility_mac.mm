@@ -621,7 +621,13 @@ private:
                 return NO;
             });
 
-            addMethod (@selector (accessibilityPerformPress),     accessibilityPerformPress);
+            addMethod (@selector (accessibilityPerformPress), [] (id self, SEL) -> BOOL
+            {
+                if (id focusedMenuItem = getFocusedPopupMenuItem (self))
+                    return [focusedMenuItem accessibilityPerformPress];
+
+                return accessibilityPerformPress (self, {});
+            });
 
             addMethod (@selector (accessibilityPerformShowMenu), [] (id self, SEL)
             {
@@ -717,8 +723,13 @@ private:
                             continue;
 
                         if (selector == @selector (accessibilityPerformPress))
+                        {
+                            if (id focusedMenuItem = getFocusedPopupMenuItem (self))
+                                return [focusedMenuItem isAccessibilitySelectorAllowed: selector];
+
                             return (handler->getCurrentState().isCheckable() && handler->getActions().contains (AccessibilityActionType::toggle))
                                    || handler->getActions().contains (AccessibilityActionType::press);
+                        }
 
                         if (selector == @selector (accessibilityPerformShowMenu))
                             return handler->getActions().contains (AccessibilityActionType::showMenu);
@@ -751,6 +762,22 @@ private:
         }
 
         //==============================================================================
+        /*  VoiceOver doesn't always place its cursor on the focused item of a popup menu.
+            When the menu window has a single item, the cursor stays on the window itself,
+            and pressing it would otherwise do nothing. Pressing the window is forwarded to
+            the item that has focus in it instead.
+        */
+        static id getFocusedPopupMenuItem (id self)
+        {
+            if (auto* handler = getHandler (self))
+                if (handler->getRole() == AccessibilityRole::popupMenu)
+                    if (auto* focusedChild = handler->getChildFocus())
+                        if (focusedChild != handler)
+                            return static_cast<id> (focusedChild->getNativeImplementation());
+
+            return nil;
+        }
+
         static bool isSelectable (AccessibleState state) noexcept
         {
             return state.isSelectable() || state.isMultiSelectable();
