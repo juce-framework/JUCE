@@ -1277,12 +1277,12 @@ public:
                 {
                     // read the format chunk
                     auto format = (unsigned short) input->readShort();
-                    numChannels = (unsigned int) input->readShort();
+                    numChannels = (uint16) input->readShort();
                     const auto intSampleRate = (uint32_t) input->readInt();
                     sampleRate = intSampleRate;
                     auto bytesPerSec = (uint32_t) input->readInt();
                     input->skipNextBytes (2);
-                    bitsPerSample = (unsigned int) (int) input->readShort();
+                    bitsPerSample = (uint16) input->readShort();
 
                     if (bitsPerSample > 64 && intSampleRate > 0)
                     {
@@ -1519,11 +1519,18 @@ public:
 
         input->setPosition (dataChunkStart + startSampleInFile * bytesPerFrame);
 
+        constexpr int stackBufferSize = 480 * 3 * 4; // (keep this a multiple of 3)
+        char stackBuffer[stackBufferSize];
+        HeapBlock<char> heapBuffer;
+
+        if (stackBufferSize < bytesPerFrame)
+            heapBuffer.malloc ((size_t) bytesPerFrame);
+
+        auto* tempBuffer = heapBuffer != nullptr ? heapBuffer.getData() : stackBuffer;
+        const auto tempBufSize = jmax (stackBufferSize, bytesPerFrame);
+
         while (numSamples > 0)
         {
-            const int tempBufSize = 480 * 3 * 4; // (keep this a multiple of 3)
-            char tempBuffer[tempBufSize];
-
             auto numThisTime = jmin (tempBufSize / bytesPerFrame, numSamples);
             auto bytesRead = input->read (tempBuffer, numThisTime * bytesPerFrame);
 
@@ -1596,6 +1603,15 @@ public:
         }
 
         return wavFileChannelLayout;
+    }
+
+    bool hasValidFormat() const
+    {
+        const auto hasSupportedBitDepth = bitsPerSample == 8 || bitsPerSample == 16
+                                       || bitsPerSample == 24 || bitsPerSample == 32;
+
+        return sampleRate > 0 && numChannels > 0 && hasSupportedBitDepth
+            && bytesPerFrame == (int) (numChannels * bitsPerSample / 8);
     }
 
     int64 bwavChunkStart = 0, bwavSize = 0;
@@ -1806,7 +1822,7 @@ private:
 
         output->writeShort ((short) numChannels);
         output->writeInt ((int) sampleRate);
-        output->writeInt ((int) ((double) bytesPerFrame * sampleRate)); // nAvgBytesPerSec
+        output->writeInt ((int) (uint32) ((double) bytesPerFrame * sampleRate)); // nAvgBytesPerSec
         output->writeShort ((short) bytesPerFrame); // nBlockAlign
         output->writeShort ((short) bitsPerSample); // wBitsPerSample
 
@@ -2025,7 +2041,7 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream, b
     }
    #endif
 
-    if (r->sampleRate > 0 && r->numChannels > 0 && r->bytesPerFrame > 0 && r->bitsPerSample <= 32)
+    if (r->hasValidFormat())
         return r.release();
 
     if (! deleteStreamIfOpeningFails)
@@ -2045,7 +2061,7 @@ MemoryMappedAudioFormatReader* WavAudioFormat::createMemoryMappedReader (FileInp
     {
         WavAudioFormatReader reader (fin);
 
-        if (reader.lengthInSamples > 0)
+        if (reader.hasValidFormat() && reader.lengthInSamples > 0)
             return new MemoryMappedWavReader (fin->getFile(), reader);
     }
 
@@ -2058,7 +2074,16 @@ std::unique_ptr<AudioFormatWriter> WavAudioFormat::createWriterFor (std::unique_
     if (streamToWriteTo == nullptr || ! getPossibleBitDepths().contains (options.getBitsPerSample()))
         return nullptr;
 
-    const auto layout = options.getChannelLayout().value_or (WavFileHelpers::canonicalWavChannelSet (options.getNumChannels()));
+    const auto numChannels = options.getNumChannels();
+    const auto bytesPerFrame = (int64) numChannels * options.getBitsPerSample() / 8;
+    const auto bytesPerSecond = (double) bytesPerFrame * options.getSampleRate();
+
+    if (numChannels <= 0
+        || std::numeric_limits<uint16>::max() < bytesPerFrame
+        || (double) std::numeric_limits<uint32>::max() < bytesPerSecond)
+        return nullptr;
+
+    const auto layout = options.getChannelLayout().value_or (WavFileHelpers::canonicalWavChannelSet (numChannels));
 
     if (! isChannelLayoutSupported (layout))
         return nullptr;
@@ -2414,6 +2439,51 @@ struct WaveAudioFormatTests final : public UnitTest
                 expectEquals (reader->metadataValues["CueLabel0Text"], String ("ab"));
             }
         }
+
+        {
+            beginTest ("Files declaring an unsupported bit depth are rejected");
+
+            const auto wav = createPcmWav (1, 12, 8, std::vector<uint8> (8, 0x80));
+            expect (createReader (wav) == nullptr);
+        }
+
+        {
+            beginTest ("Files with the maximum channel count can be read");
+
+            // 8-bit is the widest depth for which a frame of the maximum channel count fits the block-align field
+            constexpr auto numChannels = std::numeric_limits<uint16>::max();
+            constexpr int numFrames = 2;
+            const auto dataBytes = createInterleavedPattern (numChannels, numFrames);
+
+            const auto wav = createPcmWav (numChannels, 8, (uint32) dataBytes.size(), dataBytes);
+            const auto reader = createReader (wav);
+            expect (reader != nullptr);
+
+            if (reader == nullptr)
+                return;
+
+            expectEquals ((int) reader->numChannels, (int) numChannels);
+            expectEquals (reader->lengthInSamples, (int64) numFrames);
+
+            AudioBuffer<float> result (numChannels, numFrames);
+            expect (reader->read (&result, 0, numFrames, 0, true, true));
+
+            for (const int channel : { 0, 1, (int) numChannels - 1 })
+                for (int frame = 0; frame < numFrames; ++frame)
+                    expect (approximatelyEqual (result.getSample (channel, frame), expectedUnsigned8BitSample (channel, frame)));
+        }
+
+        {
+            beginTest ("Writers are not created for channel counts or frame sizes that the header cannot describe");
+
+            constexpr auto maxChannels = std::numeric_limits<uint16>::max();
+
+            expect (createWriter (0, 8) == nullptr);
+            expect (createWriter (maxChannels + 1, 8) == nullptr);
+            expect (createWriter (maxChannels, 16) == nullptr);
+            expect (createWriter (maxChannels, 8, 96000.0) == nullptr);
+            expect (createWriter (maxChannels, 8) != nullptr);
+        }
     }
 
 private:
@@ -2473,26 +2543,34 @@ private:
         return mb;
     }
 
-    /*  Creates a minimal 8-bit mono PCM wav file. The declared length of the data chunk may
-        differ from the number of data bytes actually written, in order to simulate malformed files.
+    /*  Creates a minimal PCM wav file. The declared length of the data chunk may differ from
+        the number of data bytes actually written, in order to simulate malformed files.
     */
-    static MemoryBlock createPcm8Wav (uint32 declaredDataLength,
-                                      const std::vector<uint8>& dataBytes,
-                                      const std::function<void (OutputStream&)>& appendTrailingChunks = nullptr)
+    static MemoryBlock createPcmWav (uint16 numChannels,
+                                     uint16 bitsPerSample,
+                                     uint32 declaredDataLength,
+                                     const std::vector<uint8>& dataBytes,
+                                     const std::function<void (OutputStream&)>& appendTrailingChunks = nullptr)
     {
         using namespace WavFileHelpers;
+
+        constexpr int sampleRate = 44100;
+        const auto bytesPerFrame = numChannels * bitsPerSample / 8;
+
+        // The block-align field is 16 bits wide, so this helper can't describe a wider frame
+        jassert (bytesPerFrame <= std::numeric_limits<uint16>::max());
 
         MemoryOutputStream body;
         body.writeInt (chunkName ("WAVE"));
 
         body.writeInt (chunkName ("fmt "));
         body.writeInt (16);
-        body.writeShort (1);        // WAVE_FORMAT_PCM
-        body.writeShort (1);        // channels
-        body.writeInt (44100);      // sample rate
-        body.writeInt (44100);      // bytes per second
-        body.writeShort (1);        // block align
-        body.writeShort (8);        // bits per sample
+        body.writeShort (1);                            // WAVE_FORMAT_PCM
+        body.writeShort ((short) numChannels);
+        body.writeInt (sampleRate);
+        body.writeInt (sampleRate * bytesPerFrame);     // bytes per second
+        body.writeShort ((short) bytesPerFrame);        // block align
+        body.writeShort ((short) bitsPerSample);
 
         body.writeInt (chunkName ("data"));
         body.writeInt ((int) declaredDataLength);
@@ -2508,9 +2586,42 @@ private:
         return out.getMemoryBlock();
     }
 
+    static MemoryBlock createPcm8Wav (uint32 declaredDataLength,
+                                      const std::vector<uint8>& dataBytes,
+                                      const std::function<void (OutputStream&)>& appendTrailingChunks = nullptr)
+    {
+        return createPcmWav (1, 8, declaredDataLength, dataBytes, appendTrailingChunks);
+    }
+
     static std::unique_ptr<AudioFormatReader> createReader (const MemoryBlock& mb)
     {
         return rawToUniquePtr (WavAudioFormat().createReaderFor (new MemoryInputStream (mb, true), true));
+    }
+
+    static std::unique_ptr<AudioFormatWriter> createWriter (int numChannels, int bitsPerSample, double sampleRate = 44100.0)
+    {
+        std::unique_ptr<OutputStream> stream = std::make_unique<MemoryOutputStream>();
+
+        return WavAudioFormat().createWriterFor (stream, AudioFormatWriterOptions{}.withSampleRate (sampleRate)
+                                                                                   .withNumChannels (numChannels)
+                                                                                   .withBitsPerSample (bitsPerSample));
+    }
+
+    // Interleaved 8-bit sample data in which each sample identifies its channel and frame.
+    static std::vector<uint8> createInterleavedPattern (int numChannels, int numFrames)
+    {
+        std::vector<uint8> bytes;
+
+        for (int frame = 0; frame < numFrames; ++frame)
+            for (int channel = 0; channel < numChannels; ++channel)
+                bytes.push_back ((uint8) (channel + frame));
+
+        return bytes;
+    }
+
+    static float expectedUnsigned8BitSample (int channel, int frame)
+    {
+        return (float) ((uint8) (channel + frame) - 128) / 128.0f;
     }
 
     StringPairArray getMetadataAfterReading (WavAudioFormat& format, const MemoryBlock& mb)
