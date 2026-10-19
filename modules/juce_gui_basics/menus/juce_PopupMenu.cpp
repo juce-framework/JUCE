@@ -205,7 +205,9 @@ struct ItemComponent final : public Component
             if (customComp != nullptr)
                 customComp->setHighlighted (shouldBeHighlighted);
 
-            if (isHighlighted)
+            // Items highlighted before the window is shown have the focus grabbed by
+            // MenuWindow::handleAsyncUpdate() once it is
+            if (isHighlighted && isShowing())
                 if (auto* handler = getAccessibilityHandler())
                     handler->grabFocus();
 
@@ -357,17 +359,21 @@ private:
 //==============================================================================
 struct MenuWindow final : public Component, private AsyncUpdater
 {
+    enum class OpenedByHover { no, yes };
+
     MenuWindow (const PopupMenu& menu,
                 MenuWindow* parentWindow,
                 Options opts,
                 bool alignToRectangle,
                 ApplicationCommandManager** manager,
-                float parentScaleFactor = 1.0f)
+                float parentScaleFactor = 1.0f,
+                OpenedByHover openedByHover = OpenedByHover::no)
         : Component ("menu"),
           parent (parentWindow),
           options (opts.withParentComponent (findNonNullLookAndFeel (menu, parentWindow).getParentComponentForMenuOptions (opts))),
           managerOfChosenCommand (manager),
           componentAttachedTo (options.getTargetComponent()),
+          openedByMouseHover (openedByHover == OpenedByHover::yes),
           windowCreationTime (Time::getMillisecondCounter()),
           lastFocusedTime (windowCreationTime),
           timeEnteredCurrentChildComp (windowCreationTime),
@@ -666,6 +672,12 @@ struct MenuWindow final : public Component, private AsyncUpdater
     void handleAsyncUpdate() override
     {
         if (! isShowing())
+            return;
+
+        // A submenu opened by hovering over its parent item doesn't take the accessibility focus
+        // away from that item, as with native menus. The focus moves into the submenu once an
+        // item in it is highlighted.
+        if (openedByMouseHover)
             return;
 
         auto* accessibleFocus = std::invoke ([this]() -> AccessibilityHandler*
@@ -1340,7 +1352,7 @@ struct MenuWindow final : public Component, private AsyncUpdater
 
     bool isSubMenuVisible() const noexcept          { return activeSubMenu != nullptr && activeSubMenu->isVisible(); }
 
-    bool showSubMenuFor (ItemComponent* childComp)
+    bool showSubMenuFor (ItemComponent* childComp, OpenedByHover openedByHover = OpenedByHover::no)
     {
         activeSubMenu.reset();
 
@@ -1351,7 +1363,7 @@ struct MenuWindow final : public Component, private AsyncUpdater
                                                             options.forSubmenu()
                                                                    .withTargetScreenArea (childComp->getScreenBounds())
                                                                    .withMinimumWidth (0),
-                                                            false, managerOfChosenCommand, scaleFactor));
+                                                            false, managerOfChosenCommand, scaleFactor, openedByHover));
 
         activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
         activeSubMenu->enterModalState (false);
@@ -1472,6 +1484,7 @@ struct MenuWindow final : public Component, private AsyncUpdater
     Rectangle<int> windowPos;
     bool needsToScroll = false;
     bool hideOnExit = false, disableMouseMoves = false, hasAnyJuceCompHadFocus = false;
+    const bool openedByMouseHover;
     int numColumns = 0, contentHeight = 0, childYOffset = 0;
     Component::SafePointer<ItemComponent> currentChild;
     std::unique_ptr<MenuWindow> activeSubMenu;
@@ -1499,7 +1512,12 @@ class MouseSourceState final : private Timer
 {
 public:
     MouseSourceState (MenuWindow& w, MouseInputSource s)
-        : window (w), source (s), lastScrollTime (Time::getMillisecondCounter())
+        : window (w),
+          source (s),
+          // A pointer that is already inside the window when it opens shouldn't highlight the
+          // item under it until it has actually moved
+          lastMousePos (source.getScreenPosition().roundToInt()),
+          lastScrollTime (Time::getMillisecondCounter())
     {
         startTimerHz (20);
     }
@@ -1559,7 +1577,7 @@ private:
              && window.currentChild != nullptr
              && ! (window.disableMouseMoves || window.isSubMenuVisible()))
         {
-            window.showSubMenuFor (window.currentChild);
+            window.showSubMenuFor (window.currentChild, MenuWindow::OpenedByHover::yes);
         }
 
         highlightItemUnderMouse (globalMousePos, localMousePos, timeNow);

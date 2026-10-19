@@ -112,27 +112,8 @@ private:
             addMethod (@selector (accessibilityFocusedUIElement), [] (id self, SEL) -> id
             {
                 if (auto* handler = getHandler (self))
-                {
-                    if (auto* modal = Component::getCurrentlyModalComponent())
-                    {
-                        const auto& handlerComponent = handler->getComponent();
-
-                        if (! handlerComponent.isParentOf (modal)
-                             && handlerComponent.isCurrentlyBlockedByAnotherModalComponent())
-                        {
-                            if (auto* modalHandler = modal->getAccessibilityHandler())
-                            {
-                                if (auto* focusChild = modalHandler->getChildFocus())
-                                    return static_cast<id> (focusChild->getNativeImplementation());
-
-                                return static_cast<id> (modalHandler->getNativeImplementation());
-                            }
-                        }
-                    }
-
-                    if (auto* focusChild = handler->getChildFocus())
-                        return static_cast<id> (focusChild->getNativeImplementation());
-                }
+                    if (auto* focused = detail::AccessibilityHelpers::getFocusedHandler (*handler))
+                        return static_cast<id> (focused->getNativeImplementation());
 
                 return nil;
             });
@@ -927,7 +908,7 @@ static void sendHandlerNotification (const AccessibilityHandler& handler,
 
 void detail::AccessibilityHelpers::notifyAccessibilityEvent (const AccessibilityHandler& handler, Event eventType)
 {
-    auto notification = [eventType]
+    auto notification = std::invoke ([&]
     {
         switch (eventType)
         {
@@ -935,12 +916,21 @@ void detail::AccessibilityHelpers::notifyAccessibilityEvent (const Accessibility
             case Event::elementDestroyed:       return NSAccessibilityUIElementDestroyedNotification;
             case Event::elementMovedOrResized:  return NSAccessibilityLayoutChangedNotification;
             case Event::focusChanged:           return NSAccessibilityFocusedUIElementChangedNotification;
-            case Event::windowOpened:           return NSAccessibilityWindowCreatedNotification;
+
+            case Event::windowOpened:
+                // VoiceOver moves into a newly created window by itself. Popup menus move the
+                // focus onto one of their items explicitly instead, so that a submenu opened by
+                // hovering over its parent item doesn't take the focus away from that item.
+                if (handler.getRole() == AccessibilityRole::popupMenu)
+                    break;
+
+                return NSAccessibilityWindowCreatedNotification;
+
             case Event::windowClosed:           break;
         }
 
         return NSAccessibilityNotificationName{};
-    }();
+    });
 
     sendHandlerNotification (handler, notification);
 }

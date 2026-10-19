@@ -53,6 +53,14 @@ struct AccessibilityHelpers
 
     static String getApplicationOrPluginName();
 
+    /*  Returns the handler that should be reported as having the accessibility focus when the
+        platform asks the given handler for its focused element, or nullptr if there is none.
+
+        If the handler's component is blocked by a modal component, the focus is looked for in
+        the modal components instead.
+    */
+    static AccessibilityHandler* getFocusedHandler (AccessibilityHandler&);
+
     template <typename MemberFn>
     static const AccessibilityHandler* getEnclosingHandlerWithInterface (const AccessibilityHandler* handler, MemberFn fn)
     {
