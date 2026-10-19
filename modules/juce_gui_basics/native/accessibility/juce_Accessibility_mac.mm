@@ -44,13 +44,37 @@ class AccessibilityHandler::AccessibilityNativeImpl
 {
 public:
     explicit AccessibilityNativeImpl (AccessibilityHandler& handler)
-        : accessibilityElement (AccessibilityElement::create (handler))
+        : owner (handler),
+          accessibilityElement (AccessibilityElement::create (owner))
     {
     }
 
     NSAccessibilityElement<NSAccessibility>* getAccessibilityElement() const noexcept
     {
         return accessibilityElement.get();
+    }
+
+    /*  Native menus expose their entire item hierarchy to accessibility clients, including
+        the contents of submenus that haven't been opened, and VoiceOver only announces an
+        item as a submenu if it has a child menu element. JUCE creates the contents of a
+        submenu when it is opened, so an empty menu element is exposed in its place.
+    */
+    NSAccessibilityElement* getSubMenuElement()
+    {
+        if (owner.getRole() != AccessibilityRole::menuItem || ! owner.getCurrentState().isExpandable())
+            return nullptr;
+
+        if (subMenuElement == nullptr)
+        {
+            subMenuElement.reset ([[NSAccessibilityElement alloc] init]);
+
+            [subMenuElement.get() setAccessibilityElement: YES];
+            [subMenuElement.get() setAccessibilityRole: NSAccessibilityMenuRole];
+            [subMenuElement.get() setAccessibilityParent: accessibilityElement.get()];
+            [subMenuElement.get() setAccessibilityFrameInParentSpace: NSZeroRect];
+        }
+
+        return subMenuElement.get();
     }
 
 private:
@@ -806,6 +830,9 @@ private:
                         [accessibleChildren addObjectsFromArray:(NSArray* _Nonnull) childrenOfChild];
                 }
 
+                if (auto* subMenuElement = handler->nativeImpl->getSubMenuElement())
+                    [accessibleChildren addObject: subMenuElement];
+
                 return accessibleChildren;
             }
 
@@ -817,7 +844,9 @@ private:
     };
 
     //==============================================================================
+    AccessibilityHandler& owner;
     AccessibilityElement::Holder accessibilityElement;
+    NSUniquePtr<NSAccessibilityElement> subMenuElement;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AccessibilityNativeImpl)
