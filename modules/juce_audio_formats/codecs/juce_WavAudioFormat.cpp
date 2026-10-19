@@ -1263,11 +1263,11 @@ public:
                 {
                     // read the format chunk
                     auto format = (unsigned short) input->readShort();
-                    numChannels = (unsigned int) input->readShort();
+                    numChannels = (uint16) input->readShort();
                     sampleRate = input->readInt();
                     auto bytesPerSec = input->readInt();
                     input->skipNextBytes (2);
-                    bitsPerSample = (unsigned int) (int) input->readShort();
+                    bitsPerSample = (uint16) input->readShort();
 
                     if (bitsPerSample > 64 && (int) sampleRate != 0)
                     {
@@ -1487,11 +1487,18 @@ public:
 
         input->setPosition (dataChunkStart + startSampleInFile * bytesPerFrame);
 
+        constexpr int stackBufferSize = 480 * 3 * 4; // (keep this a multiple of 3)
+        char stackBuffer[stackBufferSize];
+        HeapBlock<char> heapBuffer;
+
+        if (stackBufferSize < bytesPerFrame)
+            heapBuffer.malloc ((size_t) bytesPerFrame);
+
+        auto* tempBuffer = heapBuffer != nullptr ? heapBuffer.getData() : stackBuffer;
+        const auto tempBufSize = jmax (stackBufferSize, bytesPerFrame);
+
         while (numSamples > 0)
         {
-            const int tempBufSize = 480 * 3 * 4; // (keep this a multiple of 3)
-            char tempBuffer[tempBufSize];
-
             auto numThisTime = jmin (tempBufSize / bytesPerFrame, numSamples);
             auto bytesRead = input->read (tempBuffer, numThisTime * bytesPerFrame);
 
@@ -1564,6 +1571,15 @@ public:
         }
 
         return wavFileChannelLayout;
+    }
+
+    bool hasValidFormat() const
+    {
+        const auto hasSupportedBitDepth = bitsPerSample == 8 || bitsPerSample == 16
+                                       || bitsPerSample == 24 || bitsPerSample == 32;
+
+        return sampleRate > 0 && numChannels > 0 && hasSupportedBitDepth
+            && bytesPerFrame == (int) (numChannels * bitsPerSample / 8);
     }
 
     int64 bwavChunkStart = 0, bwavSize = 0;
@@ -1764,7 +1780,7 @@ private:
 
         output->writeShort ((short) numChannels);
         output->writeInt ((int) sampleRate);
-        output->writeInt ((int) ((double) bytesPerFrame * sampleRate)); // nAvgBytesPerSec
+        output->writeInt ((int) (uint32) ((double) bytesPerFrame * sampleRate)); // nAvgBytesPerSec
         output->writeShort ((short) bytesPerFrame); // nBlockAlign
         output->writeShort ((short) bitsPerSample); // wBitsPerSample
 
@@ -1985,7 +2001,7 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream, b
     }
    #endif
 
-    if (r->sampleRate > 0 && r->numChannels > 0 && r->bytesPerFrame > 0 && r->bitsPerSample <= 32)
+    if (r->hasValidFormat())
         return r.release();
 
     if (! deleteStreamIfOpeningFails)
@@ -2005,7 +2021,7 @@ MemoryMappedAudioFormatReader* WavAudioFormat::createMemoryMappedReader (FileInp
     {
         WavAudioFormatReader reader (fin);
 
-        if (reader.lengthInSamples > 0)
+        if (reader.hasValidFormat() && reader.lengthInSamples > 0)
             return new MemoryMappedWavReader (fin->getFile(), reader);
     }
 
@@ -2016,6 +2032,10 @@ AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out, double sa
                                                     unsigned int numChannels, int bitsPerSample,
                                                     const StringPairArray& metadataValues, int qualityOptionIndex)
 {
+    // The layout is built one channel at a time, so the count is checked before it is created
+    if (numChannels == 0 || std::numeric_limits<uint16>::max() < numChannels)
+        return nullptr;
+
     return createWriterFor (out, sampleRate, WavFileHelpers::canonicalWavChannelSet (static_cast<int> (numChannels)),
                             bitsPerSample, metadataValues, qualityOptionIndex);
 }
@@ -2027,6 +2047,15 @@ AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out,
                                                     const StringPairArray& metadataValues,
                                                     int /*qualityOptionIndex*/)
 {
+    const auto numChannels = channelLayout.size();
+    const auto bytesPerFrame = (int64) numChannels * bitsPerSample / 8;
+    const auto bytesPerSecond = (double) bytesPerFrame * sampleRate;
+
+    if (numChannels <= 0
+        || std::numeric_limits<uint16>::max() < bytesPerFrame
+        || (double) std::numeric_limits<uint32>::max() < bytesPerSecond)
+        return nullptr;
+
     if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample) && isChannelLayoutSupported (channelLayout))
         return new WavAudioFormatWriter (out, sampleRate, channelLayout,
                                          (unsigned int) bitsPerSample, metadataValues);

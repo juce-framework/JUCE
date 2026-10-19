@@ -431,9 +431,9 @@ public:
                     {
                         hasGotType = true;
 
-                        numChannels = (unsigned int) input->readShortBigEndian();
+                        numChannels = (uint16) input->readShortBigEndian();
                         lengthInSamples = input->readIntBigEndian();
-                        bitsPerSample = (unsigned int) input->readShortBigEndian();
+                        bitsPerSample = (uint16) input->readShortBigEndian();
                         bytesPerFrame = (int) ((numChannels * bitsPerSample) >> 3);
 
                         unsigned char sampleRateBytes[10];
@@ -584,11 +584,18 @@ public:
 
         input->setPosition (dataChunkStart + startSampleInFile * bytesPerFrame);
 
+        constexpr int stackBufferSize = 480 * 3 * 4; // (keep this a multiple of 3)
+        char stackBuffer[stackBufferSize];
+        HeapBlock<char> heapBuffer;
+
+        if (stackBufferSize < bytesPerFrame)
+            heapBuffer.malloc ((size_t) bytesPerFrame);
+
+        auto* tempBuffer = heapBuffer != nullptr ? heapBuffer.getData() : stackBuffer;
+        const auto tempBufSize = jmax (stackBufferSize, bytesPerFrame);
+
         while (numSamples > 0)
         {
-            const int tempBufSize = 480 * 3 * 4; // (keep this a multiple of 3)
-            char tempBuffer [tempBufSize];
-
             const int numThisTime = jmin (tempBufSize / bytesPerFrame, numSamples);
             const int bytesRead = input->read (tempBuffer, numThisTime * bytesPerFrame);
 
@@ -629,6 +636,15 @@ public:
                         break;
             default:    jassertfalse; break;
         }
+    }
+
+    bool hasValidFormat() const
+    {
+        const auto hasSupportedBitDepth = bitsPerSample == 8 || bitsPerSample == 16
+                                       || bitsPerSample == 24 || bitsPerSample == 32;
+
+        return sampleRate > 0 && numChannels > 0 && hasSupportedBitDepth
+            && bytesPerFrame == (int) (numChannels * bitsPerSample / 8);
     }
 
     int bytesPerFrame;
@@ -981,7 +997,7 @@ AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, 
 {
     std::unique_ptr<AiffAudioFormatReader> w (new AiffAudioFormatReader (sourceStream));
 
-    if (w->sampleRate > 0 && w->numChannels > 0)
+    if (w->hasValidFormat())
         return w.release();
 
     if (! deleteStreamIfOpeningFails)
@@ -1001,7 +1017,7 @@ MemoryMappedAudioFormatReader* AiffAudioFormat::createMemoryMappedReader (FileIn
     {
         AiffAudioFormatReader reader (fin);
 
-        if (reader.lengthInSamples > 0)
+        if (reader.hasValidFormat() && reader.lengthInSamples > 0)
             return new MemoryMappedAiffReader (fin->getFile(), reader);
     }
 
@@ -1015,6 +1031,9 @@ AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
                                                      const StringPairArray& metadataValues,
                                                      int /*qualityOptionIndex*/)
 {
+    if (numberOfChannels == 0 || std::numeric_limits<uint16>::max() < numberOfChannels)
+        return nullptr;
+
     if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample))
         return new AiffAudioFormatWriter (out, sampleRate, numberOfChannels,
                                           (unsigned int) bitsPerSample, metadataValues);
