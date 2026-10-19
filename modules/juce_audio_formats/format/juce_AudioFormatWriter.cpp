@@ -91,13 +91,18 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
                                               int64 startSample,
                                               int64 numSamplesToRead)
 {
-    const int bufferSize = 16384;
-    AudioBuffer<float> tempBuffer ((int) numChannels, bufferSize);
+    // numChannels is set by the writer subclass, so may hold a value that doesn't fit in an int
+    const auto numDestChannels = (int) jmin (numChannels, (unsigned int) std::numeric_limits<int>::max());
 
-    int* buffers[128] = { nullptr };
+    constexpr int preferredBufferSize = 16384;
+    constexpr int maxBufferedSamples = 1 << 20;
+    const auto bufferSize = jlimit (1, preferredBufferSize, maxBufferedSamples / jmax (1, numDestChannels));
+
+    AudioBuffer<float> tempBuffer (numDestChannels, bufferSize);
+    std::vector<int*> buffers ((size_t) numDestChannels + 1);
 
     for (int i = tempBuffer.getNumChannels(); --i >= 0;)
-        buffers[i] = reinterpret_cast<int*> (tempBuffer.getWritePointer (i, 0));
+        buffers[(size_t) i] = reinterpret_cast<int*> (tempBuffer.getWritePointer (i, 0));
 
     if (numSamplesToRead < 0)
         numSamplesToRead = reader.lengthInSamples;
@@ -106,12 +111,12 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
     {
         const int numToDo = (int) jmin (numSamplesToRead, (int64) bufferSize);
 
-        if (! reader.read (buffers, (int) numChannels, startSample, numToDo, false))
+        if (! reader.read (buffers.data(), numDestChannels, startSample, numToDo, false))
             return false;
 
         if (reader.usesFloatingPointData != isFloatingPoint())
         {
-            int** bufferChan = buffers;
+            int** bufferChan = buffers.data();
 
             while (*bufferChan != nullptr)
             {
@@ -126,7 +131,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
             }
         }
 
-        if (! write (const_cast<const int**> (buffers), numToDo))
+        if (! write (const_cast<const int**> (buffers.data()), numToDo))
             return false;
 
         numSamplesToRead -= numToDo;
@@ -163,13 +168,18 @@ bool AudioFormatWriter::writeFromFloatArrays (const float* const* channels, int 
     if (numSamples <= 0)
         return true;
 
+    jassert (numSourceChannels > 0);
+
+    if (numSourceChannels <= 0)
+        return false;
+
     if (isFloatingPoint())
         return write ((const int**) channels, numSamples);
 
-    std::vector<int*> chans (256);
-    std::vector<int> scratch (4096);
+    constexpr int preferredScratchSize = 4096;
+    std::vector<int*> chans ((size_t) numSourceChannels + 1);
+    std::vector<int> scratch ((size_t) jmax (preferredScratchSize, numSourceChannels));
 
-    jassert (numSourceChannels < (int) chans.size());
     const int maxSamples = (int) scratch.size() / numSourceChannels;
 
     for (int i = 0; i < numSourceChannels; ++i)
@@ -203,15 +213,12 @@ bool AudioFormatWriter::writeFromAudioSampleBuffer (const AudioBuffer<float>& so
     if (startSample == 0)
         return writeFromFloatArrays (source.getArrayOfReadPointers(), numSourceChannels, numSamples);
 
-    const float* chans[256];
-    jassert ((int) numChannels < numElementsInArray (chans));
+    std::vector<const float*> chans ((size_t) numSourceChannels + 1);
 
     for (int i = 0; i < numSourceChannels; ++i)
-        chans[i] = source.getReadPointer (i, startSample);
+        chans[(size_t) i] = source.getReadPointer (i, startSample);
 
-    chans[numSourceChannels] = nullptr;
-
-    return writeFromFloatArrays (chans, numSourceChannels, numSamples);
+    return writeFromFloatArrays (chans.data(), numSourceChannels, numSamples);
 }
 
 bool AudioFormatWriter::flush()

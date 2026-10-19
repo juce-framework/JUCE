@@ -1264,12 +1264,12 @@ public:
                 {
                     // read the format chunk
                     auto format = (unsigned short) input->readShort();
-                    numChannels = (unsigned int) input->readShort();
+                    numChannels = (uint16) input->readShort();
                     const auto intSampleRate = (uint32_t) input->readInt();
                     sampleRate = intSampleRate;
                     auto bytesPerSec = (uint32_t) input->readInt();
                     input->skipNextBytes (2);
-                    bitsPerSample = (unsigned int) (int) input->readShort();
+                    bitsPerSample = (uint16) input->readShort();
 
                     if (bitsPerSample > 64 && intSampleRate > 0)
                     {
@@ -1490,11 +1490,18 @@ public:
 
         input->setPosition (dataChunkStart + startSampleInFile * bytesPerFrame);
 
+        constexpr int stackBufferSize = 480 * 3 * 4; // (keep this a multiple of 3)
+        char stackBuffer[stackBufferSize];
+        HeapBlock<char> heapBuffer;
+
+        if (stackBufferSize < bytesPerFrame)
+            heapBuffer.malloc ((size_t) bytesPerFrame);
+
+        auto* tempBuffer = heapBuffer != nullptr ? heapBuffer.getData() : stackBuffer;
+        const auto tempBufSize = jmax (stackBufferSize, bytesPerFrame);
+
         while (numSamples > 0)
         {
-            const int tempBufSize = 480 * 3 * 4; // (keep this a multiple of 3)
-            char tempBuffer[tempBufSize];
-
             auto numThisTime = jmin (tempBufSize / bytesPerFrame, numSamples);
             auto bytesRead = input->read (tempBuffer, numThisTime * bytesPerFrame);
 
@@ -1567,6 +1574,15 @@ public:
         }
 
         return wavFileChannelLayout;
+    }
+
+    bool hasValidFormat() const
+    {
+        const auto hasSupportedBitDepth = bitsPerSample == 8 || bitsPerSample == 16
+                                       || bitsPerSample == 24 || bitsPerSample == 32;
+
+        return sampleRate > 0 && numChannels > 0 && hasSupportedBitDepth
+            && bytesPerFrame == (int) (numChannels * bitsPerSample / 8);
     }
 
     int64 bwavChunkStart = 0, bwavSize = 0;
@@ -1777,7 +1793,7 @@ private:
 
         output->writeShort ((short) numChannels);
         output->writeInt ((int) sampleRate);
-        output->writeInt ((int) ((double) bytesPerFrame * sampleRate)); // nAvgBytesPerSec
+        output->writeInt ((int) (uint32) ((double) bytesPerFrame * sampleRate)); // nAvgBytesPerSec
         output->writeShort ((short) bytesPerFrame); // nBlockAlign
         output->writeShort ((short) bitsPerSample); // wBitsPerSample
 
@@ -1996,7 +2012,7 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream, b
     }
    #endif
 
-    if (r->sampleRate > 0 && r->numChannels > 0 && r->bytesPerFrame > 0 && r->bitsPerSample <= 32)
+    if (r->hasValidFormat())
         return r.release();
 
     if (! deleteStreamIfOpeningFails)
@@ -2016,7 +2032,7 @@ MemoryMappedAudioFormatReader* WavAudioFormat::createMemoryMappedReader (FileInp
     {
         WavAudioFormatReader reader (fin);
 
-        if (reader.lengthInSamples > 0)
+        if (reader.hasValidFormat() && reader.lengthInSamples > 0)
             return new MemoryMappedWavReader (fin->getFile(), reader);
     }
 
@@ -2029,7 +2045,16 @@ std::unique_ptr<AudioFormatWriter> WavAudioFormat::createWriterFor (std::unique_
     if (streamToWriteTo == nullptr || ! getPossibleBitDepths().contains (options.getBitsPerSample()))
         return nullptr;
 
-    const auto layout = options.getChannelLayout().value_or (WavFileHelpers::canonicalWavChannelSet (options.getNumChannels()));
+    const auto numChannels = options.getNumChannels();
+    const auto bytesPerFrame = (int64) numChannels * options.getBitsPerSample() / 8;
+    const auto bytesPerSecond = (double) bytesPerFrame * options.getSampleRate();
+
+    if (numChannels <= 0
+        || std::numeric_limits<uint16>::max() < bytesPerFrame
+        || (double) std::numeric_limits<uint32>::max() < bytesPerSecond)
+        return nullptr;
+
+    const auto layout = options.getChannelLayout().value_or (WavFileHelpers::canonicalWavChannelSet (numChannels));
 
     if (! isChannelLayoutSupported (layout))
         return nullptr;
