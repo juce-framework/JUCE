@@ -298,6 +298,8 @@ private:
 
     bool initialiseXDisplay();
     void destroyXDisplay();
+    void dispatchPendingEvents();
+    static int afterXRequest (::Display*);
 
     //==============================================================================
     ::Window getFocusWindow (::Window) const;
@@ -363,6 +365,8 @@ private:
 
     XWindowSystemUtilities::Atoms atoms;
     ::Display* display = nullptr;
+    int (*previousAfterFunction) (::Display*) = nullptr;
+    std::atomic<bool> dispatchPosted { false };
     std::unique_ptr<DisplayVisuals> displayVisuals;
     std::unique_ptr<XWindowSystemUtilities::XSettings> xSettings;
 

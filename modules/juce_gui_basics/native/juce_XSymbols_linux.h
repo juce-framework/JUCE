@@ -474,6 +474,12 @@ public:
                                          (::Display*, ::Window, XClassHint*),
                                          void)
 
+    using XAfterFunction = int (*) (::Display*);
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSetAfterFunction, xSetAfterFunction,
+                                         (::Display*, XAfterFunction),
+                                         XAfterFunction)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSetErrorHandler, xSetErrorHandler,
                                          (XErrorHandler),
                                          XErrorHandler)

@@ -3548,34 +3548,70 @@ bool XWindowSystem::initialiseXDisplay()
 
     // Setup input event handler
     LinuxEventLoop::registerFdCallback (X11Symbols::getInstance()->xConnectionNumber (display),
-                                        [this] (int)
-                                        {
-                                            do
-                                            {
-                                                XEvent evt;
+                                        [this] (int) { dispatchPendingEvents(); });
 
-                                                {
-                                                    XWindowSystemUtilities::ScopedXLock xLock;
-
-                                                    if (! X11Symbols::getInstance()->xPending (display))
-                                                        return;
-
-                                                    X11Symbols::getInstance()->xNextEvent (display, &evt);
-                                                }
-
-                                                if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle)
-                                                {
-                                                    ClipboardHelpers::handleSelection (evt.xselectionrequest);
-                                                }
-                                                else if (evt.xany.window != juce_messageWindowHandle)
-                                                {
-                                                    windowMessageReceive (evt);
-                                                }
-
-                                            } while (display != nullptr);
-                                        });
+    previousAfterFunction = X11Symbols::getInstance()->xSetAfterFunction (display, afterXRequest);
 
     return true;
+}
+
+void XWindowSystem::dispatchPendingEvents()
+{
+    do
+    {
+        XEvent evt;
+
+        {
+            XWindowSystemUtilities::ScopedXLock xLock;
+
+            if (! X11Symbols::getInstance()->xPending (display))
+                return;
+
+            X11Symbols::getInstance()->xNextEvent (display, &evt);
+        }
+
+        if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle)
+            ClipboardHelpers::handleSelection (evt.xselectionrequest);
+        else if (evt.xany.window != juce_messageWindowHandle)
+            windowMessageReceive (evt);
+
+    } while (display != nullptr);
+}
+
+// The X11 event loop wakes when the X server sends something and dispatches the events it finds.
+// When Xlib waits for the reply to a request, it reads everything the server has sent, keeps any
+// events in its own queue, and leaves nothing for the event loop to wake up for. Those events
+// then wait until the server sends something else. For example, when a plug-in host moves its
+// window, the server reports the move with a ConfigureNotify, but if a timer has just asked for
+// a window's position, that report is read along with the reply, and the child windows that follow
+// the host stay put until the server sends something else, such as a mouse movement. Posting a
+// dispatch from here, after each request, moves them straight away.
+int XWindowSystem::afterXRequest (::Display* d)
+{
+    auto* instance = getInstanceWithoutCreating();
+
+    if (instance == nullptr)
+        return 0;
+
+    if (0 < X11Symbols::getInstance()->xEventsQueued (d, QueuedAlready)
+        && ! instance->dispatchPosted.exchange (true))
+    {
+        const auto posted = MessageManager::callAsync ([]
+        {
+            if (auto* i = getInstanceWithoutCreating())
+            {
+                // Cleared before draining, so that events queued after the drain's last check
+                // trigger another post.
+                i->dispatchPosted = false;
+                i->dispatchPendingEvents();
+            }
+        });
+
+        if (! posted)
+            instance->dispatchPosted = false;
+    }
+
+    return instance->previousAfterFunction != nullptr ? instance->previousAfterFunction (d) : 0;
 }
 
 void XWindowSystem::destroyXDisplay()
@@ -3592,6 +3628,7 @@ void XWindowSystem::destroyXDisplay()
             X11Symbols::getInstance()->xSync (display, True);
         }
 
+        X11Symbols::getInstance()->xSetAfterFunction (display, previousAfterFunction);
         LinuxEventLoop::unregisterFdCallback (X11Symbols::getInstance()->xConnectionNumber (display));
 
         {
