@@ -457,8 +457,16 @@ public:
 
     void handleAsyncUpdate() override
     {
-        setPointerState (lastPointerState,
+        setPointerState (getPointerStateForFakeMove(),
                          jmax (lastTime, Time::getCurrentTime()), true);
+    }
+
+    // The pointer can be moved without this source receiving an event, for example by a screen
+    // reader that makes the pointer follow its cursor
+    detail::PointerState getPointerStateForFakeMove() const
+    {
+        return isDragging() ? lastPointerState
+                            : lastPointerState.withPosition (getRawScreenPosition());
     }
 
     //==============================================================================
