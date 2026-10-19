@@ -184,6 +184,7 @@ bool X11Symbols::loadAllSymbols()
                        makeSymbolBinding (xSelectInput,                "XSelectInput"),
                        makeSymbolBinding (xSendEvent,                  "XSendEvent"),
                        makeSymbolBinding (xSetClassHint,               "XSetClassHint"),
+                       makeSymbolBinding (xSetAfterFunction,           "XSetAfterFunction"),
                        makeSymbolBinding (xSetErrorHandler,            "XSetErrorHandler"),
                        makeSymbolBinding (xSetIOErrorHandler,          "XSetIOErrorHandler"),
                        makeSymbolBinding (xSetInputFocus,              "XSetInputFocus"),
