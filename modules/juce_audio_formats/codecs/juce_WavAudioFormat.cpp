@@ -260,6 +260,8 @@ namespace WavFileHelpers
     constexpr inline int chunkName (const char* name) noexcept         { return (int) ByteOrder::littleEndianInt (name); }
     constexpr inline size_t roundUpSize (size_t sz) noexcept           { return (sz + 3) & ~3u; }
 
+    constexpr uint32 maxMetadataChunkSize = 16 * 1024 * 1024;
+
     #if JUCE_MSVC
      #pragma pack (push, 1)
     #endif
@@ -1358,141 +1360,153 @@ public:
                     dataChunkStart = input->getPosition();
                     lengthInSamples = (bytesPerFrame > 0) ? (dataLength / bytesPerFrame) : 0;
                 }
-                else if (chunkType == chunkName ("bext"))
+                else if (length <= maxMetadataChunkSize)
                 {
-                    bwavChunkStart = input->getPosition();
-                    bwavSize = length;
-
-                    HeapBlock<BWAVChunk> bwav;
-                    bwav.calloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
-
-                    if (bwav.getData() == nullptr)
-                        break;
-
-                    input->read (bwav, (int) length);
-                    bwav->copyTo (dict, (int) length);
-                }
-                else if (chunkType == chunkName ("smpl"))
-                {
-                    HeapBlock<SMPLChunk> smpl;
-                    smpl.calloc (jmax ((size_t) length + 1, sizeof (SMPLChunk)), 1);
-
-                    if (smpl.getData() == nullptr)
-                        break;
-
-                    input->read (smpl, (int) length);
-                    smpl->copyTo (dict, (int) length);
-                }
-                else if (chunkType == chunkName ("inst") || chunkType == chunkName ("INST")) // need to check which...
-                {
-                    HeapBlock<InstChunk> inst;
-                    inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
-
-                    if (inst.getData() == nullptr)
-                        break;
-
-                    input->read (inst, (int) length);
-                    inst->copyTo (dict);
-                }
-                else if (chunkType == chunkName ("cue "))
-                {
-                    HeapBlock<CueChunk> cue;
-                    cue.calloc (jmax ((size_t) length + 1, sizeof (CueChunk)), 1);
-
-                    if (cue.getData() == nullptr)
-                        break;
-
-                    input->read (cue, (int) length);
-                    cue->copyTo (dict, (int) length);
-                }
-                else if (chunkType == chunkName ("axml"))
-                {
-                    MemoryBlock axml;
-                    input->readIntoMemoryBlock (axml, (ssize_t) length);
-                    AXMLChunk::addToMetadata (dict, axml.toString());
-                }
-                else if (chunkType == chunkName ("iXML"))
-                {
-                    MemoryBlock ixml;
-                    input->readIntoMemoryBlock (ixml, (ssize_t) length);
-                    IXMLChunk::addToMetadata (dict, ixml.toString());
-                }
-                else if (chunkType == chunkName ("LIST"))
-                {
-                    auto subChunkType = input->readInt();
-
-                    if (subChunkType == chunkName ("info") || subChunkType == chunkName ("INFO"))
+                    if (chunkType == chunkName ("bext"))
                     {
-                        ListInfoChunk::addToMetadata (dict, *input, chunkEnd);
+                        bwavChunkStart = input->getPosition();
+                        bwavSize = length;
+
+                        HeapBlock<BWAVChunk> bwav;
+                        bwav.calloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
+
+                        if (bwav.getData() == nullptr)
+                            break;
+
+                        input->read (bwav, (int) length);
+                        bwav->copyTo (dict, (int) length);
                     }
-                    else if (subChunkType == chunkName ("adtl"))
+                    else if (chunkType == chunkName ("smpl"))
                     {
-                        while (input->getPosition() < chunkEnd)
+                        HeapBlock<SMPLChunk> smpl;
+                        smpl.calloc (jmax ((size_t) length + 1, sizeof (SMPLChunk)), 1);
+
+                        if (smpl.getData() == nullptr)
+                            break;
+
+                        input->read (smpl, (int) length);
+                        smpl->copyTo (dict, (int) length);
+                    }
+                    else if (chunkType == chunkName ("inst") || chunkType == chunkName ("INST")) // need to check which...
+                    {
+                        HeapBlock<InstChunk> inst;
+                        inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
+
+                        if (inst.getData() == nullptr)
+                            break;
+
+                        input->read (inst, (int) length);
+                        inst->copyTo (dict);
+                    }
+                    else if (chunkType == chunkName ("cue "))
+                    {
+                        HeapBlock<CueChunk> cue;
+                        cue.calloc (jmax ((size_t) length + 1, sizeof (CueChunk)), 1);
+
+                        if (cue.getData() == nullptr)
+                            break;
+
+                        input->read (cue, (int) length);
+                        cue->copyTo (dict, (int) length);
+                    }
+                    else if (chunkType == chunkName ("axml"))
+                    {
+                        MemoryBlock axml;
+                        input->readIntoMemoryBlock (axml, (ssize_t) length);
+                        AXMLChunk::addToMetadata (dict, axml.toString());
+                    }
+                    else if (chunkType == chunkName ("iXML"))
+                    {
+                        MemoryBlock ixml;
+                        input->readIntoMemoryBlock (ixml, (ssize_t) length);
+                        IXMLChunk::addToMetadata (dict, ixml.toString());
+                    }
+                    else if (chunkType == chunkName ("LIST"))
+                    {
+                        auto subChunkType = input->readInt();
+
+                        if (subChunkType == chunkName ("info") || subChunkType == chunkName ("INFO"))
                         {
-                            auto adtlChunkType = input->readInt();
-                            auto adtlLength = (uint32) input->readInt();
-                            auto adtlChunkEnd = input->getPosition() + (adtlLength + (adtlLength & 1));
+                            ListInfoChunk::addToMetadata (dict, *input, chunkEnd);
+                        }
+                        else if (subChunkType == chunkName ("adtl"))
+                        {
+                            constexpr uint32 labelHeaderSize = 4;    // the cue identifier
+                            constexpr uint32 regionHeaderSize = 20;  // the cue identifier and the region fields
 
-                            if (adtlChunkType == chunkName ("labl") || adtlChunkType == chunkName ("note"))
+                            while (input->getPosition() < chunkEnd && ! input->isExhausted())
                             {
-                                String prefix;
+                                auto adtlChunkType = input->readInt();
+                                auto adtlLength = (uint32) input->readInt();
 
-                                if (adtlChunkType == chunkName ("labl"))
-                                    prefix << "CueLabel" << cueLabelIndex++;
-                                else if (adtlChunkType == chunkName ("note"))
-                                    prefix << "CueNote" << cueNoteIndex++;
+                                // A sub-chunk can't extend beyond the end of the enclosing LIST chunk
+                                if (chunkEnd - input->getPosition() < (int64) adtlLength)
+                                    break;
 
-                                auto identifier = (uint32) input->readInt();
-                                auto stringLength = (int) adtlLength - 4;
+                                auto adtlChunkEnd = input->getPosition() + (adtlLength + (adtlLength & 1));
 
-                                MemoryBlock textBlock;
-                                input->readIntoMemoryBlock (textBlock, stringLength);
+                                if ((adtlChunkType == chunkName ("labl") || adtlChunkType == chunkName ("note"))
+                                    && labelHeaderSize <= adtlLength)
+                                {
+                                    String prefix;
 
-                                dict[prefix + "Identifier"] = String (identifier);
-                                dict[prefix + "Text"] = textBlock.toString();
+                                    if (adtlChunkType == chunkName ("labl"))
+                                        prefix << "CueLabel" << cueLabelIndex++;
+                                    else if (adtlChunkType == chunkName ("note"))
+                                        prefix << "CueNote" << cueNoteIndex++;
+
+                                    auto identifier = (uint32) input->readInt();
+                                    auto stringLength = (int) (adtlLength - labelHeaderSize);
+
+                                    MemoryBlock textBlock;
+                                    input->readIntoMemoryBlock (textBlock, stringLength);
+
+                                    dict[prefix + "Identifier"] = String (identifier);
+                                    dict[prefix + "Text"] = textBlock.toString();
+                                }
+                                else if (adtlChunkType == chunkName ("ltxt") && regionHeaderSize <= adtlLength)
+                                {
+                                    auto prefix = "CueRegion" + String (cueRegionIndex++);
+                                    auto identifier     = (uint32) input->readInt();
+                                    auto sampleLength   = (uint32) input->readInt();
+                                    auto purpose        = (uint32) input->readInt();
+                                    auto country        = (uint16) input->readShort();
+                                    auto language       = (uint16) input->readShort();
+                                    auto dialect        = (uint16) input->readShort();
+                                    auto codePage       = (uint16) input->readShort();
+                                    auto stringLength   = (int) (adtlLength - regionHeaderSize);
+
+                                    MemoryBlock textBlock;
+                                    input->readIntoMemoryBlock (textBlock, stringLength);
+
+                                    dict[prefix + "Identifier"]   = String (identifier);
+                                    dict[prefix + "SampleLength"] = String (sampleLength);
+                                    dict[prefix + "Purpose"]      = String (purpose);
+                                    dict[prefix + "Country"]      = String (country);
+                                    dict[prefix + "Language"]     = String (language);
+                                    dict[prefix + "Dialect"]      = String (dialect);
+                                    dict[prefix + "CodePage"]     = String (codePage);
+                                    dict[prefix + "Text"]         = textBlock.toString();
+                                }
+
+                                input->setPosition (adtlChunkEnd);
                             }
-                            else if (adtlChunkType == chunkName ("ltxt"))
-                            {
-                                auto prefix = "CueRegion" + String (cueRegionIndex++);
-                                auto identifier     = (uint32) input->readInt();
-                                auto sampleLength   = (uint32) input->readInt();
-                                auto purpose        = (uint32) input->readInt();
-                                auto country        = (uint16) input->readShort();
-                                auto language       = (uint16) input->readShort();
-                                auto dialect        = (uint16) input->readShort();
-                                auto codePage       = (uint16) input->readShort();
-                                auto stringLength   = adtlLength - 20;
-
-                                MemoryBlock textBlock;
-                                input->readIntoMemoryBlock (textBlock, (int) stringLength);
-
-                                dict[prefix + "Identifier"]   = String (identifier);
-                                dict[prefix + "SampleLength"] = String (sampleLength);
-                                dict[prefix + "Purpose"]      = String (purpose);
-                                dict[prefix + "Country"]      = String (country);
-                                dict[prefix + "Language"]     = String (language);
-                                dict[prefix + "Dialect"]      = String (dialect);
-                                dict[prefix + "CodePage"]     = String (codePage);
-                                dict[prefix + "Text"]         = textBlock.toString();
-                            }
-
-                            input->setPosition (adtlChunkEnd);
                         }
                     }
-                }
-                else if (chunkType == chunkName ("acid"))
-                {
-                    AcidChunk (*input, length).addToMetadata (dict);
-                }
-                else if (chunkType == chunkName ("Trkn"))
-                {
-                    MemoryBlock tracktion;
-                    input->readIntoMemoryBlock (tracktion, (ssize_t) length);
-                    dict[WavAudioFormat::tracktionLoopInfo] = tracktion.toString();
-                }
-                else if (chunkEnd <= input->getPosition())
-                {
-                    break;
+                    else if (chunkType == chunkName ("acid"))
+                    {
+                        AcidChunk (*input, length).addToMetadata (dict);
+                    }
+                    else if (chunkType == chunkName ("Trkn"))
+                    {
+                        MemoryBlock tracktion;
+                        input->readIntoMemoryBlock (tracktion, (ssize_t) length);
+                        dict[WavAudioFormat::tracktionLoopInfo] = tracktion.toString();
+                    }
+                    else if (chunkEnd <= input->getPosition())
+                    {
+                        break;
+                    }
                 }
 
                 input->setPosition (chunkEnd);
@@ -2484,6 +2498,78 @@ struct WaveAudioFormatTests final : public UnitTest
             expect (createWriter (maxChannels, 8, 96000.0) == nullptr);
             expect (createWriter (maxChannels, 8) != nullptr);
         }
+
+        {
+            beginTest ("Implausibly large metadata chunks are skipped");
+
+            const auto wav = createPcm8Wav (2, { 0x80, 0x81 }, [] (OutputStream& out)
+            {
+                out.writeInt (WavFileHelpers::chunkName ("bext"));
+                out.writeInt ((int) 0x80000000);
+            });
+
+            // A stream of unknown length can't reject the chunk for being longer than the stream
+            const auto reader = rawToUniquePtr (WavAudioFormat().createReaderFor (new UnknownLengthInputStream (wav), true));
+            expect (reader != nullptr);
+
+            if (reader != nullptr)
+            {
+                expectEquals (reader->lengthInSamples, (int64) 2);
+                expect (! reader->metadataValues.containsKey (WavAudioFormat::bwavDescription));
+            }
+        }
+
+        {
+            beginTest ("Malformed cue label sub-chunks are not read beyond their LIST chunk");
+
+            const auto wav = createPcm8Wav (2, { 0x80, 0x81 }, [] (OutputStream& out)
+            {
+                out.writeInt (WavFileHelpers::chunkName ("LIST"));
+                out.writeInt (4 + 8 + 2 + 8 + 7 + 1);               // adtl, a truncated label, a valid label and its pad byte
+                out.writeInt (WavFileHelpers::chunkName ("adtl"));
+                out.writeInt (WavFileHelpers::chunkName ("labl"));
+                out.writeInt (2);                                   // too short to hold a cue ID
+                out.writeShort (0);
+                out.writeInt (WavFileHelpers::chunkName ("labl"));
+                out.writeInt (7);
+                out.writeInt (1);
+                out.write ("ab\0", 3);
+                out.writeByte (0);
+
+                out.writeInt (WavFileHelpers::chunkName ("LIST"));
+                out.writeInt (4 + 8);                               // adtl and a note header with no body
+                out.writeInt (WavFileHelpers::chunkName ("adtl"));
+                out.writeInt (WavFileHelpers::chunkName ("note"));
+                out.writeInt (1000);                                // longer than the enclosing chunk
+            });
+
+            const auto reader = createReader (wav);
+            expect (reader != nullptr);
+
+            if (reader != nullptr)
+            {
+                expectEquals (reader->metadataValues["NumCueLabels"], String ("1"));
+                expectEquals (reader->metadataValues["CueLabel0Text"], String ("ab"));
+                expect (! reader->metadataValues.containsKey ("CueNote0Text"));
+            }
+        }
+
+        {
+            beginTest ("A truncated LIST chunk on a stream of unknown length does not hang the reader");
+
+            const auto wav = createPcm8Wav (2, { 0x80, 0x81 }, [] (OutputStream& out)
+            {
+                out.writeInt (WavFileHelpers::chunkName ("LIST"));
+                out.writeInt (100);                                 // claims more than the stream holds
+                out.writeInt (WavFileHelpers::chunkName ("adtl"));
+            });
+
+            const auto reader = rawToUniquePtr (WavAudioFormat().createReaderFor (new UnknownLengthInputStream (wav), true));
+            expect (reader != nullptr);
+
+            if (reader != nullptr)
+                expectEquals (reader->lengthInSamples, (int64) 2);
+        }
     }
 
 private:
@@ -2518,6 +2604,14 @@ private:
     private:
         MemoryBlock block;
         std::unique_ptr<AudioFormatReader> reader;
+    };
+
+    // Reads from a block without reporting its length, as a network stream might
+    struct UnknownLengthInputStream final : public MemoryInputStream
+    {
+        explicit UnknownLengthInputStream (const MemoryBlock& mb) : MemoryInputStream (mb, true) {}
+
+        int64 getTotalLength() override { return -1; }
     };
 
     MemoryBlock writeToBlock (WavAudioFormat& format, const StringMap& meta)

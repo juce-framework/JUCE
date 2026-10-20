@@ -52,6 +52,8 @@ namespace AiffFileHelpers
 {
     inline int chunkName (const char* name) noexcept    { return (int) ByteOrder::littleEndianInt (name); }
 
+    constexpr uint32 maxMetadataChunkSize = 16 * 1024 * 1024;
+
    #if JUCE_MSVC
     #pragma pack (push, 1)
    #endif
@@ -244,6 +246,9 @@ namespace AiffFileHelpers
 
         static String read (InputStream& input, const uint32 length)
         {
+            if (length < 4)
+                return {};
+
             MemoryBlock mb;
             input.skipNextBytes (4);
             input.readIntoMemoryBlock (mb, (ssize_t) length - 4);
@@ -511,82 +516,85 @@ public:
                         dataChunkStart = input->getPosition() + 4 + offset;
                         lengthInSamples = (bytesPerFrame > 0) ? jmin (lengthInSamples, ((int64) length) / (int64) bytesPerFrame) : 0;
                     }
-                    else if (type == chunkName ("MARK"))
+                    else if (length <= maxMetadataChunkSize)
                     {
-                        auto numCues = (uint16) input->readShortBigEndian();
-
-                        // these two are always the same for AIFF-read files
-                        metadataValuesMap.emplace ("NumCuePoints", String (numCues));
-                        metadataValuesMap.emplace ("NumCueLabels", String (numCues));
-
-                        for (uint16 i = 0; i < numCues; ++i)
+                        if (type == chunkName ("MARK"))
                         {
-                            auto identifier = (uint16) input->readShortBigEndian();
-                            auto offset = (uint32) input->readIntBigEndian();
-                            auto stringLength = (uint8) input->readByte();
-                            MemoryBlock textBlock;
-                            input->readIntoMemoryBlock (textBlock, stringLength);
+                            auto numCues = (uint16) input->readShortBigEndian();
 
-                            // if the stringLength is even then read one more byte as the
-                            // string needs to be an even number of bytes INCLUDING the
-                            // leading length character in the pascal string
-                            if ((stringLength & 1) == 0)
-                                input->readByte();
+                            // these two are always the same for AIFF-read files
+                            metadataValuesMap.emplace ("NumCuePoints", String (numCues));
+                            metadataValuesMap.emplace ("NumCueLabels", String (numCues));
 
-                            auto prefixCue = "Cue" + String (i);
-                            metadataValuesMap.emplace (prefixCue + "Identifier", String (identifier));
-                            metadataValuesMap.emplace (prefixCue + "Offset", String (offset));
+                            for (uint16 i = 0; i < numCues; ++i)
+                            {
+                                auto identifier = (uint16) input->readShortBigEndian();
+                                auto offset = (uint32) input->readIntBigEndian();
+                                auto stringLength = (uint8) input->readByte();
+                                MemoryBlock textBlock;
+                                input->readIntoMemoryBlock (textBlock, stringLength);
 
-                            auto prefixLabel = "CueLabel" + String (i);
-                            metadataValuesMap.emplace (prefixLabel + "Identifier", String (identifier));
-                            metadataValuesMap.emplace (prefixLabel + "Text", textBlock.toString());
+                                // if the stringLength is even then read one more byte as the
+                                // string needs to be an even number of bytes INCLUDING the
+                                // leading length character in the pascal string
+                                if ((stringLength & 1) == 0)
+                                    input->readByte();
+
+                                auto prefixCue = "Cue" + String (i);
+                                metadataValuesMap.emplace (prefixCue + "Identifier", String (identifier));
+                                metadataValuesMap.emplace (prefixCue + "Offset", String (offset));
+
+                                auto prefixLabel = "CueLabel" + String (i);
+                                metadataValuesMap.emplace (prefixLabel + "Identifier", String (identifier));
+                                metadataValuesMap.emplace (prefixLabel + "Text", textBlock.toString());
+                            }
                         }
-                    }
-                    else if (type == chunkName ("COMT"))
-                    {
-                        auto numNotes = (uint16) input->readShortBigEndian();
-                        metadataValuesMap.emplace ("NumCueNotes", String (numNotes));
-
-                        for (uint16 i = 0; i < numNotes; ++i)
+                        else if (type == chunkName ("COMT"))
                         {
-                            auto timestamp = (uint32) input->readIntBigEndian();
-                            auto identifier = (uint16) input->readShortBigEndian(); // may be zero in this case
-                            auto stringLength = (uint16) input->readShortBigEndian();
+                            auto numNotes = (uint16) input->readShortBigEndian();
+                            metadataValuesMap.emplace ("NumCueNotes", String (numNotes));
 
-                            MemoryBlock textBlock;
-                            input->readIntoMemoryBlock (textBlock, stringLength + (stringLength & 1));
+                            for (uint16 i = 0; i < numNotes; ++i)
+                            {
+                                auto timestamp = (uint32) input->readIntBigEndian();
+                                auto identifier = (uint16) input->readShortBigEndian(); // may be zero in this case
+                                auto stringLength = (uint16) input->readShortBigEndian();
 
-                            auto prefix = "CueNote" + String (i);
-                            metadataValuesMap.emplace (prefix + "TimeStamp", String (timestamp));
-                            metadataValuesMap.emplace (prefix + "Identifier", String (identifier));
-                            metadataValuesMap.emplace (prefix + "Text", textBlock.toString());
+                                MemoryBlock textBlock;
+                                input->readIntoMemoryBlock (textBlock, stringLength + (stringLength & 1));
+
+                                auto prefix = "CueNote" + String (i);
+                                metadataValuesMap.emplace (prefix + "TimeStamp", String (timestamp));
+                                metadataValuesMap.emplace (prefix + "Identifier", String (identifier));
+                                metadataValuesMap.emplace (prefix + "Text", textBlock.toString());
+                            }
                         }
-                    }
-                    else if (type == chunkName ("INST"))
-                    {
-                        HeapBlock<InstChunk> inst;
-                        inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
+                        else if (type == chunkName ("INST"))
+                        {
+                            HeapBlock<InstChunk> inst;
+                            inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
 
-                        if (inst.getData() == nullptr)
+                            if (inst.getData() == nullptr)
+                                break;
+
+                            input->read (inst, (int) length);
+                            inst->copyTo (metadataValuesMap);
+                        }
+                        else if (type == chunkName ("basc"))
+                        {
+                            AiffFileHelpers::BASCChunk (*input).addToMetadata (metadataValuesMap);
+                        }
+                        else if (type == chunkName ("cate"))
+                        {
+                            metadataValuesMap.emplace (AiffAudioFormat::appleTag,
+                                                      AiffFileHelpers::CATEChunk::read (*input, length));
+                        }
+                        else if ((hasGotVer && hasGotData && hasGotType)
+                                  || chunkEnd < input->getPosition()
+                                  || input->isExhausted())
+                        {
                             break;
-
-                        input->read (inst, (int) length);
-                        inst->copyTo (metadataValuesMap);
-                    }
-                    else if (type == chunkName ("basc"))
-                    {
-                        AiffFileHelpers::BASCChunk (*input).addToMetadata (metadataValuesMap);
-                    }
-                    else if (type == chunkName ("cate"))
-                    {
-                        metadataValuesMap.emplace (AiffAudioFormat::appleTag,
-                                                  AiffFileHelpers::CATEChunk::read (*input, length));
-                    }
-                    else if ((hasGotVer && hasGotData && hasGotType)
-                              || chunkEnd < input->getPosition()
-                              || input->isExhausted())
-                    {
-                        break;
+                        }
                     }
 
                     input->setPosition (chunkEnd + (chunkEnd & 1)); // (chunks should be aligned to an even byte address)
