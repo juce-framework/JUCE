@@ -261,8 +261,8 @@ private:
                                                {
                                                    if (result != 0)
                                                        warnUserAboutUnsuitablePaths (weakSelf);
-                                                   else
-                                                       finishedScan();
+                                                   else if (const auto strong = weakSelf.lock())
+                                                       strong->finishedScan();
                                                }));
         }
         else
