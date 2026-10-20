@@ -39,3 +39,12 @@
 #ifndef JUCE_INCLUDE_WEBPLIB_CODE
  #define JUCE_INCLUDE_WEBPLIB_CODE 1
 #endif
+
+// libwebp includes <intrin.h> on x86 when _MSC_VER is defined. It is included
+// here under the same condition so that every libwebp translation unit sees it
+// before any SIMD target attribute is applied. Otherwise clang-cl would apply
+// the attribute to the declarations in <intrin.h> as well, which conflicts with
+// the always_inline definitions in clang's own intrinsic headers.
+#if defined (_MSC_VER) && (defined (_M_X64) || defined (_M_IX86))
+ #include <intrin.h>
+#endif
