@@ -73,6 +73,7 @@ std::unique_ptr<XmlElement> parseXMLIfTagMatches (const File& file, StringRef re
 void XmlDocument::setInputSource (InputSource* newSource) noexcept
 {
     inputSource.reset (newSource);
+    externalEntitiesAllowed = true;
 }
 
 void XmlDocument::setEmptyTextElementsIgnored (bool shouldBeIgnored) noexcept
@@ -181,7 +182,9 @@ void XmlDocument::setLastError (const String& desc, const bool carryOn)
 
 String XmlDocument::getFileContents (const String& filename) const
 {
-    if (inputSource != nullptr)
+    // A document can name any file or URL as an external entity, so these are only fetched
+    // through an input source that the caller has explicitly supplied
+    if (externalEntitiesAllowed && inputSource != nullptr)
     {
         std::unique_ptr<InputStream> in (inputSource->createInputStreamFor (filename.trim().unquoted()));
 
