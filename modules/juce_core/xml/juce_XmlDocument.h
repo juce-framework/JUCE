@@ -42,7 +42,9 @@ namespace juce
     The parser will expand entities that are defined in the document's DTD, but won't
     check the document for validity against the DTD. External DTD subsets and external
     parameter entities are only loaded through an input source supplied with
-    setInputSource().
+    setInputSource(). Documents whose elements are nested more than 256 levels deep, or
+    whose entities are nested more than 40 levels deep or expand to many times the size
+    of the document, are rejected as malformed.
 
     e.g.
     @code
@@ -171,8 +173,10 @@ private:
     String::CharPointerType input { nullptr };
     bool outOfData = false, errorOccurred = false;
     String lastError, dtdText;
-    StringArray tokenisedDTD;
+    StringArray tokenisedDTD, entitiesBeingExpanded;
     bool needToLoadDTD = false, ignoreEmptyTextElements = true, externalEntitiesAllowed = false;
+    int elementNestingDepth = 0;
+    int64 inputLength = 0, expandedEntityLength = 0;
     std::unique_ptr<InputSource> inputSource;
 
     std::unique_ptr<XmlElement> parseDocumentElement (String::CharPointerType, bool outer);
@@ -184,11 +188,12 @@ private:
     XmlElement* readNextElement (bool alsoParseSubElements);
     void readChildElements (XmlElement&);
     void readQuotedString (String&);
-    void readEntity (String&);
+    String readEntity (String&);
 
     String getFileContents (const String&) const;
     String expandEntity (const String&);
     String expandExternalEntity (const String&);
+    void checkEntityExpansionLimit (const String&);
     String getParameterEntity (const String&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlDocument)
