@@ -90,6 +90,11 @@ namespace XmlParsingLimits
                     maxEntityAmplification = 100;
 }
 
+static bool entityTextIsMarkup (const String& text)
+{
+    return text[0] == '<' && text[1] != 0;
+}
+
 namespace XmlIdentifierChars
 {
     static bool isIdentifierCharSlow (juce_wchar c) noexcept
@@ -652,7 +657,7 @@ void XmlDocument::readChildElements (XmlElement& parent)
                     String entity;
                     const auto entityName = readEntity (entity);
 
-                    if (entity.startsWithChar ('<') && entity [1] != 0)
+                    if (entityTextIsMarkup (entity))
                     {
                         auto oldInput = input;
                         auto oldOutOfData = outOfData;
@@ -660,8 +665,8 @@ void XmlDocument::readChildElements (XmlElement& parent)
                         input = entity.getCharPointer();
                         outOfData = false;
 
-                        // The entity's text may contain escaped references back to itself, so it
-                        // stays marked as expanding while the text is parsed
+                        // References inside markup are only resolved while the text is parsed, so the
+                        // entity stays marked as expanding until then
                         entitiesBeingExpanded.add (entityName);
 
                         while (auto* n = readNextElement (true))
@@ -951,7 +956,18 @@ String XmlDocument::expandExternalEntity (const String& entity)
                         break;
                     }
 
-                    auto resolved = expandEntity (ent.substring (ampersand + 1, semiColon));
+                    const auto reference = ent.substring (ampersand + 1, semiColon);
+
+                    // The content parser resolves general entity references in markup, so
+                    // expanding them here too would turn an escaped "&amp;a;" into a live
+                    // reference. Character references are part of the text and are always expanded.
+                    if (reference[0] != '#' && entityTextIsMarkup (ent))
+                    {
+                        ampersand = ent.indexOfChar (semiColon + 1, '&');
+                        continue;
+                    }
+
+                    auto resolved = expandEntity (reference);
 
                     ent = ent.substring (0, ampersand)
                            + resolved
@@ -1031,12 +1047,35 @@ public:
         {
             expectParseFailure ("<!DOCTYPE doc [<!ENTITY a \"x&a;\">]><doc>&a;</doc>", "recursive entity reference");
             expectParseFailure ("<!DOCTYPE doc [<!ENTITY a \"&b;\"> <!ENTITY b \"<e>&a;</e>\">]><doc>&a;</doc>", "recursive entity reference");
-            expectParseFailure ("<!DOCTYPE doc [<!ENTITY a \"<e>&amp;a;</e>\">]><doc>&a;</doc>", "recursive entity reference");
+            expectParseFailure ("<!DOCTYPE doc [<!ENTITY a \"<e>&#38;a;</e>\">]><doc>&a;</doc>", "recursive entity reference");
 
             // A recoverable error before or after the fatal one, or an attribute value, must not hide it
             expectParseFailure ("<!DOCTYPE doc [<!ENTITY a \"x&a;\">]><doc>&a;&nope;</doc>", "recursive entity reference");
             expectParseFailure ("<!DOCTYPE doc [<!ENTITY a \"x&a;\">]><doc>&nope;&a;</doc>", "recursive entity reference");
             expectParseFailure ("<!DOCTYPE doc [<!ENTITY a \"x&a;\">]><doc y=\"&a;\"/>", "recursive entity reference");
+        });
+
+        testCase ("Escaped references inside entity markup are not expanded again", [&]
+        {
+            const auto markup = parseXML ("<!DOCTYPE doc [<!ENTITY a \"<e x='&amp;a;'>&amp;a; &lt;b&gt;</e>\">]><doc>&a;</doc>");
+            expect (markup != nullptr);
+
+            if (markup != nullptr)
+            {
+                expectEquals (markup->getAllSubText(), String ("&a; <b>"));
+
+                auto* e = markup->getChildByName ("e");
+                expect (e != nullptr);
+
+                if (e != nullptr)
+                    expectEquals (e->getStringAttribute ("x"), String ("&a;"));
+            }
+
+            const auto text = parseXML ("<!DOCTYPE doc [<!ENTITY a \"x &amp; y\">]><doc>&a;</doc>");
+            expect (text != nullptr);
+
+            if (text != nullptr)
+                expectEquals (text->getAllSubText(), String ("x & y"));
         });
 
         testCase ("Deeply nested entity references are rejected", [&]
