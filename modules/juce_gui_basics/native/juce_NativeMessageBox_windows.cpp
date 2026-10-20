@@ -115,6 +115,8 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                 const auto title = options.getTitle();
                 const auto message = options.getMessage();
 
+                static constexpr auto buttonIdOffset = 0x100;
+
                 TASKDIALOGCONFIG config{};
 
                 config.cbSize         = sizeof (config);
@@ -142,6 +144,22 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
 
                     return S_OK;
                 };
+
+                const auto& buttons = options.getButtons();
+                const auto cancelIter = buttons.size() == 1
+                                      ? buttons.begin()
+                                      : std::find_if (buttons.begin(),
+                                                      buttons.end(),
+                                                      [] (const auto& b) { return b.getRole() == MessageBoxButtonRole::cancel; });
+
+                if (cancelIter != buttons.end() || buttons.empty())
+                    config.dwFlags |= TDF_ALLOW_DIALOG_CANCELLATION;
+
+                config.nDefaultButton = (int) std::invoke ([&]
+                {
+                    const auto iter = std::find_if (buttons.begin(), buttons.end(), [] (const auto& b) { return b.isPreferredAction(); });
+                    return iter != buttons.end() ? buttonIdOffset + std::distance (buttons.begin(), iter) : 0;
+                });
 
                 if (options.getIconType() == MessageBoxIconType::QuestionIcon)
                 {
@@ -173,27 +191,34 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                 std::vector<TASKDIALOG_BUTTON> buttonLabels;
                 Array<int> resultCodes;
 
-                for (auto i = 0; i < options.getNumButtons(); ++i)
+                for (const auto& buttonIndex : AlertWindowHelpers::getSuggestedButtonOrder (options))
                 {
-                    if (const auto buttonText = options.getButtonText (i); buttonText.isNotEmpty())
+                    const auto& button = options.getButtons()[(size_t) buttonIndex];
+                    if (const auto buttonText = button.getText(); buttonText.isNotEmpty())
                     {
-                        buttonLabels.push_back ({ (int) buttonLabels.size(), buttonStrings.emplace_back (buttonText).toWideCharPointer() });
-                        resultCodes.add (options.getButtonResultCode (i));
+                        buttonLabels.push_back ({ buttonIndex + buttonIdOffset,
+                                                  buttonStrings.emplace_back (buttonText).toWideCharPointer() });
+                        resultCodes.add (button.getCode());
                     }
                 }
 
                 config.pButtons = buttonLabels.data();
                 config.cButtons = (UINT) buttonLabels.size();
 
-                int buttonIndex = 0;
-                TaskDialogIndirect (&config, &buttonIndex, nullptr, nullptr);
+                int buttonId = 0;
+                TaskDialogIndirect (&config, &buttonId, nullptr, nullptr);
 
                 const std::scoped_lock lock { mutex };
 
                 if (closed)
-                    return {};
+                    return 0;
 
-                return resultCodes[buttonIndex];
+                if (buttonId == IDCANCEL)
+                    return cancelIter != buttons.end() ? cancelIter->getCode() : 0;
+
+                const auto buttonIndex = buttonId - buttonIdOffset;
+
+                return isPositiveAndBelow (buttonIndex, buttons.size()) ? buttons[(size_t) buttonIndex].getCode() : 0;
             };
         }
 

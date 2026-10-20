@@ -48,6 +48,120 @@ enum class MessageBoxIconType
                          a response from them. */
 };
 
+/** Roles that may be applied to buttons in a dialog box. */
+enum class MessageBoxButtonRole
+{
+    normal,                 /**< A style for standard actions. */
+    destroy,                /**< An action that causes destructive changes. */
+    cancel,                 /**< An action that closes the dialog without making any changes. */
+};
+
+//==============================================================================
+/** Class that holds configuration information about the action buttons displayed in a message box.
+
+    @tags{GUI}
+*/
+class JUCE_API  MessageBoxButtonOptions
+{
+public:
+    /** Sets the text and result code for this action.
+
+        Result codes should be unique for each action within the same message box.
+    */
+    MessageBoxButtonOptions (String textIn, int codeIn)
+        : text (std::move (textIn)), code (codeIn)
+    {
+    }
+
+    /** Sets the role of this button.
+
+        If unspecified, the button will have the 'normal' role.
+        Within a given message box, a maximum of one button may have the 'destroy' role,
+        and a maximum of one button may have the 'cancel' role.
+
+        The button with the 'cancel' role, if present, will be positioned as follows in a native
+        message box:
+        - macOS: bottom of the stack of buttons, or leftmost, depending on layout
+        - Android: leftmost
+        - Windows: rightmost
+        - iOS: bottom of the stack of buttons, or leftmost, depending on layout
+
+        You will get the best result across all platforms by setting both the preferred
+        action and the cancel role.
+    */
+    MessageBoxButtonOptions& setRole (MessageBoxButtonRole roleIn)
+    {
+        role = roleIn;
+        return *this;
+    }
+
+    /** Like setRole(), but returns a copy of this object with the new state applied. */
+    [[nodiscard]] MessageBoxButtonOptions withRole (MessageBoxButtonRole roleIn) const
+    {
+        return MessageBoxButtonOptions { *this }.setRole (roleIn);
+    }
+
+    /** Sets whether this button is the default/primary action of the dialog, usually
+        highlighted and selected with the 'return' key on the keyboard.
+
+        If no action is specified as preferred, then the first button added to the dialog
+        without the 'cancel' role will be treated as the preferred action.
+
+        The preferred action (either explicit or implicit) will be positioned as follows in a native
+        message box:
+        - macOS: top of the stack of buttons, or rightmost, depending on layout
+        - Android: rightmost
+        - Windows: leftmost
+        - iOS: top of the stack of buttons (three buttons), or rightmost (two buttons). The cancel
+               role takes precedence, so if the layout has two buttons and one button has the
+               cancel role, the cancel button will be leftmost.
+
+        You will get the best result across all platforms by setting both the preferred
+        action and the cancel role.
+    */
+    MessageBoxButtonOptions& setPreferredAction (bool shouldBeDefault = true)
+    {
+        preferredAction = shouldBeDefault;
+        return *this;
+    }
+
+    /** Like setPreferredAction(), but returns a copy of this object with the new state applied. */
+    [[nodiscard]] MessageBoxButtonOptions withPreferredAction (bool shouldBeDefault = true) const
+    {
+        return MessageBoxButtonOptions { *this }.setPreferredAction (shouldBeDefault);
+    }
+
+    /** Returns the text corresponding to this action. */
+    String getText() const
+    {
+        return text;
+    }
+
+    /** Returns the result code of this action. */
+    int getCode() const
+    {
+        return code;
+    }
+
+    /** Returns the role of this action. */
+    MessageBoxButtonRole getRole() const
+    {
+        return role;
+    }
+
+    /** Returns true if this is the preferred action, or false otherwise. */
+    bool isPreferredAction() const
+    {
+        return preferredAction;
+    }
+
+private:
+    String text;
+    int code = 0;
+    MessageBoxButtonRole role = MessageBoxButtonRole::normal;
+    bool preferredAction = false;
+};
+
 //==============================================================================
 /** Class used to create a set of options to pass to the AlertWindow and NativeMessageBox
     methods for showing dialog boxes.
@@ -90,9 +204,19 @@ public:
         Generally up to 3 buttons are supported for dialog boxes, so adding any more
         than this may have no effect.
 
-        On Android, native message boxes may be dismissed by tapping outside the box. In this case,
-        the result code will match that of the final button in the MessageBoxOptions. If there are
-        no buttons, the result code will be 0.
+        Message-boxes with zero or one buttons, or that hold a button with the 'cancel' role, may
+        be cancelled. For example, on Windows, a native message box can be dismissed by pressing
+        alt+f4 or escape, and on Android, a native message box can be dismissed by tapping outside
+        the box or pressing the back button.
+
+        On macOS, a preferred "OK" button will be added automatically to native dialogs with no
+        buttons. Such dialogs can be dismissed with the return key, but not with the
+        escape key.
+
+        Cancelling a zero-button message box will return "0".
+        Cancelling a single-button message box will return the result code of that button.
+        Cancelling a message box with a different number of buttons will return the code of
+        whichever button has the 'cancel' role.
     */
     [[nodiscard]] MessageBoxOptions withButton (const String& text, int resultCode) const
     {
@@ -100,6 +224,27 @@ public:
         copy.buttons.push_back ({ text, resultCode });
         return copy;
     }
+
+    /** This will add a button to the dialog box with the specified properties.
+
+        Generally up to 3 buttons are supported for dialog boxes, so adding any more
+        than this may have no effect.
+
+        Message-boxes with zero or one buttons, or that hold a button with the 'cancel' role, may
+        be cancelled. For example, on Windows, a native message box can be dismissed by pressing
+        alt+f4 or escape, and on Android, a native message box can be dismissed by tapping outside
+        the box or pressing the back button.
+
+        On macOS, a preferred "OK" button will be added automatically to native dialogs with no
+        buttons. Such dialogs can be dismissed with the return key, but not with the
+        escape key.
+
+        Cancelling a zero-button message box will return "0".
+        Cancelling a single-button message box will return the result code of that button.
+        Cancelling a message box with a different number of buttons will return the code of
+        whichever button has the 'cancel' role.
+    */
+    [[nodiscard]] MessageBoxOptions withButton (MessageBoxButtonOptions opt) const;
 
     /** The component that the dialog box should be associated with.
 
@@ -144,10 +289,11 @@ public:
 
         @see withButton, getNumButtons
     */
+    [[deprecated ("Prefer to index into the result of getButtons()")]]
     String getButtonText (int buttonIndex) const
     {
         if (isPositiveAndBelow (buttonIndex, buttons.size()))
-            return buttons[(size_t) buttonIndex].text;
+            return buttons[(size_t) buttonIndex].getText();
 
         // Button index does not refer to a known button!
         jassertfalse;
@@ -158,23 +304,33 @@ public:
 
         @see withButton, getNumButtons
     */
+    [[deprecated ("Prefer to index into the result of getButtons()")]]
     int getButtonResultCode (int buttonIndex) const
     {
         if (isPositiveAndBelow (buttonIndex, buttons.size()))
-            return buttons[(size_t) buttonIndex].code;
+            return buttons[(size_t) buttonIndex].getCode();
 
         // Button index does not refer to a known button!
         jassertfalse;
         return {};
     }
 
+    /** Returns the properties of all buttons in the message box. */
+    Span<const MessageBoxButtonOptions> getButtons() const&
+    {
+        return buttons;
+    }
+
+    /** Deleted to avoid dangling references. */
+    Span<const MessageBoxButtonOptions> getButtons() const&& = delete;
+
     /** Returns true if all buttons have a unique result code, or false otherwise. */
     bool areAllResultCodesUnique() const
     {
         std::set<int> codes;
 
-        for (auto i = 0; i < getNumButtons(); ++i)
-            codes.insert (getButtonResultCode (i));
+        for (const auto& opt : buttons)
+            codes.insert (opt.getCode());
 
         return (int) codes.size() == getNumButtons();
     }
@@ -240,15 +396,9 @@ public:
 
 private:
     //==============================================================================
-    struct ButtonInfo
-    {
-        String text;
-        int code{};
-    };
-
     MessageBoxIconType iconType = MessageBoxIconType::InfoIcon;
     String title, message;
-    std::vector<ButtonInfo> buttons;
+    std::vector<MessageBoxButtonOptions> buttons;
     WeakReference<Component> associatedComponent;
     WeakReference<Component> parentComponent;
 };

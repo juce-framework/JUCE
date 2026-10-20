@@ -35,6 +35,28 @@
 namespace juce
 {
 
+MessageBoxOptions MessageBoxOptions::withButton (MessageBoxButtonOptions opt) const
+{
+    auto copy = *this;
+    copy.buttons.push_back (std::move (opt));
+
+    // Only a maximum of one action may be preferred!
+    // Check your MessageBoxOptions and make sure that you haven't called
+    // "setPreferredAction (true)" more than once.
+    jassert (std::count_if (copy.buttons.begin(),
+                            copy.buttons.end(),
+                            [] (const auto& b) { return b.isPreferredAction(); }) <= 1);
+
+    // Only a maximum of one action may have the cancel role!
+    // Check your MessageBoxOptions and make sure that you haven't called
+    // "setRole (MessageBoxButtonRole::cancel)" more than once.
+    jassert (std::count_if (copy.buttons.begin(),
+                            copy.buttons.end(),
+                            [] (const auto& b) { return b.getRole() == MessageBoxButtonRole::cancel; }) <= 1);
+
+    return copy;
+}
+
 MessageBoxOptions MessageBoxOptions::makeOptionsOk (MessageBoxIconType iconType,
                                                     const String& title,
                                                     const String& message,
@@ -45,7 +67,8 @@ MessageBoxOptions MessageBoxOptions::makeOptionsOk (MessageBoxIconType iconType,
         .withIconType (iconType)
         .withTitle (title)
         .withMessage (message)
-        .withButton (buttonText.isEmpty() ? TRANS ("OK") : buttonText, 0)
+        .withButton (MessageBoxButtonOptions { buttonText.isEmpty() ? TRANS ("OK") : buttonText, 0 }.setPreferredAction()
+                                                                                                    .setRole (MessageBoxButtonRole::cancel))
         .withAssociatedComponent (associatedComponent);
 }
 
@@ -60,8 +83,8 @@ MessageBoxOptions MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType ico
         .withIconType (iconType)
         .withTitle (title)
         .withMessage (message)
-        .withButton (button1Text.isEmpty() ? TRANS ("OK") : button1Text, 1)
-        .withButton (button2Text.isEmpty() ? TRANS ("Cancel") : button2Text, 0)
+        .withButton (MessageBoxButtonOptions { button1Text.isEmpty() ? TRANS ("OK") : button1Text, 1 }.setPreferredAction())
+        .withButton (MessageBoxButtonOptions { button2Text.isEmpty() ? TRANS ("Cancel") : button2Text, 0 }.setRole (MessageBoxButtonRole::cancel))
         .withAssociatedComponent (associatedComponent);
 }
 
@@ -95,7 +118,7 @@ MessageBoxOptions MessageBoxOptions::makeOptionsYesNoCancel (MessageBoxIconType 
         .withMessage (message)
         .withButton (button1Text.isEmpty() ? TRANS ("Yes") : button1Text, 1)
         .withButton (button2Text.isEmpty() ? TRANS ("No") : button2Text, 2)
-        .withButton (button3Text.isEmpty() ? TRANS ("Cancel") : button3Text, 0)
+        .withButton (MessageBoxButtonOptions { button3Text.isEmpty() ? TRANS ("Cancel") : button3Text, 0 }.setRole (MessageBoxButtonRole::cancel))
         .withAssociatedComponent (associatedComponent);
 }
 

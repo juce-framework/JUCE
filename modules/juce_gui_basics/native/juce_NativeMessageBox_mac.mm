@@ -125,21 +125,43 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
             [alert setAlertStyle: options.getIconType() == MessageBoxIconType::WarningIcon ? NSAlertStyleCritical
                                                                                            : NSAlertStyleInformational];
 
+            const auto buttonOrder = AlertWindowHelpers::getSuggestedButtonOrder (options);
+
             const String defaultButtonStrings[] { TRANS ("OK"), String{}, String{} };
             Array<int> resultCodes;
+            NSButton* cancelButton = nullptr;
 
-            for (const auto [index, fallback] : enumerate (defaultButtonStrings, int{}))
+            for (const auto [index, fallback] : enumerate (defaultButtonStrings, size_t{}))
             {
-                const auto text = index < options.getNumButtons()
-                                ? options.getButtonText (index)
-                                : fallback;
+                const auto* button = index < buttonOrder.size()
+                                   ? &options.getButtons()[(size_t) buttonOrder[index]]
+                                   : nullptr;
+                const auto text = button != nullptr ? button->getText() : fallback;
 
-                if (text.isNotEmpty())
+                if (text.isEmpty())
+                    continue;
+
+                [alert addButtonWithTitle: juceStringToNS (text)];
+                resultCodes.add (button != nullptr ? button->getCode() : resultCodes.size());
+
+                if (button == nullptr)
+                    continue;
+
+                if (button->getRole() == MessageBoxButtonRole::destroy)
                 {
-                    [alert addButtonWithTitle: juceStringToNS (text)];
-                    resultCodes.add (index < options.getNumButtons() ? options.getButtonResultCode (index) : resultCodes.size());
+                    if (@available (macOS 11, *))
+                    {
+                        [[[alert buttons] lastObject] setHasDestructiveAction: true];
+                    }
+                }
+                else if (button->getRole() == MessageBoxButtonRole::cancel)
+                {
+                    cancelButton = [[alert buttons] lastObject];
                 }
             }
+
+            if (cancelButton != nullptr && cancelButton != [[alert buttons] firstObject])
+                [cancelButton setKeyEquivalent: @"\x1b"]; // The escape code from Events.h
 
             alertWindow.reset (alert);
 
