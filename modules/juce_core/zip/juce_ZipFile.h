@@ -178,9 +178,17 @@ public:
         This will expand all the entries into a target directory. The relative
         paths of the entries are used.
 
+        Extraction stops at the first entry that fails, which includes an entry
+        whose path leads outside the target directory, a symbolic link whose
+        target does not stay inside the target directory, and an entry that
+        holds more data than the size recorded in the archive's central
+        directory. The sum of the entries' uncompressedSize fields is therefore
+        an upper bound on the disk space that this call can use.
+
         @param targetDirectory      the root folder to uncompress to
         @param shouldOverwriteFiles whether to overwrite existing files with similarly-named ones
         @returns success if the file is successfully unzipped
+        @see uncompressEntry
     */
     Result uncompressTo (const File& targetDirectory,
                          bool shouldOverwriteFiles = true);
@@ -189,6 +197,11 @@ public:
 
         This will expand the entry and write it in a target directory. The entry's path is used to
         determine which subfolder of the target should contain the new file.
+
+        The call fails if the entry's path leads outside the target directory, if the entry is a
+        symbolic link whose target does not stay inside the target directory, or if the entry
+        holds more data than the size recorded in the archive's central directory. If writing a
+        regular entry fails, the partially written file is removed.
 
         @param index                the index of the entry to uncompress - this must be a valid index
                                     between 0 and (getNumEntries() - 1).
@@ -208,11 +221,19 @@ public:
         This will expand the entry and write it in a target directory. The entry's path is used to
         determine which subfolder of the target should contain the new file.
 
+        The call fails if the entry's path leads outside the target directory, if the entry is a
+        symbolic link whose target does not stay inside the target directory, or if the entry
+        holds more data than the size recorded in the archive's central directory. If writing a
+        regular entry fails, the partially written file is removed.
+
         @param index                the index of the entry to uncompress - this must be a valid index
                                     between 0 and (getNumEntries() - 1).
         @param targetDirectory      the root folder to uncompress into
         @param overwriteFiles       whether to overwrite existing files with similarly-named ones
-        @param followSymlinks       whether to follow symlinks inside the target directory
+        @param followSymlinks       whether to write an entry whose parent path inside the target
+                                    directory passes through a symbolic link. Links created from
+                                    the archive always resolve inside the target directory, so
+                                    this only matters for links that were already present there.
         @returns success if all the files are successfully unzipped
     */
     Result uncompressEntry (int index,

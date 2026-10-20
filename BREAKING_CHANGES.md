@@ -4,6 +4,34 @@
 
 ## Change
 
+ZipFile::uncompressTo and ZipFile::uncompressEntry now refuse to create a
+symbolic link whose target does not stay inside the target directory, and fail
+an entry that holds more data than the size recorded in the archive's central
+directory.
+
+**Possible Issues**
+
+Archives containing symbolic links to absolute paths, to locations above the
+target directory, or to paths that contain ".." after a named component will
+no longer extract completely. The same applies to archives whose central
+directory understates the size of an entry.
+
+**Workaround**
+
+Extract the affected entries with createStreamForEntry() and handle them in
+application code.
+
+**Rationale**
+
+A symbolic link created from an untrusted archive could point anywhere on the
+user's machine, and anything that later opened or ran a path inside the
+extracted tree could be redirected outside it. Without a check against the
+recorded size, a small archive could also fill the disk, and callers had no way
+to bound the space that extraction would use.
+
+
+## Change
+
 NativeMessageBox::show and NativeMessageBox::showAsync have been renamed
 to showForOptions and showForOptionsAsync respectively.
 
