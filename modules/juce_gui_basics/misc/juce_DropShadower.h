@@ -86,9 +86,6 @@ private:
     class ParentVisibilityChangedListener;
     std::unique_ptr<ParentVisibilityChangedListener> visibilityChangedListener;
 
-    class VirtualDesktopWatcher;
-    std::unique_ptr<VirtualDesktopWatcher> virtualDesktopWatcher;
-
     class ScaleWatcher;
     std::unique_ptr<ScaleWatcher> scaleWatcher;
 
