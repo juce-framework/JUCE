@@ -69,6 +69,15 @@ void XmlDocument::setEmptyTextElementsIgnored (bool shouldBeIgnored) noexcept
     ignoreEmptyTextElements = shouldBeIgnored;
 }
 
+namespace XmlParsingLimits
+{
+    constexpr int maxElementNestingDepth = 256,
+                  maxEntityNestingDepth = 40;
+
+    constexpr int64 entityAmplificationThreshold = 8 * 1024 * 1024,
+                    maxEntityAmplification = 100;
+}
+
 namespace XmlIdentifierChars
 {
     static bool isIdentifierCharSlow (juce_wchar c) noexcept
@@ -164,6 +173,9 @@ const String& XmlDocument::getLastParseError() const noexcept
 
 void XmlDocument::setLastError (const String& desc, const bool carryOn)
 {
+    if (errorOccurred)
+        return;
+
     lastError = desc;
     errorOccurred = ! carryOn;
 }
@@ -203,6 +215,10 @@ std::unique_ptr<XmlElement> XmlDocument::parseDocumentElement (String::CharPoint
     errorOccurred = false;
     outOfData = false;
     needToLoadDTD = true;
+    elementNestingDepth = 0;
+    inputLength = (int64) textToParse.length();
+    expandedEntityLength = 0;
+    entitiesBeingExpanded.clear();
 
     if (textToParse.isEmpty())
     {
@@ -441,7 +457,18 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
                 ++input;
 
                 if (alsoParseSubElements)
+                {
+                    if (XmlParsingLimits::maxElementNestingDepth <= elementNestingDepth)
+                    {
+                        setLastError ("elements nested too deeply", false);
+                        outOfData = true;
+                        return node;
+                    }
+
+                    ++elementNestingDepth;
                     readChildElements (*node);
+                    --elementNestingDepth;
+                }
 
                 break;
             }
@@ -597,7 +624,7 @@ void XmlDocument::readChildElements (XmlElement& parent)
                 if (c == '&')
                 {
                     String entity;
-                    readEntity (entity);
+                    const auto entityName = readEntity (entity);
 
                     if (entity.startsWithChar ('<') && entity [1] != 0)
                     {
@@ -607,8 +634,14 @@ void XmlDocument::readChildElements (XmlElement& parent)
                         input = entity.getCharPointer();
                         outOfData = false;
 
+                        // The entity's text may contain escaped references back to itself, so it
+                        // stays marked as expanding while the text is parsed
+                        entitiesBeingExpanded.add (entityName);
+
                         while (auto* n = readNextElement (true))
                             childAppender.append (n);
+
+                        entitiesBeingExpanded.removeString (entityName);
 
                         input = oldInput;
                         outOfData = oldOutOfData;
@@ -655,7 +688,7 @@ void XmlDocument::readChildElements (XmlElement& parent)
     }
 }
 
-void XmlDocument::readEntity (String& result)
+String XmlDocument::readEntity (String& result)
 {
     // skip over the ampersand
     ++input;
@@ -722,7 +755,7 @@ void XmlDocument::readEntity (String& result)
                 if (firstChar == 0)
                 {
                     setLastError ("unexpected end of input", true);
-                    return;
+                    return {};
                 }
 
                 if (firstChar == ';')
@@ -744,7 +777,7 @@ void XmlDocument::readEntity (String& result)
         {
             setLastError ("illegal escape sequence", true);
             result += '&';
-            return;
+            return {};
         }
 
         result << (juce_wchar) charCode;
@@ -762,9 +795,13 @@ void XmlDocument::readEntity (String& result)
         else
         {
             input += closingSemiColon + 1;
-            result += expandExternalEntity (String (entityNameStart, (size_t) closingSemiColon));
+            const String entityName (entityNameStart, (size_t) closingSemiColon);
+            result += expandExternalEntity (entityName);
+            return entityName;
         }
     }
+
+    return {};
 }
 
 String XmlDocument::expandEntity (const String& ent)
@@ -794,6 +831,9 @@ String XmlDocument::expandEntity (const String& ent)
 
 String XmlDocument::expandExternalEntity (const String& entity)
 {
+    if (errorOccurred)
+        return {};
+
     if (needToLoadDTD)
     {
         if (dtdText.isNotEmpty())
@@ -830,6 +870,11 @@ String XmlDocument::expandExternalEntity (const String& entity)
                      && tokenisedDTD[i].endsWithChar (';'))
                 {
                     auto parsed = getParameterEntity (tokenisedDTD[i].substring (1, tokenisedDTD[i].length() - 1));
+                    checkEntityExpansionLimit (parsed);
+
+                    if (errorOccurred)
+                        break;
+
                     StringArray newToks;
                     newToks.addTokens (parsed, true);
 
@@ -850,14 +895,29 @@ String XmlDocument::expandExternalEntity (const String& entity)
         {
             if (tokenisedDTD[i - 1].equalsIgnoreCase ("<!entity"))
             {
+                if (entitiesBeingExpanded.contains (entity))
+                {
+                    setLastError ("recursive entity reference", false);
+                    outOfData = true;
+                    return {};
+                }
+
+                if (XmlParsingLimits::maxEntityNestingDepth <= entitiesBeingExpanded.size())
+                {
+                    setLastError ("entities nested too deeply", false);
+                    outOfData = true;
+                    return {};
+                }
+
+                entitiesBeingExpanded.add (entity);
                 auto ent = tokenisedDTD [i + 1].trimCharactersAtEnd (">").trim().unquoted();
 
                 // check for sub-entities..
                 auto ampersand = ent.indexOfChar ('&');
 
-                while (ampersand >= 0)
+                while (ampersand >= 0 && ! errorOccurred)
                 {
-                    auto semiColon = ent.indexOf (i + 1, ";");
+                    auto semiColon = ent.indexOf (ampersand + 1, ";");
 
                     if (semiColon < 0)
                     {
@@ -865,22 +925,39 @@ String XmlDocument::expandExternalEntity (const String& entity)
                         break;
                     }
 
-                    auto resolved = expandEntity (ent.substring (i + 1, semiColon));
+                    auto resolved = expandEntity (ent.substring (ampersand + 1, semiColon));
 
                     ent = ent.substring (0, ampersand)
                            + resolved
                            + ent.substring (semiColon + 1);
 
-                    ampersand = ent.indexOfChar (semiColon + 1, '&');
+                    ampersand = ent.indexOfChar (ampersand + resolved.length(), '&');
                 }
 
-                return ent;
+                entitiesBeingExpanded.removeString (entity);
+
+                if (! errorOccurred)
+                    checkEntityExpansionLimit (ent);
+
+                return errorOccurred ? String() : ent;
             }
         }
     }
 
     setLastError ("unknown entity", true);
     return entity;
+}
+
+void XmlDocument::checkEntityExpansionLimit (const String& expandedText)
+{
+    expandedEntityLength += (int64) expandedText.length();
+
+    if (XmlParsingLimits::entityAmplificationThreshold < expandedEntityLength
+         && inputLength * XmlParsingLimits::maxEntityAmplification < expandedEntityLength)
+    {
+        setLastError ("entity expansion too large", false);
+        outOfData = true;
+    }
 }
 
 String XmlDocument::getParameterEntity (const String& entity)
