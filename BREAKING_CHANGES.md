@@ -4,6 +4,39 @@
 
 ## Change
 
+XmlDocument no longer loads external DTD subsets or external parameter
+entities unless an InputSource has been supplied with setInputSource().
+
+**Possible Issues**
+
+Documents created from a File that rely on entity definitions held in a
+separate file, referenced through a SYSTEM identifier in their DOCTYPE
+declaration, will have those entities left unexpanded, and getLastParseError()
+will report an unknown entity. Documents parsed from a string were already
+treated this way.
+
+**Workaround**
+
+For documents from a trusted source, supply an input source explicitly:
+
+    XmlDocument document (file);
+    document.setInputSource (new FileInputSource (file));
+
+Otherwise, move the entity definitions into the document's internal DTD
+subset, or substitute the entities before parsing.
+
+**Rationale**
+
+A document could name any file as its external subset, and the parser would
+read it through the FileInputSource created for the document's File, which
+accepts absolute paths and parent-directory references. A malicious document
+could use this to read arbitrary files on the user's machine, so these
+references are now only followed through an input source that the caller has
+chosen to provide.
+
+
+## Change
+
 ZipFile::uncompressTo and ZipFile::uncompressEntry now refuse to create a
 symbolic link whose target does not stay inside the target directory, and fail
 an entry that holds more data than the size recorded in the archive's central
