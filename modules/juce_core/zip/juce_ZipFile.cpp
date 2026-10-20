@@ -147,6 +147,45 @@ static bool hasSymbolicPart (const File& root, const File& f)
     return false;
 }
 
+static bool symbolicLinkStaysInside (const File& root, const File& linkFile, const String& target, bool parentIsSymbolic)
+{
+    if (target.isEmpty() || File::isAbsolutePath (target))
+        return false;
+
+    // A ".." is only accepted if it does not follow a named component, which another entry could
+    // have made a symbolic link, and if the path from the target directory down to the link does
+    // not pass through one
+    auto seenNamedComponent = false;
+
+    for (const auto& component : StringArray::fromTokens (target, File::getSeparatorString(), {}))
+    {
+        if (component == "..")
+        {
+            if (parentIsSymbolic || seenNamedComponent)
+                return false;
+        }
+        else if (component.isNotEmpty() && component != ".")
+        {
+            seenNamedComponent = true;
+        }
+    }
+
+    const auto resolved = linkFile.getParentDirectory().getChildFile (target);
+    return resolved == root || resolved.isAChildOf (root);
+}
+
+static Result copyEntryData (InputStream& in, OutputStream& out, int64 declaredSize, const String& entryPath)
+{
+    out.writeFromInputStream (in, declaredSize);
+
+    char extra = 0;
+
+    if (0 < in.read (&extra, 1))
+        return Result::fail ("Entry " + entryPath + " holds more data than the archive's central directory declares");
+
+    return Result::ok();
+}
+
 //==============================================================================
 struct ZipFile::ZipInputStream final : public InputStream
 {
@@ -487,7 +526,9 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, Overwri
             return Result::fail ("Failed to write to target file: " + targetFile.getFullPathName());
     }
 
-    if (followSymlinks == FollowSymlinks::no && hasSymbolicPart (targetDirectory, targetFile.getParentDirectory()))
+    const auto parentIsSymbolic = hasSymbolicPart (targetDirectory, targetFile.getParentDirectory());
+
+    if (followSymlinks == FollowSymlinks::no && parentIsSymbolic)
         return Result::fail ("Parent directory leads through symlink for target file: " + targetFile.getFullPathName());
 
     if (! targetFile.getParentDirectory().createDirectory())
@@ -495,20 +536,40 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, Overwri
 
     if (zei->entry.isSymbolicLink)
     {
-        String originalFilePath (in->readEntireStreamAsString()
-                                    .replaceCharacter (L'/', File::getSeparatorChar()));
+        MemoryOutputStream linkText;
 
-        if (! File::createSymbolicLink (targetFile, originalFilePath, true))
-            return Result::fail ("Failed to create symbolic link: " + originalFilePath);
+        if (const auto result = copyEntryData (*in, linkText, zei->entry.uncompressedSize, entryPath); result.failed())
+            return result;
+
+        const auto linkTarget = linkText.toString().replaceCharacter (L'/', File::getSeparatorChar());
+
+        if (! symbolicLinkStaysInside (targetDirectory, targetFile, linkTarget, parentIsSymbolic))
+            return Result::fail ("Symbolic link " + entryPath + " points outside the target directory");
+
+        if (! File::createSymbolicLink (targetFile, linkTarget, true))
+            return Result::fail ("Failed to create symbolic link: " + linkTarget);
     }
     else
     {
-        FileOutputStream out (targetFile);
+        const auto writeResult = std::invoke ([&]
+        {
+            FileOutputStream out (targetFile);
 
-        if (out.failedToOpen())
-            return Result::fail ("Failed to write to target file: " + targetFile.getFullPathName());
+            if (out.failedToOpen())
+                return Result::fail ("Failed to write to target file: " + targetFile.getFullPathName());
 
-        out << *in;
+            if (const auto result = copyEntryData (*in, out, zei->entry.uncompressedSize, entryPath); result.failed())
+                return result;
+
+            out.flush();
+            return out.getStatus();
+        });
+
+        if (writeResult.failed())
+        {
+            targetFile.deleteFile();
+            return writeResult;
+        }
     }
 
     targetFile.setCreationTime (zei->entry.fileTime);
@@ -795,23 +856,152 @@ struct ZIPTests final : public UnitTest
     void runTest() override
     {
         beginTest ("ZIP");
-
-        StringArray entryNames { "first", "second", "third" };
-        auto data = createZipMemoryBlock (entryNames);
-        MemoryInputStream mi (data, false);
-        ZipFile zip (mi);
-
-        expectEquals (zip.getNumEntries(), entryNames.size());
-
-        for (auto& entryName : entryNames)
         {
-            auto* entry = zip.getEntry (entryName);
-            std::unique_ptr<InputStream> input (zip.createStreamForEntry (*entry));
-            expectEquals (input->readEntireStreamAsString(), entryName);
+            StringArray entryNames { "first", "second", "third" };
+            auto data = createZipMemoryBlock (entryNames);
+            MemoryInputStream mi (data, false);
+            ZipFile zip (mi);
+
+            expectEquals (zip.getNumEntries(), entryNames.size());
+
+            for (auto& entryName : entryNames)
+            {
+                auto* entry = zip.getEntry (entryName);
+                std::unique_ptr<InputStream> input (zip.createStreamForEntry (*entry));
+                expectEquals (input->readEntireStreamAsString(), entryName);
+            }
         }
 
         beginTest ("ZipSlip");
         runZipSlipTest();
+
+       #if JUCE_MAC || JUCE_LINUX || JUCE_BSD
+        beginTest ("Symbolic links");
+        {
+            TemporaryFile sourceDir, targetDir;
+            const auto source = sourceDir.getFile();
+            const auto target = targetDir.getFile();
+            expect (source.getChildFile ("sub").createDirectory());
+            expect (target.createDirectory());
+
+            struct TestCase
+            {
+                const char* linkPath;
+                const char* linkTarget;
+                bool shouldBeCreated;
+            };
+
+            // The builder only stores a link as a link if its target exists, so these all point at directories.
+            const TestCase testCases[] = { { "sibling",         "sub",    true  },
+                                           { "sub/up",          "..",     true  },
+                                           { "sub/upAndDown",   "../sub", true  },
+                                           { "escape",          "..",     false },
+                                           { "sub/escape",      "../..",  false },
+                                           { "absolute",        "/",      false },
+                                           { "throughNamed",    "sub/..", false },
+                                           { "toRoot",          ".",      true  },
+                                           { "toRoot/x",        "..",     false } };
+
+            ZipFile::Builder builder;
+
+            for (const auto& tc : testCases)
+            {
+                const auto link = source.getChildFile (tc.linkPath);
+                expect (File::createSymbolicLink (link, tc.linkTarget, false));
+                builder.addFile (link, 0, tc.linkPath);
+            }
+
+            MemoryBlock data;
+            MemoryOutputStream mo (data, false);
+            expect (builder.writeToStream (mo, nullptr));
+
+            MemoryInputStream mi (data, false);
+            ZipFile zip (mi);
+            expectEquals (zip.getNumEntries(), (int) std::size (testCases));
+
+            for (const auto& tc : testCases)
+            {
+                const auto index = zip.getIndexOfFileName (tc.linkPath);
+                expect (0 <= index);
+                expect (zip.getEntry (index)->isSymbolicLink);
+
+                const auto result = zip.uncompressEntry (index, target);
+                expect (result.wasOk() == tc.shouldBeCreated,
+                        String (tc.linkPath) + " was unexpectedly " + (result.wasOk() ? "OK" : "not OK"));
+                expect (target.getChildFile (tc.linkPath).isSymbolicLink() == tc.shouldBeCreated);
+            }
+
+            // When links are followed, the parent of "toRoot/x" is the link "toRoot", so the ".." in its
+            // target would leave the target directory even though it resolves lexically to the root.
+            TemporaryFile followingDir;
+            const auto following = followingDir.getFile();
+            expect (following.createDirectory());
+
+            const auto uncompressFollowingLinks = [&] (const char* linkPath)
+            {
+                return zip.uncompressEntry (zip.getIndexOfFileName (linkPath), following,
+                                            ZipFile::OverwriteFiles::yes, ZipFile::FollowSymlinks::yes);
+            };
+
+            expect (uncompressFollowingLinks ("toRoot").wasOk());
+            expect (uncompressFollowingLinks ("toRoot/x").failed());
+            expect (! following.getChildFile ("x").isSymbolicLink());
+
+            expect (source.deleteRecursively());
+            expect (target.deleteRecursively());
+            expect (following.deleteRecursively());
+        }
+       #endif
+
+        beginTest ("Oversized entries");
+        {
+            const String content ("0123456789");
+
+            for (const auto compressionLevel : { 0, 9 })
+            {
+                for (const auto declaredSize : { (uint32) content.length(), (uint32) content.length() / 2 })
+                {
+                    ZipFile::Builder builder;
+                    builder.addEntry (std::make_unique<MemoryInputStream> (content.toRawUTF8(), content.getNumBytesAsUTF8(), true),
+                                      compressionLevel,
+                                      "entry",
+                                      Time::getCurrentTime());
+
+                    MemoryBlock data;
+                    MemoryOutputStream mo (data, false);
+                    expect (builder.writeToStream (mo, nullptr));
+                    mo.flush();
+
+                    // The end of central directory record holds the directory's offset, and the first
+                    // directory entry holds the uncompressed size that uncompressEntry() trusts.
+                    auto* bytes = static_cast<uint8*> (data.getData());
+                    auto* endOfCentralDirectory = bytes + data.getSize() - 22;
+                    expect (ByteOrder::littleEndianInt (endOfCentralDirectory) == 0x06054b50);
+                    auto* directoryEntry = bytes + ByteOrder::littleEndianInt (endOfCentralDirectory + 16);
+                    expect (ByteOrder::littleEndianInt (directoryEntry) == 0x02014b50);
+                    writeUnaligned (directoryEntry + 24, ByteOrder::swapIfBigEndian (declaredSize));
+
+                    MemoryInputStream mi (data, false);
+                    ZipFile zip (mi);
+                    expectEquals (zip.getNumEntries(), 1);
+                    expectEquals (zip.getEntry (0)->uncompressedSize, (int64) declaredSize);
+
+                    TemporaryFile tmpDir;
+                    expect (tmpDir.getFile().createDirectory());
+
+                    const auto sizeIsCorrect = declaredSize == (uint32) content.length();
+                    const auto extracted = tmpDir.getFile().getChildFile ("entry");
+                    expect (zip.uncompressEntry (0, tmpDir.getFile()).wasOk() == sizeIsCorrect,
+                            "compression level " + String (compressionLevel) + ", declared size " + String (declaredSize));
+                    expect (extracted.exists() == sizeIsCorrect);
+
+                    if (sizeIsCorrect)
+                        expectEquals (extracted.loadFileAsString(), content);
+
+                    expect (tmpDir.getFile().deleteRecursively());
+                }
+            }
+        }
     }
 };
 
