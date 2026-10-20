@@ -4,6 +4,33 @@
 
 ## Change
 
+XmlDocument now rejects documents in which elements are nested more than 256
+levels deep, in which entity references are nested more than 40 levels deep,
+or which build more than 8 MB of text while expanding entities when that is
+also more than 100 times the size of the document.
+
+**Possible Issues**
+
+Such documents will fail to parse, with getLastParseError() reporting
+"elements nested too deeply", "entities nested too deeply" or "entity
+expansion too large". Documents containing entities that refer to themselves,
+which previously crashed the parser, now fail with "recursive entity
+reference".
+
+**Workaround**
+
+Restructure the document so that it stays within these limits.
+
+**Rationale**
+
+The parser recurses once for each level of nesting, and previously expanded
+entities without limit. A malicious document could use either to crash an
+application or to exhaust its memory. These limits match those used by libxml2
+and expat, and are far beyond anything a real document needs.
+
+
+## Change
+
 XmlDocument no longer loads external DTD subsets or external parameter
 entities unless an InputSource has been supplied with setInputSource().
 
