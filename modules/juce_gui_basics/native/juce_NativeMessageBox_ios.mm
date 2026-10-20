@@ -65,28 +65,79 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                                                               message: juceStringToNS (options.getMessage())
                                                        preferredStyle: UIAlertControllerStyleAlert] retain]);
 
-            for (auto i = 0; i < options.getNumButtons(); ++i)
+           #if JUCE_IOS_API_VERSION_CAN_BE_BUILT (16, 0)
+            if (@available (iOS 16, *))
             {
-                const auto text = options.getButtonText (i);
+                const auto severity = options.getIconType() == MessageBoxIconType::WarningIcon
+                                    ? UIAlertControllerSeverityCritical
+                                    : UIAlertControllerSeverityDefault;
+                [alert.get() setSeverity: severity];
+            }
+           #endif
+
+            auto buttonOrder = AlertWindowHelpers::getSuggestedButtonOrder (options);
+
+            // The interface guidelines for iOS say that a two-button alert should have
+            // the preferred action on the right, but buttons are presented left-to-right
+            if (buttonOrder.size() == 2)
+                std::reverse (buttonOrder.begin(), buttonOrder.end());
+
+            const auto& buttons = options.getButtons();
+
+            for (const auto buttonIndex : buttonOrder)
+            {
+                const auto& button = buttons[(size_t) buttonIndex];
+                const auto text = button.getText();
 
                 if (text.isEmpty())
                     continue;
 
+                const auto style = std::invoke ([&]
+                {
+                    if (buttons.size() == 1)
+                        return UIAlertActionStyleCancel;
+
+                    switch (button.getRole())
+                    {
+                        case MessageBoxButtonRole::normal:
+                            return UIAlertActionStyleDefault;
+
+                        case MessageBoxButtonRole::cancel:
+                            return UIAlertActionStyleCancel;
+
+                        case MessageBoxButtonRole::destroy:
+                            return UIAlertActionStyleDestructive;
+                    }
+
+                    return UIAlertActionStyleDefault;
+                });
+
                 auto* action = [UIAlertAction actionWithTitle: juceStringToNS (text)
-                                                        style: UIAlertActionStyleDefault
+                                                        style: style
                                                       handler: ^(UIAlertAction*)
                 {
-                    MessageManager::callAsync ([recipient, i, opt = options]
+                    const auto ind = buttonIndex;
+                    const auto opt = options;
+                    const auto r = recipient;
+                    MessageManager::callAsync ([ind, opt, r]
                     {
-                        const auto code = opt.getButtonResultCode (i);
-                        NullCheckedInvocation::invoke (recipient, code);
+                        const auto code = opt.getButtons()[(size_t) ind].getCode();
+                        NullCheckedInvocation::invoke (r, code);
                     });
                 }];
 
                 [alert.get() addAction: action];
 
-                if (i == 0)
+                if (button.isPreferredAction())
                     [alert.get() setPreferredAction: action];
+            }
+
+            if ([alert.get() preferredAction] == nullptr)
+            {
+                const auto positionSelector = buttonOrder.size() == 2
+                                            ? @selector (lastObject)
+                                            : @selector (firstObject);
+                [alert.get() setPreferredAction: [[alert.get() actions] performSelector: positionSelector]];
             }
 
             [peerToUse->controller presentViewController: alert.get()

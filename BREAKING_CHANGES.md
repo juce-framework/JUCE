@@ -4,6 +4,34 @@
 
 ## Change
 
+On Windows, native message boxes with three buttons, created using the
+MessageBoxOptions::withButton() builder, no longer have cancellation behaviour
+(where the box can be dismissed with alt+f4, escape, etc.) by default.
+
+On Android, two- and three-button native message boxes created using
+MessageBoxOptions::withButton() no longer have cancellation behaviour (where
+the box can be dismissed by tapping outside) by default.
+
+**Possible Issues**
+
+Dialogs displayed by programs may no longer respond to events that previously
+would have dismissed those dialogs.
+
+**Workaround**
+
+Use MessageBoxButtonOptions::withRole to explicitly assign the "cancel" role to
+the button that corresponds to the dialog's cancellation action.
+
+**Rationale**
+
+Previously, cancellation behaviour was poorly-specified, and the result code
+of a cancelled box was difficult to predict. The new "cancel" role allows the
+result code of the cancellation action to be specified explicitly, and allows
+cancel behaviour to be specified for dialogs with two or three buttons.
+
+
+## Change
+
 XmlDocument now rejects documents in which elements are nested more than 256
 levels deep, in which entity references are nested more than 40 levels deep,
 or which build more than 8 MB of text while expanding entities when that is

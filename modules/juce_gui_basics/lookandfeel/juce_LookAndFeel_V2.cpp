@@ -400,6 +400,8 @@ std::unique_ptr<AlertWindow> LookAndFeel_V2::createAlertWindowForOptions (const 
                                              opt.getIconType(),
                                              opt.getAssociatedComponent());
 
+    aw->setEscapeKeyCancels (opt.getNumButtons() == 0);
+
     if (opt.getNumButtons() == 0)
         return aw;
 
@@ -408,34 +410,39 @@ std::unique_ptr<AlertWindow> LookAndFeel_V2::createAlertWindowForOptions (const 
 
     if (opt.getNumButtons() == 1)
     {
-        aw->addButton (opt.getButtonText (0),
-                       opt.getButtonResultCode (0),
+        const auto& button = opt.getButtons().front();
+        aw->addButton (button.getText(),
+                       button.getCode(),
                        KeyPress (KeyPress::escapeKey),
                        KeyPress (KeyPress::returnKey));
+
+        return aw;
     }
-    else
+
+    const auto& buttons = opt.getButtons();
+
+    const auto buttonOrder = detail::AlertWindowHelpers::getSuggestedButtonOrder (opt);
+
+    std::set<juce_wchar> uniqueShortcuts;
+
+    for (const auto [index, value] : enumerate (buttonOrder))
     {
-        const auto button1 = 0 < opt.getNumButtons() ? opt.getButtonText (0) : String{};
-        const auto button2 = 1 < opt.getNumButtons() ? opt.getButtonText (1) : String{};
-        const auto button3 = 2 < opt.getNumButtons() ? opt.getButtonText (2) : String{};
+        const auto& button = buttons[(size_t) value];
+        const auto shortcut = CharacterFunctions::toLowerCase (button.getText()[0]);
+        const auto mnemonic = uniqueShortcuts.insert (shortcut).second ? KeyPress ((int) shortcut, 0, 0) : KeyPress();
 
-        const auto button1Key = (int) CharacterFunctions::toLowerCase (button1[0]);
-        const auto button2Key = (int) CharacterFunctions::toLowerCase (button2[0]);
-
-        const KeyPress button1ShortCut (button1Key, 0, 0);
-        const auto button2ShortCut = button2Key != button1Key ? KeyPress (button2Key, 0, 0) : KeyPress{};
-
-        if (opt.getNumButtons() == 2)
+        const auto actionKey = std::invoke ([&, visualIndex = index]
         {
-            aw->addButton (button1, opt.getButtonResultCode (0), KeyPress (KeyPress::returnKey), button1ShortCut);
-            aw->addButton (button2, opt.getButtonResultCode (1), KeyPress (KeyPress::escapeKey), button2ShortCut);
-        }
-        else if (opt.getNumButtons() == 3)
-        {
-            aw->addButton (button1, opt.getButtonResultCode (0), button1ShortCut);
-            aw->addButton (button2, opt.getButtonResultCode (1), button2ShortCut);
-            aw->addButton (button3, opt.getButtonResultCode (2), KeyPress (KeyPress::escapeKey));
-        }
+            if (button.isPreferredAction() || (opt.getNumButtons() == 2 && visualIndex == 0))
+                return KeyPress (KeyPress::returnKey);
+
+            if (button.getRole() == MessageBoxButtonRole::cancel || visualIndex == opt.getNumButtons() - 1)
+                return KeyPress (KeyPress::escapeKey);
+
+            return KeyPress();
+        });
+
+        aw->addButton (button.getText(), button.getCode(), mnemonic, actionKey);
     }
 
     return aw;
