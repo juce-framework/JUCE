@@ -1921,7 +1921,7 @@ struct GLState : private CachedImageListListener
         auto programs = currentShader.programs;
 
         const ShaderPrograms::MaskedShaderParams* maskParams = nullptr;
-        const ShaderPrograms::ImageParams* imageParams;
+        const ShaderPrograms::ImageParams* imageParams = nullptr;
 
         if (maskArea != nullptr)
         {
@@ -1979,6 +1979,57 @@ struct GLState : private CachedImageListListener
 
 private:
     GLuint previousFrameBufferTarget;
+
+    class ScopedTextureBindingState
+    {
+    public:
+        ScopedTextureBindingState()
+        {
+            glActiveTexture (previousTextureUnit);
+        }
+
+        ~ScopedTextureBindingState()
+        {
+            for (const auto [index, binding] : enumerate (previousTextureBindings, GLenum{}))
+            {
+                glActiveTexture (GL_TEXTURE0 + index);
+                glBindTexture (GL_TEXTURE_2D, binding);
+            }
+
+            glActiveTexture (previousTextureUnit);
+        }
+
+    private:
+        static GLuint getActiveTextureUnit()
+        {
+            GLint result{};
+            glGetIntegerv (GL_ACTIVE_TEXTURE, &result);
+            return (GLuint) result;
+        }
+
+        static std::vector<GLuint> getTextureBindings()
+        {
+            GLint numUnits{};
+            glGetIntegerv (GL_MAX_TEXTURE_IMAGE_UNITS, &numUnits);
+
+            std::vector<GLuint> result ((size_t) numUnits, 0);
+
+            for (const auto [index, value] : enumerate (result, GLenum{}))
+            {
+                glActiveTexture (GL_TEXTURE0 + index);
+                GLint binding{};
+                glGetIntegerv (GL_TEXTURE_BINDING_2D, &binding);
+                value = (GLuint) binding;
+            }
+
+            return result;
+        }
+
+        GLuint previousTextureUnit = getActiveTextureUnit();
+        std::vector<GLuint> previousTextureBindings = getTextureBindings();
+    };
+
+    ScopedTextureBindingState scopedTextureBindingState;
     SavedBinding<TraitsVAO> savedVAOBinding;
     ViewportRestorer viewportRestorer;
 
