@@ -1586,7 +1586,7 @@ public:
 
             if (inputDeviceActive)
             {
-                if (outputDevice == nullptr)
+                if (! outputDeviceActive)
                 {
                     if (WaitForSingleObject (inputDevice->clientEvent, 1000) == WAIT_TIMEOUT)
                         break;
