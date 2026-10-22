@@ -139,8 +139,17 @@ struct CachedImageList final : public ReferenceCountedObject,
 
             if (textureNeedsReloading)
             {
+                GLint prev{};
+                glGetIntegerv (GL_TEXTURE_BINDING_2D, &prev);
+
                 textureNeedsReloading = false;
                 texture.loadImage (Image (*pixelData));
+
+                GLint next{};
+                glGetIntegerv (GL_TEXTURE_BINDING_2D, &next);
+
+                if (next != prev)
+                    glBindTexture (GL_TEXTURE_2D, (GLuint) prev);
             }
 
             t.textureID = texture.getTextureID();
