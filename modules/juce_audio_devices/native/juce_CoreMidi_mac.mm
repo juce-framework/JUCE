@@ -547,7 +547,7 @@ struct CoreMidiHelpers
                 return nullptr;
 
             const std::shared_ptr<SharedEndpointsImplNative> result { new SharedEndpointsImplNative (*clientRef, listener) };
-            Listeners::get().add (result);
+            Listeners::getInstance()->add (result);
             return result;
         }
 
@@ -566,12 +566,14 @@ struct CoreMidiHelpers
             return endpoints.getEndpointInfo (x);
         }
 
-        class Listeners : private AsyncUpdater
+        class Listeners : public DeletedAtShutdown,
+                          private AsyncUpdater
         {
         public:
             ~Listeners() override
             {
                 cancelPendingUpdate();
+                clearSingletonInstance();
             }
 
             void add (std::weak_ptr<SharedEndpointsImplNative> ptr)
@@ -590,21 +592,20 @@ struct CoreMidiHelpers
                 triggerMainThreadUpdate();
             }
 
-            static Listeners& get()
-            {
-                static Listeners listeners;
-                return listeners;
-            }
+            JUCE_DECLARE_SINGLETON_SINGLETHREADED_INLINE (Listeners, false)
 
         private:
             Listeners() = default;
 
             void triggerMainThreadUpdate()
             {
-                if (MessageManager::getInstance()->isThisTheMessageThread())
-                    handleAsyncUpdate();
-                else
-                    triggerAsyncUpdate();
+                if (auto* mm = MessageManager::getInstanceWithoutCreating())
+                {
+                    if (mm->isThisTheMessageThread())
+                        handleAsyncUpdate();
+                    else
+                        triggerAsyncUpdate();
+                }
             }
 
             void handleAsyncUpdate() override
@@ -666,7 +667,8 @@ struct CoreMidiHelpers
                     const auto& addRemove = *reinterpret_cast<const MIDIObjectAddRemoveNotification*> (notification);
 
                     if (addRemove.childType == kMIDIObjectType_Source || addRemove.childType == kMIDIObjectType_Destination)
-                        Listeners::get().notify (addRemove.child);
+                        if (auto* listeners = Listeners::getInstanceWithoutCreating())
+                            listeners->notify (addRemove.child);
 
                     break;
                 }
@@ -676,7 +678,9 @@ struct CoreMidiHelpers
                 case kMIDIMsgThruConnectionsChanged:
                 case kMIDIMsgIOError:
                 case kMIDIMsgSerialPortOwnerChanged:
-                    Listeners::get().notify (std::nullopt);
+                    if (auto* listeners = Listeners::getInstanceWithoutCreating())
+                        listeners->notify (std::nullopt);
+
                     break;
 
                 case kMIDIMsgSetupChanged:
