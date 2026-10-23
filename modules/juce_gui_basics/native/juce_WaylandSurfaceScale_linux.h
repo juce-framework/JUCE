@@ -63,6 +63,7 @@ public:
     Update setPreferredFractionalScale120 (int scale120);
     Update setPreferredBufferScale (int scale);
     Update setOutputScale (int scale);
+    Update copyPreferredFractionalScale (const WaylandSurfaceScale& other);
     Update setOverrideScale (std::optional<double> scale);
 
     std::optional<double> getOverrideScale() const;

@@ -300,6 +300,11 @@ public:
 
         // No repaint or listener notification is needed while the peer is being constructed.
         surfaceScale.setOutputScale (getScaleForSurfaceOutputs());
+
+        // PopupMenu sizes the menu before the compositor reports this surface's scale.
+        if (const auto* parent = getPopupOwnerOrSubsurfaceParent())
+            surfaceScale.copyPreferredFractionalScale (parent->surfaceScale);
+
         createScaleObjects();
         updateToplevelSizeConstraints();
         WaylandProtocol::wlSurfaceAddListener (surface.get(), &surfaceListener, callbackState.get());
@@ -1722,11 +1727,28 @@ private:
         return true;
     }
 
+    const WaylandComponentPeer* getPopupOwnerOrSubsurfaceParent() const
+    {
+        if (const auto* popupRole = getPopupRole(); popupRole != nullptr && popupRole->owner.has_value())
+            return popupRole->owner->toplevel.get();
+
+        return getSubsurfaceParent();
+    }
+
     int getScaleForSurfaceOutputs() const
     {
         auto* windowSystem = WaylandWindowSystem::getInstance();
 
-        return surfaceOutputs.getLargestScale (windowSystem->getLargestOutputScale(),
+        // A new child surface usually shares its parent's output scale.
+        const auto fallbackScale = std::invoke ([&]
+        {
+            if (const auto* parent = getPopupOwnerOrSubsurfaceParent())
+                return parent->getScaleForSurfaceOutputs();
+
+            return windowSystem->getLargestOutputScale();
+        });
+
+        return surfaceOutputs.getLargestScale (fallbackScale,
                                                [windowSystem] (wl_output* output) { return windowSystem->getScaleForOutput (output); });
     }
 
@@ -2100,13 +2122,8 @@ private:
         if (getToplevelRole() != nullptr)
             return surface.get();
 
-        if (const auto* popupRole = getPopupRole(); popupRole != nullptr && popupRole->owner.has_value())
-            if (auto* toplevel = popupRole->owner->toplevel.get())
-                return toplevel->surface.get();
-
-        if (const auto* subsurfaceRole = getSubsurfaceRole())
-            if (auto* parent = subsurfaceRole->parent.get())
-                return parent->getToplevelSurface();
+        if (const auto* parent = getPopupOwnerOrSubsurfaceParent())
+            return parent->getToplevelSurface();
 
         return nullptr;
     }

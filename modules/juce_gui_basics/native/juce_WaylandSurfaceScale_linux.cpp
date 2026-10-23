@@ -63,6 +63,16 @@ WaylandSurfaceScale::Update WaylandSurfaceScale::setOutputScale (int scale)
     });
 }
 
+// The compositor may leave a surface's preferred buffer scale at 1 without sending an event,
+// so only the fractional scale is copied.
+WaylandSurfaceScale::Update WaylandSurfaceScale::copyPreferredFractionalScale (const WaylandSurfaceScale& other)
+{
+    return updateScaleState ([&]
+    {
+        preferredFractionalScale120 = other.preferredFractionalScale120;
+    });
+}
+
 WaylandSurfaceScale::Update WaylandSurfaceScale::setOverrideScale (std::optional<double> scale)
 {
     return updateScaleState ([&]
@@ -320,6 +330,59 @@ public:
             expect (! update.scaleFactorToReport.has_value());
             expect (! update.bufferGeometryChanged);
             expectEquals (state.getScaleFactor(), 1.5);
+        });
+
+        // Copied scale
+        constexpr auto parentScale120 = 160;
+        constexpr auto childOutputScale = 3;
+
+        testCase ("A copied fractional scale wins over the output scale", [&]
+        {
+            WaylandSurfaceScale parent;
+            parent.setPreferredFractionalScale120 (parentScale120);
+
+            WaylandSurfaceScale child;
+            child.setOutputScale (childOutputScale);
+            child.copyPreferredFractionalScale (parent);
+            expectEquals (child.getScaleFactor(), parent.getScaleFactor());
+        });
+
+        testCase ("Copying a fractional scale leaves the preferred buffer scale to the compositor", [&]
+        {
+            WaylandSurfaceScale parent;
+            parent.setPreferredBufferScale (childOutputScale - 1);
+            parent.setPreferredFractionalScale120 (parentScale120);
+
+            WaylandSurfaceScale child;
+            child.setOutputScale (childOutputScale);
+            child.copyPreferredFractionalScale (parent);
+            expectEquals (child.getIntegerCompositorScale(), childOutputScale);
+        });
+
+        testCase ("Copying from a parent without a fractional scale leaves the output scale in use", [&]
+        {
+            WaylandSurfaceScale parent;
+
+            WaylandSurfaceScale child;
+            child.setOutputScale (childOutputScale);
+
+            const auto update = child.copyPreferredFractionalScale (parent);
+            expect (! update.scaleFactorToReport.has_value());
+            expect (! update.bufferGeometryChanged);
+            expectEquals (child.getScaleFactor(), (double) childOutputScale);
+        });
+
+        testCase ("A surface's own fractional scale that matches the copied one reports no change", [&]
+        {
+            WaylandSurfaceScale parent;
+            parent.setPreferredFractionalScale120 (parentScale120);
+
+            WaylandSurfaceScale child;
+            child.copyPreferredFractionalScale (parent);
+
+            const auto update = child.setPreferredFractionalScale120 (parentScale120);
+            expect (! update.scaleFactorToReport.has_value());
+            expect (! update.bufferGeometryChanged);
         });
 
         testCase ("A fractional preferred scale in 120ths determines the buffer size", [&]
