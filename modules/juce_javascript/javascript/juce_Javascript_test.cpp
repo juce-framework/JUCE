@@ -447,6 +447,33 @@ public:
 
             expect (numCalls == 2);
         }
+
+        beginTest ("Native functions and properties called on the wrong object throw an exception");
+        {
+            JavascriptEngine temporaryEngine;
+
+            auto obj = rawToUniquePtr (new DynamicObject);
+            obj->setMethod ("fn", [] (const auto& args) { return args.arguments[0]; });
+            obj->setProperty ("prop", 1);
+
+            temporaryEngine.registerNativeObject ("obj", obj.release());
+            temporaryEngine.registerNativeObject ("other", new DynamicObject);
+
+            for (auto* code : { "var f = obj.fn; f (1);",
+                                "obj.fn.call ({}, 1);",
+                                "other.fn = obj.fn; other.fn (1);",
+                                "Object.getOwnPropertyDescriptor (obj, 'prop').get.call ({});",
+                                "Object.getOwnPropertyDescriptor (obj, 'prop').set.call (other, 2);" })
+            {
+                auto res = juce::Result::ok();
+                temporaryEngine.evaluate (code, &res);
+                expect (res.failed(), code);
+            }
+
+            auto res = juce::Result::fail ("");
+            expect (temporaryEngine.evaluate ("obj.fn (2) + obj.prop;", &res) == var { 3 });
+            expect (res.wasOk());
+        }
     }
 };
 
