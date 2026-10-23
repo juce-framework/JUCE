@@ -115,7 +115,7 @@ public:
 
     var evaluate (const String& code, Result* errorMessage)
     {
-        engine->resetTimeout();
+        const detail::QuickJSWrapper::ScopedExecution execution { *engine };
 
         if (errorMessage != nullptr)
             *errorMessage = Result::ok();
@@ -148,7 +148,7 @@ public:
                       const var::NativeFunctionArgs& args,
                       Result* errorMessage)
     {
-        engine->resetTimeout();
+        const detail::QuickJSWrapper::ScopedExecution execution { *engine };
 
         auto* ctx = engine->getQuickJSContext();
         const auto functionStr = function.toString();

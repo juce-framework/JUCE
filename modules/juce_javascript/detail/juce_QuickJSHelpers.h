@@ -446,17 +446,38 @@ public:
         return impl->runtime;
     }
 
-    void resetTimeout()
-    {
-        timeout = (int64) Time::getMillisecondCounterHiRes() + maximumExecutionTime.inMilliseconds();
-    }
-
     void stop()
     {
         timeout = (int64) Time::getMillisecondCounterHiRes();
     }
 
+    class ScopedExecution
+    {
+    public:
+        explicit ScopedExecution (QuickJSWrapper& engineIn)
+            : engine (engineIn)
+        {
+            if (engine.executionDepth++ == 0)
+                engine.resetTimeout();
+        }
+
+        ~ScopedExecution()
+        {
+            --engine.executionDepth;
+        }
+
+    private:
+        QuickJSWrapper& engine;
+
+        JUCE_DECLARE_NON_COPYABLE (ScopedExecution)
+    };
+
 private:
+    void resetTimeout()
+    {
+        timeout = (int64) Time::getMillisecondCounterHiRes() + maximumExecutionTime.inMilliseconds();
+    }
+
     static int handleInterrupt (qjs::JSRuntime*, void* opaque)
     {
         auto& self = *static_cast<QuickJSWrapper*> (opaque);
@@ -467,6 +488,7 @@ private:
     const RelativeTime& maximumExecutionTime;
     std::atomic<int64> timeout{};
     std::set<ValueHandle*> handles;
+    int executionDepth = 0;
 
     JUCE_DECLARE_NON_COPYABLE (QuickJSWrapper)
 };
@@ -487,7 +509,7 @@ public:
         if (engine == nullptr)
             return var::undefined();
 
-        engine->resetTimeout();
+        const QuickJSWrapper::ScopedExecution execution { *engine };
 
         auto* ctx = engine->getQuickJSContext();
         JSFunctionArguments convertedArgs { ctx, args };
