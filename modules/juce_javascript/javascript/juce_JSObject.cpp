@@ -113,7 +113,7 @@ public:
         if (engine == nullptr)
             return String ("The JavascriptEngine that owned this object has been destroyed");
 
-        engine->resetTimeout();
+        const detail::QuickJSWrapper::ScopedExecution execution { *engine };
 
         if (! hasProperty (methodName))
         {
