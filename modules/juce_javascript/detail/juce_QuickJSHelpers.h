@@ -628,17 +628,32 @@ struct DynamicObjectWrapper
     }
 
     //==============================================================================
+    static DynamicObjectWrapper* getWrapperForThis (qjs::JSValueConst thisValue, int ordinal)
+    {
+        auto* self = static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque (thisValue, getClassId()));
+        return self != nullptr && isPositiveAndBelow (ordinal, (int) self->identifiers.size()) ? self : nullptr;
+    }
+
+    static qjs::JSValue throwIncompatibleThis (qjs::JSContext* ctx)
+    {
+        return qjs::JS_ThrowTypeError (ctx, "function called on an object other than the native object it belongs to");
+    }
+
     static qjs::JSValue callDispatcher (qjs::JSContext* ctx,
                                         qjs::JSValueConst thisValue,
                                         int numArgs,
                                         qjs::JSValueConst* args,
                                         int ordinal)
     {
-        auto& self = *static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque2 (ctx, thisValue, getClassId()));
+        auto* self = getWrapperForThis (thisValue, ordinal);
+
+        if (self == nullptr)
+            return throwIncompatibleThis (ctx);
+
         const auto argList = quickJSToJuce (Span { args, (size_t) numArgs }, ctx);
-        const auto identifier = self.getIdentifier (ordinal);
-        auto result = self.object->invokeMethod (identifier,
-                                                 { self.object.get(), argList.data(), (int) argList.size() });
+        const auto identifier = self->getIdentifier (ordinal);
+        auto result = self->object->invokeMethod (identifier,
+                                                  { self->object.get(), argList.data(), (int) argList.size() });
         return juceToQuickJs (result, ctx);
     }
 
@@ -647,8 +662,12 @@ struct DynamicObjectWrapper
                                        qjs::JSValueConst val,
                                        int ordinal)
     {
-        auto& self = *static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque2 (ctx, thisVal, getClassId()));
-        self.object->setProperty (self.getIdentifier (ordinal), discardError (quickJSToJuce ({ qjs::JS_DupValue (ctx, val), ctx })));
+        auto* self = getWrapperForThis (thisVal, ordinal);
+
+        if (self == nullptr)
+            return throwIncompatibleThis (ctx);
+
+        self->object->setProperty (self->getIdentifier (ordinal), discardError (quickJSToJuce ({ qjs::JS_DupValue (ctx, val), ctx })));
 
         // In case there is a problem we could return e.g. `JS_EXCEPTION` or
         // `JS_ThrowRangeError(ctx, "invalid precision");` here.
@@ -657,8 +676,12 @@ struct DynamicObjectWrapper
 
     static qjs::JSValue getDispatcher (qjs::JSContext* ctx, qjs::JSValueConst thisVal, int ordinal)
     {
-        auto& self = *static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque2 (ctx, thisVal, getClassId()));
-        return juceToQuickJs (self.object->getProperty (self.getIdentifier (ordinal)), ctx);
+        auto* self = getWrapperForThis (thisVal, ordinal);
+
+        if (self == nullptr)
+            return throwIncompatibleThis (ctx);
+
+        return juceToQuickJs (self->object->getProperty (self->getIdentifier (ordinal)), ctx);
     }
 
     static qjs::JSClassID getClassId()
