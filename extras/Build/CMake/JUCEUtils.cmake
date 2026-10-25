@@ -440,7 +440,17 @@ function(_juce_write_configure_time_info target)
     get_target_property(juce_library_code ${target} JUCE_GENERATED_SOURCES_DIRECTORY)
 
     set(info_file "${juce_library_code}/Info.txt")
-    file(WRITE "${info_file}" "${file_content}")
+    set(old_file_content "")
+
+    if(EXISTS "${info_file}")
+        file(READ "${info_file}" old_file_content)
+    endif()
+
+    # Build-time steps that read the info file depend on it, so it's only rewritten when it changes
+    if(NOT "${old_file_content}" STREQUAL "${file_content}")
+        file(WRITE "${info_file}" "${file_content}")
+    endif()
+
     set_target_properties(${target} PROPERTIES JUCE_INFO_FILE "${info_file}")
 endfunction()
 
@@ -880,10 +890,10 @@ function(_juce_add_resources_rc source_target dest_target)
         get_target_property(input_info_file ${source_target} JUCE_INFO_FILE)
 
         get_target_property(generated_icon ${source_target} JUCE_ICON_FILE)
-        set(dependency)
+        set(dependency DEPENDS "${input_info_file}")
 
         if(generated_icon)
-            set(dependency DEPENDS "${generated_icon}")
+            list(APPEND dependency "${generated_icon}")
         endif()
 
         set(resource_rc_file "${juce_library_code}/${source_target}_resources.rc")
