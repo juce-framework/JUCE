@@ -50,16 +50,20 @@ struct WindowSceneTracker
 {
 public:
     WindowSceneTracker() = default;
+    ~WindowSceneTracker();
 
-    void setWindowScene (UIWindowScene* x) API_AVAILABLE (ios (13.0))
-    {
-        windowScene = x;
-        listeners.call ([] (auto& l) { l.windowSceneChanged(); });
-    }
+    void setWindowScene (UIWindowScene* x) API_AVAILABLE (ios (13.0));
 
     UIWindowScene* getWindowScene() const API_AVAILABLE (ios (13.0))
     {
         return static_cast<UIWindowScene*> (windowScene);
+    }
+
+    UIWindow* getDisplayInfoWindow() const { return displayInfoWindow.get(); }
+
+    void displayInfoChanged()
+    {
+        notifyListeners();
     }
 
     void addListener (WindowSceneTrackerListener& l)
@@ -73,8 +77,17 @@ public:
     }
 
 private:
+    void notifyListeners()
+    {
+        listeners.call ([] (auto& l) { l.windowSceneChanged(); });
+    }
+
+    void createDisplayInfoWindow() API_AVAILABLE (ios (13.0));
+    void destroyDisplayInfoWindow();
+
     ListenerList<WindowSceneTrackerListener> listeners;
     id windowScene = nil;
+    NSUniquePtr<UIWindow> displayInfoWindow;
 };
 
 //==============================================================================
@@ -376,10 +389,71 @@ struct CADisplayLinkDeleter
 - (void) becomeKeyWindow;
 @end
 
+@interface JuceDisplayInfoView : UIView
+{
+@public
+    WindowSceneTracker* owner;
+}
+@end
+
+@interface JuceDisplayInfoViewController : UIViewController
+@end
+
 //==============================================================================
 //==============================================================================
 namespace juce
 {
+
+WindowSceneTracker::~WindowSceneTracker()
+{
+    destroyDisplayInfoWindow();
+}
+
+void WindowSceneTracker::setWindowScene (UIWindowScene* x)
+{
+    if (windowScene != x)
+    {
+        destroyDisplayInfoWindow();
+        windowScene = x;
+
+        if (x != nil)
+            createDisplayInfoWindow();
+    }
+
+    notifyListeners();
+}
+
+void WindowSceneTracker::createDisplayInfoWindow()
+{
+    const NSUniquePtr<JuceDisplayInfoView> view { [[JuceDisplayInfoView alloc] init] };
+    view.get()->owner = this;
+
+    const NSUniquePtr<JuceDisplayInfoViewController> controller { [[JuceDisplayInfoViewController alloc] init] };
+    controller.get().view = view.get();
+
+    displayInfoWindow.reset ([[UIWindow alloc] initWithWindowScene: getWindowScene()]);
+    auto* window = displayInfoWindow.get();
+    window.rootViewController = controller.get();
+    window.windowLevel = UIWindowLevelNormal - 1;
+    window.userInteractionEnabled = NO;
+    window.alpha = 0.0;
+    window.hidden = NO;
+}
+
+void WindowSceneTracker::destroyDisplayInfoWindow()
+{
+    if (auto* window = displayInfoWindow.get())
+    {
+        static_cast<JuceDisplayInfoView*> (window.rootViewController.view)->owner = nullptr;
+        window.hidden = YES;
+        window.rootViewController = nil;
+
+        if (@available (iOS 13, *))
+            window.windowScene = nil;
+    }
+
+    displayInfoWindow.reset();
+}
 
 struct UIViewPeerControllerReceiver
 {
@@ -542,6 +616,10 @@ private:
     void appStyleChanged() override
     {
         [controller setNeedsStatusBarAppearanceUpdate];
+
+        if (@available (iOS 13, *))
+            if (auto* displayInfoWindow = windowSceneTracker->getDisplayInfoWindow())
+                [displayInfoWindow.rootViewController setNeedsStatusBarAppearanceUpdate];
     }
 
     void updateSceneForWindow()
@@ -666,6 +744,24 @@ static bool isKioskModeView (JuceUIViewController* c)
     return false;
 }
 
+static UIStatusBarStyle getStatusBarStyle (ComponentPeer::Style style)
+{
+    if (@available (iOS 13.0, *))
+    {
+        switch (style)
+        {
+            case ComponentPeer::Style::automatic:
+                return UIStatusBarStyleDefault;
+            case ComponentPeer::Style::light:
+                return UIStatusBarStyleDarkContent;
+            case ComponentPeer::Style::dark:
+                return UIStatusBarStyleLightContent;
+        }
+    }
+
+    return UIStatusBarStyleDefault;
+}
+
 MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
 } // namespace juce
@@ -710,21 +806,8 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
 - (UIStatusBarStyle) preferredStatusBarStyle
 {
-    if (@available (iOS 13.0, *))
-    {
-        if (auto* peer = getViewPeer (self))
-        {
-            switch (peer->getAppStyle())
-            {
-                case ComponentPeer::Style::automatic:
-                    return UIStatusBarStyleDefault;
-                case ComponentPeer::Style::light:
-                    return UIStatusBarStyleDarkContent;
-                case ComponentPeer::Style::dark:
-                    return UIStatusBarStyleLightContent;
-            }
-        }
-    }
+    if (auto* peer = getViewPeer (self))
+        return getStatusBarStyle (peer->getAppStyle());
 
     return UIStatusBarStyleDefault;
 }
@@ -755,6 +838,60 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 - (void) viewDidLayoutSubviews
 {
     sendScreenBoundsUpdate (self);
+}
+
+@end
+
+@implementation JuceDisplayInfoView
+
+- (void) safeAreaInsetsDidChange
+{
+    [super safeAreaInsetsDidChange];
+
+    if (owner != nullptr)
+        owner->displayInfoChanged();
+}
+
+@end
+
+@implementation JuceDisplayInfoViewController
+
+// This window must follow the scene rather than rotate on its own, so it supports the
+// orientation the scene is already in as well as the orientations allowed by the app.
+- (UIInterfaceOrientationMask) supportedInterfaceOrientations
+{
+    auto mask = Orientations::getSupportedOrientations();
+
+    if (@available (iOS 13, *))
+        if (auto* scene = self.view.window.windowScene)
+            if (scene.interfaceOrientation != UIInterfaceOrientationUnknown)
+                mask |= (UIInterfaceOrientationMask) (1 << scene.interfaceOrientation);
+
+    return mask;
+}
+
+// UIKit takes the status bar appearance from this window whenever none of the
+// app's windows fills the screen, so it must answer as they would.
+- (BOOL) prefersStatusBarHidden
+{
+    if (Desktop::getInstance().getKioskModeComponent() != nullptr)
+        return true;
+
+    return [super prefersStatusBarHidden];
+}
+
+- (BOOL) prefersHomeIndicatorAutoHidden
+{
+    return Desktop::getInstance().getKioskModeComponent() != nullptr;
+}
+
+- (UIStatusBarStyle) preferredStatusBarStyle
+{
+    if (auto* frontmost = Desktop::getInstance().getComponent (0))
+        if (auto* peer = frontmost->getPeer())
+            return getStatusBarStyle (peer->getAppStyle());
+
+    return UIStatusBarStyleDefault;
 }
 
 @end
@@ -2386,6 +2523,14 @@ void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable,
             [uiViewPeer->controller setNeedsStatusBarAppearanceUpdate];
 
         peer->setFullScreen (enableOrDisable);
+    }
+
+    if (@available (iOS 13, *))
+    {
+        SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
+
+        if (auto* window = windowSceneTracker->getDisplayInfoWindow())
+            [window.rootViewController setNeedsStatusBarAppearanceUpdate];
     }
 }
 
