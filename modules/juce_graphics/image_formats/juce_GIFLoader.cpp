@@ -230,19 +230,26 @@ private:
         sp = stack;
     }
 
+    int readFirstCode()
+    {
+        for (;;)
+        {
+            firstcode = oldcode = getCode (codeSize, false);
+
+            if (clearCode < firstcode)
+                return -2;
+
+            if (firstcode != clearCode)
+                return firstcode;
+        }
+    }
+
     int readLZWByte()
     {
         if (fresh)
         {
             fresh = false;
-
-            for (;;)
-            {
-                firstcode = oldcode = getCode (codeSize, false);
-
-                if (firstcode != clearCode)
-                    return firstcode;
-            }
+            return readFirstCode();
         }
 
         if (sp > stack)
@@ -259,8 +266,7 @@ private:
                 maxCodeSize = 2 * clearCode;
                 maxCode = clearCode + 2;
                 sp = stack;
-                firstcode = oldcode = getCode (codeSize, false);
-                return firstcode;
+                return readFirstCode();
             }
             else if (code == endCode)
             {
@@ -363,6 +369,9 @@ private:
     {
         uint8 c;
         if (input.read (&c, 1) != 1)
+            return false;
+
+        if (8 < c)
             return false;
 
         initialise (c);
