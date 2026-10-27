@@ -686,6 +686,16 @@ static const UIWindow* findWindow (const Desktop& desktop)
     return {};
 }
 
+API_AVAILABLE (ios (13.0))
+static CGRect getSceneBounds (UIWindowScene* scene)
+{
+   #if JUCE_IOS_API_VERSION_MIN_REQUIRED_AT_LEAST (26, 0)
+    return scene.effectiveGeometry.coordinateSpace.bounds;
+   #else
+    return scene.coordinateSpace.bounds;
+   #endif
+}
+
 static WindowInfo getWindowInfo (const Desktop& desktop)
 {
     if (! JUCEApplication::isStandaloneApp())
@@ -701,10 +711,14 @@ static WindowInfo getWindowInfo (const Desktop& desktop)
         // still the right place to read the safe area insets from.
         if (const auto* window = windowSceneTracker->getDisplayInfoWindow())
             if (auto* scene = windowSceneTracker->getWindowScene())
-                return WindowInfo { window, convertToRectInt (scene.coordinateSpace.bounds) };
+                return WindowInfo { window, convertToRectInt (getSceneBounds (scene)) };
     }
 
+    // A window scene may not have connected yet, so a window without one is still needed on iOS 13 and later.
+    JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
     const NSUniquePtr<UIWindow> window { [[UIWindow alloc] init] };
+    JUCE_END_IGNORE_DEPRECATION_WARNINGS
+
     return WindowInfo { window.get() };
 }
 

@@ -167,6 +167,10 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 {
     NSUInteger value;
 
+    // The replacement notifications are only available from iOS 27, so the deprecated
+    // interruption notification is still required for all earlier deployment targets.
+    JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
+
     if (juce::getNotificationValueForKey (notification, AVAudioSessionInterruptionTypeKey, value))
     {
         switch ((AVAudioSessionInterruptionType) value)
@@ -182,6 +186,8 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
             // No default so the code doesn't compile if this enum is extended.
         }
     }
+
+    JUCE_END_IGNORE_DEPRECATION_WARNINGS
 }
 
 - (void) handleMediaServicesReset
