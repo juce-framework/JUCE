@@ -4,6 +4,27 @@
 
 ## Change
 
+The default macOS and iOS deployment targets set by the Projucer have been
+increased to macOS 12.0 and iOS 15.0 respectively.
+
+**Possible Issues**
+
+Projects using the Projucer's default minimum deployment target will have their
+minimum deployment target increased.
+
+**Workaround**
+
+If you need a lower minimum deployment target then you must set this in the
+Projucer's Xcode build configuration settings.
+
+**Rationale**
+
+Xcode 27 no longer supports deployment targets lower than macOS 12.0 and iOS
+15.0.
+
+
+## Change
+
 On Windows, native message boxes with three buttons, created using the
 MessageBoxOptions::withButton() builder, no longer have cancellation behaviour
 (where the box can be dismissed with alt+f4, escape, etc.) by default.
