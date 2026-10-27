@@ -461,7 +461,7 @@ struct MenuWindow final : public Component, private AsyncUpdater
         });
 
         setOpaque (lf.findColour (backgroundColourId).isOpaque()
-                     || ! Desktop::canUseSemiTransparentWindows());
+                     || (options.getParentComponent() == nullptr && ! Desktop::canUseSemiTransparentWindows()));
 
         const auto initialSelectedId = options.getInitiallySelectedItemId();
 
