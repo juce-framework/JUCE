@@ -586,11 +586,6 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
-bool Desktop::isDarkModeActive() const
-{
-    return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
-}
-
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
 static const auto darkModeSelector = @selector (darkModeChanged:);
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
@@ -711,6 +706,11 @@ static WindowInfo getWindowInfo (const Desktop& desktop)
 
     const NSUniquePtr<UIWindow> window { [[UIWindow alloc] init] };
     return WindowInfo { window.get() };
+}
+
+bool Desktop::isDarkModeActive() const
+{
+    return getWindowInfo (*this).screen.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
 }
 
 //==============================================================================

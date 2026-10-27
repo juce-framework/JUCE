@@ -116,13 +116,13 @@ private:
         PopoverDelegateClass()
             : ObjCClass ("PopoverDelegateClass_")
         {
-            addMethod (@selector (popoverPresentationController:willRepositionPopoverToRect:inView:), [] (id, SEL, UIPopoverPresentationController*, CGRect* rect, UIView*)
+            addMethod (@selector (popoverPresentationController:willRepositionPopoverToRect:inView:), [] (id, SEL, UIPopoverPresentationController*, CGRect* rect, UIView** view)
             {
-                auto screenBounds = [UIScreen mainScreen].bounds;
+                const auto viewBounds = (*view).bounds;
 
                 rect->origin.x = 0.f;
-                rect->origin.y = screenBounds.size.height - 10.f;
-                rect->size.width = screenBounds.size.width;
+                rect->origin.y = viewBounds.size.height - 10.f;
+                rect->size.width = viewBounds.size.width;
                 rect->size.height = 10.f;
             });
 

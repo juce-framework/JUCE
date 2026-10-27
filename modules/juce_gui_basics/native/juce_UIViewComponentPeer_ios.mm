@@ -655,10 +655,7 @@ private:
             }
             else if (window == nil)
             {
-                auto r = convertToCGRect (component.getBounds());
-                r.origin.y = [UIScreen mainScreen].bounds.size.height - (r.origin.y + r.size.height);
-
-                return [[JuceUIWindow alloc] initWithFrame: r];
+                return [[JuceUIWindow alloc] initWithFrame: convertToCGRect (component.getBounds())];
             }
 
             return nil;
@@ -1994,9 +1991,6 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp,
     }
     else
     {
-        r = convertToCGRect (component.getBounds());
-        r.origin.y = [UIScreen mainScreen].bounds.size.height - (r.origin.y + r.size.height);
-
         controller = [[JuceUIViewController alloc] init];
         controller.view = view;
 
