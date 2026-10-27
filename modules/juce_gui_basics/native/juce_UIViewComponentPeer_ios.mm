@@ -154,6 +154,21 @@ static KeysCurrentlyDown keysCurrentlyDown;
 static UIViewComponentPeer* currentlyFocusedPeer = nullptr;
 } // namespace iOSGlobals
 
+API_AVAILABLE (ios (13.0))
+static UIInterfaceOrientation getInterfaceOrientation (UIWindowScene* scene)
+{
+   #if JUCE_IOS_API_VERSION_MIN_REQUIRED_AT_LEAST (16, 0)
+    return scene.effectiveGeometry.interfaceOrientation;
+   #else
+    #if JUCE_IOS_API_VERSION_CAN_BE_BUILT (16, 0)
+     if (@available (iOS 16.0, *))
+         return scene.effectiveGeometry.interfaceOrientation;
+    #endif
+
+    return scene.interfaceOrientation;
+   #endif
+}
+
 static UIInterfaceOrientation getWindowOrientation()
 {
     UIApplication* sharedApplication = [UIApplication sharedApplication];
@@ -162,7 +177,7 @@ static UIInterfaceOrientation getWindowOrientation()
     {
         for (UIScene* scene in [sharedApplication connectedScenes])
             if ([scene isKindOfClass: [UIWindowScene class]])
-                return [(UIWindowScene*) scene interfaceOrientation];
+                return getInterfaceOrientation ((UIWindowScene*) scene);
     }
 
     JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
@@ -653,10 +668,12 @@ private:
                 if (auto* scene = windowSceneTracker->getWindowScene())
                     return [[JuceUIWindow alloc] initWithWindowScene: scene];
             }
+           #if ! JUCE_IOS_API_VERSION_MIN_REQUIRED_AT_LEAST (13, 0)
             else if (window == nil)
             {
                 return [[JuceUIWindow alloc] initWithFrame: convertToCGRect (component.getBounds())];
             }
+           #endif
 
             return nil;
         });
@@ -861,8 +878,8 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
     if (@available (iOS 13, *))
         if (auto* scene = self.view.window.windowScene)
-            if (scene.interfaceOrientation != UIInterfaceOrientationUnknown)
-                mask |= (UIInterfaceOrientationMask) (1 << scene.interfaceOrientation);
+            if (const auto orientation = getInterfaceOrientation (scene); orientation != UIInterfaceOrientationUnknown)
+                mask |= (UIInterfaceOrientationMask) (1 << orientation);
 
     return mask;
 }
