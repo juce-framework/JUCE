@@ -174,10 +174,28 @@ namespace PNGHelpers
         if (readHeader (in, pngReadStruct, pngInfoStruct, errorJumpBuf,
                         width, height, bitDepth, colorType, interlaceType))
         {
+            constexpr auto maxDimension = (png_uint_32) std::numeric_limits<int>::max();
+
+            if (width == 0 || height == 0 || maxDimension < width || maxDimension < height)
+                return Image();
+
+            constexpr size_t bytesPerPixel = 4;
+            constexpr auto maxBytes = std::numeric_limits<size_t>::max();
+
+            if (maxBytes / bytesPerPixel < (size_t) width)
+                return Image();
+
+            const auto lineStride = (size_t) width * bytesPerPixel;
+
+            if (maxBytes / lineStride < (size_t) height || maxBytes / sizeof (png_bytep) < (size_t) height)
+                return Image();
+
             // load the image into a temp buffer
-            const size_t lineStride = width * 4;
             HeapBlock<uint8> tempBuffer (height * lineStride);
             HeapBlock<png_bytep> rows (height);
+
+            if (tempBuffer == nullptr || rows == nullptr)
+                return Image();
 
             for (size_t y = 0; y < height; ++y)
                 rows[y] = (png_bytep) (tempBuffer + lineStride * y);
