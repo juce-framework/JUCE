@@ -1026,10 +1026,10 @@ protected:
             : BuildConfiguration (p, t, e),
               iOS (isIOS),
               macOSBaseSDK                 (config, Ids::macOSBaseSDK,                 getUndoManager()),
-              macOSDeploymentTarget        (config, Ids::macOSDeploymentTarget,        getUndoManager(), "10.13"),
+              macOSDeploymentTarget        (config, Ids::macOSDeploymentTarget,        getUndoManager(), "12.0"),
               macOSArchitecture            (config, Ids::osxArchitecture,              getUndoManager(), macOSArch_Default),
               iosBaseSDK                   (config, Ids::iosBaseSDK,                   getUndoManager()),
-              iosDeploymentTarget          (config, Ids::iosDeploymentTarget,          getUndoManager(), "12.0"),
+              iosDeploymentTarget          (config, Ids::iosDeploymentTarget,          getUndoManager(), "15.0"),
               customXcodeFlags             (config, Ids::customXcodeFlags,             getUndoManager()),
               plistPreprocessorDefinitions (config, Ids::plistPreprocessorDefinitions, getUndoManager()),
               codeSignIdentity             (config, Ids::codeSigningIdentity,          getUndoManager()),
@@ -1070,7 +1070,7 @@ protected:
                            "The version of the iOS SDK to link against." + sdkInfoString + "14.4.");
 
                 props.add (new TextPropertyComponent (iosDeploymentTarget, "iOS Deployment Target", 8, false),
-                           "The minimum version of iOS to target." + sdkInfoString + "12.0.");
+                           "The minimum version of iOS to target." + sdkInfoString + "15.0.");
             }
             else
             {
@@ -1078,7 +1078,7 @@ protected:
                            "The version of the macOS SDK to link against." + sdkInfoString + "11.1.");
 
                 props.add (new TextPropertyComponent (macOSDeploymentTarget, "macOS Deployment Target", 8, false),
-                           "The minimum version of macOS to target." + sdkInfoString + "10.11.");
+                           "The minimum version of macOS to target." + sdkInfoString + "12.0.");
 
                 props.add (new ChoicePropertyComponent (macOSArchitecture, "macOS Architecture",
                                                         { "Native architecture of build machine", "Standard 32-bit",        "Standard 32/64-bit",     "Standard 64-bit" },
@@ -2036,8 +2036,9 @@ public:
             else
             {
                 s.set ("GCC_GENERATE_DEBUGGING_SYMBOLS", "NO");
-                s.set ("DEAD_CODE_STRIPPING", "YES");
             }
+
+            s.set ("DEAD_CODE_STRIPPING", "YES");
 
             // This prevents Xcode injecting a strip command after copying a
             // plug-in or applying any PACE Fusion post-build steps.
@@ -3300,6 +3301,7 @@ private:
         s.set ("CLANG_WARN_NON_LITERAL_NULL_CONVERSION", "YES");
         s.set ("CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF", "YES");
         s.set ("CLANG_WARN_OBJC_LITERAL_CONVERSION", "YES");
+        s.set ("CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER", "YES");
         s.set ("CLANG_WARN_RANGE_LOOP_ANALYSIS", "YES");
         s.set ("CLANG_WARN_STRICT_PROTOTYPES", "YES");
         s.set ("CLANG_WARN_SUSPICIOUS_MOVE", "YES");
@@ -3311,6 +3313,14 @@ private:
         // GCC_SYMBOLS_PRIVATE_EXTERN only takes effect if ENABLE_TESTABILITY is off
         s.set ("ENABLE_TESTABILITY", "NO");
         s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "YES");
+
+        // These settings are recommended by Xcode's project validation. User script
+        // sandboxing is deliberately disabled, as it breaks the shell script phases
+        // that copy plug-ins into their install locations.
+        s.set ("DEAD_CODE_STRIPPING", "YES");
+        s.set ("ENABLE_USER_SCRIPT_SANDBOXING", "NO");
+        s.set ("STRING_CATALOG_GENERATE_SYMBOLS", "YES");
+        s.set ("ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS", "YES");
 
         if (config.isDebug())
         {
@@ -3632,7 +3642,7 @@ private:
         output << "// !$*UTF8*$!\n{\n"
                   "\tarchiveVersion = 1;\n"
                   "\tclasses = {\n\t};\n"
-                  "\tobjectVersion = 46;\n"
+                  "\tobjectVersion = 54;\n"
                   "\tobjects = {\n";
 
         StringArray objectTypes;
@@ -4139,7 +4149,7 @@ private:
         v.setProperty ("isa", "PBXProject", nullptr);
         v.setProperty ("attributes", indentBracedList (getProjectObjectAttributes()), nullptr);
         v.setProperty ("buildConfigurationList", createID ("__projList"), nullptr);
-        v.setProperty ("compatibilityVersion", "Xcode 3.2", nullptr);
+        v.setProperty ("compatibilityVersion", "Xcode 12.0", nullptr);
         v.setProperty ("hasScannedForEncodings", (int) 0, nullptr);
         v.setProperty ("knownRegions", indentParenthesisedList ({ "en", "Base" }), nullptr);
         v.setProperty ("mainGroup", createID ("__mainsourcegroup"), nullptr);
@@ -4239,7 +4249,7 @@ private:
     {
         std::map<String, String> attributes;
 
-        attributes["LastUpgradeCheck"] = "1340";
+        attributes["LastUpgradeCheck"] = "2710";
         attributes["BuildIndependentTargetsInParallel"] = "YES";
         attributes["ORGANIZATIONNAME"] = getProject().getCompanyNameString().quoted();
 
