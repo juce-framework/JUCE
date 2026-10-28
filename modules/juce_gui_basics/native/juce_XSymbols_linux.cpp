@@ -218,12 +218,15 @@ bool X11Symbols::loadAllSymbols()
                  makeSymbolBinding (xineramaIsActive,            "XineramaIsActive"),
                  makeSymbolBinding (xineramaQueryScreens,        "XineramaQueryScreens"));
    #endif
-   #if JUCE_USE_XRENDER
-    loadSymbols (xrenderLib,
-                 makeSymbolBinding (xRenderQueryVersion,         "XRenderQueryVersion"),
-                 makeSymbolBinding (xRenderFindStandardFormat,   "XRenderFindStandardFormat"),
-                 makeSymbolBinding (xRenderFindFormat,           "XRenderFindFormat"),
-                 makeSymbolBinding (xRenderFindVisualFormat,     "XRenderFindVisualFormat"));
+   #if JUCE_USE_XINPUT
+    loadSymbols (xinputLib,
+                 makeSymbolBinding (xiQueryVersion,              "XIQueryVersion"),
+                 makeSymbolBinding (xiQueryDevice,               "XIQueryDevice"),
+                 makeSymbolBinding (xiFreeDeviceInfo,            "XIFreeDeviceInfo"),
+                 makeSymbolBinding (xiSelectEvents,              "XISelectEvents"),
+                 makeSymbolBinding (xiGetClientPointer,          "XIGetClientPointer"),
+                 makeSymbolBinding (xiGrabDevice,                "XIGrabDevice"),
+                 makeSymbolBinding (xiUngrabDevice,              "XIUngrabDevice"));
    #endif
    #if JUCE_USE_XRANDR
     loadSymbols (xrandrLib,
@@ -235,6 +238,13 @@ bool X11Symbols::loadAllSymbols()
                  makeSymbolBinding (xRRFreeCrtcInfo,             "XRRFreeCrtcInfo"),
                  makeSymbolBinding (xRRGetOutputPrimary,         "XRRGetOutputPrimary"));
    #endif
+   #if JUCE_USE_XRENDER
+    loadSymbols (xrenderLib,
+                 makeSymbolBinding (xRenderQueryVersion,         "XRenderQueryVersion"),
+                 makeSymbolBinding (xRenderFindStandardFormat,   "XRenderFindStandardFormat"),
+                 makeSymbolBinding (xRenderFindFormat,           "XRenderFindFormat"),
+                 makeSymbolBinding (xRenderFindVisualFormat,     "XRenderFindVisualFormat"));
+   #endif
    #if JUCE_USE_XSHM
     loadSymbols (xLib, xextLib,
                  makeSymbolBinding (xShmAttach,                  "XShmAttach"),
@@ -243,16 +253,6 @@ bool X11Symbols::loadAllSymbols()
                  makeSymbolBinding (xShmGetEventBase,            "XShmGetEventBase"),
                  makeSymbolBinding (xShmPutImage,                "XShmPutImage"),
                  makeSymbolBinding (xShmQueryVersion,            "XShmQueryVersion"));
-   #endif
-   #if JUCE_USE_XINPUT
-    loadSymbols (xinputLib,
-                 makeSymbolBinding (xiQueryVersion,              "XIQueryVersion"),
-                 makeSymbolBinding (xiQueryDevice,               "XIQueryDevice"),
-                 makeSymbolBinding (xiFreeDeviceInfo,            "XIFreeDeviceInfo"),
-                 makeSymbolBinding (xiSelectEvents,              "XISelectEvents"),
-                 makeSymbolBinding (xiGetClientPointer,          "XIGetClientPointer"),
-                 makeSymbolBinding (xiGrabDevice,                "XIGrabDevice"),
-                 makeSymbolBinding (xiUngrabDevice,              "XIUngrabDevice"));
    #endif
 
     return true;
