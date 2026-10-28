@@ -484,6 +484,14 @@ public:
                                          (::Display*, ::Window, XSizeHints*),
                                          void)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XShapeQueryExtension, xShapeQueryExtension,
+                                         (::Display*, int*, int*),
+                                         Bool)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XShapeCombineRectangles, xShapeCombineRectangles,
+                                         (::Display*, ::Window, int, int, int, XRectangle*, int, int, int),
+                                         void)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XStringListToTextProperty, xStringListToTextProperty,
                                          (char**, int, XTextProperty*),
                                          Status)

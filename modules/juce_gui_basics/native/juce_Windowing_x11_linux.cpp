@@ -384,8 +384,13 @@ public:
                 continue;
 
             if (auto* peer = dynamic_cast<X11ComponentPeer*> (c->getPeer()))
+            {
+                if ((peer->getStyleFlags() & windowIgnoresMouseClicks) != 0)
+                    continue;
+
                 if (peer->contains (globalToLocal (*peer, localToGlobal (*this, localPos.toFloat())).roundToInt(), true))
                     return false;
+            }
         }
 
         if (trueIfInAChildWindow)
