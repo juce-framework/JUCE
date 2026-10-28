@@ -1,6 +1,0 @@
-Upstream: https://github.com/harfbuzz/harfbuzz
-
-# hb-ot-metrics.cc
-
-GET_METRIC_X macro was un-commented to avoid a warning about multi-line
-comments with GCC.

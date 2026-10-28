@@ -2728,13 +2728,18 @@ protected:
 
     static bool shouldAddBigobjFlag (const build_tools::RelativePath& path)
     {
+        static constexpr const char* bigobjNames[] { "include_juce_audio_processors",
+                                                     "include_juce_audio_processors_headless",
+                                                     "include_juce_core",
+                                                     "include_juce_graphics",
+                                                     "include_juce_graphics_Harfbuzz",
+                                                     "include_juce_gui_basics" };
+
         const auto name = path.getFileNameWithoutExtension();
 
-        return name.equalsIgnoreCase ("include_juce_gui_basics")
-            || name.equalsIgnoreCase ("include_juce_audio_processors")
-            || name.equalsIgnoreCase ("include_juce_audio_processors_headless")
-            || name.equalsIgnoreCase ("include_juce_core")
-            || name.equalsIgnoreCase ("include_juce_graphics");
+        return std::any_of (std::begin (bigobjNames),
+                            std::end (bigobjNames),
+                            [&] (const char* bigobjName) { return name.equalsIgnoreCase (bigobjName); });
     }
 
     StringArray getModuleLibs() const
