@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 def ndkVersionString = "28.1.13356709"
 
 android {
@@ -12,6 +11,10 @@ android {
             path("CMakeLists.txt")
             version = "3.22.1"
         }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     signingConfigs {
         juceSigning {
