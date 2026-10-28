@@ -39,10 +39,10 @@ namespace juce
 /**
     Adds a drop-shadow to a component.
 
-    This object creates and manages a set of components which sit around a
-    component, creating a gaussian shadow around it. The components will track
-    the position of the component and if it's brought to the front they'll also
-    follow this.
+    This object creates and manages a component which sits behind another
+    component, creating a gaussian shadow around it. The shadow component will
+    track the position of the component and if it's brought to the front it'll
+    also follow this.
 
     For desktop windows you don't need to use this class directly - just
     set the Component::windowHasDropShadow flag when calling
@@ -78,7 +78,7 @@ private:
     class ShadowWindow;
 
     WeakReference<Component> owner;
-    OwnedArray<Component> shadowWindows;
+    std::unique_ptr<ShadowWindow> shadowWindow;
     DropShadow shadow;
     bool reentrant = false;
     WeakReference<Component> lastParentComp;
