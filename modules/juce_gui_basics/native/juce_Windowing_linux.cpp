@@ -391,7 +391,10 @@ public:
 
     void toFront (bool makeActive) override
     {
-        if (makeActive)
+        // TopLevelWindow::recreateDesktopWindow() calls toFront (true), which since JUCE 8 also
+        // happens for windows that were never made visible (any DocumentWindow constructed on the
+        // desktop), so don't map those
+        if (makeActive && component.isVisible())
         {
             setVisible (true);
             grabFocus();
