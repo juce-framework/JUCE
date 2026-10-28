@@ -362,6 +362,9 @@ namespace juce
   #include <X11/cursorfont.h>
   #include <unistd.h>
 
+  // If you're missing this header, you need to install the libxext-dev package
+  #include <X11/extensions/shape.h>
+
   #if JUCE_USE_XRANDR
    // If you're missing this header, you need to install the libxrandr-dev package
    #include <X11/extensions/Xrandr.h>

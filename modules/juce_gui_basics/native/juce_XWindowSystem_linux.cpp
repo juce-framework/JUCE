@@ -1657,6 +1657,18 @@ static int getAllEventsMask (bool ignoresMouseClicks)
         return 0;
     }
 
+    // A window that ignores mouse clicks must also let pointer events through to whatever
+    // is beneath it, as it does on the other platforms. Deselecting the events is not
+    // enough for that: X would deliver them to the window's ancestors, not to the window
+    // below it, so the window is given an empty input shape instead.
+    if ((styleFlags & ComponentPeer::windowIgnoresMouseClicks) != 0)
+    {
+        int eventBase = 0, errorBase = 0;
+
+        if (X11Symbols::getInstance()->xShapeQueryExtension (display, &eventBase, &errorBase))
+            X11Symbols::getInstance()->xShapeCombineRectangles (display, windowH, ShapeInput, 0, 0, nullptr, 0, ShapeSet, Unsorted);
+    }
+
     // Set window manager hints
     if (auto wmHints = makeXFreePtr (X11Symbols::getInstance()->xAllocWMHints()))
     {

@@ -194,6 +194,8 @@ bool X11Symbols::loadAllSymbols()
                        makeSymbolBinding (xSetWMIconName,              "XSetWMIconName"),
                        makeSymbolBinding (xSetWMName,                  "XSetWMName"),
                        makeSymbolBinding (xSetWMNormalHints,           "XSetWMNormalHints"),
+                       makeSymbolBinding (xShapeQueryExtension,        "XShapeQueryExtension"),
+                       makeSymbolBinding (xShapeCombineRectangles,     "XShapeCombineRectangles"),
                        makeSymbolBinding (xStringListToTextProperty,   "XStringListToTextProperty"),
                        makeSymbolBinding (xSync,                       "XSync"),
                        makeSymbolBinding (xSynchronize,                "XSynchronize"),

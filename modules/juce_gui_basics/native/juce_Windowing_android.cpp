@@ -2294,6 +2294,9 @@ private:
                  | FLAG_LAYOUT_NO_LIMITS
                  | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
+        if ((getStyleFlags() & windowIgnoresMouseClicks) != 0)
+            flags |= FLAG_NOT_TOUCHABLE;
+
         if (getAndroidSDKVersion() >= 30)
         {
             env->CallVoidMethod (layoutParams, AndroidWindowManagerLayoutParams30.setFitInsetsSides, (jint) 0);
@@ -2613,7 +2616,7 @@ private:
     static constexpr jint GRAVITY_LEFT = 0x3, GRAVITY_TOP = 0x30;
     static constexpr jint TYPE_APPLICATION = 0x2;
     static constexpr jint TYPE_APPLICATION_PANEL = 1000;
-    static constexpr jint FLAG_NOT_TOUCH_MODAL = 0x20, FLAG_LAYOUT_IN_SCREEN = 0x100;
+    static constexpr jint FLAG_NOT_TOUCHABLE = 0x10, FLAG_NOT_TOUCH_MODAL = 0x20, FLAG_LAYOUT_IN_SCREEN = 0x100;
     static constexpr jint FLAG_LAYOUT_NO_LIMITS = 0x200;
     static constexpr jint FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS = (jint) 0x80000000;
     static constexpr jint PIXEL_FORMAT_OPAQUE = -1, PIXEL_FORMAT_TRANSPARENT = -2;
