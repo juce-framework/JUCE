@@ -653,10 +653,6 @@ private:
         MemoryOutputStream mo;
         mo.setNewLineString (getNewLineString());
 
-        mo << "plugins {" << newLine
-           << "    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'" << newLine
-           << "}" << newLine;
-
         mo << "rootProject.name = " << "\'" << escapeQuotes (projectName) << "\'" << newLine;
         mo << (isLibrary() ? "include ':lib'" : "include ':app'");
 
@@ -702,8 +698,6 @@ private:
 
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
-        // Language version 8 (or lower) is required for compatibility with Android 24
-        mo << "java.toolchain.languageVersion = JavaLanguageVersion.of(8)" << newLine;
         // NDK 26 is required for ANDROID_WEAK_API_DEFS, which is in turn required for weak-linking AFontMatcher
         mo << "def ndkVersionString = \"28.1.13356709\"" << newLine << newLine;
 
@@ -716,6 +710,12 @@ private:
         mo << "            path(\"CMakeLists.txt\")"                                           << newLine;
         mo << "            version = \"3.22.1\""                                               << newLine;
         mo << "        }"                                                                      << newLine;
+        mo << "    }"                                                                          << newLine;
+
+        // Language version 8 (or lower) is required for compatibility with Android 24
+        mo << "    compileOptions {"                                                           << newLine;
+        mo << "        sourceCompatibility = JavaVersion.VERSION_1_8"                          << newLine;
+        mo << "        targetCompatibility = JavaVersion.VERSION_1_8"                          << newLine;
         mo << "    }"                                                                          << newLine;
 
         mo << getAndroidSigningConfig()                                                        << newLine;
