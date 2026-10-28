@@ -2583,9 +2583,9 @@ hb_raster_paint_render (hb_raster_paint_t *paint)
  *
  * Discards accumulated paint output so @paint can be reused for
  * another render.  User configuration (base transform, scale
- * factors, foreground, custom palette colors) is preserved.  Call
- * hb_raster_paint_reset() to also reset user configuration to
- * defaults.
+ * factors, foreground, background, palette, custom palette colors)
+ * is preserved.  Call hb_raster_paint_reset() to also reset user
+ * configuration to defaults.
  *
  * Since: 14.2.0
  **/
@@ -2619,6 +2619,8 @@ hb_raster_paint_reset (hb_raster_paint_t *paint)
   paint->x_scale_factor = 1.f;
   paint->y_scale_factor = 1.f;
   paint->foreground = HB_COLOR (0, 0, 0, 255);
+  paint->background = HB_COLOR (0, 0, 0, 0);
+  paint->palette = 0;
   paint->budget = HB_BUDGET_DEFAULT;
   hb_raster_paint_clear_custom_palette_colors (paint);
   hb_raster_paint_clear (paint);

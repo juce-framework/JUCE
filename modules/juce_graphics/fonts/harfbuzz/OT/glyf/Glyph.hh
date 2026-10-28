@@ -55,7 +55,10 @@ struct Glyph
     switch (type) {
     case COMPOSITE: CompositeGlyph (*header, bytes, extended).drop_hints (); return;
     case SIMPLE:    SimpleGlyph (*header, bytes).drop_hints (); return;
-    case EMPTY:     return;
+    case EMPTY:
+      if (bytes.length >= GlyphHeader::static_size)
+        SimpleGlyph (*header, bytes).drop_hints ();
+      return;
     }
   }
 
@@ -73,7 +76,13 @@ struct Glyph
     switch (type) {
     case COMPOSITE: CompositeGlyph (*header, bytes, extended).drop_hints_bytes (dest_start); return;
     case SIMPLE:    SimpleGlyph (*header, bytes).drop_hints_bytes (dest_start, dest_end); return;
-    case EMPTY:     return;
+    case EMPTY:
+      dest_start = bytes;
+      dest_end = hb_bytes_t ();
+      if (bytes.length >= GlyphHeader::static_size &&
+          SimpleGlyph (*header, bytes).has_instructions_length ())
+        SimpleGlyph (*header, bytes).drop_hints_bytes (dest_start, dest_end);
+      return;
     }
   }
 
@@ -281,10 +290,25 @@ struct Glyph
           return false;
         break;
       case EMPTY:
-        /* set empty bytes for empty glyph
-         * do not use source glyph's pointers */
         dest_start = hb_bytes_t ();
         dest_end = hb_bytes_t ();
+        /* Zero-contour glyphs may carry instructions for phantom points.
+         * Copy them into owned memory like the other compiled glyphs. */
+        if (!(plan->flags & HB_SUBSET_FLAGS_NO_HINTING) &&
+            bytes.length >= GlyphHeader::static_size &&
+            header->numberOfContours == 0)
+        {
+          SimpleGlyph simple (*header, bytes);
+          unsigned length = simple.instructions_length ();
+          if (length)
+          {
+            length = simple.length (length);
+            char *p = (char *) hb_malloc (length);
+            if (unlikely (!p)) return false;
+            hb_memcpy (p, bytes.arrayZ, length);
+            dest_start = hb_bytes_t (p, length);
+          }
+        }
         break;
       }
     }
@@ -350,7 +374,16 @@ struct Glyph
     case COMPOSITE:
     {
       for (auto &item : get_composite_iterator ())
-        if (unlikely (!item.get_points (points, extended))) return false;
+      {
+        /* Preparing a component is a traversal step, even if cycle
+         * detection later skips its child glyph. */
+        if (unlikely (!hb_budget_spend (*budget, HB_BUDGET_16) ||
+                      !item.get_points (points, extended)))
+        {
+          points.resize (old_length);
+          return false;
+        }
+      }
       break;
     }
     case EMPTY:

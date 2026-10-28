@@ -1441,7 +1441,7 @@ _hb_ot_layout_table_get_feature_variations_state (hb_face_t             *face,
 						   const int             *coords,
 						   unsigned int           num_coords,
 						   unsigned int          *variations_index,
-						   hb_vector_t<unsigned> *lookup_variations)
+						   hb_vector_t<unsigned> *lookup_conditions)
 {
   const OT::GSUBGPOS &g = get_gsubgpos_table (face, table_tag);
   const OT::GDEF &gdef = *face->table.GDEF->table;
@@ -1453,7 +1453,19 @@ _hb_ot_layout_table_get_feature_variations_state (hb_face_t             *face,
 					 num_coords,
 					 variations_index,
 					 &instancer,
-					 lookup_variations);
+					 lookup_conditions);
+}
+
+bool
+_hb_ot_layout_feature_get_lookup_variations (hb_face_t *face,
+                                             hb_tag_t table_tag,
+                                             unsigned feature_index,
+                                             unsigned variations_index,
+                                             hb_sorted_array_t<const unsigned> conditions,
+                                             hb_set_t *lookup_indexes)
+{
+  return get_gsubgpos_table (face, table_tag).get_lookup_variations (
+      feature_index, variations_index, conditions, lookup_indexes);
 }
 
 

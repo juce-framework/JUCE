@@ -151,6 +151,15 @@ struct glyph_variations_t
       contour_point_vector_t *all_points;
       if (!plan->new_gid_contour_points_map.has (new_gid, &all_points))
         return false;
+      /* IUP adds rebased constant deltas to the contour coordinates. Keep
+       * the plan's original points intact across serialization retries. */
+      contour_point_vector_t points;
+      if (iup_optimize)
+      {
+        points = *all_points;
+        if (unlikely (points.in_error ())) return false;
+        all_points = &points;
+      }
       /* avar2 partial instancing: cull unreachable tuples. */
       if (plan->has_avar2 && plan->avar2_reachable_ranges.get_population ())
 	glyph_variations[i].cull_unreachable (plan->avar2_reachable_ranges);
