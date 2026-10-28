@@ -43,6 +43,10 @@
 // <cstring> or <string.h>, which prevents the use of stricmp in JUCE source.
 #include <cstring>
 
+// funknown.cpp includes <stdatomic.h>, and libc++ refuses to include <atomic> after
+// <stdatomic.h> when building for a standard older than C++23
+#include <atomic>
+
 JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC (0, 4505 4702 6011 6031 6221 6386 6387 6330 6001 28199)
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",

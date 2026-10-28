@@ -152,6 +152,7 @@ int main (int argc, const char** argv)
         int (*doRecall) (const char*);
     };
 
+    // NOLINTNEXTLINE(clang-analyzer-optin.taint.GenericTaint)
     if (auto* handle = dlopen (libraryPath, RTLD_LAZY))
     {
         if (auto* getDescriptor = reinterpret_cast<const LV2_Descriptor* (*) (uint32_t)> (dlsym (handle, "lv2_descriptor")))

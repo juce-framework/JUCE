@@ -1172,7 +1172,7 @@ inline constexpr auto generatedCallbackImpl =
                        if (auto* object = reinterpret_cast<Class*> (host))
                            return Fn (env, *object, args...);
 
-                       return {};
+                       return Result();
                    });
 
 template <auto Fn, typename Result, typename Class, typename... Args>
