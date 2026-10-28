@@ -983,7 +983,5 @@ hb_vector_paint_render_svg (hb_vector_paint_t *paint)
 
   hb_blob_t *blob = hb_buf_blob_from (&paint->recycled_blob, &out);
 
-  hb_vector_paint_clear (paint);
-
   return blob;
 }

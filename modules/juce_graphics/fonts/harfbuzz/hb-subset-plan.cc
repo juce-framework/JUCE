@@ -132,13 +132,6 @@ static void _colr_closure (hb_subset_plan_t* plan,
   _remap_palette_indexes (&palette_indices, &plan->colr_palettes);
 
 #ifndef HB_NO_VAR
-  if (!colr.has_var_store () || !variation_indices) return;
-
-  const OT::ItemVariationStore &var_store = colr.get_var_store ();
-  // generated inner_maps is used by ItemVariationStore serialize(), which is subset only
-  unsigned subtable_count = var_store.get_sub_table_count ();
-  generate_varstore_inner_maps (variation_indices, subtable_count, plan->colrv1_varstore_inner_maps);
-
   /* colr variation indices mapping during planning phase:
    * generate colrv1_variation_idx_delta_map. When delta set index map is not
    * included, it's a mapping from varIdx-> (new varIdx,delta). Otherwise, it's
@@ -147,21 +140,29 @@ static void _colr_closure (hb_subset_plan_t* plan,
    * Besides, we need to generate a delta set idx-> new var_idx map for updating
    * delta set index map if exists. This map will be updated again after
    * instancing. */
-  if (!plan->all_axes_pinned)
+  if (colr.has_var_store () && variation_indices)
   {
-    remap_variation_indices (var_store,
+    const OT::ItemVariationStore &var_store = colr.get_var_store ();
+    // generated inner_maps is used by ItemVariationStore serialize(), which is subset only
+    unsigned subtable_count = var_store.get_sub_table_count ();
+    generate_varstore_inner_maps (variation_indices, subtable_count, plan->colrv1_varstore_inner_maps);
+
+    if (!plan->all_axes_pinned)
+      remap_variation_indices (var_store,
                               variation_indices,
                               plan->normalized_coords,
                               false, /* no need to calculate delta for COLR during planning */
                               plan->all_axes_pinned,
                               plan->colrv1_variation_idx_delta_map);
-
-    if (colr.has_delta_set_index_map ())
-      remap_colrv1_delta_set_index_indices (colr.get_delta_set_index_map (),
-                                             delta_set_indices,
-                                             plan->colrv1_variation_idx_delta_map,
-                                             plan->colrv1_new_deltaset_idx_varidx_map);
   }
+
+  /* Sentinel-only maps still need their delta-set indices remapped, even
+   * when there are no live variation rows or no variation store. */
+  if (!plan->all_axes_pinned && colr.has_delta_set_index_map ())
+    remap_colrv1_delta_set_index_indices (colr.get_delta_set_index_map (),
+                                         delta_set_indices,
+                                         plan->colrv1_variation_idx_delta_map,
+                                         plan->colrv1_new_deltaset_idx_varidx_map);
 #endif
 }
 
@@ -527,6 +528,9 @@ _create_glyph_map_gsub (const hb_set_t* glyph_set_gsub,
                         hb_map_t* out,
                         hb_vector_t<hb_codepoint_t>* out_flat)
 {
+  if (unlikely (glyph_set_gsub->in_error ()))
+    return false;
+
   hb_codepoint_t max_gid = HB_SET_VALUE_INVALID;
   hb_set_previous (glyph_set_gsub, &max_gid);
   unsigned flat_size = max_gid == HB_SET_VALUE_INVALID ? 0 : max_gid + 1;
@@ -718,6 +722,7 @@ hb_subset_plan_t::hb_subset_plan_t (hb_face_t *face,
 #ifndef HB_NO_VAR_COMPOSITES
   if (!user_axes_location.is_empty () &&
       !input->sets.drop_tables->has (OT::VARC::tableTag) &&
+      input->sets.no_subset_tables->has (OT::VARC::tableTag) &&
       face->table.VARC->has_data ())
   {
     check_success (false);

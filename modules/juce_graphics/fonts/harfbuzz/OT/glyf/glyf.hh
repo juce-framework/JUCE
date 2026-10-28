@@ -117,7 +117,10 @@ struct glyf
 
     hb_vector_t<unsigned> padded_offsets;
     if (unlikely (!padded_offsets.alloc_exact (c->plan->new_to_old_gid_list.length)))
+    {
+      hb_font_destroy (font);
       return_trace (false);
+    }
 
     hb_vector_t<glyf_impl::SubsetGlyph> glyphs;
     /* SubsetGlyphs borrow bytes from this blob until they are serialized. */
@@ -700,6 +703,13 @@ glyf::_populate_subset_glyphs (const hb_subset_plan_t   *plan,
         return false;
       }
     }
+  }
+  /* All retained glyphs can be empty. Do not write the untouched bounds
+   * accumulator's inverted sentinels into the instance's head table. */
+  if (font && plan->head_maxp_info.xMin > plan->head_maxp_info.xMax)
+  {
+    plan->head_maxp_info.xMin = plan->head_maxp_info.xMax = 0;
+    plan->head_maxp_info.yMin = plan->head_maxp_info.yMax = 0;
   }
   return true;
 }

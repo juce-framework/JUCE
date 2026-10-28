@@ -345,7 +345,7 @@ static inline double
 _hb_roundf (double x) { return floor (x + .5); }
 
 static inline float
-_hb_roundf (float x) { return floorf (x + .5f); }
+_hb_roundf (float x) { return floor ((double) x + .5); }
 
 #define roundf(x) _hb_roundf(x)
 
