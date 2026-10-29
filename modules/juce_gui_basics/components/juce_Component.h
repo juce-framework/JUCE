@@ -2739,6 +2739,8 @@ private:
     static void internalMouseUp    (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time, ModifierKeys oldModifiers);
     static void internalMouseDrag  (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time);
     static void internalMouseMove  (SafePointer<Component>, MouseInputSource, Point<float>, Time);
+    template <typename EventMethod, typename... Params>
+    static void internalMouseGesture (SafePointer<Component>, MouseInputSource, Point<float>, Time, EventMethod, const Params&...);
     static void internalMouseWheel (SafePointer<Component>, MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
     static void internalMagnifyGesture (SafePointer<Component>, MouseInputSource, Point<float>, Time, float);
     void internalBroughtToFront();
