@@ -339,7 +339,6 @@ namespace juce::build_tools
     bool isAbsolutePath (const String& path)
     {
         return File::isAbsolutePath (path)
-                || path.startsWithChar ('/') // (needed because File::isAbsolutePath will ignore forward-slashes on Windows)
                 || path.startsWithChar ('$')
                 || path.startsWithChar ('~')
                 || (CharacterFunctions::isLetter (path[0]) && path[1] == ':')
