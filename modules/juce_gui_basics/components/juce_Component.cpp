@@ -67,7 +67,9 @@ public:
           me (originalEvent)
     {
         for (Component* c = *comp; c != nullptr; c = c->getParentComponent())
-            hierarchy.emplace_back (c);
+            hierarchy.push_back ({ c,
+                                   c->getLocalPoint (me.eventComponent, me.position),
+                                   c->getLocalPoint (me.eventComponent, me.mouseDownPosition) });
     }
 
     Component* nearestNonNullParent() const
@@ -78,21 +80,23 @@ public:
     /*  Searches for the closest ancestor, and returns true if the closest ancestor is nullptr. */
     bool shouldBailOut() const
     {
-        closestAncestor = findNearestNonNullParent();
+        closestAncestor = findNearestNonNullEntry().component;
         return closestAncestor == nullptr;
     }
 
     MouseEvent eventWithNearestParent() const
     {
+        const auto nearest = findNearestNonNullEntry();
+
         return { me.source,
-                 me.position.toFloat(),
+                 nearest.position,
                  me.mods,
                  me.pressure, me.orientation, me.rotation,
                  me.tiltX, me.tiltY,
-                 closestAncestor,
-                 closestAncestor,
+                 nearest.component,
+                 nearest.component,
                  me.eventTime,
-                 me.mouseDownPosition.toFloat(),
+                 nearest.mouseDownPosition,
                  me.mouseDownTime,
                  me.getNumberOfClicks(),
                  me.mouseWasDraggedSinceMouseDown() };
@@ -102,22 +106,28 @@ public:
     void forEach (Callback&& callback)
     {
         for (auto& item : hierarchy)
-            if (item != nullptr)
-                callback (*item);
+            if (item.component != nullptr)
+                callback (*item.component);
     }
 
 private:
-    Component* findNearestNonNullParent() const
+    struct Entry
     {
-        for (auto& comp : hierarchy)
-            if (comp != nullptr)
-                return comp;
+        Component::SafePointer<Component> component;
+        Point<float> position, mouseDownPosition;
+    };
 
-        return nullptr;
+    Entry findNearestNonNullEntry() const
+    {
+        for (const auto& entry : hierarchy)
+            if (entry.component != nullptr)
+                return entry;
+
+        return { nullptr, me.position, me.mouseDownPosition };
     }
 
     Component::SafePointer<Component>& closestAncestor;
-    std::vector<Component::SafePointer<Component>> hierarchy;
+    std::vector<Entry> hierarchy;
     const MouseEvent me;
 };
 
@@ -2601,7 +2611,9 @@ void Component::internalMouseDown (SafePointer<Component> target,
     if (target->flags.repaintOnMouseActivityFlag)
         target->repaint();
 
-    target->mouseDown (me);
+    // The target may have been replaced by an ancestor if the original component was deleted
+    // while being brought to the front or given focus, so the event is retargeted to match.
+    target->mouseDown (checker.eventWithNearestParent());
 
     if (checker.shouldBailOut())
         return;
@@ -2731,8 +2743,9 @@ void Component::internalMouseMove (SafePointer<Component> target, MouseInputSour
     }
 }
 
-void Component::internalMouseWheel (SafePointer<Component> target, MouseInputSource source, Point<float> relativePos,
-                                    Time time, const MouseWheelDetails& wheel)
+template <typename EventMethod, typename... Params>
+void Component::internalMouseGesture (SafePointer<Component> target, MouseInputSource source, Point<float> relativePos,
+                                      Time time, EventMethod eventMethod, const Params&... params)
 {
     auto& desktop = Desktop::getInstance();
 
@@ -2749,60 +2762,39 @@ void Component::internalMouseWheel (SafePointer<Component> target, MouseInputSou
 
     HierarchyChecker checker (&target, me);
 
+    const auto sendToGlobalListeners = [&]
+    {
+        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { std::invoke (eventMethod, l, checker.eventWithNearestParent(), params...); });
+    };
+
     if (target->isCurrentlyBlockedByAnotherModalComponent())
     {
         // allow blocked mouse-events to go to global listeners
-        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseWheelMove (me, wheel); });
+        sendToGlobalListeners();
+        return;
     }
-    else
-    {
-        target->mouseWheelMove (me, wheel);
 
-        if (checker.shouldBailOut())
-            return;
+    std::invoke (eventMethod, *target, me, params...);
 
-        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseWheelMove (checker.eventWithNearestParent(), wheel); });
+    if (checker.shouldBailOut())
+        return;
 
-        if (! checker.shouldBailOut())
-            MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseWheelMove, wheel);
-    }
+    sendToGlobalListeners();
+
+    if (! checker.shouldBailOut())
+        MouseListenerList::sendMouseEvent (checker, eventMethod, params...);
+}
+
+void Component::internalMouseWheel (SafePointer<Component> target, MouseInputSource source, Point<float> relativePos,
+                                    Time time, const MouseWheelDetails& wheel)
+{
+    internalMouseGesture (target, source, relativePos, time, &MouseListener::mouseWheelMove, wheel);
 }
 
 void Component::internalMagnifyGesture (SafePointer<Component> target, MouseInputSource source, Point<float> relativePos,
                                         Time time, float amount)
 {
-    auto& desktop = Desktop::getInstance();
-
-    const auto me = makeMouseEvent (source,
-                                    detail::PointerState().withPosition (relativePos),
-                                    source.getCurrentModifiers(),
-                                    target,
-                                    target,
-                                    time,
-                                    relativePos,
-                                    time,
-                                    0,
-                                    false);
-
-    HierarchyChecker checker (&target, me);
-
-    if (target->isCurrentlyBlockedByAnotherModalComponent())
-    {
-        // allow blocked mouse-events to go to global listeners
-        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseMagnify (me, amount); });
-    }
-    else
-    {
-        target->mouseMagnify (me, amount);
-
-        if (checker.shouldBailOut())
-            return;
-
-        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseMagnify (checker.eventWithNearestParent(), amount); });
-
-        if (! checker.shouldBailOut())
-            MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseMagnify, amount);
-    }
+    internalMouseGesture (target, source, relativePos, time, &MouseListener::mouseMagnify, amount);
 }
 
 void Component::sendFakeMouseMove() const
@@ -4346,6 +4338,64 @@ struct ComponentTests  : public UnitTest
             expectEquals (parent.numPaintCalls, 1);
             expectEquals (childA.numPaintCalls, 1);
             expectEquals (childB.numPaintCalls, 1);
+        });
+
+        testCase ("A mouse event retargeted to a surviving ancestor has its positions converted into that ancestor's space", [&]
+        {
+            const Rectangle<int> parentBounds { 50, 50, 100, 100 };
+            const Rectangle<int> childBounds { 20, 20, 40, 40 };
+            const Point<float> positionInChild { 5.0f, 7.0f };
+            const Point<float> mouseDownPositionInChild { 1.0f, 2.0f };
+
+            auto parent = std::make_unique<Component>();
+            auto child = std::make_unique<Component>();
+            parent->setBounds (parentBounds);
+            child->setBounds (childBounds);
+            parent->addAndMakeVisible (*child);
+
+            const auto time = Time::getCurrentTime();
+            const MouseEvent event { Desktop::getInstance().getMainMouseSource(),
+                                     positionInChild,
+                                     ModifierKeys::leftButtonModifier,
+                                     MouseInputSource::defaultPressure,
+                                     MouseInputSource::defaultOrientation,
+                                     MouseInputSource::defaultRotation,
+                                     MouseInputSource::defaultTiltX,
+                                     MouseInputSource::defaultTiltY,
+                                     child.get(),
+                                     child.get(),
+                                     time,
+                                     mouseDownPositionInChild,
+                                     time,
+                                     1,
+                                     false };
+
+            Component::SafePointer<Component> target { child.get() };
+            HierarchyChecker checker (&target, event);
+
+            expect (! checker.shouldBailOut());
+            expect (target == child.get());
+
+            const auto unchanged = checker.eventWithNearestParent();
+            expect (unchanged.eventComponent == child.get());
+            expect (unchanged.position == positionInChild);
+            expect (unchanged.mouseDownPosition == mouseDownPositionInChild);
+
+            child.reset();
+
+            expect (! checker.shouldBailOut());
+            expect (target == parent.get());
+
+            const auto retargeted = checker.eventWithNearestParent();
+            expect (retargeted.eventComponent == parent.get());
+            expect (retargeted.originalComponent == parent.get());
+            expect (retargeted.position == positionInChild + childBounds.getPosition().toFloat());
+            expect (retargeted.mouseDownPosition == mouseDownPositionInChild + childBounds.getPosition().toFloat());
+
+            parent.reset();
+
+            expect (checker.shouldBailOut());
+            expect (target == nullptr);
         });
     }
 };
