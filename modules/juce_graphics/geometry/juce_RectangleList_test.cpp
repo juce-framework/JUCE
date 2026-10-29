@@ -194,6 +194,69 @@ public:
             list.subtract ({ 0, 0, 100, 100 });
             expect (list.isEmpty());
         }
+
+        // After adding these rectangles the list holds a pair whose vertical edges touch at x = 745.5,
+        // where the bottom of one is 342.5 and the top of the other is the float just below 342.5.
+        // A previous approach to consolidation cut the first rectangle at that top edge by recomputing
+        // its height, which rounded back to the original height, so the same split was found again on
+        // every pass and the function never returned.
+        beginTest ("Avoid infinite loops when consolidating rectangles");
+        {
+            const Rectangle<float> rectangles[]
+            {
+                { 745.5f,       342.499969f,  93.0f,       252.600006f },
+                { -751.599976f, -702.200073f, 1503.19995f, 1083.19995f },
+                { -751.599976f, 368.199951f,  1503.19995f, 75.1999969f },
+                { -751.599976f, 449.799957f,  1503.19995f, 132.800034f },
+                { -529.599976f, 368.199951f,  1455.19995f, 94.4000092f },
+            };
+
+            RectangleList<float> list;
+
+            for (const auto& rect : rectangles)
+                list.add (rect);
+
+            const auto before = list;
+
+            list.consolidate();
+
+            expect (list.getBounds() == before.getBounds());
+
+            for (const auto& rect : rectangles)
+                expect (list.containsRectangle (rect));
+
+            for (const auto& rect : list)
+                expect (before.containsRectangle (rect));
+        }
+
+        beginTest ("Consolidating an integer list splits and merges adjacent rectangles");
+        {
+            const Rectangle<int> rectangles[]
+            {
+                {   4,  -2, 10, 18 },
+                {  27,   2,  5,  2 },
+                {  10,  30, 45, 17 },
+                { -20, -32, 24, 50 },
+            };
+
+            RectangleList<int> list;
+
+            for (const auto& rect : rectangles)
+                list.add (rect);
+
+            list.consolidate();
+
+            const std::set<Rectangle<int>> expected { { -20,  -2, 34, 18 },
+                                                      {  27,   2,  5,  2 },
+                                                      {  10,  30, 45, 17 },
+                                                      { -20, -32, 24, 30 },
+                                                      { -20,  16, 24,  2 } };
+
+            expect (list.getNumRectangles() == (int) expected.size());
+
+            for (const auto& r : expected)
+                expect (std::find (list.begin(), list.end(), r) != list.end());
+        }
     }
 };
 

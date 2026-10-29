@@ -215,21 +215,7 @@ public:
         if (rects.isEmpty())
             return;
 
-        if constexpr (std::is_floating_point_v<ValueType>)
-        {
-            Array<AABB> alternativeRepresentation;
-            alternativeRepresentation.resize (rects.size());
-            std::copy (rects.begin(), rects.end(), alternativeRepresentation.begin());
-
-            subtract (alternativeRepresentation, rect);
-
-            rects.resize (alternativeRepresentation.size());
-            std::copy (alternativeRepresentation.begin(), alternativeRepresentation.end(), rects.begin());
-        }
-        else
-        {
-            subtract (rects, rect);
-        }
+        modifyWithExactEdges ([&] (auto& rectList) { subtract (rectList, rect); });
     }
 
     /** Removes all areas in another RectangleList from this one.
@@ -458,81 +444,18 @@ public:
         return { minX, minY, maxX - minX, maxY - minY };
     }
 
-    /** Optimises the list into a minimum number of constituent rectangles.
+    /** Simplifies the list by splitting and merging adjacent rectangles.
 
-        This will try to combine any adjacent rectangles into larger ones where
-        possible, to simplify lists that might have been fragmented by repeated
-        add/subtract calls.
+        This will try to combine adjacent rectangles into larger ones where possible,
+        to simplify lists that might have been fragmented by repeated add/subtract
+        calls.
     */
     void consolidate()
     {
-        for (int i = 0; i < rects.size() - 1; ++i)
-        {
-            auto& r = rects.getReference (i);
-            auto rx1 = r.getX();
-            auto ry1 = r.getY();
-            auto rx2 = rx1 + r.getWidth();
-            auto ry2 = ry1 + r.getHeight();
+        if (rects.size() < 2)
+            return;
 
-            for (int j = rects.size(); --j > i;)
-            {
-                auto& r2 = rects.getReference (j);
-                auto jrx1 = r2.getX();
-                auto jry1 = r2.getY();
-                auto jrx2 = jrx1 + r2.getWidth();
-                auto jry2 = jry1 + r2.getHeight();
-
-                // if the vertical edges of any blocks are touching and their horizontals don't
-                // line up, split them horizontally
-                if (jrx1 == rx2 || jrx2 == rx1)
-                {
-                    if (jry1 > ry1 && jry1 < ry2)
-                    {
-                        r.setHeight (jry1 - ry1);
-                        rects.add (RectangleType (rx1, jry1, rx2 - rx1, ry2 - jry1));
-                        i = -1;
-                        break;
-                    }
-
-                    if (jry2 > ry1 && jry2 < ry2)
-                    {
-                        r.setHeight (jry2 - ry1);
-                        rects.add (RectangleType (rx1, jry2, rx2 - rx1, ry2 - jry2));
-                        i = -1;
-                        break;
-                    }
-                    else if (ry1 > jry1 && ry1 < jry2)
-                    {
-                        r2.setHeight (ry1 - jry1);
-                        rects.add (RectangleType (jrx1, ry1, jrx2 - jrx1, jry2 - ry1));
-                        i = -1;
-                        break;
-                    }
-                    else if (ry2 > jry1 && ry2 < jry2)
-                    {
-                        r2.setHeight (ry2 - jry1);
-                        rects.add (RectangleType (jrx1, ry2, jrx2 - jrx1, jry2 - ry2));
-                        i = -1;
-                        break;
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i < rects.size() - 1; ++i)
-        {
-            auto& r = rects.getReference (i);
-
-            for (int j = rects.size(); --j > i;)
-            {
-                if (r.enlargeIfAdjacent (rects.getReference (j)))
-                {
-                    rects.remove (j);
-                    i = -1;
-                    break;
-                }
-            }
-        }
+        modifyWithExactEdges ([&] (auto& rectList) { consolidate (rectList); });
     }
 
     /** Adds an x and y value to all the coordinates. */
@@ -613,6 +536,36 @@ private:
         PointType tl, br;
     };
 
+    // Selects the axis that a single pass over the list modifies (major) and the one it
+    // leaves unchanged (minor), so the same code can be run once per axis.
+    struct Fields
+    {
+        ValueType PointType::* major;
+        ValueType PointType::* minor;
+    };
+
+    // Floating-point lists are edited as pairs of corners, so that moving an edge copies a
+    // coordinate rather than computing a width or height that may round to a different edge.
+    template <typename Fn>
+    void modifyWithExactEdges (Fn&& fn)
+    {
+        if constexpr (std::is_floating_point_v<ValueType>)
+        {
+            Array<AABB> alternativeRepresentation;
+            alternativeRepresentation.resize (rects.size());
+            std::copy (rects.begin(), rects.end(), alternativeRepresentation.begin());
+
+            fn (alternativeRepresentation);
+
+            rects.resize (alternativeRepresentation.size());
+            std::copy (alternativeRepresentation.begin(), alternativeRepresentation.end(), rects.begin());
+        }
+        else
+        {
+            fn (rects);
+        }
+    }
+
     static PointType getTL (const AABB& aabb)
     {
         return aabb.tl;
@@ -659,12 +612,6 @@ private:
                 // coordinates. Subdividing an overlapping rect in this way may produce new rects
                 // that still overlap with the parameter rect. However, those will get cleaned up
                 // on the subsequent pass, where the major/minor axes are swapped.
-
-                struct Fields
-                {
-                    ValueType PointType::* major;
-                    ValueType PointType::* minor;
-                };
 
                 for (const auto& fields : { Fields { &PointType::x, &PointType::y },
                                             Fields { &PointType::y, &PointType::x } })
@@ -717,6 +664,81 @@ private:
 
                 rectList.remove (i);
             });
+        }
+    }
+
+    // The equivalent of Rectangle::enlargeIfAdjacent, operating on corners rather than sizes.
+    static std::optional<AABB> mergeIfAdjacent (const AABB& a, const AABB& b)
+    {
+        for (const auto& fields : { Fields { &PointType::x, &PointType::y },
+                                    Fields { &PointType::y, &PointType::x } })
+        {
+            if (   exactlyEqual (a.tl.*(fields.minor), b.tl.*(fields.minor))
+                && exactlyEqual (a.br.*(fields.minor), b.br.*(fields.minor))
+                && a.tl.*(fields.major) <= b.br.*(fields.major)
+                && b.tl.*(fields.major) <= a.br.*(fields.major))
+            {
+                auto merged = a;
+                merged.tl.*(fields.major) = jmin (a.tl.*(fields.major), b.tl.*(fields.major));
+                merged.br.*(fields.major) = jmax (a.br.*(fields.major), b.br.*(fields.major));
+                return merged;
+            }
+        }
+
+        return {};
+    }
+
+    template <typename Rect>
+    static void consolidate (Array<Rect>& rectList)
+    {
+        // Where the vertical edges of two rectangles touch but their horizontal edges don't line
+        // up, split them horizontally so that the merging pass below can combine them.
+        for (int i = 0; i < rectList.size() - 1; ++i)
+        {
+            const AABB r { getTL (rectList.getReference (i)), getBR (rectList.getReference (i)) };
+
+            for (int j = rectList.size(); --j > i;)
+            {
+                const AABB r2 { getTL (rectList.getReference (j)), getBR (rectList.getReference (j)) };
+
+                if (! (exactlyEqual (r2.tl.x, r.br.x) || exactlyEqual (r2.br.x, r.tl.x)))
+                    continue;
+
+                const auto splitIfInside = [&] (int index, const AABB& aabb, ValueType y)
+                {
+                    if (! (aabb.tl.y < y && y < aabb.br.y))
+                        return false;
+
+                    rectList.getReference (index) = { aabb.tl, PointType { aabb.br.x, y } };
+                    rectList.add ({ PointType { aabb.tl.x, y }, aabb.br });
+                    return true;
+                };
+
+                if (   splitIfInside (i, r, r2.tl.y) || splitIfInside (i, r, r2.br.y)
+                    || splitIfInside (j, r2, r.tl.y) || splitIfInside (j, r2, r.br.y))
+                {
+                    i = -1;
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < rectList.size() - 1; ++i)
+        {
+            auto& r = rectList.getReference (i);
+
+            for (int j = rectList.size(); --j > i;)
+            {
+                const auto& r2 = rectList.getReference (j);
+
+                if (const auto merged = mergeIfAdjacent ({ getTL (r), getBR (r) }, { getTL (r2), getBR (r2) }))
+                {
+                    r = *merged;
+                    rectList.remove (j);
+                    i = -1;
+                    break;
+                }
+            }
         }
     }
 
