@@ -74,12 +74,6 @@ private:
         private:
             std::unique_ptr<Component> content;
         };
-
-        void parentSizeChanged() override
-        {
-            if (auto* c = getContentComponent())
-                c->resized();
-        }
        #endif
 
     private:
