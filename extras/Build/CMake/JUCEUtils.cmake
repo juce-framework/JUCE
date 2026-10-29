@@ -879,19 +879,9 @@ function(_juce_add_resources_rc source_target dest_target)
         get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
         get_target_property(input_info_file ${source_target} JUCE_INFO_FILE)
 
-        get_target_property(generated_icon ${source_target} JUCE_ICON_FILE)
-        set(dependency)
-
-        if(generated_icon)
-            set(dependency DEPENDS "${generated_icon}")
-        endif()
-
         set(resource_rc_file "${juce_library_code}/${source_target}_resources.rc")
+        _juce_execute_juceaide(rcfile "${input_info_file}" "${resource_rc_file}")
 
-        add_custom_command(OUTPUT "${resource_rc_file}"
-            COMMAND juce::juceaide rcfile "${input_info_file}" "${resource_rc_file}"
-            ${dependency}
-            VERBATIM)
 
         add_library(${source_target}_rc_lib OBJECT ${resource_rc_file})
 
