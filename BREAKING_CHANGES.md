@@ -4,6 +4,40 @@
 
 ## Change
 
+On Windows, File::isAbsolutePath() now returns true for paths that start with
+a forward slash, and File::getChildFile() resolves a path that starts with a
+separator but doesn't name a drive or share against the drive or share of the
+file on which it is called, rather than against the current working directory's
+drive.
+
+**Possible Issues**
+
+Code that relied on File::isAbsolutePath() returning false for a path such as
+"/foo" on Windows will see different behaviour. For example, ZipFile will now
+refuse to extract entries whose names start with a forward slash on Windows,
+as it already did for entries starting with a backslash.
+
+Code calling getChildFile() with a path such as "\\foo.txt" on a File on a
+different drive to the current working directory will now receive a File on
+the same drive as the File on which getChildFile() was called.
+
+**Workaround**
+
+Resolve such paths explicitly against File::getCurrentWorkingDirectory() if
+the previous behaviour is required.
+
+**Rationale**
+
+A path starting with a separator but no drive is not relative, but it is also
+not fully specified. Previously, passing such a path to getChildFile() would
+trigger an assertion, and the result depended on the current working
+directory rather than on the File being used as the context. Forward slashes
+are accepted everywhere else in File on Windows, so isAbsolutePath() now
+accepts them too.
+
+
+## Change
+
 The default macOS and iOS deployment targets set by the Projucer have been
 increased to macOS 12.0 and iOS 15.0 respectively.
 
