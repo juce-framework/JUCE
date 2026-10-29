@@ -216,11 +216,20 @@ namespace
         }
 
         //==============================================================================
+        static constexpr int maximumBundleNestingDepth = 64;
+
         OSCBundle readBundle (size_t maxBytesToRead = std::numeric_limits<size_t>::max())
         {
             // maxBytesToRead is only passed in here in case this bundle is a nested
             // bundle, so we know when to consider the next element *not* part of this
             // bundle anymore (but part of the outer bundle) and return.
+
+            // Nested bundles are parsed recursively and could exhaust the stack.
+            if (maximumBundleNestingDepth <= bundleNestingDepth)
+                throw OSCFormatError ("OSC input stream format error: bundles are nested too deeply");
+
+            ++bundleNestingDepth;
+            const ScopeGuard restoreNestingDepth { [this] { --bundleNestingDepth; } };
 
             checkBytesAvailable (16, "OSC input stream exhausted while reading bundle");
 
@@ -272,6 +281,7 @@ namespace
 
     private:
         MemoryInputStream input;
+        int bundleNestingDepth = 0;
 
         //==============================================================================
         void readPaddingZeros (size_t bytesRead)
@@ -1192,6 +1202,83 @@ public:
                 expectThrowsType (inStream.readBundle(), OSCFormatError);
             }
         }
+
+        testCase ("reading OSC bundles (nesting depth)", [&]
+        {
+            const auto maxDepth = OSCInputStream::maximumBundleNestingDepth;
+
+            // bundles nested up to the maximum depth are accepted
+            {
+                const auto data = createNestedBundles (maxDepth);
+                OSCInputStream inStream (data.getData(), data.getSize());
+                const auto bundle = inStream.readBundle();
+
+                expect (inStream.isExhausted());
+                expectEquals (countNestedBundles (bundle), maxDepth);
+            }
+
+            // bundles nested beyond the maximum depth are rejected
+            {
+                const auto data = createNestedBundles (maxDepth + 1);
+                OSCInputStream inStream (data.getData(), data.getSize());
+                expectThrowsType (inStream.readBundle(), OSCFormatError);
+            }
+
+            // the most deeply nested packet that fits in a single UDP datagram is rejected
+            // when read the way that OSCReceiver reads incoming packets
+            {
+                const auto maxDatagramSize = 65507;
+                const auto numLevels = 1 + (maxDatagramSize - (int) sizeof (emptyBundle)) / (int) nestedBundleSize;
+                const auto data = createNestedBundles (numLevels);
+                expect (data.getSize() <= (size_t) maxDatagramSize);
+
+                OSCInputStream inStream (data.getData(), data.getSize());
+                expectThrowsType (inStream.readElementWithKnownSize (data.getSize()), OSCFormatError);
+            }
+
+            // a failed read resets the depth, so the stream can still read the inner bundle,
+            // which is nested to exactly the maximum depth
+            {
+                const auto data = createNestedBundles (maxDepth + 1);
+                OSCInputStream inStream (data.getData(), data.getSize());
+                expectThrowsType (inStream.readBundle(), OSCFormatError);
+
+                expect (inStream.setPosition ((int64) nestedBundleSize));
+                expectEquals (countNestedBundles (inStream.readBundle()), maxDepth);
+            }
+        });
+    }
+
+private:
+    static constexpr uint8 emptyBundle[] = { '#', 'b', 'u', 'n', 'd', 'l', 'e', '\0',
+                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
+
+    static constexpr auto nestedBundleSize = sizeof (int32) + sizeof (emptyBundle);
+
+    static MemoryBlock createNestedBundles (int numLevels)
+    {
+        MemoryBlock bundle (emptyBundle, sizeof (emptyBundle));
+
+        for (auto i = 1; i < numLevels; ++i)
+        {
+            MemoryOutputStream outer;
+            outer.write (emptyBundle, sizeof (emptyBundle));
+            outer.writeIntBigEndian ((int) bundle.getSize());
+            outer.write (bundle.getData(), bundle.getSize());
+            bundle = outer.getMemoryBlock();
+        }
+
+        return bundle;
+    }
+
+    static int countNestedBundles (const OSCBundle& bundle)
+    {
+        auto depth = 1;
+
+        for (auto* b = &bundle; b->size() == 1 && b->begin()->isBundle(); b = &b->begin()->getBundle())
+            ++depth;
+
+        return depth;
     }
 };
 
