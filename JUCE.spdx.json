@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "JUCE-9.0.5",
-  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.5-7a75c405b0bb",
+  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.5-f7e6695651bc",
   "creationInfo": {
     "created": "2026-09-04T00:00:00Z",
     "creators": [
@@ -1046,7 +1046,7 @@
     {
       "name": "Gradle wrapper",
       "SPDXID": "SPDXRef-build-system.gradle-wrapper",
-      "versionInfo": "8.14.5",
+      "versionInfo": "9.5.1",
       "supplier": "Organization: Gradle Inc.",
       "downloadLocation": "https://gradle.org",
       "filesAnalyzed": false,
@@ -1058,12 +1058,12 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:github/gradle/gradle@8.14.5"
+          "referenceLocator": "pkg:github/gradle/gradle@9.5.1"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:gradle:gradle:8.14.5:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:gradle:gradle:9.5.1:*:*:*:*:*:*:*"
         }
       ]
     }
