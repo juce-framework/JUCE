@@ -99,7 +99,8 @@ repository.
 - __Windows__: Visual Studio 2019 (Windows 10 version 1607)
 - __Linux__: g++ 7.0 or Clang 6.0 (for a full list of dependencies, see
 [here](/docs/Linux%20Dependencies.md)).
-- __Android__: Android Studio (NDK 26) on Windows, macOS or Linux
+- __Android__: Android Studio Narwhal 3 (2025.1.3) with Android Gradle plugin 8.13.2 and
+NDK 28 on Windows, macOS or Linux
 
 #### Deployment Targets
 
