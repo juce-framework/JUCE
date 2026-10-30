@@ -43,6 +43,9 @@ namespace juce
     functions allow you to parse JSON into a var object, and to convert a var
     object to JSON-formatted text.
 
+    Documents in which objects or arrays are nested more than 256 levels deep are
+    rejected as malformed.
+
     @see var
 
     @tags{Core}

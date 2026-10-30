@@ -35,11 +35,17 @@
 namespace juce
 {
 
+namespace JSONParsingLimits
+{
+    constexpr int maxNestingDepth = 256;
+}
+
 struct JSONParser
 {
     JSONParser (String::CharPointerType text) : startLocation (text), currentLocation (text) {}
 
     String::CharPointerType startLocation, currentLocation;
+    int nestingDepth = 0;
 
     struct ErrorException
     {
@@ -69,6 +75,15 @@ struct JSONParser
     juce_wchar peekChar() const       { return *currentLocation; }
     bool matchIf (char c)             { if (peekChar() == (juce_wchar) c) { ++currentLocation; return true; } return false; }
     bool isEOF() const                { return peekChar() == 0; }
+
+    auto enterNestedContainer (String::CharPointerType location)
+    {
+        if (JSONParsingLimits::maxNestingDepth <= nestingDepth)
+            throwError ("Objects or arrays are nested too deeply", location);
+
+        ++nestingDepth;
+        return ScopeGuard { [this] { --nestingDepth; } };
+    }
 
     bool matchString (const char* t)
     {
@@ -293,6 +308,7 @@ struct JSONParser
         var result (resultObject);
         auto& resultProperties = resultObject->getProperties();
         auto startOfObjectDecl = currentLocation;
+        const auto restoreNestingDepth = enterNestedContainer (startOfObjectDecl);
 
         for (;;)
         {
@@ -338,6 +354,7 @@ struct JSONParser
         auto result = var (Array<var>());
         auto destArray = result.getArray();
         auto startOfArrayDecl = currentLocation;
+        const auto restoreNestingDepth = enterNestedContainer (startOfArrayDecl);
 
         for (;;)
         {
@@ -712,6 +729,28 @@ public:
         }
     }
 
+    static String createNestedContainers (int depth)
+    {
+        String result ("[]");
+
+        for (int i = 1; i < depth; ++i)
+            result = (i % 2 == 0) ? "[" + result + "]"
+                                  : "{\"a\":" + result + "}";
+
+        return result;
+    }
+
+    static int countNestedContainers (const var& v)
+    {
+        if (auto* array = v.getArray())
+            return 1 + (array->isEmpty() ? 0 : countNestedContainers (array->getFirst()));
+
+        if (auto* object = v.getDynamicObject())
+            return 1 + countNestedContainers (object->getProperty ("a"));
+
+        return 0;
+    }
+
     void expectCharacterEncoding (juce_wchar character, const String& expectedOutput, JSON::Encoding encoding)
     {
         const auto input = String::charToString (character);
@@ -856,6 +895,33 @@ public:
                 const auto parsed = JSON::parse ("[" + asString + "]")[0];
                 const auto parsedString = JSON::toString (parsed, oneLine);
                 expect (asString.isNotEmpty() && parsedString == asString);
+            }
+        }
+
+        beginTest ("Nesting depth");
+        {
+            const auto maxDepth = JSONParsingLimits::maxNestingDepth;
+
+            {
+                var parsed;
+                expect (JSON::parse (createNestedContainers (maxDepth), parsed).wasOk());
+                expectEquals (countNestedContainers (parsed), maxDepth);
+                expectEquals (countNestedContainers (JSON::fromString (createNestedContainers (maxDepth))), maxDepth);
+            }
+
+            {
+                var parsed;
+                const auto result = JSON::parse (createNestedContainers (maxDepth + 1), parsed);
+                expect (result.failed());
+                expect (result.getErrorMessage().contains ("nested too deeply"));
+                expect (JSON::fromString (createNestedContainers (maxDepth + 1)).isVoid());
+            }
+
+            {
+                const auto innermost = createNestedContainers (maxDepth - 1);
+                const auto parsed = JSON::parse ("[" + innermost + "," + innermost + "]");
+                expect (parsed.isArray() && parsed.size() == 2);
+                expectEquals (countNestedContainers (parsed), maxDepth);
             }
         }
     }
