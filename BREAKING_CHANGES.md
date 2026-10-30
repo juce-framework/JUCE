@@ -4,6 +4,29 @@
 
 ## Change
 
+JSON::parse() and JSON::fromString() now reject documents in which objects or
+arrays are nested more than 256 levels deep.
+
+**Possible Issues**
+
+Such documents will fail to parse. The Result returned by JSON::parse() will
+report "Objects or arrays are nested too deeply", and the other parsing
+functions will return a void var.
+
+**Workaround**
+
+Restructure the document so that it is nested less deeply.
+
+**Rationale**
+
+The parser recurses once for each level of nesting, so a malicious document
+could use deep nesting to overflow the stack and crash an application. The
+limit matches XmlDocument and sits within the range used by other JSON
+libraries, far beyond anything a real document needs.
+
+
+## Change
+
 XmlDocument now rejects documents in which elements are nested more than 256
 levels deep, in which entity references are nested more than 40 levels deep,
 or which build more than 8 MB of text while expanding entities when that is

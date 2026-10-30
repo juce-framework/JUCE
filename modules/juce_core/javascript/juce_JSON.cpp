@@ -23,11 +23,17 @@
 namespace juce
 {
 
+namespace JSONParsingLimits
+{
+    constexpr int maxNestingDepth = 256;
+}
+
 struct JSONParser
 {
     JSONParser (String::CharPointerType text) : startLocation (text), currentLocation (text) {}
 
     String::CharPointerType startLocation, currentLocation;
+    int nestingDepth = 0;
 
     struct ErrorException
     {
@@ -57,6 +63,15 @@ struct JSONParser
     juce_wchar peekChar() const       { return *currentLocation; }
     bool matchIf (char c)             { if (peekChar() == (juce_wchar) c) { ++currentLocation; return true; } return false; }
     bool isEOF() const                { return peekChar() == 0; }
+
+    auto enterNestedContainer (String::CharPointerType location)
+    {
+        if (JSONParsingLimits::maxNestingDepth <= nestingDepth)
+            throwError ("Objects or arrays are nested too deeply", location);
+
+        ++nestingDepth;
+        return ScopeGuard { [this] { --nestingDepth; } };
+    }
 
     bool matchString (const char* t)
     {
@@ -234,6 +249,7 @@ struct JSONParser
         var result (resultObject);
         auto& resultProperties = resultObject->getProperties();
         auto startOfObjectDecl = currentLocation;
+        const auto restoreNestingDepth = enterNestedContainer (startOfObjectDecl);
 
         for (;;)
         {
@@ -279,6 +295,7 @@ struct JSONParser
         auto result = var (Array<var>());
         auto destArray = result.getArray();
         auto startOfArrayDecl = currentLocation;
+        const auto restoreNestingDepth = enterNestedContainer (startOfArrayDecl);
 
         for (;;)
         {
