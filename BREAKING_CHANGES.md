@@ -4,6 +4,31 @@
 
 ## Change
 
+ValueTree::readFromStream() and the related readFromData() and
+readFromGZIPData() functions now return an invalid ValueTree for data in
+which trees are nested more than 256 levels deep. var::readFromStream() now
+reads arrays nested more than 256 levels deep as void values.
+
+**Possible Issues**
+
+Such data, which can only have been produced by a tree or array that was
+itself nested more than 256 levels deep, will no longer be read back.
+
+**Workaround**
+
+Restructure the tree or array so that it is nested less deeply.
+
+**Rationale**
+
+Both readers recurse once for each level of nesting, so a malicious data block
+could use deep nesting to overflow the stack and crash an application. The
+limit matches the one applied to JSON and XML documents. The readers also no
+longer preallocate storage based on counts and sizes read from the data, which
+could previously be used to request a very large allocation.
+
+
+## Change
+
 JSON::parse() and JSON::fromString() now reject documents in which objects or
 arrays are nested more than 256 levels deep.
 
