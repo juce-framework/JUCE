@@ -35,6 +35,11 @@
 namespace juce
 {
 
+namespace ValueTreeStreamLimits
+{
+    constexpr int maxNestingDepth = 256;
+}
+
 class ValueTree::SharedObject final : public ReferenceCountedObject
 {
 public:
@@ -412,6 +417,57 @@ public:
             output.writeCompressedInt (0);
             output.writeCompressedInt (0);
         }
+    }
+
+    static Ptr readObjectFromStream (InputStream& input, int nestingDepth, bool& nestedTooDeeply)
+    {
+        if (ValueTreeStreamLimits::maxNestingDepth <= nestingDepth)
+        {
+            nestedTooDeeply = true;
+            return nullptr;
+        }
+
+        auto type = input.readString();
+
+        if (type.isEmpty())
+            return nullptr;
+
+        Ptr object (new SharedObject (type));
+        auto numProps = input.readCompressedInt();
+
+        if (numProps < 0)
+        {
+            jassertfalse;  // trying to read corrupted data!
+            return object;
+        }
+
+        for (int i = 0; i < numProps; ++i)
+        {
+            auto name = input.readString();
+
+            if (name.isEmpty())
+            {
+                jassertfalse;  // trying to read corrupted data!
+                return object;
+            }
+
+            object->properties.set (name, var::readFromStream (input));
+        }
+
+        auto numChildren = input.readCompressedInt();
+
+        for (int i = 0; i < numChildren; ++i)
+        {
+            auto child = readObjectFromStream (input, nestingDepth + 1, nestedTooDeeply);
+
+            if (child == nullptr)
+                return object;
+
+            object->children.add (child);
+            child->parent = object.get();
+        }
+
+        return object;
     }
 
     //==============================================================================
@@ -1046,46 +1102,9 @@ void ValueTree::writeToStream (OutputStream& output) const
 
 ValueTree ValueTree::readFromStream (InputStream& input)
 {
-    auto type = input.readString();
-
-    if (type.isEmpty())
-        return {};
-
-    ValueTree v (type);
-
-    auto numProps = input.readCompressedInt();
-
-    if (numProps < 0)
-    {
-        jassertfalse;  // trying to read corrupted data!
-        return v;
-    }
-
-    for (int i = 0; i < numProps; ++i)
-    {
-        auto name = input.readString();
-
-        if (name.isNotEmpty())
-            v.object->properties.set (name, var::readFromStream (input));
-        else
-            jassertfalse;  // trying to read corrupted data!
-    }
-
-    auto numChildren = input.readCompressedInt();
-    v.object->children.ensureStorageAllocated (numChildren);
-
-    for (int i = 0; i < numChildren; ++i)
-    {
-        auto child = readFromStream (input);
-
-        if (! child.isValid())
-            return v;
-
-        v.object->children.add (child.object);
-        child.object->parent = v.object.get();
-    }
-
-    return v;
+    bool nestedTooDeeply = false;
+    auto root = SharedObject::readObjectFromStream (input, 0, nestedTooDeeply);
+    return nestedTooDeeply ? ValueTree() : ValueTree (std::move (root));
 }
 
 ValueTree ValueTree::readFromData (const void* data, size_t numBytes)
@@ -1217,6 +1236,58 @@ public:
 
                 auto v4 = v2.createCopy();
                 expect (v1.isEquivalentTo (v4));
+            }
+        }
+
+        {
+            beginTest ("Stream reading limits");
+
+            const auto maxDepth = ValueTreeStreamLimits::maxNestingDepth;
+
+            const auto createNestedTree = [] (int depth)
+            {
+                ValueTree root ("a");
+                auto node = root;
+
+                for (int i = 1; i < depth; ++i)
+                {
+                    ValueTree child ("a");
+                    node.appendChild (child, nullptr);
+                    node = child;
+                }
+
+                return root;
+            };
+
+            const auto countNestedChildren = [] (ValueTree node)
+            {
+                int depth = 0;
+
+                for (; node.isValid(); node = node.getChild (0))
+                    ++depth;
+
+                return depth;
+            };
+
+            const auto writeAndReadBack = [] (const ValueTree& tree)
+            {
+                MemoryOutputStream mo;
+                tree.writeToStream (mo);
+                return ValueTree::readFromData (mo.getData(), mo.getDataSize());
+            };
+
+            expectEquals (countNestedChildren (writeAndReadBack (createNestedTree (maxDepth))), maxDepth);
+
+            expect (! writeAndReadBack (createNestedTree (maxDepth + 1)).isValid());
+
+            {
+                MemoryOutputStream mo;
+                mo.writeString ("a");
+                mo.writeCompressedInt (0);
+                mo.writeCompressedInt (std::numeric_limits<int>::max());
+
+                const auto tree = ValueTree::readFromData (mo.getData(), mo.getDataSize());
+                expect (tree.hasType ("a") && tree.getNumChildren() == 0);
             }
         }
 

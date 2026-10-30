@@ -469,7 +469,10 @@ public:
     */
     void writeToStream (OutputStream& output) const;
 
-    /** Reloads a tree from a stream that was written with writeToStream(). */
+    /** Reloads a tree from a stream that was written with writeToStream().
+        Trees nested more than 256 levels deep are rejected, and an invalid
+        tree is returned.
+    */
     static ValueTree readFromStream (InputStream& input);
 
     /** Reloads a tree from a data block that was written with writeToStream(). */

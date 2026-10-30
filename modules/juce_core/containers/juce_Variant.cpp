@@ -48,6 +48,11 @@ enum VariantStreamMarkers
     varMarker_Undefined = 9
 };
 
+namespace VariantStreamLimits
+{
+    constexpr int maxArrayNestingDepth = 256;
+}
+
 //==============================================================================
 struct var::VariantType
 {
@@ -872,7 +877,7 @@ void var::writeToStream (OutputStream& output) const
     type->writeToStream (value, output);
 }
 
-var var::readFromStream (InputStream& input)
+static var readVarFromStream (InputStream& input, int arrayNestingDepth)
 {
     const int numBytes = input.readCompressedInt();
 
@@ -895,12 +900,12 @@ var var::readFromStream (InputStream& input)
 
             case varMarker_Binary:
             {
-                MemoryBlock mb ((size_t) numBytes - 1);
+                // The declared size comes from the stream and could be malicious
+                MemoryBlock mb;
 
-                if (numBytes > 1)
                 {
-                    const int numRead = input.read (mb.getData(), numBytes - 1);
-                    mb.setSize ((size_t) numRead);
+                    MemoryOutputStream mo (mb, false);
+                    mo.writeFromInputStream (input, numBytes - 1);
                 }
 
                 return var (mb);
@@ -908,11 +913,17 @@ var var::readFromStream (InputStream& input)
 
             case varMarker_Array:
             {
-                var v;
-                auto* destArray = v.convertToArray();
+                if (VariantStreamLimits::maxArrayNestingDepth <= arrayNestingDepth)
+                {
+                    input.skipNextBytes (numBytes - 1);
+                    break;
+                }
+
+                var v { Array<var>() };
+                auto* destArray = v.getArray();
 
                 for (int i = input.readCompressedInt(); --i >= 0;)
-                    destArray->add (readFromStream (input));
+                    destArray->add (readVarFromStream (input, arrayNestingDepth + 1));
 
                 return v;
             }
@@ -923,6 +934,11 @@ var var::readFromStream (InputStream& input)
     }
 
     return {};
+}
+
+var var::readFromStream (InputStream& input)
+{
+    return readVarFromStream (input, 0);
 }
 
 var::NativeFunctionArgs::NativeFunctionArgs (const var& t, const var* args, int numArgs) noexcept
@@ -950,6 +966,36 @@ struct VariantTests : public UnitTest
 public:
     VariantTests() : UnitTest ("Variant", UnitTestCategories::json) {}
 
+    static var createNestedArrays (int depth)
+    {
+        var result { Array<var>() };
+
+        for (int i = 1; i < depth; ++i)
+        {
+            var outer { Array<var>() };
+            outer.append (result);
+            result = outer;
+        }
+
+        return result;
+    }
+
+    static int countNestedArrays (const var& v)
+    {
+        if (auto* array = v.getArray())
+            return 1 + (array->isEmpty() ? 0 : countNestedArrays (array->getFirst()));
+
+        return 0;
+    }
+
+    static var writeAndReadBack (const var& v)
+    {
+        MemoryOutputStream mo;
+        v.writeToStream (mo);
+        MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
+        return var::readFromStream (mi);
+    }
+
     void runTest() override
     {
         beginTest ("object comparisons have value semantics");
@@ -974,6 +1020,36 @@ public:
 
             expect (varA.equals (varB));
             expect (varB.equals (varA));
+        }
+
+        beginTest ("stream reading limits");
+        {
+            const auto maxDepth = VariantStreamLimits::maxArrayNestingDepth;
+
+            expectEquals (countNestedArrays (writeAndReadBack (createNestedArrays (maxDepth))), maxDepth);
+
+            {
+                MemoryOutputStream mo;
+                createNestedArrays (maxDepth + 1).writeToStream (mo);
+                var (42).writeToStream (mo);
+
+                MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
+                expectEquals (countNestedArrays (var::readFromStream (mi)), maxDepth);
+                expect (var::readFromStream (mi) == var (42));
+                expect (mi.isExhausted());
+            }
+
+            {
+                MemoryOutputStream mo;
+                mo.writeCompressedInt (std::numeric_limits<int>::max());
+                mo.writeByte (varMarker_Binary);
+                mo.writeByte (1);
+                mo.writeByte (2);
+
+                MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
+                const auto v = var::readFromStream (mi);
+                expect (v.isBinaryData() && v.getBinaryData()->getSize() == 2);
+            }
         }
     }
 };
