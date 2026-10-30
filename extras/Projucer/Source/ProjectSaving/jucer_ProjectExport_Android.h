@@ -712,10 +712,10 @@ private:
         mo << "        }"                                                                      << newLine;
         mo << "    }"                                                                          << newLine;
 
-        // Language version 8 (or lower) is required for compatibility with Android 24
+        // The DEX compiler desugars Java 17 language features for every supported minSdk
         mo << "    compileOptions {"                                                           << newLine;
-        mo << "        sourceCompatibility = JavaVersion.VERSION_1_8"                          << newLine;
-        mo << "        targetCompatibility = JavaVersion.VERSION_1_8"                          << newLine;
+        mo << "        sourceCompatibility = JavaVersion.VERSION_17"                           << newLine;
+        mo << "        targetCompatibility = JavaVersion.VERSION_17"                           << newLine;
         mo << "    }"                                                                          << newLine;
 
         mo << getAndroidSigningConfig()                                                        << newLine;
