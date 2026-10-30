@@ -36,6 +36,11 @@ enum VariantStreamMarkers
     varMarker_Undefined = 9
 };
 
+namespace VariantStreamLimits
+{
+    constexpr int maxArrayNestingDepth = 256;
+}
+
 //==============================================================================
 struct var::VariantType
 {
@@ -823,7 +828,7 @@ void var::writeToStream (OutputStream& output) const
     type->writeToStream (value, output);
 }
 
-var var::readFromStream (InputStream& input)
+static var readVarFromStream (InputStream& input, int arrayNestingDepth)
 {
     const int numBytes = input.readCompressedInt();
 
@@ -846,12 +851,12 @@ var var::readFromStream (InputStream& input)
 
             case varMarker_Binary:
             {
-                MemoryBlock mb ((size_t) numBytes - 1);
+                // The declared size comes from the stream and could be malicious
+                MemoryBlock mb;
 
-                if (numBytes > 1)
                 {
-                    const int numRead = input.read (mb.getData(), numBytes - 1);
-                    mb.setSize ((size_t) numRead);
+                    MemoryOutputStream mo (mb, false);
+                    mo.writeFromInputStream (input, numBytes - 1);
                 }
 
                 return var (mb);
@@ -859,11 +864,17 @@ var var::readFromStream (InputStream& input)
 
             case varMarker_Array:
             {
-                var v;
-                auto* destArray = v.convertToArray();
+                if (VariantStreamLimits::maxArrayNestingDepth <= arrayNestingDepth)
+                {
+                    input.skipNextBytes (numBytes - 1);
+                    break;
+                }
+
+                var v { Array<var>() };
+                auto* destArray = v.getArray();
 
                 for (int i = input.readCompressedInt(); --i >= 0;)
-                    destArray->add (readFromStream (input));
+                    destArray->add (readVarFromStream (input, arrayNestingDepth + 1));
 
                 return v;
             }
@@ -874,6 +885,11 @@ var var::readFromStream (InputStream& input)
     }
 
     return {};
+}
+
+var var::readFromStream (InputStream& input)
+{
+    return readVarFromStream (input, 0);
 }
 
 var::NativeFunctionArgs::NativeFunctionArgs (const var& t, const var* args, int numArgs) noexcept
