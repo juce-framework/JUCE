@@ -499,6 +499,9 @@ public:
             JUCE_ASIO_LOG_ERROR ("create buffers 2", err);
 
             asioObject->disposeBuffers();
+            err = asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans);
+            jassert (err == ASE_OK);
+            totalBuffers = resetBuffers (inputChannels, outputChannels);
             err = asioObject->createBuffers (bufferInfos, totalBuffers, currentBlockSizeSamples, &callbacks);
         }
 
@@ -615,6 +618,10 @@ public:
             auto errorCopy = error;
             close(); // (this resets the error string)
             error = errorCopy;
+        }
+        else
+        {
+            reloadChannelNames();
         }
 
         needToReset = false;
@@ -891,6 +898,11 @@ private:
     int resetBuffers (const BigInteger& inputChannels,
                       const BigInteger& outputChannels)
     {
+        const int chansToAllocate = totalNumInputChans + totalNumOutputChans + 4;
+        bufferInfos.calloc (chansToAllocate);
+        inputFormat.calloc (chansToAllocate);
+        outputFormat.calloc (chansToAllocate);
+
         numActiveInputChans = 0;
         numActiveOutputChans = 0;
         auto* info = bufferInfos.get();
