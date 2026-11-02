@@ -1,6 +1,6 @@
 # JUCE breaking changes
 
-# Version 7.0.13
+# Version 7.0.14
 
 ## Change
 
