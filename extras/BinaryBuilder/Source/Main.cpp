@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE framework.
-   Copyright (c) Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited 
 
    JUCE is an open source framework subject to commercial or open source
    licensing.
