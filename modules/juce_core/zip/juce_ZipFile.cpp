@@ -517,6 +517,11 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, Overwri
     if (in == nullptr)
         return Result::fail ("Failed to open the zip file for reading");
 
+    const auto parentIsSymbolic = hasSymbolicPart (targetDirectory, targetFile.getParentDirectory());
+
+    if (followSymlinks == FollowSymlinks::no && parentIsSymbolic)
+        return Result::fail ("Parent directory leads through symlink for target file: " + targetFile.getFullPathName());
+
     if (targetFile.exists())
     {
         if (overwriteFiles == OverwriteFiles::no)
@@ -525,11 +530,6 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, Overwri
         if (! targetFile.deleteFile())
             return Result::fail ("Failed to write to target file: " + targetFile.getFullPathName());
     }
-
-    const auto parentIsSymbolic = hasSymbolicPart (targetDirectory, targetFile.getParentDirectory());
-
-    if (followSymlinks == FollowSymlinks::no && parentIsSymbolic)
-        return Result::fail ("Parent directory leads through symlink for target file: " + targetFile.getFullPathName());
 
     if (! targetFile.getParentDirectory().createDirectory())
         return Result::fail ("Failed to create target folder: " + targetFile.getParentDirectory().getFullPathName());
@@ -946,6 +946,29 @@ struct ZIPTests final : public UnitTest
             expect (uncompressFollowingLinks ("toRoot").wasOk());
             expect (uncompressFollowingLinks ("toRoot/x").failed());
             expect (! following.getChildFile ("x").isSymbolicLink());
+
+            // A pre-existing link in the target directory must not cause the file it points at to be
+            // deleted when an ordinary entry would overwrite a file through it
+            TemporaryFile outsideDir, linkedDir;
+            const auto outside = outsideDir.getFile();
+            const auto linked = linkedDir.getFile();
+            expect (outside.createDirectory());
+            expect (linked.createDirectory());
+            expect (File::createSymbolicLink (linked.getChildFile ("link"), outside.getFullPathName(), false));
+
+            const auto victim = outside.getChildFile ("victim.txt");
+            const String victimContent ("victim");
+            expect (victim.replaceWithText (victimContent));
+
+            const auto victimData = createZipMemoryBlock ({ "link/" + victim.getFileName() });
+            MemoryInputStream victimStream (victimData, false);
+            ZipFile victimZip (victimStream);
+            expectEquals (victimZip.getNumEntries(), 1);
+            expect (victimZip.uncompressEntry (0, linked, ZipFile::OverwriteFiles::yes, ZipFile::FollowSymlinks::no).failed());
+            expectEquals (victim.loadFileAsString(), victimContent);
+
+            expect (outside.deleteRecursively());
+            expect (linked.deleteRecursively());
 
             expect (source.deleteRecursively());
             expect (target.deleteRecursively());
