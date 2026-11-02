@@ -82,7 +82,7 @@ static NativeSymbol _hb_wasm_native_symbols[] =
   NATIVE_SYMBOL ("(ii)i",	font_get_glyph_h_advance),
   NATIVE_SYMBOL ("(ii)i",	font_get_glyph_v_advance),
   NATIVE_SYMBOL ("(iii)i",	font_get_glyph_extents),
-  NATIVE_SYMBOL ("(ii$*)",	font_glyph_to_string),
+  NATIVE_SYMBOL ("(iiii)",	font_glyph_to_string),
   NATIVE_SYMBOL ("(iii)i",	font_copy_glyph_outline),
   NATIVE_SYMBOL ("(ii)i",	font_copy_coords),
   NATIVE_SYMBOL ("(ii)i",	font_set_coords),
@@ -92,6 +92,8 @@ static NativeSymbol _hb_wasm_native_symbols[] =
 
   /* shape */
   NATIVE_SYMBOL ("(iiii$)i",	shape_with),
+  NATIVE_SYMBOL ("(iii)i",	feature_copy_contents),
+  NATIVE_SYMBOL ("(i)",		features_free),
 
   /* debug */
 #ifdef HB_DEBUG_WASM

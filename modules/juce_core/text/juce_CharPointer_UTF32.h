@@ -263,20 +263,26 @@ public:
         return CharacterFunctions::compare (*this, other);
     }
 
-   #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
-    /** Compares this string with another one. */
-    int compare (CharPointer_UTF32 other) const noexcept
-    {
-        return wcscmp (data, other.data);
-    }
-   #endif
-
     /** Compares this string with another one, up to a specified number of characters. */
     template <typename CharPointer>
     int compareUpTo (CharPointer other, int maxChars) const noexcept
     {
         return CharacterFunctions::compareUpTo (*this, other, maxChars);
     }
+
+   #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
+    /** Compares this string with another one. */
+    int compare (CharPointer_UTF32 other) const noexcept
+    {
+        return wcscmp (data, other.data);
+    }
+
+    /** Compares this string with another one, up to a specified number of characters. */
+    int compareUpTo (CharPointer_UTF32 other, int maxChars) const noexcept
+    {
+        return wcsncmp (data, other.data, (size_t) maxChars);
+    }
+   #endif
 
     /** Compares this string with another one. */
     template <typename CharPointer>

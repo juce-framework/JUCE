@@ -41,12 +41,12 @@ struct AlertWindowHelpers
 
     static std::unique_ptr<ScopedMessageBoxInterface> create (const MessageBoxOptions& opts)
     {
-        class AlertWindowImpl : public detail::ScopedMessageBoxInterface
+        class AlertWindowImpl : public ScopedMessageBoxInterface
         {
         public:
             explicit AlertWindowImpl (const MessageBoxOptions& opts) : options (opts) {}
 
-            void runAsync (std::function<void (int)> recipient) override
+            void runAsync (std::function<void (std::optional<int>)> recipient) override
             {
                 if (auto* comp = setUpAlert())
                     comp->enterModalState (true, ModalCallbackFunction::create (std::move (recipient)), true);
@@ -54,7 +54,7 @@ struct AlertWindowHelpers
                     NullCheckedInvocation::invoke (recipient, 0);
             }
 
-            int runSync() override
+            std::optional<int> runSync() override
             {
                #if JUCE_MODAL_LOOPS_PERMITTED
                 if (auto comp = rawToUniquePtr (setUpAlert()))
@@ -82,14 +82,7 @@ struct AlertWindowHelpers
                 auto& lf = component != nullptr ? component->getLookAndFeel()
                                                 : LookAndFeel::getDefaultLookAndFeel();
 
-                alert = lf.createAlertWindow (options.getTitle(),
-                                              options.getMessage(),
-                                              options.getButtonText (0),
-                                              options.getButtonText (1),
-                                              options.getButtonText (2),
-                                              options.getIconType(),
-                                              options.getNumButtons(),
-                                              component);
+                alert = lf.createAlertWindowForOptions (options).release();
 
                 if (alert == nullptr)
                 {
@@ -118,6 +111,32 @@ struct AlertWindowHelpers
         };
 
         return std::make_unique<AlertWindowImpl> (opts);
+    }
+
+    static std::vector<int> getSuggestedButtonOrder (const MessageBoxOptions& opt)
+    {
+        const auto& buttons = opt.getButtons();
+
+        std::vector<int> buttonOrder;
+
+        for (int i = 0; i < opt.getNumButtons(); ++i)
+            buttonOrder.push_back (i);
+
+        for (auto [index, button] : enumerate (buttons, int{}))
+        {
+            if (button.isPreferredAction())
+            {
+                buttonOrder.erase (std::find (buttonOrder.begin(), buttonOrder.end(), index));
+                buttonOrder.insert (buttonOrder.begin(), index);
+            }
+            else if (button.getRole() == MessageBoxButtonRole::cancel)
+            {
+                buttonOrder.erase (std::find (buttonOrder.begin(), buttonOrder.end(), index));
+                buttonOrder.insert (buttonOrder.end(), index);
+            }
+        }
+
+        return buttonOrder;
     }
 };
 

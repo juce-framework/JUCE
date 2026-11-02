@@ -118,6 +118,12 @@ public:
         */
         Component* componentToCentreAround = nullptr;
 
+        /** If this is not a nullptr, the dialog box is associated with this component, so that
+            it is kept above the window containing the component. See the
+            TopLevelWindow::setAssociatedComponent() method for more info about this parameter.
+        */
+        Component* associatedComponent = nullptr;
+
         /** If true, then the escape key will trigger the dialog's close button. */
         bool escapeKeyTriggersCloseButton = true;
         /** If true, the dialog will use a native title bar. See TopLevelWindow::setUsingNativeTitleBar() */

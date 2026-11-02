@@ -1993,6 +1993,13 @@ private:
 
             systemWindow = parent;
 
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            // Hosts may report the content scale either before or after attaching the view, so
+            // we need to record the DPI both here and in setContentScaleFactor()
+            if (owner->scaleManager.getHostScale().has_value())
+                dpiWhenHostScaleReported = getDpiOfDisplayUnderWindow (systemWindow);
+           #endif
+
             createContentWrapperComponentIfNeeded();
 
             const auto [desktopFlags, windowsMultiTouch] = detail::PluginUtilities::getDesktopFlagsAndWindowsMultiTouchMode (component->pluginEditor.get());
@@ -2054,6 +2061,32 @@ private:
 
             if (component == nullptr)
                 return kResultTrue;
+
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            // A per-monitor DPI aware v1 host such as REAPER resizes a resizable view for a new
+            // display before it reports the new content scale. If the host has resized the view by
+            // the ratio of the two DPIs, the new scale is adopted now.
+            if (const auto hostScale = owner->scaleManager.getHostScale(); hostScale.has_value() && 0.0 < dpiWhenHostScaleReported)
+            {
+                if (const auto dpi = getDpiOfDisplayUnderWindow (systemWindow); 0.0 < dpi && ! approximatelyEqual (dpi, dpiWhenHostScaleReported))
+                {
+                    const auto dpiRatio = dpi / dpiWhenHostScaleReported;
+                    const auto requestedHostSize = createRectangle (*newSize).toFloat();
+                    const auto previousHostSize = owner->scaleManager.convertToHostBounds (component->getSizeToContainChild().toFloat()).toFloat();
+
+                    const auto distanceFromRequestedHostSize = [&] (Rectangle<float> r)
+                    {
+                        return std::abs (requestedHostSize.getWidth() - r.getWidth()) + std::abs (requestedHostSize.getHeight() - r.getHeight());
+                    };
+
+                    if (distanceFromRequestedHostSize (previousHostSize * (float) dpiRatio) < distanceFromRequestedHostSize (previousHostSize))
+                    {
+                        dpiWhenHostScaleReported = dpi;
+                        owner->scaleManager.setHostScale (*hostScale * (float) dpiRatio);
+                    }
+                }
+            }
+           #endif
 
             const auto rounded = owner->scaleManager.convertFromHostBounds (createRectangle (*newSize)).toNearestIntEdges();
             component->onSize (rounded.getWidth(), rounded.getHeight());
@@ -2207,6 +2240,10 @@ private:
                 return factor;
                #endif
             });
+
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            dpiWhenHostScaleReported = getDpiOfDisplayUnderWindow (systemWindow);
+           #endif
 
             owner->scaleManager.setHostScale (scaleToApply);
 
@@ -2433,9 +2470,36 @@ private:
             }
         }
 
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        static double getDpiOfDisplayUnderWindow (void* window)
+        {
+            if (window == nullptr)
+                return 0.0;
+
+            const auto hwnd = static_cast<HWND> (window);
+            const auto root = GetAncestor (hwnd, GA_ROOT);
+
+            RECT rootRect{};
+
+            if (! GetWindowRect (root != nullptr ? root : hwnd, &rootRect))
+                return 0.0;
+
+            const auto rootBounds = Rectangle<int>::leftTopRightBottom (rootRect.left, rootRect.top, rootRect.right, rootRect.bottom);
+
+            if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (rootBounds, true))
+                return display->dpi;
+
+            return 0.0;
+        }
+       #endif
+
         //==============================================================================
         std::optional<ScopedRunLoop> viewRunLoop;
         std::optional<ViewRect> lastReportedSize;
+
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        double dpiWhenHostScaleReported = 0.0;
+       #endif
 
         VSTComSmartPtr<JuceVST3EditController> owner;
         AudioProcessor& pluginInstance;

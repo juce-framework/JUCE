@@ -43,10 +43,8 @@ struct WindowingHelpers
 
     #if JUCE_WINDOWS
      static bool isEmbeddedInForegroundProcess (Component* c);
-     static bool isWindowOnCurrentVirtualDesktop (void*);
     #else
      static bool isEmbeddedInForegroundProcess (Component*) { return false; }
-     static bool isWindowOnCurrentVirtualDesktop (void*) { return true; }
     #endif
 
     /*  Returns true if this process is in the foreground, or if the viewComponent

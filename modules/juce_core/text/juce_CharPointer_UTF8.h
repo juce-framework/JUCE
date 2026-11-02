@@ -348,6 +348,34 @@ public:
         return CharacterFunctions::compareUpTo (*this, other, maxChars);
     }
 
+    /** Compares this string with another one, up to a specified number of characters. */
+    int compareUpTo (const CharPointer_UTF8 other, int maxChars) const noexcept
+    {
+        // Byte order matches code point order for valid UTF-8, so the bytes can be compared
+        // directly. A character is counted only where both strings start one, so a truncated
+        // sequence in malformed data is compared rather than counted, and neither string is
+        // read beyond its null terminator or the first difference.
+        auto* a = reinterpret_cast<const uint8*> (data);
+        auto* b = reinterpret_cast<const uint8*> (other.data);
+
+        for (;; ++a, ++b)
+        {
+            if ((*a & 0xc0) != 0x80 && (*b & 0xc0) != 0x80)
+            {
+                if (maxChars <= 0)
+                    return 0;
+
+                --maxChars;
+            }
+
+            if (*a != *b)
+                return *a < *b ? -1 : 1;
+
+            if (*a == 0)
+                return 0;
+        }
+    }
+
     /** Compares this string with another one. */
     template <typename CharPointer>
     int compareIgnoreCase (const CharPointer other) const noexcept

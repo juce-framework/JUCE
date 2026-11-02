@@ -155,9 +155,18 @@ public:
         if (__builtin_available (android 29, *))
             return matchWithAFontMatcher (text, language);
 
-        // The font-fallback API is only available on Android API level 29+
-        jassertfalse;
-        return {};
+        if (text.isEmpty())
+            return {};
+
+        static const auto systemFonts = AndroidFontsFromXml::get();
+
+        if (! systemFonts.has_value())
+            return {};
+
+        // The font-fallback API is only available on Android API level 29+, so try
+        // searching the fonts.xml for a match instead
+
+        return systemFonts->findMatch (text, language);
     }
 
     Ptr cloneWithVariableSettings (Span<const FontVariableSetting> settings) const override
@@ -518,6 +527,181 @@ private:
         };
 
         std::map<String, std::vector<FileAndIndexForStyle>> map;
+    };
+
+    class AndroidFontsFromXml
+    {
+        struct FontIndex
+        {
+            size_t filenameIndex;
+            size_t typefaceIndexInFile;
+        };
+
+    public:
+        static std::optional<AndroidFontsFromXml> get()
+        {
+            const auto xml = XmlDocument::parse (File { "/system/etc/fonts.xml" });
+
+            if (xml == nullptr)
+                return {};
+
+            AndroidFontsFromXml result;
+
+            for (const auto& child : xml->getChildWithTagNameIterator ("family"))
+            {
+                for (const auto& fontElement : child->getChildWithTagNameIterator ("font"))
+                {
+                    const auto filename = fontElement->getAllSubText().trim();
+                    result.sortedFilenames.push_back (filename);
+                }
+            }
+
+            std::sort (result.sortedFilenames.begin(), result.sortedFilenames.end());
+            result.sortedFilenames.erase (std::unique (result.sortedFilenames.begin(), result.sortedFilenames.end()), result.sortedFilenames.end());
+
+            for (const auto& child : xml->getChildWithTagNameIterator ("family"))
+            {
+                const auto langs = child->getStringAttribute ("lang");
+
+                if (langs.isEmpty())
+                    continue;
+
+                for (auto it = langs.begin(), end = langs.end(); it != end;)
+                {
+                    const auto delim = std::find_if (it, end, [] (auto c)
+                    {
+                        return ! std::isalnum ((int) c) && c != '-';
+                    });
+                    const String lang (it, delim);
+
+                    auto& vec = result.fontsByLangScript[lang];
+
+                    for (const auto& fontElement : child->getChildWithTagNameIterator ("font"))
+                    {
+                        const auto filename = fontElement->getAllSubText().trim();
+                        const auto index = (size_t) std::distance (result.sortedFilenames.begin(), std::lower_bound (result.sortedFilenames.begin(), result.sortedFilenames.end(), filename));
+                        const auto indexInFile = (size_t) fontElement->getIntAttribute ("index", 0);
+                        vec.push_back ({ index, indexInFile });
+                    }
+
+                    it = delim == end ? end : delim + 1;
+                }
+            }
+
+            for (const auto& [key, value] : result.fontsByLangScript)
+            {
+                const auto lang = key.upToFirstOccurrenceOf ("-", false, false);
+
+                if (lang.isEmpty())
+                    continue;
+
+                auto& vec = result.fontsByLang[lang];
+                vec.insert (vec.end(), value.begin(), value.end());
+            }
+
+            for (const auto& child : xml->getChildWithTagNameIterator ("family"))
+            {
+                for (const auto& fontElement : child->getChildWithTagNameIterator ("font"))
+                {
+                    const auto filename = fontElement->getAllSubText().trim();
+                    const auto index = (size_t) std::distance (result.sortedFilenames.begin(), std::lower_bound (result.sortedFilenames.begin(), result.sortedFilenames.end(), filename));
+                    const auto indexInFile = (size_t) fontElement->getIntAttribute ("index", 0);
+                    result.fontsByOrder.push_back ({ index, indexInFile });
+                }
+            }
+
+            return result;
+        }
+
+        Typeface::Ptr findMatch (const String& text, const String& language) const
+        {
+            const String languagesToTry[] { language, "und" };
+            const auto script = SBScriptGetUnicodeTag (SBCodepointGetScript ((SBCodepoint) text[0]));
+            const auto scriptsToTry = script == SBScriptGetUnicodeTag (SBScriptZYYY)
+                                    ? std::initializer_list<hb_tag_t> { script, hb_tag_from_string ("Zsye", 4) }
+                                    : std::initializer_list<hb_tag_t> { script };
+
+            for (const auto& testLanguage : languagesToTry)
+            {
+                if (testLanguage.isEmpty())
+                    continue;
+
+                for (const auto& scriptTag : scriptsToTry)
+                {
+                    char scriptString[5]{};
+                    hb_tag_to_string (scriptTag, scriptString);
+
+                    String stringToFind;
+                    stringToFind << testLanguage << '-' << StringRef (scriptString);
+
+                    if (const auto compatibleFont = findCompatibleFontInMap (text, stringToFind, fontsByLangScript))
+                        return compatibleFont;
+                }
+            }
+
+            for (auto lang = language;;)
+            {
+                if (const auto compatibleFont = findCompatibleFontInMap (text, lang, fontsByLang))
+                    return compatibleFont;
+
+                if (const auto compatibleFont = findCompatibleFontInMap (text, lang, fontsByLangScript))
+                    return compatibleFont;
+
+                const auto index = lang.lastIndexOfChar ('-');
+
+                if (index == -1)
+                    break;
+
+                lang = lang.substring (0, index);
+            }
+
+            for (const auto& font : fontsByOrder)
+            {
+                if (auto compatibleFont = checkFontCompatibility (text, sortedFilenames[(size_t) font.filenameIndex], font.typefaceIndexInFile))
+                    return compatibleFont;
+            }
+
+            return {};
+        }
+
+    private:
+        Typeface::Ptr findCompatibleFontInMap (const String& text,
+                                               const String& key,
+                                               const std::map<String, std::vector<FontIndex>>& map) const
+        {
+            const auto match = map.find (key);
+
+            if (match == map.end() || match->second.empty())
+                return {};
+
+            for (const auto& index : match->second)
+            {
+                if (auto compatibleFont = checkFontCompatibility (text, sortedFilenames[index.filenameIndex], index.typefaceIndexInFile))
+                    return compatibleFont;
+            }
+
+            return {};
+        }
+
+        Typeface::Ptr checkFontCompatibility (const String& text, const String& filename, size_t index) const
+        {
+            const auto loaded = loadCompatibleFont ({ "/system/fonts/" + filename, (int) index });
+
+            if (loaded == nullptr)
+                return {};
+
+            const auto glyphIndex = loaded->getNominalGlyphForCodepoint (text[0]);
+
+            if (! glyphIndex.has_value())
+                return {};
+
+            return loaded;
+        }
+
+        std::vector<String> sortedFilenames;
+        std::map<String, std::vector<FontIndex>> fontsByLangScript;
+        std::map<String, std::vector<FontIndex>> fontsByLang;
+        std::vector<FontIndex> fontsByOrder;
     };
 
     static Ptr fromMemory (Span<const std::byte> blob, unsigned int index)

@@ -2497,28 +2497,29 @@ struct WindowsMidiHelpers
             static inline const auto isInput = false;
         };
 
-        template <typename Traits>
-        static void getAvailableDevices (const Traits&, std::vector<ump::EndpointAndStaticInfo>& result)
+        struct Device
         {
-            const auto deviceCaps = [&]
-            {
-                std::vector<typename Traits::Caps> devices;
+            UINT index;
+            ump::EndpointAndStaticInfo info;
+        };
 
-                const auto end = Traits::getNum();
-
-                for (auto i = (decltype (end)) 0; i < end; ++i)
-                    if (typename Traits::Caps mc{}; Traits::getCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                        devices.push_back (mc);
-
-                return devices;
-            }();
-
+        template <typename Traits>
+        static std::vector<Device> getDevices (const Traits&)
+        {
+            std::vector<UINT> indices;
             StringArray deviceIDs, deviceNames;
 
-            for (const auto [i, device] : enumerate (deviceCaps))
+            const auto end = Traits::getNum();
+
+            for (auto i = (decltype (end)) 0; i < end; ++i)
             {
-                const auto name = device.szPname;
-                const auto identifier = std::invoke ([index = i]() -> String
+                typename Traits::Caps mc{};
+
+                if (Traits::getCaps (i, &mc, sizeof (mc)) != MMSYSERR_NOERROR)
+                    continue;
+
+                const auto name = mc.szPname;
+                const auto identifier = std::invoke ([index = (size_t) i]() -> String
                 {
                     ULONG size = 0;
 
@@ -2536,6 +2537,7 @@ struct WindowsMidiHelpers
                     return interfaceName;
                 });
 
+                indices.push_back (i);
                 deviceNames.add (name);
                 deviceIDs.add (identifier.isNotEmpty() ? identifier : name);
             }
@@ -2545,11 +2547,19 @@ struct WindowsMidiHelpers
 
             constexpr auto direction = Traits::isInput ? ump::BlockDirection::sender : ump::BlockDirection::receiver;
 
+            std::vector<Device> result;
+
             for (auto [index, id] : enumerate (deviceIDs, int{}))
-            {
-                const auto fullInfo = ump::IOHelpers::makeProxyEndpoint ({ deviceNames[index], id }, direction);
-                result.push_back (fullInfo);
-            }
+                result.push_back ({ indices[(size_t) index], ump::IOHelpers::makeProxyEndpoint ({ deviceNames[index], id }, direction) });
+
+            return result;
+        }
+
+        template <typename Traits>
+        static void getAvailableDevices (const Traits& traits, std::vector<ump::EndpointAndStaticInfo>& result)
+        {
+            for (const auto& device : getDevices (traits))
+                result.push_back (device.info);
         }
 
         class MidiHeader
@@ -2585,11 +2595,6 @@ struct WindowsMidiHelpers
             {
                 hdr.dwBytesRecorded = 0;
                 midiInAddBuffer (device, &hdr, sizeof (hdr));
-            }
-
-            bool isFinished() const
-            {
-                return (hdr.dwFlags & MHDR_DONE) != 0;
             }
 
         private:
@@ -2634,11 +2639,6 @@ struct WindowsMidiHelpers
 
             ~InputDevice() override
             {
-                inDestructor = true;
-                SetEvent (event.get());
-
-                blockQueueThread.join();
-
                 allInputs().remove (*this);
 
                 if (deviceHandle == nullptr)
@@ -2709,21 +2709,19 @@ struct WindowsMidiHelpers
         private:
             static std::unique_ptr<InputDevice> openInternal (const ump::EndpointId& id)
             {
-                std::vector<ump::EndpointAndStaticInfo> endpoints;
-                getAvailableDevices (ITraits{}, endpoints);
-                const auto iter = std::find_if (endpoints.begin(),
-                                                endpoints.end(),
-                                                [&] (const auto& x) { return x.id == id; });
+                const auto devices = getDevices (ITraits{});
+                const auto iter = std::find_if (devices.begin(),
+                                                devices.end(),
+                                                [&] (const auto& x) { return x.info.id == id; });
 
-                if (iter == endpoints.end())
+                if (iter == devices.end())
                     return {};
 
-                const auto deviceID = std::distance (endpoints.begin(), iter);
                 auto result = rawToUniquePtr (new InputDevice { id });
 
                 HMIDIIN handle{};
                 const auto err = midiInOpen (&handle,
-                                             (UINT) deviceID,
+                                             iter->index,
                                              (DWORD_PTR) &midiInCallback,
                                              (DWORD_PTR) result.get(),
                                              CALLBACK_FUNCTION);
@@ -2741,18 +2739,6 @@ struct WindowsMidiHelpers
 
                 if (midiInStart (handle) != MMSYSERR_NOERROR)
                     return {};
-
-                result->blockQueueThread = std::thread { [self = result.get()]
-                {
-                    while (! self->inDestructor)
-                    {
-                        WaitForSingleObject (self->event.get(), INFINITE);
-
-                        for (auto& header : *self->headers)
-                            if (header.isFinished())
-                                header.write (self->deviceHandle);
-                    }
-                } };
 
                 return result;
             }
@@ -2776,8 +2762,6 @@ struct WindowsMidiHelpers
                         consumers.call ([&] (ump::Consumer& c) { c.consume (b, e, timestamp); });
                     });
                 }
-
-                SetEvent (event.get());
             }
 
             void handleSysEx (MIDIHDR* hdr, uint32 timeStamp)
@@ -2792,8 +2776,6 @@ struct WindowsMidiHelpers
                         consumers.call ([&] (ump::Consumer& c) { c.consume (b, e, timestamp); });
                     });
                 }
-
-                SetEvent (event.get());
             }
 
             void disconnected()
@@ -2822,34 +2804,45 @@ struct WindowsMidiHelpers
                 return t * 0.001;
             }
 
-            static void CALLBACK midiInCallback (HMIDIIN,
+            static void CALLBACK midiInCallback (HMIDIIN hMidiIn,
                                                  UINT uMsg,
                                                  DWORD_PTR dwInstance,
                                                  DWORD_PTR midiMessage,
                                                  DWORD_PTR timeStamp)
             {
-                auto* collector = reinterpret_cast<InputDevice*> (dwInstance);
+                auto* const collector = reinterpret_cast<InputDevice*> (dwInstance);
+                auto* const header = reinterpret_cast<MIDIHDR*> (midiMessage);
 
-                allInputs().call ([&] (auto& l)
+                switch (uMsg)
                 {
-                    if (collector != &l)
-                        return;
+                    case MIM_DATA:
+                        allInputs().call ([&] (auto& l)
+                        {
+                            if (collector == &l)
+                                l.handleMessage ((const uint8*) &midiMessage, (uint32) timeStamp);
+                        });
+                        break;
 
-                    switch (uMsg)
-                    {
-                        case MIM_DATA:
-                            l.handleMessage ((const uint8*) &midiMessage, (uint32) timeStamp);
-                            break;
+                    case MIM_LONGDATA:
+                    case MIM_LONGERROR:
+                        allInputs().call ([&] (auto& l)
+                        {
+                            if (collector == &l)
+                            {
+                                l.handleSysEx (header, (uint32) timeStamp);
+                                midiInAddBuffer (hMidiIn, header, sizeof (MIDIHDR));
+                            }
+                        });
+                        break;
 
-                        case MIM_LONGDATA:
-                            l.handleSysEx ((MIDIHDR*) midiMessage, (uint32) timeStamp);
-                            break;
-
-                        case MIM_CLOSE:
-                            l.disconnected();
-                            break;
-                    }
-                });
+                    case MIM_CLOSE:
+                        allInputs().call ([&] (auto& l)
+                        {
+                            if (collector == &l)
+                                l.disconnected();
+                        });
+                        break;
+                }
             }
 
             static WaitFreeListeners<InputDevice>& allInputs()
@@ -2867,19 +2860,6 @@ struct WindowsMidiHelpers
             // The shared input always converts to plain MIDI 1.0. Clients that want MIDI 2.0 have
             // their own converters.
             ump::BytestreamToUMPDispatcher dispatcher { 0, ump::PacketProtocol::MIDI_1_0, 4096 };
-
-            struct EventDestructor
-            {
-                void operator() (HANDLE h) const
-                {
-                    if (h != nullptr)
-                        CloseHandle (h);
-                }
-            };
-
-            std::atomic<bool> inDestructor { false };
-            std::unique_ptr<void, EventDestructor> event { CreateEvent (nullptr, false, false, nullptr) };
-            std::thread blockQueueThread;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputDevice)
         };
@@ -3170,21 +3150,19 @@ struct WindowsMidiHelpers
 
             static std::unique_ptr<OutputDevice> openInternal (const ump::EndpointId& id)
             {
-                std::vector<ump::EndpointAndStaticInfo> endpoints;
-                getAvailableDevices (OTraits{}, endpoints);
-                const auto iter = std::find_if (endpoints.begin(),
-                                                endpoints.end(),
-                                                [&] (const auto& x) { return x.id == id; });
+                const auto devices = getDevices (OTraits{});
+                const auto iter = std::find_if (devices.begin(),
+                                                devices.end(),
+                                                [&] (const auto& x) { return x.info.id == id; });
 
-                if (iter == endpoints.end())
+                if (iter == devices.end())
                     return {};
 
-                const auto deviceID = std::distance (endpoints.begin(), iter);
                 auto result = rawToUniquePtr (new OutputDevice (id));
 
                 HMIDIOUT h = nullptr;
                 auto res = midiOutOpen (&h,
-                                        (UINT) deviceID,
+                                        iter->index,
                                         (DWORD_PTR) &midiOutCallback,
                                         (DWORD_PTR) result.get(),
                                         CALLBACK_FUNCTION);

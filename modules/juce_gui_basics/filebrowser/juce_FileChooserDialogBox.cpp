@@ -197,15 +197,15 @@ void FileChooserDialogBox::okButtonPressed()
          && content->chooserComponent.isSaveMode()
          && content->chooserComponent.getSelectedFile (0).exists())
     {
-        auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                               TRANS ("File already exists"),
-                                                               TRANS ("There's already a file called: FLNM")
-                                                                  .replace ("FLNM", content->chooserComponent.getSelectedFile (0).getFullPathName())
-                                                                 + "\n\n"
-                                                                 + TRANS ("Are you sure you want to overwrite it?"),
-                                                               TRANS ("Overwrite"),
-                                                               TRANS ("Cancel"),
-                                                               this);
+        auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                          .withTitle (TRANS ("File already exists"))
+                                          .withMessage (TRANS ("There's already a file called: FLNM")
+                                                            .replace ("FLNM", content->chooserComponent.getSelectedFile (0).getFullPathName())
+                                                        + "\n\n"
+                                                        + TRANS ("Are you sure you want to overwrite it?"))
+                                          .withButton (TRANS ("Overwrite"), 1)
+                                          .withButton (TRANS ("Cancel"), 0)
+                                          .withAssociatedComponent (this);
         messageBox = AlertWindow::showScopedAsync (options, [this] (int result)
         {
             if (result != 0)

@@ -387,11 +387,23 @@ void Displays::updateToLogical()
     // Recursively traverse the display graph from the root and work out logical bounds
     processDisplay (root, displayNodes);
 
+    // Displays are arranged edge-to-edge in physical coordinates, but when the coordinates have
+    // been virtualised for a thread that isn't per-monitor DPI aware each display is scaled
+    // independently while keeping its physical origin, so a display may not touch any other
+    // display. Such a display has no neighbour to be positioned against. In a virtualised space
+    // every display reports the same scale, so scaling the whole area uniformly keeps the
+    // arrangement consistent with the cursor and window coordinates that the system reports.
     for (auto& node : displayNodes)
     {
-        // All of the nodes should have a parent
-        jassert (node.parent != nullptr);
+        if (node.parent == nullptr)
+        {
+            node.logicalArea = node.display->physicalBounds.toDouble() / node.display->scale;
+            node.parent = &node;
+        }
+    }
 
+    for (auto& node : displayNodes)
+    {
         const auto unscaledUserArea = (node.display->userBounds - node.display->logicalBounds.getTopLeft());
         const auto relativeUserArea = unscaledUserArea.toDouble() / node.display->scale;
 

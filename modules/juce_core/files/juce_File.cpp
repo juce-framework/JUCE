@@ -423,6 +423,7 @@ bool File::isAbsolutePath (StringRef path)
 
     return firstChar == getSeparatorChar()
            #if JUCE_WINDOWS
+            || firstChar == '/'
             || (firstChar != 0 && path.text[1] == ':');
            #else
             || firstChar == '~';
@@ -433,13 +434,34 @@ File File::getChildFile (StringRef relativePath) const
 {
     auto r = relativePath.text;
 
-    if (isAbsolutePath (r))
-        return File (String (r));
-
    #if JUCE_WINDOWS
     if (r.indexOf ((juce_wchar) '/') >= 0)
         return getChildFile (String (r).replaceCharacter ('/', '\\'));
+
+    // A path with a single leading separator names a location on the root of a drive or share
+    // without saying which one, so it is resolved against the drive or share of this file.
+    if (*r == getSeparatorChar() && r[1] != getSeparatorChar())
+    {
+        const auto root = std::invoke ([&]() -> String
+        {
+            if (fullPath[1] == ':')
+                return fullPath.substring (0, 2);
+
+            if (! fullPath.startsWith ("\\\\"))
+                return {};
+
+            const auto serverEnd = fullPath.indexOfChar (2, getSeparatorChar());
+            const auto shareEnd = serverEnd < 0 ? -1 : fullPath.indexOfChar (serverEnd + 1, getSeparatorChar());
+            return shareEnd < 0 ? fullPath : fullPath.substring (0, shareEnd);
+        });
+
+        if (root.isNotEmpty())
+            return File (root + String (r));
+    }
    #endif
+
+    if (isAbsolutePath (r))
+        return File (String (r));
 
     auto path = fullPath;
     auto separatorChar = getSeparatorChar();
@@ -1161,6 +1183,31 @@ public:
         expect (home.getChildFile (".././xyz/./abc") == home.getSiblingFile ("xyz/abc"));
         expect (home.getChildFile ("./../xyz") == home.getSiblingFile ("xyz"));
         expect (home.getChildFile ("a1/a2/a3/./../../a4") == home.getChildFile ("a1/a4"));
+
+        expect (File::isAbsolutePath (home.getFullPathName()));
+        expect (! File::isAbsolutePath ("xyz"));
+        expect (! File::isAbsolutePath ("xyz/abc"));
+
+       #if JUCE_WINDOWS
+        expect (File::isAbsolutePath ("C:\\xyz"));
+        expect (File::isAbsolutePath ("C:/xyz"));
+        expect (File::isAbsolutePath ("\\xyz"));
+        expect (File::isAbsolutePath ("/xyz"));
+        expect (File::isAbsolutePath ("\\\\server\\share\\xyz"));
+        expect (! File::isAbsolutePath ("xyz\\abc"));
+
+        const File driveFile ("D:\\moose\\fish");
+        expect (driveFile.getChildFile ("\\xyz") == File ("D:\\xyz"));
+        expect (driveFile.getChildFile ("/xyz") == File ("D:\\xyz"));
+        expect (driveFile.getChildFile ("\\xyz\\..\\abc") == File ("D:\\abc"));
+        expect (driveFile.getChildFile ("E:\\xyz") == File ("E:\\xyz"));
+        expect (driveFile.getChildFile ("\\\\server\\share\\xyz") == File ("\\\\server\\share\\xyz"));
+
+        const File shareFile ("\\\\server\\share\\moose\\fish");
+        expect (shareFile.getChildFile ("\\xyz") == File ("\\\\server\\share\\xyz"));
+        expect (shareFile.getChildFile ("/xyz") == File ("\\\\server\\share\\xyz"));
+        expect (shareFile.getChildFile ("E:\\xyz") == File ("E:\\xyz"));
+       #endif
 
         expect (! File().hasReadAccess());
         expect (! File().hasWriteAccess());

@@ -416,7 +416,7 @@ struct ColourEditorComp final : public Component,
         colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
         colourSelector->setSize (300, 400);
 
-        CallOutBox::launchAsynchronously (std::move (colourSelector), getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (std::move (colourSelector), *this, nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override

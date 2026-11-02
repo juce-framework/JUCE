@@ -40,66 +40,80 @@ class JSObject::Impl
 {
 public:
     using ValuePtr = detail::qjs::QuickJSContext::ValuePtr;
+    using ValueHandle = detail::QuickJSWrapper::ValueHandle;
 
     explicit Impl (detail::QuickJSWrapper* engineIn)
-        : Impl (engineIn,
-                { detail::qjs::JS_GetGlobalObject (engineIn->getQuickJSContext()), engineIn->getQuickJSContext() })
-    {
-    }
-
-    Impl (const Impl& other)
-        : Impl (other.engine,
-                { detail::qjs::JS_DupValue (other.engine->getQuickJSContext(), other.valuePtr.get()),
-                  other.engine->getQuickJSContext() })
+        : Impl (ValueHandle { *engineIn, detail::qjs::JS_GetGlobalObject (engineIn->getQuickJSContext()) })
     {
     }
 
     std::unique_ptr<Impl> getChild (const Identifier& prop) const
     {
-        return rawToUniquePtr (new Impl (engine, { detail::getOrCreateProperty (engine->getQuickJSContext(),
-                                                                                valuePtr.get(),
-                                                                                prop.toString().toRawUTF8()),
-                                                   engine->getQuickJSContext() }));
+        auto* engine = valuePtr.getEngine();
+
+        if (engine == nullptr)
+            return rawToUniquePtr (new Impl (ValueHandle{}));
+
+        return rawToUniquePtr (new Impl (ValueHandle { *engine, detail::getOrCreateProperty (engine->getQuickJSContext(),
+                                                                                             valuePtr.get(),
+                                                                                             prop.toString().toRawUTF8()) }));
     }
 
     std::unique_ptr<Impl> getChild (int64 index) const
     {
         jassert (isArray());
-        return rawToUniquePtr (new Impl (engine, valuePtr[detail::toUint32 (index)]));
+        auto* engine = valuePtr.getEngine();
+
+        if (engine == nullptr)
+            return rawToUniquePtr (new Impl (ValueHandle{}));
+
+        return rawToUniquePtr (new Impl (ValueHandle { *engine, detail::qjs::JS_GetPropertyUint32 (engine->getQuickJSContext(),
+                                                                                                   valuePtr.get(),
+                                                                                                   detail::toUint32 (index)) }));
     }
 
     bool hasProperty (const Identifier& name) const
     {
-        return detail::hasProperty (engine->getQuickJSContext(), valuePtr.get(), name.toString().toRawUTF8());
+        if (auto* ctx = getContext())
+            return detail::hasProperty (ctx, valuePtr.get(), name.toString().toRawUTF8());
+
+        return false;
     }
 
     void setProperty (const Identifier& name, const var& value) const
     {
-        auto* ctx = engine->getQuickJSContext();
-
-        detail::qjs::JS_SetPropertyStr (ctx, valuePtr.get(), name.toString().toRawUTF8(), detail::juceToQuickJs (value, ctx));
+        if (auto* ctx = getContext())
+            detail::qjs::JS_SetPropertyStr (ctx, valuePtr.get(), name.toString().toRawUTF8(), detail::juceToQuickJs (value, ctx));
     }
 
     void setProperty (int64 index, const var& value) const
     {
-        auto* ctx = engine->getQuickJSContext();
-
-        detail::qjs::JS_SetPropertyInt64 (ctx, valuePtr.get(), index, detail::juceToQuickJs (value, ctx));
+        if (auto* ctx = getContext())
+            detail::qjs::JS_SetPropertyInt64 (ctx, valuePtr.get(), index, detail::juceToQuickJs (value, ctx));
     }
 
     var get() const
     {
+        auto* ctx = getContext();
+
+        if (ctx == nullptr)
+            return var::undefined();
+
         if (auto* opaque = detail::qjs::JS_GetOpaque (valuePtr.get(), detail::DynamicObjectWrapper::getClassId()))
             if (detail::DynamicObjectWrapper::getDynamicObjects().count (opaque) != 0)
                 return { static_cast<detail::DynamicObjectWrapper*> (opaque)->object.get() };
 
-        auto* ctx = engine->getQuickJSContext();
         return detail::discardError (detail::quickJSToJuce ({ detail::qjs::JS_DupValue (ctx, valuePtr.get()), ctx }));
     }
 
     detail::VarOrError invokeMethod (const Identifier& methodName, Span<const var> args) const
     {
-        engine->resetTimeout();
+        auto* engine = valuePtr.getEngine();
+
+        if (engine == nullptr)
+            return String ("The JavascriptEngine that owned this object has been destroyed");
+
+        const detail::QuickJSWrapper::ScopedExecution execution { *engine };
 
         if (! hasProperty (methodName))
         {
@@ -125,9 +139,13 @@ public:
 
     NamedValueSet getProperties() const
     {
+        auto* ctx = getContext();
+
+        if (ctx == nullptr)
+            return {};
+
         NamedValueSet result;
 
-        auto* ctx = engine->getQuickJSContext();
         ValuePtr names { detail::qjs::JS_GetOwnPropertyNames2 (ctx,
                                                                valuePtr.get(),
                                                                detail::qjs::JS_GPN_ENUM_ONLY | detail::qjs::JS_GPN_STRING_MASK,
@@ -152,7 +170,10 @@ public:
 
     bool isArray() const
     {
-        return detail::qjs::JS_IsArray (engine->getQuickJSContext(), valuePtr.get());
+        if (auto* ctx = getContext())
+            return detail::qjs::JS_IsArray (ctx, valuePtr.get());
+
+        return false;
     }
 
     int64 getSize() const
@@ -163,20 +184,26 @@ public:
             return 0;
         }
 
-        auto lengthProp = valuePtr["length"];
+        auto* ctx = getContext();
+        ValuePtr lengthProp { detail::qjs::JS_GetPropertyStr (ctx, valuePtr.get(), "length"), ctx };
         uint32_t length = 0;
-        detail::qjs::JS_ToUint32 (engine->getQuickJSContext(), &length, lengthProp.get());
+        detail::qjs::JS_ToUint32 (ctx, &length, lengthProp.get());
         return (int64) length;
     }
 
 private:
-    Impl (detail::QuickJSWrapper* e, ValuePtr&& ptr)
-        : engine (e), valuePtr (std::move (ptr))
+    explicit Impl (ValueHandle ptr)
+        : valuePtr (std::move (ptr))
     {
     }
 
-    detail::QuickJSWrapper* engine = nullptr;
-    ValuePtr valuePtr;
+    detail::qjs::JSContext* getContext() const
+    {
+        auto* engine = valuePtr.getEngine();
+        return engine != nullptr ? engine->getQuickJSContext() : nullptr;
+    }
+
+    ValueHandle valuePtr;
 };
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 

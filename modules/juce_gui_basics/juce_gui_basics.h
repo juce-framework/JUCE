@@ -44,7 +44,7 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            9.0.4
+  version:            9.0.5
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
@@ -212,6 +212,7 @@ namespace juce
 #include "components/juce_ModalComponentManager.h"
 #include "components/juce_ComponentListener.h"
 #include "components/juce_CachedComponentImage.h"
+#include "desktop/juce_DesktopWindowOptions.h"
 #include "components/juce_Component.h"
 #include "layout/juce_ComponentAnimator.h"
 #include "desktop/juce_Desktop.h"

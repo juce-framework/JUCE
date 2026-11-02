@@ -635,7 +635,7 @@ public:
             messageBox = AlertWindow::showScopedAsync (MessageBoxOptions().withIconType (MessageBoxIconType::WarningIcon)
                                                                           .withTitle (TRANS ("Error when trying to open audio device!"))
                                                                           .withMessage (error)
-                                                                          .withButton (TRANS ("OK")),
+                                                                          .withButton (TRANS ("OK"), 0),
                                                        nullptr);
     }
 

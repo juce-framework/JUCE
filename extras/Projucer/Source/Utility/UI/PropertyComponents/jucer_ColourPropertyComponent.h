@@ -128,7 +128,7 @@ private:
             CallOutBox::launchAsynchronously (std::make_unique<PopupColourSelector> (colourValue,
                                                                                      defaultColour,
                                                                                      canResetToDefault),
-                                              getScreenBounds(),
+                                              *this,
                                               nullptr);
         }
 

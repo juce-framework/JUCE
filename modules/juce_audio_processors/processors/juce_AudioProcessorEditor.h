@@ -270,7 +270,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditorListener)
     };
 
-    ComponentPeer* createNewPeer (int styleFlags, void*) override;
+    ComponentPeer* createNewPeer (const DesktopWindowOptions&) override;
 
     //==============================================================================
     void initialise();

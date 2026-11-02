@@ -254,6 +254,12 @@ public:
         return CharacterFunctions::compareUpTo (*this, other, maxChars);
     }
 
+    /** Compares this string with another one, up to a specified number of characters. */
+    int compareUpTo (const CharPointer_ASCII other, const int maxChars) const noexcept
+    {
+        return strncmp (data, other.data, (size_t) maxChars);
+    }
+
     /** Compares this string with another one. */
     template <typename CharPointer>
     int compareIgnoreCase (const CharPointer other) const

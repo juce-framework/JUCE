@@ -391,6 +391,11 @@ retry:
   wasm_val_t results[1];
   wasm_val_t arguments[5];
 
+  uint32_t featuresptr;
+  featuresptr = num_features ? wasm_runtime_module_dup_data (module_inst,
+							     (const char *) features,
+							     num_features * sizeof (features[0])) : 0;
+
   results[0].kind = WASM_I32;
   arguments[0].kind = WASM_I32;
   arguments[0].of.i32 = plan->wasm_shape_planptr;
@@ -399,9 +404,7 @@ retry:
   arguments[2].kind = WASM_I32;
   arguments[2].of.i32 = bufferref;
   arguments[3].kind = WASM_I32;
-  arguments[3].of.i32 = num_features ? wasm_runtime_module_dup_data (module_inst,
-								     (const char *) features,
-								     num_features * sizeof (features[0])) : 0;
+  arguments[3].of.i32 = featuresptr;
   arguments[4].kind = WASM_I32;
   arguments[4].of.i32 = num_features;
 
@@ -410,7 +413,7 @@ retry:
 				  ARRAY_LENGTH (arguments), arguments);
 
   if (num_features)
-    wasm_runtime_module_free (module_inst, arguments[2].of.i32);
+    wasm_runtime_module_free (module_inst, featuresptr);
 
   if (unlikely (!ret || !results[0].of.i32))
   {

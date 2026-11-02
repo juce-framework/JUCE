@@ -44,6 +44,8 @@
 #include "juce_gui_basics.h"
 
 #include "detail/juce_LookAndFeelHelpers.h"
+#include "detail/juce_ScopedMessageBoxInterface.h"
+#include "detail/juce_AlertWindowHelpers.h"
 
 #include "lookandfeel/juce_LookAndFeel.cpp"
 #include "lookandfeel/juce_LookAndFeel_V1.cpp"

@@ -233,7 +233,7 @@ HB_WASM_API (bool_t, font_get_glyph_extents) (HB_WASM_EXEC_ENV
 HB_WASM_API (void, font_glyph_to_string) (HB_WASM_EXEC_ENV
 					  ptr_d(font_t, font),
 					  codepoint_t glyph,
-					  char *s, uint32_t size);
+					  ptr_d(char, s), uint32_t size);
 
 
 typedef struct
@@ -296,6 +296,21 @@ typedef struct
 } feature_t;
 #define FEATURE_GLOBAL_START	0
 #define FEATURE_GLOBAL_END	((uint32_t) -1)
+
+typedef struct
+{
+  uint32_t length;
+  ptr_t(feature_t) features;
+} features_t;
+#define FEATURES_INIT {0, 0}
+
+HB_WASM_API (bool_t, feature_copy_contents) (HB_WASM_EXEC_ENV
+					       ptr_d(const feature_t, features),
+					       uint32_t num_features,
+					       ptr_d(features_t, output));
+
+HB_WASM_API (void, features_free) (HB_WASM_EXEC_ENV
+				     ptr_d(features_t, features));
 
 HB_WASM_API (bool_t, shape_with) (HB_WASM_EXEC_ENV
 				  ptr_d(font_t, font),

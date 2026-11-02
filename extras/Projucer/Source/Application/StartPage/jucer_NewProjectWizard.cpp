@@ -265,12 +265,14 @@ static ScopedMessageBox prepareDirectory (const File& targetFolder, Callback&& c
     }
     else if (FileHelpers::containsAnyNonHiddenFiles (targetFolder))
     {
-        auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::InfoIcon,
-                                                               TRANS ("New JUCE Project"),
-                                                               TRANS ("You chose the folder:\n\nXFLDRX\n\n").replace ("XFLDRX", targetFolder.getFullPathName())
-                                                                 + TRANS ("This folder isn't empty - are you sure you want to create the project there?")
-                                                                 + "\n\n"
-                                                                 + TRANS ("Any existing files with the same names may be overwritten by the new files."));
+        auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::InfoIcon)
+                                          .withTitle (TRANS ("New JUCE Project"))
+                                          .withMessage (TRANS ("You chose the folder:\n\nXFLDRX\n\n").replace ("XFLDRX", targetFolder.getFullPathName())
+                                                        + TRANS ("This folder isn't empty - are you sure you want to create the project there?")
+                                                        + "\n\n"
+                                                        + TRANS ("Any existing files with the same names may be overwritten by the new files."))
+                                          .withButton (TRANS ("OK"), 1)
+                                          .withButton (TRANS ("Cancel"), 0);
         return AlertWindow::showScopedAsync (options, [callback] (int result)
         {
             if (result != 0)

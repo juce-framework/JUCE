@@ -586,11 +586,6 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
-bool Desktop::isDarkModeActive() const
-{
-    return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
-}
-
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
 static const auto darkModeSelector = @selector (darkModeChanged:);
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
@@ -653,13 +648,19 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 struct WindowInfo
 {
     explicit WindowInfo (const UIWindow* window)
-        : bounds (convertToRectInt (window.frame)),
+        : WindowInfo (window, convertToRectInt (window.frame))
+    {}
+
+    WindowInfo (const UIWindow* window, Rectangle<int> boundsIn)
+        : screen (window.screen),
+          bounds (boundsIn),
           safeInsets (window.safeAreaInsets.top,
                       window.safeAreaInsets.left,
                       window.safeAreaInsets.bottom,
                       window.safeAreaInsets.right)
     {}
 
+    UIScreen* screen;
     Rectangle<int> bounds;
     BorderSize<double> safeInsets;
 };
@@ -685,39 +686,45 @@ static const UIWindow* findWindow (const Desktop& desktop)
     return {};
 }
 
+API_AVAILABLE (ios (13.0))
+static CGRect getSceneBounds (UIWindowScene* scene)
+{
+   #if JUCE_IOS_API_VERSION_MIN_REQUIRED_AT_LEAST (26, 0)
+    return scene.effectiveGeometry.coordinateSpace.bounds;
+   #else
+    return scene.coordinateSpace.bounds;
+   #endif
+}
+
 static WindowInfo getWindowInfo (const Desktop& desktop)
 {
     if (! JUCEApplication::isStandaloneApp())
         if (const auto* window = findWindow (desktop))
             return WindowInfo { window };
 
-    const auto createTemporaryWindow = []()
+    if (@available (iOS 13, *))
     {
-        if (@available (iOS 13, *))
-        {
-            SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
+        SharedResourcePointer<WindowSceneTracker> windowSceneTracker;
 
+        // The display info window's frame may lag behind a scene resize until UIKit gets
+        // around to laying it out, so take the bounds from the scene itself. The window is
+        // still the right place to read the safe area insets from.
+        if (const auto* window = windowSceneTracker->getDisplayInfoWindow())
             if (auto* scene = windowSceneTracker->getWindowScene())
-                return NSUniquePtr<UIWindow> { [[UIWindow alloc] initWithWindowScene: scene] };
-        }
+                return WindowInfo { window, convertToRectInt (getSceneBounds (scene)) };
+    }
 
-        return NSUniquePtr<UIWindow> { [[UIWindow alloc] init] };
-    };
+    // A window scene may not have connected yet, so a window without one is still needed on iOS 13 and later.
+    JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
+    const NSUniquePtr<UIWindow> window { [[UIWindow alloc] init] };
+    JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
-    auto window (createTemporaryWindow());
     return WindowInfo { window.get() };
 }
 
-static Rectangle<int> getRecommendedWindowBounds (const Desktop& desktop)
+bool Desktop::isDarkModeActive() const
 {
-    return getWindowInfo (desktop).bounds;
-}
-
-static BorderSize<int> getSafeAreaInsets (const Desktop& desktop)
-{
-    const auto masterScale = (double) desktop.getGlobalScaleFactor();
-    const auto safeInsets = getWindowInfo (desktop).safeInsets;
-    return detail::WindowingHelpers::roundToInt (safeInsets.multipliedBy (1.0 / masterScale));
+    return getWindowInfo (*this).screen.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
 }
 
 //==============================================================================
@@ -810,16 +817,19 @@ void Displays::findDisplays (const Desktop& desktop)
     {
         static OnScreenKeyboardChangeDetectorImpl keyboardChangeDetector;
 
-        UIScreen* s = [UIScreen mainScreen];
+        // The main screen is not necessarily the one showing the app: an unfolded iPhone Duo
+        // presents its scene on a separate, larger screen.
+        const auto info = getWindowInfo (desktop);
+        UIScreen* s = info.screen;
 
         Display d;
         const auto masterScale = desktop.getGlobalScaleFactor();
         d.physicalBounds = convertToRectInt ([s bounds]) * s.nativeScale;
-        d.logicalBounds = convertToRectFloat ([s bounds]) / masterScale;
-        d.userBounds = getRecommendedWindowBounds (desktop).toFloat() / masterScale;
-        d.safeAreaInsets = getSafeAreaInsets (desktop);
-        const auto scaledInsets = keyboardChangeDetector.getInsets().multipliedBy (1.0 / (double) masterScale);
-        d.keyboardInsets = detail::WindowingHelpers::roundToInt (scaledInsets);
+        const auto inverseScale = 1.0 / (double) masterScale;
+        d.logicalBounds = convertToRectFloat ([s bounds]) * inverseScale;
+        d.userBounds = info.bounds.toFloat() * inverseScale;
+        d.safeAreaInsets = detail::WindowingHelpers::roundToInt (info.safeInsets.multipliedBy (inverseScale));
+        d.keyboardInsets = detail::WindowingHelpers::roundToInt (keyboardChangeDetector.getInsets().multipliedBy (inverseScale));
         d.isMain = true;
         d.scale = masterScale * s.scale;
         d.dpi = 160 * d.scale;

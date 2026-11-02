@@ -954,7 +954,7 @@ struct CoreMidiHelpers
             return result;
         }
 
-        static std::map<ump::EndpointId, EndpointInfo> findAllUMPDevices()
+        static std::map<ump::EndpointId, EndpointInfo> findAllUMPDevices (const std::map<ump::EndpointId, EndpointInfo>& devicesToSkip)
         {
             std::set<MIDIDeviceRef> devices;
 
@@ -995,6 +995,34 @@ struct CoreMidiHelpers
                 // We assume this is the endpoint that can transmit groupless messages.
                 const auto src = findGrouplessEndpoint (dev, ump::IOKind::src);
                 const auto dst = findGrouplessEndpoint (dev, ump::IOKind::dst);
+
+                const auto id = std::invoke ([&]() -> std::optional<ump::EndpointId>
+                {
+                    if (src.has_value() && dst.has_value())
+                    {
+                        const auto srcInfo = getConnectedEndpointInfo (*src);
+                        const auto dstInfo = getConnectedEndpointInfo (*dst);
+                        return ump::EndpointId::makeSrcDst (srcInfo.identifier, dstInfo.identifier);
+                    }
+
+                    if (src.has_value())
+                    {
+                        const auto srcInfo = getConnectedEndpointInfo (*src);
+                        return ump::EndpointId::make (ump::IOKind::src, srcInfo.identifier);
+                    }
+
+                    if (dst.has_value())
+                    {
+                        const auto dstInfo = getConnectedEndpointInfo (*dst);
+                        return ump::EndpointId::make (ump::IOKind::dst, dstInfo.identifier);
+                    }
+
+                    return {};
+                });
+
+                if (! id.has_value() || devicesToSkip.count (*id) != 0)
+                    continue;
+
                 const auto numBlocks = getSyntheticBlocks (dev, blocks);
 
                 const auto item = ump::Endpoint{}.withName (findName (dev))
@@ -1005,35 +1033,22 @@ struct CoreMidiHelpers
                 const auto srcIds = getGroupIdentifiers (dev, ump::IOKind::src);
                 const auto dstIds = getGroupIdentifiers (dev, ump::IOKind::dst);
 
-                const auto info = std::invoke ([&]() -> std::optional<std::pair<ump::EndpointId, EndpointInfo>>
+                const auto info = std::invoke ([&]() -> std::optional<EndpointInfo>
                 {
                     if (src.has_value() && dst.has_value())
-                    {
-                        const auto srcInfo = getConnectedEndpointInfo (*src);
-                        const auto dstInfo = getConnectedEndpointInfo (*dst);
-                        const auto id = ump::EndpointId::makeSrcDst (srcInfo.identifier, dstInfo.identifier);
-                        return std::tuple (id, EndpointInfo::withSrcDst (item, *src, srcIds, *dst, dstIds));
-                    }
+                        return EndpointInfo::withSrcDst (item, *src, srcIds, *dst, dstIds);
 
                     if (src.has_value())
-                    {
-                        const auto srcInfo = getConnectedEndpointInfo (*src);
-                        const auto id = ump::EndpointId::make (ump::IOKind::src, srcInfo.identifier);
-                        return std::tuple (id, EndpointInfo::withSrc (item, *src, srcIds));
-                    }
+                        return EndpointInfo::withSrc (item, *src, srcIds);
 
                     if (dst.has_value())
-                    {
-                        const auto dstInfo = getConnectedEndpointInfo (*dst);
-                        const auto id = ump::EndpointId::make (ump::IOKind::dst, dstInfo.identifier);
-                        return std::tuple (id, EndpointInfo::withDst (item, *dst, dstIds));
-                    }
+                        return EndpointInfo::withDst (item, *dst, dstIds);
 
                     return {};
                 });
 
                 if (info.has_value())
-                    result.insert (*info);
+                    result.emplace (*id, *info);
             }
 
             return result;
@@ -1096,7 +1111,7 @@ struct CoreMidiHelpers
                 const auto bidiUmpEndpoints = findNativeUMPEndpoints();
 
                 // Might include duplicates of the devices in the UMPEndpointManager
-                const auto allUmpDevices = findAllUMPDevices();
+                const auto allUmpDevices = findAllUMPDevices (bidiUmpEndpoints);
 
                 result.insert (bidiUmpEndpoints.begin(), bidiUmpEndpoints.end());
                 // Resolve duplicates in favour of the devices that the system reported as UMP-native

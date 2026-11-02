@@ -504,8 +504,19 @@ void ResizableWindow::updatePeerConstrainer()
 
 void ResizableWindow::parentSizeChanged()
 {
-    if (isFullScreen() && getParentComponent() != nullptr)
-        setBounds (getParentComponent()->getLocalBounds());
+    if (getParentComponent() != nullptr)
+    {
+        if (isFullScreen())
+            setBounds (getParentComponent()->getLocalBounds());
+
+        return;
+    }
+
+    // A window on the desktop receives this when the displays change. A full-screen window keeps
+    // its bounds then, but the safe-area and keyboard insets that its content is laid out against
+    // may have moved, as they do when a phone rotates, so the content lays itself out again.
+    if (contentComponent != nullptr && (isFullScreen() || isKioskMode()))
+        contentComponent->resized();
 }
 
 //==============================================================================

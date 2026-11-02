@@ -46,12 +46,15 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
      timeOutMsWhenCancelling (cancellingTimeOutMs),
      wasCancelledByUser (false)
 {
-    alertWindow.reset (LookAndFeel::getDefaultLookAndFeel()
-                           .createAlertWindow (title, {},
-                                               cancelButtonText.isEmpty() ? TRANS ("Cancel")
-                                                                          : cancelButtonText,
-                                               {}, {}, MessageBoxIconType::NoIcon, hasCancelButton ? 1 : 0,
-                                               componentToCentreAround));
+    auto opt = MessageBoxOptions{}.withIconType (MessageBoxIconType::NoIcon)
+                                  .withTitle (title)
+                                  .withMessage ({})
+                                  .withAssociatedComponent (componentToCentreAround);
+
+    if (hasCancelButton)
+        opt = opt.withButton (cancelButtonText.isNotEmpty() ? cancelButtonText : TRANS ("Cancel"), 0);
+
+    alertWindow = LookAndFeel::getDefaultLookAndFeel().createAlertWindowForOptions (opt);
 
     // if there are no buttons, we won't allow the user to interrupt the thread
     alertWindow->setEscapeKeyCancels (false);

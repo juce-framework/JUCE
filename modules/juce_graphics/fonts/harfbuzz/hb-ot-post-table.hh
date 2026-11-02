@@ -116,7 +116,7 @@ struct post
     Triple *axis_range;
     if (c->plan->user_axes_location.has (HB_TAG ('s','l','n','t'), &axis_range))
     {
-      float italic_angle = hb_max (-90.0, hb_min (axis_range->middle, 90.0));
+      float italic_angle = hb_max (-90.f, hb_min (axis_range->middle, 90.f));
       if (post_prime->italicAngle.to_float () != italic_angle)
         post_prime->italicAngle.set_float (italic_angle);
     }
@@ -188,7 +188,7 @@ struct post
 
       if (unlikely (!gids))
       {
-	gids = (uint16_t *) hb_malloc (count * sizeof (gids[0]));
+	gids = (uint16_t *) hb_malloc2 (count, sizeof (gids[0]));
 	if (unlikely (!gids))
 	  return false; /* Anything better?! */
 

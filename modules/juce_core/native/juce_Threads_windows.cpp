@@ -125,7 +125,7 @@ Thread::Priority Thread::getPriority() const
 bool Thread::setPriority (Priority priority)
 {
     jassert (Thread::getCurrentThreadId() == getThreadId());
-    return setPriorityInternal (isRealtime(), this, priority);
+    return setPriorityInternal (isRealtime(), threadHandle, priority);
 }
 
 void Thread::closeThreadHandle()

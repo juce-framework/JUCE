@@ -85,9 +85,11 @@ public:
 
     void deleteItem() override
     {
-        auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                               "Delete Exporter",
-                                                               "Are you sure you want to delete this export target?");
+        auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                          .withTitle ("Delete Exporter")
+                                          .withMessage ("Are you sure you want to delete this export target?")
+                                          .withButton (TRANS ("OK"), 1)
+                                          .withButton (TRANS ("Cancel"), 0);
         messageBox = AlertWindow::showScopedAsync (options, [safeThis = WeakReference { this }] (int result)
         {
             if (safeThis == nullptr || result == 0)
@@ -248,9 +250,11 @@ public:
 
     void deleteItem() override
     {
-        auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                               "Delete Configuration",
-                                                               "Are you sure you want to delete this configuration?");
+        auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                          .withTitle ("Delete Configuration")
+                                          .withMessage ("Are you sure you want to delete this configuration?")
+                                          .withButton (TRANS ("OK"), 1)
+                                          .withButton (TRANS ("Cancel"), 0);
         messageBox = AlertWindow::showScopedAsync (options, [parent = WeakReference { this }] (int result)
         {
             if (parent == nullptr)

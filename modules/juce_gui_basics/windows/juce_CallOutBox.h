@@ -55,9 +55,7 @@ namespace juce
         auto content = std::make_unique<FoobarContentComp>();
         content->setSize (300, 300);
 
-        auto& myBox = CallOutBox::launchAsynchronously (std::move (content),
-                                                        getScreenBounds(),
-                                                        nullptr);
+        auto& myBox = CallOutBox::launchAsynchronously (std::move (content), *this, nullptr);
     }
     @endcode
 
@@ -85,6 +83,31 @@ public:
     */
     CallOutBox (Component& contentComponent,
                 Rectangle<int> areaToPointTo,
+                Component* parentComponent);
+
+    /** Creates a CallOutBox that points to a component.
+
+        This is like the constructor taking an area, but the arrow points to the given
+        component's bounds, and the call-out's window is kept above the window containing that
+        component and minimised with it.
+
+        @param contentComponent     the component to display inside the call-out. This should
+                                    already have a size set (although the call-out will also
+                                    update itself when the component's size is changed later).
+                                    Obviously this component must not be deleted until the
+                                    call-out box has been deleted.
+        @param componentToPointTo   the component that the call-out's arrow should point towards.
+                                    If a parentComponent is supplied, this should be inside it,
+                                    so that its bounds can be expressed relative to that parent;
+                                    if it isn't, both must be showing on the desktop. Without a
+                                    parentComponent it must be on the desktop, or inside a
+                                    component that is.
+        @param parentComponent      if not a nullptr, this is the component to add the call-out to.
+                                    If this is a nullptr, the call-out will be added to the desktop.
+        @see DesktopWindowOptions::withAssociatedComponent
+    */
+    CallOutBox (Component& contentComponent,
+                Component& componentToPointTo,
                 Component* parentComponent);
 
     //==============================================================================
@@ -124,6 +147,30 @@ public:
     */
     static CallOutBox& launchAsynchronously (std::unique_ptr<Component> contentComponent,
                                              Rectangle<int> areaToPointTo,
+                                             Component* parentComponent);
+
+    /** This will launch a callout box containing the given content, pointing to the
+        specified component.
+
+        This is like the overload taking an area, but the arrow points to the given component's
+        bounds, and the call-out's window is kept above the window containing that component
+        and minimised with it.
+
+        @param contentComponent     the component to display inside the call-out. This should
+                                    already have a size set (although the call-out will also
+                                    update itself when the component's size is changed later).
+        @param componentToPointTo   the component that the call-out's arrow should point towards.
+                                    If a parentComponent is supplied, this should be inside it,
+                                    so that its bounds can be expressed relative to that parent;
+                                    if it isn't, both must be showing on the desktop. Without a
+                                    parentComponent it must be on the desktop, or inside a
+                                    component that is.
+        @param parentComponent      if not a nullptr, this is the component to add the call-out to.
+                                    If this is a nullptr, the call-out will be added to the desktop.
+        @see DesktopWindowOptions::withAssociatedComponent
+    */
+    static CallOutBox& launchAsynchronously (std::unique_ptr<Component> contentComponent,
+                                             Component& componentToPointTo,
                                              Component* parentComponent);
 
     /** Posts a message which will dismiss the callout box asynchronously.
@@ -187,6 +234,11 @@ private:
     bool dismissalMouseClicksAreAlwaysConsumed = false;
 
     Time creationTime;
+
+    CallOutBox (Component& contentComponent,
+                Rectangle<int> areaToPointTo,
+                Component* parentComponent,
+                Component* associatedComponent);
 
     void refreshPath();
     void timerCallback() override;

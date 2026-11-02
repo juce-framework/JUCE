@@ -46,6 +46,9 @@ static juce_wchar getDefaultPasswordChar() noexcept
 
 static int showAlertWindowUnmanaged (const MessageBoxOptions& opts, ModalComponentManager::Callback* cb)
 {
+    // If this is hit, your alert window has duplicate result codes!
+    jassert (opts.areAllResultCodesUnique());
+
     return detail::ConcreteScopedMessageBoxImpl::showUnmanaged (detail::AlertWindowHelpers::create (opts), cb);
 }
 
@@ -60,6 +63,7 @@ AlertWindow::AlertWindow (const String& title,
      desktopScale (comp != nullptr ? Component::getApproximateScaleFactorForComponent (comp) : 1.0f)
 {
     setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
+    setAssociatedComponent (comp);
 
     accessibleMessageLabel.setColour (Label::textColourId,       Colours::transparentBlack);
     accessibleMessageLabel.setColour (Label::backgroundColourId, Colours::transparentBlack);
@@ -616,14 +620,14 @@ void AlertWindow::showMessageBox (MessageBoxIconType iconType,
             .withIconType (iconType)
             .withTitle (title)
             .withMessage (message)
-            .withButton (buttonText.isEmpty() ? TRANS ("OK") : buttonText)
+            .withButton (buttonText.isEmpty() ? TRANS ("OK") : buttonText, 0)
             .withAssociatedComponent (associatedComponent));
 }
 
 int AlertWindow::show (const MessageBoxOptions& options)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        return showNativeBoxUnmanaged (options, nullptr, ResultCodeMappingMode::alertWindow);
+        return showNativeBoxUnmanaged (options, nullptr);
 
     return showAlertWindowUnmanaged (options, nullptr);
 }
@@ -633,7 +637,14 @@ bool AlertWindow::showNativeDialogBox (const String& title,
                                        bool isOkCancel)
 {
     if (isOkCancel)
-        return NativeMessageBox::showOkCancelBox (AlertWindow::NoIcon, title, bodyText);
+    {
+        auto options = MessageBoxOptions{}.withIconType (AlertWindow::NoIcon)
+                                          .withTitle (title)
+                                          .withMessage (bodyText)
+                                          .withButton (TRANS ("OK"), 1)
+                                          .withButton (TRANS ("Cancel"), 0);
+        return NativeMessageBox::showForOptions (options) != 0;
+    }
 
     NativeMessageBox::showMessageBox (AlertWindow::NoIcon, title, bodyText);
     return true;
@@ -643,7 +654,7 @@ bool AlertWindow::showNativeDialogBox (const String& title,
 void AlertWindow::showAsync (const MessageBoxOptions& options, ModalComponentManager::Callback* callback)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        NativeMessageBox::showAsync (options, callback);
+        NativeMessageBox::showForOptionsAsync (options, callback);
     else
         showAlertWindowUnmanaged (options, callback);
 }
@@ -672,7 +683,7 @@ static int showMaybeAsync (const MessageBoxOptions& options,
                            ModalComponentManager::Callback* callbackIn)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        return showNativeBoxUnmanaged (options, callbackIn, ResultCodeMappingMode::alertWindow);
+        return showNativeBoxUnmanaged (options, callbackIn);
 
     return showAlertWindowUnmanaged (options, callbackIn);
 }
@@ -685,12 +696,12 @@ bool AlertWindow::showOkCancelBox (MessageBoxIconType iconType,
                                    Component* associatedComponent,
                                    ModalComponentManager::Callback* callback)
 {
-    auto options = MessageBoxOptions::makeOptionsOkCancel (iconType,
-                                                           title,
-                                                           message,
-                                                           button1Text,
-                                                           button2Text,
-                                                           associatedComponent);
+    auto options = MessageBoxOptions{}.withIconType (iconType)
+                                      .withTitle (title)
+                                      .withMessage (message)
+                                      .withButton (button1Text.isNotEmpty() ? button1Text : TRANS ("OK"), 1)
+                                      .withButton (button2Text.isNotEmpty() ? button2Text : TRANS ("Cancel"), 0)
+                                      .withAssociatedComponent (associatedComponent);
     return showMaybeAsync (options, callback) == 1;
 }
 
@@ -703,13 +714,13 @@ int AlertWindow::showYesNoCancelBox (MessageBoxIconType iconType,
                                      Component* associatedComponent,
                                      ModalComponentManager::Callback* callback)
 {
-    auto options = MessageBoxOptions::makeOptionsYesNoCancel (iconType,
-                                                              title,
-                                                              message,
-                                                              button1Text,
-                                                              button2Text,
-                                                              button3Text,
-                                                              associatedComponent);
+    auto options = MessageBoxOptions{}.withIconType (iconType)
+                                      .withTitle (title)
+                                      .withMessage (message)
+                                      .withButton (button1Text.isNotEmpty() ? button1Text : TRANS ("Yes"), 1)
+                                      .withButton (button2Text.isNotEmpty() ? button2Text : TRANS ("No"), 2)
+                                      .withButton (button3Text.isNotEmpty() ? button3Text : TRANS ("Cancel"), 0)
+                                      .withAssociatedComponent (associatedComponent);
     return showMaybeAsync (options, callback);
 }
 
@@ -717,6 +728,9 @@ ScopedMessageBox AlertWindow::showScopedAsync (const MessageBoxOptions& options,
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
         return NativeMessageBox::showScopedAsync (options, std::move (callback));
+
+    // If this is hit, your alert window has duplicate result codes!
+    jassert (options.areAllResultCodesUnique());
 
     return detail::ConcreteScopedMessageBoxImpl::show (detail::AlertWindowHelpers::create (options), std::move (callback));
 }

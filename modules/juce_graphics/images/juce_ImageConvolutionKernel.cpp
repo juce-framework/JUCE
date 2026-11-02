@@ -166,26 +166,20 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                         continue;
 
                     int sx = x - (size >> 1);
-                    const uint8* src = srcData.getPixelPointer (sx, sy);
+                    const uint8* src = srcData.getPixelPointer (jmax (0, sx), sy);
 
-                    for (int xx = 0; xx < size; ++xx)
+                    for (int xx = 0; xx < size; ++xx, ++sx)
                     {
                         if (sx >= srcData.width)
                             break;
 
-                        if (sx >= 0)
-                        {
-                            const auto kernelMult = values[xx + yy * size];
+                        if (sx < 0)
+                            continue;
 
-                            for (auto& s : sum)
-                                s += kernelMult * *src++;
-                        }
-                        else
-                        {
-                            src += pixelStride;
-                        }
+                        const auto kernelMult = values[xx + yy * size];
 
-                        ++sx;
+                        for (auto& s : sum)
+                            s += kernelMult * *src++;
                     }
                 }
 

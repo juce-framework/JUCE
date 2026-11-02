@@ -109,7 +109,7 @@ public:
                                                                   .withIconType (MessageBoxIconType::InfoIcon)
                                                                   .withTitle ("Progress window")
                                                                   .withMessage (messageString)
-                                                                  .withButton ("OK"),
+                                                                  .withButton ("OK", 0),
                                                               nullptr);
         }
 
@@ -131,7 +131,10 @@ public:
         warningAlertWindow,
         infoAlertWindow,
         questionAlertWindow,
-        yesNoCancelAlertWindow,
+        unaryAlertWindow,
+        binaryChoiceAlertWindow,
+        ternaryChoiceAlertWindow,
+        saveOnQuitWindow,
         extraComponentsAlertWindow,
         calloutBoxWindow,
         progressWindow,
@@ -145,6 +148,25 @@ public:
         numDialogs
     };
 
+    static constexpr const char* windowNames[] { "Plain Alert Window",
+                                                 "Alert Window With Warning Icon",
+                                                 "Alert Window With Info Icon",
+                                                 "Alert Window With Question Icon",
+                                                 "Unary Alert Window",
+                                                 "Binary Choice Alert Window",
+                                                 "Ternary Choice Alert Window",
+                                                 "Save-On-Quit Window",
+                                                 "Alert Window With Extra Components",
+                                                 "CalloutBox",
+                                                 "Thread With Progress Window",
+                                                 "'Load' File Browser",
+                                                 "'Load' File Browser With Image Preview",
+                                                 "'Choose Directory' File Browser",
+                                                 "'Save' File Browser",
+                                                 "Share Text",
+                                                 "Share Files",
+                                                 "Share Images" };
+
     DialogsDemo()
     {
         setOpaque (true);
@@ -153,34 +175,17 @@ public:
         nativeButton.setButtonText ("Use Native Windows");
         nativeButton.onClick = [this] { getLookAndFeel().setUsingNativeAlertWindows (nativeButton.getToggleState()); };
 
-        StringArray windowNames { "Plain Alert Window",
-                                  "Alert Window With Warning Icon",
-                                  "Alert Window With Info Icon",
-                                  "Alert Window With Question Icon",
-                                  "Yes No Cancel Alert Window",
-                                  "Alert Window With Extra Components",
-                                  "CalloutBox",
-                                  "Thread With Progress Window",
-                                  "'Load' File Browser",
-                                  "'Load' File Browser With Image Preview",
-                                  "'Choose Directory' File Browser",
-                                  "'Save' File Browser",
-                                  "Share Text",
-                                  "Share Files",
-                                  "Share Images" };
-
         // warn in case we add any windows
-        jassert (windowNames.size() == numDialogs);
+        static_assert (std::size (windowNames) == numDialogs);
 
-        for (auto windowName : windowNames)
+        for (const auto [index, windowName] : enumerate (windowNames))
         {
             auto* newButton = new TextButton();
 
             addAndMakeVisible (windowButtons.add (newButton));
             newButton->setButtonText (windowName);
 
-            auto index = windowNames.indexOf (windowName);
-            newButton->onClick = [this, index, newButton] { showWindow (*newButton, static_cast<DialogType> (index)); };
+            newButton->onClick = [this, i = index, newButton] { showWindow (*newButton, static_cast<DialogType> (i)); };
         }
 
         setSize (500, 500);
@@ -195,7 +200,7 @@ public:
                                                                 .withTitle ("Permissions warning")
                                                                 .withMessage ("External storage access permission not granted, some files"
                                                                               " may be inaccessible.")
-                                                                .withButton ("OK"),
+                                                                .withButton ("OK", 0),
                                                             nullptr);
         });
     }
@@ -241,7 +246,7 @@ private:
                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                     .withTitle ("Alert Box")
                                                                     .withMessage ("Result code: " + String (result))
-                                                                    .withButton ("OK"),
+                                                                    .withButton ("OK", 0),
                                                                 nullptr);
         };
     }
@@ -273,7 +278,7 @@ private:
                                                                 .withMessage ("Result code: " + String (result) + newLine
                                                                               + "Option index chosen: " + String (optionIndexChosen) + newLine
                                                                               + "Text: " + text)
-                                                                .withButton ("OK"),
+                                                                .withButton ("OK", 0),
                                                             nullptr);
         };
     }
@@ -294,12 +299,43 @@ private:
                                                              "Blah blah blah blah blah blah blah blah blah blah blah blah blah.");
             messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
-        else if (type == yesNoCancelAlertWindow)
+        else if (type == unaryAlertWindow)
         {
-            auto options = MessageBoxOptions::makeOptionsYesNoCancel (MessageBoxIconType::QuestionIcon,
-                                                                      "This is a yes/no/cancel AlertWindow",
-                                                                      "And this is the AlertWindow's message. "
-                                                                      "Blah blah blah blah blah blah blah blah blah blah blah blah blah.");
+            auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::InfoIcon)
+                                              .withTitle ("This is an AlertWindow with a single button")
+                                              .withMessage ("Confirmation and cancellation will return the same value.")
+                                              .withButton (MessageBoxButtonOptions { TRANS ("OK"), 100 });
+            messageBox = AlertWindow::showScopedAsync (options, getAlertBoxResultChosen());
+        }
+        else if (type == binaryChoiceAlertWindow)
+        {
+            auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                              .withTitle ("This is a yes/no AlertWindow")
+                                              .withMessage ("And this is the AlertWindow's message. "
+                                                            "Blah blah blah blah blah blah blah blah blah blah blah blah blah.")
+                                              .withButton (MessageBoxButtonOptions { TRANS ("Yes"), 1 })
+                                              .withButton (MessageBoxButtonOptions { TRANS ("No"), 0 });
+            messageBox = AlertWindow::showScopedAsync (options, getAlertBoxResultChosen());
+        }
+        else if (type == ternaryChoiceAlertWindow)
+        {
+            auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::QuestionIcon)
+                                              .withTitle ("This is a yes/no/cancel AlertWindow")
+                                              .withMessage ("And this is the AlertWindow's message. "
+                                                            "Blah blah blah blah blah blah blah blah blah blah blah blah blah.")
+                                              .withButton (MessageBoxButtonOptions { TRANS ("Cancel"), 0 }.setRole (MessageBoxButtonRole::cancel))
+                                              .withButton (MessageBoxButtonOptions { TRANS ("No"), 2 })
+                                              .withButton (MessageBoxButtonOptions { TRANS ("Yes"), 1 }.setPreferredAction());
+            messageBox = AlertWindow::showScopedAsync (options, getAlertBoxResultChosen());
+        }
+        else if (type == saveOnQuitWindow)
+        {
+            auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::QuestionIcon)
+                                              .withTitle ("Save Changes?")
+                                              .withMessage ("This is the sort of dialog that might be displayed when the user tries to exit while there are unsaved changes.")
+                                              .withButton (MessageBoxButtonOptions { TRANS ("Exit without saving"), 2 }.setRole (MessageBoxButtonRole::destroy))
+                                              .withButton (MessageBoxButtonOptions { TRANS ("Save and exit"), 1 }.setPreferredAction())
+                                              .withButton (MessageBoxButtonOptions { TRANS ("Cancel"), 0 }.setRole (MessageBoxButtonRole::cancel));
             messageBox = AlertWindow::showScopedAsync (options, getAlertBoxResultChosen());
         }
         else if (type == calloutBoxWindow)
@@ -311,7 +347,7 @@ private:
             colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
             colourSelector->setSize (300, 400);
 
-            CallOutBox::launchAsynchronously (std::move (colourSelector), button.getScreenBounds(), nullptr);
+            CallOutBox::launchAsynchronously (std::move (colourSelector), button, nullptr);
         }
         else if (type == extraComponentsAlertWindow)
         {
@@ -357,7 +393,7 @@ private:
                                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                                     .withTitle ("File Chooser...")
                                                                                     .withMessage ("You picked: " + chosen)
-                                                                                    .withButton ("OK"),
+                                                                                    .withButton ("OK", 0),
                                                                                 nullptr);
                                  });
             }
@@ -384,7 +420,7 @@ private:
                                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                                     .withTitle ("File Chooser...")
                                                                                     .withMessage ("You picked: " + chosen)
-                                                                                    .withButton ("OK"),
+                                                                                    .withButton ("OK", 0),
                                                                                 nullptr);
                                  },
                                  &imagePreview);
@@ -438,7 +474,7 @@ private:
                                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                                     .withTitle ("File Chooser...")
                                                                                     .withMessage ("You picked: " + name)
-                                                                                    .withButton ("OK"),
+                                                                                    .withButton ("OK", 0),
                                                                                 nullptr);
                                  });
             }
@@ -460,7 +496,7 @@ private:
                                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                                     .withTitle ("File Chooser...")
                                                                                     .withMessage ("You picked: " + name)
-                                                                                    .withButton ("OK"),
+                                                                                    .withButton ("OK", 0),
                                                                                 nullptr);
                                  });
             }
@@ -478,7 +514,7 @@ private:
                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                     .withTitle ("Sharing Text Result")
                                                                     .withMessage ("Sharing text finished\nwith " + resultString)
-                                                                    .withButton ("OK"),
+                                                                    .withButton ("OK", 0),
                                                                 nullptr);
             });
         }
@@ -505,7 +541,7 @@ private:
                                                                         .withIconType (MessageBoxIconType::InfoIcon)
                                                                         .withTitle ("Sharing Files Result")
                                                                         .withMessage ("Sharing files finished\nwith " + resultString)
-                                                                        .withButton ("OK"),
+                                                                        .withButton ("OK", 0),
                                                                     nullptr);
                 });
 
@@ -539,7 +575,7 @@ private:
                                                                     .withIconType (MessageBoxIconType::InfoIcon)
                                                                     .withTitle ("Sharing Images Result")
                                                                     .withMessage ("Sharing images finished\nwith " + resultString)
-                                                                    .withButton ("OK"),
+                                                                    .withButton ("OK", 0),
                                                                 nullptr);
             });
         }

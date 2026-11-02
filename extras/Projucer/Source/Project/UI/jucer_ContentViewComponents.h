@@ -195,7 +195,7 @@ public:
         auto w = std::make_unique<InfoWindow> (info);
         w->setSize (width, w->getHeight() * numLines + 10);
 
-        CallOutBox::launchAsynchronously (std::move (w), getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (std::move (w), *this, nullptr);
     }
 
     using Button::clicked;

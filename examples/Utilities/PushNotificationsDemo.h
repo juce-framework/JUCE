@@ -205,7 +205,7 @@ public:
                                                .withIconType (MessageBoxIconType::InfoIcon)
                                                .withTitle ("Device token")
                                                .withMessage (token)
-                                               .withButton ("OK");
+                                               .withButton ("OK", 0);
                 messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
             }
         };
@@ -325,7 +325,7 @@ private:
                                            .withIconType (MessageBoxIconType::InfoIcon)
                                            .withTitle ("Incorrect notifications setup")
                                            .withMessage ("Please make sure that " + requiredFields + " are set.")
-                                           .withButton ("OK");
+                                           .withButton ("OK", 0);
             messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
 
             return;
@@ -528,7 +528,7 @@ private:
 
         paramControls.accentColourSelector = accentColourSelector.get();
 
-        CallOutBox::launchAsynchronously (std::move (accentColourSelector), paramControls.accentColourButton.getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (std::move (accentColourSelector), paramControls.accentColourButton, nullptr);
     }
 
     void setupLedColour()
@@ -544,7 +544,7 @@ private:
 
         paramControls.ledColourSelector = ledColourSelector.get();
 
-        CallOutBox::launchAsynchronously (std::move (ledColourSelector), paramControls.accentColourButton.getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (std::move (ledColourSelector), paramControls.accentColourButton, nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override
@@ -579,7 +579,7 @@ private:
                                        .withMessage ("ID: " + n.identifier
                                                      + ", title: " + n.title
                                                      + ", body: " + n.body)
-                                       .withButton ("OK");
+                                       .withButton ("OK", 0);
         messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
     }
 
@@ -598,7 +598,7 @@ private:
                                                      + ", body: " + n.body
                                                      + ", action: " + actionIdentifier
                                                      + ", optionalResponse: " + optionalResponse)
-                                       .withButton ("OK");
+                                       .withButton ("OK", 0);
         messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
 
         PushNotifications::getInstance()->removeDeliveredNotification (n.identifier);
@@ -612,7 +612,7 @@ private:
                                        .withMessage ("ID: " + n.identifier
                                                      + ", title: " + n.title
                                                      + ", body: " + n.body)
-                                       .withButton ("OK");
+                                       .withButton ("OK", 0);
         messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
     }
 
@@ -627,7 +627,7 @@ private:
                                        .withIconType (MessageBoxIconType::InfoIcon)
                                        .withTitle ("Received notification list")
                                        .withMessage (text)
-                                       .withButton ("OK");
+                                       .withButton ("OK", 0);
         messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
     }
 
@@ -642,7 +642,7 @@ private:
                                        .withIconType (MessageBoxIconType::InfoIcon)
                                        .withTitle ("Pending notification list")
                                        .withMessage (text)
-                                       .withButton ("OK");
+                                       .withButton ("OK", 0);
         messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
     }
 
@@ -652,7 +652,7 @@ private:
                                        .withIconType (MessageBoxIconType::InfoIcon)
                                        .withTitle ("Device token refreshed")
                                        .withMessage (token)
-                                       .withButton ("OK");
+                                       .withButton ("OK", 0);
         messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
     }
 
@@ -663,7 +663,7 @@ private:
                                        .withIconType (MessageBoxIconType::InfoIcon)
                                        .withTitle ("Remote notifications deleted")
                                        .withMessage ("Some of the pending messages were removed!")
-                                       .withButton ("OK");
+                                       .withButton ("OK", 0);
         messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
     }
 
@@ -673,7 +673,7 @@ private:
                                        .withIconType (MessageBoxIconType::InfoIcon)
                                        .withTitle ("Upstream message sent")
                                        .withMessage ("Message id: " + messageId)
-                                       .withButton ("OK");
+                                       .withButton ("OK", 0);
         messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
     }
 
@@ -684,7 +684,7 @@ private:
                                        .withTitle ("Upstream message sending error")
                                        .withMessage ("Message id: " + messageId
                                                      + "\nerror: " + error)
-                                       .withButton ("OK");
+                                       .withButton ("OK", 0);
         messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
     }
 
@@ -1244,7 +1244,7 @@ private:
                                                      "ensure that the app is signed and that you register "
                                                      "the bundle ID for remote notifications in "
                                                      "Apple Developer Center.")
-                                       .withButton ("OK");
+                                       .withButton ("OK", 0);
         messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
        #endif
     }

@@ -168,12 +168,6 @@ static const unsigned char temp_binary_data_4[] =
 "        private:\r\n"
 "            std::unique_ptr<Component> content;\r\n"
 "        };\r\n"
-"\r\n"
-"        void parentSizeChanged() override\r\n"
-"        {\r\n"
-"            if (auto* c = getContentComponent())\r\n"
-"                c->resized();\r\n"
-"        }\r\n"
 "       #endif\r\n"
 "\r\n"
 "    private:\r\n"
@@ -9016,7 +9010,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x31d21131:  numBytes = 1042; return LaunchScreen_storyboard;
         case 0x24e5a04d:  numBytes = 483; return PIPAudioProcessor_cpp_in;
         case 0x956e0109:  numBytes = 689; return PIPAudioProcessorWithARA_cpp_in;
-        case 0xd572ce5a:  numBytes = 3231; return PIPComponent_cpp_in;
+        case 0xd572ce5a:  numBytes = 3083; return PIPComponent_cpp_in;
         case 0x1a77c680:  numBytes = 299; return PIPConsole_cpp_in;
         case 0xa41e649d:  numBytes = 2842; return RecentFilesMenuTemplate_nib;
         case 0x667fbbb3:  numBytes = 6424; return UnityPluginGUIScript_cs_in;

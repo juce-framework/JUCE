@@ -35,27 +35,7 @@
 namespace juce
 {
 
-class WindowsScopedEvent
-{
-public:
-    explicit WindowsScopedEvent (HANDLE handleIn)
-        : handle (handleIn)
-    {
-    }
-
-    WindowsScopedEvent()
-        : WindowsScopedEvent (CreateEvent (nullptr, FALSE, FALSE, nullptr))
-    {
-    }
-
-    HANDLE getHandle() const noexcept
-    {
-        return handle.get();
-    }
-
-private:
-    std::unique_ptr<std::remove_pointer_t<HANDLE>, FunctionPointerDestructor<CloseHandle>> handle;
-};
+using WindowsScopedEvent = std::unique_ptr<std::remove_pointer_t<HANDLE>, FunctionPointerDestructor<CloseHandle>>;
 
 //==============================================================================
 class SwapChain
@@ -100,7 +80,6 @@ public:
             return hr;
         }
 
-        // Get the waitable swap chain presentation event and set the maximum frame latency
         ComSmartPtr<IDXGISwapChain2> chain2;
         if (const auto hr = chain.QueryInterface (chain2); FAILED (hr))
             return hr;
@@ -109,6 +88,7 @@ public:
             return E_FAIL;
 
         chain2->SetMaximumFrameLatency (1);
+        event.reset (chain2->GetFrameLatencyWaitableObject());
 
         createBuffer (adapter);
         return buffer != nullptr ? S_OK : E_FAIL;
@@ -176,6 +156,17 @@ public:
         return buffer;
     }
 
+    bool canPresent()
+    {
+        didWait = didWait || event == nullptr || (WaitForSingleObjectEx (event.get(), 0, true) == WAIT_OBJECT_0);
+        return didWait;
+    }
+
+    void didPresent()
+    {
+        didWait = false;
+    }
+
     static constexpr uint32 swapChainFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
     static constexpr uint32 presentSyncInterval = 1;
     static constexpr uint32 presentFlags = 0;
@@ -236,6 +227,8 @@ private:
     AssignableDirectX directX;
     ComSmartPtr<IDXGISwapChain1> chain;
     ComSmartPtr<ID2D1Bitmap1> buffer;
+    WindowsScopedEvent event;
+    bool didWait = false;
 };
 
 //==============================================================================
@@ -300,7 +293,7 @@ private:
     std::optional<CompositionTree> compositionTree;
 
     // Areas that must be repainted during the next paint call, between startFrame/endFrame
-    RectangleList<int> deferredRepaints;
+    RectangleList<int> deferredRepaintsCurrent, deferredRepaintsNext;
 
     std::vector<RECT> dirtyRectangles;
     int64 lastFinishFrameTicks = 0;
@@ -350,7 +343,7 @@ private:
 
     RectangleList<int> getPaintAreas() const override
     {
-        return deferredRepaints;
+        return deferredRepaintsNext;
     }
 
     bool checkPaintReady() override
@@ -363,9 +356,53 @@ private:
 
         bool ready = Pimpl::checkPaintReady();
         ready &= swap.canPaint();
+        ready &= swap.canPresent();
         ready &= compositionTree.has_value();
 
         return ready;
+    }
+
+    void present()
+    {
+        JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (getMetrics(), present1Duration);
+
+        if (swap.getBuffer() == nullptr || deferredRepaintsCurrent.isEmpty())
+            return;
+
+        auto const swapChainSize = swap.getSize();
+        DXGI_PRESENT_PARAMETERS params{};
+
+        if (! deferredRepaintsCurrent.containsRectangle (swapChainSize))
+        {
+            // Allocate enough memory for the array of dirty rectangles
+            dirtyRectangles.resize ((size_t) deferredRepaintsCurrent.getNumRectangles());
+
+            // Fill the array of dirty rectangles, intersecting each paint area with the swap chain buffer
+            params.pDirtyRects = dirtyRectangles.data();
+            params.DirtyRectsCount = 0;
+
+            for (const auto& area : deferredRepaintsCurrent)
+            {
+                const auto intersection = area.getIntersection (swapChainSize);
+
+                if (! intersection.isEmpty())
+                    params.pDirtyRects[params.DirtyRectsCount++] = D2DUtilities::toRECT (intersection);
+            }
+        }
+
+        // Present the freshly painted buffer
+        const auto hr = swap.getChain()->Present1 (swap.presentSyncInterval,
+                                                   swap.presentFlags,
+                                                   &params);
+        if (FAILED (hr))
+        {
+            jassertfalse;
+            return;
+        }
+
+        swap.didPresent();
+
+        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintEnd, getFrameId());
     }
 
     JUCE_DECLARE_WEAK_REFERENCEABLE (HwndPimpl)
@@ -385,7 +422,7 @@ public:
         // that's not really spelled out in the documentation.
         // This method is called when the component peer receives WM_SHOWWINDOW
         prepare();
-        deferredRepaints = getClientRect();
+        deferredRepaintsNext = getClientRect();
     }
 
     Rectangle<int> getClientRect() const
@@ -434,7 +471,7 @@ public:
             return;
 
         // Require the entire window to be repainted
-        deferredRepaints = size;
+        deferredRepaintsNext = size;
 
         InvalidateRect (hwnd, nullptr, TRUE);
 
@@ -449,7 +486,7 @@ public:
 
     void addDeferredRepaint (Rectangle<int> deferredRepaint)
     {
-        deferredRepaints.add (deferredRepaint);
+        deferredRepaintsNext.add (deferredRepaint);
 
         JUCE_TRACE_EVENT_INT_RECT (etw::repaint, etw::paintKeyword, deferredRepaint);
     }
@@ -458,10 +495,16 @@ public:
     {
         setSize (getClientRect());
 
+        if (deferredRepaintsNext.isEmpty())
+            return nullptr;
+
         auto* savedState = Pimpl::startFrame();
 
         if (savedState == nullptr)
             return nullptr;
+
+        std::swap (deferredRepaintsNext, deferredRepaintsCurrent);
+        deferredRepaintsNext.clear();
 
         JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintStart, getFrameId());
 
@@ -474,49 +517,6 @@ public:
         present();
         lastFinishFrameTicks = Time::getHighResolutionTicks();
         return result;
-    }
-
-    void present()
-    {
-        JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (getMetrics(), present1Duration);
-
-        if (swap.getBuffer() == nullptr || deferredRepaints.isEmpty())
-            return;
-
-        auto const swapChainSize = swap.getSize();
-        DXGI_PRESENT_PARAMETERS params{};
-
-        if (! deferredRepaints.containsRectangle (swapChainSize))
-        {
-            // Allocate enough memory for the array of dirty rectangles
-            dirtyRectangles.resize ((size_t) deferredRepaints.getNumRectangles());
-
-            // Fill the array of dirty rectangles, intersecting each paint area with the swap chain buffer
-            params.pDirtyRects = dirtyRectangles.data();
-            params.DirtyRectsCount = 0;
-
-            for (const auto& area : deferredRepaints)
-            {
-                const auto intersection = area.getIntersection (swapChainSize);
-
-                if (! intersection.isEmpty())
-                    params.pDirtyRects[params.DirtyRectsCount++] = D2DUtilities::toRECT (intersection);
-            }
-        }
-
-        // Present the freshly painted buffer
-        const auto hr = swap.getChain()->Present1 (swap.presentSyncInterval,
-                                                   swap.presentFlags,
-                                                   &params);
-        jassertquiet (SUCCEEDED (hr));
-
-        if (FAILED (hr))
-            return;
-
-        // There's nothing waiting to be displayed in the backbuffer.
-        deferredRepaints.clear();
-
-        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintEnd, getFrameId());
     }
 
     Image createSnapshot() const

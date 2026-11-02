@@ -461,12 +461,14 @@ void LatestVersionCheckerAndUpdater::askUserForLocationToDownload (const Version
                 return;
             }
 
-            auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                                   "Overwrite Existing JUCE Folder?",
-                                                                   "Do you want to replace the folder\n\n" + targetFolderPath + "\n\n"
-                                                                   "with the latest version from juce.com?\n\n"
-                                                                   "This will move the existing folder to " + targetFolderPath + "_old.\n\n"
-                                                                   "Replacing the folder that contains the currently running Projucer executable may not work on Windows.");
+            auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                              .withTitle ("Overwrite Existing JUCE Folder?")
+                                              .withMessage ("Do you want to replace the folder\n\n" + targetFolderPath + "\n\n"
+                                                            "with the latest version from juce.com?\n\n"
+                                                            "This will move the existing folder to " + targetFolderPath + "_old.\n\n"
+                                                            "Replacing the folder that contains the currently running Projucer executable may not work on Windows.")
+                                              .withButton (TRANS ("OK"), 1)
+                                              .withButton (TRANS ("Cancel"), 0);
             if (weakThis != nullptr)
                 weakThis->messageBox = AlertWindow::showScopedAsync (options, onResult);
 
@@ -475,10 +477,12 @@ void LatestVersionCheckerAndUpdater::askUserForLocationToDownload (const Version
 
         if (targetFolder.exists())
         {
-            auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                                   "Existing File Or Directory",
-                                                                   "Do you want to move\n\n" + targetFolderPath + "\n\n"
-                                                                   "to\n\n" + targetFolderPath + "_old?");
+            auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                              .withTitle ("Existing File Or Directory")
+                                              .withMessage ("Do you want to move\n\n" + targetFolderPath + "\n\n"
+                                                            "to\n\n" + targetFolderPath + "_old?")
+                                              .withButton (TRANS ("OK"), 1)
+                                              .withButton (TRANS ("Cancel"), 0);
             if (weakThis != nullptr)
                 weakThis->messageBox = AlertWindow::showScopedAsync (options, onResult);
 

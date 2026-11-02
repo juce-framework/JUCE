@@ -39,8 +39,12 @@ namespace juce
 /**
     Parses a text-based XML document and creates an XmlElement object from it.
 
-    The parser will parse DTDs to load external entities but won't
-    check the document for validity against the DTD.
+    The parser will expand entities that are defined in the document's DTD, but won't
+    check the document for validity against the DTD. External DTD subsets and external
+    parameter entities are only loaded through an input source supplied with
+    setInputSource(). Documents whose elements are nested more than 256 levels deep, or
+    whose entities are nested more than 40 levels deep or expand to many times the size
+    of the document, are rejected as malformed.
 
     e.g.
     @code
@@ -121,12 +125,18 @@ public:
     */
     const String& getLastParseError() const noexcept;
 
-    /** Sets an input source object to use for parsing documents that reference external entities.
+    /** Sets an input source object to use for reading the document and any external
+        entities that it references.
 
-        If the document has been created from a file, this probably won't be needed, but
-        if you're parsing some text and there might be a DTD that references external
-        files, you may need to create a custom input source that can retrieve the
-        other files it needs.
+        Supplying an input source is the only way to enable the loading of external DTD
+        subsets and external parameter entities; a document created from a file or a string
+        will not load them on its own. A document can name any file or URL as an external
+        entity, so an input source used with untrusted documents should restrict what its
+        createInputStreamFor() method will open.
+
+        The input source is also used to read the document itself if the document was
+        constructed from a file or from an empty string, as any text passed to the
+        constructor takes precedence over it.
 
         The object that is passed-in will be deleted automatically when no longer needed.
 
@@ -163,8 +173,10 @@ private:
     String::CharPointerType input { nullptr };
     bool outOfData = false, errorOccurred = false;
     String lastError, dtdText;
-    StringArray tokenisedDTD;
-    bool needToLoadDTD = false, ignoreEmptyTextElements = true;
+    StringArray tokenisedDTD, entitiesBeingExpanded;
+    bool needToLoadDTD = false, ignoreEmptyTextElements = true, externalEntitiesAllowed = false;
+    int elementNestingDepth = 0;
+    int64 inputLength = 0, expandedEntityLength = 0;
     std::unique_ptr<InputSource> inputSource;
 
     std::unique_ptr<XmlElement> parseDocumentElement (String::CharPointerType, bool outer);
@@ -176,11 +188,12 @@ private:
     XmlElement* readNextElement (bool alsoParseSubElements);
     void readChildElements (XmlElement&);
     void readQuotedString (String&);
-    void readEntity (String&);
+    String readEntity (String&);
 
     String getFileContents (const String&) const;
     String expandEntity (const String&);
     String expandExternalEntity (const String&);
+    void checkEntityExpansionLimit (const String&);
     String getParameterEntity (const String&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlDocument)

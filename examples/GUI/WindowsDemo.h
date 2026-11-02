@@ -77,8 +77,8 @@ class ColourSelectorWindow final : public DocumentWindow,
                                    private ChangeListener
 {
 public:
-    ColourSelectorWindow (const String& name, Colour backgroundColour, int buttonsNeeded)
-        : DocumentWindow (name, backgroundColour, buttonsNeeded)
+    ColourSelectorWindow (const String& name, Colour backgroundColour, int buttonsNeeded, bool addToDesktop = true)
+        : DocumentWindow (name, backgroundColour, buttonsNeeded, addToDesktop)
     {
         selector.setCurrentColour (backgroundColour);
         selector.setColour (ColourSelector::backgroundColourId, Colours::transparentWhite);
@@ -301,6 +301,7 @@ private:
 
         showDocumentWindow (false);
         showDocumentWindow (true);
+        showChildWindow();
         showTransparentWindow();
         showAlertWindow();
         showDialogWindow();
@@ -368,6 +369,24 @@ private:
         dw->setResizable (true, ! native);
         dw->setUsingNativeTitleBar (native);
         dw->setVisible (true);
+    }
+
+    void showChildWindow()
+    {
+        // A window associated with a component in another window stays above that window without
+        // being above other applications, is minimised and restored with it, and is left off the
+        // taskbar. The association is set before the window is added to the desktop so that the
+        // native window is only created once.
+        auto* tw = new ColourSelectorWindow ("Child Window", getRandomBrightColour(), DocumentWindow::closeButton, false);
+        windows.add (tw);
+
+        tw->setAssociatedComponent (this);
+        tw->addToDesktop();
+
+        const auto area = getScreenBounds().reduced (20);
+        tw->setBounds (area.withSize (jmin (200, area.getWidth()), jmin (300, area.getHeight())));
+        tw->setResizable (true, false);
+        tw->setVisible (true);
     }
 
     void showTransparentWindow()

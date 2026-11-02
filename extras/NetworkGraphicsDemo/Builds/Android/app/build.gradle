@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 def ndkVersionString = "28.1.13356709"
 
 android {
@@ -12,6 +11,10 @@ android {
             path("CMakeLists.txt")
             version = "3.22.1"
         }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     signingConfigs {
         juceSigning {
@@ -25,8 +28,8 @@ android {
 
     defaultConfig {
         applicationId("com.juce.networkgraphicsdemo")
-        minSdkVersion(24)
-        targetSdkVersion(35)
+        minSdk = 24
+        targetSdk = 35
         externalNativeBuild {
             cmake {
                 arguments("-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-24", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE", "-DANDROID_WEAK_API_DEFS=ON", "-DCMAKE_CXX_STANDARD=17", "-DCMAKE_CXX_EXTENSIONS=OFF")

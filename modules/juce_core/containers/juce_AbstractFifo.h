@@ -153,7 +153,7 @@ public:
     */
     void prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const noexcept;
 
-    /** Called after writing from the FIFO, to indicate that this many items have been added.
+    /** Called after writing to the FIFO, to indicate that this many items have been added.
         @see prepareToWrite
     */
     void finishedWrite (int numWritten) noexcept;
@@ -189,11 +189,11 @@ public:
         @endcode
 
         @param numWanted        indicates how many items you'd like to read from the buffer
-        @param startIndex1      on exit, this will contain the start index in your buffer at which your data should be written
-        @param blockSize1       on exit, this indicates how many items can be written to the block starting at startIndex1
-        @param startIndex2      on exit, this will contain the start index in your buffer at which any data that didn't fit into
-                                the first block should be written
-        @param blockSize2       on exit, this indicates how many items can be written to the block starting at startIndex2
+        @param startIndex1      on exit, this will contain the start index in your buffer from which your data should be read
+        @param blockSize1       on exit, this indicates how many items can be read from the block starting at startIndex1
+        @param startIndex2      on exit, this will contain the start index in your buffer from which any data that didn't fit into
+                                the first block should be read
+        @param blockSize2       on exit, this indicates how many items can be read from the block starting at startIndex2
         @see finishedRead
     */
     void prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const noexcept;

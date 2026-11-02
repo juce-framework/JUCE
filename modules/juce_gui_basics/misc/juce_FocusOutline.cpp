@@ -47,9 +47,10 @@ struct OutlineWindowComponent final : public Component
         if (target->isOnDesktop())
         {
             setSize (1, 1);
-            addToDesktop (ComponentPeer::windowIgnoresMouseClicks
-                            | ComponentPeer::windowIsTemporary
-                            | ComponentPeer::windowIgnoresKeyPresses);
+            addToDesktop (DesktopWindowOptions().withStyleFlags (ComponentPeer::windowIgnoresMouseClicks
+                                                                 | ComponentPeer::windowIsTemporary
+                                                                 | ComponentPeer::windowIgnoresKeyPresses)
+                                                .withAssociatedComponent (c));
         }
         else if (auto* parent = target->getParentComponent())
         {

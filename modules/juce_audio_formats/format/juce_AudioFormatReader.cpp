@@ -95,18 +95,21 @@ bool AudioFormatReader::read (int* const* destChannels,
     if (numSamplesToRead <= 0)
         return true;
 
+    // numChannels is set by the reader subclass, so may hold a value that doesn't fit in an int
+    const auto numSourceChannels = (int) jmin (numChannels, (unsigned int) std::numeric_limits<int>::max());
+
     if (! readSamples (destChannels,
-                       jmin ((int) numChannels, numDestChannels), startOffsetInDestBuffer,
+                       jmin (numSourceChannels, numDestChannels), startOffsetInDestBuffer,
                        startSampleInSource, numSamplesToRead))
         return false;
 
-    if (numDestChannels > (int) numChannels)
+    if (numSourceChannels < numDestChannels)
     {
         if (fillLeftoverChannelsWithCopies)
         {
             auto lastFullChannel = destChannels[0];
 
-            for (int i = (int) numChannels; --i > 0;)
+            for (int i = numSourceChannels; --i > 0;)
             {
                 if (destChannels[i] != nullptr)
                 {
@@ -116,13 +119,13 @@ bool AudioFormatReader::read (int* const* destChannels,
             }
 
             if (lastFullChannel != nullptr)
-                for (int i = (int) numChannels; i < numDestChannels; ++i)
+                for (int i = numSourceChannels; i < numDestChannels; ++i)
                     if (auto d = destChannels[i])
                         memcpy (d, lastFullChannel, sizeof (int) * originalNumSamplesToRead);
         }
         else
         {
-            for (int i = (int) numChannels; i < numDestChannels; ++i)
+            for (int i = numSourceChannels; i < numDestChannels; ++i)
                 if (auto d = destChannels[i])
                     zeromem (d, sizeof (int) * originalNumSamplesToRead);
         }

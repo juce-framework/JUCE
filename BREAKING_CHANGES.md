@@ -1,5 +1,340 @@
 # JUCE breaking changes
 
+# Version 9.0.5
+
+## Change
+
+ValueTree::readFromStream() and the related readFromData() and
+readFromGZIPData() functions now return an invalid ValueTree for data in
+which trees are nested more than 256 levels deep. var::readFromStream() now
+reads arrays nested more than 256 levels deep as void values.
+
+**Possible Issues**
+
+Such data, which can only have been produced by a tree or array that was
+itself nested more than 256 levels deep, will no longer be read back.
+
+**Workaround**
+
+Restructure the tree or array so that it is nested less deeply.
+
+**Rationale**
+
+Both readers recurse once for each level of nesting, so a malicious data block
+could use deep nesting to overflow the stack and crash an application. The
+limit matches the one applied to JSON and XML documents. The readers also no
+longer preallocate storage based on counts and sizes read from the data, which
+could previously be used to request a very large allocation.
+
+
+## Change
+
+JSON::parse() and JSON::fromString() now reject documents in which objects or
+arrays are nested more than 256 levels deep.
+
+**Possible Issues**
+
+Such documents will fail to parse. The Result returned by JSON::parse() will
+report "Objects or arrays are nested too deeply", and the other parsing
+functions will return a void var.
+
+**Workaround**
+
+Restructure the document so that it is nested less deeply.
+
+**Rationale**
+
+The parser recurses once for each level of nesting, so a malicious document
+could use deep nesting to overflow the stack and crash an application. The
+limit matches XmlDocument and sits within the range used by other JSON
+libraries, far beyond anything a real document needs.
+
+
+## Change
+
+On Windows, File::isAbsolutePath() now returns true for paths that start with
+a forward slash, and File::getChildFile() resolves a path that starts with a
+separator but doesn't name a drive or share against the drive or share of the
+file on which it is called, rather than against the current working directory's
+drive.
+
+**Possible Issues**
+
+Code that relied on File::isAbsolutePath() returning false for a path such as
+"/foo" on Windows will see different behaviour. For example, ZipFile will now
+refuse to extract entries whose names start with a forward slash on Windows,
+as it already did for entries starting with a backslash.
+
+Code calling getChildFile() with a path such as "\\foo.txt" on a File on a
+different drive to the current working directory will now receive a File on
+the same drive as the File on which getChildFile() was called.
+
+**Workaround**
+
+Resolve such paths explicitly against File::getCurrentWorkingDirectory() if
+the previous behaviour is required.
+
+**Rationale**
+
+A path starting with a separator but no drive is not relative, but it is also
+not fully specified. Previously, passing such a path to getChildFile() would
+trigger an assertion, and the result depended on the current working
+directory rather than on the File being used as the context. Forward slashes
+are accepted everywhere else in File on Windows, so isAbsolutePath() now
+accepts them too.
+
+
+## Change
+
+The default macOS and iOS deployment targets set by the Projucer have been
+increased to macOS 12.0 and iOS 15.0 respectively.
+
+**Possible Issues**
+
+Projects using the Projucer's default minimum deployment target will have their
+minimum deployment target increased.
+
+**Workaround**
+
+If you need a lower minimum deployment target then you must set this in the
+Projucer's Xcode build configuration settings.
+
+**Rationale**
+
+Xcode 27 no longer supports deployment targets lower than macOS 12.0 and iOS
+15.0.
+
+
+## Change
+
+On Windows, native message boxes with three buttons, created using the
+MessageBoxOptions::withButton() builder, no longer have cancellation behaviour
+(where the box can be dismissed with alt+f4, escape, etc.) by default.
+
+On Android, two- and three-button native message boxes created using
+MessageBoxOptions::withButton() no longer have cancellation behaviour (where
+the box can be dismissed by tapping outside) by default.
+
+**Possible Issues**
+
+Dialogs displayed by programs may no longer respond to events that previously
+would have dismissed those dialogs.
+
+**Workaround**
+
+Use MessageBoxButtonOptions::withRole to explicitly assign the "cancel" role to
+the button that corresponds to the dialog's cancellation action.
+
+**Rationale**
+
+Previously, cancellation behaviour was poorly-specified, and the result code
+of a cancelled box was difficult to predict. The new "cancel" role allows the
+result code of the cancellation action to be specified explicitly, and allows
+cancel behaviour to be specified for dialogs with two or three buttons.
+
+
+## Change
+
+XmlDocument now rejects documents in which elements are nested more than 256
+levels deep, in which entity references are nested more than 40 levels deep,
+or which build more than 8 MB of text while expanding entities when that is
+also more than 100 times the size of the document.
+
+**Possible Issues**
+
+Such documents will fail to parse, with getLastParseError() reporting
+"elements nested too deeply", "entities nested too deeply" or "entity
+expansion too large". Documents containing entities that refer to themselves,
+which previously crashed the parser, now fail with "recursive entity
+reference".
+
+**Workaround**
+
+Restructure the document so that it stays within these limits.
+
+**Rationale**
+
+The parser recurses once for each level of nesting, and previously expanded
+entities without limit. A malicious document could use either to crash an
+application or to exhaust its memory. These limits match those used by libxml2
+and expat, and are far beyond anything a real document needs.
+
+
+## Change
+
+XmlDocument no longer loads external DTD subsets or external parameter
+entities unless an InputSource has been supplied with setInputSource().
+
+**Possible Issues**
+
+Documents created from a File that rely on entity definitions held in a
+separate file, referenced through a SYSTEM identifier in their DOCTYPE
+declaration, will have those entities left unexpanded, and getLastParseError()
+will report an unknown entity. Documents parsed from a string were already
+treated this way.
+
+**Workaround**
+
+For documents from a trusted source, supply an input source explicitly:
+
+    XmlDocument document (file);
+    document.setInputSource (new FileInputSource (file));
+
+Otherwise, move the entity definitions into the document's internal DTD
+subset, or substitute the entities before parsing.
+
+**Rationale**
+
+A document could name any file as its external subset, and the parser would
+read it through the FileInputSource created for the document's File, which
+accepts absolute paths and parent-directory references. A malicious document
+could use this to read arbitrary files on the user's machine, so these
+references are now only followed through an input source that the caller has
+chosen to provide.
+
+
+## Change
+
+ZipFile::uncompressTo and ZipFile::uncompressEntry now refuse to create a
+symbolic link whose target does not stay inside the target directory, and fail
+an entry that holds more data than the size recorded in the archive's central
+directory.
+
+**Possible Issues**
+
+Archives containing symbolic links to absolute paths, to locations above the
+target directory, or to paths that contain ".." after a named component will
+no longer extract completely. The same applies to archives whose central
+directory understates the size of an entry.
+
+**Workaround**
+
+Extract the affected entries with createStreamForEntry() and handle them in
+application code.
+
+**Rationale**
+
+A symbolic link created from an untrusted archive could point anywhere on the
+user's machine, and anything that later opened or ran a path inside the
+extracted tree could be redirected outside it. Without a check against the
+recorded size, a small archive could also fill the disk, and callers had no way
+to bound the space that extraction would use.
+
+
+## Change
+
+NativeMessageBox::show and NativeMessageBox::showAsync have been renamed
+to showForOptions and showForOptionsAsync respectively.
+
+**Possible Issues**
+
+Applications that call these functions will fail to compile.
+
+**Workaround**
+
+Adopt the new function names. When doing so, be aware that the native message box result codes
+will match the result codes specified in the MessageBoxOptions.
+Check the specified result codes in the options that you pass to these functions. Then, update
+your code that handles the message box result code to ensure that it behaves correctly. Instead
+of updating the handler code, you may instead choose to update the options object itself with
+different result codes.
+
+**Rationale**
+
+Previously, the results of NativeMessageBox::show and NativeMessageBox::showAsync indicated
+the index of the activated button. This differed from the behaviour of other functions that
+displayed message boxes and alert windows, such as the static functions in AlertWindow.
+The behaviour of all these functions has been made consistent; they will always return the
+result codes specified in the MessageBoxOptions. The function names have been changed to
+indicate to users that they need to audit their code as they adopt the new behaviour.
+
+
+## Change
+
+MessageBoxOptions::withButton() now requires an integer result-code argument.
+AlertWindow::LookAndFeelMethods::createAlertWindow() has been deleted and
+replaced with createAlertWindowForOptions, which accepts a single
+MessageBoxOptions argument.
+
+**Possible Issues**
+
+Applications that call or override these functions will fail to compile.
+
+**Workaround**
+
+Adapt to the new signature of withButton() by passing an explicit result code
+associated with each button.
+
+Adapt implementations of createAlertWindow() to retrieve button text and
+associated result codes from the MessageBoxOptions argument.
+
+When migrating existing code, be careful to check your result-code handler
+callbacks, and assign appropriate result codes to each button. The old
+convention for AlertWindow::showAsync, AlertWindow::showOkCancelBox, and
+AlertWindow::showYesNoCancelBox was for the button result code to be equal to
+(x + 1) % N, where "x" is the button index, and "N" is total button count. The
+old convention for NativeMessageBox::showAsync was to return the button index
+directly. This discrepancy was the main motivation for making this change.
+
+**Rationale**
+
+This change makes alert window result codes explicit, which in turn should
+make it easier to write callbacks that handle each button correctly.
+
+
+## Change
+
+An AlertWindow created with an associated component is now associated with
+that component using TopLevelWindow::setAssociatedComponent(). This includes
+the alert windows shown by AlertWindow::showAsync() and the other static
+AlertWindow functions.
+
+**Possible Issues**
+
+The alert window is now kept above the window containing the component, and
+is minimised and restored with it. It also moves with that window, where a
+window can position itself. On macOS it takes that window's level, so it may be
+covered by an always-on-top window that would previously have been below it.
+
+**Workaround**
+
+Don't pass an associated component, or call setAssociatedComponent (nullptr)
+on an AlertWindow that you construct yourself.
+
+**Rationale**
+
+An alert should stay with the window it belongs to. This is the only way to
+keep it in front of that window on Wayland, where a window cannot be raised,
+and it matches the behaviour of native alerts on other platforms.
+
+
+## Change
+
+Component::createNewPeer() now takes a DesktopWindowOptions instead
+of separate style flags and native window arguments. Component::addToDesktop()
+is no longer virtual.
+
+**Possible Issues**
+
+Code that overrides createNewPeer() or addToDesktop() will fail to compile.
+
+**Workaround**
+
+Update the createNewPeer() override to take a const DesktopWindowOptions&, and
+read the style flags and native parent from it with getStyleFlags() and the
+getter for the platform's parent type, such as getParentHWND(). Replace an
+addToDesktop() override with an override of the new protected
+Component::createDesktopWindow(), which both addToDesktop() overloads call.
+
+**Rationale**
+
+A desktop window can now be created with the component it was opened from, so
+that temporary windows such as menus and tooltips can be parented to the right
+window. Describing the window with a DesktopWindowOptions needed a second
+addToDesktop() overload, and a single customisation point with its own name
+avoids having two virtual overloads that can hide or call each other.
+
+
 # Version 9.0.3
 
 ## Change
@@ -1265,7 +1600,7 @@ RFC 8259 states
 MUST be encoded using UTF-8 [RFC3629].
 >
 > Previous specifications of JSON have not required the use of UTF-8 when
-transmitting JSON text.  However, the vast majority of JSON-based software
+transmitting JSON text. However, the vast majority of JSON-based software
 implementations have chosen to use the UTF-8 encoding, to the extent that it is
 the only encoding that achieves interoperability.
 
@@ -3014,9 +3349,11 @@ overall latency does not change when enabling/disabling bypass.
 **Rationale**
 
 The documentation for AudioProcessor::getBypassParameter() says
+
 > if this method returns a non-null value, you should never call
-  processBlockBypassed but use the returned parameter to control the bypass
-  state instead.
+processBlockBypassed but use the returned parameter to control the bypass
+state instead.
+
 Some plugin wrappers were not following this rule. After this change, the
 behaviour of all plugin wrappers is consistent with the documented behaviour.
 

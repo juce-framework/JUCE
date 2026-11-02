@@ -56,6 +56,7 @@ static var discardError (VarOrError variant)
 }
 
 static VarOrError quickJSToJuce (const qjs::QuickJSContext::ValuePtr& ptr);
+static var::NativeFunction makeNativeFunction (qjs::JSContext* ctx, qjs::JSValueConst fn, qjs::JSValueConst self);
 
 static std::vector<var> quickJSToJuce (Span<qjs::JSValueConst> args, qjs::JSContext* ctx)
 {
@@ -282,66 +283,11 @@ static var tryQuickJSToJuce (const qjs::QuickJSContext::ValuePtr& ptr,
 
     if (JS_IsFunction (ptr.context, ptr.value))
     {
-        // ValuePtr is move-only, so can't be captured into a std::function.
-        // Use a custom copyable callable instead.
-        struct Callable
-        {
-            Callable (JSContext* ctxIn, JSValue fnIn, JSValue selfIn)
-                : ctx (ctxIn),
-                  fn (JS_DupValue (ctx, fnIn)),
-                  self (JS_DupValue (ctx, selfIn))
-            {
-            }
-
-            Callable (const Callable& other)
-                : ctx (other.ctx),
-                  fn (JS_DupValue (ctx, other.fn)),
-                  self (JS_DupValue (ctx, other.self))
-            {
-            }
-
-            Callable& operator= (const Callable& other)
-            {
-                Callable { other }.swap (*this);
-                return *this;
-            }
-
-            ~Callable()
-            {
-                JS_FreeValue (ctx, fn);
-                JS_FreeValue (ctx, self);
-            }
-
-            void swap (Callable& other) noexcept
-            {
-                std::swap (other.ctx, ctx);
-                std::swap (other.fn, fn);
-                std::swap (other.self, self);
-            }
-
-            var operator() (const var::NativeFunctionArgs& args) const
-            {
-                JSFunctionArguments convertedArgs { ctx, args };
-
-                const qjs::QuickJSContext::ValuePtr result { qjs::JS_Call (ctx,
-                                                                           fn,
-                                                                           self,
-                                                                           (int) convertedArgs.getSize(),
-                                                                           convertedArgs.getArguments()),
-                                                             ctx };
-
-                return discardError (quickJSToJuce (result));
-            }
-
-            JSContext* ctx{};
-            JSValue fn, self;
-        };
-
         const qjs::QuickJSContext::ValuePtr parentToUse { parent != nullptr ? JS_DupValue (ptr.context, *parent)
                                                                             : JS_GetGlobalObject (ptr.context),
                                                           ptr.context };
 
-        return var::NativeFunction { Callable { ptr.context, ptr.value, parentToUse.value } };
+        return makeNativeFunction (ptr.context, ptr.value, parentToUse.value);
     }
 
     if (JS_IsObject (ptr.value))
@@ -415,10 +361,79 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wsubobject-linkage")
 class QuickJSWrapper
 {
 public:
+    class ValueHandle
+    {
+    public:
+        ValueHandle() = default;
+
+        // Takes ownership of a reference to the value
+        ValueHandle (QuickJSWrapper& engineIn, qjs::JSValue valueIn)
+            : engine (&engineIn), value (valueIn)
+        {
+            engine->handles.insert (this);
+        }
+
+        ValueHandle (const ValueHandle& other)
+            : engine (other.engine),
+              value (engine != nullptr ? qjs::JS_DupValue (engine->getQuickJSContext(), other.value) : qjs::JSValue{})
+        {
+            if (engine != nullptr)
+                engine->handles.insert (this);
+        }
+
+        ValueHandle (ValueHandle&& other) noexcept
+            : engine (std::exchange (other.engine, {})),
+              value (std::exchange (other.value, {}))
+        {
+            if (engine != nullptr)
+            {
+                auto node = engine->handles.extract (&other);
+                node.value() = this;
+                engine->handles.insert (std::move (node));
+            }
+        }
+
+        ValueHandle& operator= (const ValueHandle&) = delete;
+        ValueHandle& operator= (ValueHandle&&) = delete;
+
+        ~ValueHandle()
+        {
+            release();
+        }
+
+        void release()
+        {
+            if (engine == nullptr)
+                return;
+
+            engine->handles.erase (this);
+            qjs::JS_FreeValue (std::exchange (engine, nullptr)->getQuickJSContext(), value);
+        }
+
+        QuickJSWrapper* getEngine() const  { return engine; }
+        qjs::JSValue get() const           { return value; }
+
+    private:
+        QuickJSWrapper* engine = nullptr;
+        qjs::JSValue value{};
+    };
+
     explicit QuickJSWrapper (const RelativeTime* maximumExecutionTimeIn)
         : maximumExecutionTime { *maximumExecutionTimeIn }
     {
         qjs::JS_SetInterruptHandler (getQuickJSRuntime(), handleInterrupt, (void*) this);
+        qjs::JS_SetRuntimeOpaque (getQuickJSRuntime(), this);
+    }
+
+    ~QuickJSWrapper()
+    {
+        while (! handles.empty())
+            (*handles.begin())->release();
+    }
+
+    static QuickJSWrapper& fromContext (qjs::JSContext* ctx)
+    {
+        return *static_cast<QuickJSWrapper*> (qjs::JS_GetRuntimeOpaque (qjs::JS_GetRuntime (ctx)));
     }
 
     qjs::JSContext* getQuickJSContext() const
@@ -431,17 +446,38 @@ public:
         return impl->runtime;
     }
 
-    void resetTimeout()
-    {
-        timeout = (int64) Time::getMillisecondCounterHiRes() + maximumExecutionTime.inMilliseconds();
-    }
-
     void stop()
     {
         timeout = (int64) Time::getMillisecondCounterHiRes();
     }
 
+    class ScopedExecution
+    {
+    public:
+        explicit ScopedExecution (QuickJSWrapper& engineIn)
+            : engine (engineIn)
+        {
+            if (engine.executionDepth++ == 0)
+                engine.resetTimeout();
+        }
+
+        ~ScopedExecution()
+        {
+            --engine.executionDepth;
+        }
+
+    private:
+        QuickJSWrapper& engine;
+
+        JUCE_DECLARE_NON_COPYABLE (ScopedExecution)
+    };
+
 private:
+    void resetTimeout()
+    {
+        timeout = (int64) Time::getMillisecondCounterHiRes() + maximumExecutionTime.inMilliseconds();
+    }
+
     static int handleInterrupt (qjs::JSRuntime*, void* opaque)
     {
         auto& self = *static_cast<QuickJSWrapper*> (opaque);
@@ -451,8 +487,53 @@ private:
     std::unique_ptr<qjs::QuickJSContext> impl = std::make_unique<qjs::QuickJSContext>();
     const RelativeTime& maximumExecutionTime;
     std::atomic<int64> timeout{};
+    std::set<ValueHandle*> handles;
+    int executionDepth = 0;
+
+    JUCE_DECLARE_NON_COPYABLE (QuickJSWrapper)
+};
+
+class JSFunction
+{
+public:
+    JSFunction (QuickJSWrapper& engine, qjs::JSValueConst fnIn, qjs::JSValueConst selfIn)
+        : fn (engine, qjs::JS_DupValue (engine.getQuickJSContext(), fnIn)),
+          self (engine, qjs::JS_DupValue (engine.getQuickJSContext(), selfIn))
+    {
+    }
+
+    var operator() (const var::NativeFunctionArgs& args) const
+    {
+        auto* engine = fn.getEngine();
+
+        if (engine == nullptr)
+            return var::undefined();
+
+        const QuickJSWrapper::ScopedExecution execution { *engine };
+
+        auto* ctx = engine->getQuickJSContext();
+        JSFunctionArguments convertedArgs { ctx, args };
+
+        const qjs::QuickJSContext::ValuePtr result { qjs::JS_Call (ctx,
+                                                                   fn.get(),
+                                                                   self.get(),
+                                                                   (int) convertedArgs.getSize(),
+                                                                   convertedArgs.getArguments()),
+                                                     ctx };
+
+        return discardError (quickJSToJuce (result));
+    }
+
+private:
+    QuickJSWrapper::ValueHandle fn;
+    QuickJSWrapper::ValueHandle self;
 };
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+static var::NativeFunction makeNativeFunction (qjs::JSContext* ctx, qjs::JSValueConst fn, qjs::JSValueConst self)
+{
+    return JSFunction { QuickJSWrapper::fromContext (ctx), fn, self };
+}
 
 using SetterFn = qjs::JSValue (*) (qjs::JSContext* ctx,
                                    qjs::JSValueConst thisVal,
@@ -547,17 +628,32 @@ struct DynamicObjectWrapper
     }
 
     //==============================================================================
+    static DynamicObjectWrapper* getWrapperForThis (qjs::JSValueConst thisValue, int ordinal)
+    {
+        auto* self = static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque (thisValue, getClassId()));
+        return self != nullptr && isPositiveAndBelow (ordinal, (int) self->identifiers.size()) ? self : nullptr;
+    }
+
+    static qjs::JSValue throwIncompatibleThis (qjs::JSContext* ctx)
+    {
+        return qjs::JS_ThrowTypeError (ctx, "function called on an object other than the native object it belongs to");
+    }
+
     static qjs::JSValue callDispatcher (qjs::JSContext* ctx,
                                         qjs::JSValueConst thisValue,
                                         int numArgs,
                                         qjs::JSValueConst* args,
                                         int ordinal)
     {
-        auto& self = *static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque2 (ctx, thisValue, getClassId()));
+        auto* self = getWrapperForThis (thisValue, ordinal);
+
+        if (self == nullptr)
+            return throwIncompatibleThis (ctx);
+
         const auto argList = quickJSToJuce (Span { args, (size_t) numArgs }, ctx);
-        const auto identifier = self.getIdentifier (ordinal);
-        auto result = self.object->invokeMethod (identifier,
-                                                 { self.object.get(), argList.data(), (int) argList.size() });
+        const auto identifier = self->getIdentifier (ordinal);
+        auto result = self->object->invokeMethod (identifier,
+                                                  { self->object.get(), argList.data(), (int) argList.size() });
         return juceToQuickJs (result, ctx);
     }
 
@@ -566,8 +662,12 @@ struct DynamicObjectWrapper
                                        qjs::JSValueConst val,
                                        int ordinal)
     {
-        auto& self = *static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque2 (ctx, thisVal, getClassId()));
-        self.object->setProperty (self.getIdentifier (ordinal), discardError (quickJSToJuce ({ qjs::JS_DupValue (ctx, val), ctx })));
+        auto* self = getWrapperForThis (thisVal, ordinal);
+
+        if (self == nullptr)
+            return throwIncompatibleThis (ctx);
+
+        self->object->setProperty (self->getIdentifier (ordinal), discardError (quickJSToJuce ({ qjs::JS_DupValue (ctx, val), ctx })));
 
         // In case there is a problem we could return e.g. `JS_EXCEPTION` or
         // `JS_ThrowRangeError(ctx, "invalid precision");` here.
@@ -576,8 +676,12 @@ struct DynamicObjectWrapper
 
     static qjs::JSValue getDispatcher (qjs::JSContext* ctx, qjs::JSValueConst thisVal, int ordinal)
     {
-        auto& self = *static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque2 (ctx, thisVal, getClassId()));
-        return juceToQuickJs (self.object->getProperty (self.getIdentifier (ordinal)), ctx);
+        auto* self = getWrapperForThis (thisVal, ordinal);
+
+        if (self == nullptr)
+            return throwIncompatibleThis (ctx);
+
+        return juceToQuickJs (self->object->getProperty (self->getIdentifier (ordinal)), ctx);
     }
 
     static qjs::JSClassID getClassId()

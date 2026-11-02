@@ -43,13 +43,16 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
         explicit OSXMessageBox (const MessageBoxOptions& opts)
             : options (opts) {}
 
-        void runAsync (std::function<void (int)> recipient) override
+        void runAsync (std::function<void (std::optional<int>)> recipient) override
         {
-            makeAlert();
+            const auto resultCodes = makeAlert();
 
-            const auto onDone = [recipient] (NSModalResponse result)
+            const auto onDone = [resultCodes, recipient, opt = options] (NSModalResponse result)
             {
-                recipient (convertResult (result));
+                const auto index = convertResult (result);
+                const auto code = index.has_value() ? std::make_optional (resultCodes[*index]) : std::nullopt;
+
+                recipient (code);
             };
 
             if (auto* comp = options.getAssociatedComponent())
@@ -71,24 +74,35 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                 }
             }
 
-            const auto result = [alertWindow.get() runModal];
-            onDone (result);
+            const NSUniquePtr<NSAlert> alert { [alertWindow.get() retain] };
+            onDone ([alert.get() runModal]);
         }
 
-        int runSync() override
+        std::optional<int> runSync() override
         {
-            makeAlert();
-            return convertResult ([alertWindow.get() runModal]);
+            const auto resultCodes = makeAlert();
+            const auto index = convertResult ([alertWindow.get() runModal]);
+
+            return index.has_value() ? std::make_optional (resultCodes[*index]) : std::nullopt;
         }
 
         void close() override
         {
-            if (auto* alert = alertWindow.get())
-                [[alert window] close];
+            if (alertWindow == nullptr)
+                return;
+
+            auto* window = [alertWindow.get() window];
+
+            if ([NSApp modalWindow] == window)
+                [NSApp stopModalWithCode: NSModalResponseAbort];
+            else if (auto* parent = [window sheetParent])
+                [parent endSheet: window returnCode: NSModalResponseAbort];
+
+            [window close];
         }
 
     private:
-        static int convertResult (NSModalResponse response)
+        static std::optional<int> convertResult (NSModalResponse response)
         {
             switch (response)
             {
@@ -98,17 +112,10 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                 default:                         break;
             }
 
-            jassertfalse;
-            return 0;
+            return {};
         }
 
-        static void addButton (NSAlert* alert, const String& button)
-        {
-            if (! button.isEmpty())
-                [alert addButtonWithTitle: juceStringToNS (button)];
-        }
-
-        void makeAlert()
+        Array<int> makeAlert()
         {
             NSAlert* alert = [[NSAlert alloc] init];
 
@@ -118,13 +125,47 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
             [alert setAlertStyle: options.getIconType() == MessageBoxIconType::WarningIcon ? NSAlertStyleCritical
                                                                                            : NSAlertStyleInformational];
 
-            const auto button1Text = options.getButtonText (0);
+            const auto buttonOrder = AlertWindowHelpers::getSuggestedButtonOrder (options);
 
-            addButton (alert, button1Text.isEmpty() ? "OK" : button1Text);
-            addButton (alert, options.getButtonText (1));
-            addButton (alert, options.getButtonText (2));
+            const String defaultButtonStrings[] { TRANS ("OK"), String{}, String{} };
+            Array<int> resultCodes;
+            NSButton* cancelButton = nullptr;
+
+            for (const auto [index, fallback] : enumerate (defaultButtonStrings, size_t{}))
+            {
+                const auto* button = index < buttonOrder.size()
+                                   ? &options.getButtons()[(size_t) buttonOrder[index]]
+                                   : nullptr;
+                const auto text = button != nullptr ? button->getText() : fallback;
+
+                if (text.isEmpty())
+                    continue;
+
+                [alert addButtonWithTitle: juceStringToNS (text)];
+                resultCodes.add (button != nullptr ? button->getCode() : resultCodes.size());
+
+                if (button == nullptr)
+                    continue;
+
+                if (button->getRole() == MessageBoxButtonRole::destroy)
+                {
+                    if (@available (macOS 11, *))
+                    {
+                        [[[alert buttons] lastObject] setHasDestructiveAction: true];
+                    }
+                }
+                else if (button->getRole() == MessageBoxButtonRole::cancel)
+                {
+                    cancelButton = [[alert buttons] lastObject];
+                }
+            }
+
+            if (cancelButton != nullptr && cancelButton != [[alert buttons] firstObject])
+                [cancelButton setKeyEquivalent: @"\x1b"]; // The escape code from Events.h
 
             alertWindow.reset (alert);
+
+            return resultCodes;
         }
 
         NSUniquePtr<NSAlert> alertWindow;

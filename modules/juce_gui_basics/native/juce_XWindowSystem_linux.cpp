@@ -101,11 +101,11 @@ XWindowSystemUtilities::ScopedXLock::~ScopedXLock()
 //==============================================================================
 XWindowSystemUtilities::Atoms::Atoms (::Display* display)
 {
-    protocols                    = getIfExists (display, "WM_PROTOCOLS");
-    protocolList [TAKE_FOCUS]    = getIfExists (display, "WM_TAKE_FOCUS");
-    protocolList [DELETE_WINDOW] = getIfExists (display, "WM_DELETE_WINDOW");
-    protocolList [PING]          = getIfExists (display, "_NET_WM_PING");
-    changeState                  = getIfExists (display, "WM_CHANGE_STATE");
+    protocols                    = getCreating (display, "WM_PROTOCOLS");
+    protocolList [TAKE_FOCUS]    = getCreating (display, "WM_TAKE_FOCUS");
+    protocolList [DELETE_WINDOW] = getCreating (display, "WM_DELETE_WINDOW");
+    protocolList [PING]          = getCreating (display, "_NET_WM_PING");
+    changeState                  = getCreating (display, "WM_CHANGE_STATE");
     state                        = getIfExists (display, "WM_STATE");
     userTime                     = getCreating (display, "_NET_WM_USER_TIME");
     activeWin                    = getCreating (display, "_NET_ACTIVE_WINDOW");
@@ -177,6 +177,11 @@ bool XWindowSystemUtilities::Atoms::isMimeTypeFile (::Display* display, Atom ato
 XWindowSystemUtilities::GetXProperty::GetXProperty (::Display* display, Window window, Atom atom,
                                                     long offset, long length, bool shouldDelete, Atom requestedType)
 {
+    jassert (window != None);
+
+    if (window == None || atom == None)
+        return;
+
     success = (X11Symbols::getInstance()->xGetWindowProperty (display, window, atom, offset, length,
                                                               (Bool) shouldDelete, requestedType, &actualType,
                                                               &actualFormat, &numItems, &bytesLeft, &data) == Success)
@@ -1752,6 +1757,26 @@ void XWindowSystem::destroyWindow (::Window windowH)
 }
 
 //==============================================================================
+void XWindowSystem::setTransientFor (::Window windowH, ::Window parentWindow) const
+{
+    jassert (windowH != 0);
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    if (parentWindow != 0)
+        X11Symbols::getInstance()->xSetTransientForHint (display, windowH, parentWindow);
+    else
+        X11Symbols::getInstance()->xDeleteProperty (display, windowH, XA_WM_TRANSIENT_FOR);
+}
+
+::Window XWindowSystem::getTransientFor (::Window windowH) const
+{
+    jassert (windowH != 0);
+    XWindowSystemUtilities::ScopedXLock xLock;
+    XWindowSystemUtilities::GetXProperty prop (display, windowH, XA_WM_TRANSIENT_FOR, 0, 1, false, XA_WINDOW);
+
+    return prop.success && prop.numItems > 0 ? *reinterpret_cast<const ::Window*> (prop.data) : 0;
+}
+
 void XWindowSystem::setTitle (::Window windowH, const String& title) const
 {
     jassert (windowH != 0);
@@ -2139,6 +2164,20 @@ Rectangle<int> XWindowSystem::getWindowBounds (::Window windowH, ::Window parent
 Point<int> XWindowSystem::getPhysicalParentScreenPosition() const
 {
     return parentScreenPosition;
+}
+
+Point<int> XWindowSystem::getScreenPosition (::Window windowH) const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    const auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
+    int x = 0, y = 0;
+    Window child;
+
+    if (! X11Symbols::getInstance()->xTranslateCoordinates (display, windowH, root, 0, 0, &x, &y, &child))
+        return {};
+
+    return { x, y };
 }
 
 void XWindowSystem::setMinimised (::Window windowH, bool shouldBeMinimised) const
@@ -3070,6 +3109,38 @@ String XWindowSystem::getTextFromClipboard() const
     return findTopLevelWindowOf (parent);
 }
 
+// The window manager marks the top-level windows it manages with WM_STATE, which distinguishes a
+// client window from the frame it may have been reparented into.
+::Window XWindowSystem::findTopLevelClientWindowOf (::Window w) const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    for (auto current = w; current != 0;)
+    {
+        XWindowSystemUtilities::GetXProperty prop (display, current, atoms.state, 0, 2, false, atoms.state);
+
+        if (prop.success && prop.numItems > 0)
+            return current;
+
+        Window* windowList = nullptr;
+        uint32 windowListSize = 0;
+        Window parent, root;
+
+        const auto result = X11Symbols::getInstance()->xQueryTree (display, current, &root, &parent, &windowList, &windowListSize);
+        const auto deleter = makeXFreePtr (windowList);
+
+        if (result == 0)
+            return w;
+
+        if (parent == root)
+            return current;
+
+        current = parent;
+    }
+
+    return w;
+}
+
 bool XWindowSystem::isParentWindowOf (::Window windowH, ::Window possibleChild) const
 {
     if (windowH == 0 || possibleChild == 0)
@@ -3477,34 +3548,70 @@ bool XWindowSystem::initialiseXDisplay()
 
     // Setup input event handler
     LinuxEventLoop::registerFdCallback (X11Symbols::getInstance()->xConnectionNumber (display),
-                                        [this] (int)
-                                        {
-                                            do
-                                            {
-                                                XEvent evt;
+                                        [this] (int) { dispatchPendingEvents(); });
 
-                                                {
-                                                    XWindowSystemUtilities::ScopedXLock xLock;
-
-                                                    if (! X11Symbols::getInstance()->xPending (display))
-                                                        return;
-
-                                                    X11Symbols::getInstance()->xNextEvent (display, &evt);
-                                                }
-
-                                                if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle)
-                                                {
-                                                    ClipboardHelpers::handleSelection (evt.xselectionrequest);
-                                                }
-                                                else if (evt.xany.window != juce_messageWindowHandle)
-                                                {
-                                                    windowMessageReceive (evt);
-                                                }
-
-                                            } while (display != nullptr);
-                                        });
+    previousAfterFunction = X11Symbols::getInstance()->xSetAfterFunction (display, afterXRequest);
 
     return true;
+}
+
+void XWindowSystem::dispatchPendingEvents()
+{
+    do
+    {
+        XEvent evt;
+
+        {
+            XWindowSystemUtilities::ScopedXLock xLock;
+
+            if (! X11Symbols::getInstance()->xPending (display))
+                return;
+
+            X11Symbols::getInstance()->xNextEvent (display, &evt);
+        }
+
+        if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle)
+            ClipboardHelpers::handleSelection (evt.xselectionrequest);
+        else if (evt.xany.window != juce_messageWindowHandle)
+            windowMessageReceive (evt);
+
+    } while (display != nullptr);
+}
+
+// The X11 event loop wakes when the X server sends something and dispatches the events it finds.
+// When Xlib waits for the reply to a request, it reads everything the server has sent, keeps any
+// events in its own queue, and leaves nothing for the event loop to wake up for. Those events
+// then wait until the server sends something else. For example, when a plug-in host moves its
+// window, the server reports the move with a ConfigureNotify, but if a timer has just asked for
+// a window's position, that report is read along with the reply, and the child windows that follow
+// the host stay put until the server sends something else, such as a mouse movement. Posting a
+// dispatch from here, after each request, moves them straight away.
+int XWindowSystem::afterXRequest (::Display* d)
+{
+    auto* instance = getInstanceWithoutCreating();
+
+    if (instance == nullptr)
+        return 0;
+
+    if (0 < X11Symbols::getInstance()->xEventsQueued (d, QueuedAlready)
+        && ! instance->dispatchPosted.exchange (true))
+    {
+        const auto posted = MessageManager::callAsync ([]
+        {
+            if (auto* i = getInstanceWithoutCreating())
+            {
+                // Cleared before draining, so that events queued after the drain's last check
+                // trigger another post.
+                i->dispatchPosted = false;
+                i->dispatchPendingEvents();
+            }
+        });
+
+        if (! posted)
+            instance->dispatchPosted = false;
+    }
+
+    return instance->previousAfterFunction != nullptr ? instance->previousAfterFunction (d) : 0;
 }
 
 void XWindowSystem::destroyXDisplay()
@@ -3521,6 +3628,7 @@ void XWindowSystem::destroyXDisplay()
             X11Symbols::getInstance()->xSync (display, True);
         }
 
+        X11Symbols::getInstance()->xSetAfterFunction (display, previousAfterFunction);
         LinuxEventLoop::unregisterFdCallback (X11Symbols::getInstance()->xConnectionNumber (display));
 
         {
@@ -3997,6 +4105,7 @@ void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer* peer, XConfi
     peer->updateWindowBounds();
     peer->updateBorderSize();
     peer->handleMovedOrResized();
+    peer->moveTransientWindows();
 
     // if the native title bar is dragged, need to tell any active menus, etc.
     if ((peer->getStyleFlags() & ComponentPeer::windowHasTitleBar) != 0)
@@ -4387,6 +4496,13 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
             for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
                 instance->dismissBlockingModals (dynamic_cast<LinuxComponentPeer*> (ComponentPeer::getPeer (i)),
                                                  event.xconfigure);
+
+            // Moving a window runs application code, which may close windows
+            for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
+                if (i < ComponentPeer::getNumPeers())
+                    if (auto* peer = dynamic_cast<LinuxComponentPeer*> (ComponentPeer::getPeer (i)))
+                        if (peer->getParentWindow() != 0 && instance->isParentWindowOf (event.xconfigure.window, peer->getWindowHandle()))
+                            peer->hostWindowMoved();
         }
     }
     else if (event.xany.type == KeymapNotify)

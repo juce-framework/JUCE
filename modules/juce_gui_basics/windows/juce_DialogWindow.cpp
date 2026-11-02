@@ -102,6 +102,7 @@ public:
 
         setUsingNativeTitleBar (options.useNativeTitleBar);
         setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
+        setAssociatedComponent (options.associatedComponent);
     }
 
     void closeButtonPressed() override

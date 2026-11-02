@@ -604,32 +604,18 @@ public:
         // Must not be negative!
         jassert (maxChars >= 0);
 
-        using Char1 = typename CharPointerType1::CharType;
-        using Char2 = typename CharPointerType2::CharType;
-
-        if constexpr (std::is_same_v<Char1, char> && std::is_same_v<Char2, char>)
+        while (--maxChars >= 0)
         {
-            return std::strncmp (s1.getAddress(), s2.getAddress(), (size_t) maxChars);
-        }
-        else if constexpr (std::is_same_v<Char1, wchar_t> && std::is_same_v<Char2, wchar_t>)
-        {
-            return std::wcsncmp (s1.getAddress(), s2.getAddress(), (size_t) maxChars);
-        }
-        else
-        {
-            while (--maxChars >= 0)
-            {
-                auto c1 = s1.getAndAdvance();
+            auto c1 = s1.getAndAdvance();
 
-                if (auto diff = compare (c1, s2.getAndAdvance()))
-                    return diff;
+            if (auto diff = compare (c1, s2.getAndAdvance()))
+                return diff;
 
-                if (c1 == 0)
-                    break;
-            }
-
-            return 0;
+            if (c1 == 0)
+                break;
         }
+
+        return 0;
     }
 
     /** Compares two characters, using a case-independant match. */

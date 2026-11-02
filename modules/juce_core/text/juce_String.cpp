@@ -2770,6 +2770,61 @@ public:
             expect (String::repeatedString ("xyz", 3) == L"xyzxyzxyz");
         }
 
+        testCase ("Searching for substrings containing multi-byte characters", [&]
+        {
+            // U+3042 U+3044 U+3046 and U+3042 U+3044 U+3048 differ only in the last character.
+            // Each of these characters takes three bytes in UTF-8, so a comparison that counts
+            // bytes rather than characters stops before it reaches the difference.
+            const auto text      = String::fromUTF8 ("\xe3\x81\x82\xe3\x81\x84\xe3\x81\x86");
+            const auto substring = String::fromUTF8 ("\xe3\x81\x82\xe3\x81\x84\xe3\x81\x88");
+
+            expect (! text.startsWith (substring));
+            expect (! text.contains (substring));
+            expect (! text.containsWholeWord (substring));
+            expectEquals (text.indexOf (substring), -1);
+            expectEquals (text.lastIndexOf (substring), -1);
+            expectEquals (text.replace (substring, "X"), text);
+            expectEquals (text.upToFirstOccurrenceOf (substring, false, false), text);
+
+            expect (text.startsWith (text.substring (0, 2)));
+            expect (text.contains (text.substring (1)));
+            expectEquals (text.indexOf (text.substring (1)), 1);
+            expectEquals (text.lastIndexOf (text.substring (1, 2)), 1);
+            expectEquals (text.replace (text.substring (1), "X"), text.substring (0, 1) + "X");
+
+            // U+1F3B5 U+1F3B6 and U+1F3B5 U+1F3B8 differ only in the last character. Emoji
+            // and other characters numbered above U+FFFF take four bytes in UTF-8 and two
+            // 16-bit units in UTF-16, so UTF-16 comparisons must also count characters rather
+            // than units.
+            const auto emojiText  = String::fromUTF8 ("\xf0\x9f\x8e\xb5\xf0\x9f\x8e\xb6");
+            const auto emojiOther = String::fromUTF8 ("\xf0\x9f\x8e\xb5\xf0\x9f\x8e\xb8");
+
+            const auto expectDiffersAtSecondCharacter = [&] (auto a, auto b)
+            {
+                expect (a.compareUpTo (b, 1) == 0);
+                expect (a.compareUpTo (b, 2) != 0);
+            };
+
+            expectDiffersAtSecondCharacter (emojiText.toUTF8(),  emojiOther.toUTF8());
+            expectDiffersAtSecondCharacter (emojiText.toUTF16(), emojiOther.toUTF16());
+            expectDiffersAtSecondCharacter (emojiText.toUTF32(), emojiOther.toUTF32());
+
+            // Malformed UTF-8 must never be read past its null terminator, and a truncated
+            // sequence is not the same character as the complete one.
+            const char complete[]  = "\xe3\x81\x82";
+            const char truncated[] = "\xe3\x81";
+            const char lone[]      = "\x81";
+
+            for (const auto* malformed : { truncated, lone })
+            {
+                for (const auto count : { 0, 1, 2 })
+                    expect (CharPointer_UTF8 (malformed).compareUpTo (CharPointer_UTF8 (malformed), count) == 0);
+
+                expect (CharPointer_UTF8 (malformed).compareUpTo (CharPointer_UTF8 (complete), 1) < 0);
+                expect (CharPointer_UTF8 (complete).compareUpTo (CharPointer_UTF8 (malformed), 1) > 0);
+            }
+        });
+
         beginTest ("UTF conversions");
         {
             TestUTFConversion <CharPointer_UTF32>::test (*this, r);
