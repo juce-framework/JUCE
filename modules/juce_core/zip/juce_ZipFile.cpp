@@ -485,6 +485,11 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, Overwri
     if (in == nullptr)
         return Result::fail ("Failed to open the zip file for reading");
 
+    const auto parentIsSymbolic = hasSymbolicPart (targetDirectory, targetFile.getParentDirectory());
+
+    if (followSymlinks == FollowSymlinks::no && parentIsSymbolic)
+        return Result::fail ("Parent directory leads through symlink for target file: " + targetFile.getFullPathName());
+
     if (targetFile.exists())
     {
         if (overwriteFiles == OverwriteFiles::no)
@@ -493,11 +498,6 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, Overwri
         if (! targetFile.deleteFile())
             return Result::fail ("Failed to write to target file: " + targetFile.getFullPathName());
     }
-
-    const auto parentIsSymbolic = hasSymbolicPart (targetDirectory, targetFile.getParentDirectory());
-
-    if (followSymlinks == FollowSymlinks::no && parentIsSymbolic)
-        return Result::fail ("Parent directory leads through symlink for target file: " + targetFile.getFullPathName());
 
     if (! targetFile.getParentDirectory().createDirectory())
         return Result::fail ("Failed to create target folder: " + targetFile.getParentDirectory().getFullPathName());
