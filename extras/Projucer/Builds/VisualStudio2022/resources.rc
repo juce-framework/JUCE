@@ -9,8 +9,8 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION  8,0,15,0
-PRODUCTVERSION  8,0,15,0
+FILEVERSION  8,0,17,0
+PRODUCTVERSION  8,0,17,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -19,9 +19,9 @@ BEGIN
       VALUE "CompanyName",  "Raw Material Software Limited\0"
       VALUE "LegalCopyright",  "Raw Material Software Limited\0"
       VALUE "FileDescription",  "Projucer\0"
-      VALUE "FileVersion",  "8.0.15\0"
+      VALUE "FileVersion",  "8.0.17\0"
       VALUE "ProductName",  "Projucer\0"
-      VALUE "ProductVersion",  "8.0.15\0"
+      VALUE "ProductVersion",  "8.0.17\0"
     END
   END
 
