@@ -35,7 +35,7 @@
 
   ID:                 juce_audio_utils
   vendor:             juce
-  version:            7.0.13
+  version:            7.0.14
   name:               JUCE extra audio utility classes
   description:        Classes for audio-related GUI and miscellaneous tasks.
   website:            http://www.juce.com/juce
