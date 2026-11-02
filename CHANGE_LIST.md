@@ -3,6 +3,20 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.17
+
+  - Fixed a crash reading AIFF and WAV files with malformed channel counts
+  - Hardened WAV and AIFF metadata parsing
+  - Confined ZipFile symbolic links to the target directory and rejected oversized entries
+  - Fixed ZipFile deleting files outside the target directory through a pre-existing link
+  - XmlDocument now only loads external entities through a caller-supplied InputSource
+  - Limited XmlDocument entity expansion and element nesting depth
+  - Validated the LZW code size in GIF images before decoding
+  - Validated PNG image dimensions before allocating the decode buffer
+  - Limited the nesting depth of received OSC bundles
+  - Limited the nesting depth of parsed JSON objects and arrays
+  - Limited the nesting depth of ValueTrees read from a stream
+
 ## Version 8.0.16
 
   - Added protection against malformed String input
