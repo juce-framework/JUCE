@@ -915,13 +915,9 @@ String File::getRelativePathFrom (const File& dir) const
     if (dir == *this)
         return ".";
 
-    auto thisPath = fullPath;
-
-    while (thisPath.endsWithChar (getSeparatorChar()))
-        thisPath = thisPath.dropLastCharacters (1);
-
-    auto dirPath = addTrailingSeparator (dir.existsAsFile() ? dir.getParentDirectory().getFullPathName()
-                                                            : dir.fullPath);
+    const auto thisPath = addTrailingSeparator (fullPath);
+    const auto dirPath = addTrailingSeparator (dir.existsAsFile() ? dir.getParentDirectory().getFullPathName()
+                                                                  : dir.fullPath);
 
     int commonBitLength = 0;
     auto thisPathAfterCommon = thisPath.getCharPointer();
@@ -955,22 +951,18 @@ String File::getRelativePathFrom (const File& dir) const
         }
     }
 
-    // if the only common bit is the root, then just return the full path
-    if (commonBitLength == 0 || (commonBitLength == 1 && thisPath[1] == getSeparatorChar()))
+    // If the paths share nothing beyond a root, there is no relative path between them
+    if (commonBitLength < addTrailingSeparator (getRootOfAbsolutePath (fullPath)).length())
         return fullPath;
 
-    auto numUpDirectoriesNeeded = countNumberOfSeparators (dirPathAfterCommon);
+    auto relativePath = String::repeatedString (String ("..") + getSeparatorString(),
+                                                countNumberOfSeparators (dirPathAfterCommon));
+    relativePath.appendCharPointer (thisPathAfterCommon);
 
-    if (numUpDirectoriesNeeded == 0)
-        return thisPathAfterCommon;
+    if (relativePath.isEmpty())
+        return ".";
 
-   #if JUCE_WINDOWS
-    auto s = String::repeatedString ("..\\", numUpDirectoriesNeeded);
-   #else
-    auto s = String::repeatedString ("../",  numUpDirectoriesNeeded);
-   #endif
-    s.appendCharPointer (thisPathAfterCommon);
-    return s;
+    return relativePath.dropLastCharacters (1);
 }
 
 //==============================================================================
@@ -1167,6 +1159,12 @@ public:
             expect (File (share + "\\..\\dir") == shareDir);
             expect (shareDir.getChildFile ("..\\..\\x") == File (share + "\\x"));
             expect (shareDir.getChildFile ("\\x") == File (share + "\\x"));
+
+            expectEquals (shareDir.getRelativePathFrom (File (share)), String ("dir"));
+            expectEquals (File (share).getRelativePathFrom (shareDir), String (".."));
+            expectEquals (shareDir.getRelativePathFrom (File ("\\\\other\\share\\dir")), shareDir.getFullPathName());
+            expectEquals (shareDir.getRelativePathFrom (File (drive + "\\dir")), shareDir.getFullPathName());
+            expectEquals (File (drive + "\\dir").getRelativePathFrom (File ("D:\\dir")), drive + "\\dir");
         });
        #endif
 
@@ -1183,6 +1181,8 @@ public:
             const File rootDir (root + "/");
             const File a (root + "/a");
             const File ab (root + "/a/b");
+            const File abc (root + "/a/b/c");
+            const File ad (root + "/a/d");
 
             expect (rootDir.isRoot());
             expect (rootDir.getParentDirectory() == rootDir);
@@ -1194,6 +1194,16 @@ public:
             expectEquals (File (root + "/a/.b/..c").getFullPathName(), root + native ("/a/.b/..c"));
             expect (a.getChildFile ("..") == rootDir);
             expect (a.getChildFile ("../../b") == rootDir.getChildFile ("b"));
+
+            expectEquals (ab.getRelativePathFrom (ab), String ("."));
+            expectEquals (ab.getRelativePathFrom (a), String ("b"));
+            expectEquals (abc.getRelativePathFrom (a), native ("b/c"));
+            expectEquals (a.getRelativePathFrom (ab), String (".."));
+            expectEquals (a.getRelativePathFrom (abc), native ("../.."));
+            expectEquals (ad.getRelativePathFrom (abc), native ("../../d"));
+            expectEquals (rootDir.getRelativePathFrom (ab), native ("../.."));
+            expectEquals (ab.getRelativePathFrom (rootDir), native ("a/b"));
+            expectEquals (File::createFileWithoutCheckingPath (ab.getFullPathName() + File::getSeparatorString()).getRelativePathFrom (a), String ("b"));
 
            #if ! JUCE_WINDOWS
             expect (File ("~/..") == home.getParentDirectory());
@@ -1284,7 +1294,8 @@ public:
         expect (! demoFolder.containsSubDirectories());
 
         expectEquals (tempFile.getRelativePathFrom (demoFolder.getParentDirectory()), demoFolder.getFileName() + File::getSeparatorString() + tempFile.getFileName());
-        expectEquals (demoFolder.getParentDirectory().getRelativePathFrom (tempFile), ".." + File::getSeparatorString() + ".." + File::getSeparatorString() + demoFolder.getParentDirectory().getFileName());
+        expectEquals (demoFolder.getParentDirectory().getRelativePathFrom (tempFile), String (".."));
+        expectEquals (demoFolder.getRelativePathFrom (tempFile), String ("."));
 
         expect (demoFolder.getNumberOfChildFiles (File::findFiles) == 1);
         expect (demoFolder.getNumberOfChildFiles (File::findFilesAndDirectories) == 1);
