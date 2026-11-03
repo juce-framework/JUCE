@@ -2337,10 +2337,8 @@ void XWindowSystem::toBehind (::Window windowH, ::Window otherWindow) const
 {
     jassert (windowH != 0 && otherWindow != 0);
 
-    const auto topLevelA = findTopLevelWindowOf (windowH);
-    const auto topLevelB = findTopLevelWindowOf (otherWindow);
-
-    Window newStack[] = { topLevelA, topLevelB };
+    Window newStack[] = { findTopLevelWindowOf (otherWindow),
+                          findTopLevelWindowOf (windowH) };
 
     XWindowSystemUtilities::ScopedXLock xLock;
     X11Symbols::getInstance()->xRestackWindows (display, newStack, numElementsInArray (newStack));
