@@ -117,42 +117,44 @@ static String getRootOfAbsolutePath (const String& path)
     return p[0] == File::getSeparatorChar() ? String (File::getSeparatorString()) : String();
 }
 
-static String removeEllipsis (const String& path)
+static String removeEllipsisFromNormalisedPath (const String& path)
 {
-    // This will quickly find both /../ and /./ at the expense of a minor
-    // false-positive performance hit when path elements end in a dot.
-   #if JUCE_WINDOWS
-    if (path.contains (".\\"))
-   #else
-    if (path.contains ("./"))
-   #endif
+    const String separator (File::getSeparatorString());
+
+    // This will quickly find both "." and ".." elements at the expense of a minor
+    // false-positive performance hit when path elements start with a dot.
+    if (! path.contains (separator + "."))
+        return path;
+
+    const auto root = getRootOfAbsolutePath (path);
+    const auto elements = path.substring (root.length()).trimCharactersAtStart (separator);
+
+    StringArray result;
+
+    for (const auto& element : StringArray::fromTokens (elements, separator, {}))
     {
-        StringArray toks;
-        toks.addTokens (path, File::getSeparatorString(), {});
-        bool anythingChanged = false;
+        if (element == ".")
+            continue;
 
-        for (int i = 1; i < toks.size(); ++i)
+        if (element == "..")
         {
-            auto& t = toks[i];
+            const auto lastParsedIndex = result.size() - 1;
 
-            if (t == ".." && toks[i - 1] != "..")
+            if (! result.isEmpty() && result[lastParsedIndex] != "..")
             {
-                anythingChanged = true;
-                toks.removeRange (i - 1, 2);
-                i = jmax (0, i - 2);
+                result.remove (lastParsedIndex);
+                continue;
             }
-            else if (t == ".")
-            {
-                anythingChanged = true;
-                toks.remove (i--);
-            }
+
+            if (root.isNotEmpty())
+                continue;
         }
 
-        if (anythingChanged)
-            return toks.joinIntoString (File::getSeparatorString());
+        result.add (element);
     }
 
-    return path;
+    const auto joined = result.joinIntoString (separator);
+    return root.isEmpty() ? joined : File::addTrailingSeparator (root) + joined;
 }
 
 static String normaliseSeparators (const String& path)
@@ -187,7 +189,7 @@ String File::parseAbsolutePath (const String& p)
 
    #if JUCE_WINDOWS
     // Windows
-    auto path = normaliseSeparators (removeEllipsis (p.replaceCharacter ('/', '\\')));
+    auto path = normaliseSeparators (p.replaceCharacter ('/', '\\'));
 
     if (const auto start = path.getCharPointer(); ! (startsWithDriveRoot (start) || isUncPath (start)))
     {
@@ -213,7 +215,7 @@ String File::parseAbsolutePath (const String& p)
     // If that's why you've ended up here, use File::getChildFile() to build your paths instead.
     jassert ((! p.containsChar ('\\')) || (p.indexOfChar ('/') >= 0 && p.indexOfChar ('/') < p.indexOfChar ('\\')));
 
-    auto path = normaliseSeparators (removeEllipsis (p));
+    auto path = normaliseSeparators (p);
 
     if (path.startsWithChar ('~'))
     {
@@ -255,6 +257,8 @@ String File::parseAbsolutePath (const String& p)
         return File::getCurrentWorkingDirectory().getChildFile (path).getFullPathName();
     }
    #endif
+
+    path = removeEllipsisFromNormalisedPath (path);
 
     while (path.endsWithChar (getSeparatorChar()) && path != getSeparatorString()) // careful not to turn a single "/" into an empty string
         path = path.dropLastCharacters (1);
@@ -493,49 +497,7 @@ File File::getChildFile (StringRef relativePath) const
     if (isAbsolutePath (r))
         return File (String (r));
 
-    auto path = fullPath;
-    auto separatorChar = getSeparatorChar();
-
-    while (*r == '.')
-    {
-        auto lastPos = r;
-        auto secondChar = *++r;
-
-        if (secondChar == '.') // remove "../"
-        {
-            auto thirdChar = *++r;
-
-            if (thirdChar == separatorChar || thirdChar == 0)
-            {
-                auto lastSlash = path.lastIndexOfChar (separatorChar);
-
-                if (lastSlash >= 0)
-                    path = path.substring (0, lastSlash);
-
-                while (*r == separatorChar) // ignore duplicate slashes
-                    ++r;
-            }
-            else
-            {
-                r = lastPos;
-                break;
-            }
-        }
-        else if (secondChar == separatorChar || secondChar == 0)  // remove "./"
-        {
-            while (*r == separatorChar) // ignore duplicate slashes
-                ++r;
-        }
-        else
-        {
-            r = lastPos;
-            break;
-        }
-    }
-
-    path = addTrailingSeparator (path);
-    path.appendCharPointer (r);
-    return File (path);
+    return File (addTrailingSeparator (fullPath) + String (r));
 }
 
 File File::getSiblingFile (StringRef fileName) const
@@ -1202,6 +1164,8 @@ public:
             expect (File (share).isRoot());
             expect (File (share).getParentDirectory() == File (share));
             expect (shareDir.getParentDirectory() == File (share));
+            expect (File (share + "\\..\\dir") == shareDir);
+            expect (shareDir.getChildFile ("..\\..\\x") == File (share + "\\x"));
             expect (shareDir.getChildFile ("\\x") == File (share + "\\x"));
         });
        #endif
@@ -1214,13 +1178,26 @@ public:
             const String root;
            #endif
 
+            const auto native = [] (String path) { return path.replaceCharacter ('/', File::getSeparatorChar()); };
+
             const File rootDir (root + "/");
             const File a (root + "/a");
+            const File ab (root + "/a/b");
 
             expect (rootDir.isRoot());
             expect (rootDir.getParentDirectory() == rootDir);
+            expect (File (root + "/a/..") == rootDir);
+            expect (File (root + "/../a") == a);
+            expect (File (root + "/a//../b") == rootDir.getChildFile ("b"));
+            expect (File (root + "/a/./b/../c") == a.getChildFile ("c"));
+            expect (File (root + "/a/b/.") == ab);
+            expectEquals (File (root + "/a/.b/..c").getFullPathName(), root + native ("/a/.b/..c"));
             expect (a.getChildFile ("..") == rootDir);
             expect (a.getChildFile ("../../b") == rootDir.getChildFile ("b"));
+
+           #if ! JUCE_WINDOWS
+            expect (File ("~/..") == home.getParentDirectory());
+           #endif
         });
 
         beginTest ("Writing");
