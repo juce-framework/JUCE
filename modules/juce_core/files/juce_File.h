@@ -134,8 +134,8 @@ public:
     /** Checks whether the path of this file represents the root of a file system,
         irrespective of its existence.
 
-        This will return true for "C:", "D:", etc on Windows and "/" on other
-        platforms.
+        This will return true for "C:", "D:", etc and for a UNC share such as
+        "\\\\server\\share" on Windows, and for "/" on other platforms.
     */
     bool isRoot() const;
 
@@ -291,8 +291,8 @@ public:
 
         e.g. for "/moose/fish/foo.txt" this will return "/moose/fish".
 
-        If you are already at the root directory ("/" or "C:") then this method will
-        return the root directory.
+        If you are already at the root directory ("/", "C:" or a UNC share) then this
+        method will return the root directory.
     */
     File getParentDirectory() const;
 
