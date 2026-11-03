@@ -76,6 +76,45 @@ File& File::operator= (File&& other) noexcept
 }
 
 //==============================================================================
+#if JUCE_WINDOWS
+static bool startsWithDriveLetter (String::CharPointerType p)
+{
+    return CharacterFunctions::isLetter (p[0]) && p[1] == ':';
+}
+
+static bool startsWithDriveRoot (String::CharPointerType p)
+{
+    return startsWithDriveLetter (p) && (p[2] == 0 || p[2] == '\\' || p[2] == '/');
+}
+
+static bool isUncPath (String::CharPointerType p)
+{
+    return p[0] == '\\' && p[1] == '\\';
+}
+
+static String getRootOfAbsolutePath (const String& path)
+{
+    const auto p = path.getCharPointer();
+
+    if (startsWithDriveRoot (p))
+        return path.substring (0, 2);
+
+    if (isUncPath (p))
+    {
+        const auto serverEnd = path.indexOfChar (2, '\\');
+
+        if (serverEnd < 0)
+            return path;
+
+        const auto shareEnd = path.indexOfChar (serverEnd + 1, '\\');
+
+        return shareEnd < 0 ? path : path.substring (0, shareEnd);
+    }
+
+    return {};
+}
+#endif
+
 static String removeEllipsis (const String& path)
 {
     // This will quickly find both /../ and /./ at the expense of a minor
@@ -148,25 +187,12 @@ String File::parseAbsolutePath (const String& p)
     // Windows
     auto path = normaliseSeparators (removeEllipsis (p.replaceCharacter ('/', '\\')));
 
-    if (path.startsWithChar (getSeparatorChar()))
-    {
-        if (path[1] != getSeparatorChar())
-        {
-            /*  When you supply a raw string to the File object constructor, it must be an absolute path.
-                If you're trying to parse a string that may be either a relative path or an absolute path,
-                you MUST provide a context against which the partial path can be evaluated - you can do
-                this by simply using File::getChildFile() instead of the File constructor. E.g. saying
-                "File::getCurrentWorkingDirectory().getChildFile (myUnknownPath)" would return an absolute
-                path if that's what was supplied, or would evaluate a partial path relative to the CWD.
-            */
-            jassertfalse;
-
-            path = File::getCurrentWorkingDirectory().getFullPathName().substring (0, 2) + path;
-        }
-    }
-    else if (! path.containsChar (':'))
+    if (const auto start = path.getCharPointer(); ! (startsWithDriveRoot (start) || isUncPath (start)))
     {
         /*  When you supply a raw string to the File object constructor, it must be an absolute path.
+            On Windows that means a path that starts with a drive such as "C:\" or a share such as
+            "\\server\share". A path with a leading separator but no drive, such as "\foo", or a
+            drive-relative path such as "C:foo", is not absolute.
             If you're trying to parse a string that may be either a relative path or an absolute path,
             you MUST provide a context against which the partial path can be evaluated - you can do
             this by simply using File::getChildFile() instead of the File constructor. E.g. saying
@@ -410,6 +436,9 @@ bool File::isAChildOf (const File& potentialParent) const
     if (potentialParent.fullPath.length() >= ourPath.length())
         return false;
 
+    if (ourPath == fullPath)
+        return false;
+
     return getParentDirectory().isAChildOf (potentialParent);
 }
 
@@ -424,7 +453,7 @@ bool File::isAbsolutePath (StringRef path)
     return firstChar == getSeparatorChar()
            #if JUCE_WINDOWS
             || firstChar == '/'
-            || (firstChar != 0 && path.text[1] == ':');
+            || startsWithDriveRoot (path.text);
            #else
             || firstChar == '~';
            #endif
@@ -457,6 +486,16 @@ File File::getChildFile (StringRef relativePath) const
 
         if (root.isNotEmpty())
             return File (root + String (r));
+    }
+
+    if (startsWithDriveLetter (r) && ! startsWithDriveRoot (r))
+    {
+        // A drive-relative path such as "C:foo" names a location on drive C relative to some unspecified
+        // directory, which can't be resolved against this file. Supply either a full path, or a path
+        // relative to this file.
+        jassertfalse;
+
+        return File (String (r).substring (0, 2)).getChildFile (String (r + 2));
     }
    #endif
 
@@ -1143,6 +1182,32 @@ public:
             // on windows, some of the drives may not contain media, so as long as at least one is ok
             expect (numRootsExisting > 0);
         }
+
+       #if JUCE_WINDOWS
+        testCase ("Windows paths", [&]
+        {
+            const String drive { "C:" };
+            const String share { "\\\\server\\share" };
+
+            expect (File::isAbsolutePath (drive));
+            expect (File::isAbsolutePath (drive + "\\"));
+            expect (File::isAbsolutePath ("c:/foo"));
+            expect (File::isAbsolutePath (share));
+            expect (! File::isAbsolutePath (drive + "foo"));
+            expect (! File::isAbsolutePath ("foo:bar"));
+            expect (! File::isAbsolutePath ("1:\\foo"));
+
+            expect (getRootOfAbsolutePath (drive) == drive);
+            expect (getRootOfAbsolutePath (drive + "\\foo\\bar") == drive);
+            expect (getRootOfAbsolutePath ("\\\\server") == "\\\\server");
+            expect (getRootOfAbsolutePath (share) == share);
+            expect (getRootOfAbsolutePath (share + "\\foo\\bar") == share);
+
+            expect (File (drive + "\\").getChildFile ("foo") == File (drive + "\\foo"));
+            expect (File (share).getChildFile ("foo") == File (share + "\\foo"));
+            expect (File (share).getChildFile ("foo:bar") == File (share + "\\foo:bar"));
+        });
+       #endif
 
         beginTest ("Writing");
 
