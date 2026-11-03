@@ -91,11 +91,13 @@ static bool isUncPath (String::CharPointerType p)
 {
     return p[0] == '\\' && p[1] == '\\';
 }
+#endif
 
 static String getRootOfAbsolutePath (const String& path)
 {
     const auto p = path.getCharPointer();
 
+   #if JUCE_WINDOWS
     if (startsWithDriveRoot (p))
         return path.substring (0, 2);
 
@@ -110,10 +112,10 @@ static String getRootOfAbsolutePath (const String& path)
 
         return shareEnd < 0 ? path : path.substring (0, shareEnd);
     }
+   #endif
 
-    return {};
+    return p[0] == File::getSeparatorChar() ? String (File::getSeparatorString()) : String();
 }
-#endif
 
 static String removeEllipsis (const String& path)
 {
@@ -382,6 +384,9 @@ bool File::copyDirectoryTo (const File& newDirectory) const
 //==============================================================================
 String File::getPathUpToLastSlash() const
 {
+    if (getRootOfAbsolutePath (fullPath) == fullPath)
+        return fullPath;
+
     auto lastSlash = fullPath.lastIndexOfChar (getSeparatorChar());
 
     if (lastSlash > 0)
@@ -471,21 +476,7 @@ File File::getChildFile (StringRef relativePath) const
     // without saying which one, so it is resolved against the drive or share of this file.
     if (*r == getSeparatorChar() && r[1] != getSeparatorChar())
     {
-        const auto root = std::invoke ([&]() -> String
-        {
-            if (fullPath[1] == ':')
-                return fullPath.substring (0, 2);
-
-            if (! fullPath.startsWith ("\\\\"))
-                return {};
-
-            const auto serverEnd = fullPath.indexOfChar (2, getSeparatorChar());
-            const auto shareEnd = serverEnd < 0 ? -1 : fullPath.indexOfChar (serverEnd + 1, getSeparatorChar());
-            return shareEnd < 0 ? fullPath : fullPath.substring (0, shareEnd);
-        });
-
-        if (root.isNotEmpty())
-            return File (root + String (r));
+        return File (getRootOfAbsolutePath (fullPath) + String (r));
     }
 
     if (startsWithDriveLetter (r) && ! startsWithDriveRoot (r))
@@ -1206,8 +1197,31 @@ public:
             expect (File (drive + "\\").getChildFile ("foo") == File (drive + "\\foo"));
             expect (File (share).getChildFile ("foo") == File (share + "\\foo"));
             expect (File (share).getChildFile ("foo:bar") == File (share + "\\foo:bar"));
+
+            const File shareDir (share + "\\dir");
+            expect (File (share).isRoot());
+            expect (File (share).getParentDirectory() == File (share));
+            expect (shareDir.getParentDirectory() == File (share));
+            expect (shareDir.getChildFile ("\\x") == File (share + "\\x"));
         });
        #endif
+
+        testCase ("Path elements", [&]
+        {
+           #if JUCE_WINDOWS
+            const String root { "C:" };
+           #else
+            const String root;
+           #endif
+
+            const File rootDir (root + "/");
+            const File a (root + "/a");
+
+            expect (rootDir.isRoot());
+            expect (rootDir.getParentDirectory() == rootDir);
+            expect (a.getChildFile ("..") == rootDir);
+            expect (a.getChildFile ("../../b") == rootDir.getChildFile ("b"));
+        });
 
         beginTest ("Writing");
 
