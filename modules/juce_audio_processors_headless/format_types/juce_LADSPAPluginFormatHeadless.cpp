@@ -36,7 +36,7 @@
 
 #include <juce_audio_processors_headless/utilities/juce_CommonProcessorUtilities.h>
 
-#include <ladspa.h>
+#include JUCE_LADSPA_INCLUDE_PATH
 
 namespace juce
 {
@@ -344,25 +344,6 @@ public:
 
     using AudioPluginInstance::processBlock;
 
-    bool isInputChannelStereoPair  (int index) const override    { return isPositiveAndBelow (index, getTotalNumInputChannels()); }
-    bool isOutputChannelStereoPair (int index) const override    { return isPositiveAndBelow (index, getTotalNumOutputChannels()); }
-
-    const String getInputChannelName (const int index) const override
-    {
-        if (isPositiveAndBelow (index, getTotalNumInputChannels()))
-            return String (plugin->PortNames [inputs [index]]).trim();
-
-        return {};
-    }
-
-    const String getOutputChannelName (const int index) const override
-    {
-        if (isPositiveAndBelow (index, getTotalNumInputChannels()))
-            return String (plugin->PortNames [outputs [index]]).trim();
-
-        return {};
-    }
-
     //==============================================================================
     int getNumPrograms() override                            { return 0; }
     int getCurrentProgram() override                         { return 0; }
@@ -448,9 +429,9 @@ private:
 
         String getCurrentValueAsText() const override
         {
-            if (auto* interface = pluginInstance.plugin)
+            if (auto* pluginInterface = pluginInstance.plugin)
             {
-                const auto& hint = interface->PortRangeHints[paramID];
+                const auto& hint = pluginInterface->PortRangeHints[paramID];
 
                 if (LADSPA_IS_HINT_INTEGER (hint.HintDescriptor))
                     return String ((int) paramValue.scaled);
@@ -463,12 +444,12 @@ private:
 
         void setValue (float newValue) override
         {
-            if (auto* interface = pluginInstance.plugin)
+            if (auto* pluginInterface = pluginInstance.plugin)
             {
                 const ScopedLock sl (pluginInstance.lock);
 
                 if (! approximatelyEqual (paramValue.unscaled, newValue))
-                    paramValue = ParameterValue (getNewParamScaled (interface->PortRangeHints [paramID], newValue), newValue);
+                    paramValue = ParameterValue (getNewParamScaled (pluginInterface->PortRangeHints [paramID], newValue), newValue);
             }
         }
 
@@ -479,9 +460,9 @@ private:
 
         ParameterValue getDefaultParamValue() const
         {
-            if (auto* interface = pluginInstance.plugin)
+            if (auto* pluginInterface = pluginInstance.plugin)
             {
-                const auto& hint = interface->PortRangeHints[paramID];
+                const auto& hint = pluginInterface->PortRangeHints[paramID];
                 const auto& desc = hint.HintDescriptor;
 
                 if (LADSPA_IS_HINT_HAS_DEFAULT (desc))

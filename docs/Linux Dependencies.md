@@ -26,7 +26,7 @@ or
 - libjack-jackd2-dev (unless `JUCE_JACK=0`)
 
 #### juce_audio_processors
-- ladspa-sdk (unless `JUCE_PLUGINHOST_LADSPA=0`)
+- ladspa-sdk (if `JUCE_PLUGINHOST_LADSPA=1`)
 
 #### juce_core
 - libcurl4-openssl-dev (unless `JUCE_USE_CURL=0`)

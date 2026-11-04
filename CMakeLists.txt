@@ -113,6 +113,12 @@ if(JUCE_GLOBAL_ARA_SDK_PATH)
     juce_set_ara_sdk_path("${JUCE_GLOBAL_ARA_SDK_PATH}")
 endif()
 
+set(enable_ladspa_flag "")
+
+if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
+    set(enable_ladspa_flag JUCE_PLUGINHOST_LADSPA=1)
+endif()
+
 # We don't build anything other than the juceaide by default, because we want to keep configuration
 # speedy and the number of targets low. If you want to add targets for the extra projects and
 # example PIPs (there's a lot of them!), specify -DJUCE_BUILD_EXAMPLES=ON and/or

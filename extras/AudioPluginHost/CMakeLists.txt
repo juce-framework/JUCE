@@ -64,7 +64,6 @@ target_compile_definitions(AudioPluginHost PRIVATE
     JUCE_CONTENT_SHARING=1
     JUCE_DIRECTSOUND=1
     JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING=1
-    JUCE_PLUGINHOST_LADSPA=1
     JUCE_PLUGINHOST_LV2=1
     JUCE_PLUGINHOST_VST3=1
     JUCE_PLUGINHOST_VST=0
@@ -82,7 +81,8 @@ target_compile_definitions(AudioPluginHost PRIVATE
     # This is a temporary workaround to allow builds to complete on Xcode 15.
     # Add -Wl,-ld_classic to the OTHER_LDFLAGS build setting if you need to
     # deploy to older versions of macOS/iOS.
-    JUCE_SILENCE_XCODE_15_LINKER_WARNING=1)
+    JUCE_SILENCE_XCODE_15_LINKER_WARNING=1
+    ${enable_ladspa_flag})
 
 target_link_libraries(AudioPluginHost PRIVATE
     AudioPluginHostData
