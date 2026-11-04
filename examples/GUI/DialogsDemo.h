@@ -304,7 +304,7 @@ private:
             auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::InfoIcon)
                                               .withTitle ("This is an AlertWindow with a single button")
                                               .withMessage ("Confirmation and cancellation will return the same value.")
-                                              .withButton (MessageBoxButtonOptions { TRANS ("OK"), 100 });
+                                              .withButton (MessageBoxButtonOptions { TRANS ("OK"), 100 }.setPreferredAction().setRole (MessageBoxButtonRole::cancel));
             messageBox = AlertWindow::showScopedAsync (options, getAlertBoxResultChosen());
         }
         else if (type == binaryChoiceAlertWindow)

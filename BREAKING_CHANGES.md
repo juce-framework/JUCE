@@ -1,5 +1,32 @@
 # JUCE breaking changes
 
+# `develop` branch
+
+## Change
+
+The deprecated function `MessageBoxOptions::makeOptionsYesNo` no longer
+produces a dialog that can be dismissed with 'escape' and confirmed with
+'return'.
+
+**Possible Issues**
+
+Programs that expect this behaviour will no longer function correctly.
+
+**Workaround**
+
+Build MessageBoxOptions manually, using `MessageBoxOptions::withButton` to add
+one button designated the preferred action, and one button with the cancel
+role.
+
+**Rationale**
+
+A yes/no choice has different semantics to OK/cancel. Unlike 'cancel',
+selecting 'no' may have some non-trivial effect. The box should not be
+dismissed with the escape key or other cancellation mechanisms ('back' on
+Android, alt+f4 on Windows), so that the user is required to explicitly select
+the negative option.
+
+
 # Version 9.0.5
 
 ## Change
