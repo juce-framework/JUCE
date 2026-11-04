@@ -177,12 +177,22 @@ public:
 	AAX_Result RegisterPacket( AAX_CParamID paramID, AAX_CFieldIndex portID,
 							  TWorker* iPt2Object, Func infPt)
 	{
+		// Validate input parameters
+		if (paramID == NULL)
+			return AAX_ERROR_NULL_ARGUMENT;
+		if (iPt2Object == NULL)
+			return AAX_ERROR_NULL_ARGUMENT;
+		
 		AAX_CPacketHandler<TWorker> handler(iPt2Object, infPt);
 		return RegisterPacket(paramID, portID, &handler);
 	}
 	
 	AAX_Result RegisterPacket( AAX_CParamID paramID, AAX_CFieldIndex portID)
 	{
+		// Validate input parameters
+		if (paramID == NULL)
+			return AAX_ERROR_NULL_ARGUMENT;
+		
 		AAX_CPacketHandler<AAX_CPacketDispatcher> handler(this, &AAX_CPacketDispatcher::GenerateSingleValuePacket);
 		return RegisterPacket(paramID, portID, &handler);
 	}

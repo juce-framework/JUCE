@@ -47,7 +47,7 @@
 #include "AAX.h"
 
 // Standard Library Includes
-#include <cmath> // for log()
+#include <cmath>
 #include <string.h>
 
 
@@ -58,22 +58,34 @@ namespace AAX
 {
 	
 	/**	\brief Double-precision safe log function.  Returns zero
-	 *	for input values that are <= 0.0
+	 *	for input values that are <= 0.0, NaN, or infinity
 	 */
-	inline double SafeLog (double aValue) { return aValue <= 0.0 ? 0.0 : log(aValue); }
+	inline double SafeLog (double aValue) { return (aValue <= 0.0 || !std::isfinite(aValue)) ? 0.0 : log(aValue); }
 
 	/**	\brief Single-precision safe log function.  Returns zero
-	 *	for input values that are <= 0.0
+	 *	for input values that are <= 0.0, NaN, or infinity
 	 */
-	inline float SafeLogf (float aValue) { return aValue <= 0.0f ? 0.0f : logf(aValue); }
+	inline float SafeLogf (float aValue) { return (aValue <= 0.0f || !std::isfinite(aValue)) ? 0.0f : logf(aValue); }
 
 	/** \brief Helper function to check if two parameter IDs are equivalent
 	 */
-	inline AAX_CBoolean IsParameterIDEqual ( AAX_CParamID iParam1, AAX_CParamID iParam2 ) { return static_cast<AAX_CBoolean>( strcmp ( iParam1, iParam2 ) == 0 ); }
+	inline AAX_CBoolean IsParameterIDEqual ( AAX_CParamID iParam1, AAX_CParamID iParam2 ) {
+		return static_cast<AAX_CBoolean>( iParam1 && iParam2 ? strncmp ( iParam1, iParam2, kAAX_ParameterIdentifierMaxSize ) == 0 : iParam1 == iParam2 );
+	}
+
+	/** \brief Helper function to check if a parameter ID is reserved by Avid
+	
+	\sa \ref AAX_CParamID
+	*/
+	inline AAX_CBoolean IsParameterIDReservedByAvid ( AAX_CParamID iParamID ) {
+		return static_cast<AAX_CBoolean>( iParamID ? strncmp ( iParamID, "avid.", 5 ) == 0 : false );
+	}
 
 	/** \brief Helper function to check if two Effect IDs are equivalent
 	 */
-	inline AAX_CBoolean IsEffectIDEqual ( const AAX_IString * iEffectID1, const AAX_IString * iEffectID2 ) { return static_cast<AAX_CBoolean>( strcmp ( iEffectID1->Get(), iEffectID2->Get() ) == 0 ); }
+	inline AAX_CBoolean IsEffectIDEqual ( const AAX_IString * iEffectID1, const AAX_IString * iEffectID2 ) {
+		return static_cast<AAX_CBoolean>( iEffectID1 && iEffectID2 ? strcmp ( iEffectID1->Get(), iEffectID2->Get() ) == 0 : iEffectID1 == iEffectID2 );
+	}
 		
 	/** \brief Helper function to check if a notification ID is reserved for host notifications
 	 */

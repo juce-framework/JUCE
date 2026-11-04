@@ -118,6 +118,12 @@ void AAX_CPacketDispatcher::Initialize( AAX_IController* inController, AAX_IEffe
 // *******************************************************************************
 AAX_Result AAX_CPacketDispatcher::RegisterPacket( AAX_CParamID paramID, AAX_CFieldIndex portID, const AAX_IPacketHandler* inHandler)
 {
+	// Validate input parameters
+	if (paramID == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	if (inHandler == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	AAX_StLock_Guard guard(this->mLockGuard); 
 	
 	AAX_CPacket* packet = NULL;
@@ -149,6 +155,10 @@ AAX_Result AAX_CPacketDispatcher::RegisterPacket( AAX_CParamID paramID, AAX_CFie
 // *******************************************************************************
 AAX_Result AAX_CPacketDispatcher::SetDirty(AAX_CParamID paramID, bool inDirty)
 {
+	// Validate input parameters
+	if (paramID == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	AAX_StLock_Guard guard(this->mLockGuard); 
 
 	PacketsHandlersMap::iterator found (mPacketsHandlers.find (paramID));

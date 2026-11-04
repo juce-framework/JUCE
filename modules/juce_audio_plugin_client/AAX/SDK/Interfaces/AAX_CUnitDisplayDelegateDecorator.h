@@ -36,6 +36,7 @@
 #define AAX_CUNITDISPLAYDELEGATEDECORATOR_H
 
 #include "AAX_IDisplayDelegateDecorator.h"
+#include "AAX_CString.h"
 
 
 /** \brief A unit type decorator conforming to AAX_IDisplayDelegateDecorator
@@ -66,6 +67,15 @@ public:
 	 */
 	AAX_CUnitDisplayDelegateDecorator(const AAX_IDisplayDelegate<T>& displayDelegate, const AAX_CString& unitString);
 	
+	/** \brief Rvalue reference constructor for display delegate
+	 *
+	 *	Allows construction from temporary display delegate objects.
+	 *
+	 *	\param[in] displayDelegate
+	 *	\param[in] unitString
+	 */
+	AAX_CUnitDisplayDelegateDecorator(AAX_IDisplayDelegate<T>&& displayDelegate, const AAX_CString& unitString);
+	
 	//Virtual Overrides
 	AAX_CUnitDisplayDelegateDecorator<T>*	Clone() const AAX_OVERRIDE;
 	bool		ValueToString(T value, AAX_CString* valueString) const AAX_OVERRIDE;
@@ -82,6 +92,14 @@ protected:
 template <typename T>
 AAX_CUnitDisplayDelegateDecorator<T>::AAX_CUnitDisplayDelegateDecorator(const AAX_IDisplayDelegate<T>& displayDelegate, const AAX_CString& unitString)  :
 	AAX_IDisplayDelegateDecorator<T>(displayDelegate),
+	mUnitString(unitString)
+{
+
+}
+
+template <typename T>
+AAX_CUnitDisplayDelegateDecorator<T>::AAX_CUnitDisplayDelegateDecorator(AAX_IDisplayDelegate<T>&& displayDelegate, const AAX_CString& unitString) :
+	AAX_IDisplayDelegateDecorator<T>(std::move(displayDelegate)),
 	mUnitString(unitString)
 {
 

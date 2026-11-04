@@ -40,10 +40,6 @@
 
 
 #include <vector>
-#ifdef WINDOWS_VERSION
-#include <algorithm>
-#endif
-
 #include <algorithm>
 
 

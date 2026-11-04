@@ -845,9 +845,9 @@ enum AAX_EProperty : int32_t
 	 */
 	AAX_eProperty_UsesTransportControl = 311,
 
-
 	AAX_eProperty_MaxFeaturesProp, // Intentionally given no explicit value
 	//@} end Plug-in features
+	
 	
 
 //---------------------------------------------------------------------	
@@ -933,7 +933,7 @@ enum AAX_EProperty : int32_t
 	 *  host. Instead, it is intercepted by \ref AAX_VPropertyMap::AddProperty() and
 	 *  replaced with the equivalent input and output stem format properties.
 	 */
-	AAX_eProperty_StemFormat = 10001,
+	AAX_eProperty_StemFormat = 20001,
 }; AAX_ENUM_SIZE_CHECK(AAX_EProperty);
 
 /// @cond ignore

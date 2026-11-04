@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019, 2021, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2021, 2023-2024, 2026 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -80,14 +80,26 @@ public:
 	//@{
 	/**	\brief Request a change to the main view size
 	 
-	 	\note \li For compatibility with the smallest supported displays,
-		plug-in GUI dimensions should not exceed 749x617 pixels, or 749x565
-		pixels for plug-ins with sidechain support.
+	 	\note \li For compatibility with the smallest supported displays, plug-in GUI dimensions
+		should not exceed 749x617 pixels, or 749x565 pixels for plug-ins with sidechain support
+		(multiplied by scaling factor if applicable). On MacOS this value should always be in
+		logical pixels while on Windows it should always be in physical pixels.
 	 
 		\param[in] inSize
 			The new size to which the plug-in view should be set
 	 */
     virtual AAX_Result	SetViewSize ( AAX_Point & inSize ) = 0;
+
+	/**	\brief Request the scaling factor of the view containter
+	 
+	 	\note \li On MacOS this will always return 1.0f. On windows this will return a value
+		based on DPI of the screen that plugin resides on. The plugin UI should be scaled based
+		on this value to show correctly on Windows when monitor scale is diffetent than 100%.
+	 
+		\param[in] outScalingFactor
+			The scaling factor of the view containter
+	 */
+	virtual AAX_Result GetScalingFactor ( float * outScalingFactor ) const = 0;
 	//@}end View change requests
 	
 	/** @name Host event handlers

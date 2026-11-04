@@ -147,7 +147,7 @@ public:
 	 * other progress reporting UI. If possible, use a localized
 	 * string based on \ref AAX_eNotificationEvent_HostLocale .
 	 *
-	 * \param[in] iDescription
+	 * \param[in] iLabel
 	 * A UTF-8 string describing the current progress state.
 	 */
 	virtual AAX_Result SetProgressLabel(const char * iLabel) = 0;

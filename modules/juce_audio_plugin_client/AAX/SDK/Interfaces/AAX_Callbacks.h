@@ -38,6 +38,7 @@
 /// @endcond
 
 #include "AAX_Enums.h"
+#include "AAX_GUITypes.h"
 #include "AAX.h"
 
 // Callback IDs
@@ -89,7 +90,6 @@ class AAX_Component
 			void *			inNewBlock,
 			int32_t			inSize,
 			IACFUnknown * const	inController);
-
 };
 
 /** @brief	A user-defined callback that %AAX calls to process data packets and/or

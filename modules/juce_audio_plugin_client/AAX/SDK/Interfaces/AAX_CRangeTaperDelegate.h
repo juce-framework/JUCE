@@ -106,7 +106,7 @@ public:
 	 *	\param[in] useSmartRounding
 	 *		\todo Document useSmartRounding parameter
 	 */
-	AAX_CRangeTaperDelegate(T* range, double* rangesSteps, unsigned long numRanges, bool useSmartRounding = true);
+	AAX_CRangeTaperDelegate( const T* range, const double* rangesSteps, unsigned long numRanges, bool useSmartRounding = true);
 	AAX_CRangeTaperDelegate( const AAX_CRangeTaperDelegate& rhs);
 	AAX_CRangeTaperDelegate& operator=( AAX_CRangeTaperDelegate& rhs );
 
@@ -134,7 +134,7 @@ private:
 };
 
 template <typename T, int32_t RealPrecision>
-AAX_CRangeTaperDelegate<T, RealPrecision>::AAX_CRangeTaperDelegate(T* ranges, double* rangesSteps, unsigned long numRanges, bool useSmartRounding) :
+AAX_CRangeTaperDelegate<T, RealPrecision>::AAX_CRangeTaperDelegate(const T* ranges, const double* rangesSteps, unsigned long numRanges, bool useSmartRounding) :
 	AAX_ITaperDelegate<T>(),
 	mMinValue(*ranges), 
 	mMaxValue(*(ranges + numRanges)),

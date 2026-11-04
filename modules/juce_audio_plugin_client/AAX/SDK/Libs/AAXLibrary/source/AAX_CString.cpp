@@ -33,6 +33,10 @@
 #include <sstream>
 #include <cstring>
 
+// Static const member definitions
+const uint32_t AAX_CString::kInvalidIndex;
+const uint32_t AAX_CString::kMaxStringLength;
+
 AAX_CString::AAX_CString()  :
 	mString("")
 {
@@ -237,34 +241,42 @@ AAX_CString&	AAX_CString::Replace(uint32_t pos, uint32_t n, const char* str)
 	return *this;
 }
 
-uint32_t		AAX_CString::FindFirst(const AAX_CString& ) const
+uint32_t		AAX_CString::FindFirst(const AAX_CString& findStr) const
 {
-	return kInvalidIndex;
+	size_t pos = mString.find(findStr.StdString());
+	return (pos != std::string::npos) ? static_cast<uint32_t>(pos) : kInvalidIndex;
 }
 
-uint32_t		AAX_CString::FindFirst(const char* ) const
+uint32_t		AAX_CString::FindFirst(const char* findStr) const
 {
-	return kInvalidIndex;
+	if (!findStr) return kInvalidIndex;
+	size_t pos = mString.find(findStr);
+	return (pos != std::string::npos) ? static_cast<uint32_t>(pos) : kInvalidIndex;
 }
 
-uint32_t		AAX_CString::FindFirst(char ) const
+uint32_t		AAX_CString::FindFirst(char findChar) const
 {
-	return kInvalidIndex;
+	size_t pos = mString.find(findChar);
+	return (pos != std::string::npos) ? static_cast<uint32_t>(pos) : kInvalidIndex;
 }
 
-uint32_t		AAX_CString::FindLast(const AAX_CString& ) const
+uint32_t		AAX_CString::FindLast(const AAX_CString& findStr) const
 {
-	return kInvalidIndex;
+	size_t pos = mString.rfind(findStr.StdString());
+	return (pos != std::string::npos) ? static_cast<uint32_t>(pos) : kInvalidIndex;
 }
 
-uint32_t		AAX_CString::FindLast(const char* ) const
+uint32_t		AAX_CString::FindLast(const char* findStr) const
 {
-	return kInvalidIndex;
+	if (!findStr) return kInvalidIndex;
+	size_t pos = mString.rfind(findStr);
+	return (pos != std::string::npos) ? static_cast<uint32_t>(pos) : kInvalidIndex;
 }
 
-uint32_t		AAX_CString::FindLast(char ) const
+uint32_t		AAX_CString::FindLast(char findChar) const
 {
-	return kInvalidIndex;
+	size_t pos = mString.rfind(findChar);
+	return (pos != std::string::npos) ? static_cast<uint32_t>(pos) : kInvalidIndex;
 }
 
 /** Direct access to a std::string. */

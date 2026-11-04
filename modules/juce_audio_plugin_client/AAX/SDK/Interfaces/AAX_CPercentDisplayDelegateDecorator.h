@@ -38,7 +38,7 @@
 #define AAX_CPERCENTDISPLAYDELEGATEDECORATOR_H
 
 #include "AAX_IDisplayDelegateDecorator.h"
-
+#include "AAX_CString.h"
 #include <cmath>
 
 
@@ -69,6 +69,7 @@ class AAX_CPercentDisplayDelegateDecorator : public AAX_IDisplayDelegateDecorato
 {
 public:
 	AAX_CPercentDisplayDelegateDecorator(const AAX_IDisplayDelegate<T>& displayDelegate);
+	AAX_CPercentDisplayDelegateDecorator(AAX_IDisplayDelegate<T>&& displayDelegate);
 	
 	//Virtual Overrides
 	AAX_CPercentDisplayDelegateDecorator<T>*	Clone() const AAX_OVERRIDE;
@@ -80,6 +81,12 @@ public:
 template <typename T>
 AAX_CPercentDisplayDelegateDecorator<T>::AAX_CPercentDisplayDelegateDecorator(const AAX_IDisplayDelegate<T>& displayDelegate)  :
 	AAX_IDisplayDelegateDecorator<T>(displayDelegate)
+{
+}
+
+template <typename T>
+AAX_CPercentDisplayDelegateDecorator<T>::AAX_CPercentDisplayDelegateDecorator(AAX_IDisplayDelegate<T>&& displayDelegate)  :
+	AAX_IDisplayDelegateDecorator<T>(std::move(displayDelegate))
 {
 }
 

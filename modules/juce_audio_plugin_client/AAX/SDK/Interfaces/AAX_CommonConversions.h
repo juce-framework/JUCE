@@ -98,10 +98,6 @@ inline double LongToDouble (int32_t aLong)
 		aLong = k56kFracNegMax;
 	return (double(aLong) * kOneOver56kFracAbsMax);
 }
-
-/**	\brief convert floating point equivalent back to int32_t
- */
-int32_t DoubleToLong (double aDouble);
 	
 /**	\brief Convert Double to DSPCoef
  */

@@ -42,7 +42,7 @@
 #include "AAX_CParameterManager.h"
 #include "AAX_CPacketDispatcher.h"
 
-#include <set>
+#include <unordered_set>
 #include <string>
 #include <vector>
 
@@ -102,9 +102,13 @@ public: ////////////////////////////////////////////////////////////////////////
 	/** @name Parameter information
 	 *
 	 *	These methods are used by the %AAX host to retrieve information about the plug-in's data
-	 *	model.  For information about adding parameters to the plug-in and otherwise modifying
-	 *	the plug-in's data model, see AAX_CParameterManager.  For information about parameters,
-	 *	see AAX_IParameter.
+	 *	model.
+	 *	
+	 *	\n
+	 *	
+	 *	For information about adding parameters to the plug-in and otherwise modifying the
+	 *	the plug-in's data model, see \ref AAX_CParameterManager.  For information about
+	 *	parameters, see \ref AAX_IParameter.
 	 */
 	//@{
 	AAX_Result GetNumberOfParameters (int32_t * oNumControls)  const AAX_OVERRIDE;
@@ -121,6 +125,9 @@ public: ////////////////////////////////////////////////////////////////////////
 	AAX_Result GetParameterIndex (AAX_CParamID iParameterID, int32_t * oControlIndex )  const AAX_OVERRIDE;
 	AAX_Result GetParameterIDFromIndex (int32_t iControlIndex, AAX_IString * oParameterIDString )  const AAX_OVERRIDE;
 	AAX_Result GetParameterValueInfo ( AAX_CParamID iParameterID, int32_t iSelector, int32_t* oValue) const AAX_OVERRIDE;
+	AAX_Result GetParameterAffectsState(AAX_CParamID iParameterID, AAX_CTypeID iStateType, void const * iQueryData, AAX_CBoolean * oAffectsState) const AAX_OVERRIDE;
+	AAX_Result GetParameterWithRole(AAX_CTypeID iParameterRole, void const * iQueryData, AAX_CBoolean * oHasParameter, AAX_IString * oParameterIDString) const AAX_OVERRIDE;
+	AAX_Result GetParameterDefaultAutomationEnabledState(AAX_CParamID iParameterID, /* AAX_EAutomationEnabledState */ int32_t * oAutomationEnabledState) const AAX_OVERRIDE;
 	//@}end Parameter information
 	
 	/** @name Parameter setters and getters
@@ -263,6 +270,18 @@ public: ////////////////////////////////////////////////////////////////////////
     AAX_Result          RenderAudio_Hybrid(AAX_SHybridRenderInfo* ioRenderInfo) AAX_OVERRIDE;
 	//@}end Hybrid audio methods
 
+	/** @name Generic message passing
+	 *
+	 */
+	//@{
+	AAX_Result			HandleQueryMessage(
+							AAX_CTypeID /* iMessageType */,
+							uint32_t /* iMessageDataSize */,
+							void const * /* iMessageData */,
+							uint32_t /* iResponseDataSize */,
+							void * /* oResponseData */,
+							uint32_t * /* oResponseDataWritten */ ) const AAX_OVERRIDE { return AAX_ERROR_UNIMPLEMENTED; }
+	//@}end Generic message passing
 
 
 public: ///////////////////////////////////////////////////////////////////////////// AAX_CEffectParameters	
@@ -351,7 +370,7 @@ protected:
     int32_t							mNumChunkedParameters;
 	AAX_CPacketDispatcher			mPacketDispatcher;	
 	AAX_CParameterManager			mParameterManager;	
-	std::set<std::string>			mFilteredParameters;	
+	std::unordered_set<std::string>	mFilteredParameters;	
 
 private:
 	// interfaces provided by the host via the IACFUnknown passed to Initialize()

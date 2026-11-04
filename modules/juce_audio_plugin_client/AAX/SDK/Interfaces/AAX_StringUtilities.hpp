@@ -31,7 +31,8 @@
 
 #include <cstdlib>
 #include <cstring>
-
+#include <cmath>
+#include <climits>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -148,18 +149,18 @@ int32_t AAX::Caseless_strcmp(const char* cs, const char* ct)
 		{
 			while(*cs && *ct)
 			{
-				int32_t cmp = toupper(*ct++) - toupper(*cs++);
+				int32_t cmp = toupper(*cs++) - toupper(*ct++);
 				if(cmp) return cmp;
 			};
 			if(*cs)
 			{
-				return -1;
+				return 1;
 			}
 			else
 			{
 				if(*ct)
 				{
-					return 1;
+					return -1;
 				}
 				else
 				{
@@ -169,13 +170,13 @@ int32_t AAX::Caseless_strcmp(const char* cs, const char* ct)
 		}
 		else
 		{
-			return -1;
+			return 1;
 		};
 	}
 	else
 	{
 		if(ct)
-			return 1;
+			return -1;
 		else
 			return 0;
 	}
@@ -187,7 +188,7 @@ std::string AAX::Binary2String(uint32_t value, int32_t numBits)
 {
 	std::string s;
 	
-	uint32_t currentBitMask = (static_cast<uint32_t>(0x1) << (numBits-1));
+	uint32_t currentBitMask = 0 < numBits ? (static_cast<uint32_t>(0x1) << (std::min<int32_t>(32,numBits)-1)) : 0;
 	
 	while (currentBitMask != 0)
 	{
@@ -210,17 +211,24 @@ uint32_t AAX::String2Binary(const AAX_IString& s)
 
 	const char* const cS = s.Get();
 	int32_t length = int32_t(s.Length());
-	for(int32_t i = 0; i < length ; i++)
+	int32_t validBitPosition = 0;
+	
+	// Process string from right to left, only counting valid binary characters
+	for(int32_t i = length - 1; i >= 0; i--)
 	{
 		switch(cS[i])
 		{
 			case '0':
+				// Bit is already 0, just increment position
+				validBitPosition++;
 				break;
 			case '1':
-				value |= (0x1 << (length-1-i));
+				value |= (0x1 << validBitPosition);
+				validBitPosition++;
 				break;
 			default:
-				AAX_ASSERT('0' == cS[i] || '1' == cS[i]);
+				// Skip non-binary characters
+				break;
 		};
 	};
 
@@ -326,10 +334,11 @@ std::string AAX::AsStringPropertyValue(AAX_EProperty inProperty, AAX_CPropertyVa
 		// Print values in ASCII range as four-char
 		return '\'' + AAX::AsStringFourChar(static_cast<uint32_t>(inPropertyValue)) + '\'';
 	}
-
-	if (0x00FFFFFF < abs(inPropertyValue))
+	
+	// abs(INT32_MIN) is out of range so check it explicitly
+	if ( INT32_MIN == inPropertyValue || 0x00FFFFFF < std::abs(inPropertyValue) )
 	{
-		// Print values with most bits used as hex
+		// Print values with upper bits used as hex
 		return internal::ToHexadecimal(inPropertyValue);
 	}
 
@@ -530,76 +539,25 @@ std::string AAX::AsStringStemChannel(AAX_EStemFormat inStemFormat, uint32_t inCh
 			if (0 == inChannelIndex--) { return std::string(inAbbreviate ? "RTS" : "Right Top Surround"); }
 			break;
 		case AAX_eStemFormat_Ambi_1_ACN:
+			if (inChannelIndex < 4) { return std::to_string(inChannelIndex + 1); }
+			break;
 		case AAX_eStemFormat_Ambi_2_ACN:
+			if (inChannelIndex < 9) { return std::to_string(inChannelIndex + 1); }
+			break;
 		case AAX_eStemFormat_Ambi_3_ACN:
+			if (inChannelIndex < 16) { return std::to_string(inChannelIndex + 1); }
+			break;
 		case AAX_eStemFormat_Ambi_4_ACN:
+			if (inChannelIndex < 25) { return std::to_string(inChannelIndex + 1); }
+			break;
 		case AAX_eStemFormat_Ambi_5_ACN:
+			if (inChannelIndex < 36) { return std::to_string(inChannelIndex + 1); }
+			break;
 		case AAX_eStemFormat_Ambi_6_ACN:
+			if (inChannelIndex < 49) { return std::to_string(inChannelIndex + 1); }
+			break;
 		case AAX_eStemFormat_Ambi_7_ACN:
-			if (0 == inChannelIndex--) { return std::string("1"); }
-			if (0 == inChannelIndex--) { return std::string("2"); }
-			if (0 == inChannelIndex--) { return std::string("3"); }
-			if (0 == inChannelIndex--) { return std::string("4"); }
-			if (0 == inChannelIndex--) { return std::string("5"); }
-			if (0 == inChannelIndex--) { return std::string("6"); }
-			if (0 == inChannelIndex--) { return std::string("7"); }
-			if (0 == inChannelIndex--) { return std::string("8"); }
-			if (0 == inChannelIndex--) { return std::string("9"); }
-			if (0 == inChannelIndex--) { return std::string("10"); }
-			if (0 == inChannelIndex--) { return std::string("11"); }
-			if (0 == inChannelIndex--) { return std::string("12"); }
-			if (0 == inChannelIndex--) { return std::string("13"); }
-			if (0 == inChannelIndex--) { return std::string("14"); }
-			if (0 == inChannelIndex--) { return std::string("15"); }
-			if (0 == inChannelIndex--) { return std::string("16"); }
-			if (0 == inChannelIndex--) { return std::string("17"); }
-			if (0 == inChannelIndex--) { return std::string("18"); }
-			if (0 == inChannelIndex--) { return std::string("19"); }
-			if (0 == inChannelIndex--) { return std::string("20"); }
-			if (0 == inChannelIndex--) { return std::string("21"); }
-			if (0 == inChannelIndex--) { return std::string("22"); }
-			if (0 == inChannelIndex--) { return std::string("23"); }
-			if (0 == inChannelIndex--) { return std::string("24"); }
-			if (0 == inChannelIndex--) { return std::string("25"); }
-			if (0 == inChannelIndex--) { return std::string("26"); }
-			if (0 == inChannelIndex--) { return std::string("27"); }
-			if (0 == inChannelIndex--) { return std::string("28"); }
-			if (0 == inChannelIndex--) { return std::string("29"); }
-			if (0 == inChannelIndex--) { return std::string("30"); }
-			if (0 == inChannelIndex--) { return std::string("31"); }
-			if (0 == inChannelIndex--) { return std::string("32"); }
-			if (0 == inChannelIndex--) { return std::string("33"); }
-			if (0 == inChannelIndex--) { return std::string("34"); }
-			if (0 == inChannelIndex--) { return std::string("35"); }
-			if (0 == inChannelIndex--) { return std::string("36"); }
-			if (0 == inChannelIndex--) { return std::string("37"); }
-			if (0 == inChannelIndex--) { return std::string("38"); }
-			if (0 == inChannelIndex--) { return std::string("39"); }
-			if (0 == inChannelIndex--) { return std::string("40"); }
-			if (0 == inChannelIndex--) { return std::string("41"); }
-			if (0 == inChannelIndex--) { return std::string("42"); }
-			if (0 == inChannelIndex--) { return std::string("43"); }
-			if (0 == inChannelIndex--) { return std::string("44"); }
-			if (0 == inChannelIndex--) { return std::string("45"); }
-			if (0 == inChannelIndex--) { return std::string("46"); }
-			if (0 == inChannelIndex--) { return std::string("47"); }
-			if (0 == inChannelIndex--) { return std::string("48"); }
-			if (0 == inChannelIndex--) { return std::string("49"); }
-			if (0 == inChannelIndex--) { return std::string("50"); }
-			if (0 == inChannelIndex--) { return std::string("51"); }
-			if (0 == inChannelIndex--) { return std::string("52"); }
-			if (0 == inChannelIndex--) { return std::string("53"); }
-			if (0 == inChannelIndex--) { return std::string("54"); }
-			if (0 == inChannelIndex--) { return std::string("55"); }
-			if (0 == inChannelIndex--) { return std::string("56"); }
-			if (0 == inChannelIndex--) { return std::string("57"); }
-			if (0 == inChannelIndex--) { return std::string("58"); }
-			if (0 == inChannelIndex--) { return std::string("59"); }
-			if (0 == inChannelIndex--) { return std::string("60"); }
-			if (0 == inChannelIndex--) { return std::string("61"); }
-			if (0 == inChannelIndex--) { return std::string("62"); }
-			if (0 == inChannelIndex--) { return std::string("63"); }
-			if (0 == inChannelIndex--) { return std::string("64"); }
+			if (inChannelIndex < 64) { return std::to_string(inChannelIndex + 1); }
 			break;
 		case AAX_eStemFormat_5_0_2:
 			if (0 == inChannelIndex--) { return std::string(inAbbreviate ? "L" : "Left"); }
@@ -838,7 +796,7 @@ std::string AAX::AsStringResult(AAX_Result inResult)
 	DEFINE_AAX_ERROR_STRING(AAX_ERROR_INVALID_INTERNAL_DATA);
 	DEFINE_AAX_ERROR_STRING(AAX_ERROR_ARGUMENT_BUFFER_OVERFLOW);
 	
-	if (AAX_ERROR_PLUGIN_BEGIN >= inResult && AAX_ERROR_PLUGIN_END <= inResult)
+	if (AAX_ERROR_PLUGIN_END < inResult && AAX_ERROR_PLUGIN_BEGIN >= inResult)
 		return std::string("plug-in defined error");
 	
 	return std::string("<unknown error code>");
