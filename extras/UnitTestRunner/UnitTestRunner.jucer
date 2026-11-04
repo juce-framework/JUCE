@@ -126,8 +126,7 @@
     <VS2026 targetFolder="Builds/VisualStudio2026" extraCompilerFlags="/w44265 /w45038 /w44062">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="UnitTestRunner" warningsAreErrors="1"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner"
-                       warningsAreErrors="1"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner" warningsAreErrors="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
