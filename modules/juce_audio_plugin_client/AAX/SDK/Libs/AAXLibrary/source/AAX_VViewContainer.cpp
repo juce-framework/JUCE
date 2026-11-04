@@ -1,6 +1,6 @@
 /*================================================================================================*/
 /*
- *	Copyright 2013-2019, 2021, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2019, 2021, 2023-2024, 2026 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -37,6 +37,7 @@ AAX_VViewContainer::AAX_VViewContainer( IACFUnknown* pUnknown )
 		pUnknown->QueryInterface ( IID_IAAXViewContainerV1, (void **) &mIViewContainer );
 		pUnknown->QueryInterface ( IID_IAAXViewContainerV2, (void **) &mIViewContainerV2 );
 		pUnknown->QueryInterface ( IID_IAAXViewContainerV3, (void **) &mIViewContainerV3 );
+		pUnknown->QueryInterface ( IID_IAAXViewContainerV4, (void **) &mIViewContainerV4 );
 	}
 }
 
@@ -70,6 +71,12 @@ AAX_VViewContainer::~AAX_VViewContainer()
 	}
 	catch (ACFRESULT r) {
 		AAX_TRACE_RELEASE(kAAX_Trace_Priority_High, "AAX_VViewContainer error when detaching mIViewContainerV3: %d", (int)r);
+	}
+	try {
+		if (mIViewContainerV4) { mIViewContainerV4.detach(); }
+	}
+	catch (ACFRESULT r) {
+		AAX_TRACE_RELEASE(kAAX_Trace_Priority_High, "AAX_VViewContainer error when detaching mIViewContainerV4: %d", (int)r);
 	}
 }
 
@@ -108,6 +115,19 @@ AAX_Result AAX_VViewContainer::GetModifiers ( uint32_t * outModifiers )
 	
 	if ( mIViewContainer )
 		result = mIViewContainer->GetModifiers ( outModifiers );
+	
+	return result;
+}
+
+// ******************************************************************************************
+// METHOD:	GetScalingFactor
+// ******************************************************************************************
+AAX_Result	AAX_VViewContainer::GetScalingFactor( float* outScalingFactor ) const
+{
+	AAX_Result	result = AAX_ERROR_UNIMPLEMENTED;
+	
+	if ( mIViewContainerV4 )
+		result = mIViewContainerV4->GetScalingFactor ( outScalingFactor );
 	
 	return result;
 }

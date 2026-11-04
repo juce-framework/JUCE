@@ -67,6 +67,20 @@ public:
 	 */
 	AAX_IDisplayDelegateDecorator(const AAX_IDisplayDelegate<T>& displayDelegate);
 	
+	/** \brief Move constructor
+	 *	
+	 *	This class implements the decorator pattern, which is a sort of wrapper.  The object that
+	 *	is being wrapped is passed into this constructor.  This object is passed by rvalue reference
+	 *	to allow temporary objects to be decorated without explicit heap allocation.
+	 *
+	 *	This constructor sets the local mWrappedDisplayDelegate member to a move of the provided 
+	 *	AAX_IDisplayDelegate. 
+	 *
+	 *	\param[in] displayDelegate
+	 *		The decorated display delegate (rvalue reference).
+	 */
+	AAX_IDisplayDelegateDecorator(AAX_IDisplayDelegate<T>&& displayDelegate);
+	
 	/** \brief Copy constructor
 	 *	
 	 *	This class implements the decorator pattern, which is a sort of wrapper.  The object that
@@ -166,6 +180,14 @@ private:
 
 template <typename T>
 AAX_IDisplayDelegateDecorator<T>::AAX_IDisplayDelegateDecorator(const AAX_IDisplayDelegate<T>& displayDelegate)  :
+	AAX_IDisplayDelegate<T>(),
+	mWrappedDisplayDelegate(displayDelegate.Clone())
+{
+
+}
+
+template <typename T>
+AAX_IDisplayDelegateDecorator<T>::AAX_IDisplayDelegateDecorator(AAX_IDisplayDelegate<T>&& displayDelegate) :
 	AAX_IDisplayDelegate<T>(),
 	mWrappedDisplayDelegate(displayDelegate.Clone())
 {

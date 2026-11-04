@@ -102,6 +102,14 @@ public:
 		int32_t inProcIDsSize) = 0;	///< \copydoc AAX_IComponentDescriptor::AddProcessProc()
 };
 
+/** \brief	Versioned description interface for an %AAX plug-in algorithm callback
+ */
+class AAX_IACFComponentDescriptor_V4 : public AAX_IACFComponentDescriptor_V3
+{
+public:
+	virtual AAX_Result	AddFieldOfType ( AAX_CFieldIndex inFieldIndex, AAX_CTypeID inFieldType, void const * inFieldContext ) = 0;	///< \copydoc AAX_IComponentDescriptor::AddFieldOfType()
+};
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

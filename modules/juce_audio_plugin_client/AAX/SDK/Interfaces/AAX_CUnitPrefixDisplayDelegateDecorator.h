@@ -36,6 +36,8 @@
 #define AAX_CUNITPREFIXDISPLAYDELEGATEDECORATOR_H
 
 #include "AAX_IDisplayDelegateDecorator.h"
+#include "AAX_CString.h"
+#include <cmath>
 
 
 /** \brief A unit prefix decorator conforming to AAX_IDisplayDelegateDecorator
@@ -73,6 +75,7 @@ class AAX_CUnitPrefixDisplayDelegateDecorator : public AAX_IDisplayDelegateDecor
 {
 public:
 	AAX_CUnitPrefixDisplayDelegateDecorator(const AAX_IDisplayDelegate<T>& displayDelegate);
+	AAX_CUnitPrefixDisplayDelegateDecorator(AAX_IDisplayDelegate<T>&& displayDelegate);
 	
 	//Virtual overrides
 	AAX_CUnitPrefixDisplayDelegateDecorator<T>*	Clone() const AAX_OVERRIDE;
@@ -90,6 +93,13 @@ AAX_CUnitPrefixDisplayDelegateDecorator<T>::AAX_CUnitPrefixDisplayDelegateDecora
 
 }
 
+template <typename T>
+AAX_CUnitPrefixDisplayDelegateDecorator<T>::AAX_CUnitPrefixDisplayDelegateDecorator(AAX_IDisplayDelegate<T>&& displayDelegate)  :
+	AAX_IDisplayDelegateDecorator<T>(std::move(displayDelegate))
+{
+
+}
+
 
 template <typename T>
 AAX_CUnitPrefixDisplayDelegateDecorator<T>*		AAX_CUnitPrefixDisplayDelegateDecorator<T>::Clone() const
@@ -101,7 +111,7 @@ template <typename T>
 bool		AAX_CUnitPrefixDisplayDelegateDecorator<T>::ValueToString(T value, AAX_CString* valueString) const 
 {
 	//Find the proper unit prefix.
-	T absValue = fabsf(float(value));	//If you fail to compile on this line, you're trying to use this class with an integer type, which is not supported.
+	T absValue = std::fabsf(float(value));	//If you fail to compile on this line, you're trying to use this class with an integer type, which is not supported.
 	if (absValue >= 1000000.0)
 	{
 		value = value / ((T) 1000000.0);
@@ -143,7 +153,7 @@ bool		AAX_CUnitPrefixDisplayDelegateDecorator<T>::ValueToString(T value, int32_t
 	//Find the proper unit prefix.
 	//<DMT> The maxNumChars is decremented by 1 in case of the unit modifier being required as this is more important than precision.
 	
-	T absValue = fabsf(float(value));	//If you fail to compile on this line, you're trying to use this class with an integer type, which is not supported.
+	T absValue = std::fabsf(float(value));	//If you fail to compile on this line, you're trying to use this class with an integer type, which is not supported.
 	if (absValue >= 1000000.0)
 	{
 		value = value / ((T) 1000000.0);

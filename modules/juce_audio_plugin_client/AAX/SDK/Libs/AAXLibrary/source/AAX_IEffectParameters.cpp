@@ -32,7 +32,9 @@ ACFMETHODIMP AAX_IEffectParameters::InternalQueryInterface(const acfIID & riid, 
     if (riid == IID_IAAXEffectParametersV1 ||
 		riid == IID_IAAXEffectParametersV2 ||
 		riid == IID_IAAXEffectParametersV3 ||
-		riid == IID_IAAXEffectParametersV4)
+		riid == IID_IAAXEffectParametersV4 ||
+		riid == IID_IAAXEffectParametersV5 ||
+		riid == IID_IAAXEffectParametersV6)
     { 
 		*ppvObjOut = static_cast<IACFUnknown *>(this);
         ( static_cast<IACFUnknown *>(*ppvObjOut))->AddRef();

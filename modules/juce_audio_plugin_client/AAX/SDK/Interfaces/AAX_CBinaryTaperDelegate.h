@@ -36,6 +36,7 @@
 #define AAX_CBINARYTAPERDELEGATE_H
 
 #include "AAX_ITaperDelegate.h"
+#include "AAX.h"
 
 
 /** \brief A binary taper conforming to \ref AAX_ITaperDelegate

@@ -212,6 +212,10 @@ AAX_VComponentDescriptor::AAX_VComponentDescriptor( IACFUnknown * pUnkHost ) :
 			// Get the V3 interface
 			if (mIACFComponentDescriptor)
                 mIACFComponentDescriptor->QueryInterface(IID_IAAXComponentDescriptorV3, (void**)&mIACFComponentDescriptorV3);
+            
+			// Get the V4 interface
+			if (mIACFComponentDescriptor)
+                mIACFComponentDescriptor->QueryInterface(IID_IAAXComponentDescriptorV4, (void**)&mIACFComponentDescriptorV4);
 		}
 	}
 }
@@ -256,6 +260,17 @@ AAX_Result AAX_VComponentDescriptor::AddReservedField ( AAX_CFieldIndex inPortID
 		return mIACFComponentDescriptor->AddReservedField ( inPortID, inFieldType );
 
 	return AAX_ERROR_NULL_OBJECT;
+}
+
+// ******************************************************************************************
+// METHOD:	AddFieldOfType
+// ******************************************************************************************
+AAX_Result AAX_VComponentDescriptor::AddFieldOfType ( AAX_CFieldIndex inPortID, AAX_CTypeID inFieldType, void const * inFieldContext )
+{
+	if ( mIACFComponentDescriptorV4 ) 
+		return mIACFComponentDescriptorV4->AddFieldOfType ( inPortID, inFieldType, inFieldContext );
+
+	return AAX_ERROR_UNIMPLEMENTED;
 }
 
 // ******************************************************************************************

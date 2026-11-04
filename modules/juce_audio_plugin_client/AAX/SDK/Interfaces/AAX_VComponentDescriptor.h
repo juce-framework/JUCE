@@ -66,6 +66,7 @@ public:
 	
 	AAX_Result			Clear () AAX_OVERRIDE; ///< \copydoc AAX_IComponentDescriptor::Clear()
 	AAX_Result			AddReservedField ( AAX_CFieldIndex inFieldIndex, uint32_t inFieldType ) AAX_OVERRIDE; ///< \copydoc AAX_IComponentDescriptor::AddReservedField()
+	AAX_Result			AddFieldOfType ( AAX_CFieldIndex inFieldIndex, AAX_CTypeID inFieldType, void const * inFieldContext ) AAX_OVERRIDE; ///< \copydoc AAX_IComponentDescriptor::AddFieldOfType()
 	AAX_Result			AddAudioIn ( AAX_CFieldIndex inFieldIndex ) AAX_OVERRIDE; ///< \copydoc AAX_IComponentDescriptor::AddAudioIn()
 	AAX_Result			AddAudioOut ( AAX_CFieldIndex inFieldIndex ) AAX_OVERRIDE; ///< \copydoc AAX_IComponentDescriptor::AddAudioOut()
 	AAX_Result			AddAudioBufferLength ( AAX_CFieldIndex inFieldIndex ) AAX_OVERRIDE; ///< \copydoc AAX_IComponentDescriptor::AddAudioBufferLength()
@@ -129,6 +130,7 @@ private:
 	ACFPtr<AAX_IACFComponentDescriptor>	mIACFComponentDescriptor;
     ACFPtr<AAX_IACFComponentDescriptor_V2> mIACFComponentDescriptorV2;
     ACFPtr<AAX_IACFComponentDescriptor_V3> mIACFComponentDescriptorV3;
+    ACFPtr<AAX_IACFComponentDescriptor_V4> mIACFComponentDescriptorV4;
 	std::set<AAX_IPropertyMap *>		mPropertyMaps;	
 };
 

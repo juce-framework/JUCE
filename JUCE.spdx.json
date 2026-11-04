@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "JUCE-9.0.6",
-  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.6-6620f3dbedce",
+  "documentNamespace": "https://juce.com/spdx/JUCE-9.0.6-eff64c2e2564",
   "creationInfo": {
     "created": "2026-09-04T00:00:00Z",
     "creators": [
@@ -856,7 +856,7 @@
     {
       "name": "AAX SDK",
       "SPDXID": "SPDXRef-juce-audio-plugin-client.aax-sdk",
-      "versionInfo": "2.9",
+      "versionInfo": "2.10",
       "supplier": "Organization: Avid Technology, Inc.",
       "downloadLocation": "https://developer.avid.com/aax",
       "filesAnalyzed": false,
@@ -868,7 +868,7 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:generic/aax-sdk@2.9"
+          "referenceLocator": "pkg:generic/aax-sdk@2.10"
         }
       ]
     },

@@ -79,7 +79,9 @@
 
 #if (!defined (MAC_VERSION))
 #  if (defined (__APPLE__) && defined (__MACH__))
-#    include "TargetConditionals.h"
+#    if (!defined (DOXYGEN_PREPROCESSOR))
+#      include "TargetConditionals.h"
+#    endif
 #    if (TARGET_OS_MAC)
 #      define MAC_VERSION 1
 #    endif
@@ -98,7 +100,11 @@
 
 
 #if (!defined (AAX_ALLOW_UNKNOWN_ENVIRONMENT) && !defined (WINDOWS_VERSION) && !defined (MAC_VERSION) && !defined (LINUX_VERSION))
-#  warning "AAX SDK: Unknown OS environment"
+#  if (defined(_MSC_VER))
+#    pragma message("AAX SDK: Unknown OS environment")
+#  else
+#    warning "AAX SDK: Unknown OS environment"
+#  endif
 #endif
 
 #endif // _AAX_ENVIRONMENTUTILITIES_H_

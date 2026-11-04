@@ -47,6 +47,10 @@ int32_t LongControlToNewRange (int32_t aValue, int32_t rangeMin, int32_t rangeMa
 /*===================================================================================================*/
 int32_t LongToLongControl (int32_t aValue, int32_t rangeMin, int32_t rangeMax)
 {
+	// This is a special case because when all the values as the same, the code below will result in 0.0 by 0.0 division
+	if(aValue == rangeMin && aValue == rangeMax)
+		return 0;
+
 	double controlMin = -2147483648.0;
 	double controlMax = 2147483647.0;
 
