@@ -3329,10 +3329,9 @@ void XWindowSystem::setWindowType (::Window windowH, int styleFlags) const
 
     if (atoms.windowType != None)
     {
-        auto hint = (styleFlags & ComponentPeer::windowIsTemporary) != 0
-                    || ((styleFlags & ComponentPeer::windowHasDropShadow) == 0 && Desktop::canUseSemiTransparentWindows())
-                        ? XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WM_WINDOW_TYPE_COMBO")
-                        : XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WM_WINDOW_TYPE_NORMAL");
+        const auto isTemporary = (styleFlags & ComponentPeer::windowIsTemporary) != 0;
+        const auto hint = XWindowSystemUtilities::Atoms::getIfExists (display, isTemporary ? "_NET_WM_WINDOW_TYPE_COMBO"
+                                                                                           : "_NET_WM_WINDOW_TYPE_NORMAL");
 
         if (hint != None)
             xchangeProperty (windowH, atoms.windowType, XA_ATOM, 32, &hint, 1);
