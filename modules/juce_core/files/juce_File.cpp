@@ -1070,66 +1070,71 @@ public:
 
     void runTest() override
     {
-        beginTest ("Reading");
-
         const File home (File::getSpecialLocation (File::userHomeDirectory));
         const File temp (File::getSpecialLocation (File::tempDirectory));
+        const File demoFolder (temp.getChildFile ("JUCE UnitTests Temp Folder "
+                                                  + String::toHexString (getRandom().nextInt())
+                                                  + ".folder"));
+        const File tempFile (demoFolder.getNonexistentChildFile ("test", ".txt", false));
 
-        expect (! File().exists());
-        expect (! File().existsAsFile());
-        expect (! File().isDirectory());
-       #if ! JUCE_WINDOWS
-        expect (File ("/").isDirectory());
-       #endif
-        expect (home.isDirectory());
-        expect (home.exists());
-        expect (! home.existsAsFile());
-        expect (File::getSpecialLocation (File::currentExecutableFile).exists());
-        expect (File::getSpecialLocation (File::currentApplicationFile).exists());
-        expect (File::getSpecialLocation (File::invokedExecutableFile).exists());
-        expect (home.getVolumeTotalSize() > 1024 * 1024);
-        expect (home.getBytesFreeOnVolume() > 0);
-        expect (! home.isHidden());
-        expect (home.isOnHardDisk());
-        expect (! home.isOnCDRomDrive());
-        expect (File::getCurrentWorkingDirectory().exists());
-        expect (home.setAsCurrentWorkingDirectory());
-
+        testCase ("Reading", [this, &home]
         {
-            auto homeParent = home;
-            bool noSymlinks = true;
+            expect (! File().exists());
+            expect (! File().existsAsFile());
+            expect (! File().isDirectory());
+           #if ! JUCE_WINDOWS
+            expect (File ("/").isDirectory());
+           #endif
+            expect (home.isDirectory());
+            expect (home.exists());
+            expect (! home.existsAsFile());
+            expect (File::getSpecialLocation (File::currentExecutableFile).exists());
+            expect (File::getSpecialLocation (File::currentApplicationFile).exists());
+            expect (File::getSpecialLocation (File::invokedExecutableFile).exists());
+            expect (home.getVolumeTotalSize() > 1024 * 1024);
+            expect (home.getBytesFreeOnVolume() > 0);
+            expect (! home.isHidden());
+            expect (home.isOnHardDisk());
+            expect (! home.isOnCDRomDrive());
+            expect (File::getCurrentWorkingDirectory().exists());
+            expect (home.setAsCurrentWorkingDirectory());
 
-            while (! homeParent.isRoot())
             {
-                if (homeParent.isSymbolicLink())
+                auto homeParent = home;
+                bool noSymlinks = true;
+
+                while (! homeParent.isRoot())
                 {
-                    noSymlinks = false;
-                    break;
+                    if (homeParent.isSymbolicLink())
+                    {
+                        noSymlinks = false;
+                        break;
+                    }
+
+                    homeParent = homeParent.getParentDirectory();
                 }
 
-                homeParent = homeParent.getParentDirectory();
+                if (noSymlinks)
+                    expect (File::getCurrentWorkingDirectory() == home);
             }
 
-            if (noSymlinks)
-                expect (File::getCurrentWorkingDirectory() == home);
-        }
+            {
+                Array<File> roots;
+                File::findFileSystemRoots (roots);
+                expect (roots.size() > 0);
 
-        {
-            Array<File> roots;
-            File::findFileSystemRoots (roots);
-            expect (roots.size() > 0);
+                int numRootsExisting = 0;
+                for (int i = 0; i < roots.size(); ++i)
+                    if (roots[i].exists())
+                        ++numRootsExisting;
 
-            int numRootsExisting = 0;
-            for (int i = 0; i < roots.size(); ++i)
-                if (roots[i].exists())
-                    ++numRootsExisting;
-
-            // on windows, some of the drives may not contain media, so as long as at least one is ok
-            expect (numRootsExisting > 0);
-        }
+                // on windows, some of the drives may not contain media, so as long as at least one is ok
+                expect (numRootsExisting > 0);
+            }
+        });
 
        #if JUCE_WINDOWS
-        testCase ("Windows paths", [&]
+        testCase ("Windows paths", [this]
         {
             const String drive { "C:" };
             const String share { "\\\\server\\share" };
@@ -1168,7 +1173,7 @@ public:
         });
        #endif
 
-        testCase ("Path elements", [&]
+        testCase ("Path elements", [this, &home]
         {
            #if JUCE_WINDOWS
             const String root { "C:" };
@@ -1195,6 +1200,19 @@ public:
             expect (a.getChildFile ("..") == rootDir);
             expect (a.getChildFile ("../../b") == rootDir.getChildFile ("b"));
 
+            expect (home.getChildFile (".") == home);
+            expect (home.getChildFile ("..") == home.getParentDirectory());
+            expect (home.getChildFile (".xyz").getFileName() == ".xyz");
+            expect (home.getChildFile ("..xyz").getFileName() == "..xyz");
+            expect (home.getChildFile ("...xyz").getFileName() == "...xyz");
+            expect (home.getChildFile ("./xyz") == home.getChildFile ("xyz"));
+            expect (home.getChildFile ("././xyz") == home.getChildFile ("xyz"));
+            expect (home.getChildFile ("../xyz") == home.getSiblingFile ("xyz"));
+            expect (home.getChildFile (".././xyz") == home.getSiblingFile ("xyz"));
+            expect (home.getChildFile (".././xyz/./abc") == home.getSiblingFile ("xyz/abc"));
+            expect (home.getChildFile ("./../xyz") == home.getSiblingFile ("xyz"));
+            expect (home.getChildFile ("a1/a2/a3/./../../a4") == home.getChildFile ("a1/a4"));
+
             expectEquals (ab.getRelativePathFrom (ab), String ("."));
             expectEquals (ab.getRelativePathFrom (a), String ("b"));
             expectEquals (abc.getRelativePathFrom (a), native ("b/c"));
@@ -1210,207 +1228,190 @@ public:
            #endif
         });
 
-        beginTest ("Writing");
-
-        auto random = getRandom();
-        const auto tempFolderName = "JUCE UnitTests Temp Folder "
-                                  + String::toHexString (random.nextInt())
-                                  + ".folder";
-        File demoFolder (temp.getChildFile (tempFolderName));
-        expect (demoFolder.deleteRecursively());
-        expect (demoFolder.createDirectory());
-        expect (demoFolder.isDirectory());
-        expect (demoFolder.getParentDirectory() == temp);
-        expect (temp.isDirectory());
-        expect (temp.findChildFiles (File::findFilesAndDirectories, false, "*").contains (demoFolder));
-        expect (temp.findChildFiles (File::findDirectories, true, "*.folder").contains (demoFolder));
-
-        File tempFile (demoFolder.getNonexistentChildFile ("test", ".txt", false));
-
-        expect (tempFile.getFileExtension() == ".txt");
-        expect (tempFile.hasFileExtension (".txt"));
-        expect (tempFile.hasFileExtension ("txt"));
-        expect (tempFile.withFileExtension ("xyz").hasFileExtension (".xyz"));
-        expect (tempFile.withFileExtension ("xyz").hasFileExtension ("abc;xyz;foo"));
-        expect (tempFile.withFileExtension ("xyz").hasFileExtension ("xyz;foo"));
-        expect (! tempFile.withFileExtension ("h").hasFileExtension ("bar;foo;xx"));
-        expect (tempFile.getSiblingFile ("foo").isAChildOf (temp));
-        expect (tempFile.hasWriteAccess());
-
-        expect (home.getChildFile (".") == home);
-        expect (home.getChildFile ("..") == home.getParentDirectory());
-        expect (home.getChildFile (".xyz").getFileName() == ".xyz");
-        expect (home.getChildFile ("..xyz").getFileName() == "..xyz");
-        expect (home.getChildFile ("...xyz").getFileName() == "...xyz");
-        expect (home.getChildFile ("./xyz") == home.getChildFile ("xyz"));
-        expect (home.getChildFile ("././xyz") == home.getChildFile ("xyz"));
-        expect (home.getChildFile ("../xyz") == home.getSiblingFile ("xyz"));
-        expect (home.getChildFile (".././xyz") == home.getSiblingFile ("xyz"));
-        expect (home.getChildFile (".././xyz/./abc") == home.getSiblingFile ("xyz/abc"));
-        expect (home.getChildFile ("./../xyz") == home.getSiblingFile ("xyz"));
-        expect (home.getChildFile ("a1/a2/a3/./../../a4") == home.getChildFile ("a1/a4"));
-
-        expect (File::isAbsolutePath (home.getFullPathName()));
-        expect (! File::isAbsolutePath ("xyz"));
-        expect (! File::isAbsolutePath ("xyz/abc"));
-
-       #if JUCE_WINDOWS
-        expect (File::isAbsolutePath ("C:\\xyz"));
-        expect (File::isAbsolutePath ("C:/xyz"));
-        expect (File::isAbsolutePath ("\\xyz"));
-        expect (File::isAbsolutePath ("/xyz"));
-        expect (File::isAbsolutePath ("\\\\server\\share\\xyz"));
-        expect (! File::isAbsolutePath ("xyz\\abc"));
-
-        const File driveFile ("D:\\moose\\fish");
-        expect (driveFile.getChildFile ("\\xyz") == File ("D:\\xyz"));
-        expect (driveFile.getChildFile ("/xyz") == File ("D:\\xyz"));
-        expect (driveFile.getChildFile ("\\xyz\\..\\abc") == File ("D:\\abc"));
-        expect (driveFile.getChildFile ("E:\\xyz") == File ("E:\\xyz"));
-        expect (driveFile.getChildFile ("\\\\server\\share\\xyz") == File ("\\\\server\\share\\xyz"));
-
-        const File shareFile ("\\\\server\\share\\moose\\fish");
-        expect (shareFile.getChildFile ("\\xyz") == File ("\\\\server\\share\\xyz"));
-        expect (shareFile.getChildFile ("/xyz") == File ("\\\\server\\share\\xyz"));
-        expect (shareFile.getChildFile ("E:\\xyz") == File ("E:\\xyz"));
-       #endif
-
-        expect (! File().hasReadAccess());
-        expect (! File().hasWriteAccess());
-
-        expect (! tempFile.hasReadAccess());
-
+        testCase ("Writing", [this, &home, &temp, &demoFolder, &tempFile]
         {
-            FileOutputStream fo (tempFile);
-            fo.write ("0123456789", 10);
-        }
+            expect (demoFolder.deleteRecursively());
+            expect (demoFolder.createDirectory());
+            expect (demoFolder.isDirectory());
+            expect (demoFolder.getParentDirectory() == temp);
+            expect (temp.isDirectory());
+            expect (temp.findChildFiles (File::findFilesAndDirectories, false, "*").contains (demoFolder));
+            expect (temp.findChildFiles (File::findDirectories, true, "*.folder").contains (demoFolder));
 
-        expect (tempFile.hasReadAccess());
+            expect (tempFile.getFileExtension() == ".txt");
+            expect (tempFile.hasFileExtension (".txt"));
+            expect (tempFile.hasFileExtension ("txt"));
+            expect (tempFile.withFileExtension ("xyz").hasFileExtension (".xyz"));
+            expect (tempFile.withFileExtension ("xyz").hasFileExtension ("abc;xyz;foo"));
+            expect (tempFile.withFileExtension ("xyz").hasFileExtension ("xyz;foo"));
+            expect (! tempFile.withFileExtension ("h").hasFileExtension ("bar;foo;xx"));
+            expect (tempFile.getSiblingFile ("foo").isAChildOf (temp));
+            expect (tempFile.hasWriteAccess());
 
-        expect (tempFile.exists());
-        expect (tempFile.getSize() == 10);
-        expect (std::abs ((int) (tempFile.getLastModificationTime().toMilliseconds() - Time::getCurrentTime().toMilliseconds())) < 3000);
-        expectEquals (tempFile.loadFileAsString(), String ("0123456789"));
-        expect (! demoFolder.containsSubDirectories());
+            expect (File::isAbsolutePath (home.getFullPathName()));
+            expect (! File::isAbsolutePath ("xyz"));
+            expect (! File::isAbsolutePath ("xyz/abc"));
 
-        expectEquals (tempFile.getRelativePathFrom (demoFolder.getParentDirectory()), demoFolder.getFileName() + File::getSeparatorString() + tempFile.getFileName());
-        expectEquals (demoFolder.getParentDirectory().getRelativePathFrom (tempFile), String (".."));
-        expectEquals (demoFolder.getRelativePathFrom (tempFile), String ("."));
+           #if JUCE_WINDOWS
+            expect (File::isAbsolutePath ("C:\\xyz"));
+            expect (File::isAbsolutePath ("C:/xyz"));
+            expect (File::isAbsolutePath ("\\xyz"));
+            expect (File::isAbsolutePath ("/xyz"));
+            expect (File::isAbsolutePath ("\\\\server\\share\\xyz"));
+            expect (! File::isAbsolutePath ("xyz\\abc"));
 
-        expect (demoFolder.getNumberOfChildFiles (File::findFiles) == 1);
-        expect (demoFolder.getNumberOfChildFiles (File::findFilesAndDirectories) == 1);
-        expect (demoFolder.getNumberOfChildFiles (File::findDirectories) == 0);
-        demoFolder.getNonexistentChildFile ("tempFolder", "", false).createDirectory();
-        expect (demoFolder.getNumberOfChildFiles (File::findDirectories) == 1);
-        expect (demoFolder.getNumberOfChildFiles (File::findFilesAndDirectories) == 2);
-        expect (demoFolder.containsSubDirectories());
+            const File driveFile ("D:\\moose\\fish");
+            expect (driveFile.getChildFile ("\\xyz") == File ("D:\\xyz"));
+            expect (driveFile.getChildFile ("/xyz") == File ("D:\\xyz"));
+            expect (driveFile.getChildFile ("\\xyz\\..\\abc") == File ("D:\\abc"));
+            expect (driveFile.getChildFile ("E:\\xyz") == File ("E:\\xyz"));
+            expect (driveFile.getChildFile ("\\\\server\\share\\xyz") == File ("\\\\server\\share\\xyz"));
 
-        expect (tempFile.hasWriteAccess());
-        expect (tempFile.setReadOnly (true));
+            const File shareFile ("\\\\server\\share\\moose\\fish");
+            expect (shareFile.getChildFile ("\\xyz") == File ("\\\\server\\share\\xyz"));
+            expect (shareFile.getChildFile ("/xyz") == File ("\\\\server\\share\\xyz"));
+            expect (shareFile.getChildFile ("E:\\xyz") == File ("E:\\xyz"));
+           #endif
 
-        // If you are running as root you are still able to write to read-only files
-        expect (tempFile.hasWriteAccess() == hasRootFilePermissions());
+            expect (! File().hasReadAccess());
+            expect (! File().hasWriteAccess());
 
-        expect (tempFile.setReadOnly (false));
-        expect (tempFile.hasWriteAccess());
-
-        Time t (Time::getCurrentTime());
-        tempFile.setLastModificationTime (t);
-        Time t2 = tempFile.getLastModificationTime();
-        expect (std::abs ((int) (t2.toMilliseconds() - t.toMilliseconds())) <= 1000);
-
-        {
-            MemoryBlock mb;
-            tempFile.loadFileAsData (mb);
-            expect (mb.getSize() == 10);
-            expect (mb[0] == '0');
-        }
-
-        {
-            expect (tempFile.getSize() == 10);
-            FileOutputStream fo (tempFile);
-            expect (fo.openedOk());
-
-            expect (fo.setPosition  (7));
-            expect (fo.truncate().wasOk());
-            expect (tempFile.getSize() == 7);
-            fo.write ("789", 3);
-            fo.flush();
-            expect (tempFile.getSize() == 10);
-        }
-
-        beginTest ("Memory-mapped files");
-
-        {
-            MemoryMappedFile mmf (tempFile, MemoryMappedFile::readOnly);
-            expect (mmf.getSize() == 10);
-            expect (mmf.getData() != nullptr);
-            expect (memcmp (mmf.getData(), "0123456789", 10) == 0);
-        }
-
-        {
-            const File tempFile2 (tempFile.getNonexistentSibling (false));
-            expect (tempFile2.create());
-            expect (tempFile2.appendData ("xxxxxxxxxx", 10));
+            expect (! tempFile.hasReadAccess());
 
             {
-                MemoryMappedFile mmf (tempFile2, MemoryMappedFile::readWrite);
-                expect (mmf.getSize() == 10);
-                expect (mmf.getData() != nullptr);
-                memcpy (mmf.getData(), "abcdefghij", 10);
+                FileOutputStream fo (tempFile);
+                fo.write ("0123456789", 10);
+            }
+
+            expect (tempFile.hasReadAccess());
+
+            expect (tempFile.exists());
+            expect (tempFile.getSize() == 10);
+            expect (std::abs ((int) (tempFile.getLastModificationTime().toMilliseconds() - Time::getCurrentTime().toMilliseconds())) < 3000);
+            expectEquals (tempFile.loadFileAsString(), String ("0123456789"));
+            expect (! demoFolder.containsSubDirectories());
+
+            expectEquals (tempFile.getRelativePathFrom (demoFolder.getParentDirectory()), demoFolder.getFileName() + File::getSeparatorString() + tempFile.getFileName());
+            expectEquals (demoFolder.getParentDirectory().getRelativePathFrom (tempFile), String (".."));
+            expectEquals (demoFolder.getRelativePathFrom (tempFile), String ("."));
+
+            expect (demoFolder.getNumberOfChildFiles (File::findFiles) == 1);
+            expect (demoFolder.getNumberOfChildFiles (File::findFilesAndDirectories) == 1);
+            expect (demoFolder.getNumberOfChildFiles (File::findDirectories) == 0);
+            demoFolder.getNonexistentChildFile ("tempFolder", "", false).createDirectory();
+            expect (demoFolder.getNumberOfChildFiles (File::findDirectories) == 1);
+            expect (demoFolder.getNumberOfChildFiles (File::findFilesAndDirectories) == 2);
+            expect (demoFolder.containsSubDirectories());
+
+            expect (tempFile.hasWriteAccess());
+            expect (tempFile.setReadOnly (true));
+
+            // If you are running as root you are still able to write to read-only files
+            expect (tempFile.hasWriteAccess() == hasRootFilePermissions());
+
+            expect (tempFile.setReadOnly (false));
+            expect (tempFile.hasWriteAccess());
+
+            Time t (Time::getCurrentTime());
+            tempFile.setLastModificationTime (t);
+            Time t2 = tempFile.getLastModificationTime();
+            expect (std::abs ((int) (t2.toMilliseconds() - t.toMilliseconds())) <= 1000);
+
+            {
+                MemoryBlock mb;
+                tempFile.loadFileAsData (mb);
+                expect (mb.getSize() == 10);
+                expect (mb[0] == '0');
             }
 
             {
-                MemoryMappedFile mmf (tempFile2, MemoryMappedFile::readWrite);
+                expect (tempFile.getSize() == 10);
+                FileOutputStream fo (tempFile);
+                expect (fo.openedOk());
+
+                expect (fo.setPosition  (7));
+                expect (fo.truncate().wasOk());
+                expect (tempFile.getSize() == 7);
+                fo.write ("789", 3);
+                fo.flush();
+                expect (tempFile.getSize() == 10);
+            }
+        });
+
+        testCase ("Memory-mapped files", [this, &tempFile]
+        {
+            {
+                MemoryMappedFile mmf (tempFile, MemoryMappedFile::readOnly);
                 expect (mmf.getSize() == 10);
                 expect (mmf.getData() != nullptr);
-                expect (memcmp (mmf.getData(), "abcdefghij", 10) == 0);
+                expect (memcmp (mmf.getData(), "0123456789", 10) == 0);
             }
 
-            expect (tempFile2.deleteFile());
-        }
+            {
+                const File tempFile2 (tempFile.getNonexistentSibling (false));
+                expect (tempFile2.create());
+                expect (tempFile2.appendData ("xxxxxxxxxx", 10));
 
-        beginTest ("More writing");
+                {
+                    MemoryMappedFile mmf (tempFile2, MemoryMappedFile::readWrite);
+                    expect (mmf.getSize() == 10);
+                    expect (mmf.getData() != nullptr);
+                    memcpy (mmf.getData(), "abcdefghij", 10);
+                }
 
-        expect (tempFile.appendData ("abcdefghij", 10));
-        expect (tempFile.getSize() == 20);
-        expect (tempFile.replaceWithData ("abcdefghij", 10));
-        expect (tempFile.getSize() == 10);
+                {
+                    MemoryMappedFile mmf (tempFile2, MemoryMappedFile::readWrite);
+                    expect (mmf.getSize() == 10);
+                    expect (mmf.getData() != nullptr);
+                    expect (memcmp (mmf.getData(), "abcdefghij", 10) == 0);
+                }
 
-        File tempFile2 (tempFile.getNonexistentSibling (false));
-        expect (tempFile.copyFileTo (tempFile2));
-        expect (tempFile2.exists());
-        expect (tempFile2.hasIdenticalContentTo (tempFile));
-        expect (tempFile.deleteFile());
-        expect (! tempFile.exists());
-        expect (tempFile2.moveFileTo (tempFile));
-        expect (tempFile.exists());
-        expect (! tempFile2.exists());
+                expect (tempFile2.deleteFile());
+            }
+        });
 
-        expect (demoFolder.deleteRecursively());
-        expect (! demoFolder.exists());
-
+        testCase ("More writing", [this, &demoFolder, &tempFile]
         {
-            URL url ("https://audio.dev/foo/bar/");
-            expectEquals (url.toString (false), String ("https://audio.dev/foo/bar/"));
-            expectEquals (url.getChildURL ("x").toString (false), String ("https://audio.dev/foo/bar/x"));
-            expectEquals (url.getParentURL().toString (false), String ("https://audio.dev/foo"));
-            expectEquals (url.getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
-            expectEquals (url.getParentURL().getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
-            expectEquals (url.getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/foo/x"));
-            expectEquals (url.getParentURL().getParentURL().getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/x"));
-        }
+            expect (tempFile.appendData ("abcdefghij", 10));
+            expect (tempFile.getSize() == 20);
+            expect (tempFile.replaceWithData ("abcdefghij", 10));
+            expect (tempFile.getSize() == 10);
 
-        {
-            URL url ("https://audio.dev/foo/bar");
-            expectEquals (url.toString (false), String ("https://audio.dev/foo/bar"));
-            expectEquals (url.getChildURL ("x").toString (false), String ("https://audio.dev/foo/bar/x"));
-            expectEquals (url.getParentURL().toString (false), String ("https://audio.dev/foo"));
-            expectEquals (url.getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
-            expectEquals (url.getParentURL().getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
-            expectEquals (url.getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/foo/x"));
-            expectEquals (url.getParentURL().getParentURL().getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/x"));
-        }
+            File tempFile2 (tempFile.getNonexistentSibling (false));
+            expect (tempFile.copyFileTo (tempFile2));
+            expect (tempFile2.exists());
+            expect (tempFile2.hasIdenticalContentTo (tempFile));
+            expect (tempFile.deleteFile());
+            expect (! tempFile.exists());
+            expect (tempFile2.moveFileTo (tempFile));
+            expect (tempFile.exists());
+            expect (! tempFile2.exists());
+
+            expect (demoFolder.deleteRecursively());
+            expect (! demoFolder.exists());
+
+            {
+                URL url ("https://audio.dev/foo/bar/");
+                expectEquals (url.toString (false), String ("https://audio.dev/foo/bar/"));
+                expectEquals (url.getChildURL ("x").toString (false), String ("https://audio.dev/foo/bar/x"));
+                expectEquals (url.getParentURL().toString (false), String ("https://audio.dev/foo"));
+                expectEquals (url.getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
+                expectEquals (url.getParentURL().getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
+                expectEquals (url.getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/foo/x"));
+                expectEquals (url.getParentURL().getParentURL().getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/x"));
+            }
+
+            {
+                URL url ("https://audio.dev/foo/bar");
+                expectEquals (url.toString (false), String ("https://audio.dev/foo/bar"));
+                expectEquals (url.getChildURL ("x").toString (false), String ("https://audio.dev/foo/bar/x"));
+                expectEquals (url.getParentURL().toString (false), String ("https://audio.dev/foo"));
+                expectEquals (url.getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
+                expectEquals (url.getParentURL().getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
+                expectEquals (url.getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/foo/x"));
+                expectEquals (url.getParentURL().getParentURL().getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/x"));
+            }
+        });
     }
 
     static bool hasRootFilePermissions()
