@@ -293,8 +293,7 @@ AlertWindow functions.
 
 The alert window is now kept above the window containing the component, and
 is minimised and restored with it. It also moves with that window, where a
-window can position itself. On macOS it takes that window's level, so it may be
-covered by an always-on-top window that would previously have been below it.
+window can position itself.
 
 **Workaround**
 

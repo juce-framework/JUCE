@@ -368,6 +368,13 @@ public:
             [parent removeChildWindow: window];
     }
 
+    static void addChildWindowKeepingLevel (NSWindow* parent, NSWindow* child)
+    {
+        const auto level = [child level];
+        [parent addChildWindow: child ordered: NSWindowAbove];
+        [child setLevel: jmax (level, [parent level])];
+    }
+
     // AppKit keeps child windows in the order they were attached, so changing the order means
     // reattaching every sibling in the new order.
     static void reattachChildWindows (NSWindow* parent, NSArray<NSWindow*>* newOrder)
@@ -377,7 +384,7 @@ public:
             if (getOwner (child) != nullptr)
             {
                 [parent removeChildWindow: child];
-                [parent addChildWindow: child ordered: NSWindowAbove];
+                addChildWindowKeepingLevel (parent, child);
             }
         }
     }
@@ -399,7 +406,7 @@ public:
         detachFromParentWindow (window);
 
         if (parent != nil)
-            [parent addChildWindow: window ordered: NSWindowAbove];
+            addChildWindowKeepingLevel (parent, window);
 
         updateOffsetFromParentWindow();
     }
@@ -2251,7 +2258,7 @@ private:
                     if (! storedLevel.has_value())
                         storedLevel = [window level];
 
-                    return NSModalPanelWindowLevel;
+                    return jmax (*storedLevel, NSModalPanelWindowLevel);
                 }
             }
 
