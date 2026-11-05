@@ -782,11 +782,6 @@ void Component::createDesktopWindow (const DesktopWindowOptions& optionsIn)
             if (wasMinimised)
                 peer->setMinimised (true);
 
-           #if JUCE_WINDOWS
-            if (isAlwaysOnTop())
-                peer->setAlwaysOnTop (true);
-           #endif
-
             peer->setConstrainer (currentConstrainer);
 
             repaint();
