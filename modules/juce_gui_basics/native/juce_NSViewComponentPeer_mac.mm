@@ -350,12 +350,21 @@ public:
         return getIvar<NSViewComponentPeer*> (viewOrWindow, "owner");
     }
 
+    // With an activation policy of prohibited, as in an out-of-process plug-in view, AppKit does
+    // not display a child ordered above a window that has a title bar, and draws a child ordered
+    // below it over it.
+    static bool canShowChildWindows (NSWindow* parent)
+    {
+        return [NSApp activationPolicy] != NSApplicationActivationPolicyProhibited
+            || ([parent styleMask] & NSWindowStyleMaskTitled) == 0;
+    }
+
     static NSWindow* findParentWindow (const ComponentPeer& peer, NSWindow* ownWindow)
     {
         if (auto* associated = peer.getAssociatedComponent())
             if (auto* associatedPeer = associated->getPeer())
                 if (auto* parent = [(NSView*) associatedPeer->getNativeHandle() window])
-                    if (parent != ownWindow)
+                    if (parent != ownWindow && canShowChildWindows (parent))
                         return parent;
 
         return nil;
