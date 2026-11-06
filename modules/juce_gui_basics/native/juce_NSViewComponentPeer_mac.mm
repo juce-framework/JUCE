@@ -322,15 +322,14 @@ public:
 
         if (! isSharedWindow)
         {
+            {
+                const NSUniquePtr<NSArray<NSWindow*>> children { [[window childWindows] copy] };
+
+                for (NSWindow* child in children.get())
+                    [window removeChildWindow: child];
+            }
+
             detachFromParentWindow (window);
-
-            NSArray<NSWindow*>* children = [[window childWindows] copy];
-
-            for (NSWindow* child in children)
-                [window removeChildWindow: child];
-
-            [children release];
-
             setOwner (window, nullptr);
             [window setContentView: nil];
             [window close];
@@ -379,6 +378,55 @@ public:
             [child setLevel: jmax (level, [parent level])];
     }
 
+    NSWindowOrderingMode getOrderingRelativeToParent() const
+    {
+        return orderedBelowParent ? NSWindowBelow : NSWindowAbove;
+    }
+
+    // In an out-of-process plug-in view, removing a window from its parent leaves the window's own
+    // children on screen but unknown to AppKit, so they no longer receive events.
+    class [[nodiscard]] ScopedChildWindowDetacher final
+    {
+    public:
+        explicit ScopedChildWindowDetacher (NSWindow* w)
+        {
+            const auto addChildrenOf = [this] (NSWindow* parent)
+            {
+                for (NSWindow* child in [parent childWindows])
+                    if (auto* owner = getOwner (child))
+                        detached.push_back ({ parent,
+                                              NSUniquePtr<NSWindow> { [child retain] },
+                                              owner->getOrderingRelativeToParent() });
+            };
+
+            addChildrenOf (w);
+
+            for (size_t i = 0; i < detached.size(); ++i)
+                addChildrenOf (detached[i].child.get());
+
+            for (auto it = detached.rbegin(); it != detached.rend(); ++it)
+                [it->parent removeChildWindow: it->child.get()];
+        }
+
+        ~ScopedChildWindowDetacher()
+        {
+            for (const auto& entry : detached)
+                addChildWindowKeepingLevel (entry.parent, entry.child.get(), entry.ordered);
+        }
+
+    private:
+        struct Entry
+        {
+            NSWindow* parent;
+            NSUniquePtr<NSWindow> child;
+            NSWindowOrderingMode ordered;
+        };
+
+        std::vector<Entry> detached;
+
+        JUCE_DECLARE_NON_COPYABLE (ScopedChildWindowDetacher)
+    };
+
     // AppKit keeps child windows in the order they were attached, so changing the order means
     // reattaching every sibling in the new order.
     static void reattachChildWindows (NSWindow* parent, NSArray<NSWindow*>* newOrder)
@@ -387,8 +435,9 @@ public:
         {
             if (auto* owner = getOwner (child))
             {
+                const ScopedChildWindowDetacher detacher (child);
                 [parent removeChildWindow: child];
-                addChildWindowKeepingLevel (parent, child, owner->orderedBelowParent ? NSWindowBelow : NSWindowAbove);
+                addChildWindowKeepingLevel (parent, child, owner->getOrderingRelativeToParent());
             }
         }
     }
@@ -402,15 +451,25 @@ public:
         if (isSharedWindow || ! component.isVisible())
             return;
 
-        auto* parent = findParentWindow (*this, window);
+        if (auto* parent = findParentWindow (*this, window); [window parentWindow] != parent)
+            reparentWindow (parent);
+    }
 
-        if ([window parentWindow] == parent)
+    void reattachToParentWindow()
+    {
+        if (isSharedWindow || ! component.isVisible())
             return;
 
+        reparentWindow (findParentWindow (*this, window));
+    }
+
+    void reparentWindow (NSWindow* parent)
+    {
+        const ScopedChildWindowDetacher detacher (window);
         detachFromParentWindow (window);
 
         if (parent != nil)
-            addChildWindowKeepingLevel (parent, window, orderedBelowParent ? NSWindowBelow : NSWindowAbove);
+            addChildWindowKeepingLevel (parent, window, getOrderingRelativeToParent());
 
         updateOffsetFromParentWindow();
     }
@@ -733,19 +792,16 @@ public:
         if (window != nil && component.isVisible())
         {
             ++insideToFrontCall;
-            orderedBelowParent = false;
+            const auto wasOrderedBelowParent = std::exchange (orderedBelowParent, false);
 
             if (makeActiveWindow && ! inBecomeKeyWindow && [window canBecomeKeyWindow])
                 [window makeKeyAndOrderFront: nil];
             else
                 [window orderFront: nil];
 
-            // Reattaching moves a child to the front of its siblings
-            if ([window parentWindow] != nil)
-            {
-                detachFromParentWindow (window);
-                attachToParentWindow();
-            }
+            if (auto* parent = [window parentWindow])
+                if (wasOrderedBelowParent || [[parent childWindows] lastObject] != window)
+                    reattachToParentWindow();
 
             if (insideToFrontCall <= 1)
             {
@@ -789,11 +845,7 @@ public:
                 if (std::exchange (orderedBelowParent, true) && [window parentWindow] == otherPeer->window)
                     return;
 
-                if (component.isVisible())
-                {
-                    detachFromParentWindow (window);
-                    attachToParentWindow();
-                }
+                reattachToParentWindow();
             }
             else if (component.isVisible())
             {
