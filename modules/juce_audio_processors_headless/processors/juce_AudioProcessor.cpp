@@ -37,6 +37,21 @@ namespace juce
 
 static ThreadLocalValue<AudioProcessor::WrapperType> wrapperTypeBeingCreated;
 
+static void checkForAAXReservedParamID ([[maybe_unused]] AudioProcessorParameter* param)
+{
+   #if JUCE_DEBUG
+    if (auto* withID = dynamic_cast<HostedAudioProcessorParameter*> (param))
+    {
+        const auto id = withID->getParameterID();
+        constexpr char prefix[] = "avid.";
+
+        // If this is hit, the parameter ID is reserved for use by AVID in AAX plugins,
+        // it's a good idea to pick a different parameter ID if possible
+        jassert (strncmp (id.toRawUTF8(), prefix, std::size (prefix) - 1) != 0);
+    }
+   #endif
+}
+
 void JUCE_CALLTYPE AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::WrapperType type)
 {
     wrapperTypeBeingCreated = type;
@@ -439,6 +454,7 @@ void AudioProcessor::validateParameter (AudioProcessorParameter* param)
 {
     checkForDuplicateParamID (param);
     checkForDuplicateTrimmedParamID (param);
+    checkForAAXReservedParamID (param);
 
     /*  If you're building this plugin as an AudioUnit, and you intend to use the plugin in
         Logic Pro or GarageBand, it's a good idea to set version hints on all of your parameters
