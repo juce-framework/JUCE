@@ -594,6 +594,8 @@ public:
 
     /** Creates a context that will draw into this image. */
     virtual std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() = 0;
+    /** Clears an area of this image. */
+    virtual void clear (Rectangle<int>, Colour);
     /** Creates a copy of this image. */
     virtual Ptr clone() = 0;
     /** Creates an instance of the type of this image. */

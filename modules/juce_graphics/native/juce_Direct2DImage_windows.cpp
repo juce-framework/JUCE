@@ -440,11 +440,17 @@ struct Direct2DPixelData::Context : public Direct2DImageContext
           frameStarted (startFrame (1.0f))
     {
         if (frameStarted)
+        {
             self->state = State::drawing;
+            self->activeContext = this;
+        }
     }
 
     ~Context() override
     {
+        if (self->activeContext == this)
+            self->activeContext = nullptr;
+
         if (! frameStarted)
             return;
 
@@ -456,9 +462,25 @@ struct Direct2DPixelData::Context : public Direct2DImageContext
             self->createPersistentBackup (D2DUtilities::getDeviceForContext (getDeviceContext()));
     }
 
+    void clear (Rectangle<int> area, Colour colour)
+    {
+        fillRectWithColour (area, colour);
+    }
+
     Ptr self;
     bool frameStarted = false;
 };
+
+void Direct2DPixelData::clear (Rectangle<int> area, Colour colourToClearTo)
+{
+    if (activeContext != nullptr)
+    {
+        activeContext->clear (area, colourToClearTo);
+        return;
+    }
+
+    ImagePixelData::clear (area, colourToClearTo);
+}
 
 ComSmartPtr<ID2D1Device1> Direct2DPixelData::getMostRelevantDevice()
 {
@@ -1259,6 +1281,38 @@ public:
 
                 testFormatConversion (size, 32);
                 testFormatConversion (32, size);
+            }
+        }
+
+        beginTest ("Clearing an image while drawing");
+        {
+            for (const auto native : { false, true })
+            {
+                Image image = native
+                            ? Image (Image::ARGB, 64, 32, true, NativeImageType())
+                            : Image (Image::ARGB, 64, 32, true, SoftwareImageType());
+
+                image.clear (image.getBounds(), Colours::white);
+                expectEquals (image.getPixelAt (5, 5).getAlpha(), (uint8) 255);
+
+                for (int round = 0; round < 3; ++round)
+                {
+                    Graphics g (image);
+
+                    image.clear ({ 0, 0, 32, 32 });
+
+                    if (round < 2)
+                    {
+                        g.setColour (Colours::white);
+                        g.fillRect (40, 10, 20, 10);
+                    }
+                }
+
+                expectEquals (image.getPixelAt (15, 15).getAlpha(), (uint8) 0);
+                expectEquals (image.getPixelAt (50, 15).getAlpha(), (uint8) 255);
+
+                image.clear ({ 32, 0, 32, 32 });
+                expectEquals (image.getPixelAt (50, 15).getAlpha(), (uint8) 0);
             }
         }
 

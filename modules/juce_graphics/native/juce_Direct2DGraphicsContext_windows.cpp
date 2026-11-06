@@ -818,6 +818,19 @@ void Direct2DGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExi
     paintPrimitive (r.toFloat(), fill);
 }
 
+void Direct2DGraphicsContext::fillRectWithColour (Rectangle<int> area, Colour colour)
+{
+    saveState();
+
+    currentState->currentTransform = {};
+    setFill (FillType { colour });
+    setOpacity (1.0f);
+    setImageBlendMode (BlendMode::source);
+    fillRect (area, true);
+
+    restoreState();
+}
+
 void Direct2DGraphicsContext::fillRect (const Rectangle<float>& r)
 {
     if (r.isEmpty())
