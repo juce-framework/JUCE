@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -40,10 +40,6 @@ ImageButton::ImageButton (const String& text_)
       scaleImageToFit (true),
       preserveProportions (true),
       alphaThreshold (0)
-{
-}
-
-ImageButton::~ImageButton()
 {
 }
 
@@ -120,6 +116,8 @@ void ImageButton::paintButton (Graphics& g,
                                bool shouldDrawButtonAsHighlighted,
                                bool shouldDrawButtonAsDown)
 {
+    g.setImageResamplingQuality (resamplingQuality);
+
     if (! isEnabled())
     {
         shouldDrawButtonAsHighlighted = false;
@@ -202,6 +200,12 @@ bool ImageButton::hitTest (int x, int y)
     return im.isNull() || ((! imageBounds.isEmpty())
                             && alphaThreshold < im.getPixelAt (((x - imageBounds.getX()) * im.getWidth()) / imageBounds.getWidth(),
                                                                ((y - imageBounds.getY()) * im.getHeight()) / imageBounds.getHeight()).getAlpha());
+}
+
+void ImageButton::setImageResamplingQuality (Graphics::ResamplingQuality newQuality)
+{
+    if (std::exchange (resamplingQuality, newQuality) != newQuality)
+        repaint();
 }
 
 } // namespace juce

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -35,19 +35,18 @@
 namespace juce
 {
 
-//==============================================================================
 class LinuxComponentPeer final : public ComponentPeer,
                                  private XWindowSystemUtilities::XSettings::Listener
 {
 public:
-    LinuxComponentPeer (Component& comp, int windowStyleFlags, ::Window parentToAddTo)
-        : ComponentPeer (comp, windowStyleFlags),
+    LinuxComponentPeer (Component& comp, int windowStyleFlags, Component* associated, ::Window parentToAddTo)
+        : ComponentPeer (comp, windowStyleFlags, associated),
           isAlwaysOnTop (comp.isAlwaysOnTop())
     {
         // it's dangerous to create a window on a thread other than the message thread
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
-        const auto* instance = XWindowSystem::getInstance();
+        auto* instance = XWindowSystem::getInstance();
 
         if (! instance->isX11Available())
             return;
@@ -60,7 +59,11 @@ public:
         windowH = instance->createWindow (parentToAddTo, this);
         parentWindow = parentToAddTo;
 
+        if (parentWindow != 0)
+            hostScreenPosition = instance->getScreenPosition (parentWindow);
+
         setTitle (component.getName());
+        updateTransientFor();
 
         if (auto* xSettings = instance->getXSettings())
             xSettings->addListener (this);
@@ -76,6 +79,14 @@ public:
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
         auto* instance = XWindowSystem::getInstance();
+
+        // The windows opened from this one would otherwise be left transient for a destroyed window.
+        // The association is checked natively, since the associated component may already be gone.
+        if (windowH != 0)
+            for (int i = 0; i < getNumPeers(); ++i)
+                if (auto* other = dynamic_cast<LinuxComponentPeer*> (getPeer (i)))
+                    if (other != this && other->windowH != 0 && instance->getTransientFor (other->windowH) == windowH)
+                        instance->setTransientFor (other->windowH, 0);
 
         repainter = nullptr;
         instance->destroyWindow (windowH);
@@ -93,22 +104,113 @@ public:
     }
 
     //==============================================================================
+    // A window opened from another window is transient for that window's top-level window, which
+    // window managers keep above it, minimise with it, and leave off the taskbar. A window embedded
+    // in a host is transient for the host's top-level window.
+    void updateTransientFor()
+    {
+        if (windowH == 0 || parentWindow != 0)
+            return;
+
+        const auto transientParent = std::invoke ([this]() -> ::Window
+        {
+            if (auto* associated = getAssociatedComponent())
+            {
+                if (auto* associatedPeer = dynamic_cast<LinuxComponentPeer*> (associated->getPeer());
+                    associatedPeer != nullptr && associatedPeer != this)
+                {
+                    if (associatedPeer->parentWindow == 0)
+                        return associatedPeer->windowH;
+
+                    return XWindowSystem::getInstance()->findTopLevelClientWindowOf (associatedPeer->parentWindow);
+                }
+            }
+
+            return 0;
+        });
+
+        XWindowSystem::getInstance()->setTransientFor (windowH, transientParent);
+    }
+
+    void associationChanged() override
+    {
+        updateTransientFor();
+    }
+
+    // The window manager keeps a transient window above its parent, but doesn't move it when
+    // the parent is moved, as macOS does for a child window. A move leaves the size of the
+    // window unchanged, which distinguishes it from a resize that changes the position too.
+    void moveTransientWindows()
+    {
+        const auto oldBounds = std::exchange (boundsForTransientWindows, physicalBounds);
+
+        if (windowH == 0
+            || parentWindow != 0
+            || ! oldBounds.has_value()
+            || oldBounds->getWidth() != physicalBounds.getWidth()
+            || oldBounds->getHeight() != physicalBounds.getHeight())
+        {
+            return;
+        }
+
+        moveWindowsTransientFor (windowH, physicalBounds.getPosition() - oldBounds->getPosition());
+    }
+
+    // A window embedded in a host isn't told when the host's window is moved, but a move of the
+    // host's top-level window is seen on the root window. The position this window reports is
+    // brought up to date from here, and the windows that are transient for the host are moved
+    // with it.
+    void hostWindowMoved()
+    {
+        if (windowH == 0 || parentWindow == 0)
+            return;
+
+        auto* instance = XWindowSystem::getInstance();
+        const auto newPosition = instance->getScreenPosition (parentWindow);
+        const auto oldPosition = std::exchange (hostScreenPosition, newPosition);
+
+        if (! oldPosition.has_value() || newPosition == *oldPosition)
+            return;
+
+        updateWindowBounds();
+        moveWindowsTransientFor (instance->findTopLevelClientWindowOf (parentWindow), newPosition - *oldPosition);
+    }
+
+    void moveWindowsTransientFor (::Window transientParent, Point<int> delta)
+    {
+        if (delta.isOrigin())
+            return;
+
+        auto* instance = XWindowSystem::getInstance();
+
+        for (int i = 0; i < getNumPeers(); ++i)
+            if (auto* other = dynamic_cast<LinuxComponentPeer*> (getPeer (i)))
+                if (other != this && other->windowH != 0 && ! other->fullScreen && instance->getTransientFor (other->windowH) == transientParent)
+                    other->forceSetBoundsPhysical (other->physicalBounds + delta, false);
+    }
+
+    //==============================================================================
     void* getNativeHandle() const override
     {
         return reinterpret_cast<void*> (getWindowHandle());
     }
 
     //==============================================================================
-    void forceSetBounds (const Rectangle<int>& correctedNewBounds, bool isNowFullScreen)
+    void forceSetBoundsPhysical (const Rectangle<int>& physicalBoundsIn, bool isNowFullScreen)
     {
-        bounds = correctedNewBounds;
+        const auto position = getMultimonitorPositionOverride().value_or (physicalBoundsIn.getPosition());
+        const auto correctedNewBounds = physicalBoundsIn.withSize (jmax (1, physicalBoundsIn.getWidth()),
+                                                                   jmax (1, physicalBoundsIn.getHeight()))
+                                                        .withPosition (position);
 
-        updateScaleFactorFromNewBounds (bounds, false);
+        if (correctedNewBounds == physicalBounds && isNowFullScreen == fullScreen)
+            return;
 
-        auto physicalBounds = parentWindow == 0 ? Desktop::getInstance().getDisplays().logicalToPhysical (bounds)
-                                                : bounds * getPlatformScaleFactor();
+        updateScaleFactorFromNewBounds (correctedNewBounds, true);
+        physicalBounds = correctedNewBounds;
+        fullScreen = isNowFullScreen;
 
-        WeakReference<Component> deletionChecker (&component);
+        const WeakReference deletionChecker (&component);
 
         // If we are in a ConfigureNotify handler then forceSetBounds is being called as a
         // consequence of X11 telling us what the window size is. There's no need to report this
@@ -116,45 +218,49 @@ public:
         // ConfigureNotify events, many of which has stale size information. By not calling
         // XWindowSystem::setBounds we are not actualising these old, incorrect sizes.
         if (! inConfigureNotifyHandler)
-            moveResizeSerial = jmax (moveResizeSerial, XWindowSystem::getInstance()->setBounds (windowH, physicalBounds, isNowFullScreen).value_or (0));
-
-        fullScreen = isNowFullScreen;
+        {
+            const auto optionalSerial = XWindowSystem::getInstance()->setBounds (windowH,
+                                                                                 physicalBounds,
+                                                                                 isNowFullScreen);
+            moveResizeSerial = jmax (moveResizeSerial, optionalSerial.value_or (0));
+        }
 
         if (deletionChecker != nullptr)
         {
             updateBorderSize();
             handleMovedOrResized();
         }
+
+        if (isValidPeer (this))
+            moveTransientWindows();
+    }
+
+    void forceSetBounds (const Rectangle<int>& correctedNewBounds, bool isNowFullScreen)
+    {
+        updateScaleFactorFromNewBounds (correctedNewBounds, false);
+        const auto scaled = correctedNewBounds.toFloat() * getPlatformScaleFactor();
+
+        using SH = detail::ScalingHelpers;
+        const auto physical = SH::convertLogicalScreenPointToPhysical (correctedNewBounds.getPosition().toFloat());
+
+        forceSetBoundsPhysical ((parentWindow == 0 ? scaled.withPosition (physical)
+                                                   : scaled).toNearestInt(),
+                                isNowFullScreen);
     }
 
     void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
     {
-        const auto correctedNewBounds = newBounds.withSize (jmax (1, newBounds.getWidth()),
-                                                            jmax (1, newBounds.getHeight()));
-
-        if (bounds != correctedNewBounds || fullScreen != isNowFullScreen)
-            forceSetBounds (correctedNewBounds, isNowFullScreen);
+        forceSetBounds (newBounds, isNowFullScreen);
     }
 
-    Point<int> getScreenPosition (bool physical) const
+    void setBoundsPhysical (const Rectangle<int>& newBounds)
     {
-        auto physicalParentPosition = XWindowSystem::getInstance()->getPhysicalParentScreenPosition();
-        auto parentPosition = parentWindow == 0 ? Desktop::getInstance().getDisplays().physicalToLogical (physicalParentPosition)
-                                                : physicalParentPosition / getPlatformScaleFactor();
-
-        auto screenBounds = parentWindow == 0 ? bounds
-                                              : bounds.translated (parentPosition.x, parentPosition.y);
-
-        if (physical)
-            return parentWindow == 0 ? Desktop::getInstance().getDisplays().logicalToPhysical (screenBounds.getTopLeft())
-                                     : screenBounds.getTopLeft() * getPlatformScaleFactor();
-
-        return screenBounds.getTopLeft();
+        forceSetBoundsPhysical (newBounds, false);
     }
 
     Rectangle<int> getBounds() const override
     {
-        return bounds;
+        return (physicalBounds.toFloat() / getPlatformScaleFactor()).toNearestInt();
     }
 
     OptionalBorderSize getFrameSizeIfPresent() const override
@@ -168,14 +274,24 @@ public:
         return optionalBorderSize ? (*optionalBorderSize) : BorderSize<int>();
     }
 
-    Point<float> localToGlobal (Point<float> relativePosition) override
+    Point<float> localToMultimonitor (Point<float> x) override
     {
-        return localToGlobal (*this, relativePosition);
+        return localToMultimonitor (*this, x);
     }
 
-    Point<float> globalToLocal (Point<float> screenPosition) override
+    Point<float> multimonitorToLocal (Point<float> x) override
     {
-        return globalToLocal (*this, screenPosition);
+        return multimonitorToLocal (*this, x);
+    }
+
+    Point<float> localToGlobal (Point<float> x) override
+    {
+        return localToGlobal (*this, x);
+    }
+
+    Point<float> globalToLocal (Point<float> x) override
+    {
+        return globalToLocal (*this, x);
     }
 
     using ComponentPeer::localToGlobal;
@@ -223,14 +339,14 @@ public:
 
         if (fullScreen != shouldBeFullScreen)
         {
-            const auto usingNativeTitleBar = ((styleFlags & windowHasTitleBar) != 0);
+            const auto usingNativeTitleBar = ((getStyleFlags() & windowHasTitleBar) != 0);
 
             if (usingNativeTitleBar)
                 XWindowSystem::getInstance()->setMaximised (windowH, shouldBeFullScreen);
 
             if (shouldBeFullScreen)
                 r = usingNativeTitleBar ? XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow)
-                                        : Desktop::getInstance().getDisplays().getDisplayForRect (bounds)->userArea;
+                                        : Desktop::getInstance().getDisplays().getDisplayForRect (physicalBounds, true)->userBounds.getSmallestIntegerContainer();
 
             if (! r.isEmpty())
                 setBounds (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
@@ -246,7 +362,7 @@ public:
 
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        if (! bounds.withZeroOrigin().contains (localPos))
+        if (! getBounds().withZeroOrigin().contains (localPos))
             return false;
 
         for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
@@ -263,8 +379,13 @@ public:
             jassert (otherPeer == nullptr || dynamic_cast<LinuxComponentPeer*> (c->getPeer()) != nullptr);
 
             if (auto* peer = static_cast<LinuxComponentPeer*> (otherPeer))
+            {
+                if ((peer->getStyleFlags() & windowIgnoresMouseClicks) != 0)
+                    continue;
+
                 if (peer->contains (globalToLocal (*peer, localToGlobal (*this, localPos.toFloat())).roundToInt(), true))
                     return false;
+            }
         }
 
         if (trueIfInAChildWindow)
@@ -289,7 +410,7 @@ public:
     {
         if (auto* otherPeer = dynamic_cast<LinuxComponentPeer*> (other))
         {
-            if (otherPeer->styleFlags & windowIsTemporary)
+            if (otherPeer->getStyleFlags() & windowIsTemporary)
                 return;
 
             setMinimised (false);
@@ -316,7 +437,7 @@ public:
     void repaint (const Rectangle<int>& area) override
     {
         if (repainter != nullptr)
-            repainter->repaint (area.getIntersection (bounds.withZeroOrigin()));
+            repainter->repaint (area.getIntersection (getBounds().withZeroOrigin()));
     }
 
     void performAnyPendingRepaintsNow() override
@@ -383,7 +504,7 @@ public:
     bool isConstrainedNativeWindow() const
     {
         return constrainer != nullptr
-            && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable)
+            && (getStyleFlags() & windowIsResizable) != 0
             && ! isKioskMode();
     }
 
@@ -395,35 +516,32 @@ public:
             return;
         }
 
-        if (isConstrainedNativeWindow())
-            XWindowSystem::getInstance()->updateConstraints (windowH);
-
-        auto physicalBounds = XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow);
-
+        physicalBounds = XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow);
+        fullScreen = XWindowSystem::getInstance()->isFullScreen (windowH);
         updateScaleFactorFromNewBounds (physicalBounds, true);
 
-        bounds = parentWindow == 0 ? Desktop::getInstance().getDisplays().physicalToLogical (physicalBounds)
-                                   : physicalBounds / getPlatformScaleFactor();
+        if (isConstrainedNativeWindow())
+            XWindowSystem::getInstance()->updateSizeHints (windowH, *this, physicalBounds);
 
         updateVBlankTimer();
     }
 
     void updateBorderSize()
     {
-        if ((styleFlags & windowHasTitleBar) == 0)
+        if ((getStyleFlags() & windowHasTitleBar) == 0)
         {
-            windowBorder = ComponentPeer::OptionalBorderSize { BorderSize<int>() };
+            windowBorder = OptionalBorderSize { BorderSize<int>() };
         }
         else if (! windowBorder
                  || ((*windowBorder).getTopAndBottom() == 0 && (*windowBorder).getLeftAndRight() == 0))
         {
-            windowBorder = [&]()
+            windowBorder = std::invoke ([&]
             {
                 if (auto unscaledBorderSize = XWindowSystem::getInstance()->getBorderSize (windowH))
                     return OptionalBorderSize { (*unscaledBorderSize).multipliedBy (1.0 / getPlatformScaleFactor()) };
 
-                return OptionalBorderSize {};
-            }();
+                return OptionalBorderSize{};
+            });
         }
     }
 
@@ -438,7 +556,10 @@ public:
 
     void startHostManagedResize (Point<int>, ResizableBorderComponent::Zone zone) override
     {
-        XWindowSystem::getInstance()->startHostManagedResize (windowH, zone);
+        // The window manager won't resize a window with fixed size hints, so keep the pointer grab
+        // and let the resizer component handle the drag.
+        if ((getStyleFlags() & windowIsResizable) != 0)
+            XWindowSystem::getInstance()->startHostManagedResize (windowH, zone);
     }
 
     //==============================================================================
@@ -512,8 +633,10 @@ private:
                         // This issue only occurs right after peer creation, when the image is
                         // null. Updating when only the width or height is changed would lead to
                         // incorrect behaviour.
-                        peer.forceSetBounds (detail::ScalingHelpers::scaledScreenPosToUnscaled (peer.component, peer.component.getBoundsInParent()),
-                                             peer.isFullScreen());
+                        using SH = detail::ScalingHelpers;
+                        const auto unscaled = SH::scaledScreenPosToUnscaled (peer.component,
+                                                                             peer.component.getBoundsInParent());
+                        peer.forceSetBounds (unscaled, peer.isFullScreen());
                     }
                 }
 
@@ -551,17 +674,48 @@ private:
         JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager)
     };
 
-    //==============================================================================
+    template <typename This>
+    static Point<float> localToMultimonitor (This& t, Point<float> x)
+    {
+        const auto localPhysical = x * t.getPlatformScaleFactor();
+        const auto multimonitor = localPhysical + t.getPhysicalScreenPosition().toFloat();
+        return multimonitor;
+    }
+
+    template <typename This>
+    static Point<float> multimonitorToLocal (This& t, Point<float> x)
+    {
+        const auto localPhysical = x - t.getPhysicalScreenPosition().toFloat();
+        const auto local = localPhysical / t.getPlatformScaleFactor();
+        return local;
+    }
+
     template <typename This>
     static Point<float> localToGlobal (This& t, Point<float> relativePosition)
     {
-        return relativePosition + t.getScreenPosition (false).toFloat();
+        return detail::ScalingHelpers::convertPhysicalScreenPointToLogical (localToMultimonitor (t, relativePosition));
     }
 
     template <typename This>
     static Point<float> globalToLocal (This& t, Point<float> screenPosition)
     {
-        return screenPosition - t.getScreenPosition (false).toFloat();
+        return multimonitorToLocal (t, detail::ScalingHelpers::convertLogicalScreenPointToPhysical (screenPosition));
+    }
+
+    Point<int> getPhysicalScreenPosition() const
+    {
+        if (parentWindow == 0)
+            return physicalBounds.getTopLeft();
+
+        // A child window isn't notified when its parent is moved, so the position of a parent
+        // in this process is taken from the parent's peer.
+        for (int i = 0; i < getNumPeers(); ++i)
+            if (auto* parent = dynamic_cast<const LinuxComponentPeer*> (getPeer (i)))
+                if (parent != this && parent->windowH == parentWindow)
+                    return parent->getPhysicalScreenPosition() + physicalBounds.getTopLeft();
+
+        const auto physicalParentPosition = XWindowSystem::getInstance()->getPhysicalParentScreenPosition();
+        return physicalBounds.getTopLeft().translated (physicalParentPosition.x, physicalParentPosition.y);
     }
 
     //==============================================================================
@@ -577,20 +731,24 @@ private:
 
     void updateScaleFactorFromNewBounds (const Rectangle<int>& newBounds, bool isPhysical)
     {
-        Point<int> translation = (parentWindow != 0 ? getScreenPosition (isPhysical) : Point<int>());
+        const auto translationScale = isPhysical ? 1.0f : getPlatformScaleFactor();
+        const auto translation = (parentWindow != 0 ? (getPhysicalScreenPosition().toFloat() / translationScale).roundToInt() : Point<int>());
         const auto& desktop = Desktop::getInstance();
+
+        const auto prev = getPlatformScaleFactor();
 
         if (auto* display = desktop.getDisplays().getDisplayForRect (newBounds.translated (translation.x, translation.y),
                                                                      isPhysical))
         {
-            auto newScaleFactor = display->scale / desktop.getGlobalScaleFactor();
-
-            if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
-            {
-                currentScaleFactor = newScaleFactor;
-                scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (currentScaleFactor); });
-            }
+            currentScaleFactor = display->scale / desktop.getGlobalScaleFactor();
         }
+
+        const auto next = getPlatformScaleFactor();
+
+        if (approximatelyEqual (prev, next))
+            return;
+
+        scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (next); });
     }
 
     void onVBlank()
@@ -604,15 +762,16 @@ private:
 
     void updateVBlankTimer()
     {
-        if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (bounds))
+        if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (physicalBounds, true))
         {
             // Some systems fail to set an explicit refresh rate, or ask for a refresh rate of 0
             // (observed on Raspbian Bullseye over VNC). In these situations, use a fallback value.
-            const auto newIntFrequencyHz = roundToInt (display->verticalFrequencyHz.value_or (0.0));
-            const auto frequencyToUse = newIntFrequencyHz != 0 ? newIntFrequencyHz : 100;
+            const auto reportedHz = display->verticalFrequencyHz.value_or (0.0);
+            const auto frequencyToUse = reportedHz > 0.0 ? reportedHz : 100.0;
+            const auto periodMs = jmax (1, (int) (1000.0 / frequencyToUse));
 
-            if (vBlankManager.getTimerInterval() != frequencyToUse)
-                vBlankManager.startTimerHz (frequencyToUse);
+            if (vBlankManager.getTimerInterval() != periodMs)
+                vBlankManager.startTimer (periodMs);
         }
     }
 
@@ -621,7 +780,9 @@ private:
     TimedCallback vBlankManager { [this]() { onVBlank(); } };
 
     ::Window windowH = {}, parentWindow = {};
-    Rectangle<int> bounds;
+    Rectangle<int> physicalBounds;
+    std::optional<Rectangle<int>> boundsForTransientWindows;
+    std::optional<Point<int>> hostScreenPosition;
     ComponentPeer::OptionalBorderSize windowBorder;
     bool fullScreen = false, isAlwaysOnTop = false;
     std::optional<double> scaleFactorOverride;
@@ -637,9 +798,10 @@ private:
 bool LinuxComponentPeer::isActiveApplication = false;
 
 //==============================================================================
-ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)
+ComponentPeer* Component::createNewPeer (const DesktopWindowOptions& options)
 {
-    return new LinuxComponentPeer (*this, styleFlags, (::Window) nativeWindowToAttachTo);
+    return new LinuxComponentPeer (*this, options.getStyleFlags(), options.getAssociatedComponent(),
+                                   (::Window) options.getParentX11Window());
 }
 
 //==============================================================================
@@ -652,7 +814,7 @@ JUCE_API void JUCE_CALLTYPE Process::hide()                   {}
 void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool)
 {
     if (enableOrDisable)
-        comp->setBounds (getDisplays().getDisplayForRect (comp->getScreenBounds())->totalArea);
+        comp->setBounds (getDisplays().getDisplayForRect (comp->getScreenBounds())->logicalBounds.getSmallestIntegerContainer());
 }
 
 void Displays::findDisplays (const Desktop& desktop)
@@ -744,9 +906,12 @@ void Desktop::allowedOrientationsChanged()                          {}
 //==============================================================================
 bool detail::MouseInputSourceList::addSource()
 {
-    if (sources.isEmpty())
+    auto numSources = sources.size();
+
+    if (numSources == 0 || canUseTouch())
     {
-        addSource (0, MouseInputSource::InputSourceType::mouse);
+        addSource (numSources, numSources == 0 ? MouseInputSource::InputSourceType::mouse
+                                               : MouseInputSource::InputSourceType::touch);
         return true;
     }
 
@@ -755,17 +920,17 @@ bool detail::MouseInputSourceList::addSource()
 
 bool detail::MouseInputSourceList::canUseTouch() const
 {
-    return false;
+    return XWindowSystem::getInstance()->canUseMultiTouch();
 }
 
 Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
-    return Desktop::getInstance().getDisplays().physicalToLogical (XWindowSystem::getInstance()->getCurrentMousePosition());
+    return detail::ScalingHelpers::convertPhysicalScreenPointToLogical (XWindowSystem::getInstance()->getCurrentMousePosition());
 }
 
 void MouseInputSource::setRawMousePosition (Point<float> newPosition)
 {
-    XWindowSystem::getInstance()->setMousePosition (Desktop::getInstance().getDisplays().logicalToPhysical (newPosition));
+    XWindowSystem::getInstance()->setMousePosition (detail::ScalingHelpers::convertLogicalScreenPointToPhysical (newPosition));
 }
 
 //==============================================================================
@@ -781,7 +946,8 @@ public:
     ~PlatformSpecificHandle()
     {
         if (cursorHandle != Cursor{})
-            XWindowSystem::getInstance()->deleteMouseCursor (cursorHandle);
+            if (auto* windowSystem = XWindowSystem::getInstanceWithoutCreating())
+                windowSystem->deleteMouseCursor (cursorHandle);
     }
 
     static void showInWindow (PlatformSpecificHandle* handle, ComponentPeer* peer)

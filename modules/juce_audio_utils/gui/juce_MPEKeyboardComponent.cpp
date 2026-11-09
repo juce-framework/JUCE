@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -157,6 +157,9 @@ void MPEKeyboardComponent::colourChanged()
 //==============================================================================
 MPEValue MPEKeyboardComponent::mousePositionToPitchbend (int initialNote, Point<float> mousePos)
 {
+    if (perNotePitchbendRange == 0)
+        return {};
+
     auto constrainedMousePos = [&]
     {
         auto horizontal = isHorizontal();
@@ -230,6 +233,9 @@ MPEValue MPEKeyboardComponent::mousePositionToTimbre (Point<float> mousePos)
 
 void MPEKeyboardComponent::mouseDown (const MouseEvent& e)
 {
+    if (channelAssigner == nullptr)
+        return;
+
     auto newNote = getNoteAndVelocityAtPosition (e.position).note;
 
     if (newNote >= 0)
@@ -249,6 +255,9 @@ void MPEKeyboardComponent::mouseDown (const MouseEvent& e)
 
 void MPEKeyboardComponent::mouseDrag (const MouseEvent& e)
 {
+    if (channelAssigner == nullptr)
+        return;
+
     auto noteID = sourceIDMap[e.source.getIndex()];
     auto note = instrument.getNoteWithID (noteID);
 
@@ -281,6 +290,9 @@ void MPEKeyboardComponent::mouseDrag (const MouseEvent& e)
 
 void MPEKeyboardComponent::mouseUp (const MouseEvent& e)
 {
+    if (channelAssigner == nullptr)
+        return;
+
     auto note = instrument.getNoteWithID (sourceIDMap[e.source.getIndex()]);
 
     if (! note.isValid())

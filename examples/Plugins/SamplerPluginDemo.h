@@ -2566,6 +2566,8 @@ private:
         // a valid state for the duration of the call.
         const GenericScopedTryLock<SpinLock> lock (commandQueueMutex);
 
+        buffer.clear();
+
         if (lock.isLocked())
             commands.call (*this);
 
@@ -2588,7 +2590,6 @@ private:
             else
                 playbackPositions[(size_t) i] = 0.0f;
         }
-
     }
 
     CommandFifo<SamplerAudioProcessor> commands;

@@ -1564,7 +1564,7 @@ public:
     }
 
 private:
-    TooltipWindow tooltipWindow { nullptr, 100 };
+    SharedResourcePointer<TooltipWindow> tooltipWindow;
 
     TabbedComponent tabs { TabbedButtonBar::Orientation::TabsAtTop };
 

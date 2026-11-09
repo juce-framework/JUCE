@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -242,6 +242,12 @@ public:
     /** Removed an input listener. */
     void removeCallback (MidiInputCallback&);
 
+    /** Adds a listener, which will be notified if the device gets disconnected. */
+    void addDisconnectionListener (ump::DisconnectionListener&);
+
+    /** Removes a previously-added disconnection listener. */
+    void removeDisconnectionListener (ump::DisconnectionListener&);
+
 private:
     class Impl;
     MidiInput();
@@ -311,9 +317,12 @@ public:
 
     @tags{Audio}
 */
-class JUCE_API  MidiOutput  final
+class JUCE_API  MidiOutput  final : private ump::DisconnectionListener
 {
 public:
+    /** Destructor */
+    ~MidiOutput() override;
+
     //==============================================================================
     /** Returns a list of the available midi output devices.
 
@@ -378,21 +387,15 @@ public:
 
     //==============================================================================
     /** Sends out a MIDI message immediately. */
-    void sendMessageNow (const MidiMessage& message)
+    bool sendMessageNow (const MidiMessage& message)
     {
-        converter.convert ({ group, message.asSpan() }, [this] (const ump::View& view)
-        {
-            ump::Iterator b (view.data(), view.size());
-            auto e = std::next (b);
-            connection.send (b, e);
-        });
+        return convertAndSend (mainPackets, Span { &message, 1 });
     }
 
     /** Sends out a sequence of MIDI messages immediately. */
-    void sendBlockOfMessagesNow (const MidiBuffer& buffer)
+    bool sendBlockOfMessagesNow (const MidiBuffer& buffer)
     {
-        for (const auto metadata : buffer)
-            sendMessageNow (metadata.getMessage());
+        return convertAndSend (mainPackets, buffer);
     }
 
     /** This lets you supply a block of messages that will be sent out at some point
@@ -436,7 +439,11 @@ public:
     /** Starts up a background thread so that the device can send blocks of data.
         Call this to get the device ready, before using sendBlockOfMessages().
     */
-    void startBackgroundThread()            { outputThread.start(); }
+    void startBackgroundThread()
+    {
+        backgroundPackets.reserve (2048);
+        outputThread.start();
+    }
 
     /** Stops the background thread, and clears any pending midi events.
         @see startBackgroundThread
@@ -449,6 +456,20 @@ public:
     */
     bool isBackgroundThreadRunning() const  { return outputThread.isRunning(); }
 
+    /** Adds a listener, which will be notified if the device gets disconnected. */
+    void addDisconnectionListener (DisconnectionListener& l)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        disconnectionListeners.add (&l);
+    }
+
+    /** Removes a previously-added disconnection listener. */
+    void removeDisconnectionListener (DisconnectionListener& l)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        disconnectionListeners.remove (&l);
+    }
+
 private:
     MidiOutput (std::shared_ptr<ump::Session>,
                 ump::Output,
@@ -456,17 +477,39 @@ private:
                 const MidiDeviceInfo&,
                 ump::LegacyVirtualOutput);
 
+    void disconnected() override
+    {
+        disconnectionListeners.call ([&] (auto& l) { l.disconnected(); });
+    }
+
+    template <typename Range>
+    bool convertAndSend (ump::Packets& packets, Range&& range)
+    {
+        packets.clear();
+
+        std::for_each (std::begin (range), std::end (range), [&] (const auto& item)
+        {
+            ump::ToUMP1Converter{}.convert ({ group, item.asSpan() }, [&packets] (auto view)
+            {
+                packets.add (view);
+            });
+        });
+
+        return connection.send (packets.begin(), packets.end());
+    }
+
     //==============================================================================
     std::shared_ptr<ump::Session> session;
     ump::LegacyVirtualOutput virtualEndpoint;
     std::optional<String> customName;
     ump::Output connection;
     MidiDeviceInfo storedInfo;
-    ump::ToUMP1Converter converter;
+    ump::Packets mainPackets, backgroundPackets;
     uint8_t group{};
+    ListenerList<DisconnectionListener> disconnectionListeners;
     ScheduledEventThread<MidiMessage> outputThread { [this] (const MidiMessage& message)
     {
-        sendMessageNow (message);
+        convertAndSend (backgroundPackets, Span { &message, 1 });
     } };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutput)

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -47,6 +47,11 @@ enum VariantStreamMarkers
     varMarker_Binary    = 8,
     varMarker_Undefined = 9
 };
+
+namespace VariantStreamLimits
+{
+    constexpr int maxArrayNestingDepth = 256;
+}
 
 //==============================================================================
 struct var::VariantType
@@ -601,10 +606,9 @@ var& var::operator= (ReferenceCountedObject* v)  { var v2 (v); swapWith (v2); re
 var& var::operator= (NativeFunction v)           { var v2 (v); swapWith (v2); return *this; }
 
 var::var (var&& other) noexcept
-    : type (other.type),
-      value (other.value)
+    : type (std::exchange (other.type, &Instance::attributesVoid)),
+      value (std::exchange (other.value, {}))
 {
-    other.type = &Instance::attributesVoid;
 }
 
 var& var::operator= (var&& other) noexcept
@@ -637,6 +641,38 @@ var& var::operator= (String&& v)
 }
 
 //==============================================================================
+Span<var> var::getArrayElements() &
+{
+    if (auto* array = getArray())
+        return Span { array->getRawDataPointer(), (size_t) array->size() };
+
+    return {};
+}
+
+Span<const var> var::getArrayElements() const&
+{
+    if (auto* array = getArray())
+        return Span { array->getRawDataPointer(), (size_t) array->size() };
+
+    return {};
+}
+
+Span<NamedValue> var::getObjectElements() &
+{
+    if (auto* obj = getDynamicObject())
+        return obj->getProperties().asSpan();
+
+    return {};
+}
+
+Span<const NamedValue> var::getObjectElements() const&
+{
+    if (auto* obj = getDynamicObject())
+        return obj->getProperties().asSpan();
+
+    return {};
+}
+
 bool var::equals (const var& other) const noexcept
 {
     return type->equals (value, other.value, *other.type);
@@ -841,7 +877,7 @@ void var::writeToStream (OutputStream& output) const
     type->writeToStream (value, output);
 }
 
-var var::readFromStream (InputStream& input)
+static var readVarFromStream (InputStream& input, int arrayNestingDepth)
 {
     const int numBytes = input.readCompressedInt();
 
@@ -864,12 +900,12 @@ var var::readFromStream (InputStream& input)
 
             case varMarker_Binary:
             {
-                MemoryBlock mb ((size_t) numBytes - 1);
+                // The declared size comes from the stream and could be malicious
+                MemoryBlock mb;
 
-                if (numBytes > 1)
                 {
-                    const int numRead = input.read (mb.getData(), numBytes - 1);
-                    mb.setSize ((size_t) numRead);
+                    MemoryOutputStream mo (mb, false);
+                    mo.writeFromInputStream (input, numBytes - 1);
                 }
 
                 return var (mb);
@@ -877,11 +913,17 @@ var var::readFromStream (InputStream& input)
 
             case varMarker_Array:
             {
-                var v;
-                auto* destArray = v.convertToArray();
+                if (VariantStreamLimits::maxArrayNestingDepth <= arrayNestingDepth)
+                {
+                    input.skipNextBytes (numBytes - 1);
+                    break;
+                }
+
+                var v { Array<var>() };
+                auto* destArray = v.getArray();
 
                 for (int i = input.readCompressedInt(); --i >= 0;)
-                    destArray->add (readFromStream (input));
+                    destArray->add (readVarFromStream (input, arrayNestingDepth + 1));
 
                 return v;
             }
@@ -892,6 +934,11 @@ var var::readFromStream (InputStream& input)
     }
 
     return {};
+}
+
+var var::readFromStream (InputStream& input)
+{
+    return readVarFromStream (input, 0);
 }
 
 var::NativeFunctionArgs::NativeFunctionArgs (const var& t, const var* args, int numArgs) noexcept
@@ -919,6 +966,36 @@ struct VariantTests : public UnitTest
 public:
     VariantTests() : UnitTest ("Variant", UnitTestCategories::json) {}
 
+    static var createNestedArrays (int depth)
+    {
+        var result { Array<var>() };
+
+        for (int i = 1; i < depth; ++i)
+        {
+            var outer { Array<var>() };
+            outer.append (result);
+            result = outer;
+        }
+
+        return result;
+    }
+
+    static int countNestedArrays (const var& v)
+    {
+        if (auto* array = v.getArray())
+            return 1 + (array->isEmpty() ? 0 : countNestedArrays (array->getFirst()));
+
+        return 0;
+    }
+
+    static var writeAndReadBack (const var& v)
+    {
+        MemoryOutputStream mo;
+        v.writeToStream (mo);
+        MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
+        return var::readFromStream (mi);
+    }
+
     void runTest() override
     {
         beginTest ("object comparisons have value semantics");
@@ -943,6 +1020,36 @@ public:
 
             expect (varA.equals (varB));
             expect (varB.equals (varA));
+        }
+
+        beginTest ("stream reading limits");
+        {
+            const auto maxDepth = VariantStreamLimits::maxArrayNestingDepth;
+
+            expectEquals (countNestedArrays (writeAndReadBack (createNestedArrays (maxDepth))), maxDepth);
+
+            {
+                MemoryOutputStream mo;
+                createNestedArrays (maxDepth + 1).writeToStream (mo);
+                var (42).writeToStream (mo);
+
+                MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
+                expectEquals (countNestedArrays (var::readFromStream (mi)), maxDepth);
+                expect (var::readFromStream (mi) == var (42));
+                expect (mi.isExhausted());
+            }
+
+            {
+                MemoryOutputStream mo;
+                mo.writeCompressedInt (std::numeric_limits<int>::max());
+                mo.writeByte (varMarker_Binary);
+                mo.writeByte (1);
+                mo.writeByte (2);
+
+                MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
+                const auto v = var::readFromStream (mi);
+                expect (v.isBinaryData() && v.getBinaryData()->getSize() == 2);
+            }
         }
     }
 };

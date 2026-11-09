@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -62,7 +62,7 @@
  #include <ctime>
 
  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4091)
- #include <Dbghelp.h>
+ #include <dbghelp.h>
  JUCE_END_IGNORE_WARNINGS_MSVC
 
  #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
@@ -73,7 +73,13 @@
  #if JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
   #include <sys/types.h>
   #include <sys/socket.h>
-  #include <sys/errno.h>
+
+  #if __has_include (<errno.h>)
+   #include <errno.h>
+  #else
+   #include <sys/errno.h>
+  #endif
+
   #include <unistd.h>
   #include <netinet/in.h>
  #endif
@@ -93,6 +99,7 @@
   #include <langinfo.h>
   #include <ifaddrs.h>
   #include <sys/resource.h>
+  #include <sys/utsname.h>
 
   #if JUCE_USE_CURL
    #include <curl/curl.h>
@@ -108,7 +115,7 @@
  #include <net/if.h>
  #include <sys/ioctl.h>
 
- #if ! (JUCE_ANDROID || JUCE_WASM)
+ #if ! (JUCE_ANDROID || JUCE_WASM) && __has_include (<execinfo.h>)
   #include <execinfo.h>
  #endif
 #endif
@@ -185,6 +192,7 @@
 #include "threads/juce_ReadWriteLock.cpp"
 #include "threads/juce_Thread.cpp"
 #include "threads/juce_ThreadPool.cpp"
+#include "threads/juce_ThreadPoolJob.cpp"
 #include "threads/juce_TimeSliceThread.cpp"
 #include "time/juce_PerformanceCounter.cpp"
 #include "time/juce_RelativeTime.cpp"
@@ -293,6 +301,7 @@
  #include "containers/juce_ListenerList_test.cpp"
  #include "maths/juce_MathsFunctions_test.cpp"
  #include "misc/juce_EnumHelpers_test.cpp"
+ #include "misc/juce_OrderedContainerHelpers_test.cpp"
  #include "containers/juce_FixedSizeFunction_test.cpp"
  #include "json/juce_JSONSerialisation_test.cpp"
  #include "memory/juce_SharedResourcePointer_test.cpp"

@@ -57,14 +57,6 @@
 
 using namespace dsp;
 
-template <typename T>
-static T* toBasePointer (SIMDRegister<T>* r) noexcept
-{
-    return reinterpret_cast<T*> (r);
-}
-
-constexpr auto registerSize = dsp::SIMDRegister<float>::size();
-
 //==============================================================================
 struct SIMDRegisterDemoDSP
 {
@@ -73,27 +65,18 @@ struct SIMDRegisterDemoDSP
         sampleRate = spec.sampleRate;
 
         iirCoefficients = IIR::Coefficients<float>::makeLowPass (sampleRate, 440.0f);
-        iir.reset (new IIR::Filter<SIMDRegister<float>> (iirCoefficients));
+        iir = IIR::Filter<SIMDRegister<float>> (iirCoefficients);
 
-        interleaved = AudioBlock<SIMDRegister<float>> (interleavedBlockData, 1, spec.maximumBlockSize);
-        zero        = AudioBlock<float> (zeroData, SIMDRegister<float>::size(), spec.maximumBlockSize);
+        static constexpr auto registerSize = SIMDRegister<float>::size();
+        const auto numChannelsSIMD = (spec.numChannels + registerSize - 1) / registerSize;
+        interleaved = AudioBlock<SIMDRegister<float>> (interleavedBlockData, numChannelsSIMD, spec.maximumBlockSize);
 
-        zero.clear();
+        scratchChannel.clear();
+        scratchChannel.resize (spec.maximumBlockSize);
 
-        auto monoSpec = spec;
-        monoSpec.numChannels = 1;
-        iir->prepare (monoSpec);
-    }
-
-    template <typename SampleType>
-    auto prepareChannelPointers (const AudioBlock<SampleType>& block)
-    {
-        std::array<SampleType*, registerSize> result {};
-
-        for (size_t ch = 0; ch < result.size(); ++ch)
-            result[ch] = (ch < block.getNumChannels() ? block.getChannelPointer (ch) : zero.getChannelPointer (ch));
-
-        return result;
+        auto specSIMD = spec;
+        specSIMD.numChannels = (uint32_t) numChannelsSIMD;
+        iir.prepare (specSIMD);
     }
 
     void process (const ProcessContextReplacing<float>& context)
@@ -101,24 +84,11 @@ struct SIMDRegisterDemoDSP
         jassert (context.getInputBlock().getNumSamples()  == context.getOutputBlock().getNumSamples());
         jassert (context.getInputBlock().getNumChannels() == context.getOutputBlock().getNumChannels());
 
-        const auto& input  = context.getInputBlock();
-        const auto numSamples = (int) input.getNumSamples();
+        SIMDInterleavingHelpers::interleave (context.getInputBlock(), interleaved, scratchChannel);
 
-        auto inChannels = prepareChannelPointers (input);
+        iir.process (ProcessContextReplacing (interleaved));
 
-        using Format = AudioData::Format<AudioData::Float32, AudioData::NativeEndian>;
-
-        AudioData::interleaveSamples (AudioData::NonInterleavedSource<Format> { inChannels.data(),                                 registerSize, },
-                                      AudioData::InterleavedDest<Format>      { toBasePointer (interleaved.getChannelPointer (0)), registerSize },
-                                      numSamples);
-
-        iir->process (ProcessContextReplacing<SIMDRegister<float>> (interleaved));
-
-        auto outChannels = prepareChannelPointers (context.getOutputBlock());
-
-        AudioData::deinterleaveSamples (AudioData::InterleavedSource<Format>  { toBasePointer (interleaved.getChannelPointer (0)), registerSize },
-                                        AudioData::NonInterleavedDest<Format> { outChannels.data(),                                registerSize },
-                                        numSamples);
+        SIMDInterleavingHelpers::deinterleave (interleaved, context.getOutputBlock(), scratchChannel);
     }
 
     void reset()
@@ -128,29 +98,29 @@ struct SIMDRegisterDemoDSP
 
     void updateParameters()
     {
-        if (! approximatelyEqual (sampleRate, 0.0))
-        {
-            auto cutoff = static_cast<float> (cutoffParam.getCurrentValue());
-            auto qVal   = static_cast<float> (qParam.getCurrentValue());
+        if (approximatelyEqual (sampleRate, 0.0))
+            return;
 
-            switch (typeParam.getCurrentSelectedID())
-            {
-                case 1:   *iirCoefficients = IIR::ArrayCoefficients<float>::makeLowPass  (sampleRate, cutoff, qVal); break;
-                case 2:   *iirCoefficients = IIR::ArrayCoefficients<float>::makeHighPass (sampleRate, cutoff, qVal); break;
-                case 3:   *iirCoefficients = IIR::ArrayCoefficients<float>::makeBandPass (sampleRate, cutoff, qVal); break;
-                default:  break;
-            }
+        auto cutoff = static_cast<float> (cutoffParam.getCurrentValue());
+        auto qVal   = static_cast<float> (qParam.getCurrentValue());
+
+        switch (typeParam.getCurrentSelectedID())
+        {
+            case 1:   *iirCoefficients = IIR::ArrayCoefficients<float>::makeLowPass  (sampleRate, cutoff, qVal); break;
+            case 2:   *iirCoefficients = IIR::ArrayCoefficients<float>::makeHighPass (sampleRate, cutoff, qVal); break;
+            case 3:   *iirCoefficients = IIR::ArrayCoefficients<float>::makeBandPass (sampleRate, cutoff, qVal); break;
+            default:  break;
         }
     }
 
     //==============================================================================
     IIR::Coefficients<float>::Ptr iirCoefficients;
-    std::unique_ptr<IIR::Filter<SIMDRegister<float>>> iir;
+    IIR::Filter<SIMDRegister<float>> iir;
 
     AudioBlock<SIMDRegister<float>> interleaved;
-    AudioBlock<float> zero;
+    std::vector<float> scratchChannel;
 
-    HeapBlock<char> interleavedBlockData, zeroData;
+    HeapBlock<char> interleavedBlockData;
 
     ChoiceParameter typeParam { { "Low-pass", "High-pass", "Band-pass" }, 1, "Type" };
     SliderParameter cutoffParam { { 20.0, 20000.0 }, 0.5, 440.0f, "Cutoff", "Hz" };

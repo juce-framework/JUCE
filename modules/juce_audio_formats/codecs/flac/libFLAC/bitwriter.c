@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2023  Xiph.Org Foundation
+ * Copyright (C) 2011-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,7 +39,7 @@
 #include "include/private/bitwriter.h"
 #include "include/private/crc.h"
 #include "include/private/format.h"
-
+#include "include/private/macros.h"
 #include "include/private/stream_encoder.h"
 #include "../assert.h"
 #include "../alloc.h"
@@ -89,8 +89,8 @@ typedef FLAC__uint64 FLAC__bwtemp;
  * next one.
  */
 static const uint32_t FLAC__BITWRITER_DEFAULT_CAPACITY = 32768u / sizeof(bwword); /* size in words */
-/* When growing, increment 4K at a time */
-static const uint32_t FLAC__BITWRITER_DEFAULT_INCREMENT = 4096u / sizeof(bwword); /* size in words */
+/* When growing, increment with 1/4th at a time */
+static const uint32_t FLAC__BITWRITER_DEFAULT_GROW_FRACTION = 2; /* means grow by >> 2 (1/4th) of current size */
 
 #define FLAC__WORDS_TO_BITS(words) ((words) * FLAC__BITS_PER_WORD)
 #define FLAC__TOTAL_BITS(bw) (FLAC__WORDS_TO_BITS((bw)->words) + (bw)->bits)
@@ -131,15 +131,15 @@ FLAC__bool bitwriter_grow_(FLAC__BitWriter *bw, uint32_t bits_to_add)
 		 * To prevent chrashing, give up */
 		return false;
 
-	/* round up capacity increase to the nearest FLAC__BITWRITER_DEFAULT_INCREMENT */
-	if((new_capacity - bw->capacity) % FLAC__BITWRITER_DEFAULT_INCREMENT)
-		new_capacity += FLAC__BITWRITER_DEFAULT_INCREMENT - ((new_capacity - bw->capacity) % FLAC__BITWRITER_DEFAULT_INCREMENT);
+	/* As reallocation can be quite expensive, grow exponentially */
+	if((new_capacity - bw->capacity) < (bw->capacity >> FLAC__BITWRITER_DEFAULT_GROW_FRACTION))
+		new_capacity = bw->capacity + (bw->capacity >> FLAC__BITWRITER_DEFAULT_GROW_FRACTION);
+
 	/* make sure we got everything right */
-	FLAC__ASSERT(0 == (new_capacity - bw->capacity) % FLAC__BITWRITER_DEFAULT_INCREMENT);
 	FLAC__ASSERT(new_capacity > bw->capacity);
 	FLAC__ASSERT(new_capacity >= bw->words + ((bw->bits + bits_to_add + FLAC__BITS_PER_WORD - 1) / FLAC__BITS_PER_WORD));
 
-	new_buffer = (bwword*) safe_realloc_nofree_mul_2op_(bw->buffer, sizeof(bwword), /*times*/new_capacity);
+	new_buffer = safe_realloc_nofree_mul_2op_(bw->buffer, sizeof(bwword), /*times*/new_capacity);
 	if(new_buffer == 0)
 		return false;
 	bw->buffer = new_buffer;
@@ -156,7 +156,7 @@ FLAC__bool bitwriter_grow_(FLAC__BitWriter *bw, uint32_t bits_to_add)
 
 FLAC__BitWriter *FLAC__bitwriter_new(void)
 {
-	FLAC__BitWriter *bw = (FLAC__BitWriter*) calloc(1, sizeof(FLAC__BitWriter));
+	FLAC__BitWriter *bw = calloc(1, sizeof(FLAC__BitWriter));
 	/* note that calloc() sets all members to 0 for us */
 	return bw;
 }
@@ -181,7 +181,7 @@ FLAC__bool FLAC__bitwriter_init(FLAC__BitWriter *bw)
 
 	bw->words = bw->bits = 0;
 	bw->capacity = FLAC__BITWRITER_DEFAULT_CAPACITY;
-	bw->buffer = (bwword*) malloc(sizeof(bwword) * bw->capacity);
+	bw->buffer = malloc(sizeof(bwword) * bw->capacity);
 	if(bw->buffer == 0)
 		return false;
 
@@ -312,7 +312,7 @@ inline FLAC__bool FLAC__bitwriter_write_zeroes(FLAC__BitWriter *bw, uint32_t bit
 
 static inline FLAC__bool FLAC__bitwriter_write_raw_uint32_nocheck(FLAC__BitWriter *bw, FLAC__uint32 val, uint32_t bits)
 {
-	uint32_t left;
+	register uint32_t left;
 
 	/* WATCHOUT: code does not work with <32bit words; we can make things much faster with this assertion */
 	FLAC__ASSERT(FLAC__BITS_PER_WORD >= 32);

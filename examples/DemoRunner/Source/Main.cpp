@@ -147,31 +147,12 @@ private:
 
         void closeButtonPressed() override    { JUCEApplication::getInstance()->systemRequestedQuit(); }
 
-       #if JUCE_IOS || JUCE_ANDROID
-        void parentSizeChanged() override
-        {
-            if (auto* comp = getContentComponent())
-                comp->resized();
-        }
-       #endif
-
         //==============================================================================
         MainComponent& getMainComponent()    { return *dynamic_cast<MainComponent*> (getContentComponent()); }
 
     private:
        #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
-        std::unique_ptr<Component> taskbarIcon = std::invoke ([&]() -> std::unique_ptr<Component>
-        {
-            // This is a workaround for a bug in the Ubuntu desktop session on Wayland, which
-            // crashes when adding an X11 system tray entry.
-            const auto sessionType = SystemStats::getEnvironmentVariable ("XDG_SESSION_TYPE", {});
-            const auto sessionName = SystemStats::getEnvironmentVariable ("XDG_SESSION_DESKTOP", {});
-
-            if (sessionName.equalsIgnoreCase ("ubuntu") && sessionType.equalsIgnoreCase ("wayland"))
-                return {};
-
-            return std::make_unique<DemoTaskbarComponent>();
-        });
+        std::unique_ptr<Component> taskbarIcon = std::make_unique<DemoTaskbarComponent>();
        #endif
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainAppWindow)

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -267,6 +267,50 @@ public:
             bool acceptsFirstMouse = true;
         };
 
+        /** Options specific to the WkWebView backend used on Linux systems. These options will be
+            ignored on other platforms.
+        */
+        class LinuxWkWebView
+        {
+        public:
+            /** Specifies whether the pinch-to-zoom and CTRL + wheel gestures are handled natively
+                by the WebView. This is disabled by default, and instead both events are propagated
+                to the page hosted by the WebView, where it can be handled as CTRL + wheel up/down
+                events.
+
+                If you enable this option the page no longer receives these events and the zoom
+                operation is instead carried out by the WebView unconditionally. This behaviour is
+                unlike any other OS implementation, hence the disabled default.
+            */
+            [[nodiscard]] LinuxWkWebView withNativeZoomGesture (bool x) const
+            {
+                return withMember (*this, &LinuxWkWebView::allowNativeZoomGesture, x);
+            }
+
+            /** A multiplier applied to deltaY parameter of the wheel event on Linux when the
+                default GTK to Javascript translation is enabled. The default value is 100.0f.
+
+                To disable this translation, call withNativeZoomGesture (true). After this no
+                wheel events will be received during touchpad pinch gestures.
+
+                @see withNativeZoomGesture
+             */
+            [[nodiscard]] LinuxWkWebView withPinchTranslationSensitivity (float x) const
+            {
+                return withMember (*this, &LinuxWkWebView::pinchTranslationSensitivity, x);
+            }
+
+            /** @see withNativeZoomGesture */
+            auto getAllowNativeZoomGesture() const { return allowNativeZoomGesture; }
+
+            /** @see withPinchTranslationSensitivity */
+            auto getPinchTranslationSensitivity() const { return pinchTranslationSensitivity; }
+
+        private:
+            bool allowNativeZoomGesture = false;
+            float pinchTranslationSensitivity = 100.0f;
+        };
+
         /** Specifies options that apply to the Windows implementation when the WebView2 feature is
             enabled.
 
@@ -282,6 +326,13 @@ public:
         [[nodiscard]] Options withAppleWkWebViewOptions (const AppleWkWebView& appleWkWebViewOptions) const
         {
             return withMember (*this, &Options::appleWkWebView, appleWkWebViewOptions);
+        }
+
+        /** Specifies options that influence the WebBrowserComponent's behaviour on Linux systems.
+        */
+        [[nodiscard]] Options withLinuxWkWebViewOptions (const LinuxWkWebView& linuxWkWebViewOptions) const
+        {
+            return withMember (*this, &Options::linuxWkWebView, linuxWkWebViewOptions);
         }
 
         /** Enables native integration features for the code running inside the WebBrowserComponent.
@@ -417,6 +468,7 @@ public:
         auto        getUserAgent() const                                 { return userAgent; }
         auto        getWinWebView2BackendOptions() const                 { return winWebView2; }
         auto        getAppleWkWebViewOptions() const                     { return appleWkWebView; }
+        auto        getLinuxWkWebViewOptions() const                     { return linuxWkWebView; }
         auto        getNativeIntegrationsEnabled() const                 { return enableNativeIntegration; }
         const auto& getNativeFunctions() const                           { return nativeFunctions; }
         const auto& getEventListeners() const                            { return eventListeners; }
@@ -434,6 +486,7 @@ public:
         String userAgent;
         WinWebView2 winWebView2;
         AppleWkWebView appleWkWebView;
+        LinuxWkWebView linuxWkWebView;
         std::map<Identifier, NativeFunction> nativeFunctions;
         std::vector<std::pair<Identifier, NativeEventListener>> eventListeners;
         StringArray userScripts;
@@ -583,6 +636,13 @@ public:
         // Unsubscribing
         window.__JUCE__.backend.removeEventListener(removalToken);
         @endcode
+
+        The event is emitted by the JUCE Javascript framework, hence this function will fail if the
+        framework isn't loaded yet. If this happens a Javascript exception is logged in debug builds
+        and an assertion is triggered on the C++ side.
+
+        To be safe, you should only call this function after the first page has finished loading,
+        i.e. after the first call to pageFinishedLoading().
     */
     void emitEventIfBrowserIsVisible (const Identifier& eventId, const var& object);
 

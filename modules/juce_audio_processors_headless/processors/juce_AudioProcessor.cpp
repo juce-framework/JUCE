@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -36,6 +36,21 @@ namespace juce
 {
 
 static ThreadLocalValue<AudioProcessor::WrapperType> wrapperTypeBeingCreated;
+
+static void checkForAAXReservedParamID ([[maybe_unused]] AudioProcessorParameter* param)
+{
+   #if JUCE_DEBUG
+    if (auto* withID = dynamic_cast<HostedAudioProcessorParameter*> (param))
+    {
+        const auto id = withID->getParameterID();
+        constexpr char prefix[] = "avid.";
+
+        // If this is hit, the parameter ID is reserved for use by AVID in AAX plugins,
+        // it's a good idea to pick a different parameter ID if possible
+        jassert (strncmp (id.toRawUTF8(), prefix, std::size (prefix) - 1) != 0);
+    }
+   #endif
+}
 
 void JUCE_CALLTYPE AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::WrapperType type)
 {
@@ -439,6 +454,7 @@ void AudioProcessor::validateParameter (AudioProcessorParameter* param)
 {
     checkForDuplicateParamID (param);
     checkForDuplicateTrimmedParamID (param);
+    checkForAAXReservedParamID (param);
 
     /*  If you're building this plugin as an AudioUnit, and you intend to use the plugin in
         Logic Pro or GarageBand, it's a good idea to set version hints on all of your parameters
@@ -901,7 +917,7 @@ AudioProcessorEditor* AudioProcessor::getActiveEditor() const noexcept
     return activeEditor;
 }
 
-AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
+AudioProcessorEditor* AudioProcessor::createEditorAndMakeActive()
 {
     // Don't create UI objects from non-UI threads!
     JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
@@ -910,7 +926,7 @@ AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
 
     if (activeEditor != nullptr)
     {
-        // There's already an active editor! Before calling createEditorIfNeeded(),
+        // There's already an active editor! Before calling createEditorAndMakeActive(),
         // you should check whether there's already an editor using getActiveEditor().
         jassertfalse;
         return nullptr;
@@ -1281,6 +1297,36 @@ VST3ClientExtensions* AudioProcessor::getVST3ClientExtensions()
         jassertfalse;
         return extensions;
     }
+
+    return nullptr;
+}
+
+AudioProcessorARAExtension* AudioProcessor::getARAClientExtensions()
+{
+   #if JucePlugin_Enable_ARA
+    if (auto* extensions = dynamic_cast<AudioProcessorARAExtension*> (this))
+    {
+        //  To silence this jassert there are two options:
+        //
+        //  1. - Override AudioProcessor::getARAClientExtensions() and
+        //       return the "this" pointer.
+        //
+        //     - This option has the advantage of being quick and easy,
+        //       and avoids the above dynamic_cast.
+        //
+        //  2. - Create a new object that inherits from AudioProcessorARAClientExtension.
+        //
+        //     - Port your existing functionality from the AudioProcessor
+        //       to the new object.
+        //
+        //     - Return a pointer to the object in AudioProcessor::getARAClientExtensions().
+        //
+        //     - This option has the advantage of allowing you to break
+        //       up your AudioProcessor into smaller composable objects.
+        jassertfalse;
+        return extensions;
+    }
+   #endif
 
     return nullptr;
 }

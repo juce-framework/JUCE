@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -40,6 +40,11 @@ struct EndpointAndStaticInfo
     Endpoint endpoint;
     StaticDeviceInfo info;
     EndpointId id;
+
+    auto tie() const { return std::tuple (endpoint, info, id); }
+
+    bool operator== (const EndpointAndStaticInfo& other) const { return tie() == other.tie(); }
+    bool operator!= (const EndpointAndStaticInfo& other) const { return tie() != other.tie(); }
 };
 
 class IOHelpers

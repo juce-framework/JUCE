@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -44,7 +44,7 @@ TopLevelWindow::TopLevelWindow (const String& name, const bool shouldAddToDeskto
     setOpaque (true);
 
     if (shouldAddToDesktop)
-        Component::addToDesktop (TopLevelWindow::getDesktopWindowStyleFlags());
+        Component::createDesktopWindow (DesktopWindowOptions().withStyleFlags (TopLevelWindow::getDesktopWindowStyleFlags()));
     else
         setDropShadowEnabled (true);
 
@@ -88,6 +88,11 @@ bool TopLevelWindow::isUsingNativeTitleBar() const noexcept
     return useNativeTitleBar && (isOnDesktop() || ! isShowing());
 }
 
+bool TopLevelWindow::isUsingWindowsMultiTouch() const noexcept
+{
+    return canUseWindowsMultiTouch && (isOnDesktop() || ! isShowing());
+}
+
 void TopLevelWindow::visibilityChanged()
 {
     if (isShowing())
@@ -104,7 +109,8 @@ void TopLevelWindow::parentHierarchyChanged()
 
 int TopLevelWindow::getDesktopWindowStyleFlags() const
 {
-    int styleFlags = ComponentPeer::windowAppearsOnTaskbar;
+    // A window that floats over another window is reached through that window, not the taskbar.
+    int styleFlags = associatedComponent != nullptr ? 0 : ComponentPeer::windowAppearsOnTaskbar;
 
     if (useDropShadow)       styleFlags |= ComponentPeer::windowHasDropShadow;
     if (useNativeTitleBar)   styleFlags |= ComponentPeer::windowHasTitleBar;
@@ -119,7 +125,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
     if (isOnDesktop())
     {
         shadower = nullptr;
-        Component::addToDesktop (getDesktopWindowStyleFlags());
+        Component::createDesktopWindow (getDesktopWindowOptions());
     }
     else
     {
@@ -151,11 +157,38 @@ void TopLevelWindow::setUsingNativeTitleBar (const bool shouldUseNativeTitleBar)
     }
 }
 
+void TopLevelWindow::setUsingWindowsMultiTouch (bool shouldUseMultiTouch)
+{
+    canUseWindowsMultiTouch = shouldUseMultiTouch;
+
+    if (auto* peer = getPeer())
+        peer->setWindowsCanUseMultiTouch (canUseWindowsMultiTouch);
+}
+
+void TopLevelWindow::setAssociatedComponent (Component* component)
+{
+    if (associatedComponent == component)
+        return;
+
+    associatedComponent = component;
+    recreateDesktopWindow();
+}
+
+DesktopWindowOptions TopLevelWindow::getDesktopWindowOptions() const
+{
+    return DesktopWindowOptions().withStyleFlags (getDesktopWindowStyleFlags())
+                                 .withAssociatedComponent (associatedComponent.get());
+}
+
 void TopLevelWindow::recreateDesktopWindow()
 {
     if (isOnDesktop())
     {
-        Component::addToDesktop (getDesktopWindowStyleFlags());
+        Component::createDesktopWindow (getDesktopWindowOptions());
+
+        if (auto* peer = getPeer())
+            peer->setWindowsCanUseMultiTouch (canUseWindowsMultiTouch);
+
         toFront (true);
     }
 }
@@ -163,11 +196,15 @@ void TopLevelWindow::recreateDesktopWindow()
 void TopLevelWindow::addToDesktop()
 {
     shadower = nullptr;
-    Component::addToDesktop (getDesktopWindowStyleFlags());
+    Component::createDesktopWindow (getDesktopWindowOptions());
+
+    if (auto* peer = getPeer())
+        peer->setWindowsCanUseMultiTouch (canUseWindowsMultiTouch);
+
     setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary
 }
 
-void TopLevelWindow::addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo)
+void TopLevelWindow::createDesktopWindow (const DesktopWindowOptions& options)
 {
     /* It's not recommended to change the desktop window flags directly for a TopLevelWindow,
        because this class needs to make sure its layout corresponds with settings like whether
@@ -177,10 +214,17 @@ void TopLevelWindow::addToDesktop (int windowStyleFlags, void* nativeWindowToAtt
        method. If you do this, it's best to call the base class's getDesktopWindowStyleFlags()
        method, then add or remove whatever flags are necessary from this value before returning it.
     */
+    const auto windowStyleFlags = options.getStyleFlags();
+
     jassert ((windowStyleFlags & ~ComponentPeer::windowIsSemiTransparent)
                == (getDesktopWindowStyleFlags() & ~ComponentPeer::windowIsSemiTransparent));
 
-    Component::addToDesktop (windowStyleFlags, nativeWindowToAttachTo);
+    // Subclasses recreate the window with only its style flags, so the association given here is
+    // kept, and one given earlier is carried over. Clearing it is done with setAssociatedComponent().
+    if (auto* newAssociatedComponent = options.getAssociatedComponent())
+        associatedComponent = newAssociatedComponent;
+
+    Component::createDesktopWindow (options.withAssociatedComponent (associatedComponent.get()));
 
     if (windowStyleFlags != getDesktopWindowStyleFlags())
         sendLookAndFeelChange();

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -272,7 +272,7 @@ struct AlsaMidiHelpers
     template <size_t N>
     static constexpr std::array<std::byte, N> makeBytesLittleEndian (unsigned int b)
     {
-        std::array<std::byte, N> result;
+        std::array<std::byte, N> result{};
 
         for (size_t i = 0; i != N; ++i)
         {
@@ -691,7 +691,7 @@ struct AlsaMidiHelpers
         int clientId = snd_seq_client_id (handle.get());
         WaitFreeListeners<InputCallback> inputCallbacks;
         WaitFreeListeners<PortExitCallback> portExitCallbacks;
-        std::map<ump::EndpointId, AlsaClientInfo> cachedEndpoints;
+        std::map<ump::EndpointId, AlsaClientInfo> cachedEndpoints = findEndpoints (handle.get());
         SequencerThread inputThread { handle.get(), *this, *this, *this };
     };
 
@@ -796,9 +796,9 @@ struct AlsaMidiHelpers
                                                                            0,
                                                                            findMaxGroup);
 
-            const unsigned int caps = protocol == ump::PacketProtocol::MIDI_2_0
-                                    ? SND_UMP_EP_INFO_PROTO_MIDI2
-                                    : SND_UMP_EP_INFO_PROTO_MIDI1;
+            const auto caps = protocol == ump::PacketProtocol::MIDI_2_0
+                            ? (unsigned int) SND_UMP_EP_INFO_PROTO_MIDI2
+                            : (unsigned int) SND_UMP_EP_INFO_PROTO_MIDI1;
 
             snd_ump_endpoint_info_t* e{};
             snd_ump_endpoint_info_alloca (&e);
@@ -882,13 +882,21 @@ struct AlsaMidiHelpers
             return rawToUniquePtr (new Port { c, portId, d, connected });
         }
 
-        bool isUmpEndpoint() const
+        int getMidiVersion() const
         {
-            return portId == -1;
+            return midiVersion;
+        }
+
+        [[nodiscard]] auto lock()
+        {
+            return ScopedLock { mutex };
         }
 
     private:
-        Port (std::shared_ptr<Client> c, int p, std::optional<ump::IOKind> dir, std::optional<snd_seq_addr_t> dst)
+        Port (std::shared_ptr<Client> c,
+              int p,
+              std::optional<ump::IOKind> dir,
+              std::optional<snd_seq_addr_t> dst)
             : client (c),
               portId (p),
               direction (dir),
@@ -931,6 +939,7 @@ struct AlsaMidiHelpers
             disconnectCallbacks.call ([&] (auto& c) { c.disconnected(); });
         }
 
+        CriticalSection mutex;
         std::shared_ptr<Client> client;
         int portId = -1; // A negative portId indicates this is a special UMP virtual port
         std::optional<ump::IOKind> direction; // nullopt == bidirectional
@@ -938,6 +947,22 @@ struct AlsaMidiHelpers
         WaitFreeListeners<InputCallback> inputCallbacks;
         // Disconnect listeners are called on the main thread
         ListenerList<ump::DisconnectionListener> disconnectCallbacks;
+        int midiVersion = std::invoke ([&]() -> int
+        {
+            if (! connected.has_value())
+                return SND_SEQ_CLIENT_UMP_MIDI_2_0;
+
+            snd_seq_client_info_t* info{};
+            snd_seq_client_info_alloca (&info);
+
+            if (snd_seq_get_any_client_info (client->getSequencer(), connected->client, info) != 0)
+                return SND_SEQ_CLIENT_LEGACY_MIDI;
+
+            if (snd_seq_client_info_get_midi_version == nullptr)
+                return SND_SEQ_CLIENT_LEGACY_MIDI;
+
+            return snd_seq_client_info_get_midi_version (info);
+        });
 
         JUCE_DECLARE_NON_COPYABLE (Port)
     };
@@ -1027,7 +1052,9 @@ struct AlsaMidiHelpers
 
         bool send (ump::Iterator b, ump::Iterator e) override
         {
-            if (snd_seq_ump_event_output_direct != nullptr)
+            const auto lock = port->lock();
+
+            if (snd_seq_ump_event_output_direct != nullptr && port->getMidiVersion() != SND_SEQ_CLIENT_LEGACY_MIDI)
             {
                 for (const auto& v : makeRange (b, e))
                     sendUmp (v);
@@ -1043,6 +1070,7 @@ struct AlsaMidiHelpers
 
         ump::EndpointId getEndpointId() const override
         {
+            const auto lock = port->lock();
             return port->getId();
         }
 
@@ -1559,7 +1587,7 @@ auto ump::Endpoints::Impl::Native::make (EndpointsListener& l) -> std::unique_pt
 
 #else
 
-auto ump::Endpoints::Impl::Native::make (EndpointsListener& l) -> std::unique_ptr<Native>
+auto ump::Endpoints::Impl::Native::make (EndpointsListener&) -> std::unique_ptr<Native>
 {
     return nullptr;
 }

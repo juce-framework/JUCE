@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -134,8 +134,8 @@ public:
     /** Checks whether the path of this file represents the root of a file system,
         irrespective of its existence.
 
-        This will return true for "C:", "D:", etc on Windows and "/" on other
-        platforms.
+        This will return true for "C:", "D:", etc and for a UNC share such as
+        "\\\\server\\share" on Windows, and for "/" on other platforms.
     */
     bool isRoot() const;
 
@@ -270,6 +270,10 @@ public:
         If the string is actually an absolute path, it will be treated as such, e.g.
             File ("/moose/fish").getChildFile ("/foo.txt") will produce "/foo.txt"
 
+        On Windows, a path that starts with a separator but doesn't name a drive or share
+        is resolved against the root of this file's drive or share, e.g.
+            File ("D:\\moose\\fish").getChildFile ("\\foo.txt") will produce "D:\\foo.txt"
+
         @see getSiblingFile, getParentDirectory, getRelativePathFrom, isAChildOf
     */
     File getChildFile (StringRef relativeOrAbsolutePath) const;
@@ -287,8 +291,8 @@ public:
 
         e.g. for "/moose/fish/foo.txt" this will return "/moose/fish".
 
-        If you are already at the root directory ("/" or "C:") then this method will
-        return the root directory.
+        If you are already at the root directory ("/", "C:" or a UNC share) then this
+        method will return the root directory.
     */
     File getParentDirectory() const;
 
@@ -991,7 +995,10 @@ public:
         globalApplicationsDirectoryX86,
 
         /** On a Windows machine returns the %LOCALAPPDATA% folder. */
-        windowsLocalAppData
+        windowsLocalAppData,
+
+        /** On a Windows machine returns the %COMMONPROGRAMFILES% folder. */
+        windowsProgramFilesCommon,
        #endif
     };
 
@@ -1061,7 +1068,14 @@ public:
     /** Indicates whether filenames are case-sensitive on the current operating system. */
     static bool areFileNamesCaseSensitive();
 
-    /** Returns true if the string seems to be a fully-specified absolute path. */
+    /** Returns true if the string seems to be an absolute path, rather than one that
+        must be resolved relative to some other directory.
+
+        On Windows, this also returns true for a path that starts with a forward or
+        backward slash but doesn't name a drive or share, such as "\\foo.txt". Such a
+        path is not fully specified, and should be passed to getChildFile() so that
+        it can be resolved against a particular file's drive or share.
+    */
     static bool isAbsolutePath (StringRef path);
 
     /** Creates a file that simply contains this string, without doing the sanity-checking

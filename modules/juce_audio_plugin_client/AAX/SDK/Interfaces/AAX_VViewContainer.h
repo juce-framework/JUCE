@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019, 2021, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2021, 2023-2024, 2026 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -57,6 +57,7 @@ public:
 	int32_t		GetType () AAX_OVERRIDE; ///< \copydoc AAX_IViewContainer::GetType()
     void *		GetPtr () AAX_OVERRIDE; ///< \copydoc AAX_IViewContainer::GetPtr()
 	AAX_Result	GetModifiers ( uint32_t * outModifiers ) AAX_OVERRIDE; ///< \copydoc AAX_IViewContainer::GetModifiers()
+	AAX_Result	GetScalingFactor( float* outScalingFactor ) const AAX_OVERRIDE;   ///< \copydoc AAX_IViewContainer::GetScalingFactor()
 
 	// Setters
     AAX_Result	SetViewSize ( AAX_Point & inSize ) AAX_OVERRIDE; ///< \copydoc AAX_IViewContainer::SetViewSize()
@@ -73,6 +74,7 @@ private:
 	ACFPtr<AAX_IACFViewContainer>	    mIViewContainer;
 	ACFPtr<AAX_IACFViewContainer_V2>	mIViewContainerV2;
 	ACFPtr<AAX_IACFViewContainer_V3>    mIViewContainerV3;
+	ACFPtr<AAX_IACFViewContainer_V4>    mIViewContainerV4;
 };
 
 

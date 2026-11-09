@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -77,10 +77,10 @@ void ResizableWindow::initialise (const bool shouldAddToDesktop)
 
 int ResizableWindow::getDesktopWindowStyleFlags() const
 {
-    int styleFlags = TopLevelWindow::getDesktopWindowStyleFlags();
+    const auto styleFlags = TopLevelWindow::getDesktopWindowStyleFlags();
 
-    if (isResizable() && Desktop::getInstance().supportsBorderlessNonClientResize())
-        styleFlags |= ComponentPeer::windowIsResizable;
+    if (isResizable())
+        return styleFlags | ComponentPeer::windowIsResizable;
 
     return styleFlags;
 }
@@ -282,10 +282,13 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
         resizableBorder.reset();
     }
 
+    // Adding or removing the resizable border changes the border thickness, so fit the window to
+    // its content before a new peer can lay out the content inside the old window bounds.
+    childBoundsChanged (contentComponent);
+
     if (isOnDesktop())
         recreateDesktopWindow();
 
-    childBoundsChanged (contentComponent);
     resized();
 }
 
@@ -501,8 +504,19 @@ void ResizableWindow::updatePeerConstrainer()
 
 void ResizableWindow::parentSizeChanged()
 {
-    if (isFullScreen() && getParentComponent() != nullptr)
-        setBounds (getParentComponent()->getLocalBounds());
+    if (getParentComponent() != nullptr)
+    {
+        if (isFullScreen())
+            setBounds (getParentComponent()->getLocalBounds());
+
+        return;
+    }
+
+    // A window on the desktop receives this when the displays change. A full-screen window keeps
+    // its bounds then, but the safe-area and keyboard insets that its content is laid out against
+    // may have moved, as they do when a phone rotates, so the content lays itself out again.
+    if (contentComponent != nullptr && (isFullScreen() || isKioskMode()))
+        contentComponent->resized();
 }
 
 //==============================================================================
@@ -583,7 +597,7 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
         if (onScreenArea.getWidth() * onScreenArea.getHeight() < 32 * 32)
         {
-            auto screen = desktop.getDisplays().getDisplayForRect (newPos)->userArea;
+            auto screen = desktop.getDisplays().getDisplayForRect (newPos)->userBounds.getLargestIntegerWithin();
 
             newPos.setSize (jmin (newPos.getWidth(),  screen.getWidth()),
                             jmin (newPos.getHeight(), screen.getHeight()));

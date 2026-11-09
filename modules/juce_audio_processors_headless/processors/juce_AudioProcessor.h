@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -36,6 +36,7 @@ namespace juce
 {
 
 class AudioProcessorEditor;
+class AudioProcessorARAExtension;
 
 //==============================================================================
 /**
@@ -514,8 +515,8 @@ public:
         AudioProcessor& owner;
         String name;
         AudioChannelSet layout, dfltLayout, lastLayout;
-        bool enabledByDefault;
-        int cachedChannelCount;
+        bool enabledByDefault = false;
+        int cachedChannelCount = 0;
 
         JUCE_DECLARE_NON_COPYABLE (Bus)
     };
@@ -954,6 +955,10 @@ public:
         A plug-in can override this function to return a parameter which controls your
         plug-in's bypass. You should always check the value of this parameter in your
         processBlock callback and bypass any effects if it is non-zero.
+
+        If you return a custom parameter here, make sure that its state is saved and
+        restored like any other parameter within getStateInformation() and
+        setStateInformation().
     */
     virtual AudioProcessorParameter* getBypassParameter() const        { return nullptr; }
 
@@ -1018,7 +1023,9 @@ public:
 
         @see hasEditor
     */
+private:
     virtual AudioProcessorEditor* createEditor() = 0;
+public:
 
     /** Your processor subclass must override this and return true if it can create an
         editor component.
@@ -1039,10 +1046,21 @@ public:
     */
     AudioProcessorEditor* getActiveEditor() const noexcept;
 
-    /** Returns the active editor, or if there isn't one, it will create one.
-        This may call createEditor() internally to create the component.
+    /** If there's no active editor, creates a new editor and stores it as the active editor
+        before returning it. Otherwise, returns nullptr.
+
+        You must use this instead of calling createEditor() directly if you
+        want calls to getActiveEditor() to work as expected.
     */
-    AudioProcessorEditor* createEditorIfNeeded();
+    AudioProcessorEditor* createEditorAndMakeActive();
+
+    /** @internal
+
+        This function is deprecated, as its name is misleading.
+        Prefer createEditorAndMakeActive().
+    */
+    [[deprecated ("Prefer createEditorAndMakeActive()")]]
+    AudioProcessorEditor* createEditorIfNeeded() { return createEditorAndMakeActive(); }
 
     //==============================================================================
     /** Returns the default number of steps for a parameter.
@@ -1129,6 +1147,9 @@ public:
 
         This must copy any info about the processor's state into the block of memory provided,
         so that the host can store this and later restore it using setStateInformation().
+        The resulting state should generally include all parameter values.
+        If you have implemented getBypassParameter(), ensure that the value of the bypass parameter
+        is included in the resulting state.
 
         Note that there's also a getCurrentProgramStateInformation() method, which only
         stores the current program, not the state of the entire processor.
@@ -1141,6 +1162,10 @@ public:
 
     /** The host will call this method if it wants to save the state of just the processor's
         current program.
+
+        The resulting state should generally include all parameter values.
+        If you have implemented getBypassParameter(), ensure that the value of the bypass parameter
+        is included in the resulting state.
 
         Unlike getStateInformation, this should only return the current program's state.
 
@@ -1171,6 +1196,9 @@ public:
         setStateInformation(), and that function should return the parameter mapping from the most
         recently-loaded state.
 
+        If you've implemented getBypassParameter(), make sure you remember to update the bypass
+        parameter value using the incoming state.
+
         @see setCurrentProgramStateInformation, VST3ClientExtensions::getCompatibleParameterIds
     */
     virtual void setStateInformation (const void* data, int sizeInBytes) = 0;
@@ -1181,6 +1209,9 @@ public:
         Not all hosts support this, and if you don't implement it, the base class
         method just calls setStateInformation() instead. If you do implement it, be
         sure to also implement getCurrentProgramStateInformation.
+
+        If you've implemented getBypassParameter(), make sure you remember to update the bypass
+        parameter value using the incoming state.
 
         @see setStateInformation, getCurrentProgramStateInformation
     */
@@ -1258,6 +1289,16 @@ public:
         of the correct type in order to avoid this dynamic cast.
     */
     virtual VST3ClientExtensions* getVST3ClientExtensions();
+
+    /** Returns a non-owning pointer to an object that implements ARA specific information
+        regarding this AudioProcessor.
+
+        By default, for backwards compatibility, this will attempt to dynamic-cast this
+        AudioProcessor to AudioProcessorARAExtension.
+        It is recommended to override this function to return a pointer directly to an object
+        of the correct type in order to avoid this dynamic cast.
+    */
+    virtual AudioProcessorARAExtension* getARAClientExtensions();
 
     //==============================================================================
     /** Some plug-ins support sharing response curve data with the host so that it can

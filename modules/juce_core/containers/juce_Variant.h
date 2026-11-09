@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -156,6 +156,34 @@ public:
     bool isBinaryData() const noexcept;
     bool isMethod() const noexcept;
 
+    //==============================================================================
+    /** Returns a span over the elements of the contained array, or an empty span if
+        the variant currently contains a non-array type.
+    */
+    Span<var> getArrayElements() &;
+
+    /** Returns a span over the elements of the contained array, or an empty span if
+        the variant currently contains a non-array type.
+    */
+    Span<const var> getArrayElements() const &;
+
+    /** Returns a span over the properties of the contained object, or an empty span if
+        the variant currently contains a non-object type.
+    */
+    Span<NamedValue> getObjectElements() &;
+
+    /** Returns a span over the properties of the contained object, or an empty span if
+        the variant currently contains a non-object type.
+    */
+    Span<const NamedValue> getObjectElements() const &;
+
+    /*  These functions are deleted to help avoid accidentally forming a span over a temporary. */
+    Span<var> getArrayElements() && = delete;
+    Span<const var> getArrayElements() const && = delete;
+    Span<NamedValue> getObjectElements() && = delete;
+    Span<const NamedValue> getObjectElements() const && = delete;
+
+    //==============================================================================
     /** Returns true if this var has the same value as the one supplied.
         Note that this ignores the type, so a string var "123" and an integer var with the
         value 123 are considered to be equal.
@@ -289,7 +317,8 @@ public:
 
     /** Reads back a stored binary representation of a value.
         The data in the stream must have been written using writeToStream(), or this
-        will have unpredictable results.
+        will have unpredictable results. Arrays nested more than 256 levels deep are
+        read as void values.
         @see JSON
     */
     static var readFromStream (InputStream& input);
@@ -325,7 +354,7 @@ private:
     friend bool canCompare (const var&, const var&);
 
     const VariantType* type;
-    ValueUnion value;
+    ValueUnion value{};
 
     Array<var>* convertToArray();
     var (const VariantType&) noexcept;

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -181,8 +181,8 @@ class NSViewComponentPeer final : public ComponentPeer,
                                   private JuceCALayerDelegateCallback
 {
 public:
-    NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
-        : ComponentPeer (comp, windowStyleFlags),
+    NSViewComponentPeer (Component& comp, const int windowStyleFlags, Component* associated, NSView* viewToAttachTo)
+        : ComponentPeer (comp, windowStyleFlags, associated),
           safeComponent (&comp),
           isSharedWindow (viewToAttachTo != nil),
           lastRepaintTime (Time::getMillisecondCounter())
@@ -322,6 +322,15 @@ public:
 
         if (! isSharedWindow)
         {
+            detachFromParentWindow (window);
+
+            NSArray<NSWindow*>* children = [[window childWindows] copy];
+
+            for (NSWindow* child in children)
+                [window removeChildWindow: child];
+
+            [children release];
+
             setOwner (window, nullptr);
             [window setContentView: nil];
             [window close];
@@ -329,6 +338,86 @@ public:
         }
 
         [view release];
+    }
+
+    //==============================================================================
+    static void setOwner (id viewOrWindow, NSViewComponentPeer* newOwner)
+    {
+        object_setInstanceVariable (viewOrWindow, "owner", newOwner);
+    }
+
+    static NSViewComponentPeer* getOwner (id viewOrWindow)
+    {
+        return getIvar<NSViewComponentPeer*> (viewOrWindow, "owner");
+    }
+
+    static NSWindow* findParentWindow (const ComponentPeer& peer, NSWindow* ownWindow)
+    {
+        if (auto* associated = peer.getAssociatedComponent())
+            if (auto* associatedPeer = associated->getPeer())
+                if (auto* parent = [(NSView*) associatedPeer->getNativeHandle() window])
+                    if (parent != ownWindow)
+                        return parent;
+
+        return nil;
+    }
+
+    static void detachFromParentWindow (NSWindow* window)
+    {
+        if (auto* parent = [window parentWindow])
+            [parent removeChildWindow: window];
+    }
+
+    // A child ordered below its parent has to share the parent's level, since the window server
+    // orders windows by level first
+    static void addChildWindowKeepingLevel (NSWindow* parent, NSWindow* child, NSWindowOrderingMode ordered)
+    {
+        const auto level = [child level];
+        [parent addChildWindow: child ordered: ordered];
+
+        if (ordered == NSWindowAbove)
+            [child setLevel: jmax (level, [parent level])];
+    }
+
+    // AppKit keeps child windows in the order they were attached, so changing the order means
+    // reattaching every sibling in the new order.
+    static void reattachChildWindows (NSWindow* parent, NSArray<NSWindow*>* newOrder)
+    {
+        for (NSWindow* child in newOrder)
+        {
+            if (auto* owner = getOwner (child))
+            {
+                [parent removeChildWindow: child];
+                addChildWindowKeepingLevel (parent, child, owner->orderedBelowParent ? NSWindowBelow : NSWindowAbove);
+            }
+        }
+    }
+
+    // A window opened from another window is a child of that window, so that it stays above it,
+    // moves with it, and is minimised with it. Ordering a child out drops the relationship, and
+    // miniaturising a child on its own miniaturises its parent too, so the child is detached
+    // around both and reattached afterwards.
+    void attachToParentWindow()
+    {
+        if (isSharedWindow || ! component.isVisible())
+            return;
+
+        auto* parent = findParentWindow (*this, window);
+
+        if ([window parentWindow] == parent)
+            return;
+
+        detachFromParentWindow (window);
+
+        if (parent != nil)
+            addChildWindowKeepingLevel (parent, window, orderedBelowParent ? NSWindowBelow : NSWindowAbove);
+
+        updateOffsetFromParentWindow();
+    }
+
+    void associationChanged() override
+    {
+        attachToParentWindow();
     }
 
     //==============================================================================
@@ -348,12 +437,19 @@ public:
             if (shouldBeVisible)
             {
                 ++insideToFrontCall;
-                [window orderFront: nil];
+
+                if (auto* parent = orderedBelowParent ? findParentWindow (*this, window) : nil)
+                    [window orderWindow: NSWindowBelow relativeTo: [parent windowNumber]];
+                else
+                    [window orderFront: nil];
+
                 --insideToFrontCall;
+                attachToParentWindow();
                 handleBroughtToFront();
             }
             else
             {
+                detachFromParentWindow (window);
                 [window orderOut: nil];
             }
         }
@@ -456,9 +552,15 @@ public:
         if (! isSharedWindow)
         {
             if (shouldBeMinimised)
+            {
+                detachFromParentWindow (window);
                 [window miniaturize: nil];
+            }
             else
+            {
                 [window deminiaturize: nil];
+                attachToParentWindow();
+            }
         }
     }
 
@@ -631,11 +733,19 @@ public:
         if (window != nil && component.isVisible())
         {
             ++insideToFrontCall;
+            orderedBelowParent = false;
 
             if (makeActiveWindow && ! inBecomeKeyWindow && [window canBecomeKeyWindow])
                 [window makeKeyAndOrderFront: nil];
             else
                 [window orderFront: nil];
+
+            // Reattaching moves a child to the front of its siblings
+            if ([window parentWindow] != nil)
+            {
+                detachFromParentWindow (window);
+                attachToParentWindow();
+            }
 
             if (insideToFrontCall <= 1)
             {
@@ -674,8 +784,36 @@ public:
                     [view release];
                 }
             }
+            else if (otherPeer->window == findParentWindow (*this, window))
+            {
+                if (std::exchange (orderedBelowParent, true) && [window parentWindow] == otherPeer->window)
+                    return;
+
+                if (component.isVisible())
+                {
+                    detachFromParentWindow (window);
+                    attachToParentWindow();
+                }
+            }
             else if (component.isVisible())
             {
+                // Going behind a sibling means reattaching the children in the new order
+                if (auto* parent = [window parentWindow])
+                {
+                    if ([otherPeer->window parentWindow] == parent)
+                    {
+                        if (NSArray<NSWindow*>* children = [parent childWindows])
+                        {
+                            NSMutableArray<NSWindow*>* order = [NSMutableArray arrayWithArray: children];
+                            [order removeObject: window];
+                            [order insertObject: window atIndex: [order indexOfObject: otherPeer->window]];
+                            reattachChildWindows (parent, order);
+                        }
+                    }
+
+                    return;
+                }
+
                 [window orderWindow: NSWindowBelow
                          relativeTo: [otherPeer->window windowNumber]];
             }
@@ -721,7 +859,7 @@ public:
         if (usingCoreGraphics != (index > 0))
         {
             usingCoreGraphics = index > 0;
-            [view setNeedsDisplay: true];
+            component.repaint();
         }
        #endif
     }
@@ -967,13 +1105,16 @@ public:
     }
 
     //==============================================================================
-    void drawRect (NSRect r)
+    void drawRect (NSRect dirty)
     {
-        if (r.size.width < 1.0f || r.size.height < 1.0f)
-            return;
-
         auto* cg = (CGContextRef) [[NSGraphicsContext currentContext] CGContext];
-        drawRectWithContext (cg, r);
+
+        deferredRepaints.subtract (Rectangle { dirty.origin.x,
+                                               dirty.origin.y,
+                                               dirty.size.width,
+                                               dirty.size.height }.toFloat());
+
+        drawRectWithContext (cg, dirty);
     }
 
     void drawRectWithContext (CGContextRef cg, NSRect r)
@@ -1030,6 +1171,9 @@ public:
 
     void renderRect (CGContextRef cg, NSRect r, float displayScale)
     {
+        CGContextSaveGState (cg);
+        const ScopeGuard pop { [&] { CGContextRestoreGState (cg); } };
+
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics)
         {
@@ -1047,6 +1191,9 @@ public:
 
             RectangleList<int> clip;
             getClipRects (clip, offset, clipW, clipH);
+
+            if (clip.isEmpty())
+                clip.add (Rectangle { r.size.width, r.size.height }.getSmallestIntegerContainer());
 
             if (! clip.isEmpty())
             {
@@ -1087,6 +1234,7 @@ public:
         // As a workaround for this, we use a RectangleList to do our own coalescing of regions before
         // asynchronously asking the OS to repaint them.
         deferredRepaints.add (area.toFloat());
+        setNeedsDisplayRectangles();
     }
 
     static bool shouldThrottleRepaint()
@@ -1117,18 +1265,10 @@ public:
         if (msSinceLastRepaint < minimumRepaintInterval && shouldThrottleRepaint())
             return;
 
-        const auto frameSize = view.frame.size;
-        const Rectangle currentBounds { (float) frameSize.width, (float) frameSize.height };
-
         for (auto& i : deferredRepaints)
             [view setNeedsDisplayInRect: makeCGRect (i)];
 
         lastRepaintTime = Time::getMillisecondCounter();
-
-       #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
-        if (metalRenderer == nullptr)
-       #endif
-            deferredRepaints.clear();
     }
 
     void performAnyPendingRepaintsNow() override
@@ -1231,8 +1371,25 @@ public:
 
     void redirectMovedOrResized()
     {
+        updateOffsetFromParentWindow();
         handleMovedOrResized();
         setNeedsDisplayRectangles();
+    }
+
+    // AppKit moves a child window along with its parent, and the clamping of each of those moves
+    // to the screen would accumulate as the parent is moved across a screen edge, so the offset
+    // of the child from its parent is recorded, and a move that keeps it is left unconstrained by
+    // constrainFrameRect:toScreen:.
+    void updateOffsetFromParentWindow()
+    {
+        offsetFromParentWindow = std::invoke ([&]() -> std::optional<Point<double>>
+        {
+            if (auto* parent = [window parentWindow])
+                return Point<double> ([window frame].origin.x - [parent frame].origin.x,
+                                      [window frame].origin.y - [parent frame].origin.y);
+
+            return {};
+        });
     }
 
     void viewMovedToWindow()
@@ -1747,9 +1904,11 @@ public:
    #endif
     NSUniquePtr<NSEvent> keyEventBeingHandled;
     bool isFirstLiveResize = false, viewCannotHandleEvent = false;
+    bool orderedBelowParent = false;
     bool isStretchingTop = false, isStretchingLeft = false, isStretchingBottom = false, isStretchingRight = false;
     bool windowRepresentsFile = false;
     bool isAlwaysOnTop = false, wasAlwaysOnTop = false, inBecomeKeyWindow = false;
+    std::optional<Point<double>> offsetFromParentWindow;
     bool inPerformKeyEquivalent = false;
     bool draggingActive = false;
     String stringBeingComposed;
@@ -1866,11 +2025,6 @@ private:
 
         if ([NSEvent pressedMouseButtons] == 0)
             sendMouseEvent (ev);
-    }
-
-    static void setOwner (id viewOrWindow, NSViewComponentPeer* newOwner)
-    {
-        object_setInstanceVariable (viewOrWindow, "owner", newOwner);
     }
 
     void getClipRects (RectangleList<int>& clip, Point<int> offset, int clipW, int clipH)
@@ -2072,15 +2226,15 @@ private:
 
     void modalComponentManagerChanged()
     {
-        // We are only changing the style flags if we absolutely have to. Plugin windows generally
-        // don't like to be modified. Windows created under plugin hosts running in an external
-        // subprocess are particularly touchy, and may make the window invisible even if we call
-        // [window setStyleMask [window setStyleMask]].
-        if (isSharedWindow || ! hasNativeTitleBar())
-            return;
-
-        const auto newStyleMask = [&]() -> std::optional<NSWindowStyleMask>
+        const auto newStyleMask = std::invoke ([&]() -> std::optional<NSWindowStyleMask>
         {
+            // We are only changing the style flags if we absolutely have to. Plugin windows generally
+            // don't like to be modified. Windows created under plugin hosts running in an external
+            // subprocess are particularly touchy, and may make the window invisible even if we call
+            // [window setStyleMask [window setStyleMask]].
+            if (isSharedWindow || ! hasNativeTitleBar())
+                return {};
+
             const auto currentStyleMask = [window styleMask];
 
             if (ModalComponentManager::getInstance()->getNumModalComponents() > 0)
@@ -2104,10 +2258,36 @@ private:
             }
 
             return {};
-        }();
+        });
 
-        if (newStyleMask && *newStyleMask != [window styleMask])
+        if (newStyleMask.has_value() && *newStyleMask != [window styleMask])
             [window setStyleMask: *newStyleMask];
+
+        const auto newLevel = std::invoke ([&]() -> std::optional<NSWindowLevel>
+        {
+            if (isSharedWindow)
+                return {};
+
+            auto* manager = ModalComponentManager::getInstance();
+
+            if (manager->getNumModalComponents() > 0)
+            {
+                auto* recent = manager->getModalComponent (0);
+
+                if (recent == &component || component.isParentOf (recent))
+                {
+                    if (! storedLevel.has_value())
+                        storedLevel = [window level];
+
+                    return jmax (*storedLevel, NSModalPanelWindowLevel);
+                }
+            }
+
+            return std::exchange (storedLevel, {});
+        });
+
+        if (newLevel.has_value() && *newLevel != [window level])
+            [window setLevel: *newLevel];
     }
 
     //==============================================================================
@@ -2115,6 +2295,7 @@ private:
     std::vector<ScopedNotificationCenterObserver> windowObservers;
 
     std::optional<StoredStyleFlags> storedFlags;
+    std::optional<NSWindowLevel> storedLevel;
     ErasedScopeGuard modalChangeListenerScope =
         detail::ComponentHelpers::ModalComponentManagerChangeNotifier::getInstance().addListener ([this]
                                                                                                   {
@@ -2136,7 +2317,7 @@ struct NSViewComponentPeerWrapper : public Base
 
     static NSViewComponentPeer* getOwner (id self)
     {
-        return getIvar<NSViewComponentPeer*> (self, "owner");
+        return NSViewComponentPeer::getOwner (self);
     }
 
     static id getAccessibleChild (id self)
@@ -2221,6 +2402,25 @@ struct JuceNSViewClass final : public NSViewComponentPeerWrapper<ObjCClass<NSVie
         addMethod (@selector (draggingEnded:),                  draggingExited);
         addMethod (@selector (draggingExited:),                 draggingExited);
 
+        addMethod (@selector (hitTest:), [] (id self, SEL, NSPoint pt) -> NSView*
+        {
+            auto* hit = sendSuperclassMessage<NSView*> (self, @selector (hitTest:), pt);
+
+            if (hit == nil || hit == self)
+                return hit;
+
+            auto* owner = getOwner (self);
+
+            if (owner == nullptr || ! owner->isBlockedByModalComponent())
+                return hit;
+
+            for (NSView* v = hit; v != nil && v != self; v = [v superview])
+                if ([v isKindOfClass: [self class]])
+                    return hit;
+
+            return owner->view;
+        });
+
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         addMethod (@selector (clipsToBounds), [] (id, SEL) { return YES; });
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
@@ -2259,6 +2459,8 @@ struct JuceNSViewClass final : public NSViewComponentPeerWrapper<ObjCClass<NSVie
         {
             if (auto* p = getOwner (self))
             {
+                NSViewComponentPeer::detachFromParentWindow (p->window);
+
                 if (p->isAlwaysOnTop)
                 {
                     // there is a bug when restoring minimised always on top windows so we need
@@ -2276,6 +2478,7 @@ struct JuceNSViewClass final : public NSViewComponentPeerWrapper<ObjCClass<NSVie
                 if (p->wasAlwaysOnTop)
                     p->setAlwaysOnTop (true);
 
+                p->attachToParentWindow();
                 p->redirectMovedOrResized();
             }
         });
@@ -2790,6 +2993,17 @@ struct JuceNSWindowClass final : public NSViewComponentPeerWrapper<ObjCClass<NSW
         {
             if (auto* owner = getOwner (self))
             {
+                // A move that keeps the offset of a child window from its parent is AppKit moving
+                // the child along with its parent.
+                if (auto* parent = [(NSWindow*) self parentWindow]; parent != nil && owner->offsetFromParentWindow.has_value())
+                {
+                    const auto proposedOffset = Point<double> (frameRect.origin.x - [parent frame].origin.x,
+                                                               frameRect.origin.y - [parent frame].origin.y);
+
+                    if (proposedOffset == *owner->offsetFromParentWindow && NSEqualSizes (frameRect.size, [(NSWindow*) self frame].size))
+                        return frameRect;
+                }
+
                 frameRect = sendSuperclassMessage<NSRect, NSRect, NSScreen*> (self, @selector (constrainFrameRect:toScreen:),
                                                                               frameRect, screen);
 
@@ -3020,7 +3234,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
             [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
                                                               : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];
 
-            kioskComp->setBounds (getDisplays().getDisplayForRect (kioskComp->getScreenBounds())->totalArea);
+            kioskComp->setBounds (getDisplays().getDisplayForRect (kioskComp->getScreenBounds())->logicalBounds.getSmallestIntegerContainer());
             peer->becomeKeyWindow();
         }
         else
@@ -3033,9 +3247,10 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
 void Desktop::allowedOrientationsChanged() {}
 
 //==============================================================================
-ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
+ComponentPeer* Component::createNewPeer (const DesktopWindowOptions& options)
 {
-    return new NSViewComponentPeer (*this, styleFlags, (NSView*) windowToAttachTo);
+    return new NSViewComponentPeer (*this, options.getStyleFlags(), options.getAssociatedComponent(),
+                                    (NSView*) options.getParentNSView());
 }
 
 //==============================================================================

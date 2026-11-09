@@ -38,6 +38,9 @@
   HB_DRAW_FUNC_IMPLEMENT (quadratic_to) \
   HB_DRAW_FUNC_IMPLEMENT (cubic_to) \
   HB_DRAW_FUNC_IMPLEMENT (close_path) \
+  HB_DRAW_FUNC_IMPLEMENT (set_budget) \
+  HB_DRAW_FUNC_IMPLEMENT (get_budget) \
+  HB_DRAW_FUNC_IMPLEMENT (get_budget_remaining) \
   /* ^--- Add new callbacks here */
 
 struct hb_draw_funcs_t
@@ -92,6 +95,20 @@ struct hb_draw_funcs_t
   { func.close_path (this, draw_data, &st,
 		     !user_data ? nullptr : user_data->close_path); }
 
+  bool set_budget (void *draw_data, int64_t budget)
+  {
+    if (budget < 0 && budget != HB_BUDGET_DEFAULT)
+      budget = 0;
+    return func.set_budget (this, draw_data, budget,
+			    !user_data ? nullptr : user_data->set_budget);
+  }
+  int64_t get_budget (void *draw_data)
+  { return func.get_budget (this, draw_data,
+			    !user_data ? nullptr : user_data->get_budget); }
+  int64_t *get_budget_remaining_ptr (void *draw_data)
+  { return func.get_budget_remaining (this, draw_data,
+				      !user_data ? nullptr : user_data->get_budget_remaining); }
+
 
   void
   HB_ALWAYS_INLINE
@@ -99,6 +116,7 @@ struct hb_draw_funcs_t
 	   float to_x, float to_y)
   {
     if (unlikely (st.path_open)) close_path (draw_data, st);
+
     st.current_x = to_x;
     st.current_y = to_y;
   }
@@ -109,7 +127,9 @@ struct hb_draw_funcs_t
 	   float to_x, float to_y)
   {
     if (unlikely (!st.path_open)) start_path (draw_data, st);
+
     emit_line_to (draw_data, st, to_x, to_y);
+
     st.current_x = to_x;
     st.current_y = to_y;
   }
@@ -121,7 +141,9 @@ struct hb_draw_funcs_t
 		float to_x, float to_y)
   {
     if (unlikely (!st.path_open)) start_path (draw_data, st);
+
     emit_quadratic_to (draw_data, st, control_x, control_y, to_x, to_y);
+
     st.current_x = to_x;
     st.current_y = to_y;
   }
@@ -134,7 +156,9 @@ struct hb_draw_funcs_t
 	    float to_x, float to_y)
   {
     if (unlikely (!st.path_open)) start_path (draw_data, st);
+
     emit_cubic_to (draw_data, st, control1_x, control1_y, control2_x, control2_y, to_x, to_y);
+
     st.current_x = to_x;
     st.current_y = to_y;
   }
@@ -168,46 +192,36 @@ DECLARE_NULL_INSTANCE (hb_draw_funcs_t);
 
 struct hb_draw_session_t
 {
-  hb_draw_session_t (hb_draw_funcs_t *funcs_, void *draw_data_, float slant_ = 0.f)
-    : slant {slant_}, not_slanted {slant == 0.f},
-      funcs {funcs_}, draw_data {draw_data_}, st HB_DRAW_STATE_DEFAULT
-  {}
+  hb_draw_session_t (hb_draw_funcs_t *funcs_, void *draw_data_)
+    : funcs {funcs_}, draw_data {draw_data_}, st HB_DRAW_STATE_DEFAULT,
+      local_budget {HB_BUDGET_GLYPH}, budget {funcs->get_budget_remaining_ptr (draw_data)}
+  {
+    if (!budget)
+      budget = &local_budget;
+  }
 
   ~hb_draw_session_t () { close_path (); }
 
   HB_ALWAYS_INLINE
   void move_to (float to_x, float to_y)
   {
-    if (likely (not_slanted))
-      funcs->move_to (draw_data, st,
-		      to_x, to_y);
-    else
-      funcs->move_to (draw_data, st,
-		      to_x + to_y * slant, to_y);
+    funcs->move_to (draw_data, st,
+		    to_x, to_y);
   }
   HB_ALWAYS_INLINE
   void line_to (float to_x, float to_y)
   {
-    if (likely (not_slanted))
-      funcs->line_to (draw_data, st,
-		      to_x, to_y);
-    else
-      funcs->line_to (draw_data, st,
-		      to_x + to_y * slant, to_y);
+    funcs->line_to (draw_data, st,
+		    to_x, to_y);
   }
   void
   HB_ALWAYS_INLINE
   quadratic_to (float control_x, float control_y,
 		float to_x, float to_y)
   {
-    if (likely (not_slanted))
-      funcs->quadratic_to (draw_data, st,
-			   control_x, control_y,
-			   to_x, to_y);
-    else
-      funcs->quadratic_to (draw_data, st,
-			   control_x + control_y * slant, control_y,
-			   to_x + to_y * slant, to_y);
+    funcs->quadratic_to (draw_data, st,
+			 control_x, control_y,
+			 to_x, to_y);
   }
   void
   HB_ALWAYS_INLINE
@@ -215,16 +229,10 @@ struct hb_draw_session_t
 	    float control2_x, float control2_y,
 	    float to_x, float to_y)
   {
-    if (likely (not_slanted))
-      funcs->cubic_to (draw_data, st,
-		       control1_x, control1_y,
-		       control2_x, control2_y,
-		       to_x, to_y);
-    else
-      funcs->cubic_to (draw_data, st,
-		       control1_x + control1_y * slant, control1_y,
-		       control2_x + control2_y * slant, control2_y,
-		       to_x + to_y * slant, to_y);
+    funcs->cubic_to (draw_data, st,
+		     control1_x, control1_y,
+		     control2_x, control2_y,
+		     to_x, to_y);
   }
   HB_ALWAYS_INLINE
   void close_path ()
@@ -232,12 +240,19 @@ struct hb_draw_session_t
     funcs->close_path (draw_data, st);
   }
 
+  int64_t &get_budget () { return *budget; }
+
   public:
-  float slant;
-  bool not_slanted;
   hb_draw_funcs_t *funcs;
   void *draw_data;
   hb_draw_state_t st;
+  int64_t local_budget;
+  int64_t *budget;
 };
+
+
+HB_INTERNAL hb_draw_funcs_t *
+hb_draw_extents_get_funcs ();
+
 
 #endif /* HB_DRAW_HH */

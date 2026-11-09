@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -104,8 +104,8 @@ struct ComponentHelpers
     template <typename PointOrRect>
     static PointOrRect convertFromParentSpace (const Component& comp, const PointOrRect pointInParentSpace)
     {
-        const auto transformed = comp.affineTransform != nullptr ? pointInParentSpace.transformedBy (comp.affineTransform->inverted())
-                                                                 : pointInParentSpace;
+        const auto transformed = comp.isTransformed() ? pointInParentSpace.transformedBy (comp.getTransform().inverted())
+                                                      : pointInParentSpace;
 
         if (comp.isOnDesktop())
         {
@@ -125,7 +125,7 @@ struct ComponentHelpers
     template <typename PointOrRect>
     static PointOrRect convertToParentSpace (const Component& comp, const PointOrRect pointInLocalSpace)
     {
-        const auto preTransform = [&]
+        const auto preTransform = std::invoke ([&]
         {
             if (comp.isOnDesktop())
             {
@@ -140,10 +140,10 @@ struct ComponentHelpers
                 return SH::unscaledScreenPosToScaled (SH::scaledScreenPosToUnscaled (comp, SH::addPosition (pointInLocalSpace, comp)));
 
             return SH::addPosition (pointInLocalSpace, comp);
-        }();
+        });
 
-        return comp.affineTransform != nullptr ? preTransform.transformedBy (*comp.affineTransform)
-                                               : preTransform;
+        return comp.isTransformed() ? preTransform.transformedBy (comp.getTransform())
+                                    : preTransform;
     }
 
     template <typename PointOrRect>
@@ -198,14 +198,14 @@ struct ComponentHelpers
         if (auto* p = comp.getParentComponent())
             return p->getLocalBounds();
 
-        return Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
+        return Desktop::getInstance().getDisplays().getPrimaryDisplay()->userBounds.toNearestInt();
     }
 
     static void releaseAllCachedImageResources (Component& c)
     {
         c.invalidateCachedImageResources();
 
-        for (auto* child : c.childComponentList)
+        for (auto* child : c.getChildren())
             releaseAllCachedImageResources (*child);
     }
 
@@ -258,6 +258,23 @@ struct ComponentHelpers
 
         detail::CallbackListenerList<> listeners;
     };
+
+    struct TopLeftPosition
+    {
+        Point<float> multimonitor;  // Coordinate in multimonitor space
+        Point<float> logical;       // Coordinate in logical space
+    };
+
+    static TopLeftPosition getTopLeftForPeer (ComponentPeer& peer,
+                                              Point<float> logicalScreenPos,
+                                              Point<float> localPos)
+    {
+        const auto localTarget = peer.globalToLocal (SH::scaledScreenPosToUnscaled (logicalScreenPos));
+        const auto multimonitorTarget = peer.localToMultimonitor (localTarget - localPos);
+        const auto logicalTarget = SH::unscaledScreenPosToScaled (peer.getComponent(), peer.localToGlobal (localTarget - localPos));
+
+        return { multimonitorTarget, logicalTarget };
+    }
 };
 
 } // namespace juce::detail

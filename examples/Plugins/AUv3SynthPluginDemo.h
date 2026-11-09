@@ -208,7 +208,7 @@ public:
             Path proAudioPath;
             proAudioPath.loadPathFromStream (*fileStream);
             proAudioIcon.setPath (proAudioPath);
-            addAndMakeVisible (proAudioIcon);
+            addAndMakeVisible (proAudioIconComponent);
 
             auto proAudioIconColour = findColour (TextButton::buttonOnColourId);
             proAudioIcon.setFill (FillType (proAudioIconColour));
@@ -235,10 +235,10 @@ public:
 
         auto guiElementAreaHeight = r.getHeight() / 3;
 
-        proAudioIcon.setTransformToFit (r.removeFromLeft (proportionOfWidth (0.25))
-                                         .withSizeKeepingCentre (guiElementAreaHeight, guiElementAreaHeight)
-                                         .toFloat(),
-                                        RectanglePlacement::fillDestination);
+        proAudioIconComponent.setTransformToFit (r.removeFromLeft (proportionOfWidth (0.25))
+                                                  .withSizeKeepingCentre (guiElementAreaHeight, guiElementAreaHeight)
+                                                  .toFloat(),
+                                                 RectanglePlacement::fillDestination);
 
         auto margin = guiElementAreaHeight / 4;
         r.reduce (margin, margin);
@@ -308,6 +308,7 @@ private:
     TextButton recordButton { "Record" };
     Slider roomSizeSlider;
     DrawablePath proAudioIcon;
+    DrawableComponent proAudioIconComponent { proAudioIcon };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AUv3SynthEditor)

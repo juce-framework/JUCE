@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -437,13 +437,13 @@ private:
     //==============================================================================
     MessageBoxOptions getAskToSaveChangesOptions() const
     {
-        return MessageBoxOptions::makeOptionsYesNoCancel (MessageBoxIconType::QuestionIcon,
-                                                          TRANS ("Closing document..."),
-                                                          TRANS ("Do you want to save the changes to \"DCNM\"?")
-                                                                  .replace ("DCNM", document.getDocumentTitle()),
-                                                          TRANS ("Save"),
-                                                          TRANS ("Discard changes"),
-                                                          TRANS ("Cancel"));
+        return MessageBoxOptions{}.withIconType (MessageBoxIconType::QuestionIcon)
+                                  .withTitle (TRANS ("Closing document..."))
+                                  .withMessage (TRANS ("Do you want to save the changes to \"DCNM\"?")
+                                                    .replace ("DCNM", document.getDocumentTitle()))
+                                  .withButton (TRANS ("Save"), 1)
+                                  .withButton (TRANS ("Discard changes"), 2)
+                                  .withButton (TRANS ("Cancel"), 0);
     }
 
     void askToSaveChangesAsync (SafeParentPointer parent,
@@ -671,14 +671,14 @@ private:
     //==============================================================================
     MessageBoxOptions getAskToOverwriteFileOptions (const File& newFile) const
     {
-        return MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                       TRANS ("File already exists"),
-                                                       TRANS ("There's already a file called: FLNM")
-                                                               .replace ("FLNM", newFile.getFullPathName())
-                                                           + "\n\n"
-                                                           + TRANS ("Are you sure you want to overwrite it?"),
-                                                       TRANS ("Overwrite"),
-                                                       TRANS ("Cancel"));
+        return MessageBoxOptions{}.withIconType (MessageBoxIconType::WarningIcon)
+                                  .withTitle (TRANS ("File already exists"))
+                                  .withMessage (TRANS ("There's already a file called: FLNM")
+                                                    .replace ("FLNM", newFile.getFullPathName())
+                                                + "\n\n"
+                                                + TRANS ("Are you sure you want to overwrite it?"))
+                                  .withButton (TRANS ("Overwrite"), 1)
+                                  .withButton (TRANS ("Cancel"), 0);
     }
 
     void askToOverwriteFileAsync (SafeParentPointer parent,

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -58,7 +58,7 @@ public:
             int numCalls = 0;
         };
 
-        beginTest ("Adding and immediately removing a receiver works");
+        testCase ("Adding and immediately removing a receiver works", [&]
         {
             Receivers receivers;
             CountingReceiver receiver;
@@ -69,9 +69,9 @@ public:
             receivers.remove (receiver);
 
             expect (receiver.numCalls == 0);
-        }
+        });
 
-        beginTest ("Notifying receivers works");
+        testCase ("Notifying receivers works", [&]
         {
             Receivers receivers;
             std::array<CountingReceiver, 63> receiverArray;
@@ -88,9 +88,9 @@ public:
             }
 
             expect ((size_t) receiverArray.front().numCalls == receiverArray.size());
-        }
+        });
 
-        beginTest ("Adding and removing receivers while notifying them works");
+        testCase ("Adding and removing receivers while notifying them works", [&]
         {
             std::atomic<bool> exit { false };
             Receivers receivers;
@@ -125,7 +125,67 @@ public:
 
             exit = true;
             notifier.join();
-        }
+        });
+
+        testCase ("Concurrent calls work", [&]
+        {
+            Receivers receivers;
+
+            class StageGate
+            {
+            public:
+                void waitForStageThenProceed (int s)
+                {
+                    std::unique_lock lock { mutex };
+                    condvar.wait (lock, [&] { return stage == s; });
+                    stage = s + 1;
+                    condvar.notify_all();
+                }
+
+            private:
+                std::condition_variable condvar;
+                std::mutex mutex;
+                int stage = 0;
+            };
+
+            struct TestReceiver : public Listener { void notify() override {} };
+
+            TestReceiver testReceiver;
+            receivers.add (testReceiver);
+
+            std::vector<std::thread> notifiers;
+
+            StageGate gate;
+
+            notifiers.emplace_back ([&]
+            {
+                receivers.call ([&] (auto&)
+                {
+                    gate.waitForStageThenProceed (1);
+                    gate.waitForStageThenProceed (3);
+                });
+
+                gate.waitForStageThenProceed (4);
+            });
+
+            notifiers.emplace_back ([&]
+            {
+                gate.waitForStageThenProceed (2);
+
+                receivers.call ([&] (auto&)
+                {
+                    gate.waitForStageThenProceed (5);
+                });
+            });
+
+            gate.waitForStageThenProceed (0);
+            gate.waitForStageThenProceed (6);
+
+            for (auto& t : notifiers)
+                t.join();
+
+            receivers.remove (testReceiver);
+        });
     }
 };
 

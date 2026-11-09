@@ -61,7 +61,7 @@ enum AAX_EError
 	AAX_ERROR_NOT_INITIALIZED								= -20011,
 	AAX_ERROR_ACF_ERROR										= -20012,
 	AAX_ERROR_INVALID_METER_TYPE							= -20013,
-	AAX_ERROR_CONTEXT_ALREADY_HAS_METERS					= -20014,
+	AAX_ERROR_CONTEXT_ALREADY_HAS_METERS					= -20014, ///< The context already has a meter field. Multiple meter fields are not allowed. \sa \ref AAX_ERROR_CONTEXT_ALREADY_HAS_FIELD_OF_TYPE
 	AAX_ERROR_NULL_COMPONENT								= -20015,
 	AAX_ERROR_PORT_ID_OUT_OF_RANGE							= -20016,
 	AAX_ERROR_FIELD_TYPE_DOES_NOT_SUPPORT_DIRECT_ACCESS		= -20017,
@@ -100,6 +100,8 @@ enum AAX_EError
 	AAX_ERROR_ARGUMENT_OUT_OF_RANGE							= -20050, ///< One or more input parameters are out of the expected range, e.g. an index argument that is negative or exceeds the number of elements
 	AAX_ERROR_PRINT_FAILURE									= -20051, ///< A failure occurred in a "print" library call such as @c printf
 	AAX_ERROR_NOTIFICATION_REGISTRATION_FAILED				= -20052, 
+	AAX_ERROR_CONTEXT_ALREADY_HAS_FIELD_OF_TYPE				= -20053, ///< The context already has a field of the specified type, and multiple fields of this type are not allowed. \sa \ref AAX_ERROR_CONTEXT_ALREADY_HAS_METERS
+	AAX_ERROR_OUT_OF_RESOURCES								= -20054, ///< The plugin has run out of an internal resource and cannot complete the requested operation
 	
 	
 	AAX_ERROR_PLUGIN_BEGIN									= -20600, ///< Custom plug-in error codes may be placed in the range ( \ref AAX_ERROR_PLUGIN_END, \ref AAX_ERROR_PLUGIN_BEGIN ]
@@ -159,6 +161,7 @@ enum {
 	kFicParseErr					= -9035,	// While trying to parse a data structure ran into an error.
 	kFicNotAcquiredErr				= -9041,	// Tried to execute code when an object needs to be acquired first.
 	kFicNoSSIClockErr				= -9045,	// DSP does not recieve peripheral clock interrupts.
+	kFicAlreadyExists				= -9047,	// Resource already exists
 	kFicNotFound					= -9048,	// Missing DAE resource or timeout occured while waiting for DAE to launch.
 	kFicCantRecordErr				= -9050,	// Error returned when CanRecord() returns false.  Exp: Recording on scrub channel.
 	kFicWrongObjectErr				= -9054,	// Object size or pointers do not match.
@@ -231,7 +234,21 @@ enum {
 	kFicBufferNotLargeEnoughError	= -9177, // Method called with a data buffer that is too small for the requested data
 	kFicInitializationFailed        = -9178, // Error caught during FicInit
 	kFicPostPacketFailed = -9179, // Error triggered by AAXH_CPlugIn::PostPacket
-	
+	kFicDiskIOTimedOut = -9180, // Semaphore acquisition timeout error in DSK_VDiskDevice::DispatchIO() or CompleteIO()
+	kFicUnknownProperty = -9181, // An unknown property or gestalt selector was encountered
+	kFicNoAction = -9182, // No action occurred (may be acceptable depending on the operation)
+	kFicZetaNotResponding			= -9183,
+	kFicOSLockupDisableLLOptError	= -9184, // 8-second OS hang detected caused by low latency optimization coupled with plugin priority inversion
+	kFicNeedFirmwareUpdate			= -9185, // Firmware update may be needed
+	kFicPlayPauseError				= -9186, // CProToolsMachine couldn't start in time -- the "play/pause" bug
+	kFicDiskAudioRegionInvalidState	= -9187, // Invalid state in a DSK_AudioRegion, probably due to an invalid disk feeder being used, e.g. a multichannel disk feeder used for a playlist with heterogeneous material
+	kFicAttemptingToReadInvalidDiskChannel	= -9188, // Attempting to read an invalid channel off the end of an AudioInfo list
+	kFicWorkerExceptionFailure				= -9189,
+	kFicWorkerExceptionUnknownFailure		= -9190,
+	kFicRendererProcessingFailure			= -9191,
+	kFicRendererCriticalFailure				= -9192,
+    kFicInvalidObjectError					= -9193, // Method called on an uninitialized or invalid object
+    kFicNonFiniteAudioDetected				= -9194, // A plug-in rendered a non-finite (NaN/Inf) sample, which the NaN sanitizer muted
 };
 
 // Weird errors preserved here for backwards compatibility (i.e., older DAE's returned these errors, so we should also):
@@ -253,22 +270,22 @@ enum {
 	kSADHostTimeoutErr				= -9204,	// Timeout occured while trying to communicate with the DSP's host port.
 	kSADInvalidValue				= -9205,	// Invalid value being set to a hardware feature.
 	kSADInvalidObject				= -9206,	// NULL object found when a valid object is required.
-	
+
 	kSADNILClient					= -9210,	// Trying to opperate on a NULL client.
 	kSADClientRegistered			= -9211,	// Client already registered.
 	kSADClientUnregistered			= -9212,	// Trying to remove a client when it's not registered.
 	kSADNoListener					= -9213,	// No client to respond to a message from another client.
-	
+
 	kSADCardOwned					= -9220,	// A card is owned by a client.
 	kSADDSPOwned					= -9230,	// A DSP is owned by a client.
-	
+
 	kSADNILShell					= -9240,	// Trying to opperate on a NULL shell.
 	kSADShellRegistered				= -9241,	// Shell already registered.
 	kSADShellUnregistered			= -9242,	// Trying to remove a shell when it's not registered.
 	kSADShellTooSmall				= -9243,	// (Undefined)
 	kSADShellTooLarge				= -9244,	// DSP code runs into standard shell or runs out of P memory.
 	kSADStandardShell				= -9245,	// Trying to unregister the standard shell.
-	
+
 	kSADNoDriverFile				= -9250,	// Unable to open or create the DigiSetup file.
 	kSADDriverFileUnused			= -9251,	// Trying to free the DigiSetup file when it hasn't been openned.
 	kSADNILResource					= -9252,	// Resource not found in the DigiSetup file.
@@ -279,7 +296,7 @@ enum {
 
 
 //----------------------------------------------------------------------------
-// Error codes for Elastic audio
+// Error codes for Elastic audio 
 //----------------------------------------------------------------------------
 enum {
 	kFicElasticGeneralErr			= -9400,	// don't know what else to do
@@ -318,7 +335,7 @@ enum {
 	kFicDiskCacheGeneralErr			= -9507,	// general error.
 	kFicDiskCacheDoubleLRUPageErr	= -9508,	// duplicate page in the LRU.
 	kFicDiskCacheDoubleOwnerPageErr = -9509,	// two pages with the same owner.
-	kFicDiskCachePageLeakErr		= -9510,	// page leak in the allocator.
+	kFicDiskCachePageLeakErr		= -9510,	// page leak in the allocator. 
 	kFicDiskCacheMappingErr			= -9511,	// corruption in mapping of disk cache objects to the page allocator
 	kFicDiskCacheUnityFileErr		= -9513,	// Unity and ISIS are incompatible with the disk cache's temporary buffers
 	kFicDiskCacheOutOfMemory		= -9514,	// Couldn't allocate the disk cache!  32bits will suffocate us all.
@@ -349,19 +366,20 @@ enum {
 //----------------------------------------------------------------------------
 
 enum {
-	
+
 	// External Callback Proc Errors -7000..-7024
 	kSelectorNotSupported 			= -7000,	// This selector ID is unknown currently.
 	kWidgetNotFound 				= -7001,	// Refnum did not specify a known widget.
-	
+
 	// Plug-In Manager Errors -7025..-7049
 	kPlugInNotInstantiated 			= -7026,	// A non-instantiated plug-in was asked to do something.
 	kNilComponentObject 			= -7027,	// A component-referencing object was NIL.
 	kWidgetNotOpen 					= -7028,	// A non-instantiated widget was asked to do something.
-	//TIMILEONE ADD
+//TIMILEONE ADD
 	kDspMgrError					= -7030,	// An error originating in DspMgr returned
 	kEffectInstantiateError			= -7032,	// Problem occurred attempting to instantiate a plug-in.
-	
+	kCannotLoadWidgetCacheFile		= -7033,	// Encountered a failure when trying to load the widget's cache file.
+
 	// Plug-In Manager Errors -7050..-7075
 	kNotEnoughHardware 				= -7050,	// Not enough hardware available to instantiate a plug-in.
 	kNotEnoughTDMSlots 				= -7052,	// Not enough TDM slots available to instantiate a plug-in.
@@ -377,10 +395,11 @@ enum {
 	//   kAAXH_Result_PluginBuiltAgainstIncompatibleSDKVersion
 	kPlugInDisabled					= -7063,
 	kPlugInNotAllowed				= -7064,	// The plug-in not allowed to load
-	
+	kPlugInNotCompatibleWithOS		= -7065,	// The plug-in has a known OS incompatibility (can be converted from kAAXH_Result_PluginNotCompatibleWithOS)
+
 	// Widget errors (returned by calls to widget functions): -7075..-7099.
 	kWidgetUnsupportedSampleRate	= -7081,	// Widget cannot instantiate at the current sample rate
-	
+
 	// Connection errors: -7100..-7124
 	kInputPortInUse 				= -7100,	// Tried to connect to an input that is already connected.
 	kOutputPortCannotConnect 		= -7101,	// Specified output port has reached its limit of output connections.
@@ -389,21 +408,23 @@ enum {
 	kFreeConnectionErr 				= -7105,	// Could not delete connection info.
 	kInvalidPortNum 				= -7106,	// Out-of-range or nonexistent port number specified.
 	kPortIsDisconnected 			= -7107,	// Tried to disconnect a disconnected port.
-	
+
 	kBadStemFormat					= -7110,
 	kBadInputStemFormat				= -7111,
 	kBadOutputStemFormat			= -7112,
 	kBadSideChainStemFormat			= -7113,
 	kBadGenericStemFormat			= -7114,
 	kBadUnknownStemFormat			= -7115,
-	
+
 	kNoFirstRTASDuringPlayback      = -7117,	// can't instantiate the first RTAS plug-in on the fly (TDM decks)
 	kNoBridgeConnectionDuringPlayback = -7118, // can't create or free a bridge connection during playback
+	kNoDeviceStreamsAvailable		= -7119,	// SmartDSP device (e.g. Zeus) has no more device streams to reserve
+	kDeviceStreamInUse				= -7120,	// the requested device stream is in use
 	
 	// Subwidget errs: -7125..-7149
 	kInstanceIndexRangeErr 			= -7126,	// Specified instance index doesn't correspond with an instance.
 	kEmptySubWidgetList 			= -7129,	// List isn't NULL, but has no elements.
-	
+
 	// Instance errs: -7150..-7174
 	kNumInstancesWentNegative 		= -7150,	// Somehow a count of instances (in widget or DSP) went < 0.
 	kCantChangeNumInputs 			= -7152,	// Plugin does not have variable number of inputs.
@@ -424,11 +445,11 @@ enum {
 	kNotOurControl 					= -7301,	// Passed in control that didn't belong to widget.
 	kNullControl 					= -7302,	// Passed in control ref was NULL.
 	kControlNumStepsErr             = -7303,	// Control provided an invalid number of steps
-	
+
 	// Builtin plugin errors: -7350..-7374
 	kUnsupportedBuiltinPlugin 		= -7350,	// Invalid built-in plugin spec.
 	kAssertErr						= -7400,
-	
+
 	// ASP Processing errors: - 7450..-7499
 	kFicProcessStuckInLoop			= -7450,	// Plugin is stuck in a loop for an process pass.
 	kFicOutputBoundsNotInited		= -7452,	// Plugin needs to set output connections to valid range within InitOutputBounds.
@@ -438,7 +459,7 @@ enum {
 	kFicASPErrorWritingToDisk		= -7457,	// ASP encountered error while writing audio data to disk.
 	kFicASPOutputFileTooLarge       = -7458,	// ASP tried to write a file larger than the 2^31 bytes in size.
 	kFicASPOverwriteOnUnity			= -7459,	// ASP tried to write destructively to Unity
-	
+
 	// Errors called from Failure Handler routines.
 	kUnknownErr			= -7401					// Plugin caught an unknown exception
 };
@@ -456,11 +477,6 @@ enum {
 	kFicSerBadPortRefereceNumber		= -7505
 };
 
-// Play nice with emacs
-// Local variables:
-// mode:c++
-// End:
-
 */
 
 
@@ -470,37 +486,46 @@ enum
 {
 	kAAXH_Result_NoErr = 0,
 	kAAXH_Result_Error_Base = -14000,			// ePSError_Base_AAXHost
-	//	kAAXH_Result_Error =							kAAXH_Result_Error_Base - 0,
-	kAAXH_Result_Warning =							kAAXH_Result_Error_Base - 1,
-	kAAXH_Result_UnsupportedPlatform =				kAAXH_Result_Error_Base - 3,
-	kAAXH_Result_EffectNotRegistered =				kAAXH_Result_Error_Base - 4,
-	kAAXH_Result_IncompleteInstantiationRequest =	kAAXH_Result_Error_Base - 5,
-	kAAXH_Result_NoShellMgrLoaded =					kAAXH_Result_Error_Base - 6,
-	kAAXH_Result_UnknownExceptionLoadingTIPlugIn =	kAAXH_Result_Error_Base - 7,
-	kAAXH_Result_EffectComponentsMissing =			kAAXH_Result_Error_Base - 8,
-	kAAXH_Result_BadLegacyPlugInIDIndex =			kAAXH_Result_Error_Base - 9,
-	kAAXH_Result_EffectFactoryInitedTooManyTimes =	kAAXH_Result_Error_Base - 10,
-	kAAXH_Result_InstanceNotFoundWhenDeinstantiating = kAAXH_Result_Error_Base - 11,
-	kAAXH_Result_FailedToRegisterEffectPackage =	kAAXH_Result_Error_Base - 12,
-	kAAXH_Result_PlugInSignatureNotValid =			kAAXH_Result_Error_Base - 13,
-	kAAXH_Result_ExceptionDuringInstantiation =		kAAXH_Result_Error_Base - 14,
-	kAAXH_Result_ShuffleCancelled =					kAAXH_Result_Error_Base - 15,
-	kAAXH_Result_NoPacketTargetRegistered =			kAAXH_Result_Error_Base - 16,
-	kAAXH_Result_ExceptionReconnectingAfterShuffle = kAAXH_Result_Error_Base - 17,
-	kAAXH_Result_EffectModuleCreationFailed =		kAAXH_Result_Error_Base - 18,
-	kAAXH_Result_AccessingUninitializedComponent =	kAAXH_Result_Error_Base - 19,
-	kAAXH_Result_TIComponentInstantiationPostponed = kAAXH_Result_Error_Base - 20,
-	kAAXH_Result_FailedToRegisterEffectPackageNotAuthorized =	kAAXH_Result_Error_Base - 21,
-	kAAXH_Result_FailedToRegisterEffectPackageWrongArchitecture =	kAAXH_Result_Error_Base - 22,
-    kAAXH_Result_PluginBuiltAgainstIncompatibleSDKVersion = kAAXH_Result_Error_Base - 23,
-    kAAXH_Result_RequiredProperyMissing =                   kAAXH_Result_Error_Base - 24,
-    kAAXH_Result_ObjectCopyFailed =                 kAAXH_Result_Error_Base - 25,
-	kAAXH_Result_CouldNotGetPlugInBundleLoc =       kAAXH_Result_Error_Base - 26,
-	kAAXH_Result_CouldNotFindExecutableInBundle =   kAAXH_Result_Error_Base - 27,
-	kAAXH_Result_CouldNotGetExecutableLoc =         kAAXH_Result_Error_Base - 28,
+//	kAAXH_Result_Error =							kAAXH_Result_Error_Base - 0, // -14000
+	kAAXH_Result_Warning =							kAAXH_Result_Error_Base - 1, // -14001
+	kAAXH_Result_UnsupportedPlatform =				kAAXH_Result_Error_Base - 3, // -14003
+	kAAXH_Result_EffectNotRegistered =				kAAXH_Result_Error_Base - 4, // -14004
+	kAAXH_Result_IncompleteInstantiationRequest =	kAAXH_Result_Error_Base - 5, // -14005
+	kAAXH_Result_NoShellMgrLoaded =					kAAXH_Result_Error_Base - 6, // -14006
+	kAAXH_Result_UnknownExceptionLoadingTIPlugIn =	kAAXH_Result_Error_Base - 7, // -14007
+	kAAXH_Result_EffectComponentsMissing =			kAAXH_Result_Error_Base - 8, // -14008
+	kAAXH_Result_BadLegacyPlugInIDIndex =			kAAXH_Result_Error_Base - 9, // -14009
+	kAAXH_Result_EffectFactoryInitedTooManyTimes =	kAAXH_Result_Error_Base - 10, // -14010
+	kAAXH_Result_InstanceNotFoundWhenDeinstantiating = kAAXH_Result_Error_Base - 11, // -14011
+	kAAXH_Result_FailedToRegisterEffectPackage =	kAAXH_Result_Error_Base - 12, // -14012
+	kAAXH_Result_PlugInSignatureNotValid =			kAAXH_Result_Error_Base - 13, // -14013
+	kAAXH_Result_ExceptionDuringInstantiation =		kAAXH_Result_Error_Base - 14, // -14014
+	kAAXH_Result_ShuffleCancelled =					kAAXH_Result_Error_Base - 15, // -14015
+	kAAXH_Result_NoPacketTargetRegistered =			kAAXH_Result_Error_Base - 16, // -14016
+	kAAXH_Result_ExceptionReconnectingAfterShuffle = kAAXH_Result_Error_Base - 17, // -14017
+	kAAXH_Result_EffectModuleCreationFailed =		kAAXH_Result_Error_Base - 18, // -14018 // also used for a failure to create other related modules such as Direct Data
+	kAAXH_Result_AccessingUninitializedComponent =	kAAXH_Result_Error_Base - 19, // -14019		
+	kAAXH_Result_TIComponentInstantiationPostponed = kAAXH_Result_Error_Base - 20, // -14020		
+	kAAXH_Result_FailedToRegisterEffectPackageNotAuthorized =	kAAXH_Result_Error_Base - 21, // -14021
+	kAAXH_Result_FailedToRegisterEffectPackageWrongArchitecture =	kAAXH_Result_Error_Base - 22, // -14022
+    kAAXH_Result_PluginBuiltAgainstIncompatibleSDKVersion = kAAXH_Result_Error_Base - 23, // -14023
+    kAAXH_Result_RequiredProperyMissing =                   kAAXH_Result_Error_Base - 24, // -14024
+    kAAXH_Result_ObjectCopyFailed =                 kAAXH_Result_Error_Base - 25, // -14025
+	kAAXH_Result_CouldNotGetPlugInBundleLoc =       kAAXH_Result_Error_Base - 26, // -14026
+	kAAXH_Result_CouldNotFindExecutableInBundle =   kAAXH_Result_Error_Base - 27, // -14027
+	kAAXH_Result_CouldNotGetExecutableLoc =         kAAXH_Result_Error_Base - 28, // -14028
+	kAAXH_Result_PlugInIDNotValid =                 kAAXH_Result_Error_Base - 29, // -14029
+	kAAXH_Result_ContextError =                     kAAXH_Result_Error_Base - 30, // -14030
+	kAAXH_Result_PlugInMeterDescriptionMismatch =   kAAXH_Result_Error_Base - 31, // -14031
+	kAAXH_Result_IncorrectThread =					kAAXH_Result_Error_Base - 32, // -14032 // Method called from an invalid thread
+	kAAXH_Result_Error_CouldNotFindPlugInSpec =     kAAXH_Result_Error_Base - 33, // -14033
+	kAAXH_Result_Error_PlugInException =			kAAXH_Result_Error_Base - 34, // -14034
+	kAAXH_Result_RequiredArgumentIsNull =			kAAXH_Result_Error_Base - 35, // -14035
+	kAAXH_Result_PluginNotCompatibleWithOS =		kAAXH_Result_Error_Base - 36, // -14036
+	kAAXH_Result_FailedToRegisterEffectPackageNoAuthorizationPresent = kAAXH_Result_Error_Base - 37, // -14037
     
-	kAAXH_Result_InvalidArgumentValue =				kAAXH_Result_Error_Base - 100,	// WARNING: Overlaps with eTISysErrorBase
-	kAAXH_Result_NameNotFoundInPageTable =			kAAXH_Result_Error_Base - 101	// WARNING: Overlaps with eTISysErrorNotImpl
+	kAAXH_Result_InvalidArgumentValue =				kAAXH_Result_Error_Base - 100, // -14100	// WARNING: Overlaps with eTISysErrorBase
+	kAAXH_Result_NameNotFoundInPageTable =			kAAXH_Result_Error_Base - 101 // -14101	// WARNING: Overlaps with eTISysErrorNotImpl
 };
 
 */
@@ -514,7 +539,7 @@ enum
 	ePSError_Base_DSI				= -1000,			// DaeStatus.h
 	ePSError_Base_DirectIO			= -6000,			// DirectIODefs.h
 	ePSError_Base_DirectMIDI		= -6500,			// DirectIODefs.h
-	
+
 	ePSError_Base_DAE_Plugins		= -7000,			// FicErrors.h
 	ePSError_Base_DAE_Disk			= -8000,			// FicErrors.h
 	ePSError_Base_DAE_General		= -9000,			// FicErrors.h
@@ -544,7 +569,7 @@ enum
 	ePSError_Base_Harpo				= -13500,			// Dhm_HarpoInterface.h
 	ePSError_Base_FlashProgram		= -13600,			// Hampton_HostFPGAProgramming.h
 	ePSError_Base_Balance			= -13700,			// Dhm_Balance.h
-	ePSError_Base_CTIDSP			= -13800,			// Dhm_Core_TIDSP.h
+	ePSError_Base_CTIDSP			= -13800,			// Dhm_TIDSP.h
 	ePSError_Base_ONFPGASerial		= -13900,			// Dhm_COnFPGASerialController.h
 	ePSError_Base_AAXHost			= -14000,			// AAXH.h
 	ePSError_Base_TISys				= -14100,			// TISysError.h
@@ -553,17 +578,20 @@ enum
 	ePSError_Base_Berlin			= -14400,			// Dhm_Berlin.h
 	ePSError_Base_Isoch				= -14500,			// Dhm_IsochEngine.h
 	ePSError_SuppHW_NotSupported	= -14600,			// Dhm_SuppHW.h
-	
+
 	// Add new ranges here...
+	ePSError_Base_Zeta				= -14700,
+	ePSError_Base_Glass				= -14800,
+	ePSError_Base_ARADX				= -19800,			// ARADX_Errors.h
 	
 	ePSError_Base_AAXPlugIns		= -20000,			// AAX_Errors.h
-	
+
 	ePSError_Base_DynamicErrors		= -30000,			// Dynamically Generated error tokens
-	
-	
-	
+
+
+
 	ePSError_Base_GenericErrorTranslations = -21000,	//	these errors used to be ePSError_Generic_PLEASESTOPUSINGTHIS - splitting into unique error codes
-	//	putting this out in space in case anyone's using other numbers on another branch
+														//	putting this out in space in case anyone's using other numbers on another branch
 	ePSError_CEthDCMDeviceInterface_CreatePort_UncaughtException													= -21001,
 	ePSError_CEthDCMDeviceInterface_DestroyPort_UncaughtException													= -21002,
 	ePSError_CEEPro1000Imp_InitializeAndAllocateBuffers_NullE1000State												= -21003,
@@ -631,7 +659,16 @@ enum
 	ePSError_Hampton_DEXImage_MakeHexIntoBin_HEXFileNameVersion_StandardExceptionThrown								= -21065,
 	ePSError_Hampton_DEXImage_MakeHexIntoBin_HEXFileNameVersion_UnknownExceptionThrown								= -21066,
 	ePSError_Hampton_DEXImage_MakeHexIntoBin_HEXDataVersion_StandardExceptionThrown									= -21067,
-	ePSError_Hampton_DEXImage_MakeHexIntoBin_HEXDataVersion_UnknownExceptionThrown									= -21068
+	ePSError_Hampton_DEXImage_MakeHexIntoBin_HEXDataVersion_UnknownExceptionThrown									= -21068,
+    
+    // Avid Video Engine Error Codes
+    ePSError_AVE_ErrorMessageType_Fatal             = -22000,
+    ePSError_AVE_ErrorMessageType_Dialog            = -22001,
+    ePSError_AVE_ErrorMessageType_Message           = -22002,
+    ePSError_AVE_ErrorMessageType_SyncErr           = -22003,
+    ePSError_AVE_ErrorMessageType_PlayStateErr      = -22004,
+    ePSError_AVE_ErrorMessageType_ClockNotLocked    = -22005,
+    ePSError_AVE_ErrorMessageType_UnknownError      = -22006,
 };
 */
 
@@ -686,9 +723,49 @@ enum
 	eTISysSwapScriptTimeout								= eTISysErrorBase - 40,
 	eTISysTIDSPModuleNotFound							= eTISysErrorBase - 41,
 	eTISysTIDSPReadError								= eTISysErrorBase - 42,
+	eTISysTIDSPDecryptionError							= eTISysErrorBase - 43,
+	eTISysExceptionOnTeardown							= eTISysErrorBase - 44,
 	
 };
 
+*/
+
+
+//_TIDspMgrAllocationReturnCodes.h
+/*
+_E( eTIDSPMgrResult_InsufficientDSPResources ),									// -14398
+_E( eTIDSPMgrResult_GeneralError ),												// -14397
+_E( eTIDSPMgrResult_ExceptionAllocatingPlugInInstance ),						// -14396
+_E( eTIDSPMgrResult_EffectRequiresDifferentShell ),								// -14395
+_E( eTIDSPMgrResult_ShellBinaryCodeSegmentAtUnexpectedAddress ),				// -14394
+_E( eTIDSPMgrResult_InstanceRequiresDifferentBufferLengthOrSampleRate ),		// -14393
+_E( eTIDSPMgrResult_InvalidPlugInSampleRateOrBufferLength ),					// -14392
+_E( eTIDSPMgrResult_ShellCycleCountRequirementsExceedChipCapacity ),			// -14391
+_E( eTIDSPMgrResult_TryingToLoadEffectDLLOnChipAllocatedForMonolithic ),		// -14390
+_E( eTIDSPMgrResult_TryingToLoadTwoMonolithicPlugInTypesOnChip ),				// -14389
+_E( eTIDSPMgrResult_NotEnoughChipMemoryToLoadPlugInDLL ),						// -14388
+_E( eTIDSPMgrResult_EffectMetersWillNotFitOnChip ),								// -14387
+_E( eTIDSPMgrResult_EffectCycleCountExceedsChipCapacity ),						// -14386
+_E( eTIDSPMgrResult_EffectMaxInstancesPerChipExceeded ),						// -14385
+_E( eTIDSPMgrResult_DataPortsPerChipExceeded ),									// -14384
+_E( eTIDSPMgrResult_InstanceIDAlreadyInUse ),									// -14383
+_E( eTIDSPMgrResult_InsufficientAudioInputsForEffect ),							// -14382
+_E( eTIDSPMgrResult_InsufficientAudioOutputsForEffect ),						// -14381
+_E( eTIDSPMgrResult_InsufficientAudioOutputsForMixer ),							// -14380
+_E( eTIDSPMgrResult_InsufficientDSPMemoryForSideChainInput ),					// -14379
+_E( eTIDSPMgrResult_InsufficientDSPMemoryForEffectInstanceData ),				// -14378
+_E( eTIDSPMgrResult_InsufficientDSPMemoryForEffect ),							// -14377
+_E( eTIDSPMgrResult_EffectOverheadCycleCountExceedsChipCapacity ),				// -14376
+_E( eTIDSPMgrResult_InsufficientDSPMemoryForMeterData ),						// -14375
+_E( eTIDSPMgrResult_ModuleNotLoadedForClump ),									// -14374
+_E( eTIDSPMgrResult_ChipAlreadyAllocatedExclusivelyForDifferentEffectType ),	// -14373
+_E( eTIDSPMgrResult_EffectRequiresExclusiveUseOfChip ),							// -14372
+_E( eTIDSPMgrResult_UnbalancedDSPShuffleList ),									// -14371
+_E( eTIDSPMgrResult_MaxClumpLimitReached ),										// -14370
+_E( eTIDSPMgrResult_MaxChipInstanceLimitReached ),								// -14369
+_E( eTIDSPMgrResult_ChipAlreadyReservedOrNotFound ),							// -14368
+_E( eTIDSPMgrResult_ChipInUseAlready ),											// -14367
+_E( eTIDSPMgrResult_TotalCycleCountPluginsNeedExclusiveChip ),					// -14366
 */
 
 /// @cond ignore

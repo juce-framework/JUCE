@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -54,7 +54,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wc99-extensions",
                                      "-Wsign-conversion",
                                      "-Wswitch-enum",
                                      "-Wunused-parameter",
-                                     "-Wzero-as-null-pointer-constant")
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wimplicit-fallthrough")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 4200 4244 4267 4389 4702 4706 4800 6308 28182 28183 6385 6386 6387 6011 6282 6323 6330 6001 6031)
 JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
@@ -62,6 +63,9 @@ extern "C"
 {
 
 #include <math.h>
+
+#pragma push_macro ("_POSIX_C_SOURCE")
+#undef _POSIX_C_SOURCE
 
 #define is_windows_path serd_is_windows_path
 
@@ -98,6 +102,8 @@ extern "C"
 #include "lilv/src/util.c"
 #include "lilv/src/world.c"
 #include "lilv/src/zix/tree.c"
+
+#pragma pop_macro ("_POSIX_C_SOURCE")
 
 #undef NS_RDF
 #undef NS_XSD

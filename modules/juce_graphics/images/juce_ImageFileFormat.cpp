@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -37,39 +37,33 @@ namespace juce
 
 struct DefaultImageFormats
 {
-    static ImageFileFormat** get()
+    static Span<ImageFileFormat*> get()
     {
-        static DefaultImageFormats formats;
-        return formats.formats;
+        static PNGImageFormat png;
+        static JPEGImageFormat jpg;
+        static GIFImageFormat gif;
+
+       #if JUCE_USE_WEBP
+        static WebPImageFormat webp;
+        static ImageFileFormat* formats[] { &png, &jpg, &gif, &webp };
+       #else
+        static ImageFileFormat* formats[] { &png, &jpg, &gif };
+       #endif
+        return formats;
     }
-
-private:
-    DefaultImageFormats() noexcept
-    {
-        formats[0] = &png;
-        formats[1] = &jpg;
-        formats[2] = &gif;
-        formats[3] = nullptr;
-    }
-
-    PNGImageFormat  png;
-    JPEGImageFormat jpg;
-    GIFImageFormat  gif;
-
-    ImageFileFormat* formats[4];
 };
 
 ImageFileFormat* ImageFileFormat::findImageFormatForStream (InputStream& input)
 {
     const int64 streamPos = input.getPosition();
 
-    for (ImageFileFormat** i = DefaultImageFormats::get(); *i != nullptr; ++i)
+    for (auto* i : DefaultImageFormats::get())
     {
-        const bool found = (*i)->canUnderstand (input);
+        const bool found = i->canUnderstand (input);
         input.setPosition (streamPos);
 
         if (found)
-            return *i;
+            return i;
     }
 
     return nullptr;
@@ -77,9 +71,9 @@ ImageFileFormat* ImageFileFormat::findImageFormatForStream (InputStream& input)
 
 ImageFileFormat* ImageFileFormat::findImageFormatForFileExtension (const File& file)
 {
-    for (ImageFileFormat** i = DefaultImageFormats::get(); *i != nullptr; ++i)
-        if ((*i)->usesFileExtension (file))
-            return *i;
+    for (auto* i : DefaultImageFormats::get())
+        if (i->usesFileExtension (file))
+            return i;
 
     return nullptr;
 }

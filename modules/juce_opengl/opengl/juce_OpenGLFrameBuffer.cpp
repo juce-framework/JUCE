@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -35,9 +35,42 @@
 namespace juce
 {
 
-/*
-    Used on Android to detect when the GL context and associated resources (textures, framebuffers,
-    etc.) need to be destroyed/created due to the Surface changing state.
+struct TextureSize
+{
+    int width = 0, height = 0;
+};
+
+// The allocated texture may be larger than the requested size.
+static std::optional<TextureSize> tryAllocTexture (int w, int h, GLenum type)
+{
+    JUCE_CHECK_OPENGL_ERROR
+
+    OpenGLHelpers::resetErrorState();
+
+    for (const auto& [testWidth, testHeight] : { std::tuple (w, h),
+                                                 std::tuple (nextPowerOfTwo (w), nextPowerOfTwo (h)) })
+    {
+        glTexImage2D (GL_TEXTURE_2D,
+                      0,
+                      type == GL_ALPHA ? GL_ALPHA : GL_RGBA,
+                      testWidth,
+                      testHeight,
+                      0,
+                      type,
+                      GL_UNSIGNED_BYTE,
+                      nullptr);
+
+        const GLenum error = glGetError();
+
+        if (error == GL_NO_ERROR)
+            return TextureSize { testWidth, testHeight };
+    }
+
+    return {};
+}
+
+/*  Used to detect when the GL context and associated resources (textures, framebuffers, etc.)
+    need to be destroyed/created.
 */
 class OpenGLContext::NativeContextListener
 {
@@ -46,9 +79,10 @@ public:
 
     virtual void contextWillPause() = 0;
     virtual void contextDidResume() = 0;
+    virtual void contextWillBeDestroyed() = 0;
 
-    static void addListener (OpenGLContext& ctx, NativeContextListener& l);
-    static void removeListener (OpenGLContext& ctx, NativeContextListener& l);
+    void registerWith (OpenGLContext& c)    { c.nativeContextListeners.add (this); }
+    void unregisterFrom (OpenGLContext& c)  { c.nativeContextListeners.remove (this); }
 };
 
 class OpenGLFrameBuffer::Pimpl : private OpenGLContext::NativeContextListener
@@ -86,7 +120,7 @@ public:
             return false;
 
         associatedContext = &context;
-        NativeContextListener::addListener (*associatedContext, *this);
+        registerWith (*associatedContext);
 
         return true;
     }
@@ -112,27 +146,29 @@ public:
             return true;
         }
 
-        const Rectangle<int> area (p->width, p->height);
+        const Rectangle<int> area { p->width, p->height };
+        const Rectangle<int> textureArea { p->textureWidth, p->textureHeight };
 
         if (! initialise (*other.pimpl->associatedContext, area.getWidth(), area.getHeight()))
             return false;
 
         jassert (associatedContext != nullptr);
 
+        const OpenGLTargetSaver targetSaver;
         auto* transientState = std::get_if<TransientState> (&state);
         transientState->bind();
-        const ScopeGuard unbinder { [transientState] { transientState->unbind(); }};
+        transientState->setViewportToContentArea();
 
        #if ! JUCE_ANDROID
-        if (! associatedContext->isCoreProfile())
+        if (associatedContext->getProfile() == OpenGLProfile::compatibility)
             glEnable (GL_TEXTURE_2D);
 
-        clearGLError();
+        OpenGLHelpers::resetErrorState();
        #endif
         {
             const ScopedTextureBinding scopedTextureBinding;
             glBindTexture (GL_TEXTURE_2D, p->textureID);
-            associatedContext->copyTexture (area, area, area.getWidth(), area.getHeight(), false);
+            associatedContext->copyTexture (area, textureArea, area.getWidth(), area.getHeight(), false);
         }
 
         return true;
@@ -141,7 +177,7 @@ public:
     void release()
     {
         if (auto* prev = std::exchange (associatedContext, nullptr))
-            NativeContextListener::removeListener (*prev, *this);
+            unregisterFrom (*prev);
 
         state.emplace<std::monostate>();
     }
@@ -190,6 +226,22 @@ public:
     {
         if (auto* transientState = std::get_if<TransientState> (&state))
             return transientState->textureID;
+
+        return 0;
+    }
+
+    int getTextureWidth() const noexcept
+    {
+        if (auto* transientState = std::get_if<TransientState> (&state))
+            return transientState->textureWidth;
+
+        return 0;
+    }
+
+    int getTextureHeight() const noexcept
+    {
+        if (auto* transientState = std::get_if<TransientState> (&state))
+            return transientState->textureHeight;
 
         return 0;
     }
@@ -245,8 +297,13 @@ public:
         const ScopeGuard unbinder { [transientState] { transientState->unbind(); }};
 
         glPixelStorei (GL_PACK_ALIGNMENT, 4);
-        glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(),
-                      JUCE_RGBA_FORMAT, GL_UNSIGNED_BYTE, target);
+        glReadPixels (area.getX(),
+                      area.getY() + transientState->getContentYOffsetInTexture(),
+                      area.getWidth(),
+                      area.getHeight(),
+                      JUCE_RGBA_FORMAT,
+                      GL_UNSIGNED_BYTE,
+                      target);
 
         if (order == RowOrder::fromTopDown)
         {
@@ -284,15 +341,26 @@ public:
         OpenGLTexture tex;
         tex.loadARGB (data, area.getWidth(), area.getHeight());
 
-        glViewport (0, 0, transientState->width, transientState->height);
-        associatedContext->copyTexture (area,
-                                        Rectangle<int> (area.getX(),
-                                                        area.getY(),
+        // loadARGB() puts the pixels in the bottom rows of a texture that may be larger than the
+        // area. Bottom-up data is drawn without flipping, so the texture's top edge is anchored
+        // above the target area by the height of the padding, which then falls outside the clip.
+        const auto flipVertically = order == RowOrder::fromTopDown;
+        const auto padding = flipVertically ? 0 : tex.getHeight() - area.getHeight();
+
+        const Rectangle<int> targetArea { area.getX(),
+                                          transientState->height - area.getBottom(),
+                                          area.getWidth(),
+                                          area.getHeight() };
+
+        transientState->setViewportToContentArea();
+        associatedContext->copyTexture (targetArea,
+                                        Rectangle<int> (targetArea.getX(),
+                                                        targetArea.getY() - padding,
                                                         tex.getWidth(),
                                                         tex.getHeight()),
                                         transientState->width,
                                         transientState->height,
-                                        order == RowOrder::fromTopDown,
+                                        flipVertically,
                                         false);
 
         JUCE_CHECK_OPENGL_ERROR
@@ -326,19 +394,14 @@ private:
                         const bool wantsDepthBuffer,
                         const bool wantsStencilBuffer)
             : width (w),
-              height (h),
-              textureID (0),
-              frameBufferID (0),
-              depthOrStencilBuffer (0)
+              height (h)
         {
             // Framebuffer objects can only be created when the current thread has an active OpenGL
             // context. You'll need to create this object in one of the OpenGLContext's callbacks.
             jassert (OpenGLHelpers::isContextActive());
 
-           #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
-            if (gl::glGenFramebuffers == nullptr)
+            if (! OpenGLHelpers::isFunctionAvailable (gl::glGenFramebuffers))
                 return;
-           #endif
 
             gl::glGenFramebuffers (1, &frameBufferID);
             bind();
@@ -357,7 +420,14 @@ private:
                 glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
                 JUCE_CHECK_OPENGL_ERROR
 
-                glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+                const auto allocatedSize = tryAllocTexture (width, height, GL_RGBA);
+                // Failed to create texture
+                jassert (allocatedSize.has_value());
+
+                const auto allocated = allocatedSize.value_or (TextureSize{});
+                textureWidth  = allocated.width;
+                textureHeight = allocated.height;
+
                 JUCE_CHECK_OPENGL_ERROR
             }
 
@@ -369,17 +439,15 @@ private:
                 gl::glBindRenderbuffer (GL_RENDERBUFFER, depthOrStencilBuffer);
                 jassert (gl::glIsRenderbuffer (depthOrStencilBuffer));
 
-               #if JUCE_OPENGL_ES
-                constexpr auto depthComponentConstant = (GLenum) GL_DEPTH_COMPONENT16;
-               #else
-                constexpr auto depthComponentConstant = (GLenum) GL_DEPTH_COMPONENT;
-               #endif
+                const auto depthComponentConstant = OpenGLHelpers::isOpenGLES()
+                                                  ? (GLenum) GL_DEPTH_COMPONENT16
+                                                  : (GLenum) GL_DEPTH_COMPONENT;
 
                 gl::glRenderbufferStorage (GL_RENDERBUFFER,
                                            (wantsDepthBuffer && wantsStencilBuffer) ? (GLenum) GL_DEPTH24_STENCIL8
                                                                                     : depthComponentConstant,
-                                           width,
-                                           height);
+                                           textureWidth,
+                                           textureHeight);
 
                 GLint params = 0;
                 gl::glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_DEPTH_SIZE, &params);
@@ -409,7 +477,31 @@ private:
 
         bool createdOk() const
         {
-            return frameBufferID != 0 && textureID != 0;
+            return frameBufferID != 0 && textureID != 0 && textureWidth > 0 && textureHeight > 0;
+        }
+
+        /*  The texture may be larger than the framebuffer's nominal size. The content is
+            kept in the top-left corner of the texture (i.e. in the rows with the highest
+            y coordinates), which matches the layout that OpenGLTexture uses for images,
+            so a framebuffer's texture can be drawn using the same texture coordinates as
+            any other image texture. This is the offset of the bottom of the content area
+            from the bottom of the texture.
+        */
+        int getContentYOffsetInTexture() const noexcept
+        {
+            return textureHeight - height;
+        }
+
+        void setViewportToContentArea() const
+        {
+            glViewport (0, getContentYOffsetInTexture(), width, height);
+        }
+
+        void abandon()
+        {
+            textureID = 0;
+            frameBufferID = 0;
+            depthOrStencilBuffer = 0;
         }
 
         void bind()
@@ -426,7 +518,8 @@ private:
         }
 
         const int width, height;
-        GLuint textureID, frameBufferID, depthOrStencilBuffer;
+        int textureWidth = 0, textureHeight = 0;
+        GLuint textureID = 0, frameBufferID = 0, depthOrStencilBuffer = 0;
 
     private:
         GLint prevFramebuffer{};
@@ -465,8 +558,10 @@ private:
             return transientState;
         }
 
-        // trying to use a framebuffer after saving it with saveAndRelease()! Be sure to call
-        // reloadSavedCopy() to put it back into GPU memory before using it
+        // Trying to use a framebuffer that isn't currently in GPU memory! Either it was saved
+        // with saveAndRelease(), in which case call reloadSavedCopy() to put it back before
+        // using it, or the context that owned it has been detached or destroyed, in which case
+        // the framebuffer must be initialised again with a live context.
         jassertfalse;
 
         return nullptr;
@@ -481,6 +576,15 @@ private:
     {
         if (associatedContext != nullptr)
             reloadSavedCopy (*associatedContext);
+    }
+
+    void contextWillBeDestroyed() override
+    {
+        if (auto* transientState = std::get_if<TransientState> (&state))
+            transientState->abandon();
+
+        associatedContext = nullptr;
+        state.emplace<std::monostate>();
     }
 
     OpenGLContext* associatedContext = nullptr;
@@ -543,6 +647,16 @@ int OpenGLFrameBuffer::getHeight() const noexcept
 GLuint OpenGLFrameBuffer::getTextureID() const noexcept
 {
     return pimpl->getTextureID();
+}
+
+int OpenGLFrameBuffer::getTextureWidth() const noexcept
+{
+    return pimpl->getTextureWidth();
+}
+
+int OpenGLFrameBuffer::getTextureHeight() const noexcept
+{
+    return pimpl->getTextureHeight();
 }
 
 bool OpenGLFrameBuffer::makeCurrentRenderingTarget()

@@ -1,0 +1,7 @@
+Upstream: https://github.com/xiph/opus.git
+Version:  1.6.1 (tag v1.6.1, commit 22244de5a79bd1d6d623c32e72bf1954b56235be)
+
+Vendored by vendor.py in the parent directory; rerun it to update. It copies
+the .c files the unity translation units compile and every header reachable
+from them, and rewrites their includes as paths relative to the including
+file.

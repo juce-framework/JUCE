@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -428,7 +428,25 @@ static ComSmartPtr<ID2D1GradientStopCollection> makeGradientStopCollection (cons
     }
 
     ComSmartPtr<ID2D1GradientStopCollection> result;
-    deviceContext->CreateGradientStopCollection (stops.data(), (UINT32) stops.size(), result.resetAndGetPointerAddress());
+
+    const auto extendMode = std::invoke ([&]
+    {
+        switch (gradient.spreadMethod)
+        {
+            case ColourGradient::SpreadMethod::pad:     return D2D1_EXTEND_MODE_CLAMP;
+            case ColourGradient::SpreadMethod::reflect: return D2D1_EXTEND_MODE_MIRROR;
+            case ColourGradient::SpreadMethod::repeat:  return D2D1_EXTEND_MODE_WRAP;
+        }
+
+        jassertfalse;
+        return D2D1_EXTEND_MODE_CLAMP;
+    });
+
+    deviceContext->CreateGradientStopCollection (stops.data(),
+                                                 (UINT32) stops.size(),
+                                                 D2D1_GAMMA_2_2,
+                                                 extendMode,
+                                                 result.resetAndGetPointerAddress());
     return result;
 }
 

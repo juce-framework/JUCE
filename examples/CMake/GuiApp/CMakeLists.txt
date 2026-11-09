@@ -42,7 +42,9 @@ juce_add_gui_app(GuiAppExample
     # ICON_SMALL ...
     # DOCUMENT_EXTENSIONS ...           # Specify file extensions that should be associated with this app
     # COMPANY_NAME ...                  # Specify the name of the app's author
-    PRODUCT_NAME "Gui App Example")     # The name of the final executable, which can differ from the target name
+    PRODUCT_NAME "Gui App Example"      # The name of the final executable, which can differ from the target name
+    NEEDS_WEB_BROWSER FALSE             # Set to TRUE if you need to use webviews
+    NEEDS_CURL FALSE)                   # Set to TRUE if you need to use curl
 
 # `juce_generate_juce_header` will create a JuceHeader.h for a given target, which will be generated
 # into your build tree. This should be included with `#include <JuceHeader.h>`. The include path for

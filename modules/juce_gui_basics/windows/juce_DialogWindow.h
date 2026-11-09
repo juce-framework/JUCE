@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -117,6 +117,12 @@ public:
             more info about this parameter.
         */
         Component* componentToCentreAround = nullptr;
+
+        /** If this is not a nullptr, the dialog box is associated with this component, so that
+            it is kept above the window containing the component. See the
+            TopLevelWindow::setAssociatedComponent() method for more info about this parameter.
+        */
+        Component* associatedComponent = nullptr;
 
         /** If true, then the escape key will trigger the dialog's close button. */
         bool escapeKeyTriggersCloseButton = true;

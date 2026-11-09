@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -110,6 +110,11 @@ static const uint8 javaJuceOpenGLView[] =
     0x05, 0x00, 0x00
 };
 
+bool OpenGLHelpers::isOpenGLES()
+{
+    return eglQueryAPI() == EGL_OPENGL_ES_API;
+}
+
 //==============================================================================
 //==============================================================================
 class OpenGLContext::NativeContext : private SurfaceHolderCallback
@@ -119,8 +124,13 @@ public:
                    const OpenGLPixelFormat& pixelFormat,
                    void* /*contextToShareWith*/,
                    bool useMultisamplingIn,
-                   OpenGLVersion)
-        : component (comp)
+                   API apiIn,
+                   Version versionIn,
+                   Profile profileIn)
+        : component (comp),
+          api (apiIn),
+          version (versionIn),
+          profile (profileIn)
     {
         auto env = getEnv();
 
@@ -155,7 +165,7 @@ public:
                              surfaceView.get());
 
         // initialise the geometry of the view
-        updateWindowPosition (component.localAreaToGlobal (component.getLocalBounds()));
+        updateWindowPosition();
         hasInitialised = true;
     }
 
@@ -167,7 +177,7 @@ public:
             if (LocalRef<jobject> holder { env->CallObjectMethod (surfaceView, AndroidSurfaceView.getHolder) })
                 env->CallVoidMethod (holder, AndroidSurfaceHolder.removeCallback, surfaceHolderCallback.get());
 
-        if (jobject viewParent = env->CallObjectMethod (surfaceView.get(), JuceOpenGLViewSurface.getParent))
+        if (LocalRef viewParent { env->CallObjectMethod (surfaceView.get(), JuceOpenGLViewSurface.getParent) })
             env->CallVoidMethod (viewParent, AndroidViewGroup.removeView, surfaceView.get());
     }
 
@@ -228,9 +238,9 @@ public:
     GLuint getFrameBufferID() const noexcept    { return 0; }
 
     //==============================================================================
-    void updateWindowPosition (Rectangle<int> bounds)
+    void updateWindowPosition()
     {
-        const auto physical = Desktop::getInstance().getDisplays().logicalToPhysical (bounds.toFloat()).toNearestInt();
+        const auto physical = computePhysicalBounds();
 
         if (std::exchange (physicalBounds, physical) == physical)
             return;
@@ -262,26 +272,6 @@ public:
         const ScopedLock lock;
     };
 
-    void addListener (NativeContextListener& l)
-    {
-        listeners.add (&l);
-    }
-
-    void removeListener (NativeContextListener& l)
-    {
-        listeners.remove (&l);
-    }
-
-    void notifyWillPause()
-    {
-        listeners.call ([&] (auto& l) { l.contextWillPause(); });
-    }
-
-    void notifyDidResume()
-    {
-        listeners.call ([&] (auto& l) { l.contextDidResume(); });
-    }
-
     Component& component;
 
 private:
@@ -303,11 +293,11 @@ private:
             t.juceContext->triggerRepaint();
     }
 
-    bool tryChooseConfig (const std::vector<EGLint>& optionalAttribs)
+    bool tryChooseConfig (Span<const EGLint> optionalAttribs)
     {
         std::vector<EGLint> allAttribs
         {
-            EGL_RENDERABLE_TYPE,    EGL_OPENGL_ES2_BIT,
+            EGL_RENDERABLE_TYPE,    api == OpenGLAPI::openGLES ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_BIT,
             EGL_SURFACE_TYPE,       EGL_WINDOW_BIT,
             EGL_BLUE_SIZE,          8,
             EGL_GREEN_SIZE,         8,
@@ -327,6 +317,10 @@ private:
     //==============================================================================
     bool initEGLDisplay (const OpenGLPixelFormat& pixelFormat, bool multisample)
     {
+        [[maybe_unused]] const auto didBind = eglBindAPI (api == OpenGLAPI::openGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API);
+        // Failed to bind the requested OpenGL API
+        jassert (didBind);
+
         // already initialised?
         if (display != EGL_NO_DISPLAY)
             return true;
@@ -343,15 +337,43 @@ private:
             return false;
         }
 
-        if (tryChooseConfig ({ EGL_SAMPLE_BUFFERS, multisample ? 1 : 0, EGL_SAMPLES, pixelFormat.multisamplingLevel }))
-            return true;
+        const EGLint optionalFlags[]
+        {
+            EGL_SAMPLE_BUFFERS, multisample ? 1 : 0,
+            EGL_SAMPLES, pixelFormat.multisamplingLevel
+        };
 
-        if (tryChooseConfig ({}))
-            return true;
+        for (const auto& num : { 4, 0 })
+        {
+            if (tryChooseConfig (Span { optionalFlags, (size_t) num }))
+                return true;
+        }
 
         eglTerminate (display);
         jassertfalse;
         return false;
+    }
+
+    Rectangle<int> computePhysicalBounds() const
+    {
+        if (auto* peer = component.getPeer())
+        {
+            const auto peerBounds = peer->getAreaCoveredBy (component).toFloat();
+            const auto desktopScale = peer->getComponent().getDesktopScaleFactor();
+            const auto globalRect = Rectangle { peer->localToGlobal (peerBounds.getTopLeft()),
+                                                peer->localToGlobal (peerBounds.getBottomRight()) }
+                                  / desktopScale;
+
+            const auto& displays = Desktop::getInstance().getDisplays();
+            const Rectangle physical { displays.logicalToPhysical (globalRect.getTopLeft()),
+                                       displays.logicalToPhysical (globalRect.getBottomRight()) };
+
+            const auto physicalPeerPos = displays.logicalToPhysical (peer->localToGlobal (Point<float>{}) / desktopScale);
+
+            return (physical - physicalPeerPos).toNearestInt();
+        }
+
+        return component.getBounds();
     }
 
     struct NativeWindowReleaser
@@ -387,23 +409,16 @@ private:
     GlobalRef surfaceView;
     Rectangle<int> physicalBounds;
 
-    struct SurfaceDestructor
-    {
-        void operator() (EGLSurface x) const { if (x != EGL_NO_SURFACE) eglDestroySurface (display, x); }
-    };
-
-    struct ContextDestructor
-    {
-        void operator() (EGLContext x) const { if (x != EGL_NO_CONTEXT) eglDestroyContext (display, x); }
-    };
-
     mutable std::mutex nativeHandleMutex;
     OpenGLContext* juceContext = nullptr;
-    ListenerList<NativeContextListener> listeners;
-    std::unique_ptr<std::remove_pointer_t<EGLSurface>, SurfaceDestructor> surface { EGL_NO_SURFACE };
-    std::unique_ptr<std::remove_pointer_t<EGLContext>, ContextDestructor> context { EGL_NO_CONTEXT };
+    EGLHelpers::PtrEGLSurface surface{};
+    EGLHelpers::PtrEGLContext context{};
 
     GlobalRef surfaceHolderCallback;
+
+    API api{};
+    Version version{};
+    Profile profile{};
 
     inline static EGLDisplay display = EGL_NO_DISPLAY;
     inline static EGLConfig config;

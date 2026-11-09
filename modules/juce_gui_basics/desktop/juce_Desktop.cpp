@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -62,6 +62,11 @@ Desktop& JUCE_CALLTYPE Desktop::getInstance()
         instance = new Desktop();
 
     return *instance;
+}
+
+Desktop* JUCE_CALLTYPE Desktop::getInstanceWithoutCreating()
+{
+    return instance;
 }
 
 Desktop* Desktop::instance = nullptr;
@@ -135,16 +140,42 @@ void Desktop::removeDesktopComponent (Component* c)
     desktopComponents.removeFirstMatchingValue (c);
 }
 
+static Component* findAssociatedDesktopComponent (const Component* c)
+{
+    if (auto* peer = c->getPeer())
+        if (auto* associated = peer->getAssociatedComponent())
+            if (auto* associatedPeer = associated->getPeer())
+                return &associatedPeer->getComponent();
+
+    return nullptr;
+}
+
+Array<Component*> Desktop::findComponentsAssociatedWith (const ComponentPeer& peer) const
+{
+    Array<Component*> result;
+
+    for (auto* c : desktopComponents)
+        if (auto* otherPeer = c->getPeer(); otherPeer != nullptr && otherPeer != &peer)
+            if (auto* associated = otherPeer->getAssociatedComponent())
+                if (associated->getPeer() == &peer)
+                    result.add (c);
+
+    return result;
+}
+
 void Desktop::componentBroughtToFront (Component* c)
 {
-    auto index = desktopComponents.indexOf (c);
-    jassert (index >= 0);
-
-    if (index >= 0)
+    const auto moveToFront = [this] (Component* window)
     {
+        auto index = desktopComponents.indexOf (window);
+        jassert (index >= 0);
+
+        if (index < 0)
+            return;
+
         int newIndex = -1;
 
-        if (! c->isAlwaysOnTop())
+        if (! window->isAlwaysOnTop())
         {
             newIndex = desktopComponents.size();
 
@@ -155,6 +186,53 @@ void Desktop::componentBroughtToFront (Component* c)
         }
 
         desktopComponents.move (index, newIndex);
+    };
+
+    const auto findAssociated = [this] (Component* window) -> Array<Component*>
+    {
+        if (auto* peer = window->getPeer())
+            return findComponentsAssociatedWith (*peer);
+
+        return {};
+    };
+
+    // The platform raises a window together with the windows it was opened from, and keeps the
+    // windows opened from it above it. The chain of windows this one was opened from moves first,
+    // each followed by its other associated windows, so that this window ends up on top of them all.
+    std::vector<Component*> chain { c };
+    std::set<Component*> moved { c };
+
+    for (auto* opener = findAssociatedDesktopComponent (c);
+         opener != nullptr && moved.insert (opener).second;
+         opener = findAssociatedDesktopComponent (opener))
+    {
+        chain.push_back (opener);
+    }
+
+    std::vector<Component*> pending;
+
+    const auto pushAssociated = [&] (Component* window)
+    {
+        const auto associated = findAssociated (window);
+        pending.insert (pending.end(), std::make_reverse_iterator (associated.end()), std::make_reverse_iterator (associated.begin()));
+    };
+
+    for (auto it = chain.rbegin(); it != chain.rend(); ++it)
+    {
+        moveToFront (*it);
+        pushAssociated (*it);
+
+        while (! pending.empty())
+        {
+            auto* other = pending.back();
+            pending.pop_back();
+
+            if (! moved.insert (other).second)
+                continue;
+
+            moveToFront (other);
+            pushAssociated (other);
+        }
     }
 }
 
@@ -190,8 +268,22 @@ int Desktop::getNumMouseSources() const noexcept                                
 int Desktop::getNumDraggingMouseSources() const noexcept                        { return mouseSources->getNumDraggingMouseSources(); }
 MouseInputSource* Desktop::getMouseSource (int index) const noexcept            { return mouseSources->getMouseSource (index); }
 MouseInputSource* Desktop::getDraggingMouseSource (int index) const noexcept    { return mouseSources->getDraggingMouseSource (index); }
-MouseInputSource Desktop::getMainMouseSource() const noexcept                   { return MouseInputSource (mouseSources->sources.getUnchecked (0)); }
 void Desktop::beginDragAutoRepeat (int interval)                                { mouseSources->beginDragAutoRepeat (interval); }
+
+MouseInputSource Desktop::getMainMouseSource() const noexcept
+{
+    auto& sources = mouseSources->sources;
+
+    const auto firstMouse = std::find_if (sources.begin(), sources.end(), [] (auto& source)
+    {
+        return source->inputType == MouseInputSource::InputSourceType::mouse;
+    });
+
+    if (firstMouse != sources.end())
+        return MouseInputSource { *firstMouse };
+
+    return MouseInputSource (mouseSources->sources.getUnchecked (0));
+}
 
 //==============================================================================
 void Desktop::addFocusChangeListener    (FocusChangeListener* l)   { focusListeners.add (l); }
@@ -311,7 +403,7 @@ void Desktop::setKioskModeComponent (Component* componentToUse, bool allowMenusA
         // agh! Don't delete or remove a component from the desktop while it's still the kiosk component!
         jassert (kioskModeComponent == nullptr || ComponentPeer::getPeerFor (kioskModeComponent) != nullptr);
 
-        if (auto* oldKioskComp = kioskModeComponent)
+        if (auto* oldKioskComp = kioskModeComponent.getComponent())
         {
             kioskModeComponent = nullptr; // (to make sure that isKioskMode() returns false when resizing the old one)
             setKioskComponent (oldKioskComp, false, allowMenusAndBars);

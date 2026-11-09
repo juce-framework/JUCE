@@ -325,6 +325,26 @@ public:
 	*/	
 	virtual AAX_Result					AddReservedField ( AAX_CFieldIndex inFieldIndex, uint32_t inFieldType ) = 0;
 
+	/*!
+	*  \brief Adds a field to the plugin's context
+	*
+	*  The type and behavior of the field are determined by the \p inFieldType and \p inFieldContext
+	*  parameters. The caller must check the return value to determine whether the host supports the
+	*  requested field type and additional context data.
+	*  
+	*  \note Currently there are no field types defined for this method; it is reserved for future extension.
+	*
+	*  \param[in] inFieldIndex
+	*		Unique identifier for the field, generated using \ref AAX_FIELD_INDEX
+	*  \param[in] inFieldType
+	*		Type of field that is being added
+	*  \param[in] inFieldContext
+	*		Additional context data for the field that is being added. The type of this
+	*		data is determined by the \p inFieldType parameter. Note that this "context"
+	*		is specific to this function and is unrelated to the algorithm context.
+	*/	
+	virtual AAX_Result					AddFieldOfType ( AAX_CFieldIndex inFieldIndex, AAX_CTypeID inFieldType, void const * inFieldContext ) = 0;
+
 	/** @brief	Creates a new, empty property map.
 		
 		The component descriptor owns the reference to the resulting property map, and

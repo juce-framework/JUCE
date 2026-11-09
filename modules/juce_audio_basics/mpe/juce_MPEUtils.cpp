@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -61,9 +61,6 @@ MPEChannelAssigner::MPEChannelAssigner (Range<int> channelRange)
 
 int MPEChannelAssigner::findMidiChannelForNewNote (int noteNumber) noexcept
 {
-    if (numChannels <= 1)
-        return firstChannel;
-
     for (int ch = firstChannel; (isLegacy || zone->isLowerZone() ? ch <= lastChannel : ch >= lastChannel); ch += channelIncrement)
     {
         if (midiChannels[(size_t) ch].isFree() && midiChannels[(size_t) ch].lastNotePlayed == noteNumber)
@@ -484,6 +481,17 @@ struct MPEUtilsUnitTests final : public UnitTest
                 expectEquals (channelAssigner.findMidiChannelForExistingNote (101), 2);
                 expectEquals (channelAssigner.findMidiChannelForExistingNote (20), 3);
             }
+        }
+
+        beginTest ("MPEChannelAssigner - One channel zone");
+        {
+            MPEZone zone { MPEZone::Type::lower, 1 };
+            MPEChannelAssigner channelAssigner { zone };
+
+            const auto channel = channelAssigner.findMidiChannelForNewNote (42);
+
+            expectEquals (channel, 2);
+            expectEquals (channelAssigner.findMidiChannelForExistingNote (42), channel);
         }
 
         beginTest ("MPEChannelRemapper");

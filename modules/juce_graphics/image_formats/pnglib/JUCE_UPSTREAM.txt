@@ -1,0 +1,9 @@
+Upstream: http://www.libpng.org/pub/png/libpng.html
+
+These files are from the libpng library.
+
+The zlib include path in pngstruct.h has been modified to point to the JUCE internal zlib.h when
+that file is available.
+
+The error on multiple-inclusion in pngpriv.h has been removed and replaced with a standard C-style
+include guard.

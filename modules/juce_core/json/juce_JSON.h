@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -42,6 +42,9 @@ namespace juce
     The var class is structurally compatible with JSON-formatted data, so these
     functions allow you to parse JSON into a var object, and to convert a var
     object to JSON-formatted text.
+
+    Documents in which objects or arrays are nested more than 256 levels deep are
+    rejected as malformed.
 
     @see var
 

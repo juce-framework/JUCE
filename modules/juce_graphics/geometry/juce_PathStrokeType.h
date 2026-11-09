@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -87,15 +87,6 @@ public:
                     JointStyle jointStyle,
                     EndCapStyle endStyle = butt) noexcept;
 
-    /** Creates a copy of another stroke type. */
-    PathStrokeType (const PathStrokeType&) noexcept;
-
-    /** Copies another stroke onto this one. */
-    PathStrokeType& operator= (const PathStrokeType&) noexcept;
-
-    /** Destructor. */
-    ~PathStrokeType() noexcept;
-
     //==============================================================================
     /** Applies this stroke type to a path and returns the resultant stroke as another Path.
 
@@ -142,13 +133,18 @@ public:
                                 a higher resolution, which improves the quality if you'll later want
                                 to enlarge the stroked path. So for example, if you're planning on drawing
                                 the stroke at 3x the size that you're creating it, you should set this to 3.
+        @param dashOffset       An absolute offset into the dash pattern at which to start the stroke.
+                                A positive offset perceptually shifts the pattern to the left. E.g. with
+                                a pattern of "20 10" and a dashOffset of "20", the first dash is skipped and
+                                the stroke starts with a gap of 10.
     */
     void createDashedStroke (Path& destPath,
                              const Path& sourcePath,
                              const float* dashLengths,
                              int numDashLengths,
                              const AffineTransform& transform = AffineTransform(),
-                             float extraAccuracy = 1.0f) const;
+                             float extraAccuracy = 1.0f,
+                             float dashOffset = 0.0f) const;
 
     //==============================================================================
     /** Applies this stroke type to a path and returns the resultant stroke as another Path.
@@ -196,6 +192,12 @@ public:
     /** Sets the end-cap style. */
     void setEndStyle (EndCapStyle newStyle) noexcept            { endStyle = newStyle; }
 
+    /** Sets the miter limit for mitered joints. */
+    void setMiterLimit (float newMiterLimit) noexcept           { miterLimit = newMiterLimit; }
+
+    /** Returns the miter limit for mitered joints. */
+    float getMiterLimit() const noexcept                        { return miterLimit; }
+
     //==============================================================================
     /** Compares the stroke thickness, joint and end styles of two stroke types. */
     bool operator== (const PathStrokeType&) const noexcept;
@@ -208,6 +210,7 @@ private:
     float thickness;
     JointStyle jointStyle;
     EndCapStyle endStyle;
+    float miterLimit = 4.0f;
 
     JUCE_LEAK_DETECTOR (PathStrokeType)
 };

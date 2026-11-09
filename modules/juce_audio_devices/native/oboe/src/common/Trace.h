@@ -17,15 +17,56 @@
 #ifndef OBOE_TRACE_H
 #define OBOE_TRACE_H
 
+#include <cstdint>
+
+namespace oboe {
+
+/**
+ * Wrapper for tracing use with Perfetto
+ */
 class Trace {
 
 public:
-    static void beginSection(const char *format, ...);
-    static void endSection();
-    static void initialize();
+    static Trace &getInstance() {
+        static Trace instance;
+        return instance;
+    }
+
+    /**
+     * @return true if Perfetto tracing is enabled.
+     */
+    bool isEnabled() const;
+
+    /**
+     * Only call this function if isEnabled() returns true.
+     * @param format
+     * @param ...
+     */
+    void beginSection(const char *format, ...);
+
+    /**
+     * Only call this function if isEnabled() returns true.
+     */
+    void endSection() const;
+
+    /**
+     * Only call this function if isEnabled() returns true.
+     * @param counterName human readable name
+     * @param counterValue value to log in trace
+     */
+    void setCounter(const char *counterName, int64_t counterValue) const;
 
 private:
-    static bool mIsTracingSupported;
+    Trace();
+// Tracing functions
+    void *(*ATrace_beginSection)(const char *sectionName) = nullptr;
+
+    void *(*ATrace_endSection)() = nullptr;
+
+    void *(*ATrace_setCounter)(const char *counterName, int64_t counterValue) = nullptr;
+
+    bool *(*ATrace_isEnabled)(void) = nullptr;
 };
 
+}
 #endif //OBOE_TRACE_H

@@ -2,7 +2,7 @@
  * jdcolor.c
  *
  * Copyright (C) 1991-1997, Thomas G. Lane.
- * Modified 2011-2023 by Guido Vollbeding.
+ * Modified 2011-2025 by Guido Vollbeding.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -640,8 +640,9 @@ jinit_color_deconverter (j_decompress_ptr cinfo)
 
   /* Support color transform only for RGB colorspaces */
   if (cinfo->color_transform &&
-      cinfo->jpeg_color_space != JCS_RGB &&
-      cinfo->jpeg_color_space != JCS_BG_RGB)
+      (cinfo->LSE_maxtrans != MAXJSAMPLE ||
+       (cinfo->jpeg_color_space != JCS_RGB &&
+	cinfo->jpeg_color_space != JCS_BG_RGB)))
     ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
 
   /* Set out_color_components and conversion method based on requested space.

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -96,7 +96,8 @@ struct Conversion
         Factory::splitIntoPackets (msg.bytes, 6, [&] (SysEx7::Kind kind, Span<const std::byte> bytesThisTime)
         {
             const auto packet = Factory::Detail::makeSysEx (msg.group, kind, bytesThisTime);
-            callback (View (packet.data()));
+            const uint32_t paddedPacket[] { packet[0], packet[1], 0, 0 };
+            callback (View (paddedPacket));
         });
     }
 
@@ -137,8 +138,8 @@ struct Conversion
 
             const auto extraByte = ((((firstByte & std::byte { 0xf0 }) == std::byte { 0xf0 }) ? std::byte { 0x1 } : std::byte { 0x2 }) << 0x4);
             const std::byte group { (uint8_t) (groupBytes.group & 0xf) };
-            const PacketX1 packet { mask & Utils::bytesToWord (extraByte | group, data[0], data[1], data[2]) };
-            callback (View (packet.data()));
+            const uint32_t packet[] { mask & Utils::bytesToWord (extraByte | group, data[0], data[1], data[2]), 0, 0, 0 };
+            callback (View (packet));
             return;
         }
 

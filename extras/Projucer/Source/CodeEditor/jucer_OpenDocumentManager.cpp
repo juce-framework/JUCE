@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -178,13 +178,13 @@ void OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Docume
         return;
     }
 
-    auto options = MessageBoxOptions::makeOptionsYesNoCancel (MessageBoxIconType::QuestionIcon,
-                                                              TRANS ("Closing document..."),
-                                                              TRANS ("Do you want to save the changes to \"")
-                                                                  + doc->getName() + "\"?",
-                                                              TRANS ("Save"),
-                                                              TRANS ("Discard changes"),
-                                                              TRANS ("Cancel"));
+    auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::QuestionIcon)
+                                      .withTitle (TRANS ("Closing document..."))
+                                      .withMessage (TRANS ("Do you want to save the changes to \"")
+                                                    + doc->getName() + "\"?")
+                                      .withButton (TRANS ("Save"), 1)
+                                      .withButton (TRANS ("Discard changes"), 2)
+                                      .withButton (TRANS ("Cancel"), 0);
     messageBox = AlertWindow::showScopedAsync (options, [parent = WeakReference<OpenDocumentManager> { this }, doc, callback] (int r)
     {
         if (parent == nullptr)

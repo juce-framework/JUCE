@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -528,17 +528,26 @@ struct CoreMidiHelpers
         {
             JUCE_ASSERT_MESSAGE_THREAD
 
-            enableSimulatorMidiSession();
+            static auto clientRef = std::invoke ([]() -> std::optional<MIDIClientRef>
+            {
+                enableSimulatorMidiSession();
 
-            const auto name = ump::Endpoints::Impl::getGlobalMidiClientName();
-            CFUniquePtr<CFStringRef> cfName (name.toCFString());
-            MIDIClientRef clientRef{};
+                const auto name = ump::Endpoints::Impl::getGlobalMidiClientName();
+                CFUniquePtr<CFStringRef> cfName (name.toCFString());
 
-            if (! JUCE_CHECK_ERROR (MIDIClientCreate (cfName.get(), systemChangeCallback, nullptr, &clientRef)))
+                MIDIClientRef midiClientRef{};
+
+                if (! JUCE_CHECK_ERROR (MIDIClientCreate (cfName.get(), systemChangeCallback, nullptr, &midiClientRef)))
+                    return {};
+
+                return midiClientRef;
+            });
+
+            if (! clientRef.has_value())
                 return nullptr;
 
-            const std::shared_ptr<SharedEndpointsImplNative> result { new SharedEndpointsImplNative (clientRef, listener) };
-            Listeners::get().add (result);
+            const std::shared_ptr<SharedEndpointsImplNative> result { new SharedEndpointsImplNative (*clientRef, listener) };
+            Listeners::getInstance()->add (result);
             return result;
         }
 
@@ -557,12 +566,14 @@ struct CoreMidiHelpers
             return endpoints.getEndpointInfo (x);
         }
 
-        class Listeners : private AsyncUpdater
+        class Listeners : public DeletedAtShutdown,
+                          private AsyncUpdater
         {
         public:
             ~Listeners() override
             {
                 cancelPendingUpdate();
+                clearSingletonInstance();
             }
 
             void add (std::weak_ptr<SharedEndpointsImplNative> ptr)
@@ -581,21 +592,20 @@ struct CoreMidiHelpers
                 triggerMainThreadUpdate();
             }
 
-            static Listeners& get()
-            {
-                static Listeners listeners;
-                return listeners;
-            }
+            JUCE_DECLARE_SINGLETON_SINGLETHREADED_INLINE (Listeners, false)
 
         private:
             Listeners() = default;
 
             void triggerMainThreadUpdate()
             {
-                if (MessageManager::getInstance()->isThisTheMessageThread())
-                    handleAsyncUpdate();
-                else
-                    triggerAsyncUpdate();
+                if (auto* mm = MessageManager::getInstanceWithoutCreating())
+                {
+                    if (mm->isThisTheMessageThread())
+                        handleAsyncUpdate();
+                    else
+                        triggerAsyncUpdate();
+                }
             }
 
             void handleAsyncUpdate() override
@@ -634,16 +644,14 @@ struct CoreMidiHelpers
         static void enableSimulatorMidiSession()
         {
            #if TARGET_OS_SIMULATOR
-            static bool hasEnabledNetworkSession = false;
+            static std::once_flag hasEnabledNetworkSession;
 
-            if (! hasEnabledNetworkSession)
+            std::call_once (hasEnabledNetworkSession, []
             {
                 MIDINetworkSession* session = [MIDINetworkSession defaultSession];
                 session.enabled = YES;
                 session.connectionPolicy = MIDINetworkConnectionPolicy_Anyone;
-
-                hasEnabledNetworkSession = true;
-            }
+            });
            #endif
         }
 
@@ -659,7 +667,8 @@ struct CoreMidiHelpers
                     const auto& addRemove = *reinterpret_cast<const MIDIObjectAddRemoveNotification*> (notification);
 
                     if (addRemove.childType == kMIDIObjectType_Source || addRemove.childType == kMIDIObjectType_Destination)
-                        Listeners::get().notify (addRemove.child);
+                        if (auto* listeners = Listeners::getInstanceWithoutCreating())
+                            listeners->notify (addRemove.child);
 
                     break;
                 }
@@ -669,12 +678,14 @@ struct CoreMidiHelpers
                 case kMIDIMsgThruConnectionsChanged:
                 case kMIDIMsgIOError:
                 case kMIDIMsgSerialPortOwnerChanged:
-                    Listeners::get().notify (std::nullopt);
+                    if (auto* listeners = Listeners::getInstanceWithoutCreating())
+                        listeners->notify (std::nullopt);
+
                     break;
 
                 case kMIDIMsgSetupChanged:
                #if JUCE_IOS
-                case kMIDIMsgInternalStart:
+                case 0x1000: // kMIDIMsgInternalStart
                #endif
 
                 default:
@@ -763,8 +774,6 @@ struct CoreMidiHelpers
                     if (numGroups == 0)
                         return;
 
-                    const auto index = log2 (*bitmap);
-
                     if (result >= blocks.size())
                     {
                         // This shouldn't happen, there's a max of 32 blocks!
@@ -772,10 +781,21 @@ struct CoreMidiHelpers
                         return;
                     }
 
+                    const auto beginOfSetRange = ffs (*bitmap) - 1;
+                    const auto endOfSetRange   = fls (*bitmap);
+
+                    if (beginOfSetRange + numGroups < endOfSetRange)
+                    {
+                        // Function blocks should only contain contiguous groups, but this bitmask
+                        // is not contiguous
+                        jassertfalse;
+                        return;
+                    }
+
                     blocks[result++] = ump::Block{}.withDirection (dir == ump::IOKind::src ? ump::BlockDirection::sender : ump::BlockDirection::receiver)
                                                    .withUiHint (dir == ump::IOKind::src ? ump::BlockUiHint::sender : ump::BlockUiHint::receiver)
                                                    .withEnabled (true)
-                                                   .withFirstGroup ((uint8_t) index)
+                                                   .withFirstGroup ((uint8_t) beginOfSetRange)
                                                    .withNumGroups ((uint8_t) numGroups)
                                                    .withMaxSysex8Streams (0)
                                                    .withMIDI1ProxyKind (ump::BlockMIDI1ProxyKind::inapplicable)
@@ -938,7 +958,7 @@ struct CoreMidiHelpers
             return result;
         }
 
-        static std::map<ump::EndpointId, EndpointInfo> findAllUMPDevices()
+        static std::map<ump::EndpointId, EndpointInfo> findAllUMPDevices (const std::map<ump::EndpointId, EndpointInfo>& devicesToSkip)
         {
             std::set<MIDIDeviceRef> devices;
 
@@ -979,6 +999,34 @@ struct CoreMidiHelpers
                 // We assume this is the endpoint that can transmit groupless messages.
                 const auto src = findGrouplessEndpoint (dev, ump::IOKind::src);
                 const auto dst = findGrouplessEndpoint (dev, ump::IOKind::dst);
+
+                const auto id = std::invoke ([&]() -> std::optional<ump::EndpointId>
+                {
+                    if (src.has_value() && dst.has_value())
+                    {
+                        const auto srcInfo = getConnectedEndpointInfo (*src);
+                        const auto dstInfo = getConnectedEndpointInfo (*dst);
+                        return ump::EndpointId::makeSrcDst (srcInfo.identifier, dstInfo.identifier);
+                    }
+
+                    if (src.has_value())
+                    {
+                        const auto srcInfo = getConnectedEndpointInfo (*src);
+                        return ump::EndpointId::make (ump::IOKind::src, srcInfo.identifier);
+                    }
+
+                    if (dst.has_value())
+                    {
+                        const auto dstInfo = getConnectedEndpointInfo (*dst);
+                        return ump::EndpointId::make (ump::IOKind::dst, dstInfo.identifier);
+                    }
+
+                    return {};
+                });
+
+                if (! id.has_value() || devicesToSkip.count (*id) != 0)
+                    continue;
+
                 const auto numBlocks = getSyntheticBlocks (dev, blocks);
 
                 const auto item = ump::Endpoint{}.withName (findName (dev))
@@ -989,35 +1037,22 @@ struct CoreMidiHelpers
                 const auto srcIds = getGroupIdentifiers (dev, ump::IOKind::src);
                 const auto dstIds = getGroupIdentifiers (dev, ump::IOKind::dst);
 
-                const auto info = std::invoke ([&]() -> std::optional<std::pair<ump::EndpointId, EndpointInfo>>
+                const auto info = std::invoke ([&]() -> std::optional<EndpointInfo>
                 {
                     if (src.has_value() && dst.has_value())
-                    {
-                        const auto srcInfo = getConnectedEndpointInfo (*src);
-                        const auto dstInfo = getConnectedEndpointInfo (*dst);
-                        const auto id = ump::EndpointId::makeSrcDst (srcInfo.identifier, dstInfo.identifier);
-                        return std::tuple (id, EndpointInfo::withSrcDst (item, *src, srcIds, *dst, dstIds));
-                    }
+                        return EndpointInfo::withSrcDst (item, *src, srcIds, *dst, dstIds);
 
                     if (src.has_value())
-                    {
-                        const auto srcInfo = getConnectedEndpointInfo (*src);
-                        const auto id = ump::EndpointId::make (ump::IOKind::src, srcInfo.identifier);
-                        return std::tuple (id, EndpointInfo::withSrc (item, *src, srcIds));
-                    }
+                        return EndpointInfo::withSrc (item, *src, srcIds);
 
                     if (dst.has_value())
-                    {
-                        const auto dstInfo = getConnectedEndpointInfo (*dst);
-                        const auto id = ump::EndpointId::make (ump::IOKind::dst, dstInfo.identifier);
-                        return std::tuple (id, EndpointInfo::withDst (item, *dst, dstIds));
-                    }
+                        return EndpointInfo::withDst (item, *dst, dstIds);
 
                     return {};
                 });
 
                 if (info.has_value())
-                    result.insert (*info);
+                    result.emplace (*id, *info);
             }
 
             return result;
@@ -1080,7 +1115,7 @@ struct CoreMidiHelpers
                 const auto bidiUmpEndpoints = findNativeUMPEndpoints();
 
                 // Might include duplicates of the devices in the UMPEndpointManager
-                const auto allUmpDevices = findAllUMPDevices();
+                const auto allUmpDevices = findAllUMPDevices (bidiUmpEndpoints);
 
                 result.insert (bidiUmpEndpoints.begin(), bidiUmpEndpoints.end());
                 // Resolve duplicates in favour of the devices that the system reported as UMP-native
@@ -1929,9 +1964,10 @@ struct CoreMidiHelpers
     class ConnectionToDst
     {
     public:
-        void send (ump::Iterator b, ump::Iterator e)
+        bool send (ump::Iterator b, ump::Iterator e)
         {
-            output.send (connection.portAndEndpoint, b, e);
+            const ScopedLock lock { mutex };
+            return output.send (connection.portAndEndpoint, b, e);
         }
 
         void addDisconnectionListener (ump::DisconnectionListener& l)
@@ -2031,6 +2067,7 @@ struct CoreMidiHelpers
 
         Connection connection;
         OutputToUse output;
+        CriticalSection mutex;
     };
 
     class InputImplNative : public ump::Input::Impl::Native,
@@ -2106,8 +2143,7 @@ struct CoreMidiHelpers
 
         bool send (ump::Iterator b, ump::Iterator e) override
         {
-            connection->send (b, e);
-            return true;
+            return connection->send (b, e);
         }
 
         ump::EndpointId getEndpointId() const override

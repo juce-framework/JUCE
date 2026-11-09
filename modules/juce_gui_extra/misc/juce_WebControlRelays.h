@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -58,7 +58,7 @@ namespace juce
 
     @code
     // In your Javascript GUI code you obtain an object from the framework
-    import * as Juce from "juce-framework-frontend";
+    import * as Juce from "@juce-framework/webview";
     const sliderState = Juce.getSliderState("cutoffSlider");
     @endcode
 
@@ -137,7 +137,7 @@ private:
 
     @code
     // In your Javascript GUI code you obtain an object from the framework
-    import * as Juce from "juce-framework-frontend";
+    import * as Juce from "@juce-framework/webview";
     const checkboxState = Juce.getToggleState("muteToggle");
     @endcode
 
@@ -214,7 +214,7 @@ private:
 
     @code
     // In your Javascript GUI code you obtain an object from the framework
-    import * as Juce from "juce-framework-frontend";
+    import * as Juce from "@juce-framework/webview";
     const comboBoxState = Juce.getComboBoxState("filterTypeCombo");
     @endcode
 

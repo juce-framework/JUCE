@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -469,7 +469,10 @@ public:
     */
     void writeToStream (OutputStream& output) const;
 
-    /** Reloads a tree from a stream that was written with writeToStream(). */
+    /** Reloads a tree from a stream that was written with writeToStream().
+        Trees nested more than 256 levels deep are rejected, and an invalid
+        tree is returned.
+    */
     static ValueTree readFromStream (InputStream& input);
 
     /** Reloads a tree from a data block that was written with writeToStream(). */

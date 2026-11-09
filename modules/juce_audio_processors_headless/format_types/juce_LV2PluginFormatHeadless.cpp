@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -76,9 +76,10 @@ bool LV2PluginFormatHeadless::isTrivialToScan() const { return true; }
 
 StringArray LV2PluginFormatHeadless::searchPathsForPlugins (const FileSearchPath& directoriesToSearch,
                                                             bool recursive,
-                                                            bool allowAsync)
+                                                            bool)
 {
-    return pimpl->searchPathsForPlugins (directoriesToSearch, recursive, allowAsync);
+    return pimpl->searchPathsForPlugins (directoriesToSearch,
+                                         recursive ? Pimpl::Recursive::yes : Pimpl::Recursive::no);
 }
 
 FileSearchPath LV2PluginFormatHeadless::getDefaultLocationsToSearch()

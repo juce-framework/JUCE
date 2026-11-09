@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -147,13 +147,13 @@ public:
             if (filesToTrash.size() > maxFilesToList)
                 fileList << "\n...plus " << (filesToTrash.size() - maxFilesToList) << " more files...";
 
-            auto options = MessageBoxOptions::makeOptionsYesNoCancel (MessageBoxIconType::NoIcon,
-                                                                      "Delete Project Items",
-                                                                      "As well as removing the selected item(s) from the project, do you also want to move their files to the trash:\n\n" + fileList,
-                                                                      "Just remove references",
-                                                                      "Also move files to Trash",
-                                                                      "Cancel",
-                                                                      tree->getTopLevelComponent());
+            auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::NoIcon)
+                                              .withTitle ("Delete Project Items")
+                                              .withMessage ("As well as removing the selected item(s) from the project, do you also want to move their files to the trash:\n\n" + fileList)
+                                              .withButton ("Just remove references", 1)
+                                              .withButton ("Also move files to Trash", 2)
+                                              .withButton ("Cancel", 0)
+                                              .withAssociatedComponent (tree->getTopLevelComponent());
             messageBox = AlertWindow::showScopedAsync (options, [treeRootItem, filesToTrash, doDelete] (int r) mutable
             {
                 if (treeRootItem == nullptr)
@@ -551,9 +551,11 @@ public:
 
             if (correspondingItem.isValid())
             {
-                auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::NoIcon,
-                                                                       "File Rename",
-                                                                       "Do you also want to rename the corresponding file \"" + correspondingFile.getFileName() + "\" to match?");
+                auto options = MessageBoxOptions{}.withIconType (MessageBoxIconType::NoIcon)
+                                                  .withTitle ("File Rename")
+                                                  .withMessage ("Do you also want to rename the corresponding file \"" + correspondingFile.getFileName() + "\" to match?")
+                                                  .withButton (TRANS ("OK"), 1)
+                                                  .withButton (TRANS ("Cancel"), 0);
                 messageBox = AlertWindow::showScopedAsync (options, [parent = WeakReference { this }, oldFile, newFile, correspondingFile, correspondingItem] (int result) mutable
                 {
                     if (parent == nullptr || result == 0)

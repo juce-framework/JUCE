@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -1176,7 +1176,9 @@ public:
     Steinberg::TBool PLUGIN_API isViewEmbeddingSupported() override
     {
         if (auto* pluginInstance = getPluginInstance())
-            return (Steinberg::TBool) dynamic_cast<AudioProcessorARAExtension*> (pluginInstance)->isEditorView();
+            if (auto* extension = pluginInstance->getARAClientExtensions())
+                return (Steinberg::TBool) extension->isEditorView();
+
         return (Steinberg::TBool) false;
     }
 
@@ -1538,7 +1540,14 @@ public:
             auto latencySamples = pluginInstance->getLatencySamples();
 
            #if JucePlugin_Enable_ARA
-            jassert (latencySamples == 0 || ! dynamic_cast<AudioProcessorARAExtension*> (pluginInstance)->isBoundToARA());
+            jassert (latencySamples == 0 || std::invoke ([&]
+            {
+                if (auto* extension = pluginInstance->getARAClientExtensions())
+                    return ! extension->isBoundToARA();
+
+                jassertfalse;
+                return false;
+            }));
            #endif
 
             if (details.latencyChanged && latencySamples != lastLatencySamples)
@@ -1984,13 +1993,24 @@ private:
 
             systemWindow = parent;
 
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            // Hosts may report the content scale either before or after attaching the view, so
+            // we need to record the DPI both here and in setContentScaleFactor()
+            if (owner->scaleManager.getHostScale().has_value())
+                dpiWhenHostScaleReported = getDpiOfDisplayUnderWindow (systemWindow);
+           #endif
+
             createContentWrapperComponentIfNeeded();
 
-            const auto desktopFlags = detail::PluginUtilities::getDesktopFlags (component->pluginEditor.get());
+            const auto [desktopFlags, windowsMultiTouch] = detail::PluginUtilities::getDesktopFlagsAndWindowsMultiTouchMode (component->pluginEditor.get());
 
            #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
             component->setOpaque (true);
             component->addToDesktop (desktopFlags, systemWindow);
+
+            if (auto* peer = component->getPeer())
+                peer->setWindowsCanUseMultiTouch (windowsMultiTouch);
+
             component->setVisible (true);
            #else
             macHostWindow = detail::VSTWindowUtilities::attachComponentToWindowRefVST (component.get(), desktopFlags, parent);
@@ -2041,6 +2061,32 @@ private:
 
             if (component == nullptr)
                 return kResultTrue;
+
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            // A per-monitor DPI aware v1 host such as REAPER resizes a resizable view for a new
+            // display before it reports the new content scale. If the host has resized the view by
+            // the ratio of the two DPIs, the new scale is adopted now.
+            if (const auto hostScale = owner->scaleManager.getHostScale(); hostScale.has_value() && 0.0 < dpiWhenHostScaleReported)
+            {
+                if (const auto dpi = getDpiOfDisplayUnderWindow (systemWindow); 0.0 < dpi && ! approximatelyEqual (dpi, dpiWhenHostScaleReported))
+                {
+                    const auto dpiRatio = dpi / dpiWhenHostScaleReported;
+                    const auto requestedHostSize = createRectangle (*newSize).toFloat();
+                    const auto previousHostSize = owner->scaleManager.convertToHostBounds (component->getSizeToContainChild().toFloat()).toFloat();
+
+                    const auto distanceFromRequestedHostSize = [&] (Rectangle<float> r)
+                    {
+                        return std::abs (requestedHostSize.getWidth() - r.getWidth()) + std::abs (requestedHostSize.getHeight() - r.getHeight());
+                    };
+
+                    if (distanceFromRequestedHostSize (previousHostSize * (float) dpiRatio) < distanceFromRequestedHostSize (previousHostSize))
+                    {
+                        dpiWhenHostScaleReported = dpi;
+                        owner->scaleManager.setHostScale (*hostScale * (float) dpiRatio);
+                    }
+                }
+            }
+           #endif
 
             const auto rounded = owner->scaleManager.convertFromHostBounds (createRectangle (*newSize)).toNearestIntEdges();
             component->onSize (rounded.getWidth(), rounded.getHeight());
@@ -2195,6 +2241,10 @@ private:
                #endif
             });
 
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            dpiWhenHostScaleReported = getDpiOfDisplayUnderWindow (systemWindow);
+           #endif
+
             owner->scaleManager.setHostScale (scaleToApply);
 
             return kResultTrue;
@@ -2293,10 +2343,10 @@ private:
 
             void createEditor (AudioProcessor& plugin)
             {
-                pluginEditor.reset (plugin.createEditorIfNeeded());
+                pluginEditor.reset (plugin.createEditorAndMakeActive());
 
                #if JucePlugin_Enable_ARA
-                jassert (dynamic_cast<AudioProcessorEditorARAExtension*> (pluginEditor.get()) != nullptr);
+                jassert (pluginEditor->getARAClientExtensions() != nullptr);
                 // for proper view embedding, ARA plug-ins must be resizable
                 jassert (pluginEditor->isResizable());
                #endif
@@ -2319,7 +2369,7 @@ private:
                 }
                 else
                 {
-                    // if hasEditor() returns true then createEditorIfNeeded has to return a valid editor
+                    // if hasEditor() returns true then createEditor() has to return a valid editor
                     jassertfalse;
                 }
             }
@@ -2420,9 +2470,36 @@ private:
             }
         }
 
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        static double getDpiOfDisplayUnderWindow (void* window)
+        {
+            if (window == nullptr)
+                return 0.0;
+
+            const auto hwnd = static_cast<HWND> (window);
+            const auto root = GetAncestor (hwnd, GA_ROOT);
+
+            RECT rootRect{};
+
+            if (! GetWindowRect (root != nullptr ? root : hwnd, &rootRect))
+                return 0.0;
+
+            const auto rootBounds = Rectangle<int>::leftTopRightBottom (rootRect.left, rootRect.top, rootRect.right, rootRect.bottom);
+
+            if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (rootBounds, true))
+                return display->dpi;
+
+            return 0.0;
+        }
+       #endif
+
         //==============================================================================
         std::optional<ScopedRunLoop> viewRunLoop;
         std::optional<ViewRect> lastReportedSize;
+
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        double dpiWhenHostScaleReported = 0.0;
+       #endif
 
         VSTComSmartPtr<JuceVST3EditController> owner;
         AudioProcessor& pluginInstance;
@@ -2483,7 +2560,6 @@ private:
  {
  public:
     JuceARAFactory() = default;
-    virtual ~JuceARAFactory() = default;
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
@@ -2987,7 +3063,7 @@ public:
     Optional<PositionInfo> getPosition() const override
     {
         PositionInfo info;
-        info.setTimeInSamples (jmax ((Steinberg::int64) 0, processContext.projectTimeSamples));
+        info.setTimeInSamples (processContext.projectTimeSamples);
         info.setTimeInSeconds (static_cast<double> (*info.getTimeInSamples()) / processContext.sampleRate);
         info.setIsRecording ((processContext.state & Vst::ProcessContext::kRecording) != 0);
         info.setIsPlaying ((processContext.state & Vst::ProcessContext::kPlaying) != 0);
@@ -3786,10 +3862,14 @@ private:
     }
 
     const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentControllerWithRoles (ARA::ARADocumentControllerRef documentControllerRef,
-                                                                                         ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles) SMTG_OVERRIDE
+                                                                                         ARA::ARAPlugInInstanceRoleFlags knownRoles,
+                                                                                         ARA::ARAPlugInInstanceRoleFlags assignedRoles) SMTG_OVERRIDE
     {
-        AudioProcessorARAExtension* araAudioProcessorExtension = dynamic_cast<AudioProcessorARAExtension*> (pluginInstance);
-        return araAudioProcessorExtension->bindToARA (documentControllerRef, knownRoles, assignedRoles);
+        if (auto* araAudioProcessorExtension = pluginInstance->getARAClientExtensions())
+            return araAudioProcessorExtension->bindToARA (documentControllerRef, knownRoles, assignedRoles);
+
+        jassertfalse;
+        return nullptr;
     }
    #endif
 

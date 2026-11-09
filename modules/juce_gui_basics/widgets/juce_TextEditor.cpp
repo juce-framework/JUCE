@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -1507,10 +1507,8 @@ void TextEditor::paintOverChildren (Graphics& g)
         g.setColour (colourForTextWhenEmpty);
         g.setFont (getFont());
 
-        Rectangle<int> textBounds (leftIndent,
-                                   topIndent,
-                                   viewport->getWidth() - leftIndent,
-                                   getHeight() - topIndent);
+        const auto textBounds = viewport->getBounds().withTrimmedLeft (leftIndent)
+                                                     .withTrimmedTop (topIndent);
 
         if (! textBounds.isEmpty())
             g.drawText (textToShowWhenEmpty, textBounds, justification, true);
@@ -1700,7 +1698,7 @@ bool TextEditor::moveCaretWithTransaction (const int newPos, const bool selectin
     moveCaretTo (newPos, selecting);
 
     if (auto* peer = getPeer())
-        peer->closeInputMethodContext();
+        peer->updateInputMethodContextSelection();
 
     return true;
 }

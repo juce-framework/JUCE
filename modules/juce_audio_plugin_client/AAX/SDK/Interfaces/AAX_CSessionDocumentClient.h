@@ -86,7 +86,7 @@ public: ////////////////////////////////////////////////////////////////////////
 	/**
 	 * \copydoc AAX_IACFSessionDocumentClient::NotificationReceived()
 	 */
-	AAX_Result NotificationReceived(/* AAX_ENotificationEvent */ AAX_CTypeID inNotificationType, const void * inNotificationData, uint32_t inNotificationDataSize) AAX_OVERRIDE { return AAX_SUCCESS; }
+	AAX_Result NotificationReceived(/* AAX_ENotificationEvent */ AAX_CTypeID inNotificationType, const void * inNotificationData, uint32_t inNotificationDataSize) AAX_OVERRIDE { (void)inNotificationType; (void)inNotificationData; (void)inNotificationDataSize; return AAX_SUCCESS; }
 	//@}end %AAX host and plug-in event notification
 
 protected: ///////////////////////////////////////////////////////////////////////////// AAX_CSessionDocumentClient

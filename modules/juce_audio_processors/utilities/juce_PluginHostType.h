@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -80,6 +80,7 @@ public:
         CakewalkByBandlab,          /**< Represents Cakewalk by Bandlab. */
         DaVinciResolve,             /**< Represents DaVinci Resolve. */
         DigitalPerformer,           /**< Represents Digital Performer. */
+        FenderStudioPro,            /**< Represents Fender Studio Pro. */
         FinalCut,                   /**< Represents Apple Final Cut Pro. */
         FruityLoops,                /**< Represents Fruity Loops. */
         JUCEPluginHost,             /**< Represents the JUCE AudioPluginHost */
@@ -199,6 +200,8 @@ public:
     bool isSteinberg() const noexcept         { return isCubase() || isNuendo() || isWavelab() || isSteinbergTestHost(); }
     /** Returns true if the host is PreSonus Studio One. */
     bool isStudioOne() const noexcept         { return type == StudioOne; }
+    /** Returns true if the host is Fender Studio Pro. */
+    bool isFenderStudioPro() const noexcept   { return type == FenderStudioPro; }
     /** Returns true if the host is any version of Tracktion. */
     bool isTracktion() const noexcept         { return type == Tracktion3 || type == TracktionGeneric || isTracktionWaveform(); }
     /** Returns true if the host is Tracktion Waveform. */

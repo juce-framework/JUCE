@@ -6,7 +6,7 @@ on:
       tag:
         required: true
         type: string
-        description: The tag to publish ("5.4.5")
+        description: The tag to publish - 5.4.5 (for JUCE 5.4.5)
 
 jobs:
   publish-github-release:

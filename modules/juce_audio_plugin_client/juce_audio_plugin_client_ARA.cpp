@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -50,9 +50,13 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)
 #include <ARA_Library/PlugIn/ARAPlug.cpp>
 #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
 #include <ARA_Library/Utilities/ARAPitchInterpretation.cpp>
-#include <ARA_Library/Utilities/ARAChannelArrangement.cpp>
+#include <ARA_Library/Utilities/ARAChannelFormat.cpp>
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
+#else
+// To get around 'has no symbols' warnings emitted by libtool
+void juce_audioPluginClientAraPlaceholder();
+void juce_audioPluginClientAraPlaceholder() {}
 #endif

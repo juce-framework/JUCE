@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -117,6 +117,40 @@ public:
     */
     bool isUsingNativeTitleBar() const noexcept;
 
+    /** Sets the component that this window is opened from.
+
+        This window is then kept above the window containing that component without being
+        kept above other applications, and is minimised and restored with it. Where a window
+        can position itself, it is also moved when that window is moved. Use this for a tool
+        window that floats over a main window. The window is also left off the taskbar,
+        since it is reached through the window it floats over.
+
+        If the window is already on the desktop, changing this to a component in a different
+        window recreates its native window. To avoid creating it twice, construct the window
+        with addToDesktop set to false, call this, and then call addToDesktop().
+
+        @see getAssociatedComponent, DesktopWindowOptions::withAssociatedComponent
+    */
+    void setAssociatedComponent (Component* component);
+
+    /** Returns the component that this window is opened from, or nullptr if none was set.
+        @see setAssociatedComponent
+    */
+    Component* getAssociatedComponent() const noexcept      { return associatedComponent.get(); }
+
+    /** Sets whether the window can handle multi-touch events on Windows. The default value is false.
+
+        On Windows, enabling multi-touch events disables the OS provided gesture recognition
+        features, and you won't receive callbacks to Component::mouseMagnify().
+    */
+    void setUsingWindowsMultiTouch (bool useMultiTouch);
+
+    /** Returns true if the window can handle multi-touch events on Windows.
+
+        @see setUsingWindowsMultiTouch
+    */
+    bool isUsingWindowsMultiTouch() const noexcept;
+
     //==============================================================================
     /** Returns the number of TopLevelWindow objects currently in use.
         @see getTopLevelWindow
@@ -136,9 +170,9 @@ public:
     /** Adds the window to the desktop using the default flags. */
     void addToDesktop();
 
+    using Component::addToDesktop;
+
     //==============================================================================
-    /** @internal */
-    void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = nullptr) override;
     /** @internal */
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
@@ -160,15 +194,20 @@ protected:
     /** @internal */
     void recreateDesktopWindow();
     /** @internal */
+    void createDesktopWindow (const DesktopWindowOptions& options) override;
+    /** @internal */
     void visibilityChanged() override;
 
 private:
     friend class detail::TopLevelWindowManager;
     friend class ResizableWindow;
     bool useDropShadow = true, useNativeTitleBar = false, isCurrentlyActive = false;
+    bool canUseWindowsMultiTouch = false;
     std::unique_ptr<DropShadower> shadower;
+    WeakReference<Component> associatedComponent;
 
     void setWindowActive (bool);
+    DesktopWindowOptions getDesktopWindowOptions() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TopLevelWindow)
 };

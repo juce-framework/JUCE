@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -39,10 +39,10 @@ namespace juce
 /**
     Adds a drop-shadow to a component.
 
-    This object creates and manages a set of components which sit around a
-    component, creating a gaussian shadow around it. The components will track
-    the position of the component and if it's brought to the front they'll also
-    follow this.
+    This object creates and manages a component which sits behind another
+    component, creating a gaussian shadow around it. The shadow component will
+    track the position of the component and if it's brought to the front it'll
+    also follow this.
 
     For desktop windows you don't need to use this class directly - just
     set the Component::windowHasDropShadow flag when calling
@@ -78,7 +78,7 @@ private:
     class ShadowWindow;
 
     WeakReference<Component> owner;
-    OwnedArray<Component> shadowWindows;
+    std::unique_ptr<ShadowWindow> shadowWindow;
     DropShadow shadow;
     bool reentrant = false;
     WeakReference<Component> lastParentComp;
@@ -86,8 +86,8 @@ private:
     class ParentVisibilityChangedListener;
     std::unique_ptr<ParentVisibilityChangedListener> visibilityChangedListener;
 
-    class VirtualDesktopWatcher;
-    std::unique_ptr<VirtualDesktopWatcher> virtualDesktopWatcher;
+    class ScaleWatcher;
+    std::unique_ptr<ScaleWatcher> scaleWatcher;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DropShadower)
     JUCE_DECLARE_WEAK_REFERENCEABLE (DropShadower)

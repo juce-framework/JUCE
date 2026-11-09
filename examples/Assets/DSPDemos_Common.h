@@ -598,7 +598,7 @@ private:
                                                   auto options = MessageBoxOptions().withIconType (MessageBoxIconType::WarningIcon)
                                                                                     .withTitle ("Error loading file")
                                                                                     .withMessage ("Unable to load audio file")
-                                                                                    .withButton ("OK");
+                                                                                    .withButton ("OK", 0);
                                                   messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
                                               }
                                               else

@@ -429,6 +429,13 @@ attributes directly to these creation functions, rather than adding them later.
   are set on a JUCE target. By default, we don't link Webkit because you might not need it, but
   if you get linker or include errors that reference Webkit, just set this argument to `TRUE`.
 
+`NEEDS_OPENGL_ES`
+- On Linux, set this to `TRUE` to build `juce_opengl` against OpenGL ES rather than desktop OpenGL.
+  This sets `JUCE_OPENGL_ES=1` on the target and links the `egl` and `glesv2` pkg-config packages,
+  which is what you need on systems whose graphics drivers only provide OpenGL ES, such as many
+  embedded Arm boards. It has no effect on other platforms: iOS and Android always use OpenGL ES,
+  and macOS and Windows never do.
+
 `NEEDS_WEBVIEW2`
 - On Windows, JUCE may or may not need to link to WebView2 depending on the compile definitions that
   are set on a JUCE target. By default, we don't link WebView2 because you might not need it, but
@@ -585,6 +592,11 @@ attributes directly to these creation functions, rather than adding them later.
   `kPlugCategGenerator`. Defaults to `kPlugCategSynth` if `IS_SYNTH` is `TRUE`. Otherwise defaults
   to `kPlugCategEffect`.
 
+`LV2_PLUGIN_CLASS`
+- Should be set to the name of one of the Plugin classes found at
+  https://lv2plug.in/ns/lv2core#Plugin. Defaults to "InstrumentPlugin" for synth plugins, and
+  "Plugin" otherwise.
+
 `VST3_CATEGORIES`
 - Should be one or more, separated by spaces, of the following: `Fx`, `Instrument`, `Analyzer`,
   `Delay`, `Distortion`, `Drum`, `Dynamics`, `EQ`, `External`, `Filter`, `Generator`, `Mastering`,
@@ -606,14 +618,14 @@ attributes directly to these creation functions, rather than adding them later.
 
 `AU_SANDBOX_SAFE`
 - Adds the appropriate entries to an AU plugin's Info.plist. May be either `TRUE` or `FALSE`.
-  Defaults to `FALSE`.
+  Defaults to `FALSE`. If this is `TRUE` then `SUPPRESS_AU_PLIST_RESOURCE_USAGE` has no effect.
 
 `SUPPRESS_AU_PLIST_RESOURCE_USAGE`
 - May be either `TRUE` or `FALSE`. Defaults to `FALSE`. Set this to `TRUE` to disable the
   `resourceUsage` key in the target's plist. This is useful for AU plugins that must access
   resources which cannot be declared in the resourceUsage block, such as UNIX domain sockets. In
   particular, PACE-protected AU plugins may require this option to be enabled in order for the
-  plugin to load in GarageBand.
+  plugin to load in GarageBand. This option has no effect if `AU_SANDBOX_SAFE` is set to `TRUE`.
 
 `AAX_CATEGORY`
 - Should be one or more of: `None`, `EQ`, `Dynamics`, `PitchShift`, `Reverb`, `Delay`, `Modulation`,

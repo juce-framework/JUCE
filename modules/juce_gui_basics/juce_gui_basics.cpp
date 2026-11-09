@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -155,7 +155,7 @@
 #include "detail/juce_FocusRestorer.h"
 
 //==============================================================================
-#if JUCE_IOS || JUCE_WINDOWS
+#if JUCE_IOS || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
  #include "native/juce_MultiTouchMapper.h"
 #endif
 
@@ -196,7 +196,7 @@
  #include "native/juce_MouseCursor_mac.mm"
 
 #elif JUCE_WINDOWS
- #include <juce_graphics/fonts/juce_FunctionPointerDestructor.h>
+ #include <juce_core/detail/juce_FunctionPointerDestructor.h>
  #include <juce_graphics/native/juce_Direct2DMetrics_windows.h>
  #include <juce_graphics/native/juce_Direct2DGraphicsContext_windows.h>
  #include <juce_graphics/native/juce_DirectX_windows.h>

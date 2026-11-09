@@ -78,6 +78,9 @@ public:
 
     void prepareToPlay (double, int) override
     {
+        incomingLevels.resize ((size_t) getTotalNumInputChannels());
+        readableLevels.resize ((size_t) getTotalNumInputChannels());
+
         samplesToPlay = (int) getSampleRate();
         reset();
     }

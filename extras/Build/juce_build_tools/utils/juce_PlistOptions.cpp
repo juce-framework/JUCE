@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -229,7 +229,7 @@ namespace juce::build_tools
 
                     addPlistDictionaryKey (*dict2, "CFBundleTypeName", ex);
                     addPlistDictionaryKey (*dict2, "CFBundleTypeRole", "Editor");
-                    addPlistDictionaryKey (*dict2, "CFBundleTypeIconFile", "Icon");
+                    addPlistDictionaryKey (*dict2, "CFBundleTypeIconFile", iconFile.getFileNameWithoutExtension());
                     addPlistDictionaryKey (*dict2, "NSPersistentStoreTypeKey", "XML");
                     addPlistDictionaryKey (*dict2, "LSHandlerRank", "Default");
                 }
@@ -374,6 +374,10 @@ namespace juce::build_tools
         plistEntry.createNewChildElement ("key")->addTextElement ("NSExtensionAttributes");
 
         auto* dict = plistEntry.createNewChildElement ("dict");
+
+        if (auv3FrameworkBundle.isNotEmpty())
+            addPlistDictionaryKey (*dict, "AudioComponentBundle", auv3FrameworkBundle);
+
         dict->createNewChildElement ("key")->addTextElement ("AudioComponents");
         auto* componentArray = dict->createNewChildElement ("array");
 

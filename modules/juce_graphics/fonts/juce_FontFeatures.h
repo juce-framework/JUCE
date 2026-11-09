@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -138,6 +138,44 @@ public:
         support additional values for specific behaviors.
     */
     uint32 value;
+};
+
+/** Represents a single OpenType variable font setting.
+
+    This allows for precise typographic control, enabling smooth transitions
+    between different font styles without requiring separate font files for
+    each variation.
+
+    Supported settings and ranges can be queried with Typeface::getSupportedVariables.
+
+    @see FontFeatureTag, FontOptions, Font, Typeface
+
+    @tags{Graphics}
+*/
+class JUCE_API FontVariableSetting final
+{
+    constexpr auto tie() const;
+
+public:
+    /** Constructs a variable font setting with the specified variable tag and value. */
+    constexpr FontVariableSetting (FontFeatureTag variableTag, float variableValue) noexcept
+        : tag (variableTag),
+          value (variableValue)
+    {
+    }
+
+    [[nodiscard]] constexpr bool operator<  (const FontVariableSetting& other) const;
+    [[nodiscard]] constexpr bool operator<= (const FontVariableSetting& other) const;
+    [[nodiscard]] constexpr bool operator>  (const FontVariableSetting& other) const;
+    [[nodiscard]] constexpr bool operator>= (const FontVariableSetting& other) const;
+    [[nodiscard]] constexpr bool operator!= (const FontVariableSetting& other) const;
+    [[nodiscard]] constexpr bool operator== (const FontVariableSetting& other) const;
+
+    /** The OpenType variation axis tag. */
+    FontFeatureTag tag;
+
+    /** The value for this axis. */
+    float value;
 };
 
 } // namespace juce

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -67,7 +67,8 @@ public:
     //==============================================================================
     /** Creates a DrawableButton.
 
-        After creating one of these, use setImages() to specify the drawables to use.
+        After creating one of these, use setImages() to specify the drawables to use. The button
+        will fit the bounds returned by Drawable::getDrawableBounds() into its image area.
 
         @param buttonName           the name to give the component
         @param buttonStyle          the layout to use
@@ -76,6 +77,20 @@ public:
     */
     DrawableButton (const String& buttonName,
                     ButtonStyle buttonStyle);
+
+    /** Creates a DrawableButton.
+
+        After creating one of these, use setImages() to specify the drawables to use.
+
+        @param buttonName           the name to give the component
+        @param buttonStyle          the layout to use
+        @param boundsToEnclose      the part of the image the button should enclose
+
+        @see ButtonStyle, setButtonStyle, setImages
+    */
+    DrawableButton (const String& buttonName,
+                    ButtonStyle buttonStyle,
+                    BoundsToEnclose boundsToEnclose);
 
     /** Destructor. */
     ~DrawableButton() override;
@@ -139,14 +154,14 @@ public:
 
     //==============================================================================
     /** Returns the image that the button is currently displaying. */
-    Drawable* getCurrentImage() const noexcept;
+    DrawableComponent* getCurrentImage() const noexcept;
 
     /** Returns the image that the button will use for its normal state. */
-    Drawable* getNormalImage() const noexcept;
+    DrawableComponent* getNormalImage() const noexcept;
     /** Returns the image that the button will use when the mouse is over it. */
-    Drawable* getOverImage() const noexcept;
+    DrawableComponent* getOverImage() const noexcept;
     /** Returns the image that the button will use when the mouse is held down on it. */
-    Drawable* getDownImage() const noexcept;
+    DrawableComponent* getDownImage() const noexcept;
 
     /** Can be overridden to specify a custom position for the image within the button. */
     virtual Rectangle<float> getImageBounds() const;
@@ -195,9 +210,18 @@ private:
 
     //==============================================================================
     ButtonStyle style;
-    std::unique_ptr<Drawable> normalImage, overImage, downImage, disabledImage,
-                              normalImageOn, overImageOn, downImageOn, disabledImageOn;
-    Drawable* currentImage = nullptr;
+    BoundsToEnclose boundsToEnclose;
+
+    std::unique_ptr<DrawableComponent> normalImage,
+                                       overImage,
+                                       downImage,
+                                       disabledImage,
+                                       normalImageOn,
+                                       overImageOn,
+                                       downImageOn,
+                                       disabledImageOn;
+
+    DrawableComponent* currentImage = nullptr;
     int edgeIndent = 3;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DrawableButton)

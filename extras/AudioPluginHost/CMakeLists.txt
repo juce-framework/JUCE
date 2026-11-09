@@ -15,7 +15,7 @@
 #  framework to you, and you must discontinue the installation or download
 #  process and cease use of the JUCE framework.
 #
-#  JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+#  JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
 #  JUCE Privacy Policy: https://juce.com/juce-privacy-policy
 #  JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 #
@@ -35,7 +35,9 @@ juce_add_gui_app(AudioPluginHost
     ICON_BIG                        "${CMAKE_CURRENT_SOURCE_DIR}/Source/JUCEAppIcon.png"
     ICON_COMPOSER_BUNDLE            "${CMAKE_CURRENT_SOURCE_DIR}/Source/AppIcon.icon"
     MICROPHONE_PERMISSION_ENABLED   TRUE
-    PLUGINHOST_AU                   TRUE)
+    PLUGINHOST_AU                   TRUE
+    NEEDS_WEB_BROWSER               FALSE
+    NEEDS_CURL                      FALSE)
 
 juce_generate_juce_header(AudioPluginHost)
 
@@ -62,7 +64,6 @@ target_compile_definitions(AudioPluginHost PRIVATE
     JUCE_CONTENT_SHARING=1
     JUCE_DIRECTSOUND=1
     JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING=1
-    JUCE_PLUGINHOST_LADSPA=1
     JUCE_PLUGINHOST_LV2=1
     JUCE_PLUGINHOST_VST3=1
     JUCE_PLUGINHOST_VST=0
@@ -80,7 +81,8 @@ target_compile_definitions(AudioPluginHost PRIVATE
     # This is a temporary workaround to allow builds to complete on Xcode 15.
     # Add -Wl,-ld_classic to the OTHER_LDFLAGS build setting if you need to
     # deploy to older versions of macOS/iOS.
-    JUCE_SILENCE_XCODE_15_LINKER_WARNING=1)
+    JUCE_SILENCE_XCODE_15_LINKER_WARNING=1
+    ${enable_ladspa_flag})
 
 target_link_libraries(AudioPluginHost PRIVATE
     AudioPluginHostData

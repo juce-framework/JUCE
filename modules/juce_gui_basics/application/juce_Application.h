@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -143,7 +143,7 @@ public:
     bool moreThanOneInstanceAllowed() override;
 
     /** Indicates that the user has tried to start up another instance of the app.
-        This will get called even if moreThanOneInstanceAllowed() is false.
+        This will get called only if moreThanOneInstanceAllowed() is false.
     */
     void anotherInstanceStarted (const String& commandLine) override;
 

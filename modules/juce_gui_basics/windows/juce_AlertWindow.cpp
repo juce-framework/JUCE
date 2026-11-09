@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -46,6 +46,9 @@ static juce_wchar getDefaultPasswordChar() noexcept
 
 static int showAlertWindowUnmanaged (const MessageBoxOptions& opts, ModalComponentManager::Callback* cb)
 {
+    // If this is hit, your alert window has duplicate result codes!
+    jassert (opts.areAllResultCodesUnique());
+
     return detail::ConcreteScopedMessageBoxImpl::showUnmanaged (detail::AlertWindowHelpers::create (opts), cb);
 }
 
@@ -60,6 +63,7 @@ AlertWindow::AlertWindow (const String& title,
      desktopScale (comp != nullptr ? Component::getApproximateScaleFactorForComponent (comp) : 1.0f)
 {
     setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
+    setAssociatedComponent (comp);
 
     accessibleMessageLabel.setColour (Label::textColourId,       Colours::transparentBlack);
     accessibleMessageLabel.setColour (Label::backgroundColourId, Colours::transparentBlack);
@@ -398,22 +402,40 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     AttributedString attributedText;
     attributedText.append (getName(), lf.getAlertWindowTitleFont());
 
+    auto numLinesInAttributedText = 1;
+
     if (text.isNotEmpty())
+    {
         attributedText.append ("\n\n" + text, messageFont);
+        numLinesInAttributedText += 2;
+    }
 
     attributedText.setColour (findColour (textColourId));
 
     if (alertIconType == NoIcon)
     {
         attributedText.setJustification (Justification::centredTop);
-        textLayout.createLayoutWithBalancedLineLengths (attributedText, (float) w);
     }
     else
     {
         attributedText.setJustification (Justification::topLeft);
-        textLayout.createLayoutWithBalancedLineLengths (attributedText, (float) w);
         iconSpace = iconWidth;
     }
+
+    textLayout = std::invoke ([&]
+    {
+        TextLayout layout;
+
+        layout.createLayout (attributedText, (float) w);
+
+        if (layout.getNumLines() > numLinesInAttributedText)
+        {
+            layout = TextLayout{};
+            layout.createLayoutWithBalancedLineLengths (attributedText, (float) w);
+        }
+
+        return layout;
+     });
 
     w = jmax (350, (int) textLayout.getWidth() + iconSpace + edgeGap * 4);
     w = jmin (w, (int) ((float) getParentWidth() * 0.7f));
@@ -598,14 +620,14 @@ void AlertWindow::showMessageBox (MessageBoxIconType iconType,
             .withIconType (iconType)
             .withTitle (title)
             .withMessage (message)
-            .withButton (buttonText.isEmpty() ? TRANS ("OK") : buttonText)
+            .withButton (buttonText.isEmpty() ? TRANS ("OK") : buttonText, 0)
             .withAssociatedComponent (associatedComponent));
 }
 
 int AlertWindow::show (const MessageBoxOptions& options)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        return NativeMessageBox::show (options);
+        return showNativeBoxUnmanaged (options, nullptr);
 
     return showAlertWindowUnmanaged (options, nullptr);
 }
@@ -615,7 +637,14 @@ bool AlertWindow::showNativeDialogBox (const String& title,
                                        bool isOkCancel)
 {
     if (isOkCancel)
-        return NativeMessageBox::showOkCancelBox (AlertWindow::NoIcon, title, bodyText);
+    {
+        auto options = MessageBoxOptions{}.withIconType (AlertWindow::NoIcon)
+                                          .withTitle (title)
+                                          .withMessage (bodyText)
+                                          .withButton (TRANS ("OK"), 1)
+                                          .withButton (TRANS ("Cancel"), 0);
+        return NativeMessageBox::showForOptions (options) != 0;
+    }
 
     NativeMessageBox::showMessageBox (AlertWindow::NoIcon, title, bodyText);
     return true;
@@ -625,7 +654,7 @@ bool AlertWindow::showNativeDialogBox (const String& title,
 void AlertWindow::showAsync (const MessageBoxOptions& options, ModalComponentManager::Callback* callback)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        NativeMessageBox::showAsync (options, callback);
+        NativeMessageBox::showForOptionsAsync (options, callback);
     else
         showAlertWindowUnmanaged (options, callback);
 }
@@ -654,7 +683,7 @@ static int showMaybeAsync (const MessageBoxOptions& options,
                            ModalComponentManager::Callback* callbackIn)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        return showNativeBoxUnmanaged (options, callbackIn, ResultCodeMappingMode::alertWindow);
+        return showNativeBoxUnmanaged (options, callbackIn);
 
     return showAlertWindowUnmanaged (options, callbackIn);
 }
@@ -667,12 +696,12 @@ bool AlertWindow::showOkCancelBox (MessageBoxIconType iconType,
                                    Component* associatedComponent,
                                    ModalComponentManager::Callback* callback)
 {
-    auto options = MessageBoxOptions::makeOptionsOkCancel (iconType,
-                                                           title,
-                                                           message,
-                                                           button1Text,
-                                                           button2Text,
-                                                           associatedComponent);
+    auto options = MessageBoxOptions{}.withIconType (iconType)
+                                      .withTitle (title)
+                                      .withMessage (message)
+                                      .withButton (button1Text.isNotEmpty() ? button1Text : TRANS ("OK"), 1)
+                                      .withButton (button2Text.isNotEmpty() ? button2Text : TRANS ("Cancel"), 0)
+                                      .withAssociatedComponent (associatedComponent);
     return showMaybeAsync (options, callback) == 1;
 }
 
@@ -685,13 +714,13 @@ int AlertWindow::showYesNoCancelBox (MessageBoxIconType iconType,
                                      Component* associatedComponent,
                                      ModalComponentManager::Callback* callback)
 {
-    auto options = MessageBoxOptions::makeOptionsYesNoCancel (iconType,
-                                                              title,
-                                                              message,
-                                                              button1Text,
-                                                              button2Text,
-                                                              button3Text,
-                                                              associatedComponent);
+    auto options = MessageBoxOptions{}.withIconType (iconType)
+                                      .withTitle (title)
+                                      .withMessage (message)
+                                      .withButton (button1Text.isNotEmpty() ? button1Text : TRANS ("Yes"), 1)
+                                      .withButton (button2Text.isNotEmpty() ? button2Text : TRANS ("No"), 2)
+                                      .withButton (button3Text.isNotEmpty() ? button3Text : TRANS ("Cancel"), 0)
+                                      .withAssociatedComponent (associatedComponent);
     return showMaybeAsync (options, callback);
 }
 
@@ -699,6 +728,9 @@ ScopedMessageBox AlertWindow::showScopedAsync (const MessageBoxOptions& options,
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
         return NativeMessageBox::showScopedAsync (options, std::move (callback));
+
+    // If this is hit, your alert window has duplicate result codes!
+    jassert (options.areAllResultCodesUnique());
 
     return detail::ConcreteScopedMessageBoxImpl::show (detail::AlertWindowHelpers::create (options), std::move (callback));
 }

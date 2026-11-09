@@ -1071,13 +1071,15 @@ namespace
         }
     }
 
-    static inline void* allocateBytes (Allocator* a, size_t size)
+    static inline void* allocateBytes ([[maybe_unused]] Allocator* a, [[maybe_unused]] size_t size)
     {
        #ifndef __clang_analyzer__ // this avoids some false positives in the Clang analyser
         if (a != nullptr)
             return a->allocate (size);
 
         return std::malloc (size);
+       #else
+        return nullptr;
        #endif
     }
 

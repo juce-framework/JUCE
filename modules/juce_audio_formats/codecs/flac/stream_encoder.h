@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2023  Xiph.Org Foundation
+ * Copyright (C) 2011-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -288,6 +288,11 @@ typedef enum {
 extern FLAC_API const char * const FLAC__StreamEncoderStateString[];
 
 
+#define FLAC__STREAM_ENCODER_SET_NUM_THREADS_OK 0
+#define FLAC__STREAM_ENCODER_SET_NUM_THREADS_NOT_COMPILED_WITH_MULTITHREADING_ENABLED 1
+#define FLAC__STREAM_ENCODER_SET_NUM_THREADS_ALREADY_INITIALIZED 2
+#define FLAC__STREAM_ENCODER_SET_NUM_THREADS_TOO_MANY_THREADS 3
+
 /** Possible return values for the FLAC__stream_encoder_init_*() functions.
  */
 typedef enum {
@@ -533,11 +538,17 @@ typedef FLAC__StreamEncoderReadStatus (*FLAC__StreamEncoderReadCallback)(const F
  *  callback is being called to write metadata.
  *
  * \note
- * Unlike when writing to native FLAC, when writing to Ogg FLAC the
- * write callback will be called twice when writing each audio
- * frame; once for the page header, and once for the page body.
- * When writing the page header, the \a samples argument to the
- * write callback will be \c 0.
+ * Unlike when writing to native FLAC, when writing to Ogg FLAC the write
+ * callback will be called at least twice when writing each audio frame; once
+ * for the page header and once for the page body, possibly repeating this
+ * pair of calls several times in a batch with the same value of
+ * \a current_frame.  When writing the page header, as well as in all but the
+ * first page body write of the batch, the \a samples argument to the write
+ * callback will be \c 0. For the write callback call containing the first
+ * page body, the \a samples argument is the number of samples contained in
+ * all newly added complete packets (not pages). This means that in case a
+ * packet is split over two pages, they are counted in the samples argument
+ * of the page on which the packet is completed.
  *
  * \note In general, FLAC__StreamEncoder functions which change the
  * state should not be called on the \a encoder while in the callback.
@@ -1102,6 +1113,52 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_min_residual_partition_order(FLAC__
  */
 FLAC_API FLAC__bool FLAC__stream_encoder_set_max_residual_partition_order(FLAC__StreamEncoder *encoder, uint32_t value);
 
+/** Set the maximum number of threads to use during encoding.
+ *  Set to a value different than 1 to enable multithreaded encoding.
+ *
+ *  Note that enabling multithreading encoding (i.e., setting a value
+ *  different than 1) results in the behaviour of
+ *  FLAC__stream_encoder_finish(), FLAC__stream_encoder_process(),
+ *  FLAC__stream_encoder_process_interleaved() subtly changing.
+ *  For example, calling one of the process functions with enough
+ *  samples to fill a block might not always result in a call to
+ *  the write callback with a frame coding these samples. Instead,
+ *  blocks with samples are distributed among worker threads,
+ *  meaning that the first few calls to those functions will
+ *  return very quickly, while later calls might block if all
+ *  threads are occupied. Also, certain calls to the process
+ *  functions will results in several calls to the write callback,
+ *  while subsequent calls might again return very quickly with no
+ *  calls to the write callback.
+ *
+ *  Also, a call to FLAC__stream_encoder_finish() blocks while
+ *  waiting for all threads to finish, and therefore might take much
+ *  longer than when not multithreading and result in multiple calls
+ *  to the write callback.
+ *
+ *  Calls to the write callback are guaranteed to be in the correct
+ *  order.
+ *
+ *  Currently, passing a value of 0 is synonymous with a value of 1,
+ *  but this might change in the future.
+ *
+ * \default \c 1
+ * \param  encoder  An encoder instance to set.
+ * \param  value    See above.
+ * \assert
+ *    \code encoder != NULL \endcode
+ * \retval uint32_t
+ *    - \c FLAC__STREAM_ENCODER_SET_NUM_THREADS_OK if the number of threads was set correctly,
+ *    - \c FLAC__STREAM_ENCODER_SET_NUM_THREADS_NOT_COMPILED_WITH_MULTITHREADING_ENABLED when
+ *    multithreading was not enabled at compilation,
+ *    - \c FLAC__STREAM_ENCODER_SET_NUM_THREADS_ALREADY_INITIALIZED when the encoder was
+ *    already initialized,
+ *    - \c FLAC__STREAM_ENCODER_SET_NUM_THREADS_TOO_MANY_THREADS when
+ *    the number of threads was larger than the maximum allowed number of threads (currently
+ *    128).
+ */
+FLAC_API uint32_t FLAC__stream_encoder_set_num_threads(FLAC__StreamEncoder *encoder, uint32_t value);
+
 /** Deprecated.  Setting this value has no effect.
  *
  * \default \c 0
@@ -1434,6 +1491,16 @@ FLAC_API uint32_t FLAC__stream_encoder_get_min_residual_partition_order(const FL
  *    See FLAC__stream_encoder_set_max_residual_partition_order().
  */
 FLAC_API uint32_t FLAC__stream_encoder_get_max_residual_partition_order(const FLAC__StreamEncoder *encoder);
+
+/** Get maximum number of threads setting.
+ *
+ * \param  encoder  An encoder instance to query.
+ * \assert
+ *    \code encoder != NULL \endcode
+ * \retval uint32_t
+ *    See FLAC__stream_encoder_set_num_threads().
+ */
+FLAC_API uint32_t FLAC__stream_encoder_get_num_threads(const FLAC__StreamEncoder *encoder);
 
 /** Get the Rice parameter search distance setting.
  *

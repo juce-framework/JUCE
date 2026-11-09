@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -814,7 +814,7 @@ public:
 
         if (editorComp == nullptr)
         {
-            if (auto* ed = processor->createEditorIfNeeded())
+            if (auto* ed = processor->createEditorAndMakeActive())
             {
                 setHasEditorFlag (true);
                 editorComp.reset (new EditorCompWrapper (*this, *ed));
@@ -968,10 +968,14 @@ public:
         {
             setVisible (false);
 
-            const auto desktopFlags = detail::PluginUtilities::getDesktopFlags (getEditorComp());
+            const auto [desktopFlags, windowsUsesMultiTouch] = detail::PluginUtilities::getDesktopFlagsAndWindowsMultiTouchMode (getEditorComp());
 
            #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
             addToDesktop (desktopFlags, args.ptr);
+
+            if (auto* peer = getPeer())
+                peer->setWindowsCanUseMultiTouch (windowsUsesMultiTouch);
+
             hostWindow = (HostWindowType) args.ptr;
 
             #if JUCE_LINUX || JUCE_BSD
@@ -1415,7 +1419,12 @@ private:
     pointer_sized_int handleSetCurrentProgramName (VstOpCodeArguments args)
     {
         if (processor != nullptr && processor->getNumPrograms() > 0)
-            processor->changeProgramName (processor->getCurrentProgram(), (char*) args.ptr);
+        {
+            const auto begin = (char*) args.ptr;
+            const String newName { CharPointer_UTF8 { begin },
+                                   CharPointer_UTF8 { begin + Vst2::kVstMaxProgNameLen + 1 } };
+            processor->changeProgramName (processor->getCurrentProgram(), newName);
+        }
 
         return 0;
     }
@@ -1423,7 +1432,7 @@ private:
     pointer_sized_int handleGetCurrentProgramName (VstOpCodeArguments args)
     {
         if (processor != nullptr && processor->getNumPrograms() > 0)
-            processor->getProgramName (processor->getCurrentProgram()).copyToUTF8 ((char*) args.ptr, 24 + 1);
+            processor->getProgramName (processor->getCurrentProgram()).copyToUTF8 ((char*) args.ptr, Vst2::kVstMaxProgNameLen + 1);
 
         return 0;
     }
@@ -1637,7 +1646,7 @@ private:
     {
         if (processor != nullptr && isPositiveAndBelow (args.index, processor->getNumPrograms()))
         {
-            processor->getProgramName (args.index).copyToUTF8 ((char*) args.ptr, 24 + 1);
+            processor->getProgramName (args.index).copyToUTF8 ((char*) args.ptr, Vst2::kVstMaxProgNameLen + 1);
             return 1;
         }
 

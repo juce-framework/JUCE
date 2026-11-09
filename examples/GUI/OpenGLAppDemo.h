@@ -159,6 +159,13 @@ public:
         bounds = getLocalBounds();
     }
 
+    static String preprocessShader (String shaderSource)
+    {
+        return shaderSource.replace ("#lowp#",    OpenGLHelpers::isOpenGLES() ? "lowp" : "")
+                           .replace ("#mediump#", OpenGLHelpers::isOpenGLES() ? "mediump" : "")
+                           .replace ("#highp#",   OpenGLHelpers::isOpenGLES() ? "highp" : "");
+    }
+
     void createShaders()
     {
         vertexShader =
@@ -180,29 +187,20 @@ public:
             "}\n";
 
         fragmentShader =
-           #if JUCE_OPENGL_ES
-            "varying lowp vec4 destinationColour;\n"
-            "varying lowp vec2 textureCoordOut;\n"
-           #else
-            "varying vec4 destinationColour;\n"
-            "varying vec2 textureCoordOut;\n"
-           #endif
+            "varying #lowp# vec4 destinationColour;\n"
+            "varying #lowp# vec2 textureCoordOut;\n"
             "\n"
             "void main()\n"
             "{\n"
-           #if JUCE_OPENGL_ES
-            "    lowp vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
-           #else
-            "    vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
-           #endif
+            "    #lowp# vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
             "    gl_FragColor = colour;\n"
             "}\n";
 
         std::unique_ptr<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
         String statusText;
 
-        if (newShader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (vertexShader))
-              && newShader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (fragmentShader))
+        if (newShader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (preprocessShader (vertexShader)))
+              && newShader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (preprocessShader (fragmentShader)))
               && newShader->link())
         {
             shape     .reset();

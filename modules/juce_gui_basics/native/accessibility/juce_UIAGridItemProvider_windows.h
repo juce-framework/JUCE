@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -109,11 +109,16 @@ public:
                                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
                                 if (child->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress())) == S_OK && provider != nullptr)
                                 {
-                                    *pRetVal = SafeArrayCreateVector (VT_UNKNOWN, 0, 1);
-                                    LONG index = 0;
-                                    const auto hr = SafeArrayPutElement (*pRetVal, &index, provider);
+                                    SafeArrayHandle result { SafeArrayCreateVector (VT_UNKNOWN, 0, 1) };
 
-                                    return ! FAILED (hr);
+                                    if (result == nullptr)
+                                        return false;
+
+                                    if (LONG index = 0; FAILED (SafeArrayPutElement (result.get(), &index, provider)))
+                                        return false;
+
+                                    *pRetVal = result.release();
+                                    return true;
                                 }
                                 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
                             }

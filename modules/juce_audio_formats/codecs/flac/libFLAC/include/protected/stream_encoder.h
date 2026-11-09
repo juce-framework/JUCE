@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2023  Xiph.Org Foundation
+ * Copyright (C) 2011-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -115,6 +115,7 @@ typedef struct FLAC__StreamEncoderProtected {
 	FLAC__bool limit_min_bitrate;
 	FLAC__StreamMetadata **metadata;
 	uint32_t num_metadata_blocks;
+	uint32_t num_threads;
 	FLAC__uint64 streaminfo_offset, seektable_offset, audio_offset;
 #if FLAC__HAS_OGG
 	FLAC__OggEncoderAspect ogg_encoder_aspect;

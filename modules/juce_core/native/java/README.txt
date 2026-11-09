@@ -1,4 +1,4 @@
-The Java code in the module's native/java subfolders have been used to generate
+The Java code in the module's native/java subfolders has been used to generate
 dex byte-code in various places in the JUCE framework. These are the steps
 required to re-generate the dex byte-code from any Java source code inside the
 native/java subfolders:
@@ -32,7 +32,7 @@ execute the following d8 command:
 
     <path-to-your-android-sdk>/build-tools/<latest-build-tool-version>/d8 --release --lib <path-to-your-android-sdk>/sdk/platforms/<latest-platform-version>/android.jar --min-api <min-api> .
 
-    (Replace <your-min-sdk-of-your-classes> with the minimal sdk version you used in step 1.)
+    (Replace <min-api> with the minimal sdk version you used in step 1.)
 
 7. gzip the output:
 

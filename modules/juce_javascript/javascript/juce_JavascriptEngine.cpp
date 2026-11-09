@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -115,7 +115,7 @@ public:
 
     var evaluate (const String& code, Result* errorMessage)
     {
-        engine->resetTimeout();
+        const detail::QuickJSWrapper::ScopedExecution execution { *engine };
 
         if (errorMessage != nullptr)
             *errorMessage = Result::ok();
@@ -148,7 +148,7 @@ public:
                       const var::NativeFunctionArgs& args,
                       Result* errorMessage)
     {
-        engine->resetTimeout();
+        const detail::QuickJSWrapper::ScopedExecution execution { *engine };
 
         auto* ctx = engine->getQuickJSContext();
         const auto functionStr = function.toString();

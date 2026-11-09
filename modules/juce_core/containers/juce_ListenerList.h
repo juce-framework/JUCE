@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -93,10 +93,22 @@ public:
         initialiseIfNeeded();
 
         if (listenerToAdd != nullptr)
-            listeners->addIfNotAlreadyThere (listenerToAdd);
+            data->listeners.addIfNotAlreadyThere (listenerToAdd);
         else
             jassertfalse; // Listeners can't be null pointers!
     }
+
+    /** Adds a listener to the list.
+        A listener can only be added once, so if the listener is already in the list, this method
+        has no effect.
+
+        If a Listener is added during a callback, it is guaranteed not to be called in the same
+        iteration.
+
+        @see remove
+    */
+    void add (ListenerClass& listenerToAdd) { add (&listenerToAdd); }
+    void add (ListenerClass&&) = delete;
 
     /** Removes a listener from the list.
         If the listener wasn't in the list, this has no effect.
@@ -111,11 +123,11 @@ public:
         if (! initialised())
             return;
 
-        const ScopedLockType lock (listeners->getLock());
+        const ScopedLockType lock (data->listeners.getLock());
 
-        if (const auto index = listeners->removeFirstMatchingValue (listenerToRemove); index >= 0)
+        if (const auto index = data->listeners.removeFirstMatchingValue (listenerToRemove); index >= 0)
         {
-            for (auto* it : *iterators)
+            for (auto* it : data->iterators)
             {
                 if (index < it->end)
                     --it->end;
@@ -125,6 +137,15 @@ public:
             }
         }
     }
+
+    /** Removes a listener from the list.
+        If the listener wasn't in the list, this has no effect.
+
+        If a Listener is removed during a callback, it is guaranteed not to be called if it hasn't
+        already been called.
+    */
+    void remove (ListenerClass& listenerToRemove) { remove (&listenerToRemove); }
+    void remove (ListenerClass&&) = delete;
 
     /** Adds a listener that will be automatically removed again when the Guard is destroyed.
 
@@ -138,11 +159,13 @@ public:
         return ErasedScopeGuard { [this, &listenerToAdd] { remove (&listenerToAdd); } };
     }
 
+    ErasedScopeGuard addScoped (ListenerClass&&) = delete;
+
     /** Returns the number of registered listeners. */
-    [[nodiscard]] int size() const noexcept                                { return ! initialised() ? 0 : listeners->size(); }
+    [[nodiscard]] int size() const noexcept                                { return ! initialised() ? 0 : data->listeners.size(); }
 
     /** Returns true if no listeners are registered, false otherwise. */
-    [[nodiscard]] bool isEmpty() const noexcept                            { return ! initialised() || listeners->isEmpty(); }
+    [[nodiscard]] bool isEmpty() const noexcept                            { return ! initialised() || data->listeners.isEmpty(); }
 
     /** Clears the list.
 
@@ -154,11 +177,11 @@ public:
         if (! initialised())
             return;
 
-        const ScopedLockType lock { listeners->getLock() };
+        const ScopedLockType lock { data->listeners.getLock() };
 
-        listeners->clear();
+        data->listeners.clear();
 
-        for (auto* it : *iterators)
+        for (auto* it : data->iterators)
             it->end = 0;
     }
 
@@ -166,7 +189,7 @@ public:
     [[nodiscard]] bool contains (ListenerClass* listener) const noexcept
     {
         return initialised()
-            && listeners->contains (listener);
+            && data->listeners.contains (listener);
     }
 
     /** Returns the raw array of listeners.
@@ -181,7 +204,7 @@ public:
     [[nodiscard]] const ArrayType& getListeners() const noexcept
     {
         const_cast<ListenerList*> (this)->initialiseIfNeeded();
-        return *listeners;
+        return data->listeners;
     }
 
     //==============================================================================
@@ -232,46 +255,10 @@ public:
         if (! initialised())
             return;
 
-        const auto localListeners = listeners;
-        const ScopedLockType lock { localListeners->getLock() };
-
-       #if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
-        {
-            // Keep a reference to the mutex to protect against the case where this list gets deleted
-            // during a callback.
-            auto localMutexPtr = callCheckedExcludingMutex;
-            const ScopedTryLock callCheckedExcludingLock (*localMutexPtr);
-
-            // If you hit this assertion it means you're trying to call the listeners from multiple
-            // threads concurrently. If you need to do this either use a LightweightListenerList, for a
-            // lock free option, or a ThreadSafeListenerList if you also need the extra guarantees
-            // provided by ListenerList. See the class descriptions for more details.
-            jassert (callCheckedExcludingLock.isLocked());
-        }
-       #endif
-
-        Iterator it{};
-        it.end = localListeners->size();
-
-        iterators->push_back (&it);
-
-        const ScopeGuard scope { [i = iterators, &it]
-        {
-            i->erase (std::remove (i->begin(), i->end(), &it), i->end());
-        } };
-
-        for (; it.index < it.end; ++it.index)
-        {
-            if (bailOutChecker.shouldBailOut())
-                return;
-
-            auto* listener = localListeners->getUnchecked (it.index);
-
-            if (listener == listenerToExclude)
-                continue;
-
-            callback (*listener);
-        }
+        callCheckedExcluding (data,
+                              listenerToExclude,
+                              bailOutChecker,
+                              std::forward<Callback> (callback));
     }
 
     //==============================================================================
@@ -350,29 +337,6 @@ private:
     //==============================================================================
     using ScopedLockType = typename ArrayType::ScopedLockType;
 
-    //==============================================================================
-    using SharedListeners = std::shared_ptr<ArrayType>;
-    SharedListeners listeners;
-
-    struct Iterator
-    {
-        int index{};
-        int end{};
-    };
-
-    using SafeIterators = std::vector<Iterator*>;
-    using SharedIterators = std::shared_ptr<SafeIterators>;
-    SharedIterators iterators;
-
-    enum class State
-    {
-        uninitialised,
-        initialising,
-        initialised
-    };
-
-    std::atomic<State> state { State::uninitialised };
-
     inline bool initialised() const noexcept { return state == State::initialised; }
 
     inline void initialiseIfNeeded() noexcept
@@ -390,8 +354,7 @@ private:
             static_assert (std::is_nothrow_constructible_v<SafeIterators>,
                            "Please notify the JUCE team if you encounter this assertion");
 
-            listeners = std::make_shared<ArrayType>();
-            iterators = std::make_shared<SafeIterators>();
+            data = std::make_shared<Data>();
             state = State::initialised;
             return;
         }
@@ -400,14 +363,83 @@ private:
             std::this_thread::yield();
     }
 
-   #if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
-    // using a shared_ptr helps keep the size of this class down to prevent excessive stack sizes
-    // due to objects that contain a ListenerList being created on the stack
-    std::shared_ptr<CriticalSection> callCheckedExcludingMutex = std::make_shared<CriticalSection>();
-   #endif
+    struct Iterator
+    {
+        int index{};
+        int end{};
+    };
+
+    using SafeIterators = std::vector<Iterator*>;
+
+    enum class State
+    {
+        uninitialised,
+        initialising,
+        initialised
+    };
+
+    struct Data
+    {
+        ArrayType listeners;
+        SafeIterators iterators;
+
+       #if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
+        CriticalSection callCheckedExcludingMutex;
+       #endif
+    };
+
+    std::shared_ptr<Data> data{};
+    std::atomic<State> state { State::uninitialised };
+
+    template <typename Callback, typename BailOutCheckerType>
+    static void callCheckedExcluding (std::shared_ptr<Data> d,
+                                      ListenerClass* listenerToExclude,
+                                      const BailOutCheckerType& bailOutChecker,
+                                      Callback&& callback)
+    {
+        const ScopedLockType lock { d->listeners.getLock() };
+
+       #if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
+        {
+            // Keep a reference to the mutex to protect against the case where this list gets deleted
+            // during a callback.
+            const ScopedTryLock callCheckedExcludingLock (d->callCheckedExcludingMutex);
+
+            // If you hit this assertion it means you're trying to call the listeners from multiple
+            // threads concurrently. If you need to do this either use a LightweightListenerList, for a
+            // lock free option, or a ThreadSafeListenerList if you also need the extra guarantees
+            // provided by ListenerList. See the class descriptions for more details.
+            jassert (callCheckedExcludingLock.isLocked());
+        }
+       #endif
+
+        Iterator it{};
+        it.end = d->listeners.size();
+
+        d->iterators.push_back (&it);
+
+        const ScopeGuard scope { [i = &d->iterators, &it]
+        {
+            i->erase (std::remove (i->begin(), i->end(), &it), i->end());
+        } };
+
+        for (; it.index < it.end; ++it.index)
+        {
+            if (bailOutChecker.shouldBailOut())
+                return;
+
+            auto* listener = d->listeners.getUnchecked (it.index);
+
+            if (listener == listenerToExclude)
+                continue;
+
+            callback (*listener);
+        }
+    }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE (ListenerList)
+    JUCE_DECLARE_NON_MOVEABLE (ListenerList)
 };
 
 //==============================================================================
@@ -469,6 +501,17 @@ public:
             jassertfalse; // Listeners can't be null pointers!
     }
 
+    /** Adds a listener to the list.
+        A listener can only be added once, so if the listener is already in the list, this method
+        has no effect.
+
+        If you need to add a Listener during a callback, use the ListenerList type.
+
+        @see remove
+    */
+    void add (ListenerClass& listenerToAdd) { add (&listenerToAdd); }
+    void add (ListenerClass&&) = delete;
+
     /** Removes a listener from the list.
         If the listener wasn't in the list, this has no effect.
 
@@ -486,6 +529,14 @@ public:
         listeners.removeFirstMatchingValue (listenerToRemove);
     }
 
+    /** Removes a listener from the list.
+        If the listener wasn't in the list, this has no effect.
+
+        If you need to remove a Listener during a callback, use the ListenerList type.
+    */
+    void remove (ListenerClass& listenerToRemove) { remove (&listenerToRemove); }
+    void remove (ListenerClass&&) = delete;
+
     /** Adds a listener that will be automatically removed when the Guard is destroyed.
 
         Be very careful to ensure that the ErasedScopeGuard is destroyed or released before the
@@ -497,6 +548,8 @@ public:
         add (&listenerToAdd);
         return ErasedScopeGuard { [this, &listenerToAdd] { remove (&listenerToAdd); } };
     }
+
+    ErasedScopeGuard addScoped (ListenerClass&&) = delete;
 
     /** Returns the number of registered listeners. */
     [[nodiscard]] int size() const noexcept { return listeners.size(); }

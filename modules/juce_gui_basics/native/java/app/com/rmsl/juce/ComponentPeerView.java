@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -76,6 +76,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ExtractedText;
+import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 
@@ -306,7 +308,7 @@ public final class ComponentPeerView extends ViewGroup
     }
 
     //==============================================================================
-    private native void handleKeyDown (long host, int keycode, int textchar, int kbFlags);
+    private native boolean handleKeyDown (long host, int keycode, int textchar, int kbFlags);
     private native void handleKeyUp (long host, int keycode, int textchar);
     private native void handleBackButton (long host);
     private native void handleKeyboardHidden (long host);
@@ -364,6 +366,12 @@ public final class ComponentPeerView extends ViewGroup
         imm.restartInput (this);
     }
 
+    public void updateInputMethodContextSelection()
+    {
+        if (cachedConnection != null)
+            cachedConnection.updateInputMethodContextSelection();
+    }
+
     public void showKeyboard (int virtualKeyboardType, int selectionStart, int selectionEnd)
     {
         InputMethodManager imm = getInputMethodManager();
@@ -403,11 +411,6 @@ public final class ComponentPeerView extends ViewGroup
         if (host == 0)
             return false;
 
-        // The key event may move the cursor, or in some cases it might enter characters (e.g.
-        // digits). In this case, we need to reset the IME so that it's aware of the new contents
-        // of the TextInputTarget.
-        closeInputMethodContext();
-
         switch (keyCode)
         {
             case KeyEvent.KEYCODE_VOLUME_UP:
@@ -423,10 +426,22 @@ public final class ComponentPeerView extends ViewGroup
                 break;
         }
 
-        handleKeyDown (host,
-                       keyCode,
-                       event.getUnicodeChar(),
-                       event.getMetaState());
+        handleKeyDown (host, keyCode, event.getUnicodeChar(), event.getMetaState());
+
+        if (cachedConnection != null && cachedConnection.target != null)
+        {
+            Editable editable = cachedConnection.getEditable();
+            cachedConnection.changeWatcher.suppressUpdates = true;
+
+            int length = cachedConnection.target.getTotalNumChars();
+            String newText = cachedConnection.target.getTextInRange (0, length);
+
+            editable.replace (0, editable.length(), newText);
+
+            cachedConnection.changeWatcher.suppressUpdates = false;
+        }
+
+        updateInputMethodContextSelection();
 
         return true;
     }
@@ -438,6 +453,7 @@ public final class ComponentPeerView extends ViewGroup
             return false;
 
         handleKeyUp (host, keyCode, event.getUnicodeChar());
+
         return true;
     }
 
@@ -544,18 +560,27 @@ public final class ComponentPeerView extends ViewGroup
         @Override
         public void onSpanAdded (Spannable text, Object what, int start, int end)
         {
+            if (suppressUpdates)
+                return;
+
             updateTargetRangesFromEditable (editable, target);
         }
 
         @Override
         public void onSpanRemoved (Spannable text, Object what, int start, int end)
         {
+            if (suppressUpdates)
+                return;
+
             updateTargetRangesFromEditable (editable, target);
         }
 
         @Override
         public void onSpanChanged (Spannable text, Object what, int ostart, int oend, int nstart, int nend)
         {
+            if (suppressUpdates)
+                return;
+
             updateTargetRangesFromEditable (editable, target);
         }
 
@@ -573,6 +598,9 @@ public final class ComponentPeerView extends ViewGroup
         @Override
         public void onTextChanged (CharSequence s, int start, int before, int count)
         {
+            if (suppressUpdates)
+                return;
+
             if (editable != s || contentsBeforeChange == null)
                 return;
 
@@ -600,7 +628,7 @@ public final class ComponentPeerView extends ViewGroup
             contentsBeforeChange = null;
         }
 
-        private static void updateEditableSelectionFromTarget (Editable editable, TextInputTarget text)
+        public static void updateEditableSelectionFromTarget (Editable editable, TextInputTarget text)
         {
             final int start = text.getHighlightedRegionBegin();
             final int end   = text.getHighlightedRegionEnd();
@@ -657,6 +685,7 @@ public final class ComponentPeerView extends ViewGroup
         private final TextInputTarget target;
         private final Editable editable;
         private String contentsBeforeChange;
+        boolean suppressUpdates = false;
     }
 
     private static final class Connection extends BaseInputConnection
@@ -717,10 +746,106 @@ public final class ComponentPeerView extends ViewGroup
             }
         }
 
+        @Override
+        public boolean beginBatchEdit()
+        {
+            editDepth += 1;
+            return true;
+        }
+
+        @Override
+        public boolean endBatchEdit()
+        {
+            // The IME may still deliver endBatchEdit calls that were queued before the
+            // connection was reset, so don't let the nesting count go negative.
+            if (editDepth <= 0)
+                return false;
+
+            editDepth -= 1;
+
+            if (editDepth == 0 && pendingUpdateSelection)
+                updateInputMethodContextSelection();
+
+            return editDepth > 0;
+        }
+
+        // Even if we don't show the 'extracted text view' (where the IME takes up the entire
+        // screen and displays its own text editor), this function is still called in some
+        // text navigation scenarios, e.g. when the IME wants to move the cursor to the very
+        // end of the text.
+        @Override
+        public ExtractedText getExtractedText (ExtractedTextRequest request, int flags)
+        {
+            // The IME may call this before it has requested the editable through any other
+            // method, so go through getEditable() rather than reading the cached field directly.
+            final Editable editable = getEditable();
+
+            if (editable == null)
+                return null;
+
+            extractedText.startOffset = 0;
+            extractedText.partialStartOffset = -1;
+            extractedText.partialEndOffset = -1;
+            extractedText.selectionStart = Selection.getSelectionStart (editable);
+            extractedText.selectionEnd = Selection.getSelectionEnd (editable);
+            extractedText.text = request == null || (request.flags & GET_TEXT_WITH_STYLES) == 0
+                               ? editable.toString()
+                               : editable;
+            return extractedText;
+        }
+
+        public void updateInputMethodContextSelection()
+        {
+            if (cached != null && target != null)
+            {
+                ChangeWatcher.updateEditableSelectionFromTarget (cached, target);
+            }
+
+            if (editDepth > 0)
+            {
+                pendingUpdateSelection = true;
+                return;
+            }
+
+            InputMethodManager imm = view.getInputMethodManager();
+
+            if (imm == null)
+                return;
+
+            int composingBegin = cached != null ? BaseInputConnection.getComposingSpanStart (cached) : -1;
+            int composingEnd   = cached != null ? BaseInputConnection.getComposingSpanEnd   (cached) : -1;
+
+            imm.updateSelection (view, Selection.getSelectionStart (cached), Selection.getSelectionEnd (cached), composingBegin, composingEnd);
+            pendingUpdateSelection = false;
+        }
+
+        @Override
+        public boolean performContextMenuAction (int id)
+        {
+            switch (id)
+            {
+                case android.R.id.selectAll:
+                {
+                    if (target == null)
+                        return false;
+
+                    target.setHighlightedRegion (0, target.getTotalNumChars());
+                    updateInputMethodContextSelection();
+                    return true;
+                }
+
+                default:
+                    return false;
+            }
+        }
+
         private ComponentPeerView view;
         private TextInputTarget target;
         private Editable cached;
         private ChangeWatcher changeWatcher;
+        private ExtractedText extractedText = new ExtractedText();
+        private int editDepth = 0;
+        private boolean pendingUpdateSelection = false;
     }
 
     @Override

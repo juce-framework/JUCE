@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 #include "oboe/AudioStreamCallback.h"
 #include "oboe/Definitions.h"
 
@@ -103,7 +104,13 @@ public:
     /**
      * @return the device ID of the stream.
      */
-    int32_t getDeviceId() const { return mDeviceId; }
+    int32_t getDeviceId() const {
+        return mDeviceIds.empty() ? kUnspecified :  mDeviceIds[0];
+    }
+
+    std::vector<int32_t> getDeviceIds() const {
+        return mDeviceIds;
+    }
 
     /**
      * For internal use only.
@@ -115,10 +122,26 @@ public:
 
     /**
      * For internal use only.
+     * @return the partial data callback object for this stream, if set.
+     */
+    AudioStreamPartialDataCallback* getPartialDataCallback() const {
+        return mPartialDataCallback;
+    }
+
+    /**
+     * For internal use only.
      * @return the error callback object for this stream, if set.
      */
     AudioStreamErrorCallback *getErrorCallback() const {
         return mErrorCallback;
+    }
+
+    /**
+     * For internal use only.
+     * @return the presentation callback object for this stream, if set.
+     */
+    std::shared_ptr<AudioStreamPresentationCallback> getPresentationCallback() const {
+        return mSharedPresentationCallback;
     }
 
     /**
@@ -129,12 +152,33 @@ public:
     }
 
     /**
+     * @return true if a partial data callback was set for this stream
+     */
+    bool isPartialDataCallbackSpecified() const {
+        return mPartialDataCallback != nullptr;
+    }
+
+    /**
+     * @return true if a data callback or a partial data callback was set for this stream
+     */
+    bool anyDataCallbackSpecified() const {
+        return isDataCallbackSpecified() || isPartialDataCallbackSpecified();
+    }
+
+    /**
      * Note that if the app does not set an error callback then a
      * default one may be provided.
      * @return true if an error callback was set for this stream
      */
     bool isErrorCallbackSpecified() const {
         return mErrorCallback != nullptr;
+    }
+
+    /**
+     * @return true if a presentation callback was set for this stream
+     */
+    bool isPresentationCallbackSpecified() const {
+        return mSharedPresentationCallback != nullptr;
     }
 
     /**
@@ -193,6 +237,28 @@ public:
     PrivacySensitiveMode getPrivacySensitiveMode() const { return mPrivacySensitiveMode; }
 
     /**
+     * Return the stream's package name
+     *
+     * See AudioStreamBuilder_setPackageName().
+     *
+     * Added in API level 31 to AAudio.
+     *
+     * @return packageName
+     */
+    std::string getPackageName() const { return mPackageName; }
+
+    /**
+     * Return the stream's attribution tag
+     *
+     * See AudioStreamBuilder_setAttributionTag().
+     *
+     * Added in API level 31 to AAudio.
+     *
+     * @return attributionTag
+     */
+    std::string getAttributionTag() const { return mAttributionTag; }
+
+    /**
      * @return true if Oboe can convert channel counts to achieve optimal results.
      */
     bool isChannelConversionAllowed() const {
@@ -240,9 +306,15 @@ protected:
     AudioStreamDataCallback        *mDataCallback = nullptr;
     std::shared_ptr<AudioStreamDataCallback> mSharedDataCallback;
 
+    /** The partial data callback which will be fired when new data is ready to be read/written. **/
+    AudioStreamPartialDataCallback  *mPartialDataCallback = nullptr;
+    std::shared_ptr<AudioStreamPartialDataCallback> mSharedPartialDataCallback;
+
     /** The callback which will be fired when an error or a disconnect occurs. **/
     AudioStreamErrorCallback       *mErrorCallback = nullptr;
     std::shared_ptr<AudioStreamErrorCallback> mSharedErrorCallback;
+
+    std::shared_ptr<AudioStreamPresentationCallback> mSharedPresentationCallback;
 
     /** Number of audio frames which will be requested in each callback */
     int32_t                         mFramesPerCallback = kUnspecified;
@@ -250,8 +322,6 @@ protected:
     int32_t                         mChannelCount = kUnspecified;
     /** Stream sample rate */
     int32_t                         mSampleRate = kUnspecified;
-    /** Stream audio device ID */
-    int32_t                         mDeviceId = kUnspecified;
     /** Stream buffer capacity specified as a number of audio frames */
     int32_t                         mBufferCapacityInFrames = kUnspecified;
     /** Stream buffer size specified as a number of audio frames */
@@ -309,6 +379,8 @@ protected:
     // Control whether and how Oboe can convert sample rates to achieve optimal results.
     SampleRateConversionQuality     mSampleRateConversionQuality = SampleRateConversionQuality::Medium;
 
+    std::vector<int32_t>            mDeviceIds;
+
     /** Validate stream parameters that might not be checked in lower layers */
     virtual Result isValidConfig() {
         switch (mFormat) {
@@ -318,6 +390,13 @@ protected:
             case AudioFormat::I24:
             case AudioFormat::I32:
             case AudioFormat::IEC61937:
+            case AudioFormat::MP3:
+            case AudioFormat::AAC_LC:
+            case AudioFormat::AAC_HE_V1:
+            case AudioFormat::AAC_HE_V2:
+            case AudioFormat::AAC_ELD:
+            case AudioFormat::AAC_XHE:
+            case AudioFormat::OPUS:
                 break;
 
             default:

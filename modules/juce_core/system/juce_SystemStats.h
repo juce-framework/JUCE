@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -105,7 +105,12 @@ public:
     */
     static String getOperatingSystemName();
 
-    /** Returns true if the OS is 64-bit, or false for a 32-bit OS. */
+    /** Returns true if the operating system is 64-bit, or false for a 32-bit OS.
+
+        This describes the OS rather than the current process, so a 32-bit build
+        running on a 64-bit OS will return true. To find out whether the current
+        process is 64-bit, use the JUCE_64BIT and JUCE_32BIT macros.
+    */
     static bool isOperatingSystem64Bit();
 
     /** Returns an environment variable.

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -129,12 +129,14 @@ bool X11Symbols::loadAllSymbols()
                        makeSymbolBinding (xFree,                       "XFree"),
                        makeSymbolBinding (xFreeCursor,                 "XFreeCursor"),
                        makeSymbolBinding (xFreeColormap,               "XFreeColormap"),
+                       makeSymbolBinding (xFreeEventData,              "XFreeEventData"),
                        makeSymbolBinding (xFreeGC,                     "XFreeGC"),
                        makeSymbolBinding (xFreeModifiermap,            "XFreeModifiermap"),
                        makeSymbolBinding (xFreePixmap,                 "XFreePixmap"),
                        makeSymbolBinding (xGetAtomName,                "XGetAtomName"),
                        makeSymbolBinding (xGetErrorDatabaseText,       "XGetErrorDatabaseText"),
                        makeSymbolBinding (xGetErrorText,               "XGetErrorText"),
+                       makeSymbolBinding (xGetEventData,               "XGetEventData"),
                        makeSymbolBinding (xGetGeometry,                "XGetGeometry"),
                        makeSymbolBinding (xGetImage,                   "XGetImage"),
                        makeSymbolBinding (xGetInputFocus,              "XGetInputFocus"),
@@ -182,14 +184,18 @@ bool X11Symbols::loadAllSymbols()
                        makeSymbolBinding (xSelectInput,                "XSelectInput"),
                        makeSymbolBinding (xSendEvent,                  "XSendEvent"),
                        makeSymbolBinding (xSetClassHint,               "XSetClassHint"),
+                       makeSymbolBinding (xSetAfterFunction,           "XSetAfterFunction"),
                        makeSymbolBinding (xSetErrorHandler,            "XSetErrorHandler"),
                        makeSymbolBinding (xSetIOErrorHandler,          "XSetIOErrorHandler"),
                        makeSymbolBinding (xSetInputFocus,              "XSetInputFocus"),
                        makeSymbolBinding (xSetSelectionOwner,          "XSetSelectionOwner"),
+                       makeSymbolBinding (xSetTransientForHint,        "XSetTransientForHint"),
                        makeSymbolBinding (xSetWMHints,                 "XSetWMHints"),
                        makeSymbolBinding (xSetWMIconName,              "XSetWMIconName"),
                        makeSymbolBinding (xSetWMName,                  "XSetWMName"),
                        makeSymbolBinding (xSetWMNormalHints,           "XSetWMNormalHints"),
+                       makeSymbolBinding (xShapeQueryExtension,        "XShapeQueryExtension"),
+                       makeSymbolBinding (xShapeCombineRectangles,     "XShapeCombineRectangles"),
                        makeSymbolBinding (xStringListToTextProperty,   "XStringListToTextProperty"),
                        makeSymbolBinding (xSync,                       "XSync"),
                        makeSymbolBinding (xSynchronize,                "XSynchronize"),
@@ -214,12 +220,15 @@ bool X11Symbols::loadAllSymbols()
                  makeSymbolBinding (xineramaIsActive,            "XineramaIsActive"),
                  makeSymbolBinding (xineramaQueryScreens,        "XineramaQueryScreens"));
    #endif
-   #if JUCE_USE_XRENDER
-    loadSymbols (xrenderLib,
-                 makeSymbolBinding (xRenderQueryVersion,         "XRenderQueryVersion"),
-                 makeSymbolBinding (xRenderFindStandardFormat,   "XRenderFindStandardFormat"),
-                 makeSymbolBinding (xRenderFindFormat,           "XRenderFindFormat"),
-                 makeSymbolBinding (xRenderFindVisualFormat,     "XRenderFindVisualFormat"));
+   #if JUCE_USE_XINPUT
+    loadSymbols (xinputLib,
+                 makeSymbolBinding (xiQueryVersion,              "XIQueryVersion"),
+                 makeSymbolBinding (xiQueryDevice,               "XIQueryDevice"),
+                 makeSymbolBinding (xiFreeDeviceInfo,            "XIFreeDeviceInfo"),
+                 makeSymbolBinding (xiSelectEvents,              "XISelectEvents"),
+                 makeSymbolBinding (xiGetClientPointer,          "XIGetClientPointer"),
+                 makeSymbolBinding (xiGrabDevice,                "XIGrabDevice"),
+                 makeSymbolBinding (xiUngrabDevice,              "XIUngrabDevice"));
    #endif
    #if JUCE_USE_XRANDR
     loadSymbols (xrandrLib,
@@ -230,6 +239,13 @@ bool X11Symbols::loadAllSymbols()
                  makeSymbolBinding (xRRGetCrtcInfo,              "XRRGetCrtcInfo"),
                  makeSymbolBinding (xRRFreeCrtcInfo,             "XRRFreeCrtcInfo"),
                  makeSymbolBinding (xRRGetOutputPrimary,         "XRRGetOutputPrimary"));
+   #endif
+   #if JUCE_USE_XRENDER
+    loadSymbols (xrenderLib,
+                 makeSymbolBinding (xRenderQueryVersion,         "XRenderQueryVersion"),
+                 makeSymbolBinding (xRenderFindStandardFormat,   "XRenderFindStandardFormat"),
+                 makeSymbolBinding (xRenderFindFormat,           "XRenderFindFormat"),
+                 makeSymbolBinding (xRenderFindVisualFormat,     "XRenderFindVisualFormat"));
    #endif
    #if JUCE_USE_XSHM
     loadSymbols (xLib, xextLib,

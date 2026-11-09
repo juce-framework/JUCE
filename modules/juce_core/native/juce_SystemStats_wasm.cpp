@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -73,12 +73,12 @@ uint32 juce_millisecondsSinceStartup() noexcept
 
 int64 Time::getHighResolutionTicks() noexcept
 {
-    return static_cast<int64> (emscripten_get_now() * 1000.0);
+    return static_cast<int64> (emscripten_get_now() * 1'000.0);
 }
 
 int64 Time::getHighResolutionTicksPerSecond() noexcept
 {
-    return 1000000;  // (microseconds)
+    return 1'000'000;  // (microseconds)
 }
 
 double Time::getMillisecondCounterHiRes() noexcept

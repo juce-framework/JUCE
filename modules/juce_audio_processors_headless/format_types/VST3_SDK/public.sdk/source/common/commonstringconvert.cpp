@@ -69,8 +69,13 @@ std::u16string convert (const std::string& utf8Str)
 //------------------------------------------------------------------------
 std::string convert (const std::u16string& str)
 {
+	// JUCE MODIFICATION
+   #ifdef __clang_analyzer__
+    return {};
+   #else
 	return converter ().to_bytes (reinterpret_cast<const UTF16Type*> (str.data ()),
 	                              reinterpret_cast<const UTF16Type*> (str.data () + str.size ()));
+   #endif
 }
 
 //------------------------------------------------------------------------

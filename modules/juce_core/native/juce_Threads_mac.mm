@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -74,7 +74,7 @@ static auto getJucePriority (qos_class_t qos)
     return Thread::Priority::normal;
 }
 
-template<typename Type>
+template <typename Type>
 static std::optional<Type> firstOptionalWithValue (const std::initializer_list<std::optional<Type>>& optionals)
 {
     for (const auto& optional : optionals)
@@ -140,7 +140,7 @@ bool Thread::createNativeThread (Priority priority)
 
     ThreadData threadData { *this, {} };
 
-    threadId = threadHandle = makeThreadHandle (attribute, &threadData, [] (void* userData) -> void*
+    auto* handle = makeThreadHandle (attribute, &threadData, [] (void* userData) -> void*
     {
         auto& data { *static_cast<ThreadData*> (userData) };
         auto& thread = data.thread;
@@ -154,16 +154,16 @@ bool Thread::createNativeThread (Priority priority)
 
         data.started.set_value (true);
 
-        JUCE_AUTORELEASEPOOL
-        {
-            juce_threadEntryPoint (&thread);
-        }
+        juce_threadEntryPoint (&thread);
 
         return nullptr;
     });
 
-    return threadId != nullptr
-        && threadData.started.get_future().get();
+    if (handle == nullptr || ! threadData.started.get_future().get())
+        return false;
+
+    threadId = threadHandle = handle;
+    return true;
 }
 
 void Thread::killThread()

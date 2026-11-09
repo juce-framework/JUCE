@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -111,9 +111,9 @@ void PositionedGlyph::createPath (Path& path) const
         if (auto t = font.getTypefacePtr())
         {
             Path p;
-            t->getOutlineForGlyph (font.getMetricsKind(), glyph, p);
+            t->getOutlineForGlyph (glyph, p);
 
-            path.addPath (p, AffineTransform::scale (font.getHeight() * font.getHorizontalScale(), font.getHeight())
+            path.addPath (p, AffineTransform::scale (font.getHeightInPoints() * font.getHorizontalScale(), font.getHeightInPoints())
                                              .translated (x, y));
         }
     }
@@ -126,10 +126,10 @@ bool PositionedGlyph::hitTest (float px, float py) const
         if (auto t = font.getTypefacePtr())
         {
             Path p;
-            t->getOutlineForGlyph (font.getMetricsKind(), glyph, p);
+            t->getOutlineForGlyph (glyph, p);
 
             AffineTransform::translation (-x, -y)
-                            .scaled (1.0f / (font.getHeight() * font.getHorizontalScale()), 1.0f / font.getHeight())
+                            .scaled (1.0f / (font.getHeightInPoints() * font.getHorizontalScale()), 1.0f / font.getHeightInPoints())
                             .transformPoint (px, py);
 
             return p.contains (px, py);
@@ -159,6 +159,11 @@ void GlyphArrangement::clear()
 }
 
 PositionedGlyph& GlyphArrangement::getGlyph (int index) noexcept
+{
+    return glyphs.getReference (index);
+}
+
+const PositionedGlyph& GlyphArrangement::getGlyph (int index) const noexcept
 {
     return glyphs.getReference (index);
 }

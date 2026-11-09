@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -482,9 +482,9 @@ public:
                 auto name  = header.upToFirstOccurrenceOf (":", false, false).trim();
                 auto value = header.fromFirstOccurrenceOf (":", false, false).trim();
 
-                env->CallObjectMethod (headersMap, JavaMap.put,
-                                       javaString (name).get(),
-                                       javaString (value).get());
+                LocalRef { env->CallObjectMethod (headersMap, JavaMap.put,
+                                                 javaString (name).get(),
+                                                 javaString (value).get()) };
             }
 
             env->CallVoidMethod ((jobject) getView(), JuceWebView.loadUrl,
@@ -817,9 +817,9 @@ private:
                                                                    JavaHashMap.constructorWithCapacity,
                                                                    1) };
 
-                    env->CallObjectMethod (headersMap, JavaMap.put,
-                                           javaString ("Access-Control-Allow-Origin").get(),
-                                           javaString (*allowedOrigin).get());
+                    LocalRef { env->CallObjectMethod (headersMap, JavaMap.put,
+                                                      javaString ("Access-Control-Allow-Origin").get(),
+                                                      javaString (*allowedOrigin).get()) };
 
                     env->CallVoidMethod (resource,
                                          WebResourceResponse.setResponseHeaders,

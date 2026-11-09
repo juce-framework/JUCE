@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -35,13 +35,14 @@
 namespace juce
 {
 
-void ComponentListener::componentMovedOrResized (Component&, bool, bool)    {}
-void ComponentListener::componentBroughtToFront (Component&)                {}
-void ComponentListener::componentVisibilityChanged (Component&)             {}
-void ComponentListener::componentChildrenChanged (Component&)               {}
-void ComponentListener::componentParentHierarchyChanged (Component&)        {}
-void ComponentListener::componentNameChanged (Component&)                   {}
-void ComponentListener::componentBeingDeleted (Component&)                  {}
-void ComponentListener::componentEnablementChanged (Component&)             {}
+void ComponentListener::componentMovedOrResized (Component&, bool, bool) {}
+void ComponentListener::componentBroughtToFront (Component&) {}
+void ComponentListener::componentVisibilityChanged (Component&) {}
+void ComponentListener::componentChildrenChanged (Component&) {}
+void ComponentListener::componentParentHierarchyChanged (Component&) {}
+void ComponentListener::componentNameChanged (Component&) {}
+void ComponentListener::componentBeingDeleted (Component&) {}
+void ComponentListener::componentEnablementChanged (Component&) {}
+void ComponentListener::componentPainted (Component&, const ComponentPaintDiagnostics&) {}
 
 } // namespace juce

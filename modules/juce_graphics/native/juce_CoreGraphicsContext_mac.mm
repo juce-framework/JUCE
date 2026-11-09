@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -334,6 +334,7 @@ struct CoreGraphicsContext::SavedState
     CGAffineTransform textMatrix = CGAffineTransformIdentity,
                inverseTextMatrix = CGAffineTransformIdentity;
     detail::GradientPtr gradient = {};
+    BlendMode imageBlendMode = BlendMode::sourceOver;
 };
 
 //==============================================================================
@@ -358,7 +359,7 @@ CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, float h)
    #endif
 
     CGContextSetShouldAntialias (context.get(), true);
-    CGContextSetBlendMode (context.get(), kCGBlendModeNormal);
+    activateBlendMode (BlendMode::sourceOver);
     rgbColourSpace.reset (CGColorSpaceCreateWithName (kCGColorSpaceSRGB));
     greyColourSpace.reset (CGColorSpaceCreateWithName (kCGColorSpaceGenericGrayGamma2_2));
     setFont (FontOptions());
@@ -598,6 +599,25 @@ void CoreGraphicsContext::setOpacity (float newOpacity)
     setFill (state->fillType);
 }
 
+static CGBlendMode getCGBlendMode (BlendMode mode)
+{
+    switch (mode)
+    {
+        case BlendMode::source:         return kCGBlendModeCopy;
+        case BlendMode::sourceOver:     return kCGBlendModeNormal;
+        case BlendMode::destinationIn:  return kCGBlendModeDestinationIn;
+        case BlendMode::destinationOut: return kCGBlendModeDestinationOut;
+    }
+
+    jassertfalse;
+    return kCGBlendModeNormal;
+}
+
+void CoreGraphicsContext::setImageBlendMode (BlendMode newMode)
+{
+    state->imageBlendMode = newMode;
+}
+
 void CoreGraphicsContext::setInterpolationQuality (Graphics::ResamplingQuality quality)
 {
     switch (quality)
@@ -647,9 +667,9 @@ void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, bool replaceExisting
 
     if (replaceExistingContents)
     {
-        CGContextSetBlendMode (context.get(), kCGBlendModeCopy);
+        const auto previous = activateBlendMode (BlendMode::source);
+        const ScopeGuard restoreBlendMode { [this, previous] { activateBlendMode (previous); } };
         fillCGRect (cgRect, false);
-        CGContextSetBlendMode (context.get(), kCGBlendModeNormal);
         return;
     }
 
@@ -663,7 +683,7 @@ void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, bool replaceExisting
     CGContextClipToRect (context.get(), cgRect);
 
     if (state->fillType.isGradient())
-        drawGradient();
+        dispatchDrawGradient();
     else
         drawImage (state->fillType.image, state->fillType.transform, true);
 }
@@ -685,7 +705,7 @@ void CoreGraphicsContext::drawCurrentPath (CGPathDrawingMode mode)
                                  || mode == kCGPathFillStroke);
 
     if (state->fillType.isGradient())
-        drawGradient();
+        dispatchDrawGradient();
     else
         drawImage (state->fillType.image, state->fillType.transform, true);
 }
@@ -816,6 +836,13 @@ void CoreGraphicsContext::drawLineWithThickness (const Line<float>& line, float 
     drawCurrentPath (kCGPathFill);
 }
 
+BlendMode CoreGraphicsContext::activateBlendMode (juce::BlendMode mode)
+{
+    const auto previous = std::exchange (lastBlendMode, mode);
+    CGContextSetBlendMode(context.get(), getCGBlendMode (mode));
+    return previous;
+}
+
 void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTransform& transform)
 {
     drawImage (sourceImage, transform, false);
@@ -823,6 +850,9 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
 
 void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles)
 {
+    const auto nonImageBlendMode = activateBlendMode (state->imageBlendMode);
+    const ScopeGuard restoreBlendMode { [this, nonImageBlendMode] { activateBlendMode (nonImageBlendMode); } };
+
     auto iw = sourceImage.getWidth();
     auto ih = sourceImage.getHeight();
 
@@ -838,52 +868,9 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
     auto imageRect = CGRectMake (0, 0, iw, ih);
 
     if (fillEntireClipAsTiles)
-    {
-      #if JUCE_IOS
         CGContextDrawTiledImage (context.get(), imageRect, image.get());
-      #else
-        // There's a bug in CGContextDrawTiledImage that makes it incredibly slow
-        // if it's doing a transformation - it's quicker to just draw lots of images manually,
-        // but we might not be able to draw the images ourselves if the clipping region is not
-        // finite
-        const auto doCustomTiling = [&]
-        {
-            if (transform.isOnlyTranslation())
-                return false;
-
-            const auto bound = CGContextGetClipBoundingBox (context.get());
-
-            if (CGRectIsNull (bound))
-                return false;
-
-            const auto clip = CGRectIntegral (bound);
-
-            int x = 0, y = 0;
-            while (x > clip.origin.x)   x -= iw;
-            while (y > clip.origin.y)   y -= ih;
-
-            auto right  = (int) (clip.origin.x + clip.size.width);
-            auto bottom = (int) (clip.origin.y + clip.size.height);
-
-            while (y < bottom)
-            {
-                for (int x2 = x; x2 < right; x2 += iw)
-                    CGContextDrawImage (context.get(), CGRectMake (x2, y, iw, ih), image.get());
-
-                y += ih;
-            }
-
-            return true;
-        };
-
-        if (! doCustomTiling())
-            CGContextDrawTiledImage (context.get(), imageRect, image.get());
-      #endif
-    }
     else
-    {
         CGContextDrawImage (context.get(), imageRect, image.get());
-    }
 }
 
 //==============================================================================
@@ -915,7 +902,7 @@ void CoreGraphicsContext::fillRectList (const RectangleList<float>& list)
     CGContextClipToRects (context.get(), rects.data(), rects.size());
 
     if (state->fillType.isGradient())
-        drawGradient();
+        dispatchDrawGradient();
     else
         drawImage (state->fillType.image, state->fillType.transform, true);
 }
@@ -983,12 +970,12 @@ void CoreGraphicsContext::drawGlyphs (Span<const uint16_t> glyphs,
     {
         Path p;
         auto& f = state->font;
-        f.getTypefacePtr()->getOutlineForGlyph (f.getMetricsKind(), glyph, p);
+        f.getTypefacePtr()->getOutlineForGlyph (glyph, p);
 
         if (p.isEmpty())
             continue;
 
-        const auto scale = f.getHeight();
+        const auto scale = f.getHeightInPoints();
         fillPath (p, AffineTransform::scale (scale * f.getHorizontalScale(), scale).translated (positions[index]).followedBy (transform));
     }
 }
@@ -1018,6 +1005,31 @@ static CGGradientRef createGradient (const ColourGradient& g, CGColorSpaceRef co
     return CGGradientCreateWithColorComponents (colourSpace, components, locations, (size_t) numColours);
 }
 
+static Rectangle<int> convertToClipInt (const CGRect& cgRect, CGFloat flipHeight)
+{
+    return convertToRectFloat (cgRect).withY ((float) (flipHeight - cgRect.origin.y - cgRect.size.height))
+                                      .getSmallestIntegerContainer();
+}
+
+void CoreGraphicsContext::dispatchDrawGradient()
+{
+    jassert (state->fillType.isGradient());
+
+    // Core Graphics only supports the pad spread method.
+    if (state->fillType.gradient->spreadMethod == ColourGradient::SpreadMethod::pad)
+    {
+        drawGradient();
+        return;
+    }
+
+    const auto clip = convertToClipInt (CGContextGetClipBoundingBox (context.get()), flipHeight);
+    const auto gradientImage = state->fillType.getSoftwareGradientImage (clip);
+
+    drawImage (gradientImage,
+               AffineTransform::translation ((float) clip.getX(), (float) clip.getY()),
+               false);
+}
+
 void CoreGraphicsContext::drawGradient()
 {
     flip();
@@ -1029,15 +1041,29 @@ void CoreGraphicsContext::drawGradient()
     if (state->gradient == nullptr)
         state->gradient.reset (createGradient (g, rgbColourSpace.get()));
 
-    auto p1 = convertToCGPoint (g.point1);
-    auto p2 = convertToCGPoint (g.point2);
+    const auto p1 = convertToCGPoint (g.point1);
+    const auto p2 = convertToCGPoint (g.point2);
 
     if (g.isRadial)
-        CGContextDrawRadialGradient (context.get(), state->gradient.get(), p1, 0, p1, g.point1.getDistanceFrom (g.point2),
+    {
+        detail::RadialGradientView rg { state->fillType.gradient.get() };
+
+        CGContextDrawRadialGradient (context.get(),
+                                     state->gradient.get(),
+                                     convertToCGPoint (rg.getStartCircle().c),
+                                     rg.getStartCircle().r,
+                                     convertToCGPoint (rg.getEndCircle().c),
+                                     rg.getEndCircle().r,
                                      kCGGradientDrawsBeforeStartLocation | kCGGradientDrawsAfterEndLocation);
+    }
     else
-        CGContextDrawLinearGradient (context.get(), state->gradient.get(), p1, p2,
+    {
+        CGContextDrawLinearGradient (context.get(),
+                                     state->gradient.get(),
+                                     p1,
+                                     p2,
                                      kCGGradientDrawsBeforeStartLocation | kCGGradientDrawsAfterEndLocation);
+    }
 }
 
 void CoreGraphicsContext::createPath (const Path& path, const AffineTransform& transform) const

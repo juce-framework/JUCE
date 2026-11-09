@@ -531,6 +531,7 @@ class LookAndFeelDemo final : public Component
 public:
     LookAndFeelDemo()
     {
+        setName ("LookAndFeel demo");
         descriptionLabel.setMinimumHorizontalScale (1.0f);
         descriptionLabel.setText ("This demonstrates how to create a custom look and feel by overriding only the desired methods.\n\n"
                                   "Components can have their look and feel individually assigned or they will inherit it from their parent. "

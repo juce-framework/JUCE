@@ -41,12 +41,12 @@ struct CoverageFormat1_3
 {
   friend struct Coverage;
 
-  protected:
-  HBUINT16      coverageFormat; /* Format identifier--format = 1 */
-  SortedArray16Of<typename Types::HBGlyphID>
-                glyphArray;     /* Array of GlyphIDs--in numerical order */
   public:
-  DEFINE_SIZE_ARRAY (4, glyphArray);
+  HBUINT16      coverageFormat; /* Format identifier--format = 1 */
+  typename Types::template SortedArrayOf<typename Types::HBGlyphID>
+                glyphArray;     /* Array of GlyphIDs--in numerical order */
+
+  DEFINE_SIZE_ARRAY (2 + Types::HBUINT::static_size, glyphArray);
 
   private:
   bool sanitize (hb_sanitize_context_t *c) const
@@ -77,7 +77,7 @@ struct CoverageFormat1_3
 
   bool intersects (const hb_set_t *glyphs) const
   {
-    if (glyphArray.len > glyphs->get_population () * hb_bit_storage ((unsigned) glyphArray.len) / 2)
+    if (glyphArray.len > glyphs->get_population () * hb_bit_storage ((unsigned) glyphArray.len))
     {
       for (auto g : *glyphs)
         if (get_coverage (g) != NOT_COVERED)
@@ -102,6 +102,8 @@ struct CoverageFormat1_3
       if (glyphs.has (glyphArray[i]))
         intersect_glyphs << glyphArray[i];
   }
+
+  unsigned cost () const { return hb_bit_storage ((unsigned) glyphArray.len); /* bsearch cost */ }
 
   template <typename set_t>
   bool collect_coverage (set_t *glyphs) const

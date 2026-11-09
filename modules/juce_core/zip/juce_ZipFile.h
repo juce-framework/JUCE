@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -50,26 +50,35 @@ public:
     /** Creates a ZipFile to read a specific file. */
     explicit ZipFile (const File& file);
 
+    /** Creates a ZipFile for the given stream. */
+    explicit ZipFile (std::unique_ptr<InputStream> inputStream);
+
+    /** Creates a ZipFile for the given input source. */
+    explicit ZipFile (std::unique_ptr<InputSource> inputSource);
+
+    /** Creates a ZipFile for the given stream.
+
+        The stream will not be owned or deleted by this class - if you want the ZipFile to
+        manage the stream's lifetime, use the constructor that takes a unique_ptr argument.
+    */
+    explicit ZipFile (InputStream& inputStream);
+
     //==============================================================================
-    /** Creates a ZipFile for a given stream.
+    /** @deprecated
 
         @param inputStream                  the stream to read from
         @param deleteStreamWhenDestroyed    if set to true, the object passed-in
                                             will be deleted when this ZipFile object is deleted
     */
+    [[deprecated ("Prefer the overload that takes a unique_ptr, or the overload that takes a reference")]]
     ZipFile (InputStream* inputStream, bool deleteStreamWhenDestroyed);
 
-    /** Creates a ZipFile for a given stream.
-        The stream will not be owned or deleted by this class - if you want the ZipFile to
-        manage the stream's lifetime, use the other constructor.
-    */
-    explicit ZipFile (InputStream& inputStream);
-
-    /** Creates a ZipFile for an input source.
+    /** @deprecated
 
         The inputSource object will be owned by the zip file, which will delete
         it later when not needed.
     */
+    [[deprecated ("Prefer the overload that takes a unique_ptr")]]
     explicit ZipFile (InputSource* inputSource);
 
     /** Destructor. */
@@ -169,9 +178,17 @@ public:
         This will expand all the entries into a target directory. The relative
         paths of the entries are used.
 
+        Extraction stops at the first entry that fails, which includes an entry
+        whose path leads outside the target directory, a symbolic link whose
+        target does not stay inside the target directory, and an entry that
+        holds more data than the size recorded in the archive's central
+        directory. The sum of the entries' uncompressedSize fields is therefore
+        an upper bound on the disk space that this call can use.
+
         @param targetDirectory      the root folder to uncompress to
         @param shouldOverwriteFiles whether to overwrite existing files with similarly-named ones
         @returns success if the file is successfully unzipped
+        @see uncompressEntry
     */
     Result uncompressTo (const File& targetDirectory,
                          bool shouldOverwriteFiles = true);
@@ -180,6 +197,11 @@ public:
 
         This will expand the entry and write it in a target directory. The entry's path is used to
         determine which subfolder of the target should contain the new file.
+
+        The call fails if the entry's path leads outside the target directory, if the entry is a
+        symbolic link whose target does not stay inside the target directory, or if the entry
+        holds more data than the size recorded in the archive's central directory. If writing a
+        regular entry fails, the partially written file is removed.
 
         @param index                the index of the entry to uncompress - this must be a valid index
                                     between 0 and (getNumEntries() - 1).
@@ -199,11 +221,19 @@ public:
         This will expand the entry and write it in a target directory. The entry's path is used to
         determine which subfolder of the target should contain the new file.
 
+        The call fails if the entry's path leads outside the target directory, if the entry is a
+        symbolic link whose target does not stay inside the target directory, or if the entry
+        holds more data than the size recorded in the archive's central directory. If writing a
+        regular entry fails, the partially written file is removed.
+
         @param index                the index of the entry to uncompress - this must be a valid index
                                     between 0 and (getNumEntries() - 1).
         @param targetDirectory      the root folder to uncompress into
         @param overwriteFiles       whether to overwrite existing files with similarly-named ones
-        @param followSymlinks       whether to follow symlinks inside the target directory
+        @param followSymlinks       whether to write an entry whose parent path inside the target
+                                    directory passes through a symbolic link. Links created from
+                                    the archive always resolve inside the target directory, so
+                                    this only matters for links that were already present there.
         @returns success if all the files are successfully unzipped
     */
     Result uncompressEntry (int index,
@@ -237,6 +267,11 @@ public:
         void addFile (const File& fileToAdd, int compressionLevel,
                       const String& storedPathName = String());
 
+        /** @deprecated */
+        [[deprecated ("Prefer the overload that takes a unique_ptr argument")]]
+        void addEntry (InputStream* streamToRead, int compressionLevel,
+                       const String& storedPathName, Time fileModificationTime);
+
         /** Adds a stream to the list of items which will be added to the archive.
 
             @param streamToRead this stream isn't read immediately - a pointer to the stream is
@@ -249,8 +284,10 @@ public:
             @param fileModificationTime the timestamp that will be stored as the last modification time
                                         of this entry
         */
-        void addEntry (InputStream* streamToRead, int compressionLevel,
-                       const String& storedPathName, Time fileModificationTime);
+        void addEntry (std::unique_ptr<InputStream> streamToRead,
+                       int compressionLevel,
+                       const String& storedPathName,
+                       Time fileModificationTime);
 
         /** Generates the zip file, writing it to the specified stream.
             If the progress parameter is non-null, it will be updated with an approximate
@@ -268,6 +305,8 @@ public:
 
 private:
     //==============================================================================
+    explicit ZipFile (OptionalScopedPointer<InputStream>);
+
     struct ZipInputStream;
     struct ZipEntryHolder;
 

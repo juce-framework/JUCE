@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -35,17 +35,6 @@
 namespace juce
 {
 
-/*
-    IMPORTANT DISCLAIMER: By choosing to enable the JUCE_USE_MP3AUDIOFORMAT flag and
-    to compile this MP3 code into your software, you do so AT YOUR OWN RISK! By doing so,
-    you are agreeing that Raw Material Software Limited is in no way responsible for any patent,
-    copyright, or other legal issues that you may suffer as a result.
-
-    The code in juce_MP3AudioFormat.cpp is NOT guaranteed to be free from infringements of 3rd-party
-    intellectual property. If you wish to use it, please seek your own independent advice about the
-    legality of doing so. If you are not willing to accept full responsibility for the consequences
-    of using this code, then do not enable the JUCE_USE_MP3AUDIOFORMAT setting.
-*/
 #if JUCE_USE_MP3AUDIOFORMAT
 
 namespace MP3Decoder
@@ -1409,9 +1398,8 @@ struct MP3Stream
             if (lastFrameSize == -1 || needToSyncBitStream)
             {
                 needToSyncBitStream = false;
-                readVBRHeader();
 
-                if (vbrHeaderFound)
+                if (readVBRHeader (jmax (0, nextFrameOffset)))
                     return 1;
             }
 
@@ -1592,7 +1580,6 @@ struct MP3Stream
     VBRTagData vbrTagData;
     BufferedInputStream stream;
     int numFrames = 0, currentFrameIndex = 0;
-    bool vbrHeaderFound = false;
 
 private:
     bool headerParsed, sideParsed, dataParsed, needToSyncBitStream;
@@ -1750,21 +1737,22 @@ private:
         return offset;
     }
 
-    void readVBRHeader()
+    bool readVBRHeader (int frameOffset)
     {
         auto oldPos = stream.getPosition();
+        stream.setPosition (oldPos + frameOffset);
         uint8 xing[194];
         stream.read (xing, sizeof (xing));
 
-        vbrHeaderFound = vbrTagData.read (xing);
-
-        if (vbrHeaderFound)
+        if (vbrTagData.read (xing))
         {
             numFrames = (int) vbrTagData.frames;
-            oldPos += jmax (vbrTagData.headersize, 1);
+            stream.setPosition (oldPos + frameOffset + jmax (vbrTagData.headersize, 1));
+            return true;
         }
 
         stream.setPosition (oldPos);
+        return false;
     }
 
     void decodeLayer1Frame (float* pcm0, float* pcm1, int& samplesDone) noexcept

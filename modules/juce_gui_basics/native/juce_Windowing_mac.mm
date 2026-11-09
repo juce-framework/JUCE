@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -329,7 +329,8 @@ public:
 private:
     struct DelegateClass final : public ObjCClass<NSObject>
     {
-        DelegateClass()  : ObjCClass<NSObject> ("JUCEDelegate_")
+        DelegateClass()
+            : ObjCClass ("JUCEDelegate_")
         {
             addMethod (darkModeSelector, [] (id, SEL, NSNotification*) { Desktop::getInstance().darkModeChanged(); });
             registerClass();
@@ -434,10 +435,10 @@ struct DisplaySettingsChangeCallback final : private DeletedAtShutdown
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DisplaySettingsChangeCallback)
 };
 
-static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
+static Rectangle<float> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
 {
     r.origin.y = mainScreenBottom - (r.origin.y + r.size.height);
-    return convertToRectInt (r);
+    return convertToRectFloat (r);
 }
 
 static Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& mainScreenBottom, const float masterScale)
@@ -449,8 +450,9 @@ static Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& mainScreenB
     if (d.isMain)
         mainScreenBottom = [s frame].size.height;
 
-    d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom) / masterScale;
-    d.totalArea = convertDisplayRect ([s frame], mainScreenBottom) / masterScale;
+    d.userBounds     = convertDisplayRect ([s visibleFrame], mainScreenBottom) / masterScale;
+    d.logicalBounds  = convertDisplayRect ([s frame],        mainScreenBottom) / masterScale;
+    d.physicalBounds = (convertDisplayRect ([s frame], mainScreenBottom) * s.backingScaleFactor).toNearestInt();
     d.scale = masterScale;
 
     if ([s respondsToSelector: @selector (backingScaleFactor)])
@@ -560,14 +562,14 @@ static Image createNSWindowSnapshot (NSWindow* nsWindow)
                 return;
             }
 
-            const auto window = [&]() -> SCWindow*
+            const auto window = std::invoke ([&]() -> SCWindow*
             {
                 for (SCWindow* w in content.windows)
                     if (w.windowID == windowId)
                         return w;
 
                 return nullptr;
-            }();
+            });
 
             if (window == nullptr)
             {
@@ -610,11 +612,20 @@ static Image createNSWindowSnapshot (NSWindow* nsWindow)
        #else
 
         JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
-        return createImageFromCGImage ((CGImageRef) CFAutorelease (CGWindowListCreateImage (CGRectNull,
-                                                                                            kCGWindowListOptionIncludingWindow,
-                                                                                            (CGWindowID) [nsWindow windowNumber],
-                                                                                            kCGWindowImageBoundsIgnoreFraming)));
+
+        if (auto cgImage = CGWindowListCreateImage (CGRectNull,
+                                                    kCGWindowListOptionIncludingWindow,
+                                                    (CGWindowID) [nsWindow windowNumber],
+                                                    kCGWindowImageBoundsIgnoreFraming))
+        {
+            return createImageFromCGImage ((CGImageRef) CFAutorelease (cgImage));
+        }
+
         JUCE_END_IGNORE_DEPRECATION_WARNINGS
+
+        // A screenshot couldn't be created, possibly a permissions issue?
+        jassertfalse;
+        return {};
 
        #endif
     }

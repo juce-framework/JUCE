@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -41,6 +41,8 @@ class HiddenMessageWindow
 public:
     HiddenMessageWindow (const TCHAR* const messageWindowName, WNDPROC wndProc)
     {
+        setDPIAwareness();
+
         String className ("JUCE_");
         className << String::toHexString (Time::getHighResolutionTicks());
 
@@ -69,6 +71,8 @@ public:
     }
 
     inline HWND getHWND() const noexcept     { return hwnd; }
+
+    static bool setDPIAwareness();
 
 private:
     ATOM atom;

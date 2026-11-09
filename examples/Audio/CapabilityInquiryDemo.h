@@ -80,7 +80,7 @@ public:
         : impl (std::make_unique<Root> (std::move (v), std::move (n))) {}
 
     explicit State (Value v)
-        : State (std::move (v), [] (const Value&, Value newer) { return std::move (newer); }) {}
+        : State (std::move (v), [] (const Value&, Value newer) { return newer; }) {}
 
     template <typename Parent>
     State (State<Parent> p, Value Parent::* member)

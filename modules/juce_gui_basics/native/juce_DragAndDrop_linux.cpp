@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -110,7 +110,7 @@ public:
     void handleExternalDragButtonReleaseEvent()
     {
         if (dragging)
-            X11Symbols::getInstance()->xUngrabPointer (getDisplay(), CurrentTime);
+            XWindowSystem::getInstance()->ungrabPointer();
 
         if (canDrop)
         {
@@ -165,10 +165,10 @@ public:
         if (windowH == 0)
             windowH = (::Window) peer->getNativeHandle();
 
-        const auto displays = Desktop::getInstance().getDisplays();
-        const auto logicalPos = displays.physicalToLogical (Point<int> ((int) clientMsg.data.l[2] >> 16,
-                                                                        (int) clientMsg.data.l[2] & 0xffff));
-        const auto dropPos = detail::ScalingHelpers::screenPosToLocalPos (peer->getComponent(), logicalPos.toFloat()).roundToInt();
+        const auto& displays = Desktop::getInstance().getDisplays();
+        const auto logicalPos = displays.physicalToLogical (Point ((int) clientMsg.data.l[2] >> 16,
+                                                                   (int) clientMsg.data.l[2] & 0xffff).toFloat());
+        const auto dropPos = detail::ScalingHelpers::screenPosToLocalPos (peer->getComponent(), logicalPos).roundToInt();
 
         const auto& atoms = getAtoms();
 
@@ -344,10 +344,7 @@ public:
     void externalResetDragAndDrop()
     {
         if (dragging)
-        {
-            XWindowSystemUtilities::ScopedXLock xLock;
-            X11Symbols::getInstance()->xUngrabPointer (getDisplay(), CurrentTime);
-        }
+            XWindowSystem::getInstance()->ungrabPointer();
 
         NullCheckedInvocation::invoke (completionCallback);
 
@@ -366,17 +363,11 @@ public:
 
         allowedTypes.add (XWindowSystemUtilities::Atoms::getCreating (display, isText ? "text/plain" : "text/uri-list"));
 
-        auto pointerGrabMask = (unsigned int) (Button1MotionMask | ButtonReleaseMask);
-
         XWindowSystemUtilities::ScopedXLock xLock;
 
-        if (X11Symbols::getInstance()->xGrabPointer (display, windowH, True, pointerGrabMask,
-                                                     GrabModeAsync, GrabModeAsync, None, None, CurrentTime) == GrabSuccess)
+        if (XWindowSystem::getInstance()->grabPointerForExternalDrag (windowH, (Cursor) createDraggingHandCursor()))
         {
             const auto& atoms = getAtoms();
-
-            // No other method of changing the pointer seems to work, this call is needed from this very context
-            X11Symbols::getInstance()->xChangeActivePointerGrab (display, pointerGrabMask, (Cursor) createDraggingHandCursor(), CurrentTime);
 
             X11Symbols::getInstance()->xSetSelectionOwner (display, atoms.XdndSelection, windowH, CurrentTime);
 
@@ -469,7 +460,7 @@ private:
         if (silentRect.contains (mousePos)) // we've been asked to keep silent
             return;
 
-        mousePos = Desktop::getInstance().getDisplays().logicalToPhysical (mousePos);
+        mousePos = Desktop::getInstance().getDisplays().logicalToPhysical (mousePos.toFloat()).roundToInt();
 
         msg.data.l[1] = 0;
         msg.data.l[2] = (mousePos.x << 16) | mousePos.y;

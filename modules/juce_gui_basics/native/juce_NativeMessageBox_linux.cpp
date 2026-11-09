@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -37,48 +37,7 @@ namespace juce::detail
 
 std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (const MessageBoxOptions& options)
 {
-    // On Linux, we re-use the AlertWindow rather than using a platform-specific dialog.
-    // For consistency with the NativeMessageBox on other platforms, the result code must
-    // match the button index, hence this adapter.
-    class MessageBox final : public ScopedMessageBoxInterface
-    {
-    public:
-        explicit MessageBox (const MessageBoxOptions& options)
-            : inner (detail::AlertWindowHelpers::create (options)),
-              numButtons (options.getNumButtons()) {}
-
-        void runAsync (std::function<void (int)> fn) override
-        {
-            inner->runAsync ([fn, n = numButtons] (int result)
-                             {
-                                 fn (map (result, n));
-                             });
-        }
-
-        int runSync() override
-        {
-            return map (inner->runSync(), numButtons);
-        }
-
-        void close() override
-        {
-            inner->close();
-        }
-
-    private:
-        static int map (int button, int numButtons)
-        {
-            if (numButtons <= 0)
-                return 0;
-
-            return (button + numButtons - 1) % numButtons;
-        }
-
-        std::unique_ptr<ScopedMessageBoxInterface> inner;
-        int numButtons = 0;
-    };
-
-    return std::make_unique<MessageBox> (options);
+    return detail::AlertWindowHelpers::create (options);
 }
 
 } // namespace juce::detail

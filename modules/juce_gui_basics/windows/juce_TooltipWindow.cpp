@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -127,12 +127,13 @@ void TooltipWindow::displayTipInternal (Point<int> screenPos, const String& tip,
         {
             const auto physicalPos = detail::ScalingHelpers::scaledScreenPosToUnscaled (screenPos);
             const auto scaledPos = detail::ScalingHelpers::unscaledScreenPosToScaled (*this, physicalPos);
-            updatePosition (tip, scaledPos, Desktop::getInstance().getDisplays().getDisplayForPoint (screenPos)->userArea);
+            updatePosition (tip, scaledPos, Desktop::getInstance().getDisplays().getDisplayForPoint (screenPos.toFloat())->userBounds.getLargestIntegerWithin());
 
-            addToDesktop (ComponentPeer::windowHasDropShadow
-                          | ComponentPeer::windowIsTemporary
-                          | ComponentPeer::windowIgnoresKeyPresses
-                          | ComponentPeer::windowIgnoresMouseClicks);
+            addToDesktop (DesktopWindowOptions().withStyleFlags (ComponentPeer::windowHasDropShadow
+                                                                 | ComponentPeer::windowIsTemporary
+                                                                 | ComponentPeer::windowIgnoresKeyPresses
+                                                                 | ComponentPeer::windowIgnoresMouseClicks)
+                                                .withAssociatedComponent (lastComponentUnderMouse.getComponent()));
         }
 
        #if JUCE_DEBUG

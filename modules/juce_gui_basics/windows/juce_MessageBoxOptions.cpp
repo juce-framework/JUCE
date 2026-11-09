@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -35,6 +35,28 @@
 namespace juce
 {
 
+MessageBoxOptions MessageBoxOptions::withButton (MessageBoxButtonOptions opt) const
+{
+    auto copy = *this;
+    copy.buttons.push_back (std::move (opt));
+
+    // Only a maximum of one action may be preferred!
+    // Check your MessageBoxOptions and make sure that you haven't called
+    // "setPreferredAction (true)" more than once.
+    jassert (std::count_if (copy.buttons.begin(),
+                            copy.buttons.end(),
+                            [] (const auto& b) { return b.isPreferredAction(); }) <= 1);
+
+    // Only a maximum of one action may have the cancel role!
+    // Check your MessageBoxOptions and make sure that you haven't called
+    // "setRole (MessageBoxButtonRole::cancel)" more than once.
+    jassert (std::count_if (copy.buttons.begin(),
+                            copy.buttons.end(),
+                            [] (const auto& b) { return b.getRole() == MessageBoxButtonRole::cancel; }) <= 1);
+
+    return copy;
+}
+
 MessageBoxOptions MessageBoxOptions::makeOptionsOk (MessageBoxIconType iconType,
                                                     const String& title,
                                                     const String& message,
@@ -45,7 +67,7 @@ MessageBoxOptions MessageBoxOptions::makeOptionsOk (MessageBoxIconType iconType,
         .withIconType (iconType)
         .withTitle (title)
         .withMessage (message)
-        .withButton (buttonText.isEmpty() ? TRANS ("OK") : buttonText)
+        .withButton (MessageBoxButtonOptions { buttonText.isEmpty() ? TRANS ("OK") : buttonText, 0 }.setPreferredAction().setRole (MessageBoxButtonRole::cancel))
         .withAssociatedComponent (associatedComponent);
 }
 
@@ -60,8 +82,8 @@ MessageBoxOptions MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType ico
         .withIconType (iconType)
         .withTitle (title)
         .withMessage (message)
-        .withButton (button1Text.isEmpty() ? TRANS ("OK") : button1Text)
-        .withButton (button2Text.isEmpty() ? TRANS ("Cancel") : button2Text)
+        .withButton (MessageBoxButtonOptions { button1Text.isEmpty() ? TRANS ("OK") : button1Text, 1 }.setPreferredAction())
+        .withButton (MessageBoxButtonOptions { button2Text.isEmpty() ? TRANS ("Cancel") : button2Text, 0 }.setRole (MessageBoxButtonRole::cancel))
         .withAssociatedComponent (associatedComponent);
 }
 
@@ -76,8 +98,8 @@ MessageBoxOptions MessageBoxOptions::makeOptionsYesNo (MessageBoxIconType iconTy
         .withIconType (iconType)
         .withTitle (title)
         .withMessage (message)
-        .withButton (button1Text.isEmpty() ? TRANS ("Yes") : button1Text)
-        .withButton (button2Text.isEmpty() ? TRANS ("No") : button2Text)
+        .withButton (button1Text.isEmpty() ? TRANS ("Yes") : button1Text, 1)
+        .withButton (button2Text.isEmpty() ? TRANS ("No") : button2Text, 0)
         .withAssociatedComponent (associatedComponent);
 }
 
@@ -93,9 +115,9 @@ MessageBoxOptions MessageBoxOptions::makeOptionsYesNoCancel (MessageBoxIconType 
         .withIconType (iconType)
         .withTitle (title)
         .withMessage (message)
-        .withButton (button1Text.isEmpty() ? TRANS ("Yes") : button1Text)
-        .withButton (button2Text.isEmpty() ? TRANS ("No") : button2Text)
-        .withButton (button3Text.isEmpty() ? TRANS ("Cancel") : button3Text)
+        .withButton (button1Text.isEmpty() ? TRANS ("Yes") : button1Text, 1)
+        .withButton (button2Text.isEmpty() ? TRANS ("No") : button2Text, 2)
+        .withButton (MessageBoxButtonOptions { button3Text.isEmpty() ? TRANS ("Cancel") : button3Text, 0 }.setRole (MessageBoxButtonRole::cancel))
         .withAssociatedComponent (associatedComponent);
 }
 

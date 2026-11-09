@@ -481,7 +481,7 @@ static ZipFile* getZipFile()
     if (stream == nullptr)
         return nullptr;
 
-    static ZipFile f { stream.get(), false };
+    static ZipFile f { *stream.get() };
     return &f;
 }
 

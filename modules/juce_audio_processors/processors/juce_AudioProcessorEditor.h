@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -37,6 +37,7 @@ namespace juce
 
 class AudioProcessorEditorListener;
 class AudioProcessor;
+class AudioProcessorEditorARAExtension;
 
 //==============================================================================
 /**
@@ -214,6 +215,16 @@ public:
     */
     void setHostContext (AudioProcessorEditorHostContext* context) noexcept   { hostContext = context; }
 
+    /** Returns a non-owning pointer to an object that implements ARA specific information
+        regarding this AudioProcessorEditor.
+
+        By default, for backwards compatibility, this will attempt to dynamic-cast this
+        AudioProcessor to AudioProcessorEditorARAExtension.
+        It is recommended to override this function to return a pointer directly to an object
+        of the correct type in order to avoid this dynamic cast.
+    */
+    virtual AudioProcessorEditorARAExtension* getARAClientExtensions();
+
     /** The ResizableCornerComponent which is currently being used by this editor,
         or nullptr if it does not have one.
     */
@@ -236,6 +247,15 @@ public:
     */
     virtual bool wantsLayerBackedView() const;
 
+    /** The plugin wrapper will call this function to decide whether the editor is capable of
+        handling multi-touch events on Windows. This is disabled by default.
+
+        Editors and Windows that opt in to handling multi-touch events will have the built-in
+        Windows gesture recognition features disabled, and will not receive callbacks to
+        Component::mouseMagnify().
+    */
+    virtual bool usesWindowsMultiTouch() const;
+
 private:
     //==============================================================================
     struct AudioProcessorEditorListener : public ComponentListener
@@ -250,7 +270,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditorListener)
     };
 
-    ComponentPeer* createNewPeer (int styleFlags, void*) override;
+    ComponentPeer* createNewPeer (const DesktopWindowOptions&) override;
 
     //==============================================================================
     void initialise();

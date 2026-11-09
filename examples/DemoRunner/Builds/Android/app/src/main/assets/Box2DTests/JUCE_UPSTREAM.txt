@@ -1,0 +1,5 @@
+Upstream: https://github.com/erincatto/box2d
+Version: 2.2.1
+
+These are the testbed sources distributed with the Box2D 2.2.1 release. The
+corresponding library is vendored at modules/juce_box2d/box2d.

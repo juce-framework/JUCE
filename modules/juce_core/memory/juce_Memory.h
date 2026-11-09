@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -37,7 +37,13 @@ namespace juce
 
 //==============================================================================
 /** Fills a block of memory with zeros. */
-inline void zeromem (void* memory, size_t numBytes) noexcept        { memset (memory, 0, numBytes); }
+inline void zeromem (void* memory, size_t numBytes) noexcept
+{
+    if (memory != nullptr)
+        memset (memory, 0, numBytes);
+    else
+        jassert (numBytes == 0);
+}
 
 /** Overwrites a structure or object with zeros. */
 template <typename Type>

@@ -18,11 +18,16 @@ on:
         type: string
         default: ""
         description: The C++ standard to use (optional [20, 23])
+      commit-message:
+        required: false
+        type: string
+        default: ""
+        description: Shortened subject of the triggering commit (optional, will default to the triggering commit's message or SHA)
 
 env:
   target_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-run-name: "[${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}] ${{ github.sha }}"
+run-name: "[${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}] ${{ inputs.commit-message && inputs.commit-message || github.sha }}"
 
 jobs:
   setup:
@@ -34,7 +39,7 @@ jobs:
     outputs:
       build: ${{ steps.status_check.outputs.build }}
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
           sparse-checkout: |
@@ -60,7 +65,7 @@ jobs:
             post_response = json_github_api_request(f'statuses/{sha}', 'POST', data)
             print(post_response)
   build:
-    if: ${{ !cancelled() && (success() || needs.setup.result == 'skipped') && (inputs.nightly-targets != '[]' || inputs.cpp-std != '' || needs.setup.outputs.build == '1' || contains(fromJSON('["master"]'), github.ref_name)) }}
+    if: ${{ !cancelled() && (success() || needs.setup.result == 'skipped') && inputs.nightly-targets == '[]' && (inputs.cpp-std != '' || needs.setup.outputs.build == '1' || contains(fromJSON('["master"]'), github.ref_name)) }}
     needs: [setup]
     name: .
     # Not having the ability to do a dynamic 'uses' call is a real pain. To
@@ -68,26 +73,43 @@ jobs:
     # below.
     uses: juce-framework/JUCE-utils/.github/workflows/main.yml@master
     with:
-      juce-utils-branch: master
-      nightly-targets: ${{ inputs.nightly-targets }}
-      triggerer: ${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}
+      juce-utils-branch: &juce-utils-branch master
+      triggerer: &triggerer ${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}
       cpp-std: ${{ inputs.cpp-std }}
     secrets: inherit
+  nightly:
+    if: ${{ inputs.nightly-targets != '[]' }}
+    name: .
+    uses: juce-framework/JUCE-utils/.github/workflows/nightly.yml@master
+    with:
+      juce-utils-branch: *juce-utils-branch
+      nightly-targets: ${{ inputs.nightly-targets }}
+      triggerer: *triggerer
+    secrets: inherit
   deploy:
-    if: ${{ !cancelled() && (success() || needs.build.result == 'skipped') && contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
-    needs: [build]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && contains(fromJSON('["success", "skipped"]'), needs.build.result) && contains(fromJSON('["master", "develop", "wayland"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
+    needs: [setup, build]
     name: Deploy
     uses: juce-framework/JUCE-utils/.github/workflows/deploy.yml@master
     secrets: inherit
+  submit-sbom:
+    # juce_submit_sbom.yml is also called directly for pushes to master in the
+    # public repository - it only has an effect on the default branch
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.deploy.result == 'success' && contains(fromJSON('["develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
+    needs: [setup, build, deploy]
+    name: Submit SBOM
+    permissions:
+      contents: write
+    uses: ./.github/workflows/juce_submit_sbom.yml
   docs:
-    if: ${{ !cancelled() && (success() || needs.deploy.result == 'success') && contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
-    needs: [deploy]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.deploy.result == 'success' && contains(fromJSON('["master", "develop"]'), github.ref_name) && inputs.cpp-std == '' && inputs.nightly-targets == '[]' }}
+    needs: [setup, build, deploy]
     name: Docs
     uses: juce-framework/JUCE-utils/.github/workflows/docs.yml@master
     secrets: inherit
   set-commit-status:
     if: ${{ always() && (inputs.nightly-targets == '[]') && (inputs.cpp-std == '') }}
-    needs: [setup, build, deploy, docs]
+    needs: [setup, build, deploy, submit-sbom, docs]
     name: Set CI commit status
     runs-on: ubuntu-latest
     env:
@@ -103,11 +125,11 @@ jobs:
           targetUrl: ${{ env.target_url }}
   notify:
     if: ${{ always() && !contains(needs.*.result, 'cancelled') }}
-    needs: [setup, build, deploy, docs]
+    needs: [setup, build, nightly, deploy, docs, submit-sbom]
     name: Notify
     uses: juce-framework/JUCE-utils/.github/workflows/notify.yml@master
     with:
-      juce-utils-branch: master
-      triggerer: ${{ inputs.triggerer && inputs.triggerer || github.event.sender.login }}
+      juce-utils-branch: *juce-utils-branch
+      triggerer: *triggerer
       context: ${{ toJson(needs) }}
     secrets: inherit

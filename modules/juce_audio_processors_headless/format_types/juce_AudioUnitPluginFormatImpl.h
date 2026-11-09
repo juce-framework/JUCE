@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -39,7 +39,6 @@
 #if JUCE_MAC
 #include <AudioUnit/AUCocoaUIView.h>
 #include <CoreAudioKit/AUGenericView.h>
-#include <AudioToolbox/AudioUnitUtilities.h>
 
 #if JUCE_INTERNAL_HAS_ARA
  #include <ARA_API/ARAAudioUnit.h>
@@ -55,6 +54,63 @@
 #include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
 #include <juce_audio_processors_headless/format_types/juce_AU_Shared.h>
 #include <juce_audio_processors_headless/format_types/juce_ARACommonInternal.h>
+
+#if __has_include (<AudioToolbox/AudioUnitUtilities.h>)
+#include <AudioToolbox/AudioUnitUtilities.h>
+#else
+
+extern "C"
+{
+
+// These symbols are available on iOS 6+, but are not exported in a public header.
+using AUEventListenerRef = struct AUListenerBase*;
+struct AudioUnitEvent
+{
+    UInt32 mEventType;
+    union
+    {
+        AudioUnitParameter mParameter;
+        AudioUnitProperty mProperty;
+    } mArgument;
+};
+
+OSStatus AUParameterSet (AUEventListenerRef,
+                         void*,
+                         const AudioUnitParameter*,
+                         AudioUnitParameterValue,
+                         UInt32);
+OSStatus AUParameterListenerNotify (AUEventListenerRef,
+                                    void*,
+                                    const AudioUnitParameter*);
+OSStatus AUEventListenerNotify (AUEventListenerRef,
+                                void*,
+                                const AudioUnitEvent*);
+OSStatus AUEventListenerAddEventType (AUEventListenerRef,
+                                      void*,
+                                      const AudioUnitEvent*);
+using AUEventListenerProc = void (*) (void*, void*, const AudioUnitEvent*, unsigned long long, float);
+OSStatus AUEventListenerCreate (AUEventListenerProc,
+                                void*,
+                                CFRunLoopRef,
+                                CFStringRef,
+                                Float32,
+                                Float32,
+                                AUEventListenerRef*);
+OSStatus AUListenerDispose (AUEventListenerRef);
+
+enum : UInt32
+{
+    kAUParameterListener_AnyParameter = 0xffffffff,
+
+    kAudioUnitEvent_ParameterValueChange = 0,
+    kAudioUnitEvent_BeginParameterChangeGesture = 1,
+    kAudioUnitEvent_EndParameterChangeGesture = 2,
+    kAudioUnitEvent_PropertyChange = 3,
+};
+
+} // extern "C"
+
+#endif
 
 namespace juce
 {
@@ -573,6 +629,10 @@ class AudioUnitPluginWindowCocoa;
 
 //==============================================================================
 class AudioUnitPluginInstanceHeadless : public AudioPluginInstance
+                                      , private AudioPluginExtensions::AudioUnitClient
+                                     #ifdef JUCE_INTERNAL_HAS_ARA
+                                      , private AudioPluginExtensions::ARAClient
+                                     #endif
 {
 public:
     struct AUInstanceParameter final  : public Parameter
@@ -609,30 +669,45 @@ public:
 
         float getValue() const override
         {
+            return cachedValue;
+        }
+
+        void syncCachedValue()
+        {
             const ScopedLock sl (pluginInstance.lock);
 
-            AudioUnitParameterValue value = 0;
+            AudioUnitParameterValue newValue{};
 
-            if (auto* au = pluginInstance.audioUnit)
-            {
-                AudioUnitGetParameter (au, paramID, kAudioUnitScope_Global, 0, &value);
-                value = normaliseParamValue (value);
-            }
+            if (AudioUnitGetParameter (pluginInstance.audioUnit, paramID, kAudioUnitScope_Global, 0, &newValue) != noErr)
+                return;
 
-            return value;
+            cachedValue = normaliseParamValue (newValue);
+        }
+
+        void updateCachedValueAndNotify (float newValue)
+        {
+            cachedValue = newValue;
+            sendValueChangedMessageToListeners (newValue);
         }
 
         void setValue (float newValue) override
         {
             const ScopedLock sl (pluginInstance.lock);
 
-            if (auto* au = pluginInstance.audioUnit)
-            {
-                AudioUnitSetParameter (au, paramID, kAudioUnitScope_Global,
-                                       0, scaleParamValue (newValue), 0);
+            cachedValue = newValue;
 
-                sendParameterChangeEvent();
-            }
+            auto* au = pluginInstance.audioUnit;
+
+            if (au == nullptr)
+                return;
+
+            AudioUnitParameter parameter;
+            parameter.mParameterID = paramID;
+            parameter.mAudioUnit = au;
+            parameter.mScope = kAudioUnitScope_Global;
+            parameter.mElement = 0;
+
+            AUParameterSet (pluginInstance.eventListenerRef, nullptr, &parameter, scaleParamValue (newValue), 0);
         }
 
         float getDefaultValue() const override
@@ -798,6 +873,7 @@ public:
         const bool valuesHaveStrings, isSwitch;
         String valueLabel;
         const AudioUnitParameterValue defaultValue;
+        AudioUnitParameterValue cachedValue = defaultValue;
         StringArray auValueStrings;
     };
 
@@ -805,9 +881,7 @@ public:
         : AudioPluginInstance (getBusesProperties (au)),
           auComponent (AudioComponentInstanceGetComponent (au)),
           audioUnit (au),
-        #if JUCE_MAC
           eventListenerRef (nullptr),
-        #endif
           midiConcatenator (2048)
     {
         using namespace AudioUnitFormatHelpers;
@@ -870,9 +944,7 @@ public:
     // called from the destructor above
     void cleanup()
     {
-       #if JUCE_MAC
         disposeEventListener();
-       #endif
 
         if (prepared)
             releaseResources();
@@ -888,10 +960,7 @@ public:
         setLatencySamples (0);
         refreshParameterList();
         setPluginCallbacks();
-
-       #if JUCE_MAC
         createEventListener();
-       #endif
 
         return true;
     }
@@ -1141,48 +1210,28 @@ public:
        #endif
     }
 
-    void getExtensions (ExtensionsVisitor& visitor) const override
+          AudioPluginExtensions::AudioUnitClient* getAudioUnitClient()       override { return this; }
+    const AudioPluginExtensions::AudioUnitClient* getAudioUnitClient() const override { return this; }
+
+   #ifdef JUCE_INTERNAL_HAS_ARA
+          AudioPluginExtensions::ARAClient* getARAClient()       override { return this; }
+    const AudioPluginExtensions::ARAClient* getARAClient() const override { return this; }
+
+    void createARAFactoryAsync (std::function<void (ARAFactoryWrapper)> cb) const override
     {
-        struct Extensions final : public ExtensionsVisitor::AudioUnitClient
+        getOrCreateARAAudioUnit ({ auComponent, isAUv3 }, [origCb = std::move (cb)] (auto dylibKeepAliveAudioUnit)
         {
-            explicit Extensions (const AudioUnitPluginInstanceHeadless* instanceIn) : instance (instanceIn) {}
-
-            AudioUnit getAudioUnitHandle() const noexcept override   { return instance->audioUnit; }
-
-            const AudioUnitPluginInstanceHeadless* instance = nullptr;
-        };
-
-        visitor.visitAudioUnitClient (Extensions { this });
-
-       #ifdef JUCE_INTERNAL_HAS_ARA
-        struct ARAExtensions final : public ExtensionsVisitor::ARAClient
-        {
-            explicit ARAExtensions (const AudioUnitPluginInstanceHeadless* instanceIn) : instance (instanceIn) {}
-
-            void createARAFactoryAsync (std::function<void (ARAFactoryWrapper)> cb) const override
+            origCb (std::invoke ([&]
             {
-                getOrCreateARAAudioUnit ({ instance->auComponent, instance->isAUv3 },
-                                         [origCb = std::move (cb)] (auto dylibKeepAliveAudioUnit)
-                                         {
-                                             origCb ([&]() -> ARAFactoryWrapper
-                                                     {
-                                                         if (dylibKeepAliveAudioUnit != nullptr)
-                                                             return ARAFactoryWrapper { ::juce::getARAFactory (std::move (dylibKeepAliveAudioUnit)) };
+                if (dylibKeepAliveAudioUnit != nullptr)
+                    return ARAFactoryWrapper { ::juce::getARAFactory (std::move (dylibKeepAliveAudioUnit)) };
 
-                                                         return ARAFactoryWrapper { nullptr };
-                                                     }());
-                                         });
-            }
-
-            const AudioUnitPluginInstanceHeadless* instance = nullptr;
-        };
-
-        if (hasARAExtension (audioUnit))
-            visitor.visitARAClient (ARAExtensions (this));
-       #endif
+                return ARAFactoryWrapper { nullptr };
+            }));
+        });
     }
+   #endif
 
-    void* getPlatformSpecificData() override             { return audioUnit; }
     const String getName() const override                { return pluginName; }
 
     double getTailLengthSeconds() const override
@@ -1200,7 +1249,7 @@ public:
     bool acceptsMidi() const override                    { return wantsMidiMessages; }
     bool producesMidi() const override                   { return producesMidiMessages; }
 
-    AudioUnit getAudioUnitHandle() const                 { return audioUnit; }
+    AudioUnit getAudioUnitHandle() const noexcept override { return audioUnit; }
 
     //==============================================================================
     // AudioProcessor methods:
@@ -1504,15 +1553,21 @@ public:
     //==============================================================================
     void sendAllParametersChangedEvents()
     {
-       #if JUCE_MAC
         jassert (audioUnit != nullptr);
+
+        for (const auto& idAndParam : paramIDToParameter)
+        {
+            if (auto* param = idAndParam.second)
+            {
+                param->syncCachedValue();
+            }
+        }
 
         AudioUnitParameter param;
         param.mAudioUnit = audioUnit;
         param.mParameterID = kAUParameterListener_AnyParameter;
 
         AUParameterListenerNotify (nullptr, nullptr, &param);
-       #endif
     }
 
     //==============================================================================
@@ -1890,7 +1945,6 @@ private:
                     AudioUnitSetProperty (parent.audioUnit, kAudioUnitProperty_BypassEffect,
                                           kAudioUnitScope_Global, 0, &value, sizeof (UInt32));
 
-                   #if JUCE_MAC
                     jassert (parent.audioUnit != nullptr);
 
                     AudioUnitEvent ev;
@@ -1901,7 +1955,6 @@ private:
                     ev.mArgument.mProperty.mElement     = 0;
 
                     AUEventListenerNotify (parent.eventListenerRef, nullptr, &ev);
-                   #endif
                 }
             }
         }
@@ -1950,9 +2003,7 @@ private:
     HeapBlock<AUChannelInfo> channelInfos;
 
     AudioUnit audioUnit;
-   #if JUCE_MAC
     AUEventListenerRef eventListenerRef;
-   #endif
 
     std::map<UInt32, AUInstanceParameter*> paramIDToParameter;
 
@@ -1995,7 +2046,6 @@ private:
         }
     }
 
-   #if JUCE_MAC
     void disposeEventListener()
     {
         if (eventListenerRef != nullptr)
@@ -2068,7 +2118,7 @@ private:
             return;
 
         if (event.mEventType == kAudioUnitEvent_ParameterValueChange)
-            param->sendValueChangedMessageToListeners (param->normaliseParamValue (newValue));
+            param->updateCachedValueAndNotify (param->normaliseParamValue (newValue));
         else if (event.mEventType == kAudioUnitEvent_BeginParameterChangeGesture)
             param->beginChangeGesture();
         else if (event.mEventType == kAudioUnitEvent_EndParameterChangeGesture)
@@ -2125,7 +2175,6 @@ private:
             param->setLabel (getParamLabel (info.get()));
         }
     }
-   #endif
 
     /*  Some fields in the AudioUnitParameterInfo may need to be released after use,
         so we'll do that using RAII.

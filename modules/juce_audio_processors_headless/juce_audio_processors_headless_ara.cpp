@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -50,4 +50,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments", "-Wm
  #include <ARA_Library/Debug/ARADebug.c>
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
+#else
+ // To get around 'has no symbols' warnings emitted by libtool
+ void juce_audioProcessorsHeadlessAraPlaceholder();
+ void juce_audioProcessorsHeadlessAraPlaceholder() {}
 #endif

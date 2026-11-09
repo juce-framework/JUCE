@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2023  Xiph.Org Foundation
+ * Copyright (C) 2011-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -76,7 +76,7 @@ FLAC__bool FLAC__memory_alloc_aligned_int32_array(size_t elements, FLAC__int32 *
 	if(elements > SIZE_MAX / sizeof(*pu)) /* overflow check */
 		return false;
 
-	pu = (FLAC__int32*) FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
+	pu = FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
 	if(0 == pu) {
 		return false;
 	}
@@ -105,7 +105,7 @@ FLAC__bool FLAC__memory_alloc_aligned_uint32_array(size_t elements, FLAC__uint32
 	if(elements > SIZE_MAX / sizeof(*pu)) /* overflow check */
 		return false;
 
-	pu = (FLAC__uint32*) FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
+	pu = FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
 	if(0 == pu) {
 		return false;
 	}
@@ -134,7 +134,7 @@ FLAC__bool FLAC__memory_alloc_aligned_int64_array(size_t elements, FLAC__int64 *
 	if(elements > SIZE_MAX / sizeof(*pu)) /* overflow check */
 		return false;
 
-	pu = (FLAC__int64*) FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
+	pu = FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
 	if(0 == pu) {
 		return false;
 	}
@@ -163,7 +163,7 @@ FLAC__bool FLAC__memory_alloc_aligned_uint64_array(size_t elements, FLAC__uint64
 	if(elements > SIZE_MAX / sizeof(*pu)) /* overflow check */
 		return false;
 
-	pu = (FLAC__uint64*) FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
+	pu = FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
 	if(0 == pu) {
 		return false;
 	}
@@ -194,7 +194,7 @@ FLAC__bool FLAC__memory_alloc_aligned_real_array(size_t elements, FLAC__real **u
 	if(elements > SIZE_MAX / sizeof(*pu)) /* overflow check */
 		return false;
 
-	pu = (FLAC__real*) FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
+	pu = FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
 	if(0 == pu) {
 		return false;
 	}

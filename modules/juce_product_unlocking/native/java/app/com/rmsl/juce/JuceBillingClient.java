@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -47,8 +47,9 @@ public class JuceBillingClient implements PurchasesUpdatedListener,
         host = hostToUse;
 
         billingClient = BillingClient.newBuilder(context)
-                .enablePendingPurchases()
+                .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
                 .setListener(this)
+                .enableAutoServiceReconnection()
                 .build();
 
         billingClient.startConnection(this);
@@ -82,9 +83,9 @@ public class JuceBillingClient implements PurchasesUpdatedListener,
         } else {
             billingClient.queryProductDetailsAsync(getProductListParams(productsToQuery, productTypes.get(0)), new ProductDetailsResponseListener() {
                 @Override
-                public void onProductDetailsResponse(BillingResult billingResult, java.util.List<ProductDetails> newDetails) {
+                public void onProductDetailsResponse(BillingResult billingResult, QueryProductDetailsResult queryProductDetailsResult) {
                     if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                        details.addAll(newDetails);
+                        details.addAll(queryProductDetailsResult.getProductDetailsList());
                         queryProductDetailsImpl(productsToQuery, productTypes.subList(1, productTypes.size()), details);
                     } else {
                         queryProductDetailsImpl(productsToQuery, null, details);
@@ -115,6 +116,14 @@ public class JuceBillingClient implements PurchasesUpdatedListener,
 
     private void queryPurchasesImpl(java.util.List<String> toCheck, java.util.ArrayList<Purchase> purchases) {
         if (toCheck == null || toCheck.isEmpty()) {
+            // Purchases can become PURCHASED even when our app isn't running. In such cases we
+            // will not receive an onPurchasesUpdated callback, so we need to process them here.
+            for (Purchase purchase : purchases) {
+                if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged()) {
+                    handlePurchase(purchase, BillingClient.BillingResponseCode.OK);
+                }
+            }
+
             purchasesListQueryCallback(host, purchases);
         } else {
             billingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(toCheck.get(0)).build(), new PurchasesResponseListener() {

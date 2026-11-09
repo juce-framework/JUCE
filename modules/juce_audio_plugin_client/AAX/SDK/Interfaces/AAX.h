@@ -140,6 +140,57 @@
 #endif
 
 
+/** @def AAX_DEPRECATED
+ @brief <tt>[[deprecated]]</tt> attribute macro
+
+ Do not use on: enumerators, namespaces, template specializations, using declarations
+ */
+#if defined(__has_cpp_attribute)
+#	if __has_cpp_attribute(deprecated)
+#		define AAX_DEPRECATED [[deprecated]]
+#	endif
+#endif
+
+#if !defined(AAX_DEPRECATED)
+#	if defined(__clang__)
+#		define AAX_DEPRECATED __attribute__((deprecated))
+#	elif defined(__GNUC__)
+#		if (__GNUC__ > 3) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
+#			define AAX_DEPRECATED __attribute__((deprecated))
+#		else
+#			define AAX_DEPRECATED
+#		endif
+#	elif defined(_MSC_VER)
+#		define AAX_DEPRECATED __declspec(deprecated)
+#	else
+#		define AAX_DEPRECATED
+#	endif
+#endif
+
+/** @def AAX_DEPRECATED_ENUMERATOR
+ @brief <tt>[[deprecated]]</tt> attribute macro for enumerators
+ */
+#if defined(__has_cpp_attribute)
+#	if __has_cpp_attribute(deprecated) && (__cplusplus >= 202002L)
+#		define AAX_DEPRECATED_ENUMERATOR(NAME) NAME [[deprecated]]
+#	endif
+#endif
+
+#if !defined(AAX_DEPRECATED_ENUMERATOR)
+#	if defined(__clang__)
+#		define AAX_DEPRECATED_ENUMERATOR(NAME) NAME __attribute__((deprecated))
+#	elif defined(__GNUC__)
+#		if (__GNUC__ > 3) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
+#			define AAX_DEPRECATED_ENUMERATOR(NAME) NAME __attribute__((deprecated))
+#		else
+#			define AAX_DEPRECATED_ENUMERATOR(NAME) NAME
+#		endif
+#	else
+#		define AAX_DEPRECATED_ENUMERATOR(NAME) NAME
+#	endif
+#endif
+
+
 /** @name Pointer definitions
  */
 //@{
@@ -302,19 +353,57 @@ typedef AAX_CIndex	AAX_CCount;        //!< \todo Not used by %AAX plug-ins
 typedef uint8_t		AAX_CBoolean;      //!< Cross-compiler boolean type used by %AAX interfaces
 typedef uint32_t	AAX_CSelector;     //!< \todo Clean up usage; currently used for a variety of ID-related values
 typedef int64_t		AAX_CTimestamp;    //!< Time stamp value.  Measured against the DAE clock (see \ref AAX_IComponentDescriptor::AddClock() )
-typedef int64_t		AAX_CTimeOfDay;    //!< Hardware running clock value.  MIDI packet time stamps are measured against this clock.  This is actually the same as TransportCounter, but kept for compatibility.
-typedef int64_t     AAX_CTransportCounter;  //!< Offset of samples from transport start. Same as TimeOfDay, but added for new interfaces as TimeOfDay is a confusing name.
-typedef float		AAX_CSampleRate;   //!< Literal sample rate value used by the \ref AAX_IComponentDescriptor::AddSampleRate() "sample rate field".  For \ref AAX_eProperty_SampleRate, use a mask of \ref AAX_ESampleRateMask.  \sa sampleRateInMask
+/** Hardware running clock value
 
-typedef uint32_t	AAX_CTypeID;  //!< Matches type of OSType used in classic plugins. All type IDs with prefix 'AX', i.e. <tt>0x4158____</tt>, are reserved for Avid.
+	MIDI packet time stamps are measured against this clock.  This is actually the same
+	as \ref AAX_CTransportCounter, but kept for compatibility.
+*/
+typedef int64_t		AAX_CTimeOfDay;
+/** Offset of samples from transport start
+
+	Same as \ref AAX_CTimeOfDay, but added for new interfaces as TimeOfDay is a confusing name.
+*/
+typedef int64_t     AAX_CTransportCounter;
+/** Literal sample rate value
+
+	This value is used by the \ref AAX_IComponentDescriptor::AddSampleRate() "sample rate field".
+	
+	For \ref AAX_eProperty_SampleRate, use a mask of \ref AAX_ESampleRateMask.
+	
+	\sa sampleRateInMask
+*/
+typedef float		AAX_CSampleRate;
+
+/** OSType "four char" identifier type
+
+	All type IDs with prefix 'AX', i.e. <tt>0x4158____</tt>, are reserved for Avid.
+*/
+typedef uint32_t	AAX_CTypeID;
 AAX_CONSTEXPR AAX_CTypeID kAAX_TypeID_Undefined = 0; //!< Undefined type ID. This value must not be used for properties requiring a \ref AAX_CTypeID
 typedef int32_t		AAX_Result;
-typedef int32_t		AAX_CPropertyValue; //!< \brief 32-bit property values \details Use this property value type for all properties unless otherwise specified by the property documentation
-typedef int64_t		AAX_CPropertyValue64; //!< \brief 64-bit property values \details Do not use this value type unless specified explicitly in the property documentation
+/** \brief 32-bit property values
+
+	\details Use this property value type for all properties unless otherwise specified by the
+	property documentation
+*/
+typedef int32_t		AAX_CPropertyValue;
+/** \brief 64-bit property values
+
+	\details Do not use this value type unless specified explicitly in the property documentation
+*/
+typedef int64_t		AAX_CPropertyValue64;
 #if AAX_PointerSize == AAXPointer_32bit
-	typedef AAX_CPropertyValue AAX_CPointerPropertyValue; //!< \brief Pointer-sized property values \details Do not use this value type unless specified explicitly in the property documentation
+	/** \brief Pointer-sized property values
+	
+		\details Do not use this value type unless specified explicitly in the property documentation
+	*/
+	typedef AAX_CPropertyValue AAX_CPointerPropertyValue;
 #elif AAX_PointerSize == AAXPointer_64bit
-	typedef AAX_CPropertyValue64 AAX_CPointerPropertyValue; //!< \brief Pointer-sized property values \details Do not use this value type unless specified explicitly in the property documentation
+	/** \brief Pointer-sized property values
+	
+		\details Do not use this value type unless specified explicitly in the property documentation
+	*/
+	typedef AAX_CPropertyValue64 AAX_CPointerPropertyValue;
 #else
 	#error unexpected pointer size
 #endif
@@ -323,13 +412,33 @@ typedef int32_t		AAX_CTargetPlatform;  //!< Matches type of \ref AAX_ETargetPlat
 typedef AAX_CIndex		AAX_CFieldIndex;    //!< Not used by %AAX plug-ins (except in \ref AAX_FIELD_INDEX macro)
 typedef AAX_CSelector	AAX_CComponentID;   //!< \todo Not used by %AAX plug-ins
 typedef AAX_CSelector	AAX_CMeterID;       //!< \todo Not used by %AAX plug-ins
-typedef const char *	AAX_CParamID;		//!< Parameter identifier \note While this is a string, it must be less than 32 characters in length.  (strlen of 31 or less) \sa \ref kAAX_ParameterIdentifierMaxSize
-typedef AAX_CParamID	AAX_CPageTableParamID; //!< \brief Parameter identifier used in a page table \details May be a parameter ID or a parameter name string depending on the page table formatting. Must be less than 32 characters in length (strlen of 31 or less.) \sa \ref subsection_parameter_identifiers in the \ref AAX_Page_Table_Guide
+/** Parameter identifier
+
+	\note All parameter IDs beginning with <tt>avid.</tt> are reserved and must not be
+	used for plugin-defined parameters.
+
+	\note Parameter IDs must be less than 32 characters in length (strlen of 31 or less.)
+	\sa \ref kAAX_ParameterIdentifierMaxSize
+*/
+typedef const char *	AAX_CParamID;
+/** \brief Parameter identifier used in a page table
+
+	\details May be a parameter ID or a parameter name string depending on the page table
+	formatting. Must be less than 32 characters in length (strlen of 31 or less.)
+	
+	\sa \ref subsection_parameter_identifiers in the \ref AAX_Page_Table_Guide
+*/
+typedef AAX_CParamID	AAX_CPageTableParamID;
 typedef const char *	AAX_CEffectID;      //!< URL-style Effect identifier.  Must be unique among all registered effects in the collection.
 typedef uint32_t		AAX_CInstanceID; //!< Identifier for a plug-in instance
 AAX_CONSTEXPR AAX_CInstanceID kAAX_InstanceID_Undefined = 0xFFFFFFFF; //!< Undefined instance ID
 typedef uint64_t		AAX_CInstanceGroupID; //!< Identifier for a group of instances
-AAX_CONSTEXPR AAX_CInstanceGroupID kAAX_InstanceGroupID_Undefined = 0; //!< Undefined instance group ID; instances with this ID have undefined grouping or the host does not support group identification
+/** Undefined instance group ID
+
+	Instances with this ID have undefined grouping or the host does not support group
+	identification
+*/
+AAX_CONSTEXPR AAX_CInstanceGroupID kAAX_InstanceGroupID_Undefined = 0;
 typedef uint64_t		AAX_CTaskID; //!< Identifier for a task instance
 AAX_CONSTEXPR AAX_CTaskID kAAX_TaskID_Undefined = 0; //!< Undefined task ID
 
@@ -614,6 +723,8 @@ struct AAX_CMidiStream
 	uint32_t			mBufferSize;		//!< The number of \ref AAX_CMidiPacket objects contained in the node's buffer. 
 	AAX_CMidiPacket*		mBuffer;		//!< Pointer to the first element of the node's buffer.
 };	
+
+typedef uint8_t AAX_CHostElementUID[16]; //!< Host Element Unique Identifier (UID) type
 
 #if ( defined(_WIN64) || defined(__LP64__) || defined(_TMS320C6X) )
 	#include AAX_ALIGN_FILE_BEGIN

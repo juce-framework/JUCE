@@ -101,9 +101,11 @@ public:
 	 *	Look at the \ref AAX_ENotificationEvent enumeration to see a description of events you can listen for and the
 	 *	data they come with.
 	 *
+	 *  \sa \ref AAX_IController::RegisterForNotification()
+	 *
 	 *	- \note some notifications are sent only to the plug-in GUI while other notifications are sent only to the
 	 *	  plug-in data model. If you are not seeing an expected notification, try checking the other plug-in objects'
-	 *	  \c NotificationReceived() methods.
+	 *	  \c NotificationReceived() methods, or register explicitly for the required notifications.
 	 *	- \note the host may dispatch notifications synchronously or asynchronously, and calls to this method may
 	 *	  occur concurrently on multiple threads.
 	 *
@@ -127,7 +129,7 @@ public:
 	 *	These methods are used by the %AAX host to retrieve information about the plug-in's data
 	 *	model.
 	 *	
-	 *	\n \n
+	 *	\n
 	 *	
 	 *	For information about adding parameters to the plug-in and otherwise modifying
 	 *	the plug-in's data model, see AAX_CParameterManager.  For information about parameters,
@@ -1100,6 +1102,142 @@ public:
 	 */
 	virtual AAX_Result UpdatePageTable(uint32_t inTableType, int32_t inTablePageSize, IACFUnknown* iHostUnknown, IACFUnknown* ioPageTableUnknown) const = 0;
 	//@}end Auxiliary UI methods
+};
+
+class AAX_IACFEffectParameters_V5 : public AAX_IACFEffectParameters_V4
+{
+public:
+	/** @name Parameter information
+	 */
+	//@{
+	/** \brief Retrieves whether a parameter affects a particular type of state in the effect.
+	 *
+	 *	Currently unused.
+	 *
+	 *	\param[in] iParameterID
+	 *		The ID of the parameter that is being queried.
+	 *	\param[in] iStateType
+	 *		The type of state that is being queried.
+	 *	\param[in] iQueryData
+	 *		Additional context data for the query, if any
+	 *	\param[out] oAffectsState
+	 *		True if the queried parameter affects the queried state, false otherwise
+	 *
+	 */
+	virtual AAX_Result GetParameterAffectsState(
+		AAX_CParamID iParameterID,
+		AAX_CTypeID iStateType,
+		void const * iQueryData,
+		AAX_CBoolean * oAffectsState) const = 0;
+	
+	/*!
+	 *  \brief Retrieves the ID of a parameter for a given parameter role
+	 *
+	 *	\param[out] iParameterRole
+	 *		The parameter role that is being queried
+	 *	\param[in] iQueryData
+	 *		Additional context data for the query, if any
+	 *	\param[out] oHasParameter
+	 *		Set this to zero if there is no parameter that fulfills the
+	 *		given role; otherwise set to a nonzero value
+	 *	\param[out] oParameterIDString
+	 *		The ID of the parameter that fulfills the given role
+	 *
+	 *	If no parameter fulfills the given role then set \p oHasParameter
+	 *	to zero and return \ref AAX_SUCCESS .
+	 */
+	virtual AAX_Result GetParameterWithRole(
+		AAX_CTypeID iParameterRole,
+		void const * iQueryData,
+		AAX_CBoolean * oHasParameter,
+		AAX_IString * oParameterIDString) const = 0;
+	//@}end Parameter information
+};
+
+
+class AAX_IACFEffectParameters_V6 : public AAX_IACFEffectParameters_V5
+{
+public:
+	/** @name Generic message passing
+	 */
+	/*!
+	 *  \brief Generic query function
+	 *
+	 *  This function is called by the host to retrieve information from the plugin object using well-defined
+	 *  query IDs. Data types of \c iMessageData and \c oMessageResponse depend on \c iMessageType . See the
+	 *  documentation for specific message type IDs for any additional requirements.
+	 *
+	 *  - \sa \ref AAX_IACFEffectParameters::NotificationReceived() for observer-style message passing with no
+	 *    response payload.
+	 *  - \sa \ref AAX_IACFEffectParameters::GetCustomData() for arbitrary message passing between objects of the
+	 *    same plugin.
+	 *
+	 *	\param[in] iMessageType
+	 *		Message type ID.
+	 *	\param[in] iMessageDataSize
+	 *		Size of \p iMessageData in bytes
+	 *	\param[in] iMessageData
+	 *		Message data payload
+	 *	\param[in] iResponseDataSize
+	 *		Size of \p oResponseData in bytes
+	 *	\param[out] oResponseData
+	 *		Message response payload
+	 *	\param[out] oResponseDataWritten
+	 *		Number of bytes written to \p oResponseData . Optional, may be null. The host should only check
+	 *		the information written to this argument if the method returns \ref AAX_SUCCESS .
+	 *
+	 *  - \return \ref AAX_SUCCESS if the message is handled.
+	 *  - \return \ref AAX_ERROR_UNIMPLEMENTED if the message type is unknown or otherwise not implemented.
+	 *  - \return \ref AAX_ERROR_NULL_ARGUMENT if the \p iMessageData is null but \p iMessageType requires
+	 *    non-null data, or if \p oResponseData is null but \p iMessageType requires a non-null response.
+	 *  - \return \ref AAX_ERROR_INVALID_ARGUMENT if the \p iMessageDataSize or non-null \p iMessageData does
+	 *    not match the expected data for \p iMessageType
+	 *  - \return \ref AAX_ERROR_ARGUMENT_BUFFER_OVERFLOW if \p iResponseDataSize is too small for the expected
+	 *    response data for \p iMessageType .
+	 */
+	virtual AAX_Result HandleQueryMessage(
+		AAX_CTypeID iMessageType,
+		uint32_t iMessageDataSize,
+		void const * iMessageData,
+		uint32_t iResponseDataSize,
+		void * oResponseData,
+		uint32_t * oResponseDataWritten
+	) const = 0;
+	//@}end Generic message passing
+
+	/** @name Parameter information
+	 */
+	//@{
+	/*!
+	 *  \brief Retrieves whether an automatable parameter should be automation-enabled by default
+	 *
+	 *  In general, the plugin should provide \ref AAX_eAutomationEnabledState_None for all parameters. The
+	 *  plugin should only provide a definite value if there is a need for the specific parameter to have
+	 *  its automation enabled or disabled whenever a new instance is created.
+	 *
+	 *  This is optional; the host may or may not respect the value provided by the plugin for this method.
+	 *
+	 *  \sa \ref AAX_IACFEffectParameters::GetParameterIsAutomatable() ; for example, in Pro Tools, an
+	 *  automatable parameter will be available for its automation to be enabled. Once automation is enabled
+	 *  for the parameter, the parameter may be controlled using automation.
+	 *
+	 *  If the plugin provides \c false to
+	 *  \ref AAX_IACFEffectParameters::GetParameterIsAutomatable() "GetParameterIsAutomatable()" for a
+	 *  parameter then the value provided by this method will be ignored for the parameter.
+	 *
+	 *  \param[in] iParameterID
+	 *		The ID of the parameter that is being queried.
+	 *	\param[out] oAutomationEnabledState
+	 *		One of \ref AAX_EAutomationEnabledState indicating the preferred default automation-enabled state
+	 *		for the parameter, or \ref AAX_eAutomationEnabledState_None if there is no preference.
+	 *
+	 *  \compatibility This function is not currently supported by any %AAX host
+	 */
+	virtual AAX_Result GetParameterDefaultAutomationEnabledState(
+		AAX_CParamID iParameterID,
+		/* AAX_EAutomationEnabledState */ int32_t * oAutomationEnabledState
+	) const = 0;
+	//@}end Parameter information
 };
 
 #ifdef __clang__

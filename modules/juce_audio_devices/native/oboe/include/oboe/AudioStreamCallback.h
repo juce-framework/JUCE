@@ -170,6 +170,103 @@ public:
 };
 
 /**
+ * AudioStreamPresentationCallback defines a callback interface for
+ * being notified when a data presentation event is filed.
+ *
+ * It is used with AudioStreamBuilder::setPresentationCallback().
+ */
+class AudioStreamPresentationCallback {
+public:
+    virtual ~AudioStreamPresentationCallback() = default;
+
+    /**
+     * This will be called when all the buffers of an offloaded
+     * stream that were queued in the audio system (e.g. the
+     * combination of the Android audio framework and the device's
+     * audio hardware) have been played.
+     *
+     * @param audioStream pointer to the associated stream
+     */
+    virtual void onPresentationEnded(AudioStream* /* audioStream */) {}
+};
+
+/**
+ * AudioStreamPartialDataCallback defines a callback interface for
+ * moving data to/from an audio stream using `onAudioReady`
+ *
+ * It is used with AudioStreamBuilder::setPartialDataCallback(). The only difference
+ * between AudioStreamPartialDataCallback and AudioStreamDataCallback is that the
+ * AudioStreamPartialDataCallback allows apps to only process part of the requested
+ * data.
+ *
+ * Note that Android only support partial data callback from aaudio API at
+ * API level 37. In that case, when partial data callback is set on the Android
+ * device that is not supporting partial data callback API, apps must process all
+ * the requested data to avoid data lost.
+ *
+ * Call OboeExtensions::isPartialDataCallbackSupported() to check if partial data callback
+ * is supported by the device or not.
+ */
+class AudioStreamPartialDataCallback {
+public:
+    virtual ~AudioStreamPartialDataCallback() = default;
+
+    /**
+     * A buffer is ready for processing. If the client cannot process all the provided/requested
+     * data, returns a number to indicate the actual processed frames.
+     *
+     * For an output stream, this function should render and write at most numFrames of data
+     * in the stream's current data format to the audioData buffer.
+     *
+     * For an input stream, this function should read and process at most numFrames of data
+     * from the audioData buffer.
+     *
+     * The audio data is passed through the buffer. So do NOT call read() or
+     * write() on the stream that is making the callback.
+     *
+     * Note that numFrames can vary unless AudioStreamBuilder::setFramesPerCallback()
+     * is called. If AudioStreamBuilder::setFramesPerCallback() is NOT called then
+     * numFrames should always be <= AudioStream::getFramesPerBurst().
+     *
+     * Also note that this callback function should be considered a "real-time" function.
+     * It must not do anything that could cause an unbounded delay because that can cause the
+     * audio to glitch or pop.
+     *
+     * These are things the function should NOT do:
+     * <ul>
+     * <li>allocate memory using, for example, malloc() or new</li>
+     * <li>any file operations such as opening, closing, reading or writing</li>
+     * <li>any network operations such as streaming</li>
+     * <li>use any mutexes or other synchronization primitives</li>
+     * <li>sleep</li>
+     * <li>oboeStream->stop(), pause(), flush() or close()</li>
+     * <li>oboeStream->read()</li>
+     * <li>oboeStream->write()</li>
+     * </ul>
+     *
+     * The following are OK to call from the data callback:
+     * <ul>
+     * <li>oboeStream->get*()</li>
+     * <li>oboe::convertToText()</li>
+     * <li>oboeStream->setBufferSizeInFrames()</li>
+     * </ul>
+     *
+     * If you need to move data, eg. MIDI commands, in or out of the callback function then
+     * we recommend the use of non-blocking techniques such as an atomic FIFO.
+     *
+     * @param audioStream pointer to the associated stream
+     * @param audioData buffer containing input data or a place to put output data
+     * @param numFrames number of frames to be processed
+     * @return the actual processed data frames, must be within range of [0, numFrames].
+     *         Returning a negative number will stop the stream.
+     */
+    virtual int32_t onPartialAudioReady(
+            AudioStream *audioStream,
+            void *audioData,
+            int32_t numFrames) = 0;
+};
+
+/**
  * AudioStreamCallback defines a callback interface for:
  *
  * 1) moving data to/from an audio stream using `onAudioReady`

@@ -199,6 +199,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_EnumHelpers_test.cpp">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_OrderedContainerHelpers_test.cpp">
+      <Filter>JUCE Modules\juce_core\misc</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_Result.cpp">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClCompile>
@@ -397,6 +400,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPool.cpp">
       <Filter>JUCE Modules\juce_core\threads</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPoolJob.cpp">
+      <Filter>JUCE Modules\juce_core\threads</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_TimeSliceThread.cpp">
       <Filter>JUCE Modules\juce_core\threads</Filter>
     </ClCompile>
@@ -472,10 +478,16 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\juce_core_CompilationTime.cpp">
       <Filter>JUCE Modules\juce_core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\juce_core_zlib.c">
+      <Filter>JUCE Modules\juce_core</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_core_CompilationTime.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_core_zlib.c">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
   </ItemGroup>
@@ -549,6 +561,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_CallbackListenerList.h">
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_FunctionPointerDestructor.h">
+      <Filter>JUCE Modules\juce_core\detail</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_IncrementRef.h">
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
@@ -556,6 +571,9 @@
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_NativeFileHandle.h">
+      <Filter>JUCE Modules\juce_core\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_ThreadPoolLambdaJob.h">
       <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_AndroidDocument.h">
@@ -897,6 +915,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPool.h">
       <Filter>JUCE Modules\juce_core\threads</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPoolJob.h">
+      <Filter>JUCE Modules\juce_core\threads</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_TimeSliceThread.h">
       <Filter>JUCE Modules\juce_core\threads</Filter>
     </ClInclude>
@@ -910,6 +931,12 @@
       <Filter>JUCE Modules\juce_core\time</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\time\juce_Time.h">
+      <Filter>JUCE Modules\juce_core\time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\time\juce_TimedDiagnostic.h">
+      <Filter>JUCE Modules\juce_core\time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\time\juce_TimeUnits.h">
       <Filter>JUCE Modules\juce_core\time</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\unit_tests\juce_UnitTest.h">
@@ -980,7 +1007,7 @@
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt">
       <Filter>JUCE Modules\juce_core\native\java</Filter>
     </None>
-    <None Include="..\..\..\..\modules\juce_core\zip\zlib\JUCE_CHANGES.txt">
+    <None Include="..\..\..\..\modules\juce_core\zip\zlib\JUCE_UPSTREAM.txt">
       <Filter>JUCE Modules\juce_core\zip\zlib</Filter>
     </None>
   </ItemGroup>

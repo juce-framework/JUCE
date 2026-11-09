@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -390,15 +390,10 @@ void LookAndFeel_V4::changeToggleButtonWidthToFitText (ToggleButton& button)
 }
 
 //==============================================================================
-AlertWindow* LookAndFeel_V4::createAlertWindow (const String& title, const String& message,
-                                                const String& button1, const String& button2, const String& button3,
-                                                MessageBoxIconType iconType,
-                                                int numButtons, Component* associatedComponent)
+std::unique_ptr<AlertWindow> LookAndFeel_V4::createAlertWindowForOptions (const MessageBoxOptions& opt)
 {
     auto boundsOffset = 50;
-
-    auto* aw = LookAndFeel_V2::createAlertWindow (title, message, button1, button2, button3,
-                                                  iconType, numButtons, associatedComponent);
+    auto aw = LookAndFeel_V2::createAlertWindowForOptions (opt);
 
     auto bounds = aw->getBounds();
     bounds = bounds.withSizeKeepingCentre (bounds.getWidth() + boundsOffset, bounds.getHeight() + boundsOffset);

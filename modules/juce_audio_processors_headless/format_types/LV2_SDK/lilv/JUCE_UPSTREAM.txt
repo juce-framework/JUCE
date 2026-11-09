@@ -1,0 +1,16 @@
+Upstream: https://drobilla.net/software/lilv.html
+Version: 0.24.12
+
+Files not strictly required to build the library, including the generated
+config headers, have been removed. A handwritten lilv_config.h is provided in
+the parent directory, alongside juce_lv2_config.h which defines the library
+version. Remember to update the versions in the config headers if you ever
+update the library versions.
+
+The include of dlfcn.h has been removed from src/world.c.
+
+A leak of world->opt.lv2_path when calling lilv_world_set_option multiple times
+has been fixed.
+
+A leak of plugin classes when calling lilv_world_load_plugin_classes multiple
+times has been fixed.

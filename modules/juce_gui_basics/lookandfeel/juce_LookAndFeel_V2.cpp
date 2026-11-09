@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -393,37 +393,57 @@ void LookAndFeel_V2::drawDrawableButton (Graphics& g, DrawableButton& button,
 }
 
 //==============================================================================
-AlertWindow* LookAndFeel_V2::createAlertWindow (const String& title, const String& message,
-                                                const String& button1, const String& button2, const String& button3,
-                                                MessageBoxIconType iconType,
-                                                int numButtons, Component* associatedComponent)
+std::unique_ptr<AlertWindow> LookAndFeel_V2::createAlertWindowForOptions (const MessageBoxOptions& opt)
 {
-    AlertWindow* aw = new AlertWindow (title, message, iconType, associatedComponent);
+    auto aw = std::make_unique<AlertWindow> (opt.getTitle(),
+                                             opt.getMessage(),
+                                             opt.getIconType(),
+                                             opt.getAssociatedComponent());
 
-    if (numButtons == 1)
+    aw->setEscapeKeyCancels (opt.getNumButtons() == 0);
+
+    if (opt.getNumButtons() == 0)
+        return aw;
+
+    // If this is hit, your alert window has duplicate result codes!
+    jassert (opt.areAllResultCodesUnique());
+
+    if (opt.getNumButtons() == 1)
     {
-        aw->addButton (button1, 0,
-                       KeyPress (KeyPress::escapeKey),
+        const auto& button = opt.getButtons().front();
+        const auto cancelRole = button.getRole() == MessageBoxButtonRole::cancel;
+        aw->addButton (button.getText(),
+                       button.getCode(),
+                       cancelRole ? KeyPress (KeyPress::escapeKey) : KeyPress{},
                        KeyPress (KeyPress::returnKey));
-    }
-    else
-    {
-        const KeyPress button1ShortCut ((int) CharacterFunctions::toLowerCase (button1[0]), 0, 0);
-        KeyPress button2ShortCut ((int) CharacterFunctions::toLowerCase (button2[0]), 0, 0);
-        if (button1ShortCut == button2ShortCut)
-            button2ShortCut = KeyPress();
 
-        if (numButtons == 2)
+        return aw;
+    }
+
+    const auto& buttons = opt.getButtons();
+
+    const auto buttonOrder = detail::AlertWindowHelpers::getSuggestedButtonOrder (opt);
+
+    std::set<juce_wchar> uniqueShortcuts;
+
+    for (const auto& value : buttonOrder)
+    {
+        const auto& button = buttons[(size_t) value];
+        const auto shortcut = CharacterFunctions::toLowerCase (button.getText()[0]);
+        const auto mnemonic = uniqueShortcuts.insert (shortcut).second ? KeyPress ((int) shortcut, 0, 0) : KeyPress();
+
+        const auto actionKey = std::invoke ([&]
         {
-            aw->addButton (button1, 1, KeyPress (KeyPress::returnKey), button1ShortCut);
-            aw->addButton (button2, 0, KeyPress (KeyPress::escapeKey), button2ShortCut);
-        }
-        else if (numButtons == 3)
-        {
-            aw->addButton (button1, 1, button1ShortCut);
-            aw->addButton (button2, 2, button2ShortCut);
-            aw->addButton (button3, 0, KeyPress (KeyPress::escapeKey));
-        }
+            if (button.isPreferredAction())
+                return KeyPress (KeyPress::returnKey);
+
+            if (button.getRole() == MessageBoxButtonRole::cancel)
+                return KeyPress (KeyPress::escapeKey);
+
+            return KeyPress();
+        });
+
+        aw->addButton (button.getText(), button.getCode(), mnemonic, actionKey);
     }
 
     return aw;
@@ -2469,14 +2489,14 @@ Button* LookAndFeel_V2::createTabBarExtrasButton()
     dp.setFill (Colour (0x59000000));
 
     DrawableComposite normalImage;
-    normalImage.addAndMakeVisible (ellipse.createCopy().release());
-    normalImage.addAndMakeVisible (dp.createCopy().release());
+    normalImage.addChild (ellipse.createCopy());
+    normalImage.addChild (dp.createCopy());
 
     dp.setFill (Colour (0xcc000000));
 
     DrawableComposite overImage;
-    overImage.addAndMakeVisible (ellipse.createCopy().release());
-    overImage.addAndMakeVisible (dp.createCopy().release());
+    overImage.addChild (ellipse.createCopy());
+    overImage.addChild (dp.createCopy());
 
     auto db = new DrawableButton (TRANS ("Additional Items"), DrawableButton::ImageFitted);
     db->setImages (&normalImage, &overImage, nullptr);
@@ -2820,9 +2840,7 @@ void LookAndFeel_V2::layoutFileBrowserComponent (FileBrowserComponent& browserCo
 //==============================================================================
 static std::unique_ptr<Drawable> createDrawableFromSVG (const char* data)
 {
-    auto xml = parseXML (data);
-    jassert (xml != nullptr);
-    return Drawable::createFromSVG (*xml);
+    return Drawable::createFromSVGString (data);
 }
 
 const Drawable* LookAndFeel_V2::getDefaultFolderImage()

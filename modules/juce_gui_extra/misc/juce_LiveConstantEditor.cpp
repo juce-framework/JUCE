@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -416,7 +416,7 @@ struct ColourEditorComp final : public Component,
         colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
         colourSelector->setSize (300, 400);
 
-        CallOutBox::launchAsynchronously (std::move (colourSelector), getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (std::move (colourSelector), *this, nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override

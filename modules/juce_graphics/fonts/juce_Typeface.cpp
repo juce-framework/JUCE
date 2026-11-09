@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -140,119 +140,31 @@ using HbDrawFuncs = JUCE_HB_PTR_TYPE (draw_funcs);
 
 #undef JUCE_HB_PTR_TYPE
 
-//==============================================================================
-#if JUCE_MAC || JUCE_IOS
-template <CTFontOrientation orientation>
-void getAdvancesForGlyphs (hb_font_t* hbFont, CTFontRef ctFont, Span<const CGGlyph> glyphs, Span<CGSize> advances)
+struct TypefaceVerticalMetrics
 {
-    jassert (glyphs.size() == advances.size());
+    TypefaceVerticalMetrics() = default;
 
-    int x, y;
-    hb_font_get_scale (hbFont, &x, &y);
-    const auto scaleAdjustment = HbScale::hbToJuce (orientation == kCTFontOrientationHorizontal ? x : y) / CTFontGetSize (ctFont);
-
-    CTFontGetAdvancesForGlyphs (ctFont, orientation, std::data (glyphs), std::data (advances), (CFIndex) std::size (glyphs));
-
-    for (auto& advance : advances)
-        (orientation == kCTFontOrientationHorizontal ? advance.width : advance.height) *= scaleAdjustment;
-}
-
-template <CTFontOrientation orientation>
-static auto getAdvanceFn()
-{
-    return [] (hb_font_t* f, void*, hb_codepoint_t glyph, void* voidFontRef) -> hb_position_t
+    TypefaceVerticalMetrics (float ascentIn, float descentIn, float lineGapIn)
+        : ascent (ascentIn),
+          descent (descentIn),
+          lineGap (lineGapIn)
     {
-        auto* fontRef = static_cast<CTFontRef> (voidFontRef);
+    }
 
-        const CGGlyph glyphs[] { (CGGlyph) glyph };
-        CGSize advances[std::size (glyphs)]{};
-        getAdvancesForGlyphs<orientation> (f, fontRef, glyphs, advances);
-
-        return HbScale::juceToHb ((float) (orientation == kCTFontOrientationHorizontal ? advances->width : advances->height));
-    };
-}
-
-template <CTFontOrientation orientation>
-static auto getAdvancesFn()
-{
-    return [] (hb_font_t* f,
-               void*,
-               unsigned int count,
-               const hb_codepoint_t* firstGlyph,
-               unsigned int glyphStride,
-               hb_position_t* firstAdvance,
-               unsigned int advanceStride,
-               void* voidFontRef)
-    {
-        auto* fontRef = static_cast<CTFontRef> (voidFontRef);
-
-        std::vector<CGGlyph> glyphs (count);
-
-        for (auto [index, glyph] : enumerate (glyphs))
-            glyph = (CGGlyph) *addBytesToPointer (firstGlyph, glyphStride * index);
-
-        std::vector<CGSize> advances (count);
-
-        getAdvancesForGlyphs<orientation> (f, fontRef, glyphs, advances);
-
-        for (auto [index, advance] : enumerate (advances))
-            *addBytesToPointer (firstAdvance, advanceStride * index) = HbScale::juceToHb ((float) (orientation == kCTFontOrientationHorizontal ? advance.width : advance.height));
-    };
-}
-
-/*  This function overrides the callbacks that fetch glyph advances for fonts on macOS.
-    The built-in OpenType glyph metric callbacks that HarfBuzz uses by default for fonts such as
-    "Apple Color Emoji" don't always return correct advances, resulting in emoji that may overlap
-    with subsequent characters. This may be to do with ignoring the 'trak' table, but I'm not an
-    expert, so I'm not sure!
-
-    In any case, using CTFontGetAdvancesForGlyphs produces much nicer advances for emoji on Apple
-    platforms, as long as the CTFont is set to the size that will eventually be rendered.
-
-    This might need a bit of testing to make sure that it correctly handles advances for
-    custom (non-Apple?) fonts.
-
-    @param hb       a hb_font_t to update with Apple-specific advances
-    @param fontRef  the CTFontRef (normally with a custom point size) that will be queried when computing advances
-*/
-static void overrideCTFontAdvances (hb_font_t* hb, CTFontRef fontRef)
-{
-    HbFontFuncs funcs { hb_font_funcs_create(), IncrementRef::no };
-
-    // We pass the CTFontRef as user data to each of these functions.
-    // We don't pass a custom destructor for the user data, as that will be handled by the custom
-    // destructor for the hb_font_funcs_t.
-    hb_font_funcs_set_glyph_h_advance_func  (funcs.get(), getAdvanceFn <kCTFontOrientationHorizontal>(), (void*) fontRef, nullptr);
-    hb_font_funcs_set_glyph_v_advance_func  (funcs.get(), getAdvanceFn <kCTFontOrientationVertical>(),   (void*) fontRef, nullptr);
-    hb_font_funcs_set_glyph_h_advances_func (funcs.get(), getAdvancesFn<kCTFontOrientationHorizontal>(), (void*) fontRef, nullptr);
-    hb_font_funcs_set_glyph_v_advances_func (funcs.get(), getAdvancesFn<kCTFontOrientationVertical>(),   (void*) fontRef, nullptr);
-
-    // We want to keep a copy of the font around so that all of our custom callbacks can query it,
-    // so retain it here and release it once the custom functions are no longer in use.
-    jassert (fontRef != nullptr);
-    CFRetain (fontRef);
-
-    hb_font_set_funcs (hb, funcs.get(), (void*) fontRef, [] (void* ptr)
-    {
-        CFRelease ((CTFontRef) ptr);
-    });
-}
-#endif
-
-struct TypefaceAscentDescent
-{
     float ascent{};  // in em units
     float descent{}; // in em units
+    float lineGap{}; // in em units
 
     float getScaledAscent()  const { return ascent  * getHeightToPointsFactor(); }
     float getScaledDescent() const { return descent * getHeightToPointsFactor(); }
+    float getScaledLineGap() const { return lineGap * getHeightToPointsFactor(); }
 
     float getPointsToHeightFactor() const { return ascent + descent; }
     float getHeightToPointsFactor() const { return 1.0f / getPointsToHeightFactor(); }
 
     TypefaceMetrics getTypefaceMetrics() const
     {
-        return { getScaledAscent(), getHeightToPointsFactor() };
+        return { getScaledAscent(), getHeightToPointsFactor(), getScaledLineGap() };
     }
 };
 
@@ -262,27 +174,331 @@ struct TypefaceFallbackColourGlyphSupport
     virtual std::vector<GlyphLayer> getFallbackColourGlyphLayers (int, const AffineTransform&) const = 0;
 };
 
+//==============================================================================
+class VariableAxisRegistry
+{
+public:
+    explicit VariableAxisRegistry (hb_font_t* font)
+    {
+        auto* face = hb_font_get_face (font);
+        const auto hbVarInfos = std::invoke ([face]
+        {
+            auto count = hb_ot_var_get_axis_count (face);
+            std::vector<hb_ot_var_axis_info_t> infos (count);
+            hb_ot_var_get_axis_infos (face, 0, &count, infos.data());
+            return infos;
+        });
+
+        indexMap.resize (hbVarInfos.size());
+        std::iota (indexMap.begin(), indexMap.end(), 0);
+        std::sort (indexMap.begin(), indexMap.end(), [&] (auto leftIndex, auto rightIndex)
+        {
+            return hbVarInfos[leftIndex].tag < hbVarInfos[rightIndex].tag;
+        });
+
+        tags.reserve (hbVarInfos.size());
+        axes.reserve (hbVarInfos.size());
+
+        for (auto index : indexMap)
+        {
+            tags.emplace_back ((uint32) hbVarInfos[index].tag);
+            axes.push_back ({ hbVarInfos[index].default_value,
+                              Range { hbVarInfos[index].min_value,
+                                      hbVarInfos[index].max_value } });
+        }
+
+        const auto instanceCount = hb_ot_var_get_named_instance_count (face);
+
+        for (size_t i = 0; i < instanceCount; ++i)
+        {
+            auto instanceSettings = std::invoke ([i, face]
+            {
+                std::vector<FontVariableSetting> variables;
+                auto numAxis = hb_ot_var_get_axis_count (face);
+
+                if (numAxis <= 0)
+                    return variables;
+
+                std::vector<float> coords (numAxis);
+                std::vector<hb_ot_var_axis_info_t> info (numAxis);
+                hb_ot_var_get_axis_infos (face, 0, &numAxis, info.data());
+
+                const auto numCoords = hb_ot_var_named_instance_get_design_coords (face,
+                                                                                   (unsigned int) i,
+                                                                                   &numAxis,
+                                                                                   coords.data());
+
+                variables.reserve (numCoords);
+
+                for (unsigned int j = 0; j < numCoords; ++j)
+                    variables.emplace_back (FontFeatureTag { (uint32) info[j].tag }, coords[j]);
+
+                std::sort (variables.begin(),
+                           variables.end(),
+                           FontComparators::VariableSettingComparator{});
+
+                return variables;
+            });
+
+            const auto instanceName = std::invoke ([&]
+            {
+                const auto id = hb_ot_var_named_instance_get_subfamily_name_id (face, (unsigned int) i);
+                const auto genuineName = getHbOtName (face, id);
+                return genuineName.isNotEmpty() ? genuineName : "Instance " + String ((int) i);
+            });
+
+            if (instances.emplace (instanceName, std::move (instanceSettings)).second)
+                instanceNames.push_back (instanceName);
+        }
+    }
+
+    Span<const FontFeatureTag> getSupportedVariables() const { return tags; }
+
+    std::vector<FontVariableSetting> sanitiseVariables (Span<const FontVariableSetting> userVariables) const
+    {
+        std::vector<FontVariableSetting> sanitised;
+        sanitised.reserve (userVariables.size());
+
+        for (auto var : userVariables)
+        {
+            if (auto range = getRangeForVariable (var.tag))
+            {
+                sanitised.push_back ({ var.tag, range->clipValue (var.value) });
+            }
+        }
+
+        std::sort (sanitised.begin(),
+                   sanitised.end(),
+                   FontComparators::VariableSettingComparator{});
+
+        return sanitised;
+    }
+
+    std::optional<float> getDefaultValueForVariable (FontFeatureTag tag) const
+    {
+        if (auto index = getIndex (tag))
+            return axes[*index].defaultValue;
+
+        return std::nullopt;
+    }
+
+    std::optional<Range<float>> getRangeForVariable (FontFeatureTag tag) const
+    {
+        if (auto index = getIndex (tag))
+            return axes[*index].range;
+
+        return std::nullopt;
+    }
+
+    Span<const String> getInstanceNames() const
+    {
+        return instanceNames;
+    }
+
+    Span<const FontVariableSetting> getNamedInstanceConfiguration (StringRef instanceName) const
+    {
+        auto iter = instances.find (instanceName);
+        return iter != instances.end() ? iter->second : Span<const FontVariableSetting>{};
+    }
+
+    std::optional<size_t> getOriginalIndexForTag (FontFeatureTag tag) const
+    {
+        if (auto index = getIndex (tag))
+            return std::make_optional (indexMap[*index]);
+
+        return std::nullopt;
+    }
+
+    static String getHbOtName (hb_face_t* face, hb_ot_name_id_t id)
+    {
+        auto length = hb_ot_name_get_utf8 (face, id, {}, {}, {}) + 1;
+        std::vector<char> buffer (length);
+        hb_ot_name_get_utf8 (face, id, {}, &length, buffer.data());
+        return String { CharPointer_UTF8 { buffer.data() } };
+    }
+
+private:
+    std::optional<size_t> getIndex (FontFeatureTag tag) const
+    {
+        auto iter = OrderedContainerHelpers::find (tags, tag);
+
+        if (iter != tags.end())
+            return std::make_optional ((size_t) std::distance (tags.begin(), iter));
+
+        return std::nullopt;
+    }
+
+    struct Axis
+    {
+        float defaultValue;
+        Range<float> range;
+    };
+
+    std::vector<FontFeatureTag> tags;
+    std::vector<Axis> axes;
+    std::vector<size_t> indexMap;
+
+    // We 'store' the names twice to allow for Span access to the names only.
+    std::vector<String> instanceNames;
+    std::map<String, std::vector<FontVariableSetting>> instances;
+
+    JUCE_DECLARE_NON_COPYABLE (VariableAxisRegistry)
+    JUCE_DECLARE_NON_MOVEABLE (VariableAxisRegistry)
+};
+
+// This is used by the D2D renderer to extract a font face from the JUCE typeface object.
+class WindowsDirectWriteTypeface;
+
 struct TypefaceNativeOptions
 {
     HbFont font;
-    TypefaceAscentDescent metrics;
+    TypefaceVerticalMetrics metrics;
+    std::vector<FontVariableSetting> variables{};
     TypefaceFallbackColourGlyphSupport* colourGlyphSupport{};
+    WindowsDirectWriteTypeface* windowsDirectWriteTypeface{};
+    std::shared_ptr<VariableAxisRegistry> existingRegistry{};
 };
+
+#if JUCE_MAC || JUCE_IOS
+struct TypefaceCTFontUtils
+{
+    TypefaceCTFontUtils() = delete;
+
+    template <CTFontOrientation orientation>
+    static void getAdvancesForGlyphs (hb_font_t* hbFont, CTFontRef ctFont, Span<const CGGlyph> glyphs, Span<CGSize> advances)
+    {
+        jassert (glyphs.size() == advances.size());
+
+        int x, y;
+        hb_font_get_scale (hbFont, &x, &y);
+        const auto scaleAdjustment = HbScale::hbToJuce (orientation == kCTFontOrientationHorizontal ? x : y) / CTFontGetSize (ctFont);
+
+        CTFontGetAdvancesForGlyphs (ctFont, orientation, std::data (glyphs), std::data (advances), (CFIndex) std::size (glyphs));
+
+        for (auto& advance : advances)
+            (orientation == kCTFontOrientationHorizontal ? advance.width : advance.height) *= scaleAdjustment;
+    }
+
+    template <CTFontOrientation orientation>
+    [[nodiscard]] static auto getAdvanceFn()
+    {
+        return [] (hb_font_t* f, void*, hb_codepoint_t glyph, void* voidFontRef) -> hb_position_t
+        {
+            auto* fontRef = static_cast<CTFontRef> (voidFontRef);
+
+            const CGGlyph glyphs[] { (CGGlyph) glyph };
+            CGSize advances[std::size (glyphs)]{};
+            getAdvancesForGlyphs<orientation> (f, fontRef, glyphs, advances);
+
+            return HbScale::juceToHb ((float) (orientation == kCTFontOrientationHorizontal ? advances->width : advances->height));
+        };
+    }
+
+    template <CTFontOrientation orientation>
+    [[nodiscard]] static auto getAdvancesFn()
+    {
+        return [] (hb_font_t* f,
+                   void*,
+                   unsigned int count,
+                   const hb_codepoint_t* firstGlyph,
+                   unsigned int glyphStride,
+                   hb_position_t* firstAdvance,
+                   unsigned int advanceStride,
+                   void* voidFontRef)
+        {
+            auto* fontRef = static_cast<CTFontRef> (voidFontRef);
+
+            std::vector<CGGlyph> glyphs (count);
+
+            for (auto [index, glyph] : enumerate (glyphs))
+                glyph = (CGGlyph) *addBytesToPointer (firstGlyph, glyphStride * index);
+
+            std::vector<CGSize> advances (count);
+
+            getAdvancesForGlyphs<orientation> (f, fontRef, glyphs, advances);
+
+            for (auto [index, advance] : enumerate (advances))
+                *addBytesToPointer (firstAdvance, advanceStride * index) = HbScale::juceToHb ((float) (orientation == kCTFontOrientationHorizontal ? advance.width : advance.height));
+        };
+    }
+
+    /*  This function overrides the callbacks that fetch glyph advances for fonts on macOS.
+        The built-in OpenType glyph metric callbacks that HarfBuzz uses by default for fonts such as
+        "Apple Color Emoji" don't always return correct advances, resulting in emoji that may overlap
+        with subsequent characters. This may be to do with ignoring the 'trak' table, but I'm not an
+        expert, so I'm not sure!
+
+        In any case, using CTFontGetAdvancesForGlyphs produces much nicer advances for emoji on Apple
+        platforms, as long as the CTFont is set to the size that will eventually be rendered.
+
+        This might need a bit of testing to make sure that it correctly handles advances for
+        custom (non-Apple?) fonts.
+
+        @param hb       a hb_font_t to update with Apple-specific advances
+        @param fontRef  the CTFontRef (normally with a custom point size) that will be queried when computing advances
+    */
+    static void overrideCTFontAdvances (hb_font_t* hb, CTFontRef fontRef)
+    {
+        HbFontFuncs funcs { hb_font_funcs_create(), IncrementRef::no };
+
+        // We pass the CTFontRef as user data to each of these functions.
+        // We don't pass a custom destructor for the user data, as that will be handled by the custom
+        // destructor for the hb_font_funcs_t.
+        hb_font_funcs_set_glyph_h_advance_func  (funcs.get(), getAdvanceFn <kCTFontOrientationHorizontal>(), (void*) fontRef, nullptr);
+        hb_font_funcs_set_glyph_v_advance_func  (funcs.get(), getAdvanceFn <kCTFontOrientationVertical>(),   (void*) fontRef, nullptr);
+        hb_font_funcs_set_glyph_h_advances_func (funcs.get(), getAdvancesFn<kCTFontOrientationHorizontal>(), (void*) fontRef, nullptr);
+        hb_font_funcs_set_glyph_v_advances_func (funcs.get(), getAdvancesFn<kCTFontOrientationVertical>(),   (void*) fontRef, nullptr);
+
+        // We want to keep a copy of the font around so that all of our custom callbacks can query it,
+        // so retain it here and release it once the custom functions are no longer in use.
+        jassert (fontRef != nullptr);
+        CFRetain (fontRef);
+
+        hb_font_set_funcs (hb, funcs.get(), (void*) fontRef, [] (void* ptr)
+        {
+            CFRelease ((CTFontRef) ptr);
+        });
+    }
+};
+#endif
 
 class Typeface::Native
 {
 public:
+    static String getTypefaceName (hb_face_t* face)
+    {
+        if (auto x = VariableAxisRegistry::getHbOtName (face, HB_OT_NAME_ID_TYPOGRAPHIC_FAMILY); x.isNotEmpty())
+            return x;
+
+        return VariableAxisRegistry::getHbOtName (face, HB_OT_NAME_ID_FONT_FAMILY);
+    }
+
+    static String getTypefaceStyle (hb_face_t* face)
+    {
+        if (auto x = VariableAxisRegistry::getHbOtName (face, HB_OT_NAME_ID_TYPOGRAPHIC_SUBFAMILY); x.isNotEmpty())
+            return x;
+
+        return VariableAxisRegistry::getHbOtName (face, HB_OT_NAME_ID_FONT_SUBFAMILY);
+    }
+
     explicit Native (TypefaceNativeOptions options)
         : font (std::move (options.font)),
           nonPortable (options.metrics),
-          colourGlyphSupport (options.colourGlyphSupport)
+          colourGlyphSupport (options.colourGlyphSupport),
+          variableRegistry (options.existingRegistry != nullptr ? options.existingRegistry
+                                                                : std::make_shared<VariableAxisRegistry> (getFont())),
+          configuredVariables (std::move (options.variables)),
+          dwriteFace (options.windowsDirectWriteTypeface)
     {
+        configureHarfbuzzFontVariables (getFont(), configuredVariables);
     }
 
     // Returns the backing HarfBuzz font with a size of 1 pt (i.e. 1 pt per em).
     hb_font_t* getFont() const { return font.get(); }
 
-    TypefaceAscentDescent getAscentDescent (TypefaceMetricsKind kind) const
+    [[nodiscard]] std::shared_ptr<VariableAxisRegistry> getVariableRegistry() const { return variableRegistry; }
+
+    TypefaceVerticalMetrics getAscentDescent (TypefaceMetricsKind kind) const
     {
         switch (kind)
         {
@@ -320,7 +536,7 @@ public:
             hb_font_set_scale (subFont.get(), HbScale::juceToHb (p * h), HbScale::juceToHb (p));
 
            #if JUCE_MAC || JUCE_IOS
-            overrideCTFontAdvances (subFont.get(), hb_coretext_font_get_ct_font (subFont.get()));
+            TypefaceCTFontUtils::overrideCTFontAdvances (subFont.get(), hb_coretext_font_get_ct_font (subFont.get()));
            #endif
 
             return subFont;
@@ -336,10 +552,54 @@ public:
         return colourGlyphSupport->getFallbackColourGlyphLayers (glyph, transform);
     }
 
+    [[nodiscard]] Span<const FontVariableSetting> getConfiguredVariables() const&& = delete;
+    [[nodiscard]] Span<const FontVariableSetting> getConfiguredVariables() const&
+    {
+        return configuredVariables;
+    }
+
+    HbBlob getBlob() const
+    {
+        auto face = hb_font_get_face (getFont());
+        return HbBlob { hb_face_reference_blob (face), IncrementRef::no };
+    }
+
+    WindowsDirectWriteTypeface* getWindowsDirectWriteTypeface() const
+    {
+        return dwriteFace;
+    }
+
+    String getTypefaceName() const
+    {
+        return getTypefaceName (hb_font_get_face (font.get()));
+    }
+
+    String getTypefaceStyle() const
+    {
+        return getTypefaceStyle (hb_font_get_face (font.get()));
+    }
+
 private:
+    static void configureHarfbuzzFontVariables (hb_font_t* font,
+                                                Span<const FontVariableSetting> settings)
+    {
+        std::vector<hb_variation_t> hbVars;
+        hbVars.reserve (settings.size());
+
+        std::transform (settings.begin(),
+                        settings.end(),
+                        std::back_inserter (hbVars),
+                        [] (FontVariableSetting setting)
+        {
+            return hb_variation_t { setting.tag.getTag(), setting.value };
+        });
+
+        hb_font_set_variations (font, hbVars.data(), (unsigned int) hbVars.size());
+    }
+
     HbFont font;
-    TypefaceAscentDescent nonPortable;
-    TypefaceAscentDescent portable = std::invoke ([&]
+    TypefaceVerticalMetrics nonPortable;
+    TypefaceVerticalMetrics portable = std::invoke ([&]
     {
         hb_font_extents_t extents{};
 
@@ -348,16 +608,261 @@ private:
 
         const auto ascent  = std::abs ((float) extents.ascender);
         const auto descent = std::abs ((float) extents.descender);
+        const auto lineGap = std::abs ((float) extents.line_gap);
         const auto upem    = (float) hb_face_get_upem (hb_font_get_face (font.get()));
 
-        TypefaceAscentDescent result;
-        result.ascent  = ascent  / upem;
-        result.descent = descent / upem;
-        return result;
+        return TypefaceVerticalMetrics { ascent / upem, descent / upem, lineGap / upem };
     });
     TypefaceFallbackColourGlyphSupport* colourGlyphSupport;
     mutable LruCache<std::tuple<float, float>, HbFont> subFontCache;
     mutable LruCache<hb_codepoint_t, std::optional<hb_glyph_extents_t>, 512> glyphExtentsCache;
+
+    std::shared_ptr<VariableAxisRegistry> variableRegistry;
+    std::vector<FontVariableSetting> configuredVariables;
+    WindowsDirectWriteTypeface* dwriteFace;
+};
+
+struct TypefaceUtils
+{
+    TypefaceUtils() = delete;
+
+    [[nodiscard]] static Path getGlyphPathInGlyphUnits (hb_codepoint_t glyph, hb_font_t* font)
+    {
+        static const auto funcs = getPathDrawFuncs();
+
+        Path result;
+        hb_font_draw_glyph (font, glyph, funcs.get(), &result);
+        return result;
+    }
+
+    [[nodiscard]] static AffineTransform getGlyphUnitsToEmTransform (hb_font_t* font)
+    {
+        const auto scale = 1.0f / (float) hb_face_get_upem (hb_font_get_face (font));
+        return AffineTransform::scale (scale, -scale);
+    }
+
+    [[nodiscard]] static std::vector<GlyphLayer> getCOLRv0Layers (const Typeface& typeface,
+                                                                  int glyphNumber,
+                                                                  const AffineTransform& transform)
+    {
+        auto* font = typeface.getNativeDetails()->getFont();
+        auto* face = hb_font_get_face (font);
+        constexpr auto palette = 0;
+
+        auto numLayers = hb_ot_color_glyph_get_layers (face, (hb_codepoint_t) glyphNumber, 0, nullptr, nullptr);
+        std::vector<hb_ot_color_layer_t> layers (numLayers);
+        hb_ot_color_glyph_get_layers (face, (hb_codepoint_t) glyphNumber, 0, &numLayers, layers.data());
+
+        if (layers.empty())
+            return {};
+
+        std::vector<GlyphLayer> result;
+
+        for (const auto& layer : layers)
+        {
+            const auto hbFillColour = layer.color_index == 0xffff ? std::optional<hb_color_t>() : std::invoke ([&]
+            {
+                hb_color_t colour{};
+                unsigned int numColours = 1;
+                hb_ot_color_palette_get_colors (face, palette, layer.color_index, &numColours, &colour);
+                return colour;
+            });
+
+            const auto juceFillColour = hbFillColour.has_value() ? makeColour (*hbFillColour) : std::optional<Colour>();
+
+            auto path = getGlyphPathInGlyphUnits (layer.glyph, font);
+            path.applyTransform (transform);
+            result.push_back ({ ColourLayer
+                                        {
+                                                EdgeTable { path.getBounds().getSmallestIntegerContainer().expanded (1, 0), path, {} },
+                                                juceFillColour
+                                        } });
+        }
+
+        return result;
+    }
+
+    [[nodiscard]] static std::vector<GlyphLayer> getBitmapLayer (const Typeface& typeface,
+                                                                 int glyphNumber,
+                                                                 const AffineTransform& t)
+    {
+        if ((typeface.getColourGlyphFormats() & Typeface::colourGlyphFormatBitmap) == 0)
+            return {};
+
+        const auto* native = typeface.getNativeDetails();
+        const auto extents = native->getGlyphExtents ((hb_codepoint_t) glyphNumber);
+
+        if (! extents.has_value())
+            return {};
+
+        auto* font = native->getFont();
+
+        HbBlob blob { hb_ot_color_glyph_reference_png (font, (hb_codepoint_t) glyphNumber),
+                      IncrementRef::no };
+
+        unsigned int imageDataSize{};
+        const char* imageData = hb_blob_get_data (blob.get(), &imageDataSize);
+        const auto juceImage = PNGImageFormat::loadFrom (imageData, imageDataSize);
+
+        if (juceImage.isNull())
+            return {};
+
+        const auto wDenom = std::max (1, juceImage.getWidth());
+        const auto hDenom = std::max (1, juceImage.getHeight());
+
+        const auto transform = AffineTransform::scale ((float) extents->width  / (float) wDenom,
+                                                       (float) extents->height / (float) hDenom)
+                .translated ((float) extents->x_bearing,
+                             (float) extents->y_bearing)
+                .followedBy (t);
+        return { GlyphLayer { ImageLayer { juceImage, transform } } };
+    }
+
+    [[nodiscard]] static Colour makeColour (hb_color_t c)
+    {
+        return PixelARGB (hb_color_get_alpha (c),
+                          hb_color_get_red (c),
+                          hb_color_get_green (c),
+                          hb_color_get_blue (c));
+    }
+
+    [[nodiscard]] static HbDrawFuncs getPathDrawFuncs()
+    {
+        HbDrawFuncs funcs { hb_draw_funcs_create(), IncrementRef::no };
+
+        hb_draw_funcs_set_move_to_func (funcs.get(), [] (auto*, void* data, auto*, float x, float y, auto*)
+        {
+            auto& path = *static_cast<Path*> (data);
+            path.startNewSubPath ({ x, y });
+        }, nullptr, nullptr);
+        hb_draw_funcs_set_line_to_func (funcs.get(), [] (auto*, void* data, auto*, float x, float y, auto*)
+        {
+            auto& path = *static_cast<Path*> (data);
+            path.lineTo ({ x, y });
+        }, nullptr, nullptr);
+        hb_draw_funcs_set_quadratic_to_func (funcs.get(), [] (auto*, void* data, auto*, float ctlX, float ctlY, float toX, float toY, auto*)
+        {
+            auto& path = *static_cast<Path*> (data);
+            path.quadraticTo ({ ctlX, ctlY }, { toX, toY });
+        }, nullptr, nullptr);
+        hb_draw_funcs_set_cubic_to_func (funcs.get(), [] (auto*, void* data, auto*, float ctlX1, float ctlY1, float ctlX2, float ctlY2, float toX, float toY, auto*)
+        {
+            auto& path = *static_cast<Path*> (data);
+            path.cubicTo ({ ctlX1, ctlY1 }, { ctlX2, ctlY2 }, { toX, toY });
+        }, nullptr, nullptr);
+        hb_draw_funcs_set_close_path_func (funcs.get(), [] (auto*, void* data, auto*, auto*)
+        {
+            auto& path = *static_cast<Path*> (data);
+            path.closeSubPath();
+        }, nullptr, nullptr);
+
+        return funcs;
+    }
+
+    class StoredMemoryFonts
+    {
+        struct Item
+        {
+            String name;
+            String style;
+            std::function<Typeface::Ptr()> constructor;
+
+            bool operator< (const Item& other) const
+            {
+                return name < other.name;
+            }
+        };
+
+        using Store = std::list<Item>;
+
+    public:
+        using Token = Store::const_iterator;
+
+        static StoredMemoryFonts& get()
+        {
+            static StoredMemoryFonts result;
+            return result;
+        }
+
+        Token add (const String& name, const String& style, std::function<Typeface::Ptr()> getter)
+        {
+            const std::scoped_lock lock { mutex };
+            const auto pair = findEqualRange (name);
+            return faces.insert (pair.second, { name, style, getter });
+        }
+
+        void remove (Token t)
+        {
+            const std::scoped_lock lock { mutex };
+            faces.erase (t);
+        }
+
+        Typeface::Ptr find (const String& family, const String& style) const
+        {
+            const std::scoped_lock lock { mutex };
+
+            const auto pair = findEqualRange (family);
+            const auto iter = std::find_if (pair.first, pair.second, [&] (const auto& item)
+            {
+                return item.style == style;
+            });
+
+            if (iter == pair.second)
+                return {};
+
+            if (iter->constructor == nullptr)
+                return {};
+
+            return iter->constructor();
+        }
+
+        StringArray findAllTypefaceNames() const
+        {
+            const std::scoped_lock lock { mutex };
+
+            std::set<String> unique;
+            StringArray result;
+
+            for (const auto& item : faces)
+                if (unique.insert (item.name).second)
+                    result.add (item.name);
+
+            return result;
+        }
+
+        StringArray findAllTypefaceStyles (const String& family) const
+        {
+            const std::scoped_lock lock { mutex };
+
+            const auto pair = findEqualRange (family);
+
+            std::set<String> unique;
+            StringArray result;
+
+            for (const auto& item : makeRange (pair.first, pair.second))
+                if (unique.insert (item.style).second)
+                    result.add (item.style);
+
+            return result;
+        }
+
+    private:
+        StoredMemoryFonts() = default;
+
+        std::pair<Token, Token> findEqualRange (const String& family) const
+        {
+            struct Comparator
+            {
+                bool operator() (const Store::value_type& a, const String& b) const { return a.name < b; }
+                bool operator() (const String& a, const Store::value_type& b) const { return a < b.name; }
+            };
+
+            return std::equal_range (faces.begin(), faces.end(), family, Comparator{});
+        }
+
+        mutable std::mutex mutex;
+        Store faces;
+    };
 };
 
 struct FontStyleHelpers
@@ -478,203 +983,51 @@ Typeface::Typeface (const String& nameIn, const String& styleIn)
 
 Typeface::~Typeface() = default;
 
-static HbDrawFuncs getPathDrawFuncs()
-{
-    HbDrawFuncs funcs { hb_draw_funcs_create(), IncrementRef::no };
-
-    hb_draw_funcs_set_move_to_func (funcs.get(), [] (auto*, void* data, auto*, float x, float y, auto*)
-    {
-        auto& path = *static_cast<Path*> (data);
-        path.startNewSubPath ({ x, y });
-    }, nullptr, nullptr);
-    hb_draw_funcs_set_line_to_func (funcs.get(), [] (auto*, void* data, auto*, float x, float y, auto*)
-    {
-        auto& path = *static_cast<Path*> (data);
-        path.lineTo ({ x, y });
-    }, nullptr, nullptr);
-    hb_draw_funcs_set_quadratic_to_func (funcs.get(), [] (auto*, void* data, auto*, float ctlX, float ctlY, float toX, float toY, auto*)
-    {
-        auto& path = *static_cast<Path*> (data);
-        path.quadraticTo ({ ctlX, ctlY }, { toX, toY });
-    }, nullptr, nullptr);
-    hb_draw_funcs_set_cubic_to_func (funcs.get(), [] (auto*, void* data, auto*, float ctlX1, float ctlY1, float ctlX2, float ctlY2, float toX, float toY, auto*)
-    {
-        auto& path = *static_cast<Path*> (data);
-        path.cubicTo ({ ctlX1, ctlY1 }, { ctlX2, ctlY2 }, { toX, toY });
-    }, nullptr, nullptr);
-    hb_draw_funcs_set_close_path_func (funcs.get(), [] (auto*, void* data, auto*, auto*)
-    {
-        auto& path = *static_cast<Path*> (data);
-        path.closeSubPath();
-    }, nullptr, nullptr);
-
-    return funcs;
-}
-
-[[nodiscard]] static Path getGlyphPathInGlyphUnits (hb_codepoint_t glyph, hb_font_t* font)
-{
-    static const auto funcs = getPathDrawFuncs();
-
-    Path result;
-    hb_font_draw_glyph (font, glyph, funcs.get(), &result);
-    return result;
-}
-
-void Typeface::getOutlineForGlyph (TypefaceMetricsKind kind, int glyphNumber, Path& path) const
+void Typeface::getOutlineForGlyph (int glyphNumber, Path& path) const
 {
     auto* font = getNativeDetails()->getFont();
-    const auto metrics = getNativeDetails()->getAscentDescent (kind);
-    const auto factor = metrics.getHeightToPointsFactor();
-    jassert (! std::isinf (factor));
-    const auto scale = factor / (float) hb_face_get_upem (hb_font_get_face (font));
-
-    // getTypefaceGlyph returns glyphs in em space, getOutlineForGlyph returns glyphs in "special JUCE units" space
-    path = getGlyphPathInGlyphUnits ((hb_codepoint_t) glyphNumber, font);
-    path.applyTransform (AffineTransform::scale (scale, -scale));
+    path = TypefaceUtils::getGlyphPathInGlyphUnits ((hb_codepoint_t) glyphNumber, font);
+    path.applyTransform (TypefaceUtils::getGlyphUnitsToEmTransform (font));
 }
 
-Rectangle<float> Typeface::getGlyphBounds (TypefaceMetricsKind kind, int glyphNumber) const
+Rectangle<float> Typeface::getGlyphBounds (int glyphNumber) const
 {
-    const auto extents = getNativeDetails()->getGlyphExtents ((hb_codepoint_t) glyphNumber);
-
-    if (! extents.has_value())
-        return {};
-
-    auto* font = getNativeDetails()->getFont();
-    const auto metrics = getNativeDetails()->getAscentDescent (kind);
-    const auto factor = metrics.getHeightToPointsFactor();
-    jassert (! std::isinf (factor));
-    const auto scale = factor / (float) hb_face_get_upem (hb_font_get_face (font));
-
-    return Rectangle { (float) extents->width, (float) extents->height }
-            .withPosition ((float) extents->x_bearing, (float) extents->y_bearing)
-            .transformedBy (AffineTransform::scale (scale).scaled (1.0f, -1.0f));
-}
-
-void Typeface::applyVerticalHintingTransform (float, Path&)
-{
-    jassertfalse;
-}
-
-EdgeTable* Typeface::getEdgeTableForGlyph (TypefaceMetricsKind kind, int glyphNumber, const AffineTransform& transform, float)
-{
-    Path path;
-    getOutlineForGlyph (kind, glyphNumber, path);
-    path.applyTransform (transform);
-
-    return new EdgeTable (path.getBounds().getSmallestIntegerContainer().expanded (1, 0), std::move (path), {});
-}
-
-static Colour makeColour (hb_color_t c)
-{
-    return PixelARGB (hb_color_get_alpha (c),
-                      hb_color_get_red (c),
-                      hb_color_get_green (c),
-                      hb_color_get_blue (c));
-}
-
-static std::vector<GlyphLayer> getCOLRv0Layers (const Typeface& typeface, int glyphNumber, const AffineTransform& transform)
-{
-    auto* font = typeface.getNativeDetails()->getFont();
-    auto* face = hb_font_get_face (font);
-    constexpr auto palette = 0;
-
-    auto numLayers = hb_ot_color_glyph_get_layers (face, (hb_codepoint_t) glyphNumber, 0, nullptr, nullptr);
-    std::vector<hb_ot_color_layer_t> layers (numLayers);
-    hb_ot_color_glyph_get_layers (face, (hb_codepoint_t) glyphNumber, 0, &numLayers, layers.data());
-
-    if (layers.empty())
-        return {};
-
-    std::vector<GlyphLayer> result;
-
-    for (const auto& layer : layers)
-    {
-        const auto hbFillColour = layer.color_index == 0xffff ? std::optional<hb_color_t>() : [&]
-        {
-            hb_color_t colour{};
-            unsigned int numColours = 1;
-            hb_ot_color_palette_get_colors (face, palette, layer.color_index, &numColours, &colour);
-            return colour;
-        }();
-
-        const auto juceFillColour = hbFillColour.has_value() ? makeColour (*hbFillColour) : std::optional<Colour>();
-
-        auto path = getGlyphPathInGlyphUnits (layer.glyph, font);
-        path.applyTransform (transform);
-        result.push_back ({ ColourLayer
-        {
-            EdgeTable { path.getBounds().getSmallestIntegerContainer().expanded (1, 0), path, {} },
-            juceFillColour
-        } });
-    }
-
-    return result;
-}
-
-static std::vector<GlyphLayer> getBitmapLayer (const Typeface& typeface, int glyphNumber, const AffineTransform& t)
-{
-    if ((typeface.getColourGlyphFormats() & Typeface::colourGlyphFormatBitmap) == 0)
-        return {};
-
-    const auto* native = typeface.getNativeDetails();
+    const auto* native = getNativeDetails();
     const auto extents = native->getGlyphExtents ((hb_codepoint_t) glyphNumber);
 
     if (! extents.has_value())
         return {};
 
-    auto* font = native->getFont();
-
-    HbBlob blob { hb_ot_color_glyph_reference_png (font, (hb_codepoint_t) glyphNumber),
-                  IncrementRef::no };
-
-    unsigned int imageDataSize{};
-    const char* imageData = hb_blob_get_data (blob.get(), &imageDataSize);
-    const auto juceImage = PNGImageFormat::loadFrom (imageData, imageDataSize);
-
-    if (juceImage.isNull())
-        return {};
-
-    const auto wDenom = std::max (1, juceImage.getWidth());
-    const auto hDenom = std::max (1, juceImage.getHeight());
-
-    const auto transform = AffineTransform::scale ((float) extents->width  / (float) wDenom,
-                                                   (float) extents->height / (float) hDenom)
-            .translated ((float) extents->x_bearing,
-                         (float) extents->y_bearing)
-            .followedBy (t);
-    return { GlyphLayer { ImageLayer { juceImage, transform } } };
+    return Rectangle { (float) extents->width, (float) extents->height }
+            .withPosition ((float) extents->x_bearing, (float) extents->y_bearing)
+            .transformedBy (TypefaceUtils::getGlyphUnitsToEmTransform (native->getFont()));
 }
 
-std::vector<GlyphLayer> Typeface::getLayersForGlyph (TypefaceMetricsKind kind,
-                                                     int glyphNumber,
-                                                     const AffineTransform& transform) const
+std::vector<GlyphLayer> Typeface::getLayersForGlyph (int glyphNumber, const AffineTransform& transform) const
 {
-    auto* font = getNativeDetails()->getFont();
-    const auto metrics = getNativeDetails()->getAscentDescent (kind);
-    const auto factor = metrics.getHeightToPointsFactor();
-    jassert (! std::isinf (factor));
-    const auto scale = factor / (float) hb_face_get_upem (hb_font_get_face (font));
-    const auto combinedTransform = AffineTransform::scale (scale, -scale).followedBy (transform);
+    const auto native = getNativeDetails();
+    auto* font = native->getFont();
+    const auto combinedTransform = TypefaceUtils::getGlyphUnitsToEmTransform (font).followedBy (transform);
 
-    if (auto bitmapLayer = getBitmapLayer (*this, glyphNumber, combinedTransform); ! bitmapLayer.empty())
+    if (auto bitmapLayer = TypefaceUtils::getBitmapLayer (*this, glyphNumber, combinedTransform); ! bitmapLayer.empty())
         return bitmapLayer;
 
     // Instead of calling through to the 'paint' API, which JUCE can't easily support due to complex
     // gradients and blend modes, attempt to load COLRv0 layers for the glyph, which we'll be able
     // to render more successfully.
-    if (auto layers = getCOLRv0Layers (*this, glyphNumber, combinedTransform); ! layers.empty())
+    if (auto layers = TypefaceUtils::getCOLRv0Layers (*this, glyphNumber, combinedTransform); ! layers.empty())
         return layers;
 
     // Some fonts (e.g. Noto Color Emoji on Android) might only contain COLRv1 data, which we can't
     // easily display. In such cases, we can use system facilities to render the glyph into a
     // bitmap. If the face has colour info that wasn't already handled, try rendering to a bitmap.
-    if (getColourGlyphFormats() != 0)
-        if (auto layer = getNativeDetails()->getFallbackColourGlyphLayers (glyphNumber, combinedTransform); ! layer.empty())
-            return layer;
+    if (auto layers = native->getFallbackColourGlyphLayers (glyphNumber, combinedTransform); ! layers.empty())
+        return layers;
 
-    // No colour info available for this glyph, so just get a simple monochromatic outline
-    auto path = getGlyphPathInGlyphUnits ((hb_codepoint_t) glyphNumber, font);
+    // No colour info available for this glyph, so just get a simple monochromatic outline.
+    // Some glyphs may have no colour information, even if other glyphs in the same typeface
+    // do have colour information.
+    auto path = TypefaceUtils::getGlyphPathInGlyphUnits ((hb_codepoint_t) glyphNumber, font);
 
     if (path.isEmpty())
         return {};
@@ -697,9 +1050,132 @@ TypefaceMetrics Typeface::getMetrics (TypefaceMetricsKind kind) const
     return getNativeDetails()->getAscentDescent (kind).getTypefaceMetrics();
 }
 
-Typeface::Ptr Typeface::createSystemTypefaceFor (const void* fontFileData, size_t fontFileDataSize)
+auto Typeface::createSystemTypefaceFor (const Font& font) -> Ptr
+{
+    if (auto matched = TypefaceUtils::StoredMemoryFonts::get().find (font.getTypefaceName(), font.getTypefaceStyle()))
+        return matched;
+
+    return createFromFontImpl (font);
+}
+
+auto Typeface::createSystemTypefaceFor (const void* fontFileData, size_t fontFileDataSize) -> Ptr
 {
     return createSystemTypefaceFor (Span (static_cast<const std::byte*> (fontFileData), fontFileDataSize));
+}
+
+auto Typeface::createSystemTypefaceFor (Span<const std::byte> data) -> Ptr
+{
+    class Decorator : public Typeface
+    {
+    public:
+        Decorator (Ptr x, const String& nameIn, const String& styleIn)
+            : Typeface (nameIn.isNotEmpty() ? nameIn : x->getName(),
+                        styleIn.isNotEmpty() ? styleIn : x->getStyle()),
+              wrapped (std::move (x))
+        {
+        }
+
+        Ptr createSystemFallback (const String& text, const String& language) const override
+        {
+            return wrapped->createSystemFallback (text, language);
+        }
+
+        Ptr cloneWithVariableSettings (Span<const FontVariableSetting> settings) const override
+        {
+            return wrapped->cloneWithVariableSettings (settings);
+        }
+
+        const Native* getNativeDetails() const override
+        {
+            return wrapped->getNativeDetails();
+        }
+
+        Ptr getWrapped() const
+        {
+            return wrapped;
+        }
+
+    private:
+        Ptr wrapped;
+    };
+
+    class CachedTypefaces
+    {
+    public:
+        void insert (const String& ptrName, const String& ptrStyle, std::function<Typeface::Ptr()> constructor)
+        {
+            tokens.push_back (TypefaceUtils::StoredMemoryFonts::get().add (ptrName, ptrStyle, std::move (constructor)));
+        }
+
+        ~CachedTypefaces()
+        {
+            for (const auto& token : tokens)
+                TypefaceUtils::StoredMemoryFonts::get().remove (token);
+        }
+
+    private:
+        std::vector<TypefaceUtils::StoredMemoryFonts::Token> tokens;
+    };
+
+    class CachingWrapper : public Decorator
+    {
+    public:
+        explicit CachingWrapper (Ptr x)
+            : CachingWrapper (x, std::make_shared<CachedTypefaces>())
+        {
+            addToCache (getStyle());
+
+            for (const auto& instanceName : x->getInstanceNames())
+                addToCache (instanceName);
+        }
+
+        Ptr cloneWithVariableSettings (Span<const FontVariableSetting> settings) const override
+        {
+            return new CachingWrapper { getWrapped()->cloneWithVariableSettings (settings), cache };
+        }
+
+    private:
+        CachingWrapper (Ptr x, std::shared_ptr<CachedTypefaces> cacheIn)
+            : Decorator (std::move (x), {}, {}), cache (std::move (cacheIn))
+        {
+        }
+
+        void addToCache (const String& instanceName)
+        {
+            // It's possible for faces to be created directly from the StoredMemoryFonts singleton
+            // after resolving a suitable typeface by name and style. In this case, we want that
+            // newly-created face to keep the loaded font resources alive, even if the original
+            // Typeface loaded from memory has been destroyed at an earlier point.
+            // Using a weak_ptr in the factory function below ensures that the entries in the
+            // StoredMemoryFonts _do not_ own the CachedTypefaces instance. However, new typefaces
+            // created from the StoredMemoryFonts _do_ contribute to the usage count of the
+            // CachedTypefaces. Therefore, the CachedTypefaces will only be destroyed (removing all
+            // face instance records from the StoredMemoryFonts) after no face of the family is in
+            // use.
+
+            cache->insert (getName(),
+                           instanceName,
+                           [x = getWrapped(),
+                            instanceName,
+                            weak = std::weak_ptr<CachedTypefaces> (cache)]() -> Typeface::Ptr
+            {
+                const auto cloned = x->cloneWithVariableSettings (x->getNamedInstanceConfiguration (instanceName));
+
+                if (auto strong = weak.lock())
+                    return new CachingWrapper (cloned, strong);
+
+                // This should never happen! This implies that the face records in the
+                // StoredMemoryFonts singleton somehow outlived all concrete typeface instances
+                // derived from the font.
+                jassertfalse;
+                return nullptr;
+            });
+        }
+
+        std::shared_ptr<CachedTypefaces> cache;
+    };
+
+    return new CachingWrapper { createFromDataImpl (data) };
 }
 
 //==============================================================================
@@ -716,116 +1192,6 @@ std::optional<uint32_t> Typeface::getNominalGlyphForCodepoint (juce_wchar cp) co
         return {};
 
     return result;
-}
-
-static constexpr auto hbTag (const char (&arr)[5])
-{
-    return HB_TAG (arr[0], arr[1], arr[2], arr[3]);
-}
-
-template <typename Consumer>
-static float doSimpleShapeWithNoBreaks (const Typeface& typeface,
-                                        TypefaceMetricsKind kind,
-                                        const String& text,
-                                        float height,
-                                        float horizontalScale,
-                                        Consumer&& consumer)
-{
-    HbBuffer buffer { hb_buffer_create(), IncrementRef::no };
-    hb_buffer_add_utf8 (buffer.get(), text.toRawUTF8(), -1, 0, -1);
-    hb_buffer_set_cluster_level (buffer.get(), HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS);
-    hb_buffer_guess_segment_properties (buffer.get());
-
-    const auto* native = typeface.getNativeDetails();
-    const auto points = typeface.getMetrics (kind).heightToPoints * height;
-    const auto sized = native->getFontAtPointSizeAndScale (points, horizontalScale);
-    auto* font = sized.get();
-
-    // Disable ligatures, because TextEditor requires a 1:1 codepoint/glyph mapping for caret
-    // positioning to work as expected.
-    // Use an alternative method if you require shaping with ligature support.
-    static const std::vector<hb_feature_t> features = []
-    {
-        std::vector<hb_feature_t> result;
-
-        for (const auto key : { hbTag ("liga"), hbTag ("clig"), hbTag ("hlig"), hbTag ("dlig"), hbTag ("calt") })
-            result.push_back (hb_feature_t { key, 0, HB_FEATURE_GLOBAL_START, HB_FEATURE_GLOBAL_END });
-
-        return result;
-    }();
-
-    hb_shape (font, buffer.get(), features.data(), (unsigned int) features.size());
-
-    unsigned int numGlyphs{};
-    auto* infos = hb_buffer_get_glyph_infos (buffer.get(), &numGlyphs);
-    auto* positions = hb_buffer_get_glyph_positions (buffer.get(), &numGlyphs);
-
-    Point<hb_position_t> cursor{};
-
-    for (auto i = decltype (numGlyphs){}; i < numGlyphs; ++i)
-    {
-        const auto& info = infos[i];
-        const auto& position = positions[i];
-        consumer (info.codepoint, HbScale::hbToJuce (cursor.x + position.x_offset));
-        cursor += Point { position.x_advance, position.y_advance };
-    }
-
-    return HbScale::hbToJuce (cursor.x);
-}
-
-template <typename Consumer>
-static float doSimpleShape (const Typeface& typeface,
-                            TypefaceMetricsKind kind,
-                            const String& originalText,
-                            float height,
-                            float horizontalScale,
-                            Consumer&& consumer)
-{
-    const juce_wchar zeroWidthSpace = 0x200b;
-    const auto text = originalText.replaceCharacter ('\n', zeroWidthSpace);
-
-    float lastX{};
-
-    for (auto iter = text.begin(), end = text.end(); iter != end;)
-    {
-        const auto next = [&]
-        {
-            for (auto i = iter; i != end; ++i)
-                if (*i == zeroWidthSpace)
-                    return i + 1;
-
-            return end;
-        }();
-
-        lastX += doSimpleShapeWithNoBreaks (typeface, kind, String (iter, next), height, horizontalScale, [&] (auto codepoint, auto x)
-        {
-            consumer (codepoint, lastX + x);
-        });
-        iter = next;
-    }
-
-    return lastX;
-}
-
-float Typeface::getStringWidth (TypefaceMetricsKind kind, const String& text, float height, float horizontalScale)
-{
-    return doSimpleShape (*this, kind, text, height, horizontalScale, [&] (auto, auto) {});
-}
-
-void Typeface::getGlyphPositions (TypefaceMetricsKind kind,
-                                  const String& text,
-                                  Array<int>& glyphs,
-                                  Array<float>& xOffsets,
-                                  float height,
-                                  float horizontalScale)
-{
-    const auto width = doSimpleShape (*this, kind, text, height, horizontalScale, [&] (auto codepoint, auto xOffset)
-    {
-        glyphs.add ((int) codepoint);
-        xOffsets.add (xOffset);
-    });
-
-    xOffsets.add (width);
 }
 
 std::vector<FontFeatureTag> Typeface::getSupportedFeatures() const
@@ -870,6 +1236,78 @@ std::vector<FontFeatureTag> Typeface::getSupportedFeatures() const
     features.erase (std::unique (features.begin(), features.end()), features.end());
 
     return features;
+}
+
+Span<const FontFeatureTag> Typeface::getSupportedVariables() const&
+{
+    return getNativeDetails()->getVariableRegistry()->getSupportedVariables();
+}
+
+std::optional<float> Typeface::getDefaultValueForVariable (FontFeatureTag variableTag) const
+{
+    return getNativeDetails()->getVariableRegistry()->getDefaultValueForVariable (variableTag);
+}
+
+std::optional<Range<float>> Typeface::getRangeForVariable (FontFeatureTag variableTag) const
+{
+    return getNativeDetails()->getVariableRegistry()->getRangeForVariable (variableTag);
+}
+
+Span<const String> Typeface::getInstanceNames() const&
+{
+    return getNativeDetails()->getVariableRegistry()->getInstanceNames();
+}
+
+Span<const FontVariableSetting> Typeface::getNamedInstanceConfiguration (StringRef instanceName) const&
+{
+    return getNativeDetails()->getVariableRegistry()->getNamedInstanceConfiguration (instanceName);
+}
+
+Span<const FontVariableSetting> Typeface::getConfiguredVariables() const&
+{
+    return getNativeDetails()->getConfiguredVariables();
+}
+
+//==============================================================================
+StringArray Font::findAllTypefaceNames()
+{
+    std::set<String> unique;
+
+    for (const auto& list : { TypefaceUtils::StoredMemoryFonts::get().findAllTypefaceNames(),
+                              findAllTypefaceNamesImpl() })
+    {
+        for (const auto& item : list)
+        {
+            unique.insert (item);
+        }
+    }
+
+    StringArray result;
+
+    for (const auto& item : unique)
+    {
+        result.add (item);
+    }
+
+    return result;
+}
+
+StringArray Font::findAllTypefaceStyles (const String& family)
+{
+    std::set<String> unique;
+    StringArray result;
+
+    for (const auto& list : { TypefaceUtils::StoredMemoryFonts::get().findAllTypefaceStyles (family),
+                              findAllTypefaceStylesImpl (family) })
+    {
+        for (const auto& item : list)
+        {
+            if (unique.insert (item).second)
+                result.add (item);
+        }
+    }
+
+    return result;
 }
 
 //==============================================================================
@@ -918,7 +1356,7 @@ struct MetricsRecord
 class TypefaceTests : public UnitTest
 {
 public:
-    TypefaceTests() : UnitTest ("Typeface", UnitTestCategories::graphics) {}
+    TypefaceTests() : UnitTest ("Typeface", UnitTestCategories::fonts) {}
 
     void runTest() override
     {
@@ -1086,12 +1524,107 @@ public:
         return Typeface::createSystemTypefaceFor (data.data(), data.size());
     }
 
+    [[nodiscard]] static constexpr auto hbTag (const char (&arr)[5])
+    {
+        return HB_TAG (arr[0], arr[1], arr[2], arr[3]);
+    }
+
+    template <typename Consumer>
+    static float doSimpleShapeWithNoBreaks (const Typeface& typeface,
+                                            TypefaceMetricsKind kind,
+                                            const String& text,
+                                            float height,
+                                            float horizontalScale,
+                                            Consumer&& consumer)
+    {
+        HbBuffer buffer { hb_buffer_create(), IncrementRef::no };
+        hb_buffer_add_utf8 (buffer.get(), text.toRawUTF8(), -1, 0, -1);
+        hb_buffer_set_cluster_level (buffer.get(), HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS);
+        hb_buffer_guess_segment_properties (buffer.get());
+
+        const auto* native = typeface.getNativeDetails();
+        const auto points = typeface.getMetrics (kind).heightToPoints * height;
+        const auto sized = native->getFontAtPointSizeAndScale (points, horizontalScale);
+        auto* font = sized.get();
+
+        // Disable ligatures, because TextEditor requires a 1:1 codepoint/glyph mapping for caret
+        // positioning to work as expected.
+        // Use an alternative method if you require shaping with ligature support.
+        static const std::vector<hb_feature_t> features = std::invoke ([]
+        {
+            std::vector<hb_feature_t> result;
+
+            for (const auto key : { hbTag ("liga"), hbTag ("clig"), hbTag ("hlig"), hbTag ("dlig"), hbTag ("calt") })
+                result.push_back (hb_feature_t { key, 0, HB_FEATURE_GLOBAL_START, HB_FEATURE_GLOBAL_END });
+
+            return result;
+        });
+
+        hb_shape (font, buffer.get(), features.data(), (unsigned int) features.size());
+
+        unsigned int numGlyphs{};
+        auto* infos = hb_buffer_get_glyph_infos (buffer.get(), &numGlyphs);
+        auto* positions = hb_buffer_get_glyph_positions (buffer.get(), &numGlyphs);
+
+        Point<hb_position_t> cursor{};
+
+        for (auto i = decltype (numGlyphs){}; i < numGlyphs; ++i)
+        {
+            const auto& info = infos[i];
+            const auto& position = positions[i];
+            consumer (info.codepoint, HbScale::hbToJuce (cursor.x + position.x_offset));
+            cursor += Point { position.x_advance, position.y_advance };
+        }
+
+        return HbScale::hbToJuce (cursor.x);
+    }
+
+    template <typename Consumer>
+    static float doSimpleShape (const Typeface& typeface,
+                                TypefaceMetricsKind kind,
+                                const String& originalText,
+                                float height,
+                                float horizontalScale,
+                                Consumer&& consumer)
+    {
+        const juce_wchar zeroWidthSpace = 0x200b;
+        const auto text = originalText.replaceCharacter ('\n', zeroWidthSpace);
+
+        float lastX{};
+
+        for (auto iter = text.begin(), end = text.end(); iter != end;)
+        {
+            const auto next = std::invoke ([&]
+            {
+                for (auto i = iter; i != end; ++i)
+                    if (*i == zeroWidthSpace)
+                        return i + 1;
+
+                return end;
+            });
+
+            lastX += doSimpleShapeWithNoBreaks (typeface, kind, String (iter, next), height, horizontalScale, [&] (auto codepoint, auto x)
+            {
+                consumer (codepoint, lastX + x);
+            });
+            iter = next;
+        }
+
+        return lastX;
+    }
+
     static std::vector<GlyphAdvance> getGlyphPositions (Typeface::Ptr typeface, StringRef text)
     {
         Array<int> glyphs;
         Array<float> positions;
 
-        typeface->getGlyphPositions (TypefaceMetricsKind::legacy, text, glyphs, positions);
+        const auto width = doSimpleShape (*typeface, TypefaceMetricsKind::legacy, text, 1.0f, 1.0f, [&] (auto codepoint, auto xOffset)
+        {
+            glyphs.add ((int) codepoint);
+            positions.add (xOffset);
+        });
+
+        positions.add (width);
 
         std::vector<GlyphAdvance> result;
 
@@ -1161,7 +1694,7 @@ static TypefaceTests typefaceTests;
 class FontFeatureTests : public UnitTest
 {
 public:
-    FontFeatureTests() : UnitTest ("Font Features", UnitTestCategories::graphics) {}
+    FontFeatureTests() : UnitTest ("Font Features", UnitTestCategories::fonts) {}
 
     void runTest() override
     {
@@ -1175,12 +1708,9 @@ public:
             return std::find (features.begin(), features.end(), "aalt") != features.end();
         }));
 
-        Array<int> glyphs;
-        Array<float> offsets;
-        typeface->getGlyphPositions (TypefaceMetricsKind::legacy, "AD", glyphs, offsets);
-
-        const auto aIndex = glyphs[0];
-        const auto dIndex = glyphs[1];
+        const auto glyphs = TypefaceTests::getGlyphPositions (typeface, "AD");
+        const auto aIndex = glyphs[0].glyph;
+        const auto dIndex = glyphs[1].glyph;
 
         beginTest ("Check feature disablement");
         {
@@ -1285,7 +1815,7 @@ private:
         };
 
         MemoryInputStream memoryStream { (const void*) testFontZip, std::size (testFontZip), false };
-        ZipFile zip { &memoryStream, false };
+        ZipFile zip { memoryStream };
 
         auto stream = rawToUniquePtr (zip.createStreamForEntry (zip.getIndexOfFileName ("test.otf")));
         jassert (stream != nullptr);

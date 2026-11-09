@@ -15,7 +15,7 @@
 #  framework to you, and you must discontinue the installation or download
 #  process and cease use of the JUCE framework.
 #
-#  JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+#  JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
 #  JUCE Privacy Policy: https://juce.com/juce-privacy-policy
 #  JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 #
@@ -30,14 +30,17 @@
 #
 # ==============================================================================
 
-juce_add_gui_app(NetworkGraphicsDemo)
+juce_add_gui_app(NetworkGraphicsDemo
+    NEEDS_WEB_BROWSER FALSE
+    NEEDS_CURL FALSE)
 
 juce_generate_juce_header(NetworkGraphicsDemo)
 
 target_sources(NetworkGraphicsDemo PRIVATE Source/Main.cpp)
 
 target_compile_definitions(NetworkGraphicsDemo PRIVATE
-    JUCE_USE_CURL=0 JUCE_WEB_BROWSER=0)
+    JUCE_USE_CURL=0
+    JUCE_WEB_BROWSER=0)
 
 target_link_libraries(NetworkGraphicsDemo PRIVATE
     juce::juce_audio_utils

@@ -188,13 +188,13 @@ AAX_Atomic_Load_Pointer(TPointer const * const volatile * inValue)
 					_InterlockedCompareExchange64)
 
 inline uint32_t AAX_CALLBACK
-AAX_Atomic_IncThenGet_32(register uint32_t& ioData)
+AAX_Atomic_IncThenGet_32(uint32_t& ioData)
 {
 	return static_cast<uint32_t>(_InterlockedIncrement((volatile long*)&ioData));
 }
 
 inline uint32_t AAX_CALLBACK
-AAX_Atomic_DecThenGet_32(register uint32_t& ioData)
+AAX_Atomic_DecThenGet_32(uint32_t& ioData)
 {
 	return static_cast<uint32_t>(_InterlockedDecrement((volatile long*)&ioData));
 }

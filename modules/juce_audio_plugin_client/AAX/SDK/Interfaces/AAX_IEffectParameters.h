@@ -88,7 +88,7 @@
 
 	\ingroup CommonInterface_DataModel
 */
-class AAX_IEffectParameters :	public AAX_IACFEffectParameters_V4
+class AAX_IEffectParameters :	public AAX_IACFEffectParameters_V6
 								, public CACFUnknown
 {
 public:

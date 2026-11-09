@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -127,8 +127,8 @@ public:
         and AudioIODevice::getCurrentBufferSizeSamples() on the supplied pointer.
 
         @param device       the audio IO device that will be used to drive the callback.
-                            Note that if you're going to store this this pointer, it is
-                            only valid until the next time that audioDeviceStopped is called.
+                            Note that if you're going to store this pointer, it is only
+                            valid until the next time that audioDeviceStopped is called.
     */
     virtual void audioDeviceAboutToStart (AudioIODevice* device) = 0;
 

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -154,6 +154,10 @@ public:
         will first be removed from that parent. Likewise if a component is on the desktop
         and is subsequently added to another component, it'll be removed from the desktop.
 
+        If the component is already on the desktop, its window is recreated with the new flags
+        and keeps the associated component it was given, if any. To change that, use the
+        overload taking a DesktopWindowOptions.
+
         @param windowStyleFlags             a combination of the flags specified in the
                                             ComponentPeer::StyleFlags enum, which define the
                                             window's characteristics.
@@ -166,8 +170,19 @@ public:
              getPeer, ComponentPeer::setMinimised, ComponentPeer::StyleFlags,
              ComponentPeer::getStyleFlags, ComponentPeer::setFullScreen
     */
-    virtual void addToDesktop (int windowStyleFlags,
-                               void* nativeWindowToAttachTo = nullptr);
+    void addToDesktop (int windowStyleFlags,
+                       void* nativeWindowToAttachTo = nullptr);
+
+    /** Makes this component appear as a window on the desktop.
+
+        This does the same as the overload taking style flags, but describes the window with a
+        DesktopWindowOptions, which can also name the component that the window is opened from.
+        Calling it again with different options, such as an associated component in a different
+        window, recreates the window.
+
+        @see DesktopWindowOptions, createDesktopWindow, removeFromDesktop, isOnDesktop
+    */
+    void addToDesktop (const DesktopWindowOptions& options);
 
     /** If the component is currently showing on the desktop, this will hide it.
 
@@ -243,7 +258,11 @@ public:
     void toBack();
 
     /** Changes this component's z-order so that it's just behind another component.
-        @see toFront, toBack
+
+        For desktop windows, a window is never placed behind the window it is associated with:
+        asking for that puts it at the back of the other windows associated with the same window.
+
+        @see toFront, toBack, DesktopWindowOptions::withAssociatedComponent
     */
     void toBehind (Component* other);
 
@@ -2508,7 +2527,7 @@ public:
     /** Returns the object that was set by setCachedComponentImage().
         @see setCachedComponentImage
     */
-    CachedComponentImage* getCachedComponentImage() const noexcept      { return cachedImage.get(); }
+    CachedComponentImage* getCachedComponentImage() const noexcept;
 
     /** Invalidates cached images, both in the CachedComponentImage (if any) and the image effect state. */
     void invalidateCachedImageResources();
@@ -2658,26 +2677,20 @@ private:
     String componentName, componentID, componentTitle, componentDescription, componentHelpText;
     Component* parentComponent = nullptr;
     Rectangle<int> boundsRelativeToParent;
-    std::unique_ptr<Positioner> positioner;
-    std::unique_ptr<AffineTransform> affineTransform;
     Array<Component*> childComponentList;
     WeakReference<LookAndFeel> lookAndFeel;
     MouseCursor cursor;
 
-    class EffectState;
-    std::unique_ptr<EffectState> effectState;
-    std::unique_ptr<CachedComponentImage> cachedImage;
-
-    class MouseListenerList;
-    std::unique_ptr<MouseListenerList> mouseListeners;
-    std::unique_ptr<Array<KeyListener*>> keyListeners;
     ListenerList<ComponentListener> componentListeners;
     NamedValueSet properties;
 
     friend class WeakReference<Component>;
     WeakReference<Component>::Master masterReference;
 
-    std::unique_ptr<AccessibilityHandler> accessibilityHandler;
+    class EffectState;
+    class MouseListenerList;
+    class Data;
+    std::unique_ptr<Data> componentData;
 
     struct ComponentFlags
     {
@@ -2726,6 +2739,8 @@ private:
     static void internalMouseUp    (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time, ModifierKeys oldModifiers);
     static void internalMouseDrag  (SafePointer<Component>, MouseInputSource, const detail::PointerState&, Time);
     static void internalMouseMove  (SafePointer<Component>, MouseInputSource, Point<float>, Time);
+    template <typename EventMethod, typename... Params>
+    static void internalMouseGesture (SafePointer<Component>, MouseInputSource, Point<float>, Time, EventMethod, const Params&...);
     static void internalMouseWheel (SafePointer<Component>, MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
     static void internalMagnifyGesture (SafePointer<Component>, MouseInputSource, Point<float>, Time, float);
     void internalBroughtToFront();
@@ -2741,9 +2756,9 @@ private:
     void internalRepaintUnchecked (Rectangle<int>, bool);
     Component* removeChildComponent (int index, bool sendParentEvents, bool sendChildEvents);
     void reorderChildInternal (int sourceIndex, int destIndex);
-    void paintEntireComponent (Graphics&, bool, OpaqueLayer&);
-    void paintComponentAndChildren (Graphics&, OpaqueLayer&);
-    void paintWithinParentContext (Graphics&, OpaqueLayer&);
+    void paintEntireComponent (Graphics&, bool, OpaqueLayer&, ComponentPaintDiagnostics&);
+    void paintComponentAndChildren (Graphics&, OpaqueLayer&, ComponentPaintDiagnostics&);
+    void paintWithinParentContext (Graphics&, OpaqueLayer&, ComponentPaintDiagnostics&);
     void sendMovedResizedMessages (bool wasMoved, bool wasResized);
     void sendMovedResizedMessagesIfPending();
     void repaintParent();
@@ -2753,8 +2768,8 @@ private:
     void giveAwayKeyboardFocusInternal (bool sendFocusLossEvent);
     void sendEnablementChangeMessage();
     void sendVisibilityChangeMessage();
-
-    friend struct detail::ComponentHelpers;
+    Data& createDataIfNeeded();
+    const Array<KeyListener*>* getKeyListeners() const;
 
     /* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
        You might need to give your subclasses a private dummy constructor to avoid compiler warnings.
@@ -2764,10 +2779,21 @@ private:
 protected:
     //==============================================================================
     /** @internal */
-    virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
+    virtual ComponentPeer* createNewPeer (const DesktopWindowOptions& options);
     /** @internal */
     static std::unique_ptr<AccessibilityHandler> createIgnoredAccessibilityHandler (Component&);
     /** @endcond */
+
+    //==============================================================================
+    /** Creates this component's desktop window, or recreates it if the options have changed.
+
+        Both addToDesktop() overloads call this. Override it to respond to, or to adjust,
+        every request to put the component on the desktop, and call the base class
+        implementation to do the work.
+
+        @see addToDesktop, DesktopWindowOptions
+    */
+    virtual void createDesktopWindow (const DesktopWindowOptions& options);
 };
 
 } // namespace juce

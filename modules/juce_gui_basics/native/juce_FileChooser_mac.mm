@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -347,7 +347,8 @@ private:
     template <typename Base>
     struct SafeModalPanel : public ObjCClass<Base>
     {
-        explicit SafeModalPanel (const char* name) : ObjCClass<Base> (name)
+        explicit SafeModalPanel (const char* name)
+            : ObjCClass<Base> (name)
         {
             this->addMethod (@selector (preventsApplicationTerminationWhenModal),
                              preventsApplicationTerminationWhenModal);
@@ -369,7 +370,8 @@ private:
     //==============================================================================
     struct DelegateClass final : public ObjCClass<DelegateType>
     {
-        DelegateClass() : ObjCClass<DelegateType> ("JUCEFileChooser_")
+        DelegateClass()
+            : ObjCClass ("JUCEFileChooser_")
         {
             addIvar<Native*> ("cppObject");
 

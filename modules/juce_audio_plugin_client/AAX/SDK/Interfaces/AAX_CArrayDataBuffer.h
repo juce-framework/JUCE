@@ -45,6 +45,8 @@
  * \brief A convenience class for array data buffers
  * 
  * The data payload is an array of \c D
+ * 
+ * Note: \c D cannot be an array itself.
  */
 template <AAX_CTypeID T, class D>
 class AAX_CArrayDataBufferOfType : public AAX_IDataBuffer

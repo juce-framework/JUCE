@@ -62,6 +62,7 @@ public:
     //==============================================================================
     AnimationAppDemo()
     {
+        setName ("Animation app demo");
         setSize (800, 600);
         setSynchroniseToVBlank (true);
     }

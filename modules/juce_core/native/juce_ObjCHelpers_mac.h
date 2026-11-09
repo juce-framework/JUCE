@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -317,14 +317,6 @@ struct ObjCClass
         jassert (cls != nil);
     }
 
-    ~ObjCClass()
-    {
-        auto kvoSubclassName = String ("NSKVONotifying_") + class_getName (cls);
-
-        if (objc_getClass (kvoSubclassName.toUTF8()) == nullptr)
-            objc_disposeClassPair (cls);
-    }
-
     ObjCClass (ObjCClass&& other) noexcept
         : cls (std::exchange (other.cls, {})) {}
 
@@ -397,7 +389,7 @@ template <class JuceClass>
 struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
 {
     ObjCLifetimeManagedClass()
-        : ObjCClass<NSObject> ("ObjCLifetimeManagedClass_")
+        : ObjCClass ("ObjCLifetimeManagedClass_")
     {
         addIvar<JuceClass*> ("cppObject");
 

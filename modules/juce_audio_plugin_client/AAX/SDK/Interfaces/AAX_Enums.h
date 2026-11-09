@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019-2025 Avid Technology, Inc.
+ *	Copyright (c) 2013-2017, 2019-2026 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -248,38 +248,38 @@ enum AAX_EMaxAudioSuiteTracks
 enum AAX_EStemFormat
 {
 	// Point source stem formats
-	AAX_eStemFormat_Mono		= AAX_STEM_FORMAT ( 0,	 1 ),	///<  M
+	AAX_eStemFormat_Mono        = AAX_STEM_FORMAT ( 0,  1  ),  ///<  M
 	AAX_eStemFormat_DummyConnection = AAX_eStemFormat_Mono,
-	AAX_eStemFormat_Stereo		= AAX_STEM_FORMAT ( 1,	 2 ),	///<  L     R
-	AAX_eStemFormat_LCR			= AAX_STEM_FORMAT ( 2,	 3 ),	///<  L  C  R
-	AAX_eStemFormat_LCRS		= AAX_STEM_FORMAT ( 3,	 4 ),	///<  L  C  R  S
-	AAX_eStemFormat_Quad		= AAX_STEM_FORMAT ( 4,	 4 ),	///<  L     R          Ls      Rs
-	AAX_eStemFormat_5_0			= AAX_STEM_FORMAT ( 5,	 5 ),	///<  L  C  R          Ls      Rs
-	AAX_eStemFormat_5_1			= AAX_STEM_FORMAT ( 6,	 6 ),	///<  L  C  R          Ls      Rs  LFE
-	AAX_eStemFormat_6_0			= AAX_STEM_FORMAT ( 7,	 6 ),	///<  L  C  R          Ls  Cs  Rs
-	AAX_eStemFormat_6_1			= AAX_STEM_FORMAT ( 8,	 7 ),	///<  L  C  R          Ls  Cs  Rs  LFE
-	AAX_eStemFormat_7_0_SDDS	= AAX_STEM_FORMAT ( 9,	 7 ),	///<  L  Lc C  Rc  R   Ls      Rs
-	AAX_eStemFormat_7_1_SDDS	= AAX_STEM_FORMAT ( 10,	 8 ),	///<  L  Lc C  Rc  R   Ls      Rs  LFE
-	AAX_eStemFormat_7_0_DTS		= AAX_STEM_FORMAT ( 11,	 7 ),	///<  L  C  R          Lss Rss Lsr Rsr
-	AAX_eStemFormat_7_1_DTS		= AAX_STEM_FORMAT ( 12,	 8 ),	///<  L  C  R          Lss Rss Lsr Rsr LFE
-	AAX_eStemFormat_7_0_2		= AAX_STEM_FORMAT ( 20,	 9 ),	///<  L  C  R          Lss Rss Lsr Rsr     Lts Rts
-	AAX_eStemFormat_7_1_2		= AAX_STEM_FORMAT ( 13,	 10 ),	///<  L  C  R          Lss Rss Lsr Rsr LFE Lts Rts
-	AAX_eStemFormat_5_0_2		= AAX_STEM_FORMAT ( 21,	 7 ),	///<  L  C  R  Ls  Rs          Ltm Rtm
-	AAX_eStemFormat_5_1_2		= AAX_STEM_FORMAT ( 22,	 8 ),	///<  L  C  R  Ls  Rs  LFE     Ltm Rtm
-	AAX_eStemFormat_5_0_4		= AAX_STEM_FORMAT ( 23,	 9 ),	///<  L  C  R  Ls  Rs                      Ltf Rtf         Ltr Rtr
-	AAX_eStemFormat_5_1_4		= AAX_STEM_FORMAT ( 24,	 10 ),	///<  L  C  R  Ls  Rs  LFE                 Ltf Rtf         Ltr Rtr
-	AAX_eStemFormat_7_0_4		= AAX_STEM_FORMAT ( 25,	 11 ),	///<  L  C  R          Lss Rss Lsr Rsr     Ltf Rtf         Ltr Rtr
-	AAX_eStemFormat_7_1_4		= AAX_STEM_FORMAT ( 26,	 12 ),	///<  L  C  R          Lss Rss Lsr Rsr LFE Ltf Rtf         Ltr Rtr
-	AAX_eStemFormat_7_0_6		= AAX_STEM_FORMAT ( 35,	 13 ),	///<  L  C  R          Lss Rss Lsr Rsr     Ltf Rtf Ltm Rtm Ltr Rtr
-	AAX_eStemFormat_7_1_6		= AAX_STEM_FORMAT ( 36,	 14 ),	///<  L  C  R          Lss Rss Lsr Rsr LFE Ltf Rtf Ltm Rtm Ltr Rtr
-	AAX_eStemFormat_9_0_4		= AAX_STEM_FORMAT ( 27,	 13 ),	///<  L  C  R  Lw  Rw  Lss Rss Lsr Rsr     Ltf Rtf         Ltr Rtr
-	AAX_eStemFormat_9_1_4		= AAX_STEM_FORMAT ( 28,	 14 ),	///<  L  C  R  Lw  Rw  Lss Rss Lsr Rsr LFE Ltf Rtf         Ltr Rtr
-	AAX_eStemFormat_9_0_6		= AAX_STEM_FORMAT ( 29,	 15 ),	///<  L  C  R  Lw  Rw  Lss Rss Lsr Rsr     Ltf Rtf Ltm Rtm Ltr Rtr
-	AAX_eStemFormat_9_1_6		= AAX_STEM_FORMAT ( 30,	 16 ),	///<  L  C  R  Lw  Rw  Lss Rss Lsr Rsr LFE Ltf Rtf Ltm Rtm Ltr Rtr
+	AAX_eStemFormat_Stereo      = AAX_STEM_FORMAT ( 1,  2  ),  ///<  L     R
+	AAX_eStemFormat_LCR         = AAX_STEM_FORMAT ( 2,  3  ),  ///<  L     C      R
+	AAX_eStemFormat_LCRS        = AAX_STEM_FORMAT ( 3,  4  ),  ///<  L     C      R          S
+	AAX_eStemFormat_Quad        = AAX_STEM_FORMAT ( 4,  4  ),  ///<  L     R                 Ls      Rs
+	AAX_eStemFormat_5_0         = AAX_STEM_FORMAT ( 5,  5  ),  ///<  L     C      R          Ls      Rs
+	AAX_eStemFormat_5_1         = AAX_STEM_FORMAT ( 6,  6  ),  ///<  L     C      R          Ls      Rs      LFE
+	AAX_eStemFormat_6_0         = AAX_STEM_FORMAT ( 7,  6  ),  ///<  L     C      R          Ls  Cs  Rs
+	AAX_eStemFormat_6_1         = AAX_STEM_FORMAT ( 8,  7  ),  ///<  L     C      R          Ls  Cs  Rs      LFE
+	AAX_eStemFormat_7_0_SDDS    = AAX_STEM_FORMAT ( 9,  7  ),  ///<  L  Lc C  Rc  R          Ls      Rs
+	AAX_eStemFormat_7_1_SDDS    = AAX_STEM_FORMAT ( 10, 8  ),  ///<  L  Lc C  Rc  R          Ls      Rs      LFE
+	AAX_eStemFormat_7_0_DTS     = AAX_STEM_FORMAT ( 11, 7  ),  ///<  L     C      R          Lss Rss Lsr Rsr
+	AAX_eStemFormat_7_1_DTS     = AAX_STEM_FORMAT ( 12, 8  ),  ///<  L     C      R          Lss Rss Lsr Rsr LFE
+	AAX_eStemFormat_7_0_2       = AAX_STEM_FORMAT ( 20, 9  ),  ///<  L     C      R          Lss Rss Lsr Rsr     Lts Rts
+	AAX_eStemFormat_7_1_2       = AAX_STEM_FORMAT ( 13, 10 ),  ///<  L     C      R          Lss Rss Lsr Rsr LFE Lts Rts
+	AAX_eStemFormat_5_0_2       = AAX_STEM_FORMAT ( 21, 7  ),  ///<  L     C      R          Ls      Rs                  Ltm Rtm
+	AAX_eStemFormat_5_1_2       = AAX_STEM_FORMAT ( 22, 8  ),  ///<  L     C      R          Ls      Rs      LFE         Ltm Rtm
+	AAX_eStemFormat_5_0_4       = AAX_STEM_FORMAT ( 23, 9  ),  ///<  L     C      R          Ls      Rs          Ltf Rtf         Ltr Rtr
+	AAX_eStemFormat_5_1_4       = AAX_STEM_FORMAT ( 24, 10 ),  ///<  L     C      R          Ls      Rs      LFE Ltf Rtf         Ltr Rtr
+	AAX_eStemFormat_7_0_4       = AAX_STEM_FORMAT ( 25, 11 ),  ///<  L     C      R          Lss Rss Lsr Rsr     Ltf Rtf         Ltr Rtr
+	AAX_eStemFormat_7_1_4       = AAX_STEM_FORMAT ( 26, 12 ),  ///<  L     C      R          Lss Rss Lsr Rsr LFE Ltf Rtf         Ltr Rtr
+	AAX_eStemFormat_7_0_6       = AAX_STEM_FORMAT ( 35, 13 ),  ///<  L     C      R          Lss Rss Lsr Rsr     Ltf Rtf Ltm Rtm Ltr Rtr
+	AAX_eStemFormat_7_1_6       = AAX_STEM_FORMAT ( 36, 14 ),  ///<  L     C      R          Lss Rss Lsr Rsr LFE Ltf Rtf Ltm Rtm Ltr Rtr
+	AAX_eStemFormat_9_0_4       = AAX_STEM_FORMAT ( 27, 13 ),  ///<  L     C      R  Lw  Rw  Lss Rss Lsr Rsr     Ltf Rtf         Ltr Rtr
+	AAX_eStemFormat_9_1_4       = AAX_STEM_FORMAT ( 28, 14 ),  ///<  L     C      R  Lw  Rw  Lss Rss Lsr Rsr LFE Ltf Rtf         Ltr Rtr
+	AAX_eStemFormat_9_0_6       = AAX_STEM_FORMAT ( 29, 15 ),  ///<  L     C      R  Lw  Rw  Lss Rss Lsr Rsr     Ltf Rtf Ltm Rtm Ltr Rtr
+	AAX_eStemFormat_9_1_6       = AAX_STEM_FORMAT ( 30, 16 ),  ///<  L     C      R  Lw  Rw  Lss Rss Lsr Rsr LFE Ltf Rtf Ltm Rtm Ltr Rtr
 	
 	// Ambisonics stem formats
-	AAX_eStemFormat_Ambi_1_ACN = AAX_STEM_FORMAT ( 14, 4 ),   ///< Ambisonics: first-order with ACN channel order and SN3D (AmbiX) normalization
-	AAX_eStemFormat_Ambi_2_ACN = AAX_STEM_FORMAT ( 18, 9 ),   ///< Ambisonics: second-order with ACN channel order and SN3D (AmbiX) normalization
+	AAX_eStemFormat_Ambi_1_ACN = AAX_STEM_FORMAT ( 14, 4  ),  ///< Ambisonics: first-order with ACN channel order and SN3D (AmbiX) normalization
+	AAX_eStemFormat_Ambi_2_ACN = AAX_STEM_FORMAT ( 18, 9  ),  ///< Ambisonics: second-order with ACN channel order and SN3D (AmbiX) normalization
 	AAX_eStemFormat_Ambi_3_ACN = AAX_STEM_FORMAT ( 19, 16 ),  ///< Ambisonics: third-order with ACN channel order and SN3D (AmbiX) normalization
 	AAX_eStemFormat_Ambi_4_ACN = AAX_STEM_FORMAT ( 31, 25 ),  ///< Ambisonics: fourth-order with ACN channel order and SN3D (AmbiX) normalization
 	AAX_eStemFormat_Ambi_5_ACN = AAX_STEM_FORMAT ( 32, 36 ),  ///< Ambisonics: fifth-order with ACN channel order and SN3D (AmbiX) normalization
@@ -502,12 +502,12 @@ enum AAX_EResourceType
 	AAX_eResourceType_None = 0,
 	/** The file name of the page table xml file
 	 */
-	AAX_eResourceType_PageTable,
+	AAX_eResourceType_PageTable = 1,
 	/** The absolute path to the directory containing the plug-in's page table xml file(s)
 	 
 	 Defaults to *.aaxplugin/Contents/Resources
 	 */
-	AAX_eResourceType_PageTableDir
+	AAX_eResourceType_PageTableDir = 2
 }; AAX_ENUM_SIZE_CHECK( AAX_EResourceType );
 
 /*!	@brief Events IDs for %AAX notifications
@@ -543,14 +543,15 @@ enum AAX_ENotificationEvent
 	 \compatibility Supported in Pro Tools 11.2 and higher
 	 \compatibility Not supported by Media Composer
 	 
-	 <em>Data: \c const \ref AAX_IString</em> <br />
+	 <em>Data: \c const \ref AAX_IString *</em> <br />
+	 <em>Size: Byte size of the string data including its null terminating character</em> <br />
 	 <em>Sent by: Host</em>
 	 */
 	AAX_eNotificationEvent_TrackNameChanged = 'AXtn',
 	/** \brief  (not currently sent) The current UID of
 	 this plug-in instance's track
 	 
-	 <em>Data: <tt>const uint8_t[16]</tt></em> <br />
+	 <em>Data: \ref AAX_CHostElementUID</em> <br />
 	 <em>Sent by: Host</em>
 	 */
 	AAX_eNotificationEvent_TrackUIDChanged = 'AXtu',
@@ -632,12 +633,29 @@ enum AAX_ENotificationEvent
 	 <em>Sent by: Host</em>
 	 */
 	AAX_eNotificationEvent_ExitingOfflineMode = 'AXox',
+	/** \brief  Entering bounce
+	 
+	 \compatibility Supported in Pro Tools 2026.4 and higher
+	 
+	 <em>Data: none</em> <br />
+	 <em>Sent by: Host</em>
+	 */
+	AAX_eNotificationEvent_EnteringBounce = 'AXeb',
+	/** \brief  Exiting bounce
+	 
+	 \compatibility Supported in Pro Tools 2026.4 and higher
+	 
+	 <em>Data: none</em> <br />
+	 <em>Sent by: Host</em>
+	 */
+	AAX_eNotificationEvent_ExitingBounce = 'AXxb',
 	/** \brief  A string representing the path of the
 	 current session
 	 
 	 \compatibility Supported in Pro Tools 11.1 and higher
 	 
-	 <em>Data: \c const \ref AAX_IString</em> <br />
+	 <em>Data: \c const \ref AAX_IString *</em> <br />
+	 <em>Size: Byte size of the string data including its null terminating character</em> <br />
 	 <em>Sent by: Host</em>
 	 */
 	AAX_eNotificationEvent_SessionPathChanged = 'AXsp',
@@ -815,7 +833,8 @@ enum AAX_ENotificationEvent
 
 	 \compatibility Supported in Pro Tools 2024.3 and higher
 
-	 <em>Data: \c const \ref AAX_IString</em> <br />
+	 <em>Data: \c const \ref AAX_IString *</em> <br />
+	 <em>Size: Byte size of the string data including its null terminating character</em> <br />
 	 <em>Sent by: Host</em>
 
 	 */
@@ -1061,6 +1080,7 @@ enum AAX_EParameterValueInfoSelector
 	 *
 	 */
 	AAX_ePageTable_EQ_Band_Type = 0,
+
 	/** \brief Description of whether a particular EQ band is active
 	 *
 	 *  \details
@@ -1070,6 +1090,7 @@ enum AAX_EParameterValueInfoSelector
 	 *
 	 */
 	AAX_ePageTable_EQ_InCircuitPolarity = 1,
+
 	/** \brief Description of whether an alternate parameter should be used for a
 	 *  given slot
 	 *
@@ -1087,7 +1108,23 @@ enum AAX_EParameterValueInfoSelector
 	 *	\legacy converted from \c eDigi_PageTable_UseAlternateControl in the legacy SDK
 	 *
 	 */
-	AAX_ePageTable_UseAlternateControl = 2
+	AAX_ePageTable_UseAlternateControl = 2,
+
+	/** \brief Description of whether the control should allow value wrapping
+	 *
+	 *  \details
+	 *  Normally control surface knobs will stop turning at the end of the
+	 *  value table range.  This wrapping mode is used to tell the control surface 
+	 *  to allow value table wrapping for continuous turning from the 
+	 *  control surface interactions.
+	 *
+	 *  Possible response values are listed in \ref AAX_EWraparoundMode
+	 *
+	 *	\legacy converted from \c eDigi_PageTable_WraparoundMode in the legacy SDK
+	 *
+	 */
+	AAX_ePageTable_WraparoundMode = 3,
+	
 }; AAX_ENUM_SIZE_CHECK( AAX_EParameterValueInfoSelector );
 
 /** @brief Definitions of band types for EQ page table
@@ -1127,6 +1164,19 @@ enum AAX_EUseAlternateControl
 	AAX_eUseAlternateControl_No = 0,
 	AAX_eUseAlternateControl_Yes = 1
 }; AAX_ENUM_SIZE_CHECK( AAX_EUseAlternateControl );
+
+/** @brief Definitions for wrap araound mode parameter
+ *
+ *  @details
+ *	For the AAX_ePageTable_WraparoundMode parameter value info selector
+ */
+enum AAX_EWraparoundMode
+{
+	AAX_eWraparoundMode_None      = 0x00000000,
+	AAX_eWraparoundMode_Left      = 0x00000001,
+	AAX_eWraparoundMode_Right     = 0x00000010,
+	AAX_eWraparoundMode_LeftRight = 0x00000011,
+}; AAX_ENUM_SIZE_CHECK( AAX_EWraparoundMode );
 
 /*! \brief MIDI node types
  	
@@ -1539,6 +1589,21 @@ enum AAX_ERecordMode
 
 	AAX_eRecordMode_Num
 }; AAX_ENUM_SIZE_CHECK(AAX_ERecordMode);
+
+// ENUM: AAX_EAutomationEnabledState
+/**	\brief Indicates an automation-enabled state
+
+	\sa \ref AAX_IEffectParameters::GetParameterDefaultAutomationEnabledState()
+ */
+enum AAX_EAutomationEnabledState
+#if defined(AAX_CPP11_SUPPORT)
+: int32_t
+#endif
+{
+	AAX_eAutomationEnabledState_None = 0, ///< Unknown or undefined automation enabled state
+	AAX_eAutomationEnabledState_Off = 1, ///< Automation disabled
+	AAX_eAutomationEnabledState_On = 2, ///< Automation enabled
+}; AAX_ENUM_SIZE_CHECK(AAX_EAutomationEnabledState);
 
 /// @cond ignore
 #endif // include guard

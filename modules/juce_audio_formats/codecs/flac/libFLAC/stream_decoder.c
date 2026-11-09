@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2023  Xiph.Org Foundation
+ * Copyright (C) 2011-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,7 +52,7 @@
 #include "include/private/lpc.h"
 #include "include/private/md5.h"
 #include "include/private/memory.h"
-
+#include "include/private/macros.h"
 
 
 /* technically this should be in an "export.c" but this is convenient enough */
@@ -74,7 +74,7 @@ static const FLAC__byte ID3V2_TAG_[3] = { 'I', 'D', '3' };
  ***********************************************************************/
 
 static void set_defaults_(FLAC__StreamDecoder *decoder);
-//static FILE *get_binary_stdin_(void);
+static FILE *get_binary_stdin_(void);
 static FLAC__bool allocate_output_(FLAC__StreamDecoder *decoder, uint32_t size, uint32_t channels, uint32_t bps);
 static FLAC__bool has_id_filtered_(FLAC__StreamDecoder *decoder, FLAC__byte *id);
 static FLAC__bool find_metadata_(FLAC__StreamDecoder *decoder);
@@ -107,11 +107,12 @@ static FLAC__bool seek_to_absolute_sample_(FLAC__StreamDecoder *decoder, FLAC__u
 #if FLAC__HAS_OGG
 static FLAC__bool seek_to_absolute_sample_ogg_(FLAC__StreamDecoder *decoder, FLAC__uint64 stream_length, FLAC__uint64 target_sample);
 #endif
-//static FLAC__StreamDecoderReadStatus file_read_callback_(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes, void *client_data);
-//static FLAC__StreamDecoderSeekStatus file_seek_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 absolute_byte_offset, void *client_data);
-//static FLAC__StreamDecoderTellStatus file_tell_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 *absolute_byte_offset, void *client_data);
-//static FLAC__StreamDecoderLengthStatus file_length_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 *stream_length, void *client_data);
-//static FLAC__bool file_eof_callback_(const FLAC__StreamDecoder *decoder, void *client_data);
+static FLAC__StreamDecoderReadStatus file_read_callback_(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes, void *client_data);
+static FLAC__StreamDecoderSeekStatus file_seek_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 absolute_byte_offset, void *client_data);
+static FLAC__StreamDecoderTellStatus file_tell_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 *absolute_byte_offset, void *client_data);
+static FLAC__StreamDecoderLengthStatus file_length_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 *stream_length, void *client_data);
+static FLAC__bool file_eof_callback_(const FLAC__StreamDecoder *decoder, void *client_data);
+static void reset_decoder_internal_(FLAC__StreamDecoder* decoder);
 
 /***********************************************************************
  *
@@ -156,6 +157,7 @@ typedef struct FLAC__StreamDecoderPrivate {
 	FLAC__bool do_md5_checking; /* initially gets protected_->md5_checking but is turned off after a seek or if the metadata has a zero MD5 */
 	FLAC__bool internal_reset_hack; /* used only during init() so we can call reset to set up the decoder without rewinding the input */
 	FLAC__bool is_seeking;
+	FLAC__bool is_indexing; /* to be able to seek in chained streams */
 	FLAC__MD5Context md5context;
 	FLAC__byte computed_md5sum[16]; /* this is the sum we computed from the decoded data */
 	/* (the rest of these are only used for seeking) */
@@ -165,8 +167,15 @@ typedef struct FLAC__StreamDecoderPrivate {
 	FLAC__uint64 last_seen_framesync; /* if tell callback works, the location of the last seen frame sync code, to rewind to if needed */
 	FLAC__uint64 target_sample;
 	uint32_t unparseable_frame_count; /* used to tell whether we're decoding a future version of FLAC or just got a bad sync */
-	FLAC__bool got_a_frame; /* hack needed in Ogg FLAC seek routine to check when process_single() actually writes a frame */
+	FLAC__bool got_a_frame; /* hack needed in Ogg FLAC seek routine and find_total_samples to check when process_single() actually writes a frame */
 	FLAC__bool (*local_bitreader_read_rice_signed_block)(FLAC__BitReader *br, int vals[], uint32_t nvals, uint32_t parameter);
+	FLAC__bool error_has_been_sent; /* To check whether a missing frame has been signalled yet */
+#if FLAC__HAS_OGG
+	FLAC__bool ogg_decoder_aspect_allocation_failure;
+#endif
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+	uint32_t fuzzing_rewind_count; /* To stop excessive rewinding, as it causes timeouts */
+#endif
 } FLAC__StreamDecoderPrivate;
 
 /***********************************************************************
@@ -185,7 +194,8 @@ FLAC_API const char * const FLAC__StreamDecoderStateString[] = {
 	"FLAC__STREAM_DECODER_SEEK_ERROR",
 	"FLAC__STREAM_DECODER_ABORTED",
 	"FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR",
-	"FLAC__STREAM_DECODER_UNINITIALIZED"
+	"FLAC__STREAM_DECODER_UNINITIALIZED",
+	"FLAC__STREAM_DECODER_END_OF_LINK"
 };
 
 FLAC_API const char * const FLAC__StreamDecoderInitStatusString[] = {
@@ -200,7 +210,8 @@ FLAC_API const char * const FLAC__StreamDecoderInitStatusString[] = {
 FLAC_API const char * const FLAC__StreamDecoderReadStatusString[] = {
 	"FLAC__STREAM_DECODER_READ_STATUS_CONTINUE",
 	"FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM",
-	"FLAC__STREAM_DECODER_READ_STATUS_ABORT"
+	"FLAC__STREAM_DECODER_READ_STATUS_ABORT",
+	"FLAC__STREAM_DECODER_READ_STATUS_END_OF_LINK"
 };
 
 FLAC_API const char * const FLAC__StreamDecoderSeekStatusString[] = {
@@ -231,7 +242,9 @@ FLAC_API const char * const FLAC__StreamDecoderErrorStatusString[] = {
 	"FLAC__STREAM_DECODER_ERROR_STATUS_BAD_HEADER",
 	"FLAC__STREAM_DECODER_ERROR_STATUS_FRAME_CRC_MISMATCH",
 	"FLAC__STREAM_DECODER_ERROR_STATUS_UNPARSEABLE_STREAM",
-	"FLAC__STREAM_DECODER_ERROR_STATUS_BAD_METADATA"
+	"FLAC__STREAM_DECODER_ERROR_STATUS_BAD_METADATA",
+	"FLAC__STREAM_DECODER_ERROR_STATUS_OUT_OF_BOUNDS",
+	"FLAC__STREAM_DECODER_ERROR_STATUS_MISSING_FRAME"
 };
 
 /***********************************************************************
@@ -246,18 +259,18 @@ FLAC_API FLAC__StreamDecoder *FLAC__stream_decoder_new(void)
 
 	FLAC__ASSERT(sizeof(int) >= 4); /* we want to die right away if this is not true */
 
-	decoder = (FLAC__StreamDecoder*) calloc(1, sizeof(FLAC__StreamDecoder));
+	decoder = safe_calloc_(1, sizeof(FLAC__StreamDecoder));
 	if(decoder == 0) {
 		return 0;
 	}
 
-	decoder->protected_ = (FLAC__StreamDecoderProtected*) calloc(1, sizeof(FLAC__StreamDecoderProtected));
+	decoder->protected_ = safe_calloc_(1, sizeof(FLAC__StreamDecoderProtected));
 	if(decoder->protected_ == 0) {
 		free(decoder);
 		return 0;
 	}
 
-	decoder->private_ = (FLAC__StreamDecoderPrivate*) calloc(1, sizeof(FLAC__StreamDecoderPrivate));
+	decoder->private_ = safe_calloc_(1, sizeof(FLAC__StreamDecoderPrivate));
 	if(decoder->private_ == 0) {
 		free(decoder->protected_);
 		free(decoder);
@@ -273,7 +286,7 @@ FLAC_API FLAC__StreamDecoder *FLAC__stream_decoder_new(void)
 	}
 
 	decoder->private_->metadata_filter_ids_capacity = 16;
-	if(0 == (decoder->private_->metadata_filter_ids = (FLAC__byte*) malloc((FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8) * decoder->private_->metadata_filter_ids_capacity))) {
+	if(0 == (decoder->private_->metadata_filter_ids = malloc((FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8) * decoder->private_->metadata_filter_ids_capacity))) {
 		FLAC__bitreader_delete(decoder->private_->input);
 		free(decoder->private_);
 		free(decoder->protected_);
@@ -355,10 +368,8 @@ static FLAC__StreamDecoderInitStatus init_stream_internal_(
 	if(decoder->protected_->state != FLAC__STREAM_DECODER_UNINITIALIZED)
 		return FLAC__STREAM_DECODER_INIT_STATUS_ALREADY_INITIALIZED;
 
-   #if FLAC__HAS_OGG == 0
-	if(is_ogg)
+	if(FLAC__HAS_OGG == 0 && is_ogg)
 		return FLAC__STREAM_DECODER_INIT_STATUS_UNSUPPORTED_CONTAINER;
-   #endif
 
 	if(
 		0 == read_callback ||
@@ -370,8 +381,10 @@ static FLAC__StreamDecoderInitStatus init_stream_internal_(
 
 #if FLAC__HAS_OGG
 	decoder->private_->is_ogg = is_ogg;
-	if(is_ogg && !FLAC__ogg_decoder_aspect_init(&decoder->protected_->ogg_decoder_aspect))
+	if(is_ogg && !FLAC__ogg_decoder_aspect_init(&decoder->protected_->ogg_decoder_aspect)) {
+		FLAC__ogg_decoder_aspect_finish(&decoder->protected_->ogg_decoder_aspect);
 		return decoder->protected_->initstate = FLAC__STREAM_DECODER_INIT_STATUS_ERROR_OPENING_FILE;
+	}
 #endif
 
 	FLAC__cpu_info(&decoder->private_->cpuinfo);
@@ -406,6 +419,7 @@ static FLAC__StreamDecoderInitStatus init_stream_internal_(
 
 	decoder->private_->do_md5_checking = decoder->protected_->md5_checking;
 	decoder->private_->is_seeking = false;
+	decoder->private_->is_indexing = false;
 
 	decoder->private_->internal_reset_hack = true; /* so the following reset does not try to rewind the input */
 	if(!FLAC__stream_decoder_reset(decoder)) {
@@ -472,7 +486,6 @@ FLAC_API FLAC__StreamDecoderInitStatus FLAC__stream_decoder_init_ogg_stream(
 	);
 }
 
-#if 0
 static FLAC__StreamDecoderInitStatus init_FILE_internal_(
 	FLAC__StreamDecoder *decoder,
 	FILE *file,
@@ -597,7 +610,6 @@ FLAC_API FLAC__StreamDecoderInitStatus FLAC__stream_decoder_init_ogg_file(
 {
 	return init_file_internal_(decoder, filename, write_callback, metadata_callback, error_callback, client_data, /*is_ogg=*/true);
 }
-#endif
 
 FLAC_API FLAC__bool FLAC__stream_decoder_finish(FLAC__StreamDecoder *decoder)
 {
@@ -660,6 +672,7 @@ FLAC_API FLAC__bool FLAC__stream_decoder_finish(FLAC__StreamDecoder *decoder)
 			md5_failed = true;
 	}
 	decoder->private_->is_seeking = false;
+	decoder->private_->is_indexing = false;
 
 	set_defaults_(decoder);
 
@@ -678,6 +691,21 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_ogg_serial_number(FLAC__StreamDecod
 #if FLAC__HAS_OGG
 	/* can't check decoder->private_->is_ogg since that's not set until init time */
 	FLAC__ogg_decoder_aspect_set_serial_number(&decoder->protected_->ogg_decoder_aspect, value);
+	return true;
+#else
+	(void)value;
+	return false;
+#endif
+}
+
+FLAC_API FLAC__bool FLAC__stream_decoder_set_decode_chained_stream(FLAC__StreamDecoder* decoder, FLAC__bool value)
+{
+	FLAC__ASSERT(0 != decoder);
+	FLAC__ASSERT(0 != decoder->protected_);
+	if (decoder->protected_->state != FLAC__STREAM_DECODER_UNINITIALIZED)
+		return false;
+#if FLAC__HAS_OGG
+	FLAC__ogg_decoder_aspect_set_decode_chained_stream(&decoder->protected_->ogg_decoder_aspect, value);
 	return true;
 #else
 	(void)value;
@@ -704,8 +732,6 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_metadata_respond(FLAC__StreamDecode
 	/* double protection */
 	if((uint32_t)type > FLAC__MAX_METADATA_TYPE_CODE)
 		return false;
-	if(decoder->protected_->state != FLAC__STREAM_DECODER_UNINITIALIZED)
-		return false;
 	decoder->private_->metadata_filter[type] = true;
 	if(type == FLAC__METADATA_TYPE_APPLICATION)
 		decoder->private_->metadata_filter_ids_count = 0;
@@ -718,8 +744,6 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_metadata_respond_application(FLAC__
 	FLAC__ASSERT(0 != decoder->private_);
 	FLAC__ASSERT(0 != decoder->protected_);
 	FLAC__ASSERT(0 != id);
-	if(decoder->protected_->state != FLAC__STREAM_DECODER_UNINITIALIZED)
-		return false;
 
 	if(decoder->private_->metadata_filter[FLAC__METADATA_TYPE_APPLICATION])
 		return true;
@@ -727,7 +751,7 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_metadata_respond_application(FLAC__
 	FLAC__ASSERT(0 != decoder->private_->metadata_filter_ids);
 
 	if(decoder->private_->metadata_filter_ids_count == decoder->private_->metadata_filter_ids_capacity) {
-		if(0 == (decoder->private_->metadata_filter_ids = (FLAC__byte*) safe_realloc_mul_2op_(decoder->private_->metadata_filter_ids, decoder->private_->metadata_filter_ids_capacity, /*times*/2))) {
+		if(0 == (decoder->private_->metadata_filter_ids = safe_realloc_mul_2op_(decoder->private_->metadata_filter_ids, decoder->private_->metadata_filter_ids_capacity, /*times*/2))) {
 			decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 			return false;
 		}
@@ -746,8 +770,6 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_metadata_respond_all(FLAC__StreamDe
 	FLAC__ASSERT(0 != decoder);
 	FLAC__ASSERT(0 != decoder->private_);
 	FLAC__ASSERT(0 != decoder->protected_);
-	if(decoder->protected_->state != FLAC__STREAM_DECODER_UNINITIALIZED)
-		return false;
 	for(i = 0; i < sizeof(decoder->private_->metadata_filter) / sizeof(decoder->private_->metadata_filter[0]); i++)
 		decoder->private_->metadata_filter[i] = true;
 	decoder->private_->metadata_filter_ids_count = 0;
@@ -763,8 +785,6 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_metadata_ignore(FLAC__StreamDecoder
 	/* double protection */
 	if((uint32_t)type > FLAC__MAX_METADATA_TYPE_CODE)
 		return false;
-	if(decoder->protected_->state != FLAC__STREAM_DECODER_UNINITIALIZED)
-		return false;
 	decoder->private_->metadata_filter[type] = false;
 	if(type == FLAC__METADATA_TYPE_APPLICATION)
 		decoder->private_->metadata_filter_ids_count = 0;
@@ -777,8 +797,6 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_metadata_ignore_application(FLAC__S
 	FLAC__ASSERT(0 != decoder->private_);
 	FLAC__ASSERT(0 != decoder->protected_);
 	FLAC__ASSERT(0 != id);
-	if(decoder->protected_->state != FLAC__STREAM_DECODER_UNINITIALIZED)
-		return false;
 
 	if(!decoder->private_->metadata_filter[FLAC__METADATA_TYPE_APPLICATION])
 		return true;
@@ -786,7 +804,7 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_metadata_ignore_application(FLAC__S
 	FLAC__ASSERT(0 != decoder->private_->metadata_filter_ids);
 
 	if(decoder->private_->metadata_filter_ids_count == decoder->private_->metadata_filter_ids_capacity) {
-		if(0 == (decoder->private_->metadata_filter_ids = (FLAC__byte*) safe_realloc_mul_2op_(decoder->private_->metadata_filter_ids, decoder->private_->metadata_filter_ids_capacity, /*times*/2))) {
+		if(0 == (decoder->private_->metadata_filter_ids = safe_realloc_mul_2op_(decoder->private_->metadata_filter_ids, decoder->private_->metadata_filter_ids_capacity, /*times*/2))) {
 			decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 			return false;
 		}
@@ -804,8 +822,6 @@ FLAC_API FLAC__bool FLAC__stream_decoder_set_metadata_ignore_all(FLAC__StreamDec
 	FLAC__ASSERT(0 != decoder);
 	FLAC__ASSERT(0 != decoder->private_);
 	FLAC__ASSERT(0 != decoder->protected_);
-	if(decoder->protected_->state != FLAC__STREAM_DECODER_UNINITIALIZED)
-		return false;
 	memset(decoder->private_->metadata_filter, 0, sizeof(decoder->private_->metadata_filter));
 	decoder->private_->metadata_filter_ids_count = 0;
 	return true;
@@ -821,6 +837,18 @@ FLAC_API FLAC__StreamDecoderState FLAC__stream_decoder_get_state(const FLAC__Str
 FLAC_API const char *FLAC__stream_decoder_get_resolved_state_string(const FLAC__StreamDecoder *decoder)
 {
 	return FLAC__StreamDecoderStateString[decoder->protected_->state];
+}
+
+FLAC_API FLAC__bool FLAC__stream_decoder_get_decode_chained_stream(const FLAC__StreamDecoder* decoder)
+{
+	FLAC__ASSERT(0 != decoder);
+	FLAC__ASSERT(0 != decoder->protected_);
+#if FLAC__HAS_OGG
+	return FLAC__ogg_decoder_aspect_get_decode_chained_stream(&decoder->protected_->ogg_decoder_aspect);
+#else
+	(void)decoder;
+	return false;
+#endif
 }
 
 FLAC_API FLAC__bool FLAC__stream_decoder_get_md5_checking(const FLAC__StreamDecoder *decoder)
@@ -906,6 +934,8 @@ FLAC_API FLAC__bool FLAC__stream_decoder_flush(FLAC__StreamDecoder *decoder)
 
 	if(!decoder->private_->internal_reset_hack && decoder->protected_->state == FLAC__STREAM_DECODER_UNINITIALIZED)
 		return false;
+	if(decoder->protected_->state == FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR)
+		return false;
 
 	decoder->private_->samples_decoded = 0;
 	decoder->private_->do_md5_checking = false;
@@ -926,35 +956,10 @@ FLAC_API FLAC__bool FLAC__stream_decoder_flush(FLAC__StreamDecoder *decoder)
 	return true;
 }
 
-FLAC_API FLAC__bool FLAC__stream_decoder_reset(FLAC__StreamDecoder *decoder)
-{
-	FLAC__ASSERT(0 != decoder);
-	FLAC__ASSERT(0 != decoder->private_);
-	FLAC__ASSERT(0 != decoder->protected_);
-
-	if(!FLAC__stream_decoder_flush(decoder)) {
-		/* above call sets the state for us */
-		return false;
-	}
-
-#if FLAC__HAS_OGG
-	/*@@@ could go in !internal_reset_hack block below */
-	if(decoder->private_->is_ogg)
-		FLAC__ogg_decoder_aspect_reset(&decoder->protected_->ogg_decoder_aspect);
-#endif
-
-	/* Rewind if necessary.  If FLAC__stream_decoder_init() is calling us,
-	 * (internal_reset_hack) don't try to rewind since we are already at
-	 * the beginning of the stream and don't want to fail if the input is
-	 * not seekable.
-	 */
-	if(!decoder->private_->internal_reset_hack) {
-		if(decoder->private_->file == stdin)
-			return false; /* can't rewind stdin, reset fails */
-		if(decoder->private_->seek_callback && decoder->private_->seek_callback(decoder, 0, decoder->private_->client_data) == FLAC__STREAM_DECODER_SEEK_STATUS_ERROR)
-			return false; /* seekable and seek fails, reset fails */
-	}
-
+void reset_decoder_internal_(FLAC__StreamDecoder* decoder) {
+	/* This code resets only the FLAC parser and decoder, not the Ogg part,
+	 * nor the input buffering etc. This is used to prepare the FLAC
+	 * decoder to receive another Ogg chain link */
 	decoder->protected_->state = FLAC__STREAM_DECODER_SEARCH_FOR_METADATA;
 
 	decoder->private_->has_stream_info = false;
@@ -989,6 +994,39 @@ FLAC_API FLAC__bool FLAC__stream_decoder_reset(FLAC__StreamDecoder *decoder)
 	decoder->private_->unparseable_frame_count = 0;
 	decoder->private_->last_seen_framesync = 0;
 	decoder->private_->last_frame_is_set = false;
+	decoder->private_->error_has_been_sent = false;
+}
+
+FLAC_API FLAC__bool FLAC__stream_decoder_reset(FLAC__StreamDecoder *decoder)
+{
+	FLAC__ASSERT(0 != decoder);
+	FLAC__ASSERT(0 != decoder->private_);
+	FLAC__ASSERT(0 != decoder->protected_);
+
+	if(!FLAC__stream_decoder_flush(decoder)) {
+		/* above call sets the state for us */
+		return false;
+	}
+
+#if FLAC__HAS_OGG
+	/*@@@ could go in !internal_reset_hack block below */
+	if(decoder->private_->is_ogg)
+		FLAC__ogg_decoder_aspect_reset(&decoder->protected_->ogg_decoder_aspect);
+#endif
+
+	/* Rewind if necessary.  If FLAC__stream_decoder_init() is calling us,
+	 * (internal_reset_hack) don't try to rewind since we are already at
+	 * the beginning of the stream and don't want to fail if the input is
+	 * not seekable.
+	 */
+	if(!decoder->private_->internal_reset_hack) {
+		if(decoder->private_->file == stdin)
+			return false; /* can't rewind stdin, reset fails */
+		if(decoder->private_->seek_callback && decoder->private_->seek_callback(decoder, 0, decoder->private_->client_data) == FLAC__STREAM_DECODER_SEEK_STATUS_ERROR)
+			return false; /* seekable and seek fails, reset fails */
+	}
+
+	reset_decoder_internal_(decoder);
 
 	return true;
 }
@@ -1011,8 +1049,9 @@ FLAC_API FLAC__bool FLAC__stream_decoder_process_single(FLAC__StreamDecoder *dec
 				else
 					return true;
 			case FLAC__STREAM_DECODER_SEARCH_FOR_FRAME_SYNC:
-				if(!frame_sync_(decoder))
+				if(!frame_sync_(decoder)) {
 					return true; /* above function sets the status for us */
+				}
 				break;
 			case FLAC__STREAM_DECODER_READ_FRAME:
 				if(!read_frame_(decoder, &got_a_frame, /*do_full_decode=*/true))
@@ -1021,6 +1060,7 @@ FLAC_API FLAC__bool FLAC__stream_decoder_process_single(FLAC__StreamDecoder *dec
 					return true; /* above function sets the status for us */
 				break;
 			case FLAC__STREAM_DECODER_END_OF_STREAM:
+			case FLAC__STREAM_DECODER_END_OF_LINK:
 			case FLAC__STREAM_DECODER_ABORTED:
 				return true;
 			default:
@@ -1047,12 +1087,78 @@ FLAC_API FLAC__bool FLAC__stream_decoder_process_until_end_of_metadata(FLAC__Str
 			case FLAC__STREAM_DECODER_SEARCH_FOR_FRAME_SYNC:
 			case FLAC__STREAM_DECODER_READ_FRAME:
 			case FLAC__STREAM_DECODER_END_OF_STREAM:
+			case FLAC__STREAM_DECODER_END_OF_LINK:
 			case FLAC__STREAM_DECODER_ABORTED:
 				return true;
 			default:
 				return false;
 		}
 	}
+}
+
+FLAC_API FLAC__bool FLAC__stream_decoder_process_until_end_of_link(FLAC__StreamDecoder *decoder)
+{
+	FLAC__bool dummy;
+	FLAC__ASSERT(0 != decoder);
+	FLAC__ASSERT(0 != decoder->protected_);
+
+	while(1) {
+		switch(decoder->protected_->state) {
+			case FLAC__STREAM_DECODER_SEARCH_FOR_METADATA:
+				if(!find_metadata_(decoder))
+					return false; /* above function sets the status for us */
+				break;
+			case FLAC__STREAM_DECODER_READ_METADATA:
+				if(!read_metadata_(decoder))
+					return false; /* above function sets the status for us */
+				break;
+			case FLAC__STREAM_DECODER_SEARCH_FOR_FRAME_SYNC:
+				if(!frame_sync_(decoder)) {
+					return true; /* above function sets the status for us */
+				}
+				break;
+			case FLAC__STREAM_DECODER_READ_FRAME:
+				if(!read_frame_(decoder, &dummy, /*do_full_decode=*/true))
+					return false; /* above function sets the status for us */
+				break;
+			case FLAC__STREAM_DECODER_END_OF_STREAM:
+			case FLAC__STREAM_DECODER_END_OF_LINK:
+			case FLAC__STREAM_DECODER_ABORTED:
+				return true;
+			default:
+				return false;
+		}
+	}
+}
+
+FLAC_API FLAC__bool FLAC__stream_decoder_finish_link(FLAC__StreamDecoder *decoder)
+{
+	FLAC__bool md5_failed = false;
+
+	FLAC__ASSERT(0 != decoder);
+	FLAC__ASSERT(0 != decoder->private_);
+	FLAC__ASSERT(0 != decoder->protected_);
+
+	if(decoder->protected_->state != FLAC__STREAM_DECODER_END_OF_LINK) {
+		FLAC__ASSERT(0); /* This function should not be called in any other state */
+		return true;
+	}
+
+	FLAC__MD5Final(decoder->private_->computed_md5sum, &decoder->private_->md5context);
+
+	if(decoder->private_->do_md5_checking) {
+		if(memcmp(decoder->private_->stream_info.data.stream_info.md5sum, decoder->private_->computed_md5sum, 16))
+			md5_failed = true;
+	}
+
+	reset_decoder_internal_(decoder);
+
+#if FLAC__HAS_OGG
+	if(decoder->private_->is_ogg)
+		FLAC__ogg_decoder_aspect_next_link(&decoder->protected_->ogg_decoder_aspect);
+#endif
+
+	return !md5_failed;
 }
 
 FLAC_API FLAC__bool FLAC__stream_decoder_process_until_end_of_stream(FLAC__StreamDecoder *decoder)
@@ -1072,12 +1178,16 @@ FLAC_API FLAC__bool FLAC__stream_decoder_process_until_end_of_stream(FLAC__Strea
 					return false; /* above function sets the status for us */
 				break;
 			case FLAC__STREAM_DECODER_SEARCH_FOR_FRAME_SYNC:
-				if(!frame_sync_(decoder))
+				if(!frame_sync_(decoder) && decoder->protected_->state != FLAC__STREAM_DECODER_END_OF_LINK && decoder->protected_->state != FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR) {
 					return true; /* above function sets the status for us */
+				}
 				break;
 			case FLAC__STREAM_DECODER_READ_FRAME:
 				if(!read_frame_(decoder, &dummy, /*do_full_decode=*/true))
 					return false; /* above function sets the status for us */
+				break;
+			case FLAC__STREAM_DECODER_END_OF_LINK:
+				FLAC__stream_decoder_finish_link(decoder);
 				break;
 			case FLAC__STREAM_DECODER_END_OF_STREAM:
 			case FLAC__STREAM_DECODER_ABORTED:
@@ -1098,10 +1208,11 @@ FLAC_API FLAC__bool FLAC__stream_decoder_skip_single_frame(FLAC__StreamDecoder *
 		switch(decoder->protected_->state) {
 			case FLAC__STREAM_DECODER_SEARCH_FOR_METADATA:
 			case FLAC__STREAM_DECODER_READ_METADATA:
-				return false; /* above function sets the status for us */
+				return false;
 			case FLAC__STREAM_DECODER_SEARCH_FOR_FRAME_SYNC:
-				if(!frame_sync_(decoder))
+				if(!frame_sync_(decoder)) {
 					return true; /* above function sets the status for us */
+				}
 				break;
 			case FLAC__STREAM_DECODER_READ_FRAME:
 				if(!read_frame_(decoder, &got_a_frame, /*do_full_decode=*/false))
@@ -1110,12 +1221,62 @@ FLAC_API FLAC__bool FLAC__stream_decoder_skip_single_frame(FLAC__StreamDecoder *
 					return true; /* above function sets the status for us */
 				break;
 			case FLAC__STREAM_DECODER_END_OF_STREAM:
+			case FLAC__STREAM_DECODER_END_OF_LINK:
 			case FLAC__STREAM_DECODER_ABORTED:
 				return true;
 			default:
 				return false;
 		}
 	}
+}
+
+FLAC_API FLAC__bool FLAC__stream_decoder_skip_single_link(FLAC__StreamDecoder *decoder)
+{
+#if FLAC__HAS_OGG
+	FLAC__OggDecoderAspectReadStatus status;
+	FLAC__ASSERT_DECLARATION(FLAC__uint32 linknumber_start);
+	FLAC__ASSERT(0 != decoder);
+	FLAC__ASSERT(0 != decoder->protected_);
+
+	if(!decoder->private_->is_ogg ||
+	   decoder->protected_->state == FLAC__STREAM_DECODER_ABORTED ||
+	   decoder->protected_->state == FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR ||
+	   decoder->protected_->state == FLAC__STREAM_DECODER_UNINITIALIZED)
+		return false;
+
+	FLAC__ASSERT_DECLARATION(linknumber_start = decoder->protected_->ogg_decoder_aspect.current_linknumber);
+
+	if(!FLAC__bitreader_clear(decoder->private_->input)) {
+		decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
+		return false;
+	}
+	status = FLAC__ogg_decoder_aspect_skip_link(&decoder->protected_->ogg_decoder_aspect, read_callback_proxy_, decoder->private_->seek_callback, decoder->private_->tell_callback, decoder->private_->length_callback, decoder, decoder->private_->client_data);
+	if(status == FLAC__OGG_DECODER_ASPECT_READ_STATUS_END_OF_STREAM) {
+		decoder->protected_->state = FLAC__STREAM_DECODER_END_OF_STREAM;
+		return true;
+	}
+	else if(status == FLAC__OGG_DECODER_ASPECT_READ_STATUS_CALLBACKS_NONFUNCTIONAL) {
+		decoder->private_->is_seeking = true;
+		FLAC__stream_decoder_process_until_end_of_link(decoder);
+		if(decoder->protected_->state == FLAC__STREAM_DECODER_END_OF_LINK)
+			FLAC__stream_decoder_finish_link(decoder);
+		decoder->private_->is_seeking = false;
+	}
+	else if(status != FLAC__OGG_DECODER_ASPECT_READ_STATUS_OK) {
+		decoder->protected_->state = FLAC__STREAM_DECODER_OGG_ERROR;
+		return false;
+	}
+	else {
+		FLAC__MD5Final(decoder->private_->computed_md5sum, &decoder->private_->md5context);
+		reset_decoder_internal_(decoder);
+	}
+
+	FLAC__ASSERT(decoder->protected_->state == FLAC__STREAM_DECODER_END_OF_STREAM || decoder->protected_->ogg_decoder_aspect.current_linknumber > linknumber_start);
+	return true;
+#else
+	(void)decoder;
+	return false;
+#endif
 }
 
 FLAC_API FLAC__bool FLAC__stream_decoder_seek_absolute(FLAC__StreamDecoder *decoder, FLAC__uint64 sample)
@@ -1141,7 +1302,7 @@ FLAC_API FLAC__bool FLAC__stream_decoder_seek_absolute(FLAC__StreamDecoder *deco
 	FLAC__ASSERT(decoder->private_->length_callback);
 	FLAC__ASSERT(decoder->private_->eof_callback);
 
-	if(FLAC__stream_decoder_get_total_samples(decoder) > 0 && sample >= FLAC__stream_decoder_get_total_samples(decoder))
+	if(!FLAC__stream_decoder_get_decode_chained_stream(decoder) && FLAC__stream_decoder_get_total_samples(decoder) > 0 && sample >= FLAC__stream_decoder_get_total_samples(decoder))
 		return false;
 
 	decoder->private_->is_seeking = true;
@@ -1184,6 +1345,168 @@ FLAC_API FLAC__bool FLAC__stream_decoder_seek_absolute(FLAC__StreamDecoder *deco
 		return ok;
 	}
 }
+
+FLAC_API FLAC__uint64 FLAC__stream_decoder_find_total_samples(FLAC__StreamDecoder *decoder)
+{
+	if(
+		decoder->protected_->state != FLAC__STREAM_DECODER_SEARCH_FOR_METADATA &&
+		decoder->protected_->state != FLAC__STREAM_DECODER_READ_METADATA &&
+		decoder->protected_->state != FLAC__STREAM_DECODER_SEARCH_FOR_FRAME_SYNC &&
+		decoder->protected_->state != FLAC__STREAM_DECODER_READ_FRAME &&
+		decoder->protected_->state != FLAC__STREAM_DECODER_END_OF_STREAM
+	)
+		return 0;
+
+	if(
+		decoder->private_->length_callback == NULL ||
+		decoder->private_->seek_callback == NULL ||
+		decoder->private_->tell_callback == NULL
+	)
+		return 0;
+
+#if FLAC__HAS_OGG
+	if(decoder->private_->is_ogg && FLAC__ogg_decoder_aspect_get_decode_chained_stream(&decoder->protected_->ogg_decoder_aspect)) {
+		/* Keep moving forward until reaching end-of-stream */
+		uint32_t i;
+		FLAC__uint64 total_samples = 0;
+		decoder->private_->is_indexing = true;
+		while(1) {
+			FLAC__OggDecoderAspectReadStatus status;
+			if(decoder->protected_->state == FLAC__STREAM_DECODER_END_OF_STREAM ||
+			   decoder->protected_->state == FLAC__STREAM_DECODER_OGG_ERROR ||
+			   decoder->protected_->state == FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR ||
+			   decoder->protected_->state == FLAC__STREAM_DECODER_ABORTED) {
+				decoder->private_->is_indexing = false;
+				decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+				return 0;
+			}
+			status = FLAC__ogg_decoder_aspect_skip_link(&decoder->protected_->ogg_decoder_aspect, read_callback_proxy_, decoder->private_->seek_callback, decoder->private_->tell_callback, decoder->private_->length_callback, decoder, decoder->private_->client_data);
+			if(status == FLAC__OGG_DECODER_ASPECT_READ_STATUS_END_OF_STREAM)
+				break;
+			else if(status != FLAC__OGG_DECODER_ASPECT_READ_STATUS_OK) {
+				decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+				return 0;
+			}
+		}
+		decoder->private_->is_indexing = false;
+		for(i = 0; i < decoder->protected_->ogg_decoder_aspect.number_of_links_indexed; i++) {
+			total_samples += decoder->protected_->ogg_decoder_aspect.linkdetails[i].samples;
+		}
+		return total_samples;
+	}
+	else
+#endif /* FLAC__HAS_OGG */
+	{ /* not decoding chained ogg */
+		FLAC__uint64 length;
+		FLAC__uint64 pos;
+		uint32_t eof_distance = 1024; /* Some number, needs tuning */
+		decoder->private_->is_seeking = true;
+		decoder->private_->target_sample = UINT64_MAX;
+		/* get the file length */
+		if(decoder->private_->length_callback(decoder, &length, decoder->private_->client_data) != FLAC__STREAM_DECODER_LENGTH_STATUS_OK) {
+			decoder->private_->is_indexing = false;
+			return 0;
+		}
+		pos = length;
+		for( ; ; eof_distance *= 2) {
+			if(eof_distance > (1u << FLAC__STREAM_METADATA_LENGTH_LEN)) {
+				/* Could not find a frame within a reasonable distance of EOF */
+				return 0;
+			}
+			else if(pos == 0) {
+				/* Did not find a frame while reading from the start of the file */
+				return 0;
+			}
+			else if(eof_distance > length) {
+				pos = 0;
+			}
+			else {
+				pos = length - eof_distance;
+			}
+
+			if(decoder->private_->seek_callback(decoder, pos, decoder->private_->client_data) != FLAC__STREAM_DECODER_SEEK_STATUS_OK) {
+				decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+				return 0;
+			}
+			if(!FLAC__stream_decoder_flush(decoder)) {
+				/* above call sets the state for us */
+				return 0;
+			}
+
+			decoder->private_->got_a_frame = false;
+			if(!FLAC__stream_decoder_process_single(decoder) ||
+			   decoder->protected_->state == FLAC__STREAM_DECODER_ABORTED) {
+				if(decoder->protected_->state != FLAC__STREAM_DECODER_ABORTED && decoder->protected_->state != FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR)
+					decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+				return 0;
+			}
+			if(decoder->private_->got_a_frame) {
+				/* Found a frame, but we need the last frame and the frame before that, unless the last frame is
+				 * also the first frame */
+				if(decoder->private_->frame.header.number.sample_number > 0) {
+					/* For now, assume this is not the last frame, set blocksize, and continue.
+					 * If it turns out this is not the last frame, we'll start over anyway */
+					decoder->private_->fixed_block_size = decoder->private_->last_frame.header.blocksize;
+					if(!FLAC__stream_decoder_process_single(decoder) ||
+					   decoder->protected_->state == FLAC__STREAM_DECODER_ABORTED) {
+						if(decoder->protected_->state != FLAC__STREAM_DECODER_ABORTED && decoder->protected_->state != FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR)
+							decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+						return 0;
+					}
+					if(decoder->protected_->state == FLAC__STREAM_DECODER_END_OF_STREAM) {
+						/* Found last frame, but need to find frame before that too */
+						continue;
+					}
+				}
+				if(!FLAC__stream_decoder_process_until_end_of_stream(decoder))
+					return 0;
+				FLAC__ASSERT(decoder->private_->is_seeking);
+				FLAC__ASSERT(decoder->private_->last_frame_is_set);
+				decoder->private_->is_seeking = false;
+				return (FLAC__uint64)decoder->private_->last_frame.header.number.sample_number + (FLAC__uint64)decoder->private_->last_frame.header.blocksize;
+
+			}
+		}
+	}
+	return 0;
+}
+
+FLAC_API int32_t FLAC__stream_decoder_get_link_lengths(FLAC__StreamDecoder *decoder, FLAC__uint64 **link_lengths)
+{
+	/* If we don't have Ogg, this is (for now) useless, fail */
+#if FLAC__HAS_OGG
+	uint32_t i;
+
+	/* Check whether we're decoding chaines ogg, and decoder is somewhat valid */
+	if(!decoder->private_->is_ogg ||
+	   !FLAC__stream_decoder_get_decode_chained_stream(decoder) ||
+	   decoder->protected_->state == FLAC__STREAM_DECODER_ABORTED ||
+	   decoder->protected_->state == FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR ||
+	   decoder->protected_->state == FLAC__STREAM_DECODER_UNINITIALIZED)
+		return FLAC__STREAM_DECODER_GET_LINK_LENGTHS_INVALID;
+
+	/* Check whether link details are known. If not, fail */
+	if(decoder->protected_->ogg_decoder_aspect.number_of_links_indexed == 0 ||
+	   !decoder->protected_->ogg_decoder_aspect.linkdetails[decoder->protected_->ogg_decoder_aspect.number_of_links_indexed - 1].is_last)
+		return FLAC__STREAM_DECODER_GET_LINK_LENGTHS_NOT_INDEXED;
+
+	if(link_lengths != NULL) {
+		*link_lengths = safe_malloc_mul_2op_p(sizeof(FLAC__uint64), decoder->protected_->ogg_decoder_aspect.number_of_links_indexed);
+		if(*link_lengths == NULL)
+			return FLAC__STREAM_DECODER_GET_LINK_LENGTHS_MEMORY_ALLOCATION_ERROR;
+
+		for(i = 0; i < decoder->protected_->ogg_decoder_aspect.number_of_links_indexed; i++)
+			(*link_lengths)[i] = decoder->protected_->ogg_decoder_aspect.linkdetails[i].samples;
+	}
+
+	return decoder->protected_->ogg_decoder_aspect.number_of_links_indexed;
+#else
+	(void)decoder;
+	(void)link_lengths;
+	return FLAC__STREAM_DECODER_GET_LINK_LENGTHS_INVALID;
+#endif
+}
+
 
 /***********************************************************************
  *
@@ -1229,7 +1552,6 @@ void set_defaults_(FLAC__StreamDecoder *decoder)
 #endif
 }
 
-#if 0
 /*
  * This will forcibly set stdin to binary mode (for OSes that require it)
  */
@@ -1247,7 +1569,6 @@ FILE *get_binary_stdin_(void)
 
 	return stdin;
 }
-#endif
 
 FLAC__bool allocate_output_(FLAC__StreamDecoder *decoder, uint32_t size, uint32_t channels, uint32_t bps)
 {
@@ -1276,6 +1597,11 @@ FLAC__bool allocate_output_(FLAC__StreamDecoder *decoder, uint32_t size, uint32_
 		decoder->private_->side_subframe = 0;
 	}
 
+	/* Only grow per-channel buffers, even if number of channels increases */
+	if(decoder->private_->output_capacity > size) {
+		size = decoder->private_->output_capacity;
+	}
+
 	for(i = 0; i < channels; i++) {
 		/* WATCHOUT:
 		 * FLAC__lpc_restore_signal_asm_ia32_mmx() and ..._intrin_sseN()
@@ -1283,7 +1609,7 @@ FLAC__bool allocate_output_(FLAC__StreamDecoder *decoder, uint32_t size, uint32_
 		 * in front (at negative indices) for alignment purposes;
 		 * we use 4 to keep the data well-aligned.
 		 */
-		tmp = (FLAC__int32*) safe_malloc_muladd2_(sizeof(FLAC__int32), /*times (*/size, /*+*/4/*)*/);
+		tmp = safe_malloc_muladd2_(sizeof(FLAC__int32), /*times (*/size, /*+*/4/*)*/);
 		if(tmp == 0) {
 			decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 			return false;
@@ -1298,7 +1624,7 @@ FLAC__bool allocate_output_(FLAC__StreamDecoder *decoder, uint32_t size, uint32_
 	}
 
 	if(bps == 32) {
-		decoder->private_->side_subframe = (FLAC__int64*) safe_malloc_mul_2op_p(sizeof(FLAC__int64), /*times (*/size);
+		decoder->private_->side_subframe = safe_malloc_mul_2op_p(sizeof(FLAC__int64), /*times (*/size);
 		if(decoder->private_->side_subframe == NULL) {
 			decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 			return false;
@@ -1471,7 +1797,7 @@ FLAC__bool read_metadata_(FLAC__StreamDecoder *decoder)
 				case FLAC__METADATA_TYPE_APPLICATION:
 					/* remember, we read the ID already */
 					if(real_length > 0) {
-						if(0 == (block.data.application.data = (FLAC__byte*) malloc(real_length))) {
+						if(0 == (block.data.application.data = malloc(real_length))) {
 							decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 							ok = false;
 						}
@@ -1499,7 +1825,7 @@ FLAC__bool read_metadata_(FLAC__StreamDecoder *decoder)
 					break;
 				default:
 					if(real_length > 0) {
-						if(0 == (block.data.unknown.data = (FLAC__byte*) malloc(real_length))) {
+						if(0 == (block.data.unknown.data = malloc(real_length))) {
 							decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 							ok = false;
 						}
@@ -1673,7 +1999,7 @@ FLAC__bool read_metadata_seektable_(FLAC__StreamDecoder *decoder, FLAC__bool is_
 	decoder->private_->seek_table.data.seek_table.num_points = length / FLAC__STREAM_METADATA_SEEKPOINT_LENGTH;
 
 	/* use realloc since we may pass through here several times (e.g. after seeking) */
-	if(0 == (decoder->private_->seek_table.data.seek_table.points = (FLAC__StreamMetadata_SeekPoint*) safe_realloc_mul_2op_(decoder->private_->seek_table.data.seek_table.points, decoder->private_->seek_table.data.seek_table.num_points, /*times*/sizeof(FLAC__StreamMetadata_SeekPoint)))) {
+	if(0 == (decoder->private_->seek_table.data.seek_table.points = safe_realloc_mul_2op_(decoder->private_->seek_table.data.seek_table.points, decoder->private_->seek_table.data.seek_table.num_points, /*times*/sizeof(FLAC__StreamMetadata_SeekPoint)))) {
 		decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 		return false;
 	}
@@ -1716,7 +2042,7 @@ FLAC__bool read_metadata_vorbiscomment_(FLAC__StreamDecoder *decoder, FLAC__Stre
 		}
 		else
 			length -= obj->vendor_string.length;
-		if (0 == (obj->vendor_string.entry = (FLAC__byte*) safe_malloc_add_2op_(obj->vendor_string.length, /*+*/1))) {
+		if (0 == (obj->vendor_string.entry = safe_malloc_add_2op_(obj->vendor_string.length, /*+*/1))) {
 			decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 			return false;
 		}
@@ -1736,7 +2062,7 @@ FLAC__bool read_metadata_vorbiscomment_(FLAC__StreamDecoder *decoder, FLAC__Stre
 			return false;
 		}
 		if (obj->num_comments > 0) {
-			if (0 == (obj->comments = (FLAC__StreamMetadata_VorbisComment_Entry*) safe_malloc_mul_2op_p(obj->num_comments, /*times*/sizeof(FLAC__StreamMetadata_VorbisComment_Entry)))) {
+			if (0 == (obj->comments = safe_malloc_mul_2op_p(obj->num_comments, /*times*/sizeof(FLAC__StreamMetadata_VorbisComment_Entry)))) {
 				obj->num_comments = 0;
 				decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 				return false;
@@ -1764,7 +2090,7 @@ FLAC__bool read_metadata_vorbiscomment_(FLAC__StreamDecoder *decoder, FLAC__Stre
 				}
 				else
 					length -= obj->comments[i].length;
-				if (0 == (obj->comments[i].entry = (FLAC__byte*) safe_malloc_add_2op_(obj->comments[i].length, /*+*/1))) {
+				if (0 == (obj->comments[i].entry = safe_malloc_add_2op_(obj->comments[i].length, /*+*/1))) {
 					decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 					obj->num_comments = i;
 					return false;
@@ -1827,7 +2153,7 @@ FLAC__bool read_metadata_cuesheet_(FLAC__StreamDecoder *decoder, FLAC__StreamMet
 	obj->num_tracks = x;
 
 	if(obj->num_tracks > 0) {
-		if(0 == (obj->tracks = (FLAC__StreamMetadata_CueSheet_Track*) safe_calloc_(obj->num_tracks, sizeof(FLAC__StreamMetadata_CueSheet_Track)))) {
+		if(0 == (obj->tracks = safe_calloc_(obj->num_tracks, sizeof(FLAC__StreamMetadata_CueSheet_Track)))) {
 			decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 			return false;
 		}
@@ -1860,7 +2186,7 @@ FLAC__bool read_metadata_cuesheet_(FLAC__StreamDecoder *decoder, FLAC__StreamMet
 			track->num_indices = (FLAC__byte)x;
 
 			if(track->num_indices > 0) {
-				if(0 == (track->indices = (FLAC__StreamMetadata_CueSheet_Index*) safe_calloc_(track->num_indices, sizeof(FLAC__StreamMetadata_CueSheet_Index)))) {
+				if(0 == (track->indices = safe_calloc_(track->num_indices, sizeof(FLAC__StreamMetadata_CueSheet_Index)))) {
 					decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 					return false;
 				}
@@ -1897,7 +2223,7 @@ FLAC__bool read_metadata_picture_(FLAC__StreamDecoder *decoder, FLAC__StreamMeta
 	if(!FLAC__bitreader_read_raw_uint32(decoder->private_->input, &x, FLAC__STREAM_METADATA_PICTURE_TYPE_LEN))
 		return false; /* read_callback_ sets the state for us */
 	if(x < FLAC__STREAM_METADATA_PICTURE_TYPE_UNDEFINED)
-		obj->type = (FLAC__StreamMetadata_Picture_Type) x;
+		obj->type = x;
 	else
 		obj->type = FLAC__STREAM_METADATA_PICTURE_TYPE_OTHER;
 
@@ -1908,7 +2234,7 @@ FLAC__bool read_metadata_picture_(FLAC__StreamDecoder *decoder, FLAC__StreamMeta
 		FLAC__bitreader_limit_invalidate(decoder->private_->input);
 		return false;
 	}
-	if(0 == (obj->mime_type = (char*) safe_malloc_add_2op_(x, /*+*/1))) {
+	if(0 == (obj->mime_type = safe_malloc_add_2op_(x, /*+*/1))) {
 		decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 		return false;
 	}
@@ -1925,7 +2251,7 @@ FLAC__bool read_metadata_picture_(FLAC__StreamDecoder *decoder, FLAC__StreamMeta
 		FLAC__bitreader_limit_invalidate(decoder->private_->input);
 		return false;
 	}
-	if(0 == (obj->description = (FLAC__byte*) safe_malloc_add_2op_(x, /*+*/1))) {
+	if(0 == (obj->description = safe_malloc_add_2op_(x, /*+*/1))) {
 		decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 		return false;
 	}
@@ -1958,7 +2284,7 @@ FLAC__bool read_metadata_picture_(FLAC__StreamDecoder *decoder, FLAC__StreamMeta
 		FLAC__bitreader_limit_invalidate(decoder->private_->input);
 		return false;
 	}
-	if(0 == (obj->data = (FLAC__byte*) safe_malloc_(obj->data_length))) {
+	if(0 == (obj->data = safe_malloc_(obj->data_length))) {
 		decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
 		return false;
 	}
@@ -2049,7 +2375,7 @@ FLAC__bool read_frame_(FLAC__StreamDecoder *decoder, FLAC__bool *got_a_frame, FL
 	uint32_t channel;
 	uint32_t i;
 	uint32_t frame_crc; /* the one we calculate from the input stream */
-	FLAC__uint32 x{};
+	FLAC__uint32 x;
 
 	*got_a_frame = false;
 	decoder->private_->side_subframe_in_use = false;
@@ -2130,13 +2456,15 @@ FLAC__bool read_frame_(FLAC__StreamDecoder *decoder, FLAC__bool *got_a_frame, FL
 			undo_channel_coding(decoder);
 			/* Check whether decoded data actually fits bps */
 			for(channel = 0; channel < decoder->private_->frame.header.channels; channel++) {
+				int shift_bits = 32 - decoder->private_->frame.header.bits_per_sample;
+				int lower_limit = INT32_MIN >> shift_bits;
+				int upper_limit = INT32_MAX >> shift_bits;
 				for(i = 0; i < decoder->private_->frame.header.blocksize; i++) {
-					int shift_bits = 32 - decoder->private_->frame.header.bits_per_sample;
 					/* Check whether shift_bits MSBs are 'empty' by shifting up and down */
-					if((decoder->private_->output[channel][i] < (INT32_MIN >> shift_bits)) ||
-					   (decoder->private_->output[channel][i] > (INT32_MAX >> shift_bits))) {
+					if((decoder->private_->output[channel][i] < lower_limit) ||
+					   (decoder->private_->output[channel][i] > upper_limit)) {
 						/* Bad frame, emit error */
-						send_error_to_client_(decoder, FLAC__STREAM_DECODER_ERROR_STATUS_FRAME_CRC_MISMATCH);
+						send_error_to_client_(decoder, FLAC__STREAM_DECODER_ERROR_STATUS_OUT_OF_BOUNDS);
 						decoder->protected_->state = FLAC__STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
 						break;
 					}
@@ -2158,7 +2486,12 @@ FLAC__bool read_frame_(FLAC__StreamDecoder *decoder, FLAC__bool *got_a_frame, FL
 		FLAC__ASSERT(decoder->private_->last_frame.header.number_type == FLAC__FRAME_NUMBER_TYPE_SAMPLE_NUMBER);
 		if(decoder->private_->last_frame.header.number.sample_number + decoder->private_->last_frame.header.blocksize < decoder->private_->frame.header.number.sample_number) {
 			uint32_t padding_samples_needed = decoder->private_->frame.header.number.sample_number - (decoder->private_->last_frame.header.number.sample_number + decoder->private_->last_frame.header.blocksize);
-
+			/* Send an error that we lost sync, but only in case no error
+			 * has been sent yet. This is the case if exactly one or more
+			 * frames are missing, and the frames before and after it
+			 * are complete */
+			if(!decoder->private_->error_has_been_sent)
+				send_error_to_client_(decoder, FLAC__STREAM_DECODER_ERROR_STATUS_MISSING_FRAME);
 			/* Do some extra validation to assure last frame an current frame
 			 * header are both valid before adding silence inbetween
 			 * Technically both frames could be valid with differing sample_rates,
@@ -2172,7 +2505,7 @@ FLAC__bool read_frame_(FLAC__StreamDecoder *decoder, FLAC__bool *got_a_frame, FL
 				empty_frame.header = decoder->private_->last_frame.header;
 				empty_frame.footer.crc = 0;
 				for(i = 0; i < empty_frame.header.channels; i++) {
-					empty_buffer[i] = (FLAC__int32*) safe_calloc_(empty_frame.header.blocksize, sizeof(FLAC__int32));
+					empty_buffer[i] = safe_calloc_(empty_frame.header.blocksize, sizeof(FLAC__int32));
 					if(empty_buffer[i] == NULL) {
 						for(i = 0; i < empty_frame.header.channels; i++)
 							if(empty_buffer[i] != NULL)
@@ -2220,19 +2553,24 @@ FLAC__bool read_frame_(FLAC__StreamDecoder *decoder, FLAC__bool *got_a_frame, FL
 		}
 	}
 
+	decoder->private_->error_has_been_sent = false;
+
 	if(decoder->protected_->state == FLAC__STREAM_DECODER_SEARCH_FOR_FRAME_SYNC || decoder->protected_->state == FLAC__STREAM_DECODER_END_OF_STREAM) {
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+		decoder->private_->fuzzing_rewind_count++; /* To stop excessive rewinding, as it causes timeouts */
+#endif
 		/* Got corruption, rewind if possible. Return value of seek
 		* isn't checked, if the seek fails the decoder will continue anyway */
 		if(!FLAC__bitreader_rewind_to_after_last_seen_framesync(decoder->private_->input)){
 #ifndef NDEBUG
-			fprintf(stderr, "Rewinding, seeking necessary\n");
+			flac_fprintf(stderr, "Rewinding, seeking necessary\n");
 #endif
 			if(decoder->private_->seek_callback && decoder->private_->last_seen_framesync){
 				/* Last framesync isn't in bitreader anymore, rewind with seek if possible */
 #ifndef NDEBUG
 				FLAC__uint64 current_decode_position;
 				if(FLAC__stream_decoder_get_decode_position(decoder, &current_decode_position))
-					fprintf(stderr, "Bitreader was %" PRIu64 " bytes short\n", current_decode_position-decoder->private_->last_seen_framesync);
+					flac_fprintf(stderr, "Bitreader was %" PRIu64 " bytes short\n", current_decode_position-decoder->private_->last_seen_framesync);
 #endif
 				if(decoder->private_->seek_callback(decoder, decoder->private_->last_seen_framesync, decoder->private_->client_data) == FLAC__STREAM_DECODER_SEEK_STATUS_ERROR) {
 					decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
@@ -2246,12 +2584,15 @@ FLAC__bool read_frame_(FLAC__StreamDecoder *decoder, FLAC__bool *got_a_frame, FL
 		}
 #ifndef NDEBUG
 		else{
-			fprintf(stderr, "Rewinding, seeking not necessary\n");
+			flac_fprintf(stderr, "Rewinding, seeking not necessary\n");
 		}
 #endif
 	}
 	else {
 		*got_a_frame = true;
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+		decoder->private_->fuzzing_rewind_count = 0;
+#endif
 
 		/* we wait to update fixed_block_size until here, when we're sure we've got a proper frame and hence a correct blocksize */
 		if(decoder->private_->next_fixed_block_size)
@@ -2563,11 +2904,14 @@ FLAC__bool read_frame_header_(FLAC__StreamDecoder *decoder)
 
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 	if(FLAC__crc8(raw_header, raw_header_len) != crc8) {
+#else
+	if(decoder->private_->fuzzing_rewind_count > 32 && (FLAC__crc8(raw_header, raw_header_len) << 4) != (crc8 << 4)) {
+#endif
+
 		send_error_to_client_(decoder, FLAC__STREAM_DECODER_ERROR_STATUS_BAD_HEADER);
 		decoder->protected_->state = FLAC__STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
 		return true;
 	}
-#endif
 
 	/* calculate the sample number from the frame number if needed */
 	decoder->private_->next_fixed_block_size = 0;
@@ -3068,11 +3412,24 @@ FLAC__bool read_callback_(FLAC__byte buffer[], size_t *bytes, void *client_data)
 				decoder->private_->read_callback(decoder, buffer, bytes, decoder->private_->client_data)
 			;
 			if(status == FLAC__STREAM_DECODER_READ_STATUS_ABORT) {
+#if FLAC__HAS_OGG
+				if(decoder->private_->ogg_decoder_aspect_allocation_failure) {
+					decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;
+					return false;
+				}
+#endif
 				decoder->protected_->state = FLAC__STREAM_DECODER_ABORTED;
 				return false;
 			}
 			else if(*bytes == 0) {
-				if(
+				if(status == FLAC__STREAM_DECODER_READ_STATUS_END_OF_LINK) {
+					if(FLAC__bitreader_is_consumed_byte_aligned(decoder->private_->input))
+						decoder->protected_->state = FLAC__STREAM_DECODER_END_OF_LINK;
+					else
+						decoder->protected_->state = FLAC__STREAM_DECODER_OGG_ERROR;
+					return false;
+				}
+				else if(
 					status == FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM ||
 					(
 #if FLAC__HAS_OGG
@@ -3172,7 +3529,7 @@ void undo_channel_coding(FLAC__StreamDecoder *decoder) {
 #if FLAC__HAS_OGG
 FLAC__StreamDecoderReadStatus read_callback_ogg_aspect_(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes)
 {
-	switch(FLAC__ogg_decoder_aspect_read_callback_wrapper(&decoder->protected_->ogg_decoder_aspect, buffer, bytes, read_callback_proxy_, decoder, decoder->private_->client_data)) {
+	switch(FLAC__ogg_decoder_aspect_read_callback_wrapper(&decoder->protected_->ogg_decoder_aspect, buffer, bytes, read_callback_proxy_, decoder->private_->tell_callback, decoder, decoder->private_->client_data)) {
 		case FLAC__OGG_DECODER_ASPECT_READ_STATUS_OK:
 			return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 		/* we don't really have a way to handle lost sync via read
@@ -3183,11 +3540,15 @@ FLAC__StreamDecoderReadStatus read_callback_ogg_aspect_(const FLAC__StreamDecode
 			return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 		case FLAC__OGG_DECODER_ASPECT_READ_STATUS_END_OF_STREAM:
 			return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
+		case FLAC__OGG_DECODER_ASPECT_READ_STATUS_END_OF_LINK:
+			return FLAC__STREAM_DECODER_READ_STATUS_END_OF_LINK;
 		case FLAC__OGG_DECODER_ASPECT_READ_STATUS_NOT_FLAC:
 		case FLAC__OGG_DECODER_ASPECT_READ_STATUS_UNSUPPORTED_MAPPING_VERSION:
 		case FLAC__OGG_DECODER_ASPECT_READ_STATUS_ABORT:
 		case FLAC__OGG_DECODER_ASPECT_READ_STATUS_ERROR:
+			return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
 		case FLAC__OGG_DECODER_ASPECT_READ_STATUS_MEMORY_ALLOCATION_ERROR:
+			decoder->private_->ogg_decoder_aspect_allocation_failure = true;
 			return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
 		default:
 			FLAC__ASSERT(0);
@@ -3219,16 +3580,15 @@ FLAC__StreamDecoderWriteStatus write_audio_frame_to_client_(FLAC__StreamDecoder 
 {
 	decoder->private_->last_frame = *frame; /* save the frame */
 	decoder->private_->last_frame_is_set = true;
-	if(decoder->private_->is_seeking) {
+	if(decoder->private_->is_seeking && !decoder->private_->is_indexing) {
 		FLAC__uint64 this_frame_sample = frame->header.number.sample_number;
 		FLAC__uint64 next_frame_sample = this_frame_sample + (FLAC__uint64)frame->header.blocksize;
 		FLAC__uint64 target_sample = decoder->private_->target_sample;
 
 		FLAC__ASSERT(frame->header.number_type == FLAC__FRAME_NUMBER_TYPE_SAMPLE_NUMBER);
 
-#if FLAC__HAS_OGG
 		decoder->private_->got_a_frame = true;
-#endif
+
 		if(this_frame_sample <= target_sample && target_sample < next_frame_sample) { /* we hit our target frame */
 			uint32_t delta = (uint32_t)(target_sample - this_frame_sample);
 			/* kick out of seek mode */
@@ -3257,7 +3617,7 @@ FLAC__StreamDecoderWriteStatus write_audio_frame_to_client_(FLAC__StreamDecoder 
 			return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 		}
 	}
-	else {
+	else if(!decoder->private_->is_indexing) {
 		/*
 		 * If we never got STREAMINFO, turn off MD5 checking to save
 		 * cycles since we don't have a sum to compare to anyway
@@ -3270,12 +3630,17 @@ FLAC__StreamDecoderWriteStatus write_audio_frame_to_client_(FLAC__StreamDecoder 
 		}
 		return decoder->private_->write_callback(decoder, frame, buffer, decoder->private_->client_data);
 	}
+	else { /* decoder->private_->is_indexing == true */
+		return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
+	}
 }
 
 void send_error_to_client_(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status)
 {
-	if(!decoder->private_->is_seeking)
+	if(!decoder->private_->is_seeking) {
+		decoder->private_->error_has_been_sent = true;
 		decoder->private_->error_callback(decoder, status, decoder->private_->client_data);
+	}
 	else if(status == FLAC__STREAM_DECODER_ERROR_STATUS_UNPARSEABLE_STREAM)
 		decoder->private_->unparseable_frame_count++;
 }
@@ -3396,8 +3761,10 @@ FLAC__bool seek_to_absolute_sample_(FLAC__StreamDecoder *decoder, FLAC__uint64 s
 		}
 	}
 
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 	FLAC__ASSERT(upper_bound_sample >= lower_bound_sample);
-	/* there are 2 insidious ways that the following equality occurs, which
+#endif
+	/* there are 3 insidious ways that the following equality occurs, which
 	 * we need to fix:
 	 *  1) total_samples is 0 (unknown) and target_sample is 0
 	 *  2) total_samples is 0 (unknown) and target_sample happens to be
@@ -3405,9 +3772,16 @@ FLAC__bool seek_to_absolute_sample_(FLAC__StreamDecoder *decoder, FLAC__uint64 s
 	 *     means there is no seek point above it, and upper_bound_samples
 	 *     remains equal to the estimate (of target_samples) we made above
 	 * in either case it does not hurt to move upper_bound_sample up by 1
+	 *  3) the file is corrupt
 	 */
-	if(upper_bound_sample == lower_bound_sample)
-		upper_bound_sample++;
+	if(upper_bound_sample == lower_bound_sample) {
+		if(total_samples == 0)
+			upper_bound_sample++;
+		else {
+			decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+			return false;
+		}
+	}
 
 	decoder->private_->target_sample = target_sample;
 	while(1) {
@@ -3419,7 +3793,8 @@ FLAC__bool seek_to_absolute_sample_(FLAC__StreamDecoder *decoder, FLAC__uint64 s
 		/* check if the bounds are still ok */
 		if (lower_bound_sample >= upper_bound_sample ||
 		    lower_bound > upper_bound ||
-		    upper_bound >= INT64_MAX) {
+		    upper_bound >= INT64_MAX ||
+		    target_sample > upper_bound_sample) {
 			decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
 			return false;
 		}
@@ -3469,7 +3844,8 @@ FLAC__bool seek_to_absolute_sample_(FLAC__StreamDecoder *decoder, FLAC__uint64 s
 				continue;
 			}
 			else {
-				decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+				if(decoder->protected_->state != FLAC__STREAM_DECODER_ABORTED && decoder->protected_->state != FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR)
+					decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
 				return false;
 			}
 		}
@@ -3529,10 +3905,12 @@ FLAC__bool seek_to_absolute_sample_(FLAC__StreamDecoder *decoder, FLAC__uint64 s
 FLAC__bool seek_to_absolute_sample_ogg_(FLAC__StreamDecoder *decoder, FLAC__uint64 stream_length, FLAC__uint64 target_sample)
 {
 	FLAC__uint64 left_pos = 0, right_pos = stream_length;
-	FLAC__uint64 left_sample = 0, right_sample = FLAC__stream_decoder_get_total_samples(decoder);
+	FLAC__uint64 left_sample = 0, right_sample = 0;
 	FLAC__uint64 this_frame_sample = (FLAC__uint64)0 - 1;
 	FLAC__uint64 pos = 0; /* only initialized to avoid compiler warning */
 	FLAC__bool did_a_seek;
+	FLAC__OggDecoderAspect_TargetLink *target_link;
+	uint32_t current_linknumber = decoder->protected_->ogg_decoder_aspect.current_linknumber;
 	uint32_t iteration = 0;
 
 	/* In the first iterations, we will calculate the target byte position
@@ -3547,12 +3925,66 @@ FLAC__bool seek_to_absolute_sample_ogg_(FLAC__StreamDecoder *decoder, FLAC__uint
 	 */
 	static const FLAC__uint64 LINEAR_SEARCH_WITHIN_SAMPLES = FLAC__MAX_BLOCK_SIZE * 2;
 
-	/* If the total number of samples is unknown, use a large value, and
-	 * force binary search immediately.
-	 */
-	if(right_sample == 0) {
-		right_sample = (FLAC__uint64)(-1);
-		BINARY_SEARCH_AFTER_ITERATION = 0;
+	if(FLAC__ogg_decoder_aspect_get_decode_chained_stream(&decoder->protected_->ogg_decoder_aspect)) {
+		/* Check whether target sample is contained by indexed links.
+		 * If it is not keep moving forward until found */
+		decoder->private_->is_indexing = true;
+		while(NULL == (target_link = FLAC__ogg_decoder_aspect_get_target_link(&decoder->protected_->ogg_decoder_aspect, target_sample))) {
+			FLAC__OggDecoderAspectReadStatus status;
+			if(decoder->protected_->state == FLAC__STREAM_DECODER_END_OF_STREAM ||
+			   decoder->protected_->state == FLAC__STREAM_DECODER_OGG_ERROR ||
+			   decoder->protected_->state == FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR ||
+			   decoder->protected_->state == FLAC__STREAM_DECODER_ABORTED) {
+				/* Target sample is not contained in stream or other error */
+				decoder->private_->is_indexing = false;
+				decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+				return false;
+			}
+			status = FLAC__ogg_decoder_aspect_skip_link(&decoder->protected_->ogg_decoder_aspect, read_callback_proxy_, decoder->private_->seek_callback, decoder->private_->tell_callback, decoder->private_->length_callback, decoder, decoder->private_->client_data);
+			if(status == FLAC__OGG_DECODER_ASPECT_READ_STATUS_END_OF_STREAM)
+				decoder->protected_->state = FLAC__STREAM_DECODER_END_OF_STREAM;
+			else if(status != FLAC__OGG_DECODER_ASPECT_READ_STATUS_OK) {
+				decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+				return false;
+			}
+		}
+		decoder->private_->is_indexing = false;
+		/* Target link found, send metadata if necessary */
+		FLAC__ogg_decoder_aspect_set_seek_parameters(&decoder->protected_->ogg_decoder_aspect, target_link);
+		if(target_link->linknumber != current_linknumber) {
+			if(decoder->private_->seek_callback((FLAC__StreamDecoder*)decoder, (FLAC__uint64)target_link->start_byte, decoder->private_->client_data) != FLAC__STREAM_DECODER_SEEK_STATUS_OK) {
+				decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+				return false;
+			}
+			if(!FLAC__stream_decoder_flush(decoder)) {
+				/* above call sets the state for us */
+				return false;
+			}
+			decoder->protected_->state = FLAC__STREAM_DECODER_SEARCH_FOR_METADATA;
+			decoder->private_->is_seeking = false;
+			if(!FLAC__stream_decoder_process_until_end_of_metadata(decoder)) {
+				decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+				return false;
+			}
+			decoder->private_->is_seeking = true;
+		}
+		/* set boundaries */
+		left_pos = target_link->start_byte;
+		left_sample = 0;
+		right_pos = target_link->end_byte;
+		right_sample = target_link->samples_this_link;
+		target_sample -= target_link->samples_in_preceding_links;
+	}
+	else {
+		right_sample = FLAC__stream_decoder_get_total_samples(decoder);
+
+		/* If the total number of samples is unknown, use a large value, and
+		 * force binary search immediately.
+		 */
+		if(right_sample == 0) {
+			right_sample = (FLAC__uint64)(-1);
+			BINARY_SEARCH_AFTER_ITERATION = 0;
+		}
 	}
 
 	decoder->private_->target_sample = target_sample;
@@ -3569,13 +4001,13 @@ FLAC__bool seek_to_absolute_sample_ogg_(FLAC__StreamDecoder *decoder, FLAC__uint
 			}
 			else {
 #ifndef FLAC__INTEGER_ONLY_LIBRARY
-				pos = (FLAC__uint64)((double)(target_sample - left_sample) / (double)(right_sample - left_sample) * (double)(right_pos - left_pos));
+				pos = (FLAC__uint64)((double)(target_sample - left_sample) / (double)(right_sample - left_sample) * (double)(right_pos - left_pos)) + left_pos;
 #else
 				/* a little less accurate: */
 				if ((target_sample-left_sample <= 0xffffffff) && (right_pos-left_pos <= 0xffffffff))
-					pos = (FLAC__int64)(((target_sample-left_sample) * (right_pos-left_pos)) / (right_sample-left_sample));
+					pos = (FLAC__int64)(((target_sample-left_sample) * (right_pos-left_pos)) / (right_sample-left_sample)) + left_pos;
 				else /* @@@ WATCHOUT, ~2TB limit */
-					pos = (FLAC__int64)((((target_sample-left_sample)>>8) * ((right_pos-left_pos)>>8)) / ((right_sample-left_sample)>>16));
+					pos = (FLAC__int64)((((target_sample-left_sample)>>8) * ((right_pos-left_pos)>>8)) / ((right_sample-left_sample)>>16)) + left_pos;
 #endif
 				/* @@@ TODO: might want to limit pos to some distance
 				 * before EOF, to make sure we land before the last frame,
@@ -3601,7 +4033,8 @@ FLAC__bool seek_to_absolute_sample_ogg_(FLAC__StreamDecoder *decoder, FLAC__uint
 		decoder->private_->got_a_frame = false;
 		if(!FLAC__stream_decoder_process_single(decoder) ||
 		   decoder->protected_->state == FLAC__STREAM_DECODER_ABORTED) {
-			decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
+			if(decoder->protected_->state != FLAC__STREAM_DECODER_ABORTED && decoder->protected_->state != FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR)
+				decoder->protected_->state = FLAC__STREAM_DECODER_SEEK_ERROR;
 			return false;
 		}
 		if(!decoder->private_->got_a_frame) {
@@ -3659,12 +4092,12 @@ FLAC__bool seek_to_absolute_sample_ogg_(FLAC__StreamDecoder *decoder, FLAC__uint
 			}
 		}
 	}
-
+	/* Tell ogg decoder aspect that seeking is done */
+	FLAC__ogg_decoder_aspect_set_seek_parameters(&decoder->protected_->ogg_decoder_aspect, 0);
 	return true;
 }
 #endif
 
-#if 0
 FLAC__StreamDecoderReadStatus file_read_callback_(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes, void *client_data)
 {
 	(void)client_data;
@@ -3736,4 +4169,3 @@ FLAC__bool file_eof_callback_(const FLAC__StreamDecoder *decoder, void *client_d
 
 	return feof(decoder->private_->file)? true : false;
 }
-#endif

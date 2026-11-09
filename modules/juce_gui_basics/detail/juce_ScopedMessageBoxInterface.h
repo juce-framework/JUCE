@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -50,10 +50,10 @@ struct ScopedMessageBoxInterface
         When the message box exits normally, it should send the result to the passed-in function.
         The passed-in function is safe to call from any thread at any time.
     */
-    virtual void runAsync (std::function<void (int)>) = 0;
+    virtual void runAsync (std::function<void (std::optional<int>)>) = 0;
 
     /*  Shows the message box and blocks. */
-    virtual int runSync() = 0;
+    virtual std::optional<int> runSync() = 0;
 
     /*  Forcefully closes the message box.
 

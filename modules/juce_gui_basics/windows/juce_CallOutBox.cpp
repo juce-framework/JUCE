@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -35,7 +35,23 @@
 namespace juce
 {
 
+static Rectangle<int> getAreaToPointTo (Component& target, Component* parent)
+{
+    return parent != nullptr ? parent->getLocalArea (&target, target.getLocalBounds())
+                             : target.getScreenBounds();
+}
+
 CallOutBox::CallOutBox (Component& c, Rectangle<int> area, Component* const parent)
+    : CallOutBox (c, area, parent, nullptr)
+{
+}
+
+CallOutBox::CallOutBox (Component& c, Component& target, Component* const parent)
+    : CallOutBox (c, getAreaToPointTo (target, parent), parent, &target)
+{
+}
+
+CallOutBox::CallOutBox (Component& c, Rectangle<int> area, Component* const parent, Component* const associated)
     : content (c)
 {
     addAndMakeVisible (content);
@@ -49,8 +65,9 @@ CallOutBox::CallOutBox (Component& c, Rectangle<int> area, Component* const pare
     else
     {
         setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
-        updatePosition (area, Desktop::getInstance().getDisplays().getDisplayForRect (area)->userArea);
-        addToDesktop (ComponentPeer::windowIsTemporary);
+        updatePosition (area, Desktop::getInstance().getDisplays().getDisplayForRect (area)->userBounds.getLargestIntegerWithin());
+        addToDesktop (DesktopWindowOptions().withStyleFlags (ComponentPeer::windowIsTemporary)
+                                            .withAssociatedComponent (associated));
 
         startTimer (100);
     }
@@ -63,9 +80,10 @@ class CallOutBoxCallback final : public ModalComponentManager::Callback,
                                  private Timer
 {
 public:
-    CallOutBoxCallback (std::unique_ptr<Component> c, const Rectangle<int>& area, Component* parent)
+    template <typename Target>
+    CallOutBoxCallback (std::unique_ptr<Component> c, Target& target, Component* parent)
         : content (std::move (c)),
-          callout (*content, area, parent)
+          callout (*content, target, parent)
     {
         callout.setVisible (true);
         callout.enterModalState (true, this);
@@ -91,6 +109,13 @@ CallOutBox& CallOutBox::launchAsynchronously (std::unique_ptr<Component> content
     jassert (content != nullptr); // must be a valid content component!
 
     return (new CallOutBoxCallback (std::move (content), area, parent))->callout;
+}
+
+CallOutBox& CallOutBox::launchAsynchronously (std::unique_ptr<Component> content, Component& target, Component* parent)
+{
+    jassert (content != nullptr); // must be a valid content component!
+
+    return (new CallOutBoxCallback (std::move (content), target, parent))->callout;
 }
 
 //==============================================================================
@@ -198,7 +223,7 @@ bool CallOutBox::keyPressed (const KeyPress& key)
 
 void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const Rectangle<int>& newAreaToFitIn)
 {
-    targetArea = newAreaToPointTo;
+    const auto targetAreaChanged = std::exchange (targetArea, newAreaToPointTo) != newAreaToPointTo;
     availableArea = newAreaToFitIn;
 
     auto borderSpace = getBorderSize();
@@ -246,6 +271,10 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
                                    (int) (centre.y - (float) hh));
         }
     }
+
+    // The path is refreshed already for bounds changes
+    if (targetAreaChanged && getBounds() == newBounds)
+        refreshPath();
 
     setBounds (newBounds);
 }

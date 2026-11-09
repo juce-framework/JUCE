@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <set>
 #include <sstream>
 
 #ifdef __ANDROID__
@@ -69,6 +70,17 @@ int32_t convertFormatToSizeInBytes(AudioFormat format) {
         case AudioFormat::IEC61937:
             size = sizeof(int16_t);
             break;
+        case AudioFormat::MP3:
+        case AudioFormat::AAC_LC:
+        case AudioFormat::AAC_HE_V1:
+        case AudioFormat::AAC_HE_V2:
+        case AudioFormat::AAC_ELD:
+        case AudioFormat::AAC_XHE:
+        case AudioFormat::OPUS:
+            // For compressed formats, set the size per sample as 0 as they may not have
+            // fix size per sample.
+            size = 0;
+            break;
         default:
             break;
     }
@@ -110,6 +122,13 @@ const char *convertToText<AudioFormat>(AudioFormat format) {
         case AudioFormat::I24:          return "I24";
         case AudioFormat::I32:          return "I32";
         case AudioFormat::IEC61937:     return "IEC61937";
+        case AudioFormat::MP3:          return "MP3";
+        case AudioFormat::AAC_LC:       return "AAC_LC";
+        case AudioFormat::AAC_HE_V1:    return "AAC_HE_V1";
+        case AudioFormat::AAC_HE_V2:    return "AAC_HE_V2";
+        case AudioFormat::AAC_ELD:      return "AAC_ELD";
+        case AudioFormat::AAC_XHE:      return "AAC_XHE";
+        case AudioFormat::OPUS:         return "OPUS";
         default:                        return "Unrecognized format";
     }
 }
@@ -292,6 +311,25 @@ const char *convertToText<SampleRateConversionQuality>(SampleRateConversionQuali
     }
 }
 
+template<>
+const char *convertToText<FallbackMode>(FallbackMode fallbackMode) {
+    switch (fallbackMode) {
+        case FallbackMode::Default: return "Default";
+        case FallbackMode::Fail:    return "Fail";
+        case FallbackMode::Mute:    return "Mute";
+        default:                    return "Unrecognized fallback mode";
+    }
+}
+
+template<>
+const char *convertToText<StretchMode>(StretchMode stretchMode) {
+    switch (stretchMode) {
+        case StretchMode::Default: return "Default";
+        case StretchMode::Voice:   return "Voice";
+        default:                   return "Unrecognized stretch mode";
+    }
+}
+
 std::string getPropertyString(const char * name) {
     std::string result;
 #ifdef __ANDROID__
@@ -342,6 +380,24 @@ bool isAtLeastPreReleaseCodename(const std::string& codename) {
 
 int getChannelCountFromChannelMask(ChannelMask channelMask) {
     return __builtin_popcount(static_cast<uint32_t>(channelMask));
+}
+
+
+std::set<AudioFormat> COMPRESSED_FORMATS = {
+        AudioFormat::MP3, AudioFormat::AAC_LC, AudioFormat::AAC_HE_V1, AudioFormat::AAC_HE_V2,
+        AudioFormat::AAC_ELD, AudioFormat::AAC_XHE, AudioFormat::OPUS
+};
+bool isCompressedFormat(AudioFormat format) {
+    return COMPRESSED_FORMATS.count(format) != 0;
+}
+
+std::string toString(const PlaybackParameters& parameters) {
+    std::stringstream ss;
+    ss << "Fallback Mode: " << convertToText(parameters.fallbackMode)
+       << ", Stretch Mode:" << convertToText(parameters.stretchMode)
+       << ", pitch: " << parameters.pitch
+       << ", speed: " << parameters.speed;
+    return ss.str();
 }
 
 }// namespace oboe

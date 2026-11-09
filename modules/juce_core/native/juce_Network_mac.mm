@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -108,10 +108,9 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments ([[maybe_unused]] const Str
         script << "end tell\r\n"
                   "end tell\r\n";
 
-        NSAppleScript* s = [[NSAppleScript alloc] initWithSource: juceStringToNS (script)];
+        NSUniquePtr<NSAppleScript> s { [[NSAppleScript alloc] initWithSource: juceStringToNS (script)] };
         NSDictionary* error = nil;
-        const bool ok = [s executeAndReturnError: &error] != nil;
-        [s release];
+        const bool ok = [s.get() executeAndReturnError: &error] != nil;
 
         return ok;
     }
@@ -347,11 +346,11 @@ public:
     TaskToken() = default;
 
     explicit TaskToken (NSURLRequest* request, SessionListener* l)
-        : task ([&]
+        : task (std::invoke ([&]
                 {
                     SharedResourcePointer<SharedSession> session;
                     return session->addTask (request, l);
-                }())
+                }))
     {
         if (auto* t = task.get())
             [t resume];
@@ -397,6 +396,8 @@ public:
     {
         const std::scoped_lock lock { mutex };
         token.cancel();
+        state = State::cancelled;
+        condvar.notify_one();
     }
 
     int64 getContentLength() const noexcept
@@ -437,7 +438,11 @@ public:
             }
         }
 
-        return true;
+        if (state != State::cancelled)
+            return true;
+
+        token.cancel();
+        return false;
     }
 
     int read (char* dest, int numBytes)
@@ -449,7 +454,10 @@ public:
             std::unique_lock lock { mutex };
 
             const auto getNumAvailable = [&] { return jmin (numBytes, (int) [data.get() length]); };
-            condvar.wait (lock, [&] { return getNumAvailable() > 0 || state == State::requestFinished; });
+            condvar.wait (lock, [&] { return getNumAvailable() > 0 || state == State::requestFinished || state == State::cancelled; });
+
+            if (state == State::cancelled)
+                break;
 
             const auto available = getNumAvailable();
 
@@ -530,7 +538,8 @@ private:
     {
         beforeStart,
         started,
-        requestFinished
+        requestFinished,
+        cancelled,
     };
 
     mutable std::mutex mutex;
@@ -566,8 +575,8 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
         downloaded = -1;
 
         static DelegateClass cls;
-        delegate = [cls.createInstance() init];
-        DelegateClass::setState (delegate, this);
+        delegate.reset ([cls.createInstance() init]);
+        DelegateClass::setState (delegate.get(), this);
 
         activeSessions.set (uniqueIdentifier, this);
         auto nsUrl = [NSURL URLWithString: juceStringToNS (urlToUse.toString (true))];
@@ -575,11 +584,15 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
         jassert (nsUrl != nullptr);
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
-        NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL: nsUrl];
+        NSUniquePtr<NSMutableURLRequest> request { [[NSMutableURLRequest alloc] initWithURL: nsUrl] };
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         if (options.usePost)
-            [request setHTTPMethod: @"POST"];
+            [request.get() setHTTPMethod: @"POST"];
+
+        if (const auto& postData = urlToUse.getPostDataAsMemoryBlock(); ! postData.isEmpty())
+            [request.get() setHTTPBody: [NSData dataWithBytes: postData.getData()
+                                                       length: postData.getSize()]];
 
         StringArray headerLines;
         headerLines.addLines (options.extraHeaders);
@@ -591,7 +604,7 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
             String value = headerLines[i].fromFirstOccurrenceOf (":", false, false).trim();
 
             if (key.isNotEmpty() && value.isNotEmpty())
-                [request addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
+                [request.get() addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
         }
 
         auto* configuration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier: juceStringToNS (uniqueIdentifier)];
@@ -600,16 +613,14 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
             [configuration setSharedContainerIdentifier: juceStringToNS (options.sharedContainer)];
 
         session = [NSURLSession sessionWithConfiguration: configuration
-                                                delegate: delegate
+                                                delegate: delegate.get()
                                            delegateQueue: nullptr];
 
         if (session != nullptr)
-            downloadTask = [session downloadTaskWithRequest:request];
+            downloadTask = [session downloadTaskWithRequest:request.get()];
 
         // Workaround for an Apple bug. See https://github.com/AFNetworking/AFNetworking/issues/2334
-        [request HTTPBody];
-
-        [request release];
+        [request.get() HTTPBody];
     }
 
     ~BackgroundDownloadTask()
@@ -625,8 +636,6 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
         [session invalidateAndCancel];
         while (! hasBeenDestroyed)
             destroyEvent.wait();
-
-        [delegate release];
     }
 
     bool initOK()
@@ -646,7 +655,7 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
 
     //==============================================================================
     URL::DownloadTask::Listener* listener;
-    NSObject<NSURLSessionDelegate>* delegate = nil;
+    NSUniquePtr<NSObject<NSURLSessionDelegate>> delegate;
     NSURLSession* session = nil;
     NSURLSessionDownloadTask* downloadTask = nil;
     bool connectFinished = false, hasBeenDestroyed = false;
@@ -756,7 +765,8 @@ struct BackgroundDownloadTask final : public URL::DownloadTask
     //==============================================================================
     struct DelegateClass final : public ObjCClass<NSObject<NSURLSessionDelegate>>
     {
-        DelegateClass()  : ObjCClass<NSObject<NSURLSessionDelegate>> ("JUCE_URLDelegate_")
+        DelegateClass()
+            : ObjCClass ("JUCE_URLDelegate_")
         {
             addIvar<BackgroundDownloadTask*> ("state");
 
@@ -841,14 +851,7 @@ public:
 
     bool connect (WebInputStream::Listener* webInputListener, [[maybe_unused]] int numRetries = 0)
     {
-        {
-            const ScopedLock lock (createConnectionLock);
-
-            if (hasBeenCancelled)
-                return false;
-
-            createConnection();
-        }
+        createConnection();
 
         if (! connection.has_value())
             return false;
@@ -970,6 +973,11 @@ private:
 
     void createConnection()
     {
+        const ScopedLock lock (createConnectionLock);
+
+        if (hasBeenCancelled)
+            return;
+
         jassert (! connection.has_value());
 
         NSUniquePtr<NSURL> nsURL { [[NSURL URLWithString: juceStringToNS (url.toString (! addParametersToRequestBody))] retain] };
@@ -977,13 +985,13 @@ private:
         if (nsURL == nullptr)
             return;
 
-        const auto timeOutSeconds = [this]
+        const auto timeOutSeconds = std::invoke ([this]
         {
             if (timeOutMs > 0)
                 return timeOutMs / 1000.0;
 
             return timeOutMs < 0 ? std::numeric_limits<double>::infinity() : 60.0;
-        }();
+        });
 
         NSUniquePtr<NSMutableURLRequest> req { [[NSMutableURLRequest requestWithURL: nsURL.get()
                                                                         cachePolicy: NSURLRequestReloadIgnoringLocalCacheData

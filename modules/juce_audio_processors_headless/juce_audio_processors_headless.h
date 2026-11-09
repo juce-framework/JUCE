@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_processors_headless
   vendor:             juce
-  version:            8.0.12
+  version:            9.0.6
   name:               JUCE audio processor classes without UI
   description:        Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors without UI.
   website:            http://www.juce.com/juce
@@ -95,12 +95,20 @@
 #endif
 
 /** Config: JUCE_PLUGINHOST_LADSPA
-    Enables the LADSPA plugin hosting classes. This is Linux-only, of course.
+    Enables the LADSPA plugin hosting classes.
+
+    The LADSPA header is not distributed with JUCE, and is licensed under the LGPL. If this flag
+    is enabled, the header must be available as <ladspa.h>, or at the location specified by
+    JUCE_LADSPA_INCLUDE_PATH, and you must ensure that you adhere to the terms of the LGPL.
 
     @see LADSPAPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_VST3, JUCE_PLUGINHOST_AU
  */
 #ifndef JUCE_PLUGINHOST_LADSPA
  #define JUCE_PLUGINHOST_LADSPA 0
+#endif
+
+#ifndef JUCE_LADSPA_INCLUDE_PATH
+ #define JUCE_LADSPA_INCLUDE_PATH <ladspa.h>
 #endif
 
 /** Config: JUCE_PLUGINHOST_LV2
@@ -138,7 +146,7 @@
 #include <juce_audio_processors_headless/utilities/juce_VST3Interface.h>
 #include <juce_audio_processors_headless/utilities/juce_VST3ClientExtensions.h>
 #include <juce_audio_processors_headless/format_types/juce_ARACommon.h>
-#include <juce_audio_processors_headless/utilities/juce_ExtensionsVisitor.h>
+#include <juce_audio_processors_headless/utilities/juce_AudioPluginExtensions.h>
 #include <juce_audio_processors_headless/processors/juce_AudioProcessorParameter.h>
 #include <juce_audio_processors_headless/processors/juce_HostedAudioProcessorParameter.h>
 #include <juce_audio_processors_headless/processors/juce_AudioProcessorParameterGroup.h>

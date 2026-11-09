@@ -18,10 +18,13 @@
 #include <pthread.h>
 #include <thread>
 
-#include <oboe/AudioStream.h>
+#include "oboe/AudioClock.h"
+#include "oboe/AudioStream.h"
+
+#include <algorithm>
+
+#include "oboe/Utilities.h"
 #include "OboeDebug.h"
-#include "AudioClock.h"
-#include <oboe/Utilities.h>
 
 namespace oboe {
 
@@ -77,6 +80,28 @@ DataCallbackResult AudioStream::fireDataCallback(void *audioData, int32_t numFra
     // On Oreo, we might get called after returning stop.
     // So block that here.
     setDataCallbackEnabled(result == DataCallbackResult::Continue);
+
+    endPerformanceHintInCallback(numFrames);
+
+    return result;
+}
+
+int32_t AudioStream::firePartialDataCallback(void *audioData, int numFrames) {
+    if (!isDataCallbackEnabled()) {
+        LOGW("AudioStream::%s() called with data callback disabled!", __func__);
+        return -1; // Should not be getting called
+    }
+
+    beginPerformanceHintInCallback();
+
+    // Call the app to do the work.
+    int32_t result;
+    if (mPartialDataCallback) {
+        result = mPartialDataCallback->onPartialAudioReady(this, audioData, numFrames);
+    } else {
+        LOGE("AudioStream::%s, called without a partial data callback!", __func__);
+        result = -1; // This should not happen, return negative value to stop the stream.
+    }
 
     endPerformanceHintInCallback(numFrames);
 
@@ -223,8 +248,9 @@ ResultWithValue<FrameTimestamp> AudioStream::getTimestamp(clockid_t clockId) {
 void AudioStream::calculateDefaultDelayBeforeCloseMillis() {
     // Calculate delay time before close based on burst duration.
     // Start with a burst duration then add 1 msec as a safety margin.
-    mDelayBeforeCloseMillis = std::max(kMinDelayBeforeCloseMillis,
-                                       1 + ((mFramesPerBurst * 1000) / getSampleRate()));
+    mDelayBeforeCloseMillis = std::clamp(1 + (mFramesPerBurst * 1000) / getSampleRate(),
+            kMinDelayBeforeCloseMillis,
+            kMaxDelayBeforeCloseMillis);
     LOGD("calculateDefaultDelayBeforeCloseMillis() default = %d",
          static_cast<int>(mDelayBeforeCloseMillis));
 }

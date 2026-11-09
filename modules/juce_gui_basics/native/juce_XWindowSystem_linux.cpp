@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -101,11 +101,11 @@ XWindowSystemUtilities::ScopedXLock::~ScopedXLock()
 //==============================================================================
 XWindowSystemUtilities::Atoms::Atoms (::Display* display)
 {
-    protocols                    = getIfExists (display, "WM_PROTOCOLS");
-    protocolList [TAKE_FOCUS]    = getIfExists (display, "WM_TAKE_FOCUS");
-    protocolList [DELETE_WINDOW] = getIfExists (display, "WM_DELETE_WINDOW");
-    protocolList [PING]          = getIfExists (display, "_NET_WM_PING");
-    changeState                  = getIfExists (display, "WM_CHANGE_STATE");
+    protocols                    = getCreating (display, "WM_PROTOCOLS");
+    protocolList [TAKE_FOCUS]    = getCreating (display, "WM_TAKE_FOCUS");
+    protocolList [DELETE_WINDOW] = getCreating (display, "WM_DELETE_WINDOW");
+    protocolList [PING]          = getCreating (display, "_NET_WM_PING");
+    changeState                  = getCreating (display, "WM_CHANGE_STATE");
     state                        = getIfExists (display, "WM_STATE");
     userTime                     = getCreating (display, "_NET_WM_USER_TIME");
     activeWin                    = getCreating (display, "_NET_ACTIVE_WINDOW");
@@ -113,6 +113,8 @@ XWindowSystemUtilities::Atoms::Atoms (::Display* display)
     windowType                   = getIfExists (display, "_NET_WM_WINDOW_TYPE");
     windowState                  = getIfExists (display, "_NET_WM_STATE");
     windowStateHidden            = getIfExists (display, "_NET_WM_STATE_HIDDEN");
+    windowStateMaximisedHorz     = getIfExists (display, "_NET_WM_STATE_MAXIMIZED_HORZ");
+    windowStateMaximisedVert     = getIfExists (display, "_NET_WM_STATE_MAXIMIZED_VERT");
 
     XdndAware                    = getCreating (display, "XdndAware");
     XdndEnter                    = getCreating (display, "XdndEnter");
@@ -175,6 +177,11 @@ bool XWindowSystemUtilities::Atoms::isMimeTypeFile (::Display* display, Atom ato
 XWindowSystemUtilities::GetXProperty::GetXProperty (::Display* display, Window window, Atom atom,
                                                     long offset, long length, bool shouldDelete, Atom requestedType)
 {
+    jassert (window != None);
+
+    if (window == None || atom == None)
+        return;
+
     success = (X11Symbols::getInstance()->xGetWindowProperty (display, window, atom, offset, length,
                                                               (Bool) shouldDelete, requestedType, &actualType,
                                                               &actualFormat, &numItems, &bytesLeft, &data) == Success)
@@ -593,6 +600,85 @@ enum
 {
     KeyPressEventType = 2
 };
+
+//=============================== X11 - XInput =================================
+#if JUCE_USE_XINPUT
+ namespace XInputHelpers
+ {
+     static MultiTouchMapper<int> currentTouches;
+
+     static std::optional<int> setupXI2 (::Display* display)
+     {
+         static const auto result = std::invoke ([display]() -> std::optional<int>
+         {
+             int xinputOpcode, first_event, first_error;
+             if (! X11Symbols::getInstance()->xQueryExtension (display, "XInputExtension", &xinputOpcode, &first_event, &first_error))
+                 return {};
+
+             int major = 2, minor = 2;
+             if (X11Symbols::getInstance()->xiQueryVersion (display, &major, &minor) != Success)
+                return {};
+
+             if (std::tuple (major, minor) < std::tuple (2, 2))
+                 return {};
+
+             return xinputOpcode;
+         });
+
+         return result;
+     }
+
+     static void registerForXI2Events (::Display* display, ::Window windowH)
+     {
+         if (! setupXI2 (display))
+             return;
+
+         const auto shouldHandleMouseClicks = std::invoke ([windowH]
+         {
+             if (auto* peer = getPeerFor (windowH))
+                 return (peer->getStyleFlags() & ComponentPeer::windowIgnoresMouseClicks) == 0;
+
+             return true;
+         });
+
+         // The slave devices behind a master pointer can report buttons and motion separately, as
+         // they do under Xwayland. Selecting on the master devices means that the implicit grab
+         // from a button press also covers the motion that follows it.
+         unsigned char maskData[XIMaskLen (XI_LASTEVENT)] = {};
+         XISetMask (maskData, XI_Motion);
+
+         if (shouldHandleMouseClicks)
+         {
+             XISetMask (maskData, XI_ButtonPress);
+             XISetMask (maskData, XI_ButtonRelease);
+             XISetMask (maskData, XI_TouchBegin);
+             XISetMask (maskData, XI_TouchUpdate);
+             XISetMask (maskData, XI_TouchEnd);
+         }
+
+         XIEventMask eventMask;
+         eventMask.deviceid = XIAllMasterDevices;
+         eventMask.mask_len = sizeof (maskData);
+         eventMask.mask = maskData;
+
+         X11Symbols::getInstance()->xiSelectEvents (display, windowH, &eventMask, 1);
+         X11Symbols::getInstance()->xFlush (display);
+     }
+
+     static std::optional<int> getClientPointer (::Display* display)
+     {
+         if (! setupXI2 (display))
+             return {};
+
+         int deviceId = 0;
+
+         if (! X11Symbols::getInstance()->xiGetClientPointer (display, None, &deviceId))
+             return {};
+
+         return deviceId;
+     }
+ }
+#endif
 
 //================================== X11 - Shm =================================
 #if JUCE_USE_XSHM
@@ -1525,7 +1611,7 @@ static int getAllEventsMask (bool ignoresMouseClicks)
              | (ignoresMouseClicks ? 0 : (ButtonPressMask | ButtonReleaseMask));
 }
 
-::Window XWindowSystem::createWindow (::Window parentToAddTo, LinuxComponentPeer* peer) const
+::Window XWindowSystem::createWindow (::Window parentToAddTo, LinuxComponentPeer* peer)
 {
     if (! xIsAvailable)
     {
@@ -1569,6 +1655,18 @@ static int getAllEventsMask (bool ignoresMouseClicks)
         X11Symbols::getInstance()->xDestroyWindow (display, windowH);
 
         return 0;
+    }
+
+    // A window that ignores mouse clicks must also let pointer events through to whatever
+    // is beneath it, as it does on the other platforms. Deselecting the events is not
+    // enough for that: X would deliver them to the window's ancestors, not to the window
+    // below it, so the window is given an empty input shape instead.
+    if ((styleFlags & ComponentPeer::windowIgnoresMouseClicks) != 0)
+    {
+        int eventBase = 0, errorBase = 0;
+
+        if (X11Symbols::getInstance()->xShapeQueryExtension (display, &eventBase, &errorBase))
+            X11Symbols::getInstance()->xShapeCombineRectangles (display, windowH, ShapeInput, 0, 0, nullptr, 0, ShapeSet, Unsorted);
     }
 
     // Set window manager hints
@@ -1620,6 +1718,10 @@ static int getAllEventsMask (bool ignoresMouseClicks)
     unsigned long info[2] = { 0, 1 };
     xchangeProperty (windowH, atoms.XembedInfo, atoms.XembedInfo, 32, (unsigned char*) info, 2);
 
+   #if JUCE_USE_XINPUT
+    XInputHelpers::registerForXI2Events (display, windowH);
+   #endif
+
     return windowH;
 }
 
@@ -1660,9 +1762,33 @@ void XWindowSystem::destroyWindow (::Window windowH)
     if (XSHMHelpers::isShmAvailable (display))
         shmPaintsPendingMap.erase (windowH);
    #endif
+
+   #if JUCE_USE_XINPUT
+    XInputHelpers::currentTouches.deleteAllTouchesForPeer (peer);
+   #endif
 }
 
 //==============================================================================
+void XWindowSystem::setTransientFor (::Window windowH, ::Window parentWindow) const
+{
+    jassert (windowH != 0);
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    if (parentWindow != 0)
+        X11Symbols::getInstance()->xSetTransientForHint (display, windowH, parentWindow);
+    else
+        X11Symbols::getInstance()->xDeleteProperty (display, windowH, XA_WM_TRANSIENT_FOR);
+}
+
+::Window XWindowSystem::getTransientFor (::Window windowH) const
+{
+    jassert (windowH != 0);
+    XWindowSystemUtilities::ScopedXLock xLock;
+    XWindowSystemUtilities::GetXProperty prop (display, windowH, XA_WM_TRANSIENT_FOR, 0, 1, false, XA_WINDOW);
+
+    return prop.success && prop.numItems > 0 ? *reinterpret_cast<const ::Window*> (prop.data) : 0;
+}
+
 void XWindowSystem::setTitle (::Window windowH, const String& title) const
 {
     jassert (windowH != 0);
@@ -1770,28 +1896,17 @@ std::optional<unsigned long> XWindowSystem::setBounds (::Window windowH, Rectang
             }
         }
 
-        updateConstraints (windowH, *peer);
+        updateSizeHints (windowH, *peer, newBounds);
 
-        XWindowSystemUtilities::ScopedXLock xLock;
-
-        if (auto hints = makeXFreePtr (X11Symbols::getInstance()->xAllocSizeHints()))
-        {
-            hints->flags  = USSize | USPosition;
-            hints->x      = newBounds.getX();
-            hints->y      = newBounds.getY();
-            hints->width  = newBounds.getWidth();
-            hints->height = newBounds.getHeight();
-            X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints.get());
-        }
-
-        const auto nativeWindowBorder = [&]() -> BorderSize<int>
+        const auto nativeWindowBorder = std::invoke ([&]() -> BorderSize<int>
         {
             if (const auto& frameSize = peer->getFrameSizeIfPresent())
                 return frameSize->multipliedBy (peer->getPlatformScaleFactor());
 
             return {};
-        }();
+        });
 
+        const XWindowSystemUtilities::ScopedXLock xLock;
         const auto serial = X11Symbols::getInstance()->xNextRequest (display);
         X11Symbols::getInstance()->xMoveResizeWindow (display, windowH,
                                                       newBounds.getX() - nativeWindowBorder.getLeft(),
@@ -1814,7 +1929,7 @@ void XWindowSystem::startHostManagedResize (::Window windowH,
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
-    X11Symbols::getInstance()->xUngrabPointer (display, CurrentTime);
+    ungrabPointer();
 
     const auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
     const auto mouseDown = getCurrentMousePosition();
@@ -1866,23 +1981,74 @@ void XWindowSystem::startHostManagedResize (::Window windowH,
                                            unalignedPointerCast<XEvent*> (&clientMsg));
 }
 
-void XWindowSystem::updateConstraints (::Window windowH) const
+bool XWindowSystem::grabPointerForExternalDrag (::Window windowH, Cursor cursor) const
 {
-    if (auto* peer = getPeerFor (windowH))
-        updateConstraints (windowH, *peer);
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+   #if JUCE_USE_XINPUT
+    // The X server refuses a core grab while the pointer has an XInput grab, and a button press
+    // delivered as an XInput event creates one.
+    if (const auto pointer = XInputHelpers::getClientPointer (display))
+    {
+        unsigned char maskData[XIMaskLen (XI_LASTEVENT)] = {};
+        XISetMask (maskData, XI_Motion);
+        XISetMask (maskData, XI_ButtonRelease);
+
+        XIEventMask eventMask;
+        eventMask.deviceid = *pointer;
+        eventMask.mask_len = sizeof (maskData);
+        eventMask.mask = maskData;
+
+        // All events go to the grabbing window, so that the drag also tracks the pointer and ends
+        // correctly over this application's other windows.
+        return X11Symbols::getInstance()->xiGrabDevice (display, *pointer, windowH, CurrentTime, cursor,
+                                                        GrabModeAsync, GrabModeAsync, False, &eventMask) == GrabSuccess;
+    }
+   #endif
+
+    const auto eventMask = (unsigned int) (Button1MotionMask | ButtonReleaseMask);
+
+    if (X11Symbols::getInstance()->xGrabPointer (display, windowH, True, eventMask,
+                                                 GrabModeAsync, GrabModeAsync, None, None, CurrentTime) != GrabSuccess)
+        return false;
+
+    // No other method of changing the pointer seems to work, this call is needed from this very context
+    X11Symbols::getInstance()->xChangeActivePointerGrab (display, eventMask, cursor, CurrentTime);
+    return true;
 }
 
-void XWindowSystem::updateConstraints (::Window windowH, ComponentPeer& peer) const
+void XWindowSystem::ungrabPointer() const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+   #if JUCE_USE_XINPUT
+    if (const auto pointer = XInputHelpers::getClientPointer (display))
+    {
+        X11Symbols::getInstance()->xiUngrabDevice (display, *pointer, CurrentTime);
+        return;
+    }
+   #endif
+
+    X11Symbols::getInstance()->xUngrabPointer (display, CurrentTime);
+}
+
+void XWindowSystem::updateSizeHints (::Window windowH, ComponentPeer& peer, Rectangle<int> physicalBounds) const
 {
     XWindowSystemUtilities::ScopedXLock xLock;
 
     if (auto hints = makeXFreePtr (X11Symbols::getInstance()->xAllocSizeHints()))
     {
+        hints->flags  = USSize | USPosition;
+        hints->x      = physicalBounds.getX();
+        hints->y      = physicalBounds.getY();
+        hints->width  = physicalBounds.getWidth();
+        hints->height = physicalBounds.getHeight();
+
         if ((peer.getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
         {
-            hints->min_width  = hints->max_width  = peer.getBounds().getWidth();
-            hints->min_height = hints->max_height = peer.getBounds().getHeight();
-            hints->flags = PMinSize | PMaxSize;
+            hints->min_width  = hints->max_width  = physicalBounds.getWidth();
+            hints->min_height = hints->max_height = physicalBounds.getHeight();
+            hints->flags |= PMinSize | PMaxSize;
         }
         else if (auto* c = peer.getConstrainer())
         {
@@ -1897,11 +2063,35 @@ void XWindowSystem::updateConstraints (::Window windowH, ComponentPeer& peer) co
             const auto factor       = peer.getPlatformScaleFactor();
             const auto leftAndRight = windowBorder.getLeftAndRight();
             const auto topAndBottom = windowBorder.getTopAndBottom();
-            hints->min_width  = jmax (1, (int) (factor * c->getMinimumWidth())  - leftAndRight);
-            hints->max_width  = jmax (1, (int) (factor * c->getMaximumWidth())  - leftAndRight);
-            hints->min_height = jmax (1, (int) (factor * c->getMinimumHeight()) - topAndBottom);
-            hints->max_height = jmax (1, (int) (factor * c->getMaximumHeight()) - topAndBottom);
-            hints->flags = PMinSize | PMaxSize;
+
+            const auto scaledLimit = [factor] (int limit, int border)
+            {
+                const auto scaled = jmin ((double) std::numeric_limits<int>::max(), factor * limit);
+                return jmax (1, (int) scaled - border);
+            };
+
+            // The window manager can't call the constrainer during a resize, so find the limits
+            // by checking out-of-range sizes. This accounts for constrainers that wrap another
+            // constrainer.
+            const auto current = windowBorder.addedTo ((physicalBounds.toDouble() / factor).toNearestInt());
+            const auto largeExtent = 0x00ffffff;
+            const Rectangle<int> unlimited { -largeExtent, -largeExtent, 4 * largeExtent, 4 * largeExtent };
+
+            const auto constrainedSize = [&] (int extent)
+            {
+                auto bounds = current.withSize (extent, extent);
+                c->checkBounds (bounds, current, unlimited, false, false, true, true);
+                return bounds;
+            };
+
+            const auto smallest = constrainedSize (0);
+            const auto largest  = constrainedSize (largeExtent);
+
+            hints->min_width  = scaledLimit (smallest.getWidth(),  leftAndRight);
+            hints->max_width  = scaledLimit (largest.getWidth(),   leftAndRight);
+            hints->min_height = scaledLimit (smallest.getHeight(), topAndBottom);
+            hints->max_height = scaledLimit (largest.getHeight(),  topAndBottom);
+            hints->flags |= PMinSize | PMaxSize;
         }
 
         X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints.get());
@@ -1988,6 +2178,20 @@ Point<int> XWindowSystem::getPhysicalParentScreenPosition() const
     return parentScreenPosition;
 }
 
+Point<int> XWindowSystem::getScreenPosition (::Window windowH) const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    const auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
+    int x = 0, y = 0;
+    Window child;
+
+    if (! X11Symbols::getInstance()->xTranslateCoordinates (display, windowH, root, 0, 0, &x, &y, &child))
+        return {};
+
+    return { x, y };
+}
+
 void XWindowSystem::setMinimised (::Window windowH, bool shouldBeMinimised) const
 {
     jassert (windowH != 0);
@@ -2061,10 +2265,8 @@ void XWindowSystem::toBehind (::Window windowH, ::Window otherWindow) const
 {
     jassert (windowH != 0 && otherWindow != 0);
 
-    const auto topLevelA = findTopLevelWindowOf (windowH);
-    const auto topLevelB = findTopLevelWindowOf (otherWindow);
-
-    Window newStack[] = { topLevelA, topLevelB };
+    Window newStack[] = { findTopLevelWindowOf (otherWindow),
+                          findTopLevelWindowOf (windowH) };
 
     XWindowSystemUtilities::ScopedXLock xLock;
     X11Symbols::getInstance()->xRestackWindows (display, newStack, numElementsInArray (newStack));
@@ -2162,6 +2364,15 @@ bool XWindowSystem::canUseARGBImages() const
    #endif
 
     return canUseARGB;
+}
+
+bool XWindowSystem::canUseMultiTouch() const
+{
+   #if JUCE_USE_XINPUT
+    return XInputHelpers::setupXI2 (display).has_value();
+   #endif
+
+    return false;
 }
 
 bool XWindowSystem::isDarkModeActive() const
@@ -2279,7 +2490,7 @@ void XWindowSystem::setScreenSaverEnabled (bool enabled) const
     NullCheckedInvocation::invoke (xScreenSaverSuspend, display, ! enabled);
 }
 
-Point<float> XWindowSystem::getCurrentMousePosition() const
+Point<int> XWindowSystem::queryPointerPosition() const
 {
     Window root, child;
     int x, y, winx, winy;
@@ -2296,7 +2507,27 @@ Point<float> XWindowSystem::getCurrentMousePosition() const
         x = y = -1;
     }
 
-    return { (float) x, (float) y };
+    return { x, y };
+}
+
+Point<float> XWindowSystem::getCurrentMousePosition() const
+{
+    const auto reportedPosition = queryPointerPosition();
+
+    if (lastForwardedClick.has_value() && lastForwardedClick->isCurrent (reportedPosition))
+        return lastForwardedClick->screenPosition.toFloat();
+
+    return reportedPosition.toFloat();
+}
+
+void XWindowSystem::clickForwarded (const XButtonEvent& buttonEvent)
+{
+    lastForwardedClick = ForwardedClick { { buttonEvent.x_root, buttonEvent.y_root }, queryPointerPosition() };
+}
+
+void XWindowSystem::pointerSeenByServer()
+{
+    lastForwardedClick.reset();
 }
 
 void XWindowSystem::setMousePosition (Point<float> pos) const
@@ -2593,7 +2824,6 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
     auto workAreaHints = XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WORKAREA");
 
    #if JUCE_USE_XRANDR
-    if (workAreaHints != None)
     {
         int major_opcode, first_event, first_error;
 
@@ -2605,10 +2835,14 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
             for (int i = 0; i < numMonitors; ++i)
             {
                 auto rootWindow = X11Symbols::getInstance()->xRootWindow (display, i);
-                XWindowSystemUtilities::GetXProperty prop (display, rootWindow, workAreaHints, 0, 4, false, XA_CARDINAL);
 
-                if (! hasWorkAreaData (prop))
-                    continue;
+                if (workAreaHints != None)
+                {
+                    XWindowSystemUtilities::GetXProperty prop (display, rootWindow, workAreaHints, 0, 4, false, XA_CARDINAL);
+
+                    if (! hasWorkAreaData (prop))
+                        continue;
+                }
 
                 if (auto screens = makeDeletedPtr (X11Symbols::getInstance()->xRRGetScreenResources (display, rootWindow),
                                                    [] (XRRScreenResources* srs) { X11Symbols::getInstance()->xRRFreeScreenResources (srs); }))
@@ -2631,11 +2865,12 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
                                                                     [] (XRRCrtcInfo* ci) { X11Symbols::getInstance()->xRRFreeCrtcInfo (ci); }))
                                     {
                                         Displays::Display d;
-                                        d.totalArea = { crtc->x, crtc->y, (int) crtc->width, (int) crtc->height };
+                                        d.physicalBounds = { crtc->x, crtc->y, (int) crtc->width, (int) crtc->height };
+                                        d.logicalBounds = d.physicalBounds.toFloat();
                                         d.isMain = (mainDisplay == screens->outputs[j]) && (i == 0);
                                         d.dpi = DisplayHelpers::getDisplayDPI (display, 0);
 
-                                        d.verticalFrequencyHz = [&]() -> std::optional<double>
+                                        d.verticalFrequencyHz = std::invoke ([&]() -> std::optional<double>
                                         {
                                             if (crtc->mode != None)
                                             {
@@ -2644,12 +2879,13 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
                                                                             [&crtc] (const auto& m) { return m.id == crtc->mode; });
                                                     it != screens->modes + screens->nmode)
                                                 {
-                                                    return (double) it->dotClock / ((double) it->hTotal * (double) it->vTotal);
+                                                    if (it->hTotal > 0 && it->vTotal > 0)
+                                                        return (double) it->dotClock / ((double) it->hTotal * (double) it->vTotal);
                                                 }
                                             }
 
                                             return {};
-                                        }();
+                                        });
 
                                         // The raspberry pi returns a zero sized display, so we need to guard for divide-by-zero
                                         if (output->mm_width > 0 && output->mm_height > 0)
@@ -2692,8 +2928,8 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
                 if (screens[j].screen_number == index)
                 {
                     Displays::Display d;
-                    d.totalArea = { screens[j].x_org, screens[j].y_org,
-                                    screens[j].width, screens[j].height };
+                    d.physicalBounds = { screens[j].x_org, screens[j].y_org, screens[j].width, screens[j].height };
+                    d.logicalBounds = d.physicalBounds.toFloat();
                     d.isMain = (index == 0);
                     d.scale = masterScale;
                     d.dpi = DisplayHelpers::getDisplayDPI (display, 0); // (all screens share the same DPI)
@@ -2723,7 +2959,8 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
                 {
                     Displays::Display d;
 
-                    d.totalArea = workArea;
+                    d.physicalBounds = workArea;
+                    d.logicalBounds = d.physicalBounds.toFloat();
                     d.isMain = displays.isEmpty();
                     d.scale = masterScale;
                     d.dpi = DisplayHelpers::getDisplayDPI (display, i);
@@ -2736,8 +2973,9 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
         if (displays.isEmpty())
         {
             Displays::Display d;
-            d.totalArea = { X11Symbols::getInstance()->xDisplayWidth  (display, X11Symbols::getInstance()->xDefaultScreen (display)),
-                            X11Symbols::getInstance()->xDisplayHeight (display, X11Symbols::getInstance()->xDefaultScreen (display)) };
+            d.physicalBounds = { X11Symbols::getInstance()->xDisplayWidth  (display, X11Symbols::getInstance()->xDefaultScreen (display)),
+                                 X11Symbols::getInstance()->xDisplayHeight (display, X11Symbols::getInstance()->xDefaultScreen (display)) };
+            d.logicalBounds = d.physicalBounds.toFloat();
             d.isMain = true;
             d.scale = masterScale;
             d.dpi = DisplayHelpers::getDisplayDPI (display, 0);
@@ -2747,7 +2985,7 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
     }
 
     for (auto& d : displays)
-        d.userArea = d.totalArea; // JUCE currently does not support requesting the user area on Linux
+        d.userBounds = d.logicalBounds; // JUCE currently does not support requesting the user area on Linux
 
     return displays;
 }
@@ -2879,6 +3117,38 @@ String XWindowSystem::getTextFromClipboard() const
         return w;
 
     return findTopLevelWindowOf (parent);
+}
+
+// The window manager marks the top-level windows it manages with WM_STATE, which distinguishes a
+// client window from the frame it may have been reparented into.
+::Window XWindowSystem::findTopLevelClientWindowOf (::Window w) const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    for (auto current = w; current != 0;)
+    {
+        XWindowSystemUtilities::GetXProperty prop (display, current, atoms.state, 0, 2, false, atoms.state);
+
+        if (prop.success && prop.numItems > 0)
+            return current;
+
+        Window* windowList = nullptr;
+        uint32 windowListSize = 0;
+        Window parent, root;
+
+        const auto result = X11Symbols::getInstance()->xQueryTree (display, current, &root, &parent, &windowList, &windowListSize);
+        const auto deleter = makeXFreePtr (windowList);
+
+        if (result == 0)
+            return w;
+
+        if (parent == root)
+            return current;
+
+        current = parent;
+    }
+
+    return w;
 }
 
 bool XWindowSystem::isParentWindowOf (::Window windowH, ::Window possibleChild) const
@@ -3059,10 +3329,9 @@ void XWindowSystem::setWindowType (::Window windowH, int styleFlags) const
 
     if (atoms.windowType != None)
     {
-        auto hint = (styleFlags & ComponentPeer::windowIsTemporary) != 0
-                    || ((styleFlags & ComponentPeer::windowHasDropShadow) == 0 && Desktop::canUseSemiTransparentWindows())
-                        ? XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WM_WINDOW_TYPE_COMBO")
-                        : XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WM_WINDOW_TYPE_NORMAL");
+        const auto isTemporary = (styleFlags & ComponentPeer::windowIsTemporary) != 0;
+        const auto hint = XWindowSystemUtilities::Atoms::getIfExists (display, isTemporary ? "_NET_WM_WINDOW_TYPE_COMBO"
+                                                                                           : "_NET_WM_WINDOW_TYPE_NORMAL");
 
         if (hint != None)
             xchangeProperty (windowH, atoms.windowType, XA_ATOM, 32, &hint, 1);
@@ -3288,34 +3557,70 @@ bool XWindowSystem::initialiseXDisplay()
 
     // Setup input event handler
     LinuxEventLoop::registerFdCallback (X11Symbols::getInstance()->xConnectionNumber (display),
-                                        [this] (int)
-                                        {
-                                            do
-                                            {
-                                                XEvent evt;
+                                        [this] (int) { dispatchPendingEvents(); });
 
-                                                {
-                                                    XWindowSystemUtilities::ScopedXLock xLock;
-
-                                                    if (! X11Symbols::getInstance()->xPending (display))
-                                                        return;
-
-                                                    X11Symbols::getInstance()->xNextEvent (display, &evt);
-                                                }
-
-                                                if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle)
-                                                {
-                                                    ClipboardHelpers::handleSelection (evt.xselectionrequest);
-                                                }
-                                                else if (evt.xany.window != juce_messageWindowHandle)
-                                                {
-                                                    windowMessageReceive (evt);
-                                                }
-
-                                            } while (display != nullptr);
-                                        });
+    previousAfterFunction = X11Symbols::getInstance()->xSetAfterFunction (display, afterXRequest);
 
     return true;
+}
+
+void XWindowSystem::dispatchPendingEvents()
+{
+    do
+    {
+        XEvent evt;
+
+        {
+            XWindowSystemUtilities::ScopedXLock xLock;
+
+            if (! X11Symbols::getInstance()->xPending (display))
+                return;
+
+            X11Symbols::getInstance()->xNextEvent (display, &evt);
+        }
+
+        if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle)
+            ClipboardHelpers::handleSelection (evt.xselectionrequest);
+        else if (evt.xany.window != juce_messageWindowHandle)
+            windowMessageReceive (evt);
+
+    } while (display != nullptr);
+}
+
+// The X11 event loop wakes when the X server sends something and dispatches the events it finds.
+// When Xlib waits for the reply to a request, it reads everything the server has sent, keeps any
+// events in its own queue, and leaves nothing for the event loop to wake up for. Those events
+// then wait until the server sends something else. For example, when a plug-in host moves its
+// window, the server reports the move with a ConfigureNotify, but if a timer has just asked for
+// a window's position, that report is read along with the reply, and the child windows that follow
+// the host stay put until the server sends something else, such as a mouse movement. Posting a
+// dispatch from here, after each request, moves them straight away.
+int XWindowSystem::afterXRequest (::Display* d)
+{
+    auto* instance = getInstanceWithoutCreating();
+
+    if (instance == nullptr)
+        return 0;
+
+    if (0 < X11Symbols::getInstance()->xEventsQueued (d, QueuedAlready)
+        && ! instance->dispatchPosted.exchange (true))
+    {
+        const auto posted = MessageManager::callAsync ([]
+        {
+            if (auto* i = getInstanceWithoutCreating())
+            {
+                // Cleared before draining, so that events queued after the drain's last check
+                // trigger another post.
+                i->dispatchPosted = false;
+                i->dispatchPendingEvents();
+            }
+        });
+
+        if (! posted)
+            instance->dispatchPosted = false;
+    }
+
+    return instance->previousAfterFunction != nullptr ? instance->previousAfterFunction (d) : 0;
 }
 
 void XWindowSystem::destroyXDisplay()
@@ -3332,6 +3637,7 @@ void XWindowSystem::destroyXDisplay()
             X11Symbols::getInstance()->xSync (display, True);
         }
 
+        X11Symbols::getInstance()->xSetAfterFunction (display, previousAfterFunction);
         LinuxEventLoop::unregisterFdCallback (X11Symbols::getInstance()->xConnectionNumber (display));
 
         {
@@ -3357,10 +3663,10 @@ void juce_deleteKeyProxyWindow (::Window keyProxy)
 }
 
 //==============================================================================
-template <typename EventType>
-static Point<float> getLogicalMousePos (const EventType& e, double scaleFactor) noexcept
+template <typename PosType>
+static Point<float> getLogicalMousePos (Point<PosType> pt, const LinuxComponentPeer& peer) noexcept
 {
-    return Point<float> ((float) e.x, (float) e.y) / scaleFactor;
+    return pt.toFloat() / peer.getPlatformScaleFactor();
 }
 
 static int64 getEventTime (::Time t)
@@ -3372,12 +3678,6 @@ static int64 getEventTime (::Time t)
         eventTimeOffset = Time::currentTimeMillis() - thisMessageTime;
 
     return eventTimeOffset + thisMessageTime;
-}
-
-template <typename EventType>
-static int64 getEventTime (const EventType& t)
-{
-    return getEventTime (t.time);
 }
 
 void XWindowSystem::handleWindowMessage (LinuxComponentPeer* peer, XEvent& event) const
@@ -3588,7 +3888,7 @@ void XWindowSystem::handleKeyReleaseEvent (LinuxComponentPeer* peer, const XKeyE
     }
 }
 
-void XWindowSystem::handleWheelEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent, float amount) const
+void XWindowSystem::handleWheelEvent (LinuxComponentPeer* peer, int64 eventTime, Point<float> logicalMousePos, float amount) const
 {
     MouseWheelDetails wheel;
     wheel.deltaX = 0.0f;
@@ -3597,50 +3897,58 @@ void XWindowSystem::handleWheelEvent (LinuxComponentPeer* peer, const XButtonPre
     wheel.isSmooth = false;
     wheel.isInertial = false;
 
-    peer->handleMouseWheel (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (buttonPressEvent, peer->getPlatformScaleFactor()),
-                            getEventTime (buttonPressEvent), wheel);
+    peer->handleMouseWheel (MouseInputSource::InputSourceType::mouse, logicalMousePos, eventTime, wheel);
 }
 
-void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent, int buttonModifierFlag) const
+void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, int64 eventTime, Point<float> logicalMousePos, int buttonModifierFlag) const
 {
     ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withFlags (buttonModifierFlag);
     peer->toFront (true);
-    peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (buttonPressEvent, peer->getPlatformScaleFactor()),
+    peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, logicalMousePos,
                             ModifierKeys::getCurrentModifiers(), MouseInputSource::defaultPressure,
-                            MouseInputSource::defaultOrientation, getEventTime (buttonPressEvent), {});
+                            MouseInputSource::defaultOrientation, eventTime, {});
 }
 
-void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent) const
+void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, int state, int button, ::Time time, Point<double> pt) const
 {
-    updateKeyModifiers ((int) buttonPressEvent.state);
+    updateKeyModifiers (state);
 
-    auto mapIndex = (uint32) (buttonPressEvent.button - Button1);
+    auto mapIndex = (uint32) (button - Button1);
 
     if (mapIndex < (uint32) numElementsInArray (pointerMap))
     {
+        const auto eventTime = getEventTime (time);
+        const auto eventPos = getLogicalMousePos (pt, *peer);
+
         switch (pointerMap[mapIndex])
         {
-            case Keys::WheelUp:         handleWheelEvent (peer, buttonPressEvent,  50.0f / 256.0f); break;
-            case Keys::WheelDown:       handleWheelEvent (peer, buttonPressEvent, -50.0f / 256.0f); break;
-            case Keys::LeftButton:      handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::leftButtonModifier); break;
-            case Keys::RightButton:     handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::rightButtonModifier); break;
-            case Keys::MiddleButton:    handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::middleButtonModifier); break;
-            case Keys::BackButton:      handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::backButtonModifier); break;
-            case Keys::ForwardButton:   handleButtonPressEvent (peer, buttonPressEvent, ModifierKeys::forwardButtonModifier); break;
+            case Keys::WheelUp:         handleWheelEvent (peer, eventTime, eventPos,  50.0f / 256.0f); break;
+            case Keys::WheelDown:       handleWheelEvent (peer, eventTime, eventPos, -50.0f / 256.0f); break;
+            case Keys::LeftButton:      handleButtonPressEvent (peer, eventTime, eventPos, ModifierKeys::leftButtonModifier); break;
+            case Keys::RightButton:     handleButtonPressEvent (peer, eventTime, eventPos, ModifierKeys::rightButtonModifier); break;
+            case Keys::MiddleButton:    handleButtonPressEvent (peer, eventTime, eventPos, ModifierKeys::middleButtonModifier); break;
+            case Keys::BackButton:      handleButtonPressEvent (peer, eventTime, eventPos, ModifierKeys::backButtonModifier); break;
+            case Keys::ForwardButton:   handleButtonPressEvent (peer, eventTime, eventPos, ModifierKeys::forwardButtonModifier); break;
 
             default: break;
         }
     }
 }
 
-void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer* peer, const XButtonReleasedEvent& buttonRelEvent) const
+void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent) const
 {
-    updateKeyModifiers ((int) buttonRelEvent.state);
+    handleButtonPressEvent (peer, (int) buttonPressEvent.state, (int) buttonPressEvent.button, buttonPressEvent.time,
+                            Point { buttonPressEvent.x, buttonPressEvent.y }.toDouble());
+}
+
+void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer* peer, int state, int button, ::Time time, Point<double> pt) const
+{
+    updateKeyModifiers (state);
 
     if (peer->getParentWindow() != 0)
         peer->updateWindowBounds();
 
-    auto mapIndex = (uint32) (buttonRelEvent.button - Button1);
+    auto mapIndex = (uint32) (button - Button1);
 
     if (mapIndex < (uint32) numElementsInArray (pointerMap))
     {
@@ -3661,13 +3969,19 @@ void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer* peer, const XB
     if (dragState.isDragging())
         dragState.handleExternalDragButtonReleaseEvent();
 
-    peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (buttonRelEvent, peer->getPlatformScaleFactor()),
-                            ModifierKeys::getCurrentModifiers(), MouseInputSource::defaultPressure, MouseInputSource::defaultOrientation, getEventTime (buttonRelEvent));
+    peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (pt, *peer),
+                            ModifierKeys::getCurrentModifiers(), MouseInputSource::defaultPressure, MouseInputSource::defaultOrientation, getEventTime (time));
 }
 
-void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer* peer, const XPointerMovedEvent& movedEvent) const
+void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent) const
 {
-    updateKeyModifiers ((int) movedEvent.state);
+    handleButtonReleaseEvent (peer, (int) buttonPressEvent.state, (int) buttonPressEvent.button, buttonPressEvent.time,
+                              Point { buttonPressEvent.x, buttonPressEvent.y }.toDouble());
+}
+
+void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer* peer, int state, ::Time time, Point<double> pt) const
+{
+    updateKeyModifiers (state);
     Keys::refreshStaleMouseKeys();
 
     auto& dragState = dragAndDropStateMap[peer];
@@ -3675,9 +3989,15 @@ void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer* peer, const XPo
     if (dragState.isDragging())
         dragState.handleExternalDragMotionNotify();
 
-    peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (movedEvent, peer->getPlatformScaleFactor()),
+    peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (pt, *peer),
                             ModifierKeys::getCurrentModifiers(), MouseInputSource::defaultPressure,
-                            MouseInputSource::defaultOrientation, getEventTime (movedEvent));
+                            MouseInputSource::defaultOrientation, getEventTime (time));
+}
+
+void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer* peer, const XPointerMovedEvent& movedEvent) const
+{
+    handleMotionNotifyEvent (peer, (int) movedEvent.state, movedEvent.time,
+                             Point { movedEvent.x, movedEvent.y }.toDouble());
 }
 
 void XWindowSystem::handleEnterNotifyEvent (LinuxComponentPeer* peer, const XEnterWindowEvent& enterEvent) const
@@ -3688,9 +4008,9 @@ void XWindowSystem::handleEnterNotifyEvent (LinuxComponentPeer* peer, const XEnt
     if (! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
     {
         updateKeyModifiers ((int) enterEvent.state);
-        peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (enterEvent, peer->getPlatformScaleFactor()),
+        peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (Point { enterEvent.x, enterEvent.y }, *peer),
                                 ModifierKeys::getCurrentModifiers(), MouseInputSource::defaultPressure,
-                                MouseInputSource::defaultOrientation, getEventTime (enterEvent));
+                                MouseInputSource::defaultOrientation, getEventTime (enterEvent.time));
     }
 }
 
@@ -3703,9 +4023,9 @@ void XWindowSystem::handleLeaveNotifyEvent (LinuxComponentPeer* peer, const XLea
          || leaveEvent.mode == NotifyUngrab)
     {
         updateKeyModifiers ((int) leaveEvent.state);
-        peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (leaveEvent, peer->getPlatformScaleFactor()),
+        peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, getLogicalMousePos (Point { leaveEvent.x, leaveEvent.y }, *peer),
                                 ModifierKeys::getCurrentModifiers(), MouseInputSource::defaultPressure,
-                                MouseInputSource::defaultOrientation, getEventTime (leaveEvent));
+                                MouseInputSource::defaultOrientation, getEventTime (leaveEvent.time));
     }
 }
 
@@ -3794,6 +4114,7 @@ void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer* peer, XConfi
     peer->updateWindowBounds();
     peer->updateBorderSize();
     peer->handleMovedOrResized();
+    peer->moveTransientWindows();
 
     // if the native title bar is dragged, need to tell any active menus, etc.
     if ((peer->getStyleFlags() & ComponentPeer::windowHasTitleBar) != 0)
@@ -3843,6 +4164,21 @@ bool XWindowSystem::isHidden (Window w) const
     const auto end = data + prop.numItems;
 
     return std::find (data, end, atoms.windowStateHidden) != end;
+}
+
+bool XWindowSystem::isFullScreen (Window w) const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+    XWindowSystemUtilities::GetXProperty prop (display, w, atoms.windowState, 0, 128, false, XA_ATOM);
+
+    if (! (prop.success && prop.actualFormat == 32 && prop.actualType == XA_ATOM))
+        return false;
+
+    const auto* data = unalignedPointerCast<const long*> (prop.data);
+    const auto end = data + prop.numItems;
+
+    return    std::find (data, end, atoms.windowStateMaximisedHorz) != end
+           && std::find (data, end, atoms.windowStateMaximisedVert) != end;
 }
 
 void XWindowSystem::propertyNotifyEvent (LinuxComponentPeer* peer, const XPropertyEvent& event) const
@@ -3906,7 +4242,8 @@ void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer* peer, XClientM
         }
         else if (atom == atoms.protocolList [XWindowSystemUtilities::Atoms::DELETE_WINDOW])
         {
-            peer->handleUserClosingWindow();
+            if (! peer->getComponent().isCurrentlyBlockedByAnotherModalComponent())
+                peer->handleUserClosingWindow();
         }
     }
     else if (clientMsg.message_type == atoms.XdndEnter)
@@ -3960,6 +4297,91 @@ void XWindowSystem::handleXEmbedMessage (LinuxComponentPeer* peer, XClientMessag
     }
 }
 
+
+#if JUCE_USE_XINPUT
+void XWindowSystem::handleXIDeviceEvent (LinuxComponentPeer* peer, int eventType, XIDeviceEvent& deviceEvent) const
+{
+    const Point eventPos { deviceEvent.event_x, deviceEvent.event_y };
+
+    switch (eventType)
+    {
+        case XI_ButtonPress:
+        {
+            handleButtonPressEvent (peer,
+                                    deviceEvent.mods.effective,
+                                    deviceEvent.detail,
+                                    deviceEvent.time,
+                                    eventPos);
+            return;
+        }
+        case XI_ButtonRelease:
+        {
+            handleButtonReleaseEvent (peer,
+                                      deviceEvent.mods.effective,
+                                      deviceEvent.detail,
+                                      deviceEvent.time,
+                                      eventPos);
+            return;
+        }
+        case XI_Motion:
+        {
+            handleMotionNotifyEvent (peer,
+                                     deviceEvent.mods.effective,
+                                     deviceEvent.time,
+                                     eventPos);
+            return;
+        }
+    }
+
+    const auto touchIndex = XInputHelpers::currentTouches.getIndexOfTouch (peer, deviceEvent.detail);
+    const auto touchPos = getLogicalMousePos (eventPos, *peer);
+    const auto time = getEventTime (deviceEvent.time);
+
+    const auto touchFlags = eventType == XI_TouchEnd ? 0 : ModifierKeys::leftButtonModifier;
+    ModifierKeys::currentModifiers = ModifierKeys::getCurrentModifiers().withoutMouseButtons()
+                                                                        .withFlags (touchFlags);
+    const auto modsToSend = ModifierKeys::getCurrentModifiers();
+
+    const auto sendTouchEvent = [peer, time, touchIndex] (Point<float> pos, ModifierKeys mods)
+    {
+        peer->handleMouseEvent (MouseInputSource::InputSourceType::touch,
+                                pos,
+                                mods,
+                                MouseInputSource::defaultPressure,
+                                MouseInputSource::defaultOrientation,
+                                time,
+                                {},
+                                touchIndex);
+
+        // In case this component was deleted by the event
+        return ComponentPeer::isValidPeer (peer);
+    };
+
+    switch (eventType)
+    {
+        case XI_TouchBegin:
+        {
+            // This forces a mouse-enter/up event, in case we didn't get one before.
+            if (! sendTouchEvent (touchPos, modsToSend.withoutMouseButtons()))
+                return;
+
+            break;
+        }
+        case XI_TouchEnd:
+        {
+            XInputHelpers::currentTouches.clearTouch (touchIndex);
+            break;
+        }
+    }
+
+    if (! sendTouchEvent (touchPos, modsToSend))
+        return;
+
+    if (eventType == XI_TouchEnd)
+        sendTouchEvent (MouseInputSource::offscreenMousePos, modsToSend.withoutMouseButtons());
+}
+#endif
+
 //==============================================================================
 void XWindowSystem::dismissBlockingModals (LinuxComponentPeer* peer, const XConfigureEvent& configure) const
 {
@@ -3980,7 +4402,22 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
         if (! juce_handleXEmbedEvent (nullptr, &event))
        #endif
         {
-            auto* instance = XWindowSystem::getInstance();
+            auto* instance = getInstance();
+
+            // A client that hosts one of our windows, such as a system tray, forwards a click
+            // to it as a synthesised ButtonPress when the pointer is over the host's own surface
+            // rather than over the window. Any other pointer event comes from the X server
+            // having seen the pointer.
+            if (event.xany.send_event)
+            {
+                if (event.xany.type == ButtonPress)
+                    instance->clickForwarded (event.xbutton);
+            }
+            else if (event.xany.type == ButtonPress || event.xany.type == ButtonRelease
+                     || event.xany.type == MotionNotify || event.xany.type == EnterNotify)
+            {
+                instance->pointerSeenByServer();
+            }
 
             if (auto* xSettings = instance->getXSettings())
             {
@@ -3995,9 +4432,70 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
                 }
             }
 
+           #if JUCE_USE_XINPUT
+            if (auto* display = instance->getDisplay();
+                const auto xInputOpcode = XInputHelpers::setupXI2 (display))
+            {
+                // We need to collect and process these mouse events via XInput so that
+                // it is possible to detect, and then ignore (via XISlavePointer),
+                // emulated mouse events when a touch device is connected.
+                switch (event.xany.type)
+                {
+                    case ButtonPress:
+                    case ButtonRelease:
+                    case MotionNotify:
+                        // Events with send_event set were synthesised by another client, such as GNOME
+                        // Shell forwarding a click to a tray icon. They have no XInput counterpart, so
+                        // they must be handled here.
+                        if (! event.xany.send_event)
+                            return;
+
+                        break;
+                }
+
+                if (event.xcookie.type == GenericEvent && event.xcookie.extension == xInputOpcode)
+                {
+
+                    // You can only call xGetEventData once per event, even if you free the data afterwards
+                    if (! X11Symbols::getInstance()->xGetEventData (display, &event.xcookie))
+                        return;
+
+                    const ScopeGuard scope { [display, &event] { X11Symbols::getInstance()->xFreeEventData (display, &event.xcookie); }};
+
+                    switch (event.xcookie.evtype)
+                    {
+                        case XI_Enter:
+                        case XI_Leave:
+                            // A grab on a master device reports pointer crossings as XInput events
+                            // too. The core events for the same crossings are the ones handled.
+                            break;
+
+                        case XI_ButtonPress:
+                        case XI_ButtonRelease:
+                        case XI_Motion:
+                        case XI_TouchBegin:
+                        case XI_TouchEnd:
+                        case XI_TouchUpdate:
+                            if (auto* deviceEvent = (XIDeviceEvent*) event.xcookie.data;
+                                auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (deviceEvent->event)))
+                                instance->handleXIDeviceEvent (peer, event.xcookie.evtype, *deviceEvent);
+
+                            break;
+
+                        default:
+                            // Unhandled event type
+                            jassertfalse;
+                            break;
+                    }
+
+                    return;
+                }
+            }
+           #endif
+
             if (auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (event.xany.window)))
             {
-                XWindowSystem::getInstance()->handleWindowMessage (peer, event);
+                instance->handleWindowMessage (peer, event);
                 return;
             }
 
@@ -4007,6 +4505,13 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
             for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
                 instance->dismissBlockingModals (dynamic_cast<LinuxComponentPeer*> (ComponentPeer::getPeer (i)),
                                                  event.xconfigure);
+
+            // Moving a window runs application code, which may close windows
+            for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
+                if (i < ComponentPeer::getNumPeers())
+                    if (auto* peer = dynamic_cast<LinuxComponentPeer*> (ComponentPeer::getPeer (i)))
+                        if (peer->getParentWindow() != 0 && instance->isParentWindowOf (event.xconfigure.window, peer->getWindowHandle()))
+                            peer->hostWindowMoved();
         }
     }
     else if (event.xany.type == KeymapNotify)

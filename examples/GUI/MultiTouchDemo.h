@@ -54,15 +54,121 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class MultiTouchDemo final : public Component
+class MultiTouchDemo final : public Component,
+                             private ComponentMovementWatcher
 {
 public:
+    class InputSource
+    {
+    public:
+        explicit InputSource (const MouseInputSource& src)
+            : source (src)
+        {}
+
+        Colour getColour() const
+        {
+            return colour;
+        }
+
+        const MouseInputSource& getSource() const
+        {
+            return source;
+        }
+
+        Point<float> getPosition() const
+        {
+            return position;
+        }
+
+        void setPosition (Point<float> pos)
+        {
+            position = pos;
+        }
+
+        const Path& getTrail() const
+        {
+            return trail;
+        }
+
+        void addPointToTrail (Point<float> point, float pressure)
+        {
+            if (! lastTrailPoint.has_value())
+            {
+                lastTrailPoint = point;
+                return;
+            }
+
+            if (point.getDistanceFrom (*lastTrailPoint) > 5.0f)
+            {
+                Path newSegment;
+                newSegment.startNewSubPath (*lastTrailPoint);
+                newSegment.lineTo (point);
+
+                auto diameter = 20.0f * (pressure > 0 && pressure < 1.0f ? pressure : 1.0f);
+
+                PathStrokeType (diameter, PathStrokeType::curved, PathStrokeType::rounded).createStrokedPath (newSegment, newSegment);
+                newSegment.closeSubPath();
+
+                trail.addPath (newSegment);
+
+                lastTrailPoint = point;
+            }
+        }
+
+        void clearTrail()
+        {
+            trail.clear();
+            lastTrailPoint.reset();
+        }
+
+    private:
+        MouseInputSource source;
+        Point<float> position;
+        std::optional<Point<float>> lastTrailPoint;
+        Path trail;
+        Colour colour { getRandomBrightColour().withAlpha (0.6f) };
+    };
+
     MultiTouchDemo()
+        : ComponentMovementWatcher (this)
     {
         setOpaque (true);
 
-        setSize (500, 500);
+        initSize();
     }
+
+    ~MultiTouchDemo() override
+    {
+        setUsingWindowsMultiTouch (false);
+    }
+
+    void componentMovedOrResized (bool, bool) override {}
+
+    void setUsingWindowsMultiTouch (bool shouldUseMultiTouch)
+    {
+        auto* peer = getPeer();
+
+        if (peer == nullptr)
+            return;
+
+        auto* window = dynamic_cast<TopLevelWindow*> (&peer->getComponent());
+
+        if (window == nullptr)
+            return;
+
+        window->setUsingWindowsMultiTouch (shouldUseMultiTouch);
+    }
+
+    void componentPeerChanged() override
+    {
+        setUsingWindowsMultiTouch (true);
+        initSize();
+    }
+
+    void componentVisibilityChanged() override {}
+
+    using ComponentMovementWatcher::componentVisibilityChanged;
+    using ComponentMovementWatcher::componentMovedOrResized;
 
     void paint (Graphics& g) override
     {
@@ -75,113 +181,131 @@ public:
         g.drawFittedText ("Drag here with as many fingers as you have!",
                           getLocalBounds().reduced (30), Justification::centred, 4);
 
-        for (auto* trail : trails)
-            drawTrail (*trail, g);
+        for (const auto& source : sources)
+        {
+            g.setColour (source->getColour());
+
+            const auto& trail = source->getTrail();
+
+            if (! trail.isEmpty())
+            {
+                g.fillPath (trail);
+
+                const auto radius = 40.0f;
+                const auto lastPathPoint = trail.getCurrentPosition();
+
+                g.fillEllipse (lastPathPoint.x - radius,
+                               lastPathPoint.y - radius,
+                               radius * 2.0f,
+                               radius * 2.0f);
+            }
+
+            const auto pos = source->getPosition();
+            const auto radius = 30.0f;
+            g.drawEllipse (pos.x - radius,
+                           pos.y - radius,
+                           radius * 2.0f,
+                           radius * 2.0f,
+                           2.0f);
+
+            g.setFont (14.0f);
+
+            const auto& mouseSource = source->getSource();
+
+            auto desc = std::invoke ([&mouseSource]() -> String
+            {
+                switch (mouseSource.getType())
+                {
+                    case (MouseInputSource::InputSourceType::mouse): return "Mouse";
+                    case (MouseInputSource::InputSourceType::touch): return "Touch";
+                    case (MouseInputSource::InputSourceType::pen):   return "Pen";
+                }
+
+                jassertfalse;
+                return "Unknown";
+            });
+
+            desc << " #" << mouseSource.getIndex();
+
+            auto pressure = mouseSource.getCurrentPressure();
+
+            if (pressure > 0.0f && pressure < 1.0f)
+                desc << "  (pressure: " << (int) (pressure * 100.0f) << "%)";
+
+            const auto modifierKeys = mouseSource.getCurrentModifiers();
+
+            if (modifierKeys.isCommandDown()) desc << " (CMD)";
+            if (modifierKeys.isShiftDown())   desc << " (SHIFT)";
+            if (modifierKeys.isCtrlDown())    desc << " (CTRL)";
+            if (modifierKeys.isAltDown())     desc << " (ALT)";
+
+            const auto labelPos = trail.isEmpty() ? pos : trail.getCurrentPosition();
+
+            g.drawText (desc,
+                        Rectangle<int> ((int) labelPos.x - 200,
+                                        (int) labelPos.y - 60,
+                                        400, 20),
+                        Justification::centredTop, false);
+        }
+    }
+
+    void mouseEnter (const MouseEvent& e) override
+    {
+        auto& source = getInputSource (e);
+        source.setPosition (e.position);
+        repaint();
+    }
+
+    void mouseExit (const MouseEvent& e) override
+    {
+        removeInputSource (e);
+        repaint();
+    }
+
+    void mouseMove (const MouseEvent& e) override
+    {
+        auto& source = getInputSource (e);
+        source.setPosition (e.position);
+        repaint();
     }
 
     void mouseDrag (const MouseEvent& e) override
     {
-        auto* t = getTrail (e.source);
-
-        if (t == nullptr)
-        {
-            t = new Trail (e.source);
-            t->path.startNewSubPath (e.position);
-            trails.add (t);
-        }
-
-        t->pushPoint (e.position, e.mods, e.pressure);
+        auto& source = getInputSource (e);
+        source.addPointToTrail (e.position, e.pressure);
         repaint();
     }
 
     void mouseUp (const MouseEvent& e) override
     {
-        trails.removeObject (getTrail (e.source));
+        auto& source = getInputSource (e);
+        source.setPosition (e.position);
+        source.clearTrail();
         repaint();
     }
 
-    struct Trail
+    static auto sourceMatches (const MouseInputSource& source)
     {
-        Trail (const MouseInputSource& ms)
-            : source (ms)
-        {}
-
-        void pushPoint (Point<float> newPoint, ModifierKeys newMods, float pressure)
-        {
-            currentPosition = newPoint;
-            modifierKeys = newMods;
-
-            if (lastPoint.getDistanceFrom (newPoint) > 5.0f)
-            {
-                if (lastPoint != Point<float>())
-                {
-                    Path newSegment;
-                    newSegment.startNewSubPath (lastPoint);
-                    newSegment.lineTo (newPoint);
-
-                    auto diameter = 20.0f * (pressure > 0 && pressure < 1.0f ? pressure : 1.0f);
-
-                    PathStrokeType (diameter, PathStrokeType::curved, PathStrokeType::rounded).createStrokedPath (newSegment, newSegment);
-                    path.addPath (newSegment);
-                }
-
-                lastPoint = newPoint;
-            }
-        }
-
-        MouseInputSource source;
-        Path path;
-        Colour colour  { getRandomBrightColour().withAlpha (0.6f) };
-        Point<float> lastPoint, currentPosition;
-        ModifierKeys modifierKeys;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Trail)
-    };
-
-    OwnedArray<Trail> trails;
-
-    void drawTrail (Trail& trail, Graphics& g)
-    {
-        g.setColour (trail.colour);
-        g.fillPath (trail.path);
-
-        auto radius = 40.0f;
-
-        g.setColour (Colours::black);
-        g.drawEllipse (trail.currentPosition.x - radius,
-                       trail.currentPosition.y - radius,
-                       radius * 2.0f, radius * 2.0f, 2.0f);
-
-        g.setFont (14.0f);
-
-        String desc ("Mouse #");
-        desc << trail.source.getIndex();
-
-        auto pressure = trail.source.getCurrentPressure();
-
-        if (pressure > 0.0f && pressure < 1.0f)
-            desc << "  (pressure: " << (int) (pressure * 100.0f) << "%)";
-
-        if (trail.modifierKeys.isCommandDown()) desc << " (CMD)";
-        if (trail.modifierKeys.isShiftDown())   desc << " (SHIFT)";
-        if (trail.modifierKeys.isCtrlDown())    desc << " (CTRL)";
-        if (trail.modifierKeys.isAltDown())     desc << " (ALT)";
-
-        g.drawText (desc,
-                    Rectangle<int> ((int) trail.currentPosition.x - 200,
-                                    (int) trail.currentPosition.y - 60,
-                                    400, 20),
-                    Justification::centredTop, false);
+        return [&source] (const auto& x) { return x->getSource() == source; };
     }
 
-    Trail* getTrail (const MouseInputSource& source)
+    InputSource& getInputSource (const MouseEvent& e)
     {
-        for (auto* trail : trails)
-        {
-            if (trail->source == source)
-                return trail;
-        }
-
-        return nullptr;
+        const auto it = std::find_if (sources.begin(), sources.end(), sourceMatches (e.source));
+        return it != sources.end() ? **it : *sources.emplace_back (std::make_unique<InputSource> (e.source));
     }
+
+    void removeInputSource (const MouseEvent& e)
+    {
+        sources.erase (std::remove_if (sources.begin(), sources.end(), sourceMatches (e.source)),
+                       sources.end());
+    }
+
+private:
+    void initSize()
+    {
+        setSize (500, 500);
+    }
+
+    std::vector<std::unique_ptr<InputSource>> sources;
 };

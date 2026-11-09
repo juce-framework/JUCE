@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -45,7 +45,8 @@
                       _10, _11, _12, _13, _14, _15, _16, _17, _18, _19,        \
                       _20, _21, _22, _23, _24, _25, _26, _27, _28, _29,        \
                       _30, _31, _32, _33, _34, _35, _36, _37, _38, _39,        \
-                      _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, N, ...)\
+                      _40, _41, _42, _43, _44, _45, _46, _47, _48, _49,        \
+                      _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, N, ...)\
     N
 
 #define JUCE_EACH_00_(FN)
@@ -98,10 +99,30 @@
 #define JUCE_EACH_47_(FN, X, ...) FN(X) JUCE_EACH_46_(FN, __VA_ARGS__)
 #define JUCE_EACH_48_(FN, X, ...) FN(X) JUCE_EACH_47_(FN, __VA_ARGS__)
 #define JUCE_EACH_49_(FN, X, ...) FN(X) JUCE_EACH_48_(FN, __VA_ARGS__)
+#define JUCE_EACH_50_(FN, X, ...) FN(X) JUCE_EACH_49_(FN, __VA_ARGS__)
+#define JUCE_EACH_51_(FN, X, ...) FN(X) JUCE_EACH_50_(FN, __VA_ARGS__)
+#define JUCE_EACH_52_(FN, X, ...) FN(X) JUCE_EACH_51_(FN, __VA_ARGS__)
+#define JUCE_EACH_53_(FN, X, ...) FN(X) JUCE_EACH_52_(FN, __VA_ARGS__)
+#define JUCE_EACH_54_(FN, X, ...) FN(X) JUCE_EACH_53_(FN, __VA_ARGS__)
+#define JUCE_EACH_55_(FN, X, ...) FN(X) JUCE_EACH_54_(FN, __VA_ARGS__)
+#define JUCE_EACH_56_(FN, X, ...) FN(X) JUCE_EACH_55_(FN, __VA_ARGS__)
+#define JUCE_EACH_57_(FN, X, ...) FN(X) JUCE_EACH_56_(FN, __VA_ARGS__)
+#define JUCE_EACH_58_(FN, X, ...) FN(X) JUCE_EACH_57_(FN, __VA_ARGS__)
+#define JUCE_EACH_59_(FN, X, ...) FN(X) JUCE_EACH_58_(FN, __VA_ARGS__)
 
 /** Apply the macro FN to each of the other arguments. */
 #define JUCE_EACH(FN, ...)                                                     \
     JUCE_NTH_ARG_(, __VA_ARGS__,                                               \
+                  JUCE_EACH_59_,                                               \
+                  JUCE_EACH_58_,                                               \
+                  JUCE_EACH_57_,                                               \
+                  JUCE_EACH_56_,                                               \
+                  JUCE_EACH_55_,                                               \
+                  JUCE_EACH_54_,                                               \
+                  JUCE_EACH_53_,                                               \
+                  JUCE_EACH_52_,                                               \
+                  JUCE_EACH_51_,                                               \
+                  JUCE_EACH_50_,                                               \
                   JUCE_EACH_49_,                                               \
                   JUCE_EACH_48_,                                               \
                   JUCE_EACH_47_,                                               \

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -133,6 +133,34 @@ namespace juce::build_tools
                 }
 
                 return "undefined";
+            }
+
+            bool supportsPaceProtection() const noexcept
+            {
+                switch (type)
+                {
+                    case GUIApp:            return true;
+                    case VSTPlugIn:         return true;
+                    case VST3PlugIn:        return true;
+                    case AudioUnitPlugIn:   return true;
+                    case StandalonePlugIn:  return true;
+                    case AudioUnitv3PlugIn: return true;
+                    case AAXPlugIn:         return true;
+                    case ConsoleApp:        return true;
+                    case StaticLibrary:     return true;
+                    case DynamicLibrary:    return true;
+                    case SharedCodeTarget:  return true;
+
+                    case UnityPlugIn:       return false;
+                    case LV2PlugIn:         return false;
+                    case AggregateTarget:   return false;
+                    case LV2Helper:         return false;
+                    case VST3Helper:        return false;
+
+                    case unspecified:       return false;
+                }
+
+                return false;
             }
 
             static Type typeFromName (const String& name)

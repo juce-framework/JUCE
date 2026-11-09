@@ -31,6 +31,7 @@
 #include "AAX_Assert.h"
 #include "AAX_CParameterManager.h"
 #include "AAX_CPacketDispatcher.h"
+#include "AAX_UtilsNative.h"
 #include <cmath>
 #include <cstring>
 
@@ -172,6 +173,9 @@ AAX_Result	AAX_CEffectParameters::NotificationReceived(AAX_CTypeID inNotificatio
 	switch (inNotificationType) {
 		case AAX_eNotificationEvent_ASPreviewState:
 		{
+			if (inNotificationData == NULL)
+				return AAX_ERROR_NULL_ARGUMENT;
+			
 			AAX_IParameter* parameter = mParameterManager.GetParameterByID(cPreviewID);
 			if (parameter != 0)
 			{
@@ -208,12 +212,18 @@ const AAX_IAutomationDelegate*  AAX_CEffectParameters::AutomationDelegate() cons
 
 AAX_Result AAX_CEffectParameters::GetNumberOfParameters(int32_t* aNumControls)  const 
 {
+	if (aNumControls == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	*aNumControls = mParameterManager.NumParameters();
 	return AAX_SUCCESS;
 }
 
 AAX_Result AAX_CEffectParameters::GetMasterBypassParameter( AAX_IString * oMasterBypassControl )  const 
 {
+	if (oMasterBypassControl == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	//<DMT> Having this return a default value when this class doesn't actually create this parameter cause all sorts of bugs.  This needs to return NULL.  However, if the default master bypass ID is used and that parameter exists, we will return that value.  Mainly this is to preserve behavior for people who've already ported their plug-ins using the older code.  When adding a parameter, please use cDefaultMasterBypassID instead calling this function.
 	if (mParameterManager.GetParameterByID(cDefaultMasterBypassID) != 0)
 		*oMasterBypassControl = AAX_CString(cDefaultMasterBypassID);
@@ -225,6 +235,9 @@ AAX_Result AAX_CEffectParameters::GetMasterBypassParameter( AAX_IString * oMaste
 
 AAX_Result AAX_CEffectParameters::GetParameterIsAutomatable( AAX_CParamID iParameterID, AAX_CBoolean * itIs )  const 
 {
+	if (itIs == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	*itIs = false;
 	const AAX_IParameter* parameter = mParameterManager.GetParameterByID(iParameterID);
 	if (parameter == 0)
@@ -236,6 +249,9 @@ AAX_Result AAX_CEffectParameters::GetParameterIsAutomatable( AAX_CParamID iParam
 
 AAX_Result AAX_CEffectParameters::GetParameterNumberOfSteps( AAX_CParamID iParameterID, int32_t * aNumSteps )  const 
 {
+	if (aNumSteps == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	const AAX_IParameter* parameter = mParameterManager.GetParameterByID( iParameterID );
 	if (parameter == 0)
 		return AAX_ERROR_INVALID_PARAMETER_ID;
@@ -251,6 +267,9 @@ AAX_Result AAX_CEffectParameters::GetParameterNumberOfSteps( AAX_CParamID iParam
 
 AAX_Result AAX_CEffectParameters::GetParameterValueString ( AAX_CParamID iParameterID, AAX_IString * oValueString, int32_t iMaxLength )  const 
 {
+	if (oValueString == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	//<DMT> Right now, this one isn't called from DAE.  It instead calls GetParameterStringFromValue().
 	const AAX_IParameter*			parameter = mParameterManager.GetParameterByID(iParameterID);
 	AAX_CString				str;
@@ -266,6 +285,9 @@ AAX_Result AAX_CEffectParameters::GetParameterValueString ( AAX_CParamID iParame
 
 AAX_Result AAX_CEffectParameters::GetParameterValueFromString ( AAX_CParamID iParameterID, double * oValuePtr, const AAX_IString & iValueString )  const 
 {
+	if (oValuePtr == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	const AAX_IParameter*			parameter = mParameterManager.GetParameterByID(iParameterID);
 	const AAX_CString				valueStr(iValueString);
 	double normValue;
@@ -282,6 +304,9 @@ AAX_Result AAX_CEffectParameters::GetParameterValueFromString ( AAX_CParamID iPa
 	
 AAX_Result AAX_CEffectParameters::GetParameterStringFromValue ( AAX_CParamID iParameterID, double value, AAX_IString * valueString, int32_t maxLength )  const 
 {
+	if (valueString == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	const AAX_IParameter *	parameter = mParameterManager.GetParameterByID(iParameterID);
 	AAX_CString				valueStr;
 	
@@ -297,6 +322,9 @@ AAX_Result AAX_CEffectParameters::GetParameterStringFromValue ( AAX_CParamID iPa
 
 AAX_Result AAX_CEffectParameters::GetParameterName( AAX_CParamID iParameterID, AAX_IString * oName )  const 
 {
+	if (oName == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	const AAX_IParameter*			parameter = mParameterManager.GetParameterByID( iParameterID );
 	if (parameter != 0)
 	{
@@ -378,6 +406,9 @@ AAX_Result AAX_CEffectParameters::GetParameterNameOfLength ( AAX_CParamID iParam
 
 AAX_Result AAX_CEffectParameters::GetParameterNormalizedValue ( AAX_CParamID iParameterID, double * oValuePtr )  const 
 {
+	if (oValuePtr == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	const AAX_IParameter*			parameter = mParameterManager.GetParameterByID( iParameterID );
 	if (parameter == 0)
 		return AAX_ERROR_INVALID_PARAMETER_ID;
@@ -389,6 +420,9 @@ AAX_Result AAX_CEffectParameters::GetParameterNormalizedValue ( AAX_CParamID iPa
 
 AAX_Result AAX_CEffectParameters::GetParameterDefaultNormalizedValue( AAX_CParamID iParameterID, double * aValuePtr )  const 
 {
+	if (aValuePtr == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	const AAX_IParameter* parameter = mParameterManager.GetParameterByID( iParameterID );
 	if (parameter == 0)
 		return AAX_ERROR_INVALID_PARAMETER_ID;
@@ -541,6 +575,9 @@ AAX_Result	AAX_CEffectParameters::UpdateParameterNormalizedRelative(AAX_CParamID
 
 AAX_Result AAX_CEffectParameters::GetNumberOfChunks ( int32_t * numChunks )  const 
 {
+	if (numChunks == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	*numChunks = 1;	//just the standard control chunk.
 	return AAX_SUCCESS;
 }
@@ -548,6 +585,9 @@ AAX_Result AAX_CEffectParameters::GetNumberOfChunks ( int32_t * numChunks )  con
 
 AAX_Result AAX_CEffectParameters::GetChunkIDFromIndex ( int32_t index, AAX_CTypeID * chunkID )  const 
 {
+	if (chunkID == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	if (index != 0)
 	{
 		*chunkID = AAX_CTypeID(0);
@@ -561,6 +601,9 @@ AAX_Result AAX_CEffectParameters::GetChunkIDFromIndex ( int32_t index, AAX_CType
 
 AAX_Result AAX_CEffectParameters::GetChunkSize ( AAX_CTypeID chunkID, uint32_t * oSize )  const 
 {
+	if (oSize == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	if (chunkID != CONTROLS_CHUNK_ID)
 	{
 		*oSize = 0;
@@ -582,6 +625,9 @@ AAX_Result AAX_CEffectParameters::GetChunkSize ( AAX_CTypeID chunkID, uint32_t *
 
 AAX_Result AAX_CEffectParameters::GetChunk ( AAX_CTypeID chunkID, AAX_SPlugInChunk * chunk )  const 
 {	
+	if (chunk == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	//Check the chunkID
 	if (chunkID != CONTROLS_CHUNK_ID)
 		return AAX_ERROR_INVALID_CHUNK_ID;
@@ -604,6 +650,9 @@ AAX_Result AAX_CEffectParameters::GetChunk ( AAX_CTypeID chunkID, AAX_SPlugInChu
 
 AAX_Result AAX_CEffectParameters::SetChunk ( AAX_CTypeID chunkID, const AAX_SPlugInChunk * chunk )
 {
+	if (chunk == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	if (chunkID != CONTROLS_CHUNK_ID) 
 		return AAX_ERROR_INVALID_CHUNK_ID;
 
@@ -667,6 +716,9 @@ AAX_Result AAX_CEffectParameters::SetChunk ( AAX_CTypeID chunkID, const AAX_SPlu
 
 AAX_Result AAX_CEffectParameters::CompareActiveChunk ( const AAX_SPlugInChunk * aChunkP, AAX_CBoolean * aIsEqualP )  const 
 {
+	if (aChunkP == NULL || aIsEqualP == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	if (aChunkP->fChunkID != CONTROLS_CHUNK_ID) 
 	{
 		// If we don't know what the chunk is then we don't want to be turning on the compare light unnecessarily.
@@ -756,6 +808,9 @@ AAX_Result AAX_CEffectParameters::CompareActiveChunk ( const AAX_SPlugInChunk * 
 
 AAX_Result AAX_CEffectParameters::GetNumberOfChanges ( int32_t * aValueP )  const 
 {
+	if (aValueP == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	if(mNumPlugInChanges >= 0)
 	{
 		*aValueP = mNumPlugInChanges;
@@ -767,6 +822,9 @@ AAX_Result AAX_CEffectParameters::GetNumberOfChanges ( int32_t * aValueP )  cons
 
 AAX_Result AAX_CEffectParameters::GetParameterType ( AAX_CParamID iParameterID, AAX_EParameterType * aControlType )  const 
 {
+	if (aControlType == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	const AAX_IParameter* parameter = mParameterManager.GetParameterByID( iParameterID );
 	if (parameter == 0)
 		return AAX_ERROR_INVALID_PARAMETER_ID;
@@ -778,6 +836,9 @@ AAX_Result AAX_CEffectParameters::GetParameterType ( AAX_CParamID iParameterID, 
 
 AAX_Result AAX_CEffectParameters::GetParameterOrientation( AAX_CParamID iParameterID, AAX_EParameterOrientation * aControlOrientation )  const 
 {
+	if (aControlOrientation == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	const AAX_IParameter*	parameter = mParameterManager.GetParameterByID( iParameterID );
 	if (parameter == 0)
 		return AAX_ERROR_INVALID_PARAMETER_ID;
@@ -788,6 +849,9 @@ AAX_Result AAX_CEffectParameters::GetParameterOrientation( AAX_CParamID iParamet
 					
 AAX_Result AAX_CEffectParameters::GetParameter(AAX_CParamID iParameterID, AAX_IParameter** parameter) 
 {
+	if (parameter == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	*parameter = mParameterManager.GetParameterByID( iParameterID );
 	if (*parameter == 0)
 		return AAX_ERROR_INVALID_PARAMETER_ID;
@@ -796,6 +860,9 @@ AAX_Result AAX_CEffectParameters::GetParameter(AAX_CParamID iParameterID, AAX_IP
 
 AAX_Result AAX_CEffectParameters::GetParameterIndex( AAX_CParamID iParameterID, int32_t * oControlIndex )  const 
 {
+	if (oControlIndex == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	*oControlIndex = mParameterManager.GetParameterIndex( iParameterID );
 	if (*oControlIndex < 0)
 		return AAX_ERROR_INVALID_PARAMETER_ID;
@@ -805,6 +872,9 @@ AAX_Result AAX_CEffectParameters::GetParameterIndex( AAX_CParamID iParameterID, 
 
 AAX_Result AAX_CEffectParameters::GetParameterIDFromIndex( int32_t iControlIndex, AAX_IString * oParameterID )  const 
 {
+	if (oParameterID == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	const AAX_IParameter * parameter = mParameterManager.GetParameter( iControlIndex );
 	if ( parameter )
 		*oParameterID = parameter->Identifier();
@@ -819,9 +889,38 @@ AAX_Result AAX_CEffectParameters::GetParameterIDFromIndex( int32_t iControlIndex
 
 AAX_Result AAX_CEffectParameters::GetParameterValueInfo ( AAX_CParamID /*iParameterID*/, int32_t /*iSelector*/, int32_t* oValue) const
 {
+	if (oValue == NULL)
+		return AAX_ERROR_NULL_ARGUMENT;
+	
 	// plugins should override this method if they wish to use
 	// the parameter properties
 	*oValue = 0;
+	return AAX_ERROR_UNIMPLEMENTED;
+}
+
+AAX_Result AAX_CEffectParameters::GetParameterAffectsState(
+	AAX_CParamID /*iParameterID*/,
+	AAX_CTypeID /*iStateType*/,
+	void const * /*iQueryData*/,
+	AAX_CBoolean * /*oAffectsState*/) const
+{
+	// Leave oAffectsState unmodified
+	return AAX_ERROR_UNIMPLEMENTED;
+}
+
+AAX_Result AAX_CEffectParameters::GetParameterWithRole(
+	AAX_CTypeID /*iParameterRole*/,
+	void const * /*iQueryData*/,
+	AAX_CBoolean * /*oHasParameter*/,
+	AAX_IString * /*oParameterIDString*/) const
+{
+	return AAX_ERROR_UNIMPLEMENTED;
+}
+
+AAX_Result AAX_CEffectParameters::GetParameterDefaultAutomationEnabledState(
+	AAX_CParamID /*iParameterID*/,
+	/* AAX_EAutomationEnabledState */ int32_t * /*oAutomationEnabledState*/) const
+{
 	return AAX_ERROR_UNIMPLEMENTED;
 }
 
@@ -846,8 +945,14 @@ void	AAX_CEffectParameters::BuildChunkData() const
 			continue;
 		
 		const char* parameterID = parameter->Identifier();
+
+		// Check if the parameter is explicitly filtered out.
+		auto const isFiltered = 0 < mFilteredParameters.count(parameterID);
+
+		// Never save reserved parameters in the default chunk.
+		auto const isReserved = AAX::IsParameterIDReservedByAvid(parameterID);
 		
-		if (mFilteredParameters.find(parameterID) == mFilteredParameters.end())
+		if (!isFiltered && !isReserved)
 		{
 			bool boolValue;
 			int32_t intValue;

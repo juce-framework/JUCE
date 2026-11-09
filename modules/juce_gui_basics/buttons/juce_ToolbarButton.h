@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -94,12 +94,12 @@ public:
 
 private:
     //==============================================================================
-    std::unique_ptr<Drawable> normalImage, toggledOnImage;
-    Drawable* currentImage = nullptr;
+    std::unique_ptr<DrawableComponent> normalImage, toggledOnImage;
+    DrawableComponent* currentImage = nullptr;
 
     void updateDrawable();
-    Drawable* getImageToUse() const;
-    void setCurrentImage (Drawable*);
+    DrawableComponent* getImageToUse() const;
+    void setCurrentImage (DrawableComponent*);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarButton)
 };

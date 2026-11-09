@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -1761,6 +1761,8 @@ struct AndroidMidiHelpers
 
         bool send (ump::Iterator b, ump::Iterator e) override
         {
+            const ScopedLock lock { mutex };
+
             if (dst != nullptr)
                 return converter.convert (b, e, [&] (auto&&... args) { return dst->send (args...); });
 
@@ -1773,6 +1775,7 @@ struct AndroidMidiHelpers
             consumers.call ([&] (auto& x) { x.consume (b, e, time); });
         }
 
+        CriticalSection mutex;
         std::optional<ump::Endpoint> endpoint;
         WaitFreeListeners<Consumer> consumers;
         ConverterWithOptionalProtocol converter;
@@ -2894,6 +2897,8 @@ struct AndroidMidiHelpers
 
         bool send (ump::Iterator b, ump::Iterator e) override
         {
+            const ScopedLock lock { mutex };
+
             if (dst == nullptr)
                 return false;
 
@@ -2991,6 +2996,8 @@ struct AndroidMidiHelpers
         std::vector<MidiPort> ports;
 
         ConverterWithOptionalProtocol converter;
+
+        CriticalSection mutex;
     };
 
     class BytestreamConnection : public Connection,
@@ -3058,6 +3065,8 @@ struct AndroidMidiHelpers
 
         bool send (ump::Iterator b, ump::Iterator e) override
         {
+            const ScopedLock lock { mutex };
+
             bool success = true;
 
             for (const auto v : makeRange (b, e))
@@ -3126,6 +3135,8 @@ struct AndroidMidiHelpers
         std::vector<std::unique_ptr<MidiSource>> src;
         std::vector<std::unique_ptr<MidiDestination>> dst;
         std::vector<MidiPort> ports;
+
+        CriticalSection mutex;
     };
 
     class Client : private DeviceManagerListener,

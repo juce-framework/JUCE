@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -33,23 +33,15 @@
 */
 
 // The purpose of this internal header, included by juce_core and juce_graphics,
-// is to place the zlib symbols in a common namespace with consistent preprocessor
-// definitions.
+// is to apply consistent preprocessor definitions to zlib.h.
 
 #pragma once
 
-namespace juce::zlibNamespace
-{
 #define ZLIB_CONST 1
+#define HAVE_MEMCPY 1
 
-#if JUCE_INCLUDE_ZLIB_CODE
-
- #define HAVE_MEMCPY 1
-
+#if ! defined (JUCE_INCLUDE_ZLIB_CODE) || JUCE_INCLUDE_ZLIB_CODE
  #include "juce_core/zip/zlib/zlib.h"
-
 #else
  #include JUCE_ZLIB_INCLUDE_PATH
 #endif
-
-} // namespace juce::zlibNamespace

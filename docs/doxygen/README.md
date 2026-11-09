@@ -18,4 +18,4 @@ python3 build.py
 
 JUCE specific overrides then live in `css/doxygen-juce-overrides.css`.
 
-Code highlighting is done with [highlight.js](highlightjs.org).
+Code highlighting is done with [highlight.js](https://highlightjs.org).

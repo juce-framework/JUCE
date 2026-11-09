@@ -34,3 +34,7 @@ int32_t OboeExtensions::setMMapEnabled(bool enabled){
 bool OboeExtensions::isMMapUsed(oboe::AudioStream *oboeStream){
     return AAudioExtensions::getInstance().isMMapUsed(oboeStream);
 }
+
+bool OboeExtensions::isPartialDataCallbackSupported() {
+    return AAudioExtensions::getInstance().isPartialDataCallbackSupported();
+}

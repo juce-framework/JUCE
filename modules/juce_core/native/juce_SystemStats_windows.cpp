@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -83,20 +83,22 @@ static int findNumberOfPhysicalCores() noexcept
  #if JUCE_CLANG
 static void callCPUID (int result[4], uint32 type)
 {
-  uint32 la = (uint32) result[0], lb = (uint32) result[1],
-         lc = (uint32) result[2], ld = (uint32) result[3];
+  uint32 la = 0, lb = 0, lc = 0, ld = 0;
 
   asm ("mov %%ebx, %%esi \n\t"
        "cpuid \n\t"
        "xchg %%esi, %%ebx"
-       : "=a" (la), "=S" (lb), "=c" (lc), "=d" (ld) : "a" (type)
-        #if JUCE_64BIT
-     , "b" (lb), "c" (lc), "d" (ld)
-        #endif
+       : "=a" (la), "=S" (lb), "=c" (lc), "=d" (ld)
+       : "a" (type)
+      #if JUCE_64BIT
+       , "b" (lb), "c" (lc), "d" (ld)
+      #endif
        );
 
-  result[0] = (int) la; result[1] = (int) lb;
-  result[2] = (int) lc; result[3] = (int) ld;
+  result[0] = (int) la;
+  result[1] = (int) lb;
+  result[2] = (int) lc;
+  result[3] = (int) ld;
 }
  #else
 static void callCPUID (int result[4], int infoType)
@@ -345,29 +347,38 @@ bool SystemStats::isOperatingSystem64Bit()
    #if JUCE_64BIT
     return true;
    #else
-    using LPFN_ISWOW64PROCESS = BOOL (WINAPI*) (HANDLE, PBOOL);
+    auto* kernel32 = ::GetModuleHandleA ("kernel32");
+
+    if (kernel32 == nullptr)
+        return false;
 
     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type")
 
-    static const auto fnIsWow64Process = std::invoke ([]() -> LPFN_ISWOW64PROCESS
-    {
-        if (auto* moduleHandle = ::GetModuleHandleA ("kernel32"))
-            if (auto* result = (LPFN_ISWOW64PROCESS) ::GetProcAddress (moduleHandle, "IsWow64Process"))
-                return result;
+    // Available from Windows 10 1709 and is correct for 32-bit processes on ARM64.
+    using IsWow64Process2Fn = BOOL (WINAPI*) (HANDLE, USHORT*, USHORT*);
 
-        // Unable to locate function! Please let the JUCE team know your current platform/environment
-        // so that we can fix this issue.
-        jassertfalse;
-        return {};
-    });
+    if (auto* fn = (IsWow64Process2Fn) ::GetProcAddress (kernel32, "IsWow64Process2"))
+    {
+        USHORT processMachine = IMAGE_FILE_MACHINE_UNKNOWN;
+        USHORT nativeMachine  = IMAGE_FILE_MACHINE_UNKNOWN;
+
+        if (fn (GetCurrentProcess(), &processMachine, &nativeMachine))
+            return nativeMachine == IMAGE_FILE_MACHINE_AMD64
+                || nativeMachine == IMAGE_FILE_MACHINE_ARM64;
+    }
+
+    using IsWow64ProcessFn = BOOL (WINAPI*) (HANDLE, PBOOL);
+
+    if (auto* fn = (IsWow64ProcessFn) ::GetProcAddress (kernel32, "IsWow64Process"))
+    {
+        BOOL isWow64 = FALSE;
+        return fn (GetCurrentProcess(), &isWow64) && isWow64 != FALSE;
+    }
 
     JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-    BOOL isWow64 = FALSE;
-
-    return fnIsWow64Process != nullptr
-            && fnIsWow64Process (GetCurrentProcess(), &isWow64)
-            && isWow64 != FALSE;
+    jassertfalse;
+    return false;
    #endif
 }
 
@@ -406,7 +417,6 @@ class HiResCounterHandler
 {
 public:
     HiResCounterHandler()
-        : hiResTicksOffset (0)
     {
         // This macro allows you to override the default timer-period
         // used on Windows. By default this is set to 1, because that has
@@ -428,23 +438,23 @@ public:
         LARGE_INTEGER f;
         QueryPerformanceFrequency (&f);
         hiResTicksPerSecond = f.QuadPart;
-        hiResTicksScaleFactor = 1000.0 / (double) hiResTicksPerSecond;
+        hiResMillisecondsPerTick = 1'000.0 / (double) hiResTicksPerSecond;
     }
 
     inline int64 getHighResolutionTicks() noexcept
     {
         LARGE_INTEGER ticks;
         QueryPerformanceCounter (&ticks);
-        return ticks.QuadPart + hiResTicksOffset;
+        return ticks.QuadPart;
     }
 
     inline double getMillisecondCounterHiRes() noexcept
     {
-        return (double) getHighResolutionTicks() * hiResTicksScaleFactor;
+        return (double) getHighResolutionTicks() * hiResMillisecondsPerTick;
     }
 
-    int64 hiResTicksPerSecond, hiResTicksOffset;
-    double hiResTicksScaleFactor;
+    int64 hiResTicksPerSecond;
+    double hiResMillisecondsPerTick;
 };
 
 static HiResCounterHandler hiResCounterHandler;

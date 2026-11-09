@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -88,6 +88,9 @@ public:
         A value of 0.0 is completely transparent, 1.0 is completely opaque.
     */
     void setOpacity (float newOpacity);
+
+    /** Changes the blend mode used for drawing images. */
+    void setImageBlendMode (BlendMode newMode);
 
     /** Sets the context to use a gradient for its fill pattern. */
     void setGradientFill (const ColourGradient& gradient);

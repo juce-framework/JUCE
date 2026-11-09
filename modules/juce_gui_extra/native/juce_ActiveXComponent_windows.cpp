@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -287,8 +287,7 @@ namespace ActiveXHelpers
 }
 
 //==============================================================================
-class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher,
-                                        public ComponentPeer::ScaleFactorListener
+class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher
 {
 public:
     Pimpl (HWND hwnd, ActiveXControlComponent& activeXComp)
@@ -314,9 +313,6 @@ public:
 
         clientSite->Release();
         storage->Release();
-
-        if (currentPeer != nullptr)
-            currentPeer->removeScaleFactorListener (this);
     }
 
     void setControlBounds (Rectangle<int> newBounds) const
@@ -345,28 +341,16 @@ public:
             setControlBounds (peer->getAreaCoveredBy (owner));
     }
 
-    void componentPeerChanged() override
-    {
-        if (currentPeer != nullptr)
-            currentPeer->removeScaleFactorListener (this);
-
-        componentMovedOrResized (true, true);
-
-        currentPeer = owner.getTopLevelComponent()->getPeer();
-
-        if (currentPeer != nullptr)
-            currentPeer->addScaleFactorListener (this);
-    }
+    void componentPeerChanged() override {}
 
     using ComponentMovementWatcher::componentVisibilityChanged;
 
     void componentVisibilityChanged() override
     {
         setControlVisible (owner.isShowing());
-        componentPeerChanged();
     }
 
-    void nativeScaleFactorChanged (double /*newScaleFactor*/) override
+    void nativeScaleFactorChanged()
     {
         componentMovedOrResized (true, true);
     }
@@ -420,6 +404,7 @@ public:
     ActiveXHelpers::JuceIOleClientSite* clientSite = nullptr;
     IOleObject* control = nullptr;
     WNDPROC originalWndProc = nullptr;
+    NativeScaleFactorNotifier notifier { &owner, [this] (auto) { nativeScaleFactorChanged(); } };
 };
 
 //==============================================================================

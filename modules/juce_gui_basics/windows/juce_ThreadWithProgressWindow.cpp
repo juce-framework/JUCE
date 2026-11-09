@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -46,12 +46,15 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
      timeOutMsWhenCancelling (cancellingTimeOutMs),
      wasCancelledByUser (false)
 {
-    alertWindow.reset (LookAndFeel::getDefaultLookAndFeel()
-                           .createAlertWindow (title, {},
-                                               cancelButtonText.isEmpty() ? TRANS ("Cancel")
-                                                                          : cancelButtonText,
-                                               {}, {}, MessageBoxIconType::NoIcon, hasCancelButton ? 1 : 0,
-                                               componentToCentreAround));
+    auto opt = MessageBoxOptions{}.withIconType (MessageBoxIconType::NoIcon)
+                                  .withTitle (title)
+                                  .withMessage ({})
+                                  .withAssociatedComponent (componentToCentreAround);
+
+    if (hasCancelButton)
+        opt = opt.withButton (cancelButtonText.isNotEmpty() ? cancelButtonText : TRANS ("Cancel"), 0);
+
+    alertWindow = LookAndFeel::getDefaultLookAndFeel().createAlertWindowForOptions (opt);
 
     // if there are no buttons, we won't allow the user to interrupt the thread
     alertWindow->setEscapeKeyCancels (false);

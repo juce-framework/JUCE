@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -132,7 +132,7 @@ public:
         }
     }
 
-    /** Applies a smoothed gain to a buffer */
+    /** Applies a smoothed gain to a buffer. */
     void applyGain (AudioBuffer<FloatType>& buffer, int numSamples) noexcept
     {
         jassert (numSamples >= 0);
@@ -162,6 +162,9 @@ public:
             buffer.applyGain (0, numSamples, target);
         }
     }
+
+    /** Returns the number of samples remaining to reach the target value. */
+    int getNumSamplesToReachTarget() const noexcept { return countdown; }
 
 private:
     //==============================================================================

@@ -40,6 +40,7 @@
 #include "AAX_Enums.h"
 #include "AAX.h"
 #include <memory>
+#include <type_traits>
 
 // Forward declarations
 class AAX_IPageTable;
@@ -643,5 +644,28 @@ public:
 			uint32_t inTableType,
 			int32_t inTablePageSize) const = 0;
 };
+
+
+namespace AAX
+{
+	/** \brief Wrapper for AAX_IController::PostPacket()
+	 *
+	 *  Automatically applies the payload size.
+	 */
+	template <class T,
+			  typename std::enable_if<
+				  !std::is_reference<T>::value &&
+				  !std::is_pointer<T>::value, int>::type = 0>
+	AAX_Result
+	PostPacket(
+			AAX_IController * inController,
+			AAX_CFieldIndex inFieldIndex,
+			const T & inPayload)
+	{
+		return inController
+			? inController->PostPacket(inFieldIndex, &inPayload, sizeof(T))
+			: AAX_ERROR_NULL_ARGUMENT;
+	}
+}
 
 #endif // #ifndef _AAX_IPLUGIN_H_

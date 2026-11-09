@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -293,6 +293,7 @@ juce::build_tools::PlistOptions parsePlistOptions (const juce::File& file,
     updateField ("PLUGIN_DESCRIPTION",                   result.pluginDescription);
     updateField ("PLUGIN_AU_EXPORT_PREFIX",              result.pluginAUExportPrefix);
     updateField ("PLUGIN_AU_MAIN_TYPE",                  result.auMainType);
+    updateField ("PLUGIN_AU_FRAMEWORK_BUNDLE_ID",        result.auv3FrameworkBundle);
     updateField ("IS_AU_SANDBOX_SAFE",                   result.isAuSandboxSafe);
     updateField ("IS_PLUGIN_SYNTH",                      result.isPluginSynth);
     updateField ("IS_PLUGIN_ARA_EFFECT",                 result.isPluginARAEffect);

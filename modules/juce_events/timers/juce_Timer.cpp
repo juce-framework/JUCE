@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -35,53 +35,9 @@
 namespace juce
 {
 
-class ShutdownDetector : private DeletedAtShutdown
-{
-public:
-    ShutdownDetector() = default;
-
-    ~ShutdownDetector() override
-    {
-        getListeners().call (&Listener::applicationShuttingDown);
-        clearSingletonInstance();
-    }
-
-    struct Listener
-    {
-        virtual ~Listener() = default;
-        virtual void applicationShuttingDown() = 0;
-    };
-
-    static void addListener (Listener* listenerToAdd)
-    {
-        // Only try to create an instance of the ShutdownDetector when a listener is added
-        [[maybe_unused]] auto* instance = getInstance();
-        getListeners().add (listenerToAdd);
-    }
-
-    static void removeListener (Listener* listenerToRemove)
-    {
-        getListeners().remove (listenerToRemove);
-    }
-
-private:
-    using ListenerListType = ThreadSafeListenerList<Listener>;
-
-    // By having a static ListenerList it can outlive the ShutdownDetector instance preventing
-    // issues for objects trying to remove themselves after the instance has been deleted
-    static ListenerListType& getListeners()
-    {
-        static ListenerListType listeners;
-        return listeners;
-    }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShutdownDetector)
-    JUCE_DECLARE_NON_MOVEABLE (ShutdownDetector)
-    JUCE_DECLARE_SINGLETON_INLINE (ShutdownDetector, false)
-};
-
 class Timer::TimerThread final : private Thread,
-                                 private ShutdownDetector::Listener
+                                 private Thread::Listener,
+                                 private MessageManager::LifetimeListener
 {
 public:
     using LockType = CriticalSection;
@@ -90,19 +46,44 @@ public:
         : Thread (SystemStats::getJUCEVersion() + ": Timer")
     {
         timers.reserve (32);
-        ShutdownDetector::addListener (this);
+        addListener (this);
+        MessageManager::addLifetimeListener (*this);
     }
 
     ~TimerThread() override
     {
-        // If this is hit, a timer has outlived the platform event system.
-        jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
-
-        stopThreadAsync();
-        ShutdownDetector::removeListener (this);
-        stopThread (-1);
+        MessageManager::removeLifetimeListener (*this);
+        stopThread();
+        removeListener (this);
     }
 
+    void startTimer (Timer* t, int interval)
+    {
+        const LockType::ScopedLockType sl (lock);
+
+        if (t->timerPeriodMs.exchange (interval) > 0)
+            resetTimerCounter (t);
+        else
+            addTimer (t);
+    }
+
+    void stopTimer (Timer* t)
+    {
+        if (! t->isTimerRunning())
+            return;
+
+        const LockType::ScopedLockType sl (lock);
+
+        if (t->timerPeriodMs.exchange (0) > 0)
+            removeTimer (t);
+    }
+
+    void callTimersSynchronously()
+    {
+        callTimers();
+    }
+
+private:
     void run() override
     {
         auto lastTime = Time::getMillisecondCounter();
@@ -127,15 +108,14 @@ public:
                 {
                     messageToSend->post();
 
-                    if (! callbackArrived.wait (300))
-                    {
-                        // Sometimes our message can get discarded by the OS (e.g. when running as an RTAS
-                        // when the app has a modal loop), so this is how long to wait before assuming the
-                        // message has been lost and trying again.
-                        messageToSend->post();
-                    }
+                    // Sometimes our message can get discarded by the OS (e.g.
+                    // when running as an RTAS when the app has a modal loop),
+                    // so this is how long to wait before assuming the message
+                    // has been lost and trying again.
+                    if (callbackArrived.wait (300) || threadShouldExit())
+                        continue;
 
-                    continue;
+                    messageToSend->post();
                 }
             }
 
@@ -151,7 +131,7 @@ public:
 
         const LockType::ScopedLockType sl (lock);
 
-        while (! timers.empty())
+        while (! isShuttingDown && ! timers.empty())
         {
             auto& first = timers.front();
 
@@ -159,9 +139,8 @@ public:
                 break;
 
             auto* timer = first.timer;
-            first.countdownMs = timer->timerPeriodMs;
+            first.countdownMs = timer->getTimerInterval();
             shuffleTimerBackInQueue (0);
-            notify();
 
             const LockType::ScopedUnlockType ul (lock);
 
@@ -177,20 +156,11 @@ public:
         }
 
         callbackArrived.signal();
-    }
-
-    void callTimersSynchronously()
-    {
-        callTimers();
+        notify();
     }
 
     void addTimer (Timer* t)
     {
-        const LockType::ScopedLockType sl (lock);
-
-        if (! isThreadRunning())
-            startThread (Thread::Priority::high);
-
         // Trying to add a timer that's already here - shouldn't get to this point,
         // so if you get this assertion, let me know!
         jassert (std::none_of (timers.begin(), timers.end(),
@@ -198,18 +168,18 @@ public:
 
         auto pos = timers.size();
 
-        timers.push_back ({ t, t->timerPeriodMs });
+        timers.push_back ({ t, t->getTimerInterval() });
         t->positionInQueue = pos;
         shuffleTimerForwardInQueue (pos);
+
+        tryStartThread();
         notify();
     }
 
     void removeTimer (Timer* t)
     {
-        const LockType::ScopedLockType sl (lock);
-
-        auto pos = t->positionInQueue;
-        auto lastIndex = timers.size() - 1;
+        const auto pos = t->positionInQueue;
+        const auto lastIndex = timers.size() - 1;
 
         jassert (pos <= lastIndex);
         jassert (timers[pos].timer == t);
@@ -225,15 +195,13 @@ public:
 
     void resetTimerCounter (Timer* t) noexcept
     {
-        const LockType::ScopedLockType sl (lock);
-
         auto pos = t->positionInQueue;
 
         jassert (pos < timers.size());
         jassert (timers[pos].timer == t);
 
-        auto lastCountdown = timers[pos].countdownMs;
-        auto newCountdown = t->timerPeriodMs;
+        const auto lastCountdown = timers[pos].countdownMs;
+        const auto newCountdown = t->getTimerInterval();
 
         if (newCountdown != lastCountdown)
         {
@@ -248,7 +216,6 @@ public:
         }
     }
 
-private:
     LockType lock;
 
     struct TimerCountdown
@@ -258,6 +225,7 @@ private:
     };
 
     std::vector<TimerCountdown> timers;
+    bool isShuttingDown = false;
 
     WaitableEvent callbackArrived;
 
@@ -267,8 +235,7 @@ private:
 
         void messageCallback() override
         {
-            if (auto instance = SharedResourcePointer<TimerThread>::getSharedObjectWithoutCreating())
-                (*instance)->callTimers();
+            Timer::callPendingTimersSynchronously();
         }
     };
 
@@ -337,14 +304,36 @@ private:
     }
 
     //==============================================================================
-    void applicationShuttingDown() final
+    void tryStartThread()
     {
-        stopThreadAsync();
+        if (isThreadRunning()
+            || timers.empty()
+            || isShuttingDown
+            || MessageManager::getInstanceWithoutCreating() == nullptr)
+            return;
+
+        startThread (Priority::high);
     }
 
-    void stopThreadAsync()
+    void messageManagerStarting() final
     {
-        signalThreadShouldExit();
+        const LockType::ScopedLockType sl (lock);
+        isShuttingDown = false;
+        tryStartThread();
+    }
+
+    void messageManagerStopping() final
+    {
+        {
+            const LockType::ScopedLockType sl (lock);
+            isShuttingDown = true;
+        }
+
+        stopThread();
+    }
+
+    void exitSignalSent() final
+    {
         callbackArrived.signal();
     }
 
@@ -371,17 +360,7 @@ Timer::~Timer()
 
 void Timer::startTimer (int interval) noexcept
 {
-    // If you're calling this before (or after) the MessageManager is
-    // running, then you're not going to get any timer callbacks!
-    JUCE_ASSERT_MESSAGE_MANAGER_EXISTS
-
-    bool wasStopped = (timerPeriodMs == 0);
-    timerPeriodMs = jmax (1, interval);
-
-    if (wasStopped)
-        timerThread->addTimer (this);
-    else
-        timerThread->resetTimerCounter (this);
+    timerThread->startTimer (this, jmax (1, interval));
 }
 
 void Timer::startTimerHz (int timerFrequencyHz) noexcept
@@ -394,11 +373,7 @@ void Timer::startTimerHz (int timerFrequencyHz) noexcept
 
 void Timer::stopTimer() noexcept
 {
-    if (timerPeriodMs > 0)
-    {
-        timerThread->removeTimer (this);
-        timerPeriodMs = 0;
-    }
+    timerThread->stopTimer (this);
 }
 
 void JUCE_CALLTYPE Timer::callPendingTimersSynchronously()
@@ -436,5 +411,112 @@ void JUCE_CALLTYPE Timer::callAfterDelay (int milliseconds, std::function<void()
 {
     new LambdaInvoker (milliseconds, std::move (f));
 }
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class TimerTests final : public UnitTest
+{
+public:
+    TimerTests()
+        : UnitTest ("Timer", UnitTestCategories::threads)
+    {}
+
+    void runTest() final
+    {
+        ScopedJuceInitialiser_GUI libraryInitialiser;
+
+        beginTest ("Start and stop a timer");
+        {
+            TestTimer timer;
+            expect (! timer.isTimerRunning());
+            expectEquals (timer.getTimerInterval(), 0);
+
+            timer.startTimer (1000);
+            expect (timer.isTimerRunning());
+            expectEquals (timer.getTimerInterval(), 1000);
+
+            timer.stopTimer();
+            expect (! timer.isTimerRunning());
+            expectEquals (timer.getTimerInterval(), 0);
+        }
+
+        beginTest ("Changing the interval of a running timer");
+        {
+            TestTimer timer;
+            timer.startTimer (1000);
+            expectEquals (timer.getTimerInterval(), 1000);
+
+            timer.startTimer (50);
+            expect (timer.isTimerRunning());
+            expectEquals (timer.getTimerInterval(), 50);
+
+            timer.stopTimer();
+        }
+
+        beginTest ("startTimerHz");
+        {
+            TestTimer timer;
+            timer.startTimerHz (10);
+            expect (timer.isTimerRunning());
+            expectEquals (timer.getTimerInterval(), 100);
+
+            timer.startTimerHz (0);
+            expect (! timer.isTimerRunning());
+        }
+
+        beginTest ("startTimer and stopTimer can be called from a background thread");
+        {
+            TestTimer timer;
+            std::atomic<bool> runningAfterStart { false };
+            std::atomic<bool> runningAfterStop { true };
+
+            WorkerThread worker {[&]
+            {
+                timer.startTimer (1000);
+                runningAfterStart = timer.isTimerRunning();
+                timer.stopTimer();
+                runningAfterStop = timer.isTimerRunning();
+            }};
+
+            expect (worker.waitForThreadToExit (maximumTimeout));
+            expect (runningAfterStart);
+            expect (! runningAfterStop);
+        }
+    }
+
+private:
+    static constexpr Seconds maximumTimeout { 30 };
+
+    class WorkerThread final : public Thread
+    {
+    public:
+        explicit WorkerThread (std::function<void()> fn)
+            : Thread ("TimerTests worker"), callback (std::move (fn))
+        {
+            startThread();
+        }
+
+        ~WorkerThread() final { stopThread(); }
+
+        void run() final { callback(); }
+
+    private:
+        std::function<void()> callback;
+    };
+
+    class TestTimer final : public Timer
+    {
+    public:
+        TestTimer() = default;
+        ~TestTimer() override { stopTimer(); }
+
+        void timerCallback() final {}
+    };
+};
+
+static TimerTests timerTests;
+
+#endif
 
 } // namespace juce

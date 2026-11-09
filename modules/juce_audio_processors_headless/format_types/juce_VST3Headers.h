@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -42,6 +42,10 @@
 // On Windows, the VST3 headers might end up defining `stricmp` as `_stricmp` before including
 // <cstring> or <string.h>, which prevents the use of stricmp in JUCE source.
 #include <cstring>
+
+// funknown.cpp includes <stdatomic.h>, and libc++ refuses to include <atomic> after
+// <stdatomic.h> when building for a standard older than C++23
+#include <atomic>
 
 JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC (0, 4505 4702 6011 6031 6221 6386 6387 6330 6001 28199)
 
@@ -89,7 +93,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
                                      "-Wunused-parameter",
                                      "-Wzero-as-null-pointer-constant",
                                      "-Wdangling-else",
-                                     "-Wnontrivial-memcall")
+                                     "-Wnontrivial-memcall",
+                                     "-Wnewline-eof")
 
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values

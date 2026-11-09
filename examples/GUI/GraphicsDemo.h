@@ -121,7 +121,7 @@ public:
 class GraphicsDemoBase : public Component
 {
 public:
-    GraphicsDemoBase (ControllersComponent& cc, const String& name)
+    GraphicsDemoBase (ControllersComponent* cc, const String& name)
         : Component (name),
           controls (cc)
     {
@@ -135,19 +135,19 @@ public:
 
         AffineTransform t;
 
-        if (controls.animateRotation.getToggleState())
+        if (controls != nullptr && controls->animateRotation.getToggleState())
             t = t.rotated (rotation.getValue() * MathConstants<float>::twoPi);
 
-        if (controls.animateSize.getToggleState())
+        if (controls != nullptr && controls->animateSize.getToggleState())
             t = t.scaled (0.3f + size.getValue() * 2.0f);
 
-        if (controls.animatePosition.getToggleState())
+        if (controls != nullptr && controls->animatePosition.getToggleState())
             t = t.translated (hw + hw * (offsetX.getValue() - 0.5f),
                               hh + hh * (offsetY.getValue() - 0.5f));
         else
             t = t.translated (hw, hh);
 
-        if (controls.animateShear.getToggleState())
+        if (controls != nullptr && controls->animateShear.getToggleState())
             t = t.sheared (shear.getValue() * 2.0f - 1.0f, 0.0f);
 
         return t;
@@ -155,7 +155,7 @@ public:
 
     float getAlpha() const
     {
-        if (controls.animateAlpha.getToggleState())
+        if (controls != nullptr && controls->animateAlpha.getToggleState())
             return alpha.getValue();
 
         return 1.0f;
@@ -170,12 +170,12 @@ public:
             // construction when it goes out of scope. We use it here to avoid clipping the fps text
             const Graphics::ScopedSaveState state (g);
 
-            if (controls.clipToRectangle.getToggleState())  clipToRectangle (g);
-            if (controls.clipToPath     .getToggleState())  clipToPath (g);
-            if (controls.clipToImage    .getToggleState())  clipToImage (g);
+            if (controls != nullptr && controls->clipToRectangle.getToggleState())  clipToRectangle (g);
+            if (controls != nullptr && controls->clipToPath     .getToggleState())  clipToPath (g);
+            if (controls != nullptr && controls->clipToImage    .getToggleState())  clipToImage (g);
 
-            g.setImageResamplingQuality (controls.quality.getToggleState() ? Graphics::highResamplingQuality
-                                                                           : Graphics::mediumResamplingQuality);
+            g.setImageResamplingQuality (controls != nullptr && controls->quality.getToggleState() ? Graphics::highResamplingQuality
+                                                                                                   : Graphics::mediumResamplingQuality);
 
             // take a note of the time before the render
             startTime = Time::getMillisecondCounterHiRes();
@@ -183,6 +183,9 @@ public:
             // then let the demo draw itself..
             drawDemo (g);
         }
+
+        if (controls == nullptr)
+            return;
 
         auto now = Time::getMillisecondCounterHiRes();
         auto filtering = 0.08;
@@ -271,7 +274,7 @@ public:
     }
 
     //==============================================================================
-    ControllersComponent& controls;
+    ControllersComponent* controls;
 
     SlowerBouncingNumber offsetX, offsetY, rotation, size, shear, alpha, clipRectX,
                          clipRectY, clipPathX, clipPathY, clipPathDepth, clipPathAngle,
@@ -288,7 +291,7 @@ public:
 class RectangleFillTypesDemo final : public GraphicsDemoBase
 {
 public:
-    RectangleFillTypesDemo (ControllersComponent& cc)
+    RectangleFillTypesDemo (ControllersComponent* cc)
         : GraphicsDemoBase (cc, "Fill Types: Rectangles")
     {}
 
@@ -324,7 +327,7 @@ public:
 class PathsDemo final : public GraphicsDemoBase
 {
 public:
-    PathsDemo (ControllersComponent& cc, bool linear, bool radial)
+    PathsDemo (ControllersComponent* cc, bool linear, bool radial)
         : GraphicsDemoBase (cc, String ("Paths") + (radial ? ": Radial Gradients"
                                                            : (linear ? ": Linear Gradients"
                                                                      : ": Solid"))),
@@ -385,7 +388,7 @@ public:
 class StrokesDemo final : public GraphicsDemoBase
 {
 public:
-    StrokesDemo (ControllersComponent& cc)
+    StrokesDemo (ControllersComponent* cc)
         : GraphicsDemoBase (cc, "Paths: Stroked")
     {}
 
@@ -418,7 +421,7 @@ public:
 class ImagesRenderingDemo final : public GraphicsDemoBase
 {
 public:
-    ImagesRenderingDemo (ControllersComponent& cc, bool argb, bool tiled)
+    ImagesRenderingDemo (ControllersComponent* cc, bool argb, bool tiled)
         : GraphicsDemoBase (cc, String ("Images") + (argb ? ": ARGB" : ": RGB") + (tiled ? " Tiled" : String() )),
           isArgb (argb), isTiled (tiled)
     {
@@ -456,7 +459,7 @@ public:
 class GlyphsDemo final : public GraphicsDemoBase
 {
 public:
-    GlyphsDemo (ControllersComponent& cc)
+    GlyphsDemo (ControllersComponent* cc)
         : GraphicsDemoBase (cc, "Glyphs")
     {
         glyphs.addFittedText (FontOptions { 20.0f }, "The Quick Brown Fox Jumps Over The Lazy Dog",
@@ -476,7 +479,7 @@ public:
 class SVGDemo final : public GraphicsDemoBase
 {
 public:
-    SVGDemo (ControllersComponent& cc)
+    SVGDemo (ControllersComponent* cc)
         : GraphicsDemoBase (cc, "SVG")
     {
         createSVGDrawable();
@@ -494,7 +497,7 @@ public:
     {
         lastSVGLoadTime = Time::getCurrentTime();
 
-        ZipFile icons (createAssetInputStream ("icons.zip").release(), true);
+        ZipFile icons { createAssetInputStream ("icons.zip") };
 
         // Load a random SVG file from our embedded icons.zip file.
         const std::unique_ptr<InputStream> svgFileStream (icons.createStreamForEntry (Random::getSystemRandom().nextInt (icons.getNumEntries())));
@@ -520,7 +523,7 @@ public:
 class BlurDemo final : public GraphicsDemoBase
 {
 public:
-    BlurDemo (ControllersComponent& cc)
+    BlurDemo (ControllersComponent* cc)
         : GraphicsDemoBase (cc, "Blur")
     {
         image.setBackupEnabled (false);
@@ -597,71 +600,99 @@ public:
 class LinesDemo final : public GraphicsDemoBase
 {
 public:
-    LinesDemo (ControllersComponent& cc)
+    LinesDemo (ControllersComponent* cc)
         : GraphicsDemoBase (cc, "Lines")
     {}
 
     void drawDemo (Graphics& g) override
     {
+        const auto bounds = getLocalBounds().toFloat();
+
+        g.addTransform (AffineTransform::translation (-bounds.getWidth() / 2.0f,
+                                                      -bounds.getHeight() / 2.0f)
+                            .followedBy (getTransform()));
+
+        // There are two reasons to use a transparency layer here instead of
+        // setting the alpha of each colour.
+        //
+        //  1. To prevent semi-transparent lines occurring between rectangles in
+        //     the D2D renderer, each rectangle has been expanded in size so
+        //     there is a small overlap. A transparency layer prevents this
+        //     overlap from becoming visible when applying an alpha.
+        //
+        //  2. In the CoreGraphics renderer when applying an alpha, or clipping
+        //     to a path or image, lines would occur between rectangles that
+        //     were not resolved by expanding the rectangles size. This appears
+        //     to be a bug in CoreGraphics. However, drawing the changes into a
+        //     transparency layer appears to avoid the issue.
+
+        g.beginTransparencyLayer (getAlpha());
+        ScopeGuard scope { [&] { g.endTransparencyLayer(); }};
+
+        const auto lineWidth = 19 * thickness.getValue() + 1.0f;
+
         {
-            RectangleList<float> verticalLines;
-            verticalLines.ensureStorageAllocated (getWidth());
+            lines.clear();
 
-            auto pos = offset.getValue();
+            const auto pos = offset.getValue();
 
-            for (int x = 0; x < getWidth(); ++x)
+            for (auto x = 0.0f; x < bounds.getWidth(); x += lineWidth)
             {
-                auto y = (float) getHeight() * 0.3f;
-                auto length = y * std::abs (std::sin ((float) x / 100.0f + 2.0f * pos));
-                verticalLines.addWithoutMerging (Rectangle<float> ((float) x, y - length * 0.5f, 1.0f, length));
+                const auto y = bounds.getHeight() * 0.3f;
+                const auto length = y * std::abs (std::sin (x / 100.0f + 2.0f * pos));
+                const auto width = jmin (lineWidth, bounds.getRight() - x);
+                const Rectangle<float> lineBounds { x, y - length * 0.5f, width, length };
+                lines.addWithoutMerging (lineBounds.expanded (0.5f, 0.0f));
             }
 
-            g.setColour (Colours::blue.withAlpha (getAlpha()));
-            g.fillRectList (verticalLines);
+            g.setColour (Colours::blue);
+            g.fillRectList (lines);
         }
 
         {
-            RectangleList<float> horizontalLines;
-            horizontalLines.ensureStorageAllocated (getHeight());
+            lines.clear();
 
-            auto pos = offset.getValue();
+            const auto pos = offset.getValue();
 
-            for (int y = 0; y < getHeight(); ++y)
+            for (auto y = 0.0f; y < bounds.getWidth(); y += lineWidth)
             {
-                auto x = (float) getWidth() * 0.3f;
-                auto length = x * std::abs (std::sin ((float) y / 100.0f + 2.0f * pos));
-                horizontalLines.addWithoutMerging (Rectangle<float> (x - length * 0.5f, (float) y, length, 1.0f));
+                const auto x = bounds.getWidth() * 0.3f;
+                const auto length = x * std::abs (std::sin (y / 100.0f + 2.0f * pos));
+                const auto width = jmin (lineWidth, bounds.getBottom() - y);
+                const Rectangle<float> lineBounds { x - length * 0.5f, y, length, width };
+                lines.addWithoutMerging (lineBounds.expanded (0.0f, 0.5f));
             }
 
-            g.setColour (Colours::green.withAlpha (getAlpha()));
-            g.fillRectList (horizontalLines);
+            g.setGradientFill (ColourGradient (Colours::green,
+                                               bounds.getTopLeft(),
+                                               Colours::yellow,
+                                               bounds.withWidth (bounds.getWidth() / 2.0f).getBottomRight(), false));
+            g.fillRectList (lines);
         }
 
-        g.setColour (Colours::red.withAlpha (getAlpha()));
+        g.setColour (Colours::red);
 
-        auto w = (float) getWidth();
-        auto h = (float) getHeight();
+        g.drawLine (positions[0].getValue() * bounds.getWidth(),
+                    positions[1].getValue() * bounds.getHeight(),
+                    positions[2].getValue() * bounds.getWidth(),
+                    positions[3].getValue() * bounds.getHeight());
 
-        g.drawLine (positions[0].getValue() * w,
-                    positions[1].getValue() * h,
-                    positions[2].getValue() * w,
-                    positions[3].getValue() * h);
-
-        g.drawLine (positions[4].getValue() * w,
-                    positions[5].getValue() * h,
-                    positions[6].getValue() * w,
-                    positions[7].getValue() * h,
+        g.drawLine (positions[4].getValue() * bounds.getWidth(),
+                    positions[5].getValue() * bounds.getHeight(),
+                    positions[6].getValue() * bounds.getWidth(),
+                    positions[7].getValue() * bounds.getHeight(),
                     10.0f * thickness.getValue());
     }
 
     SlowerBouncingNumber offset, positions[8], thickness;
+    RectangleList<float> lines;
 };
 
 //==============================================================================
 class ShapesDemo final : public GraphicsDemoBase
 {
 public:
-    explicit ShapesDemo (ControllersComponent& cc)
+    explicit ShapesDemo (ControllersComponent* cc)
         : GraphicsDemoBase (cc, "Shapes")
     {}
 
@@ -701,8 +732,7 @@ public:
 };
 
 //==============================================================================
-class DemoHolderComponent final : public Component,
-                                  private Timer
+class DemoHolderComponent final : public Component
 {
 public:
     DemoHolderComponent()
@@ -716,12 +746,6 @@ public:
                             Colours::lightgrey, Colours::white);
     }
 
-    void timerCallback() override
-    {
-        if (currentDemo != nullptr)
-            currentDemo->repaint();
-    }
-
     void setDemo (GraphicsDemoBase* newDemo)
     {
         if (currentDemo != nullptr)
@@ -732,7 +756,6 @@ public:
         if (currentDemo != nullptr)
         {
             addAndMakeVisible (currentDemo);
-            startTimerHz (60);
             resized();
         }
     }
@@ -745,6 +768,11 @@ public:
 
 private:
     GraphicsDemoBase* currentDemo = nullptr;
+    VBlankAttachment vblank { this, [&]
+    {
+        if (currentDemo != nullptr)
+            currentDemo->repaint();
+    }};
 };
 
 //==============================================================================
@@ -752,7 +780,7 @@ class TestListComponent final : public Component,
                                 private ListBoxModel
 {
 public:
-    TestListComponent (DemoHolderComponent& holder, ControllersComponent& controls)
+    TestListComponent (DemoHolderComponent& holder, ControllersComponent* controls)
         : demoHolder (holder)
     {
         demos.add (new PathsDemo (controls, false, true));
@@ -826,8 +854,9 @@ class GraphicsDemo final : public Component
 {
 public:
     GraphicsDemo()
-        : testList (demoHolder, controllersComponent)
+        : testList (demoHolder, &controllersComponent)
     {
+        setName ("Graphics demo");
         setOpaque (true);
 
         addAndMakeVisible (demoHolder);

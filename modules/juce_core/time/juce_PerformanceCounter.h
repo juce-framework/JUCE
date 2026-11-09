@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -152,7 +152,7 @@ private:
 
     @tags{Core}
 */
-class JUCE_API  ScopedTimeMeasurement
+class JUCE_API [[nodiscard]] ScopedTimeMeasurement
 {
 public:
     ScopedTimeMeasurement (double& resultInSeconds) noexcept
@@ -163,8 +163,8 @@ public:
 
     ~ScopedTimeMeasurement()
     {
-        static auto scaler = 1.0 / static_cast<double> (Time::getHighResolutionTicksPerSecond());
-        result = static_cast<double> (Time::getHighResolutionTicks() - startTimeTicks) * scaler;
+        const auto now = Time::getHighResolutionTicks();
+        result = Time::highResolutionTicksToSeconds (now - startTimeTicks);
     }
 
 private:

@@ -349,7 +349,7 @@ jpeg_make_d_derived_tbl (j_decompress_ptr cinfo, boolean isDC, int tblno,
       ((j_common_ptr) cinfo, JPOOL_IMAGE, SIZEOF(d_derived_tbl));
   dtbl = *pdtbl;
   dtbl->pub = htbl;		/* fill in back link */
-
+  
   /* Figure C.1: make table of Huffman code length for each symbol */
 
   p = 0;
@@ -362,10 +362,10 @@ jpeg_make_d_derived_tbl (j_decompress_ptr cinfo, boolean isDC, int tblno,
   }
   huffsize[p] = 0;
   numsymbols = p;
-
+  
   /* Figure C.2: generate the codes themselves */
   /* We also validate that the counts represent a legal Huffman code tree. */
-
+  
   code = 0;
   si = huffsize[0];
   p = 0;
@@ -683,7 +683,7 @@ process_restart (j_decompress_ptr cinfo)
 /*
  * Huffman MCU decoding.
  * Each of these routines decodes and returns one MCU's worth of
- * Huffman-compressed coefficients.
+ * Huffman-compressed coefficients. 
  * The coefficients are reordered from zigzag order into natural array order,
  * but are not dequantized.
  *
@@ -1380,14 +1380,14 @@ start_pass_huff_decoder (j_decompress_ptr cinfo)
     /* Select MCU decoding routine */
     if (cinfo->Ah == 0) {
       if (cinfo->Ss == 0)
-	entropy->pub.decode_mcu_f = decode_mcu_DC_first;
+	entropy->pub.decode_mcu = decode_mcu_DC_first;
       else
-	entropy->pub.decode_mcu_f = decode_mcu_AC_first;
+	entropy->pub.decode_mcu = decode_mcu_AC_first;
     } else {
       if (cinfo->Ss == 0)
-	entropy->pub.decode_mcu_f = decode_mcu_DC_refine;
+	entropy->pub.decode_mcu = decode_mcu_DC_refine;
       else
-	entropy->pub.decode_mcu_f = decode_mcu_AC_refine;
+	entropy->pub.decode_mcu = decode_mcu_AC_refine;
     }
 
     for (ci = 0; ci < cinfo->comps_in_scan; ci++) {
@@ -1432,9 +1432,9 @@ start_pass_huff_decoder (j_decompress_ptr cinfo)
      * function.
      */
     if (cinfo->lim_Se != DCTSIZE2-1)
-      entropy->pub.decode_mcu_f = decode_mcu_sub;
+      entropy->pub.decode_mcu = decode_mcu_sub;
     else
-      entropy->pub.decode_mcu_f = decode_mcu;
+      entropy->pub.decode_mcu = decode_mcu;
 
     for (ci = 0; ci < cinfo->comps_in_scan; ci++) {
       compptr = cinfo->cur_comp_info[ci];
@@ -1532,8 +1532,8 @@ jinit_huff_decoder (j_decompress_ptr cinfo)
   entropy = (huff_entropy_ptr) (*cinfo->mem->alloc_small)
     ((j_common_ptr) cinfo, JPOOL_IMAGE, SIZEOF(huff_entropy_decoder));
   cinfo->entropy = &entropy->pub;
-  entropy->pub.start_pass_f = start_pass_huff_decoder;
-  entropy->pub.finish_pass_f = finish_pass_huff;
+  entropy->pub.start_pass = start_pass_huff_decoder;
+  entropy->pub.finish_pass = finish_pass_huff;
 
   if (cinfo->progressive_mode) {
     /* Create progression status table */

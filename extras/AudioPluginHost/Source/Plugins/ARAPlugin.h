@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -328,7 +328,7 @@ public:
 class ContentAccessController final : public ARA::Host::ContentAccessControllerInterface
 {
 public:
-    using Converter = ARAHostModel::ConversionFunctions<ARA::ARAContentType, ARA::ARAContentReaderHostRef>;
+    using Converter = ARAHostModel::ConversionFunctions<intptr_t, ARA::ARAContentReaderHostRef>;
 
     bool isMusicalContextContentAvailable (ARA::ARAMusicalContextHostRef musicalContextHostRef,
                                            ARA::ARAContentType type) noexcept override
@@ -384,7 +384,7 @@ public:
 
     ARA::ARAInt32 getContentReaderEventCount (ARA::ARAContentReaderHostRef contentReaderHostRef) noexcept override
     {
-        const auto contentType = Converter::fromHostRef (contentReaderHostRef);
+        const auto contentType = (ARA::ARAContentType) Converter::fromHostRef (contentReaderHostRef);
 
         if (contentType == ARA::kARAContentTypeTempoEntries || contentType == ARA::kARAContentTypeBarSignatures)
             return 2;
@@ -471,6 +471,10 @@ public:
                                              ARA::ContentUpdateScopes scopeFlags) noexcept override
     {
         ignoreUnused (playbackRegionHostRef, range, scopeFlags);
+    }
+
+    void notifyDocumentDataChanged() noexcept override
+    {
     }
 };
 
@@ -1129,8 +1133,31 @@ public:
 
     AudioProcessorEditor* createEditor() override
     {
-        std::lock_guard<std::mutex> lock (innerMutex);
-        return inner->createEditorIfNeeded();
+        struct Destructor : public ReferenceCountedObject
+        {
+            Destructor (ARAPluginInstanceWrapper& s, AudioProcessorEditor& e)
+                : self (s), editor (e)
+            {
+            }
+
+            ~Destructor() override
+            {
+                self.editorBeingDeleted (&editor);
+            }
+
+            ARAPluginInstanceWrapper& self;
+            AudioProcessorEditor& editor;
+        };
+
+        std::lock_guard lock (innerMutex);
+
+        if (auto result = rawToUniquePtr (inner->createEditorAndMakeActive()))
+        {
+            result->getProperties().set ("_juce_customDestructorBehaviour", new Destructor { *this, *result });
+            return result.release();
+        }
+
+        return nullptr;
     }
 
     bool hasEditor() const override

@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -257,7 +257,7 @@ private:
 
     void updateSize()
     {
-        const auto bounds = image.getScaledBounds().toNearestInt();
+        const auto bounds = image.getScaledBounds().getLargestIntegerWithin();
         setSize (bounds.getWidth(), bounds.getHeight());
     }
 
@@ -324,38 +324,20 @@ private:
 
     void setNewScreenPos (Point<int> screenPos)
     {
-        setTopLeftPosition (std::invoke ([&]
+        if (auto* p = getParentComponent())
         {
-            if (auto* p = getParentComponent())
-                return p->getLocalPoint (nullptr, screenPos - imageOffset);
+            setTopLeftPosition (p->getLocalPoint (nullptr, screenPos - imageOffset));
+            return;
+        }
 
-           #if JUCE_WINDOWS
-            if (JUCEApplicationBase::isStandaloneApp())
-            {
-                // On Windows, the mouse position is continuous in physical pixels across screen boundaries.
-                // i.e. if two screens are set to different scale factors, when the mouse moves horizontally
-                // between those screens, the mouse's physical y coordinate will be preserved, and if
-                // the mouse moves vertically between screens its physical x coordinate will be preserved.
-
-                // To avoid the dragged image detaching from the mouse, compute the new top left position
-                // in physical coords and then convert back to logical.
-                // If we were to stay in logical coordinates the whole time, the image may detach from the
-                // mouse because the mouse does not move continuously in logical coordinate space.
-
-                const auto& displays = Desktop::getInstance().getDisplays();
-                const auto physicalPos = displays.logicalToPhysical (screenPos);
-
-                float scale = 1.0f;
-
-                if (auto* p = getPeer())
-                    scale = (float) p->getPlatformScaleFactor();
-
-                return displays.physicalToLogical (physicalPos - (imageOffset * scale));
-            }
-           #endif
-
-            return screenPos - imageOffset;
-        }));
+        if (auto* peer = isOnDesktop() ? getPeer() : nullptr)
+        {
+            const auto globalMouseDown = localPointToGlobal (imageOffset.toFloat());
+            const auto peerSpaceMouseDown = peer->globalToLocal (detail::ScalingHelpers::scaledScreenPosToUnscaled (globalMouseDown));
+            const auto [multimonitor, logical] = detail::ComponentHelpers::getTopLeftForPeer (*peer, screenPos.toFloat(), peerSpaceMouseDown);
+            const auto scope = peer->setMultimonitorPositionOverride (multimonitor.roundToInt());
+            setTopLeftPosition (logical.roundToInt());
+        }
     }
 
     void sendDragMove (DragAndDropTarget::SourceDetails& details) const
@@ -522,8 +504,9 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
         if (! Desktop::canUseSemiTransparentWindows())
             dragImageComponent->setOpaque (true);
 
-        dragImageComponent->addToDesktop (ComponentPeer::windowIgnoresMouseClicks
-                                          | ComponentPeer::windowIsTemporary);
+        dragImageComponent->addToDesktop (DesktopWindowOptions().withStyleFlags (ComponentPeer::windowIgnoresMouseClicks
+                                                                                 | ComponentPeer::windowIsTemporary)
+                                                                .withAssociatedComponent (sourceComponent));
     }
     else
     {

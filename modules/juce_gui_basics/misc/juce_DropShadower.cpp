@@ -16,7 +16,7 @@
    framework to you, and you must discontinue the installation or download
    process and cease use of the JUCE framework.
 
-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-9-licence/
    JUCE Privacy Policy: https://juce.com/juce-privacy-policy
    JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
@@ -38,46 +38,46 @@ namespace juce
 class DropShadower::ShadowWindow final : public Component
 {
 public:
-    ShadowWindow (Component* comp, const DropShadow& ds)
-        : target (comp), shadow (ds)
+    ShadowWindow (Component& comp, const DropShadow& ds, Rectangle<int> initialBounds)
+        : target (&comp), shadow (ds)
     {
-        setVisible (true);
         setAccessible (false);
         setInterceptsMouseClicks (false, false);
+        setAlwaysOnTop (comp.isAlwaysOnTop());
+        setBounds (initialBounds);
 
-        if (comp->isOnDesktop())
+        if (comp.isOnDesktop())
         {
            #if JUCE_WINDOWS
-            const auto scope = [&]() -> std::optional<ScopedThreadDPIAwarenessSetter>
-            {
-                if (comp != nullptr)
-                    if (auto* handle = comp->getWindowHandle())
-                        return ScopedThreadDPIAwarenessSetter (handle);
-
-                return {};
-            }();
+            const ScopedThreadDPIAwarenessSetter scope { comp.getWindowHandle() };
            #endif
 
-            setSize (1, 1); // to keep the OS happy by not having zero-size windows
-            addToDesktop (ComponentPeer::windowIgnoresMouseClicks
-                            | ComponentPeer::windowIsTemporary
-                            | ComponentPeer::windowIgnoresKeyPresses);
+            addToDesktop (DesktopWindowOptions().withStyleFlags (ComponentPeer::windowIgnoresMouseClicks
+                                                                 | ComponentPeer::windowIsTemporary
+                                                                 | ComponentPeer::windowIgnoresKeyPresses)
+                                                .withAssociatedComponent (&comp));
+
+            if (auto* compPeer = comp.getPeer())
+                if (auto* selfPeer = getPeer())
+                    selfPeer->setCustomPlatformScaleFactor (compPeer->getPlatformScaleFactor());
         }
-        else if (Component* const parent = comp->getParentComponent())
+        else if (auto* parent = comp.getParentComponent())
         {
             parent->addChildComponent (this);
         }
+
+        toBehind (&comp);
+        setVisible (true);
     }
 
     void paint (Graphics& g) override
     {
-        if (Component* c = target)
-            shadow.drawForRectangle (g, getLocalArea (c, c->getLocalBounds()));
-    }
-
-    void resized() override
-    {
-        repaint();  // (needed for correct repainting)
+        if (auto* c = target.get())
+        {
+            const auto ownerArea = getLocalArea (c, c->getLocalBounds());
+            g.excludeClipRegion (ownerArea);
+            shadow.drawForRectangle (g, ownerArea);
+        }
     }
 
     float getDesktopScaleFactor() const override
@@ -93,91 +93,6 @@ private:
     DropShadow shadow;
 
     JUCE_DECLARE_NON_COPYABLE (ShadowWindow)
-};
-
-class DropShadower::VirtualDesktopWatcher final  : public ComponentListener,
-                                                   private Timer
-{
-public:
-    //==============================================================================
-    VirtualDesktopWatcher (Component& c) : component (&c)
-    {
-        component->addComponentListener (this);
-        update();
-    }
-
-    ~VirtualDesktopWatcher() override
-    {
-        stopTimer();
-
-        if (auto* c = component.get())
-            c->removeComponentListener (this);
-    }
-
-    bool shouldHideDropShadow() const
-    {
-        return hasReasonToHide;
-    }
-
-    void addListener (void* listener, std::function<void()> cb)
-    {
-        listeners[listener] = std::move (cb);
-    }
-
-    void removeListener (void* listener)
-    {
-        listeners.erase (listener);
-    }
-
-    //==============================================================================
-    void componentParentHierarchyChanged (Component& c) override
-    {
-        if (component.get() == &c)
-            update();
-    }
-
-private:
-    //==============================================================================
-    void update()
-    {
-        bool newHasReasonToHide = false;
-
-        if (! component.wasObjectDeleted() && isWindows && component->isOnDesktop())
-        {
-            startTimerHz (5);
-
-            WeakReference<VirtualDesktopWatcher> weakThis (this);
-
-            // During scaling changes this call can trigger a call to HWNDComponentPeer::handleDPIChanging()
-            // which deletes this VirtualDesktopWatcher.
-            newHasReasonToHide = ! detail::WindowingHelpers::isWindowOnCurrentVirtualDesktop (component->getWindowHandle());
-
-            if (weakThis == nullptr)
-                return;
-        }
-        else
-        {
-            stopTimer();
-        }
-
-        if (std::exchange (hasReasonToHide, newHasReasonToHide) != newHasReasonToHide)
-            for (auto& l : listeners)
-                l.second();
-    }
-
-    void timerCallback() override
-    {
-        update();
-    }
-
-    //==============================================================================
-    WeakReference<Component> component;
-    const bool isWindows = (SystemStats::getOperatingSystemType() & SystemStats::Windows) != 0;
-    bool hasReasonToHide = false;
-    std::map<void*, std::function<void()>> listeners;
-
-    JUCE_DECLARE_WEAK_REFERENCEABLE (VirtualDesktopWatcher)
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VirtualDesktopWatcher)
 };
 
 class DropShadower::ParentVisibilityChangedListener final : public ComponentListener
@@ -226,7 +141,7 @@ private:
 
     void updateParentHierarchy()
     {
-        const auto lastSeenComponents = std::exchange (observedComponents, [&]
+        const auto lastSeenComponents = std::exchange (observedComponents, std::invoke ([&]
         {
             std::set<ComponentWithWeakReference> result;
 
@@ -234,7 +149,7 @@ private:
                 result.emplace (*node);
 
             return result;
-        }());
+        }));
 
         const auto withDifference = [] (const auto& rangeA, const auto& rangeB, auto&& callback)
         {
@@ -258,14 +173,34 @@ private:
     JUCE_DECLARE_NON_MOVEABLE (ParentVisibilityChangedListener)
 };
 
+class DropShadower::ScaleWatcher
+{
+public:
+    explicit ScaleWatcher (DropShadower& shadower)
+    {
+        if (shadower.owner == nullptr)
+            return;
+
+        notifier.emplace (shadower.owner.get(), [&shadower] (auto x)
+        {
+            if (auto* sw = shadower.shadowWindow.get())
+                if (sw->isOnDesktop())
+                    if (auto* peer = sw->getPeer())
+                        peer->setCustomPlatformScaleFactor (x);
+
+            shadower.updateShadows();
+        });
+    }
+
+private:
+    std::optional<NativeScaleFactorNotifier> notifier;
+};
+
 //==============================================================================
 DropShadower::DropShadower (const DropShadow& ds)  : shadow (ds)  {}
 
 DropShadower::~DropShadower()
 {
-    if (virtualDesktopWatcher != nullptr)
-        virtualDesktopWatcher->removeListener (this);
-
     if (owner != nullptr)
     {
         owner->removeComponentListener (this);
@@ -275,7 +210,7 @@ DropShadower::~DropShadower()
     updateParent();
 
     const ScopedValueSetter<bool> setter (reentrant, true);
-    shadowWindows.clear();
+    shadowWindow.reset();
 }
 
 void DropShadower::setOwner (Component* componentToFollow)
@@ -299,8 +234,7 @@ void DropShadower::setOwner (Component* componentToFollow)
         visibilityChangedListener = std::make_unique<ParentVisibilityChangedListener> (*owner,
                                                                                        static_cast<ComponentListener&> (*this));
 
-        virtualDesktopWatcher = std::make_unique<VirtualDesktopWatcher> (*owner);
-        virtualDesktopWatcher->addListener (this, [this]() { updateShadows(); });
+        scaleWatcher = std::make_unique<ScaleWatcher> (*this);
 
         updateShadows();
     }
@@ -359,50 +293,68 @@ void DropShadower::updateShadows()
     if (owner != nullptr
         && owner->isShowing()
         && owner->getWidth() > 0 && owner->getHeight() > 0
-        && (Desktop::canUseSemiTransparentWindows() || owner->getParentComponent() != nullptr)
-        && (virtualDesktopWatcher == nullptr || ! virtualDesktopWatcher->shouldHideDropShadow()))
+        && (Desktop::canUseSemiTransparentWindows() || owner->getParentComponent() != nullptr))
     {
-        while (shadowWindows.size() < 4)
-            shadowWindows.add (new ShadowWindow (owner, shadow));
+        const auto shadowEdge = jmax (shadow.offset.x, shadow.offset.y) + shadow.radius;
+        const auto shadowBounds = owner->getLocalBounds().expanded (shadowEdge) + owner->getPosition();
 
-        const int shadowEdge = jmax (shadow.offset.x, shadow.offset.y) + shadow.radius;
-        const int x = owner->getX();
-        const int y = owner->getY() - shadowEdge;
-        const int w = owner->getWidth();
-        const int h = owner->getHeight() + shadowEdge + shadowEdge;
+        // there seem to be rare situations where the dropshadower may be deleted by
+        // callbacks during this function, so use a weak ref to watch out for this
+        const WeakReference self (this);
 
-        for (int i = 4; --i >= 0;)
+        const auto isNewWindow = shadowWindow == nullptr;
+
+        if (isNewWindow)
+            shadowWindow = std::make_unique<ShadowWindow> (*owner, shadow, shadowBounds);
+        else
+            shadowWindow->setAlwaysOnTop (owner->isAlwaysOnTop());
+
+        if (self == nullptr)
+            return;
+
         {
-            // there seem to be rare situations where the dropshadower may be deleted by
-            // callbacks during this loop, so use a weak ref to watch out for this
-            WeakReference<Component> sw (shadowWindows[i]);
-
-            if (sw != nullptr)
+            using Scope = decltype (std::declval<ComponentPeer>().setMultimonitorPositionOverride ({}));
+            const auto scope = std::invoke ([&]() -> std::optional<Scope>
             {
-                sw->setAlwaysOnTop (owner->isAlwaysOnTop());
+                auto* peer = owner->isOnDesktop() ? owner->getPeer() : nullptr;
 
-                if (sw == nullptr)
-                    return;
+                if (peer == nullptr)
+                    return std::nullopt;
 
-                switch (i)
-                {
-                    case 0: sw->setBounds (x - shadowEdge, y, shadowEdge, h); break;
-                    case 1: sw->setBounds (x + w, y, shadowEdge, h); break;
-                    case 2: sw->setBounds (x, y, w, shadowEdge); break;
-                    case 3: sw->setBounds (x, owner->getBottom(), w, shadowEdge); break;
-                    default: break;
-                }
+                auto* shadowPeer = shadowWindow->getPeer();
 
-                if (sw == nullptr)
-                    return;
+                if (shadowPeer == nullptr)
+                    return std::nullopt;
 
-                sw->toBehind (i == 3 ? owner.get() : shadowWindows.getUnchecked (i + 1));
+                using SH = detail::ScalingHelpers;
+                const auto localPos = SH::scaledScreenPosToUnscaled (*owner, Point { -shadowEdge, -shadowEdge }.toFloat());
+                const auto multimonitorPos = peer->localToMultimonitor (localPos);
+
+                return shadowPeer->setMultimonitorPositionOverride (multimonitorPos.roundToInt());
+            });
+
+            // A new window already has these bounds, but its native window was positioned
+            // without the override, which matters when it straddles displays of different scales.
+            if (isNewWindow)
+            {
+                if (scope.has_value())
+                    if (auto* shadowPeer = shadowWindow->getPeer())
+                        shadowPeer->updateBounds();
+            }
+            else
+            {
+                shadowWindow->setBounds (shadowBounds);
             }
         }
+
+        if (self == nullptr)
+            return;
+
+        shadowWindow->toBehind (owner.get());
     }
     else
     {
-        shadowWindows.clear();
+        shadowWindow.reset();
     }
 }
 
