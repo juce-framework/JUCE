@@ -35,6 +35,7 @@ juce_add_gui_app(AudioPluginHost
     ICON_BIG                        "${CMAKE_CURRENT_SOURCE_DIR}/Source/JUCEAppIcon.png"
     ICON_COMPOSER_BUNDLE            "${CMAKE_CURRENT_SOURCE_DIR}/Source/AppIcon.icon"
     MICROPHONE_PERMISSION_ENABLED   TRUE
+    BLUETOOTH_PERMISSION_ENABLED    TRUE # for MIDI on macOS + iOS
     PLUGINHOST_AU                   TRUE
     NEEDS_WEB_BROWSER               FALSE
     NEEDS_CURL                      FALSE)
