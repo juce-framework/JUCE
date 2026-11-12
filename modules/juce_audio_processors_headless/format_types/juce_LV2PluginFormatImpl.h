@@ -125,7 +125,7 @@ public:
     WindowSizeChangeDetector()
         : hook (SetWindowsHookEx (WH_CALLWNDPROC,
                                   callWndProc,
-                                  (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                  nullptr,
                                   GetCurrentThreadId()))
     {}
 
