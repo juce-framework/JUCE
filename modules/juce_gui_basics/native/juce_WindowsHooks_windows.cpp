@@ -67,7 +67,7 @@ private:
 
     HHOOK keyboardHook = SetWindowsHookEx (WH_GETMESSAGE,
                                            keyboardHookCallback,
-                                           (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                           nullptr,
                                            GetCurrentThreadId());
 };
 

@@ -640,7 +640,7 @@ private:
     bool darkModeEnabled = false;
     HHOOK hook { SetWindowsHookEx (WH_CALLWNDPROC,
                                    callWndProc,
-                                   (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                   nullptr,
                                    GetCurrentThreadId()) };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
@@ -4856,7 +4856,7 @@ private:
         TopLevelWindowBroadcaster()
             : hook (SetWindowsHookEx (WH_CALLWNDPROC,
                                       callWndProc,
-                                      (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                      nullptr,
                                       GetCurrentThreadId()))
         {}
 
