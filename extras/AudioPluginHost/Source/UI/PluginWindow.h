@@ -266,6 +266,16 @@ public:
         return DocumentWindow::getDesktopWindowStyleFlags();
     }
 
+    void childBoundsChanged (Component* child) override
+    {
+        std::optional<ScopedValueSetter<Rectangle<int>>> scope;
+
+        if (child == getContentComponent())
+            scope.emplace (constrainer.pendingBoundsFromChild, child->getLocalBounds());
+
+        DocumentWindow::childBoundsChanged (child);
+    }
+
 private:
     static bool isInternalPlugin (const AudioProcessor& processor)
     {
@@ -309,6 +319,14 @@ private:
                           bool isStretchingBottom,
                           bool isStretchingRight) override
         {
+            // If we're responding to a change that originated from the child component, then the
+            // only valid size is that of the child component.
+            if (! pendingBoundsFromChild.isEmpty())
+            {
+                bounds = getAdditionalBorder().addedTo (pendingBoundsFromChild).withPosition (previousBounds.getPosition());
+                return;
+            }
+
             if (auto* editor = dynamic_cast<AudioProcessorEditor*> (window.getContentComponent()))
             {
                 if (! editor->isResizable())
@@ -326,6 +344,8 @@ private:
                                                              isStretchingBottom,
                                                              isStretchingRight);
         }
+
+        Rectangle<int> pendingBoundsFromChild;
 
     private:
         DocumentWindow& window;
