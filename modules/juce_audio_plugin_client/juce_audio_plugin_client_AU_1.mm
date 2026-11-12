@@ -112,8 +112,6 @@ static Array<void*> activePlugins, activeUIs;
 
 static const AudioUnitPropertyID juceFilterObjectPropertyID = 0x1a45ffe9;
 
-template <> struct ContainerDeletePolicy<const __CFString>   { static void destroy (const __CFString* o) { if (o != nullptr) CFRelease (o); } };
-
 // make sure the audio processor is initialized before the AUBase class
 struct AudioProcessorHolder
 {
@@ -1130,28 +1128,26 @@ public:
         if (outStrings == nullptr)
             return noErr;
 
-        if (inScope == kAudioUnitScope_Global && juceFilter != nullptr)
-        {
-            if (auto* param = getParameterForAUParameterID (inParameterID))
-            {
-                if (param->isDiscrete())
-                {
-                    auto index = LegacyAudioParameter::getParamIndex (*juceFilter, param);
+        if (inScope != kAudioUnitScope_Global || juceFilter == nullptr)
+            return kAudioUnitErr_InvalidParameter;
 
-                    if (auto* valueStrings = parameterValueStringArrays[index])
-                    {
-                        *outStrings = CFArrayCreate (nullptr,
-                                                     (const void **) valueStrings->getRawDataPointer(),
-                                                     valueStrings->size(),
-                                                     nullptr);
+        auto* param = getParameterForAUParameterID (inParameterID);
 
-                        return noErr;
-                    }
-                }
-            }
-        }
+        if (param == nullptr || ! param->isDiscrete())
+            return kAudioUnitErr_InvalidParameter;
 
-        return kAudioUnitErr_InvalidParameter;
+        const auto index = LegacyAudioParameter::getParamIndex (*juceFilter, param);
+
+        if (! isPositiveAndBelow (index, parameterValueStringArrays.size()))
+            return kAudioUnitErr_InvalidParameter;
+
+        auto* valueStrings = parameterValueStringArrays.getReference (index).get();
+
+        if (valueStrings == nullptr)
+            return kAudioUnitErr_InvalidParameter;
+
+        *outStrings = CFArrayCreateCopy (nullptr, valueStrings);
+        return noErr;
     }
 
     ComponentResult GetParameter (AudioUnitParameterID inID,
@@ -1663,9 +1659,11 @@ public:
         if (chosenPresetNumber >= numPrograms)
             return kAudioUnitErr_InvalidProperty;
 
+        const auto managedProgramName = makeCFUniquePtr (juceFilter->getProgramName (chosenPresetNumber).toCFString());
+
         AUPreset chosenPreset;
         chosenPreset.presetNumber = chosenPresetNumber;
-        chosenPreset.presetName = juceFilter->getProgramName (chosenPresetNumber).toCFString();
+        chosenPreset.presetName = managedProgramName.get();
 
         juceFilter->setCurrentProgram (chosenPresetNumber);
         SetAFactoryPresetAsCurrent (chosenPreset);
@@ -2122,7 +2120,7 @@ private:
     AudioUnitHelpers::ChannelRemapper mapper;
 
     //==============================================================================
-    OwnedArray<OwnedArray<const __CFString>> parameterValueStringArrays;
+    Array<CFUniquePtr<CFArrayRef>> parameterValueStringArrays;
 
     //==============================================================================
     AudioProcessorParameter* bypassParam = nullptr;
@@ -2403,7 +2401,7 @@ private:
 
         for (auto* param : juceParameters)
         {
-            OwnedArray<const __CFString>* stringValues = nullptr;
+            CFUniquePtr<CFMutableArrayRef> stringValues;
 
             auto initialValue = param->getValue();
             bool paramIsLegacy = dynamic_cast<LegacyAudioParameter*> (param) != nullptr;
@@ -2411,8 +2409,7 @@ private:
             if (param->isDiscrete() && (! forceUseLegacyParamIDs))
             {
                 const auto numSteps = param->getNumSteps();
-                stringValues = new OwnedArray<const __CFString>();
-                stringValues->ensureStorageAllocated (numSteps);
+                stringValues.reset (CFArrayCreateMutable (nullptr, numSteps, &kCFTypeArrayCallBacks));
 
                 const auto maxValue = getMaximumParameterValue (param);
 
@@ -2430,14 +2427,14 @@ private:
                 for (int i = 0; i < numSteps; ++i)
                 {
                     auto value = (float) i / maxValue;
-                    stringValues->add (CFStringCreateCopy (nullptr, (getTextValue (value).toCFString())));
+                    CFArrayAppendValue (stringValues.get(), makeCFUniquePtr (getTextValue (value).toCFString()).get());
                 }
             }
 
             if (paramIsLegacy)
                 param->setValue (initialValue);
 
-            parameterValueStringArrays.add (stringValues);
+            parameterValueStringArrays.add (std::move (stringValues));
         }
 
         if ((bypassParam = juceFilter->getBypassParameter()) != nullptr)
@@ -2587,10 +2584,11 @@ private:
 
         const int currentProgramNumber = juceFilter->getCurrentProgram();
         const String currentProgramName = juceFilter->getProgramName (currentProgramNumber);
+        const auto managedProgramName = makeCFUniquePtr (currentProgramName.toCFString());
 
         AUPreset currentPreset;
         currentPreset.presetNumber = currentProgramNumber;
-        currentPreset.presetName = currentProgramName.toCFString();
+        currentPreset.presetName = managedProgramName.get();
 
         SetAFactoryPresetAsCurrent (currentPreset);
     }
