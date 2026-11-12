@@ -117,9 +117,22 @@ static bool readFromDirect2DBitmap (ComSmartPtr<ID2D1DeviceContext1> context,
                                                               size,
                                                               D2D1_BITMAP_OPTIONS_CPU_READ | D2D1_BITMAP_OPTIONS_CANNOT_DRAW);
 
+    if (readableBitmap == nullptr)
+    {
+        // Unable to allocate a new temporary bitmap
+        return false;
+    }
+
     const auto dstPoint = D2D1::Point2U();
     const auto srcRect = D2DUtilities::toRECT_U (D2DUtilities::rectFromSize (size));
-    readableBitmap->CopyFromBitmap (&dstPoint, bitmap, &srcRect);
+    const auto copyResult = readableBitmap->CopyFromBitmap (&dstPoint, bitmap, &srcRect);
+
+    if (copyResult != S_OK)
+    {
+        // Target bitmap is too small, has incorrect format, or some other problem
+        jassertfalse;
+        return false;
+    }
 
     // This is only used to construct a read-only BitmapData backed by a texture for conversion to a
     // software image
@@ -175,7 +188,11 @@ static bool readFromDirect2DBitmap (ComSmartPtr<ID2D1DeviceContext1> context,
             };
 
             D2D1_MAPPED_RECT mapped{};
-            bitmap->Map (D2D1_MAP_OPTIONS_READ, &mapped);
+            const auto mapResult = bitmap->Map (D2D1_MAP_OPTIONS_READ, &mapped);
+
+            if (mapResult != S_OK)
+                return;
+
             const auto dataEnd = mapped.bits + bitmap->GetPixelSize().height * mapped.pitch;
 
             bd.pixelFormat = pixelFormat;
@@ -194,8 +211,12 @@ static bool readFromDirect2DBitmap (ComSmartPtr<ID2D1DeviceContext1> context,
                                             (int) size.width,
                                             (int) size.height } };
 
-    Image::BitmapData dstData { Image { target }, Image::BitmapData::writeOnly };
-    dstData.convertFrom ({ srcImage, Image::BitmapData::readOnly });
+    Image::BitmapData srcData { srcImage, Image::BitmapData::readOnly };
+
+    if (srcData.data == nullptr)
+        return false;
+
+    Image::BitmapData { Image { target }, Image::BitmapData::writeOnly }.convertFrom (srcData);
 
     return true;
 }
