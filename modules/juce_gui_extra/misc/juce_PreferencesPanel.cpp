@@ -61,7 +61,16 @@ void PreferencesPanel::addSettingsPage (const String& title,
                                         const Drawable* overIcon,
                                         const Drawable* downIcon)
 {
-    auto* button = new DrawableButton (title, DrawableButton::ImageAboveTextLabel);
+    addSettingsPage (title, icon, overIcon, downIcon, BoundsToEnclose::drawableBounds);
+}
+
+void PreferencesPanel::addSettingsPage (const String& title,
+                                        const Drawable* icon,
+                                        const Drawable* overIcon,
+                                        const Drawable* downIcon,
+                                        BoundsToEnclose boundsToEnclose)
+{
+    auto* button = new DrawableButton (title, DrawableButton::ImageAboveTextLabel, boundsToEnclose);
     buttons.add (button);
 
     button->setImages (icon, overIcon, downIcon);
