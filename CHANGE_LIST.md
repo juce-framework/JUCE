@@ -3,6 +3,20 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 9.0.6
+
+  - Updated the bundled AAX SDK to 2.10
+  - Added support for the AAX dynamic scale factor API
+  - Changed DropShadower to use a single window behind its owner
+  - Improved PopupMenu and TreeView accessibility
+  - Fixed File handling of UNC shares and drive-relative Windows paths
+  - Fixed multiple Android font loading and IME issues
+  - Fixed some macOS child window and popup menu ordering issues
+  - Fixed some Windows always-on-top window and plug-in scaling issues
+  - Fixed input-only WASAPI devices receiving no input
+  - Fixed a potential CoreMIDI use after free in plug-ins
+  - Added a custom include path option for the LADSPA host
+
 ## Version 9.0.5
 
   - Fixed some layout issues on the iPhone Duo
