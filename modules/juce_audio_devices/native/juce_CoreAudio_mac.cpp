@@ -1360,8 +1360,9 @@ public:
 
     void stop()
     {
+        // We deliberately don't check isAlive() here. It also returns false
+        // when the query fails, in which case the IOProc may still be running.
         if (created
-            && device.isAlive()
             && tryMultiple ([&] { return checkStatus (AudioDeviceStop (device.getId(), processorId)); }, 3))
         {
             running = false;
@@ -1370,7 +1371,9 @@ public:
 
     virtual ~AudioDeviceProcessor()
     {
-        if (created && device.isAlive())
+        // As in stop(), we don't check isAlive() here. Destroying the IOProc
+        // also stops it, so it can't be called after this object has gone.
+        if (created)
             checkStatus (AudioDeviceDestroyIOProcID (device.getId(), processorId));
     }
 
@@ -1579,7 +1582,8 @@ private:
     {
         const SpinLock::ScopedTryLockType lock { mutex };
 
-        if (! lock.isLocked() || detectedSetupChange)
+        // The IOProc may still be called if stopping it failed
+        if (! lock.isLocked() || ! playing || detectedSetupChange)
             return;
 
         using Direction = PlaybackDirection;
@@ -1638,13 +1642,16 @@ private:
     std::array<ChannelMap, 2> activeChannelMap;
     DeviceSetupChangedListener* listener;
     AudioIODeviceCallback* callback{};
-    AudioDeviceProcessor processor { coreAudioDevice, this };
     std::map<PlaybackDirection, AudioBuffer<float>> buffers;
     std::atomic<bool> playing{};
     std::atomic<bool> detectedSetupChange{};
     CoreAudioTimeConversions timeConversions;
     mutable SpinLock mutex;
     mutable std::mutex errorMutex;
+
+    // This must be the last member, so that the IOProc is created after, and
+    // destroyed before, the members that it and its error handler use.
+    AudioDeviceProcessor processor { coreAudioDevice, this };
 };
 
 //==============================================================================
