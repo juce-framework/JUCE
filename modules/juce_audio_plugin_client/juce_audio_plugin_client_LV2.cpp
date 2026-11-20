@@ -564,6 +564,13 @@ public:
         prepare (sampleRate, (int) maxBlockSize);
     }
 
+   #if JUCE_LINUX || JUCE_BSD
+    ~LV2PluginInstance() override
+    {
+        destructionLock.emplace();
+    }
+   #endif
+
     void connect (uint32_t port, void* data)
     {
         ports.connect ((int) port, data);
@@ -872,6 +879,11 @@ private:
 
    #if JUCE_LINUX || JUCE_BSD
     SharedResourcePointer<detail::MessageThread> messageThread;
+
+    // The host may call cleanup on any thread, so the members declared below are
+    // destroyed while the destructor holds this lock. It must be released before
+    // messageThread is destroyed.
+    std::optional<MessageManagerLock> destructionLock;
    #endif
 
     std::unique_ptr<AudioProcessor> processor = createProcessorInstance();
