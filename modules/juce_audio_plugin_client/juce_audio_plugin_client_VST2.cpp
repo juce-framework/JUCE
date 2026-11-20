@@ -1433,6 +1433,8 @@ private:
     {
         if (processor != nullptr && processor->getNumPrograms() > 0)
             processor->getProgramName (processor->getCurrentProgram()).copyToUTF8 ((char*) args.ptr, Vst2::kVstMaxProgNameLen + 1);
+        else if (args.ptr != nullptr)
+            zeromem (args.ptr, Vst2::kVstMaxProgNameLen);
 
         return 0;
     }
@@ -1649,6 +1651,9 @@ private:
             processor->getProgramName (args.index).copyToUTF8 ((char*) args.ptr, Vst2::kVstMaxProgNameLen + 1);
             return 1;
         }
+
+        if (args.ptr != nullptr)
+            zeromem (args.ptr, Vst2::kVstMaxProgNameLen);
 
         return 0;
     }
