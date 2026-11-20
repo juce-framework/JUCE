@@ -1381,6 +1381,15 @@ public:
         for (int i = 0; i < getBusCount (false); ++i)  AudioUnitReset (audioUnit, kAudioUnitScope_Output, static_cast<UInt32> (i));
     }
 
+    void reset() override
+    {
+        if (prepared)
+        {
+            AudioUnitReset (audioUnit, kAudioUnitScope_Global, 0);
+            resetBuses();
+        }
+    }
+
     void processAudio (AudioBuffer<float>& buffer, MidiBuffer& midiMessages, bool processBlockBypassedCalled)
     {
         auto* playhead = getPlayHead();
