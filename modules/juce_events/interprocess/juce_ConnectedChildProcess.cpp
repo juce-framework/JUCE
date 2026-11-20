@@ -166,13 +166,27 @@ bool ChildProcessCoordinator::sendMessageToWorker (const MemoryBlock& mb)
 bool ChildProcessCoordinator::launchWorkerProcess (const File& executable, const String& commandLineUniqueID,
                                                    int timeoutMs, int streamFlags)
 {
-    killWorkerProcess();
-
-    auto pipeName = "p" + String::toHexString (Random().nextInt64());
-
     StringArray args;
     args.add (executable.getFullPathName());
-    args.add (getCommandLinePrefix (commandLineUniqueID) + pipeName);
+
+    return launchWorkerProcess(args, commandLineUniqueID, timeoutMs, streamFlags);
+}
+
+bool ChildProcessCoordinator::launchWorkerProcess(const StringArray& arguments, const String& commandLineUniqueID,
+                                                  int timeoutMs, int streamFlags)
+{
+    killWorkerProcess();
+
+    auto pipeName = "p" + String::toHexString(Random().nextInt64());
+
+    StringArray args;
+    args.add(arguments[0]);
+    args.add(getCommandLinePrefix(commandLineUniqueID) + pipeName);
+    if (arguments.size() > 1)
+    {
+        args.addArray(arguments.begin() + 1, arguments.end());
+    }
+
 
     childProcess = [&]() -> std::shared_ptr<ChildProcess>
     {
