@@ -341,6 +341,8 @@ public:
                                                                         ARA::ARAPlugInInstanceRoleFlags knownRoles,
                                                                         ARA::ARAPlugInInstanceRoleFlags assignedRoles)
     {
+       #if JUCE_INTERNAL_HAS_VST3
+        ignoreUnused (instance, knownRoles, assignedRoles);
         if (auto* vst3Client = instance.getVST3Client())
         {
             auto* iComponentPtr = vst3Client->getIComponentPtr();
@@ -349,7 +351,8 @@ public:
             if (araEntryPoint.loadFrom (iComponentPtr))
                 return ARAHostModel::PlugInExtensionInstance { araEntryPoint->bindToDocumentControllerWithRoles (documentController.getRef(), knownRoles, assignedRoles) };
         }
-
+       #endif
+       
        #if JUCE_INTERNAL_HAS_AU
         if (auto* auClient = instance.getAudioUnitClient())
         {
