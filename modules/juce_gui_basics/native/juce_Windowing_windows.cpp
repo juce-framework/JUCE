@@ -3709,7 +3709,9 @@ private:
         if (parentToAddTo == nullptr)
             return;
 
-        updateBounds();
+        if (component.isOnDesktop())
+            updateBounds();
+
         InvalidateRect (hwnd, nullptr, FALSE);
         scaleFactorListeners.call ([this] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (getPlatformScaleFactor()); });
     }
