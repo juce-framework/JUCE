@@ -1949,6 +1949,11 @@ private:
             if (detail::PluginUtilities::getHostType().type == PluginHostType::SteinbergCubase10)
                 cubase10Workaround.reset (new Cubase10WindowResizeWorkaround (*this));
            #endif
+
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            if (detail::PluginUtilities::getHostType().isReaper())
+                reaperDpiChangeHandler.emplace (*this);
+           #endif
         }
 
         ~JuceVST3Editor() override = default; // NOLINT
@@ -1998,10 +2003,8 @@ private:
             systemWindow = parent;
 
            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            // Hosts may report the content scale either before or after attaching the view, so
-            // we need to record the DPI both here and in setContentScaleFactor()
-            if (owner->scaleManager.getHostScale().has_value())
-                dpiWhenHostScaleReported = getDpiOfDisplayUnderWindow (systemWindow);
+            if (reaperDpiChangeHandler.has_value())
+                reaperDpiChangeHandler->viewAttached();
            #endif
 
             createContentWrapperComponentIfNeeded();
@@ -2066,12 +2069,14 @@ private:
             if (component == nullptr)
                 return kResultTrue;
 
+            const auto requestedHostSize = createRectangle (*newSize);
+
            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            if (handleResizeForUnreportedDpiChange (createRectangle (*newSize)))
+            if (reaperDpiChangeHandler.has_value() && reaperDpiChangeHandler->handleResizeForUnreportedDpiChange (requestedHostSize))
                 return kResultTrue;
            #endif
 
-            const auto rounded = owner->scaleManager.convertFromHostBounds (createRectangle (*newSize)).toNearestIntEdges();
+            const auto rounded = owner->scaleManager.convertFromHostBounds (requestedHostSize).toNearestIntEdges();
             component->onSize (rounded.getWidth(), rounded.getHeight());
 
            #if JUCE_MAC
@@ -2224,11 +2229,15 @@ private:
                #endif
             });
 
-            applyHostScale (scaleToApply);
-
            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            refitHostWindowIfScaleWasInferred();
+            if (reaperDpiChangeHandler.has_value())
+            {
+                reaperDpiChangeHandler->applyScaleReportedByHost (scaleToApply);
+                return kResultTrue;
+            }
            #endif
+
+            owner->scaleManager.setHostScale (scaleToApply);
 
             return kResultTrue;
            #else
@@ -2453,18 +2462,64 @@ private:
             }
         }
 
-        void applyHostScale (float scale)
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        Rectangle<int> getCurrentHostSize() const
         {
-           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            dpiWhenHostScaleReported = getDpiOfDisplayUnderWindow (systemWindow);
-           #endif
-
-            owner->scaleManager.setHostScale (scale);
+            return owner->scaleManager.convertToHostBounds (component->getSizeToContainChild().toFloat());
         }
 
-       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-        /*  REAPER doesn't report a new content scale until the user has finished dragging its
-            window to a display with a different DPI. Before then:
+        struct WindowGeometry
+        {
+            WindowGeometry() = delete;
+
+            static HWND getTopLevelWindow (void* window)
+            {
+                const auto hwnd = static_cast<HWND> (window);
+                const auto root = GetAncestor (hwnd, GA_ROOT);
+
+                return root != nullptr ? root : hwnd;
+            }
+
+            static std::optional<Rectangle<int>> getTopLevelWindowBounds (void* window)
+            {
+                RECT rect{};
+
+                if (window == nullptr || ! GetWindowRect (getTopLevelWindow (window), &rect))
+                    return {};
+
+                return Rectangle<int>::leftTopRightBottom (rect.left, rect.top, rect.right, rect.bottom);
+            }
+
+            static std::optional<double> getDpiOfDisplayUnderBounds (Rectangle<int> physicalBounds)
+            {
+                if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (physicalBounds, true))
+                    return display->dpi;
+
+                return {};
+            }
+
+            static std::optional<double> getDpiOfDisplayUnderWindow (void* window)
+            {
+                if (const auto bounds = getTopLevelWindowBounds (window))
+                    return getDpiOfDisplayUnderBounds (*bounds);
+
+                return {};
+            }
+
+            static bool isCloserToScaledSize (Rectangle<int> requested, Rectangle<int> current, float scale)
+            {
+                const auto distanceFromRequested = [&] (Rectangle<float> r)
+                {
+                    return std::abs ((float) requested.getWidth() - r.getWidth())
+                         + std::abs ((float) requested.getHeight() - r.getHeight());
+                };
+
+                return distanceFromRequested (current.toFloat() * scale) < distanceFromRequested (current.toFloat());
+            }
+        };
+
+        /*  On Windows, REAPER doesn't report a new content scale until the user has finished
+            dragging its window to a display with a different DPI. Before then:
 
             1. The host scales its whole window by the ratio of the two DPIs and calls onSize()
                with a size that only approximates the size of the editor at the new scale. We
@@ -2474,78 +2529,64 @@ private:
             When the host does report the new scale its window still has the size that it chose
             in step 1, so the exact size is requested again.
         */
-        bool handleResizeForUnreportedDpiChange (Rectangle<int> requestedHostSize)
+        class ReaperDpiChangeHandler final
         {
-            if (! detail::PluginUtilities::getHostType().isReaper())
-                return false;
+        public:
+            explicit ReaperDpiChangeHandler (JuceVST3Editor& editorIn) : editor (editorIn) {}
 
-            if (const auto scale = getScaleImpliedByResize (requestedHostSize))
+            void viewAttached()
             {
-                sizeRequestedWithInferredScale = requestedHostSize;
-                applyHostScale (*scale);
-                return true;
+                // The scale may have been reported before the view had a window
+                if (editor.owner->scaleManager.getHostScale().has_value())
+                    dpiWhenHostScaleReported = WindowGeometry::getDpiOfDisplayUnderWindow (editor.systemWindow);
             }
 
-            return sizeRequestedWithInferredScale == requestedHostSize;
-        }
-
-        void refitHostWindowIfScaleWasInferred()
-        {
-            if (std::exchange (sizeRequestedWithInferredScale, std::nullopt).has_value() && component != nullptr)
-                component->resizeHostWindow();
-        }
-
-        std::optional<float> getScaleImpliedByResize (Rectangle<int> requestedHostSize) const
-        {
-            const auto hostScale = owner->scaleManager.getHostScale();
-            const auto dpi = getDpiOfDisplayUnderWindow (systemWindow);
-
-            if (! hostScale.has_value() || ! dpi.has_value() || ! dpiWhenHostScaleReported.has_value())
-                return {};
-
-            if (approximatelyEqual (*dpi, *dpiWhenHostScaleReported))
-                return {};
-
-            const auto dpiRatio = (float) (*dpi / *dpiWhenHostScaleReported);
-            const auto currentHostSize = owner->scaleManager.convertToHostBounds (component->getSizeToContainChild().toFloat());
-
-            if (! isCloserToScaledSize (requestedHostSize, currentHostSize, dpiRatio))
-                return {};
-
-            return *hostScale * dpiRatio;
-        }
-
-        static bool isCloserToScaledSize (Rectangle<int> requested, Rectangle<int> current, float scale)
-        {
-            const auto distanceFromRequested = [&] (Rectangle<float> r)
+            bool handleResizeForUnreportedDpiChange (Rectangle<int> requestedHostSize)
             {
-                return std::abs ((float) requested.getWidth() - r.getWidth())
-                     + std::abs ((float) requested.getHeight() - r.getHeight());
-            };
+                const auto hostScale = editor.owner->scaleManager.getHostScale();
+                const auto dpi = WindowGeometry::getDpiOfDisplayUnderWindow (editor.systemWindow);
 
-            return distanceFromRequested (current.toFloat() * scale) < distanceFromRequested (current.toFloat());
-        }
+                const auto hasDpiChanged = hostScale.has_value()
+                                           && dpi.has_value()
+                                           && dpiWhenHostScaleReported.has_value()
+                                           && ! approximatelyEqual (*dpi, *dpiWhenHostScaleReported);
 
-        static std::optional<double> getDpiOfDisplayUnderWindow (void* window)
-        {
-            if (window == nullptr)
-                return {};
+                if (hasDpiChanged)
+                {
+                    const auto dpiRatio = (float) (*dpi / *dpiWhenHostScaleReported);
 
-            const auto hwnd = static_cast<HWND> (window);
-            const auto root = GetAncestor (hwnd, GA_ROOT);
+                    if (WindowGeometry::isCloserToScaledSize (requestedHostSize, editor.getCurrentHostSize(), dpiRatio))
+                    {
+                        const auto scaleImpliedByResize = *hostScale * dpiRatio;
 
-            RECT rootRect{};
+                        sizeRequestedWithInferredScale = requestedHostSize;
+                        setHostScaleAndRecordDpi (scaleImpliedByResize);
+                        return true;
+                    }
+                }
 
-            if (! GetWindowRect (root != nullptr ? root : hwnd, &rootRect))
-                return {};
+                return sizeRequestedWithInferredScale == requestedHostSize;
+            }
 
-            const auto rootBounds = Rectangle<int>::leftTopRightBottom (rootRect.left, rootRect.top, rootRect.right, rootRect.bottom);
+            void applyScaleReportedByHost (float scale)
+            {
+                setHostScaleAndRecordDpi (scale);
 
-            if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (rootBounds, true))
-                return display->dpi;
+                if (std::exchange (sizeRequestedWithInferredScale, std::nullopt).has_value() && editor.component != nullptr)
+                    editor.component->resizeHostWindow();
+            }
 
-            return {};
-        }
+        private:
+            void setHostScaleAndRecordDpi (float scale)
+            {
+                dpiWhenHostScaleReported = WindowGeometry::getDpiOfDisplayUnderWindow (editor.systemWindow);
+                editor.owner->scaleManager.setHostScale (scale);
+            }
+
+            JuceVST3Editor& editor;
+            std::optional<double> dpiWhenHostScaleReported;
+            std::optional<Rectangle<int>> sizeRequestedWithInferredScale;
+        };
        #endif
 
         //==============================================================================
@@ -2553,8 +2594,7 @@ private:
         std::optional<ViewRect> lastReportedSize;
 
        #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-        std::optional<double> dpiWhenHostScaleReported;
-        std::optional<Rectangle<int>> sizeRequestedWithInferredScale;
+        std::optional<ReaperDpiChangeHandler> reaperDpiChangeHandler;
        #endif
 
         VSTComSmartPtr<JuceVST3EditController> owner;
