@@ -1730,6 +1730,9 @@ public:
     {
         callVBlankListeners (timestampSec);
 
+        if (! isValidPeer (this)) // (in case this peer was deleted by a listener)
+            return;
+
         if (renderContext != nullptr)
             renderContext->onVBlank();
     }
