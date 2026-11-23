@@ -928,7 +928,7 @@ private:
             return false;
 
         actualNumChannels  = format->Format.nChannels;
-        const bool isFloat = format->Format.wFormatTag == WAVE_FORMAT_EXTENSIBLE && format->SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+        const bool isFloat = format->Format.wFormatTag == WAVE_FORMAT_EXTENSIBLE && readUnaligned<GUID> (&format->SubFormat) == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
         bytesPerSample     = format->Format.wBitsPerSample / 8;
         bytesPerFrame      = format->Format.nBlockAlign;
 
