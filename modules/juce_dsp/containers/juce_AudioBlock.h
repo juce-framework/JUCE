@@ -123,6 +123,9 @@ public:
         to point into it.
         The HeapBlock must of course not be freed or re-allocated while this object is still in
         use, because it will be referencing its data.
+
+        The data for each channel will start at an address that is a multiple of
+        alignmentInBytes, which must be a power of two.
     */
     AudioBlock (HeapBlock<char>& heapBlockToUseForAllocation,
                 size_t numberOfChannels, size_t numberOfSamples,
@@ -130,10 +133,12 @@ public:
         : numChannels (static_cast<ChannelCountType> (numberOfChannels)),
           numSamples (numberOfSamples)
     {
+        jassert (isPowerOfTwo (alignmentInBytes));
+
         auto roundedUpNumSamples = (numberOfSamples + elementMask) & ~elementMask;
-        auto channelSize = sizeof (SampleType) * roundedUpNumSamples;
-        auto channelListBytes = sizeof (SampleType*) * numberOfChannels;
         auto extraBytes = alignmentInBytes - 1;
+        auto channelSize = (sizeof (SampleType) * roundedUpNumSamples + extraBytes) & ~extraBytes;
+        auto channelListBytes = sizeof (SampleType*) * numberOfChannels;
 
         heapBlockToUseForAllocation.malloc (channelListBytes + extraBytes + channelSize * numberOfChannels);
 
@@ -146,7 +151,7 @@ public:
         for (ChannelCountType i = 0; i < numChannels; ++i)
         {
             chanArray[i] = data;
-            data += roundedUpNumSamples;
+            data = addBytesToPointer (data, channelSize);
         }
     }
 

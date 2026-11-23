@@ -86,6 +86,28 @@ public:
             expect (block == AudioBlock<const SampleType> (block));
         }
 
+        testCase ("The HeapBlock constructor aligns every channel", [&]
+        {
+            constexpr size_t channelsToAllocate = 3;
+
+            for (const auto alignmentFactor : std::initializer_list<size_t> { 1, 2, 4, 8 })
+            {
+                const auto alignment = alignmentFactor * sizeof (SampleType);
+
+                for (size_t samplesToAllocate = 1; samplesToAllocate <= 9; ++samplesToAllocate)
+                {
+                    HeapBlock<char> heapBlock;
+                    AudioBlock<SampleType> allocated { heapBlock, channelsToAllocate, samplesToAllocate, alignment };
+
+                    for (size_t c = 0; c < channelsToAllocate; ++c)
+                        expect ((size_t) allocated.getChannelPointer (c) % alignment == 0);
+
+                    for (size_t c = 1; c < channelsToAllocate; ++c)
+                        expect (allocated.getChannelPointer (c - 1) + samplesToAllocate <= allocated.getChannelPointer (c));
+                }
+            }
+        });
+
         beginTest ("Swap");
         {
             resetBlocks();
