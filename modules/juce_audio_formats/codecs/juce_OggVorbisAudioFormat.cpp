@@ -224,8 +224,22 @@ public:
 
                 jassert (samps <= numToRead);
 
-                for (int i = jmin ((int) numChannels, reservoir.getNumChannels()); --i >= 0;)
-                    memcpy (reservoir.getWritePointer (i, offset), dataIn[i], (size_t) samps * sizeof (float));
+                // Each link of a chained stream has its own channel count
+                const auto numChannelsInLink = std::invoke ([&]
+                {
+                    if (const auto* info = ov_info (&ovFile, bitStream))
+                        return info->channels;
+
+                    return 0;
+                });
+
+                for (int i = reservoir.getNumChannels(); --i >= 0;)
+                {
+                    if (i < numChannelsInLink)
+                        memcpy (reservoir.getWritePointer (i, offset), dataIn[i], (size_t) samps * sizeof (float));
+                    else
+                        reservoir.clear (i, offset, samps);
+                }
 
                 numToRead -= samps;
                 offset += samps;
