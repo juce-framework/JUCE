@@ -516,6 +516,11 @@ auto Direct2DPixelData::createNativeContext() -> std::unique_ptr<Context>
     if (maxSize < width || maxSize < height)
         return nullptr;
 
+    // If the graphics device holding the only up-to-date copy of the image has gone away, then
+    // that copy is lost, and the main-memory copy is the most recent one that remains.
+    if (state == State::outdated && ! canBackup())
+        state = State::drawn;
+
     const auto iter = getIteratorForDevice (device);
     jassert (iter != pagesForDevice.end());
 
