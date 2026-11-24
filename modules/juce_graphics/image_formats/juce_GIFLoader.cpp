@@ -286,7 +286,13 @@ private:
 
             const int incode = code;
 
-            if (code >= maxCode)
+            // A code may only refer to an existing table entry, or to the one that it adds. Rejecting
+            // any other code keeps the prefix of each entry below the entry itself, so the loop below
+            // ends before the stack is full.
+            if (maxCode < code)
+                return -2;
+
+            if (code == maxCode)
             {
                 *sp++ = firstcode;
                 code = oldcode;
@@ -295,9 +301,6 @@ private:
             while (code >= clearCode)
             {
                 *sp++ = table[1][code];
-                if (code == table[0][code])
-                    return -2;
-
                 code = table[0][code];
             }
 
@@ -470,5 +473,131 @@ bool GIFImageFormat::writeImageToStream (const Image& /*sourceImage*/, OutputStr
     jassertfalse; // writing isn't implemented for GIFs!
     return false;
 }
+
+//==============================================================================
+#if JUCE_UNIT_TESTS && ! ((JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER)
+
+struct GIFLoaderTests final : public UnitTest
+{
+    GIFLoaderTests()  : UnitTest ("GIFLoader", UnitTestCategories::graphics) {}
+
+    static constexpr uint32 palette[] { 0xffff0000, 0xff00ff00, 0xff0000ff, 0xffffffff };
+
+    static constexpr auto minCodeSize = 2;
+    static constexpr auto clearCode = 1 << minCodeSize;
+    static constexpr auto endCode = clearCode + 1;
+    static constexpr auto firstTableCode = endCode + 1;
+
+    // Codes are this wide until two have been added to the table. The tests send a clear code
+    // before that happens.
+    static constexpr size_t numBitsPerCode = minCodeSize + 1;
+
+    static MemoryBlock createGif (int width, int height, const std::vector<int>& codes)
+    {
+        MemoryOutputStream out;
+
+        // The logical screen may not be empty, even when the image is
+        out << "GIF89a";
+        out.writeShort ((short) jmax (1, width));
+        out.writeShort ((short) jmax (1, height));
+
+        const uint8 hasGlobalPalette = 0x80;
+        const uint8 screenFlags = hasGlobalPalette | (minCodeSize - 1);
+        out.write (&screenFlags, 1);
+        out.writeByte (0);
+        out.writeByte (0);
+
+        for (const auto argb : palette)
+        {
+            const Colour colour { argb };
+            out.writeByte ((char) colour.getRed());
+            out.writeByte ((char) colour.getGreen());
+            out.writeByte ((char) colour.getBlue());
+        }
+
+        // image descriptor
+        out.writeByte (',');
+        out.writeShort (0);
+        out.writeShort (0);
+        out.writeShort ((short) width);
+        out.writeShort ((short) height);
+        out.writeByte (0);
+
+        // image data
+        out.writeByte ((char) minCodeSize);
+
+        std::vector<uint8> packed ((codes.size() * numBitsPerCode + 7) / 8);
+        jassert (packed.size() < 256);
+
+        for (const auto [i, code] : enumerate (codes, size_t{}))
+        {
+            for (size_t bit = 0; bit < numBitsPerCode; ++bit)
+            {
+                const auto position = i * numBitsPerCode + bit;
+                packed[position / 8] |= (uint8) (((code >> bit) & 1) << (position % 8));
+            }
+        }
+
+        out.writeByte ((char) packed.size());
+        out.write (packed.data(), packed.size());
+        out.writeByte (0);
+        out.writeByte (';');
+
+        return out.getMemoryBlock();
+    }
+
+    void runTest() override
+    {
+        const auto decode = [] (const MemoryBlock& data, size_t numBytesToDrop = 0)
+        {
+            MemoryInputStream in (data.getData(), data.getSize() - numBytesToDrop, false);
+            return GIFImageFormat().decodeImage (in);
+        };
+
+        const auto expectPixels = [this] (const Image& image, const std::vector<uint32>& expected)
+        {
+            expectEquals (image.getWidth(), (int) expected.size());
+
+            for (const auto [x, argb] : enumerate (expected, int{}))
+                expect (image.getPixelAt (x, 0) == Colour { argb });
+        };
+
+        // Some native image types store an RGB image as ARGB
+        const auto getClearedPixel = [] (const Image& image)
+        {
+            return image.hasAlphaChannel() ? (uint32) 0 : 0xff000000;
+        };
+
+        testCase ("Literal codes are decoded", [&]
+        {
+            expectPixels (decode (createGif (4, 1, { clearCode, 0, 1, clearCode, 2, 3, endCode })),
+                          { palette[0], palette[1], palette[2], palette[3] });
+        });
+
+        testCase ("A code may refer to an existing table entry", [&]
+        {
+            expectPixels (decode (createGif (4, 1, { clearCode, 1, 2, firstTableCode, endCode })),
+                          { palette[1], palette[2], palette[1], palette[2] });
+        });
+
+        testCase ("A code may refer to the table entry that it adds", [&]
+        {
+            expectPixels (decode (createGif (3, 1, { clearCode, 2, firstTableCode, endCode })),
+                          { palette[2], palette[2], palette[2] });
+        });
+
+        testCase ("Decoding stops at a code beyond the next table entry", [&]
+        {
+            const auto image = decode (createGif (4, 1, { clearCode, 1, firstTableCode + 1, clearCode, 2, 3, endCode }));
+            const auto unwritten = getClearedPixel (image);
+
+            expectPixels (image, { palette[1], unwritten, unwritten, unwritten });
+        });
+    }
+};
+
+static const GIFLoaderTests gifLoaderTests;
+
+#endif
 
 } // namespace juce
