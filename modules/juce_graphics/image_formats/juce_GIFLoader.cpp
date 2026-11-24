@@ -346,7 +346,7 @@ private:
             buffer[0] = buffer [jmax (0, lastByteIndex - 2)];
             buffer[1] = buffer [jmax (0, lastByteIndex - 1)];
 
-            const int n = readDataBlock (buffer + 2);
+            const int n = jmax (0, readDataBlock (buffer + 2));
 
             if (n == 0)
                 finished = true;
@@ -592,6 +592,23 @@ struct GIFLoaderTests final : public UnitTest
             const auto unwritten = getClearedPixel (image);
 
             expectPixels (image, { palette[1], unwritten, unwritten, unwritten });
+        });
+
+        testCase ("Decoding stops when the image data is truncated", [&]
+        {
+            // Eight codes fill three bytes, so there are no padding bits to be read as further codes
+            const auto height = 64;
+            const auto data = createGif (8, height, { clearCode, 1, 2, clearCode, 3, 1, clearCode, 2 });
+            const auto numBytesAfterImageData = (size_t) 2;
+            const auto image = decode (data, numBytesAfterImageData);
+            const auto unwritten = getClearedPixel (image);
+
+            expectEquals (image.getHeight(), height);
+            expectPixels (image, { palette[1], palette[2], palette[3], palette[1], palette[2], unwritten, unwritten, unwritten });
+
+            for (int y = 1; y < image.getHeight(); ++y)
+                for (int x = 0; x < image.getWidth(); ++x)
+                    expect (image.getPixelAt (x, y) == Colour { unwritten });
         });
     }
 };
