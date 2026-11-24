@@ -509,6 +509,11 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, Overwri
     if (! targetFile.isAChildOf (targetDirectory))
         return Result::fail ("Entry " + entryPath + " is outside the target directory");
 
+    const auto parentIsSymbolic = hasSymbolicPart (targetDirectory, targetFile.getParentDirectory());
+
+    if (followSymlinks == FollowSymlinks::no && parentIsSymbolic)
+        return Result::fail ("Parent directory leads through symlink for target file: " + targetFile.getFullPathName());
+
     if (entryPath.endsWithChar ('/') || entryPath.endsWithChar ('\\'))
         return targetFile.createDirectory(); // (entry is a directory, not a file)
 
@@ -516,11 +521,6 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, Overwri
 
     if (in == nullptr)
         return Result::fail ("Failed to open the zip file for reading");
-
-    const auto parentIsSymbolic = hasSymbolicPart (targetDirectory, targetFile.getParentDirectory());
-
-    if (followSymlinks == FollowSymlinks::no && parentIsSymbolic)
-        return Result::fail ("Parent directory leads through symlink for target file: " + targetFile.getFullPathName());
 
     if (targetFile.exists())
     {
@@ -966,6 +966,17 @@ struct ZIPTests final : public UnitTest
             expectEquals (victimZip.getNumEntries(), 1);
             expect (victimZip.uncompressEntry (0, linked, ZipFile::OverwriteFiles::yes, ZipFile::FollowSymlinks::no).failed());
             expectEquals (victim.loadFileAsString(), victimContent);
+
+            // Nor may a directory entry create a directory through the link, unless links are followed
+            const auto directory = outside.getChildFile ("directory");
+            const auto directoryData = createZipMemoryBlock ({ "link/" + directory.getFileName() + "/" });
+            MemoryInputStream directoryStream (directoryData, false);
+            ZipFile directoryZip (directoryStream);
+            expectEquals (directoryZip.getNumEntries(), 1);
+            expect (directoryZip.uncompressTo (linked).failed());
+            expect (! directory.exists());
+            expect (directoryZip.uncompressEntry (0, linked, ZipFile::OverwriteFiles::no, ZipFile::FollowSymlinks::yes).wasOk());
+            expect (directory.isDirectory());
 
             expect (outside.deleteRecursively());
             expect (linked.deleteRecursively());
