@@ -87,6 +87,9 @@ public:
                 imageWidth  = (int) ByteOrder::littleEndianShort (buf + 4);
                 imageHeight = (int) ByteOrder::littleEndianShort (buf + 6);
 
+                if (imageWidth == 0 || imageHeight == 0)
+                    break;
+
                 numColours = 2 << (buf[8] & 7);
 
                 if ((buf[8] & 0x80) != 0)
@@ -609,6 +612,14 @@ struct GIFLoaderTests final : public UnitTest
             for (int y = 1; y < image.getHeight(); ++y)
                 for (int x = 0; x < image.getWidth(); ++x)
                     expect (image.getPixelAt (x, y) == Colour { unwritten });
+        });
+
+        testCase ("An image without any pixels is rejected", [&]
+        {
+            const std::vector codes { clearCode, 1, 2, endCode };
+
+            expect (! decode (createGif (1, 0, codes)).isValid());
+            expect (! decode (createGif (0, 1, codes)).isValid());
         });
     }
 };
