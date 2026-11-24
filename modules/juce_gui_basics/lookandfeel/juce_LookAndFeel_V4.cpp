@@ -1307,7 +1307,6 @@ void LookAndFeel_V4::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
     if (cachedImage.isNull())
     {
         cachedImage = { Image::ARGB, box.getWidth(), box.getHeight(), true, *g.getInternalContext().getPreferredImageTypeForTemporaryImages() };
-        cachedImage.setBackupEnabled (false);
 
         Graphics g2 (cachedImage);
 

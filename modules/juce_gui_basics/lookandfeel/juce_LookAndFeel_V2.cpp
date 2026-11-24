@@ -2671,7 +2671,6 @@ void LookAndFeel_V2::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
                              box.getHeight(),
                              true,
                              *g.getInternalContext().getPreferredImageTypeForTemporaryImages());
-        cachedImage.setBackupEnabled (false);
 
         Graphics g2 (cachedImage);
 
