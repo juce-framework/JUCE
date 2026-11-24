@@ -93,8 +93,9 @@ public:
                     if (! readPalette (numColours))
                         break;
 
+                // The image is cleared because the image data may not supply every pixel
                 image = Image (transparent >= 0 ? Image::ARGB : Image::RGB,
-                               imageWidth, imageHeight, transparent >= 0);
+                               imageWidth, imageHeight, true);
 
                 image.getProperties()->set ("originalImageHadAlpha", transparent >= 0);
 
@@ -109,8 +110,8 @@ public:
 
 private:
     InputStream& input;
-    uint8 buffer [260];
-    PixelARGB palette [256];
+    uint8 buffer [260] {};
+    PixelARGB palette [256] {};
     bool dataBlockIsZero, fresh, finished;
     int currentBit, lastBit, lastByteIndex;
     int codeSize, setCodeSize;
