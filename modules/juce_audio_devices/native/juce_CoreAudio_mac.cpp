@@ -1398,10 +1398,19 @@ private:
     {
         const auto numSamples = (int) std::invoke ([&]
         {
-            const auto& buffer = inInputData->mNumberBuffers > 0 ? inInputData->mBuffers[0]
-                                                                 : outOutputData->mBuffers[0];
+            for (const auto* bufferList : { inInputData, (const AudioBufferList*) outOutputData })
+            {
+                for (UInt32 i = 0; i < bufferList->mNumberBuffers; ++i)
+                {
+                    const auto& buffer = bufferList->mBuffers[i];
 
-            return (size_t) buffer.mDataByteSize / (size_t) buffer.mNumberChannels / sizeof (float);
+                    if (buffer.mNumberChannels > 0)
+                        return (size_t) buffer.mDataByteSize / (size_t) buffer.mNumberChannels / sizeof (float);
+                }
+            }
+
+            // There may be no channels while the device is being reconfigured
+            return (size_t) 0;
         });
 
         listener->audioDeviceProcessorCallback (numSamples,
