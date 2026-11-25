@@ -44,13 +44,37 @@ class AccessibilityHandler::AccessibilityNativeImpl
 {
 public:
     explicit AccessibilityNativeImpl (AccessibilityHandler& handler)
-        : accessibilityElement (AccessibilityElement::create (handler))
+        : owner (handler),
+          accessibilityElement (AccessibilityElement::create (owner))
     {
     }
 
     NSAccessibilityElement<NSAccessibility>* getAccessibilityElement() const noexcept
     {
         return accessibilityElement.get();
+    }
+
+    /*  Native menus expose their entire item hierarchy to accessibility clients, including
+        the contents of submenus that haven't been opened, and VoiceOver only announces an
+        item as a submenu if it has a child menu element. JUCE creates the contents of a
+        submenu when it is opened, so an empty menu element is exposed in its place.
+    */
+    NSAccessibilityElement* getSubMenuElement()
+    {
+        if (owner.getRole() != AccessibilityRole::menuItem || ! owner.getCurrentState().isExpandable())
+            return nullptr;
+
+        if (subMenuElement == nullptr)
+        {
+            subMenuElement.reset ([[NSAccessibilityElement alloc] init]);
+
+            [subMenuElement.get() setAccessibilityElement: YES];
+            [subMenuElement.get() setAccessibilityRole: NSAccessibilityMenuRole];
+            [subMenuElement.get() setAccessibilityParent: accessibilityElement.get()];
+            [subMenuElement.get() setAccessibilityFrameInParentSpace: NSZeroRect];
+        }
+
+        return subMenuElement.get();
     }
 
 private:
@@ -88,27 +112,8 @@ private:
             addMethod (@selector (accessibilityFocusedUIElement), [] (id self, SEL) -> id
             {
                 if (auto* handler = getHandler (self))
-                {
-                    if (auto* modal = Component::getCurrentlyModalComponent())
-                    {
-                        const auto& handlerComponent = handler->getComponent();
-
-                        if (! handlerComponent.isParentOf (modal)
-                             && handlerComponent.isCurrentlyBlockedByAnotherModalComponent())
-                        {
-                            if (auto* modalHandler = modal->getAccessibilityHandler())
-                            {
-                                if (auto* focusChild = modalHandler->getChildFocus())
-                                    return static_cast<id> (focusChild->getNativeImplementation());
-
-                                return static_cast<id> (modalHandler->getNativeImplementation());
-                            }
-                        }
-                    }
-
-                    if (auto* focusChild = handler->getChildFocus())
-                        return static_cast<id> (focusChild->getNativeImplementation());
-                }
+                    if (auto* focused = detail::AccessibilityHelpers::getFocusedHandler (*handler))
+                        return static_cast<id> (focused->getNativeImplementation());
 
                 return nil;
             });
@@ -597,7 +602,13 @@ private:
                 return NO;
             });
 
-            addMethod (@selector (accessibilityPerformPress),     accessibilityPerformPress);
+            addMethod (@selector (accessibilityPerformPress), [] (id self, SEL) -> BOOL
+            {
+                if (id focusedMenuItem = getFocusedPopupMenuItem (self))
+                    return [focusedMenuItem accessibilityPerformPress];
+
+                return accessibilityPerformPress (self, {});
+            });
 
             addMethod (@selector (accessibilityPerformShowMenu), [] (id self, SEL)
             {
@@ -693,8 +704,13 @@ private:
                             continue;
 
                         if (selector == @selector (accessibilityPerformPress))
+                        {
+                            if (id focusedMenuItem = getFocusedPopupMenuItem (self))
+                                return [focusedMenuItem isAccessibilitySelectorAllowed: selector];
+
                             return (handler->getCurrentState().isCheckable() && handler->getActions().contains (AccessibilityActionType::toggle))
                                    || handler->getActions().contains (AccessibilityActionType::press);
+                        }
 
                         if (selector == @selector (accessibilityPerformShowMenu))
                             return handler->getActions().contains (AccessibilityActionType::showMenu);
@@ -727,6 +743,22 @@ private:
         }
 
         //==============================================================================
+        /*  VoiceOver doesn't always place its cursor on the focused item of a popup menu.
+            When the menu window has a single item, the cursor stays on the window itself,
+            and pressing it would otherwise do nothing. Pressing the window is forwarded to
+            the item that has focus in it instead.
+        */
+        static id getFocusedPopupMenuItem (id self)
+        {
+            if (auto* handler = getHandler (self))
+                if (handler->getRole() == AccessibilityRole::popupMenu)
+                    if (auto* focusedChild = handler->getChildFocus())
+                        if (focusedChild != handler)
+                            return static_cast<id> (focusedChild->getNativeImplementation());
+
+            return nil;
+        }
+
         static bool isSelectable (AccessibleState state) noexcept
         {
             return state.isSelectable() || state.isMultiSelectable();
@@ -806,6 +838,9 @@ private:
                         [accessibleChildren addObjectsFromArray:(NSArray* _Nonnull) childrenOfChild];
                 }
 
+                if (auto* subMenuElement = handler->nativeImpl->getSubMenuElement())
+                    [accessibleChildren addObject: subMenuElement];
+
                 return accessibleChildren;
             }
 
@@ -817,7 +852,9 @@ private:
     };
 
     //==============================================================================
+    AccessibilityHandler& owner;
     AccessibilityElement::Holder accessibilityElement;
+    NSUniquePtr<NSAccessibilityElement> subMenuElement;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AccessibilityNativeImpl)
@@ -871,7 +908,7 @@ static void sendHandlerNotification (const AccessibilityHandler& handler,
 
 void detail::AccessibilityHelpers::notifyAccessibilityEvent (const AccessibilityHandler& handler, Event eventType)
 {
-    auto notification = [eventType]
+    auto notification = std::invoke ([&]
     {
         switch (eventType)
         {
@@ -879,12 +916,21 @@ void detail::AccessibilityHelpers::notifyAccessibilityEvent (const Accessibility
             case Event::elementDestroyed:       return NSAccessibilityUIElementDestroyedNotification;
             case Event::elementMovedOrResized:  return NSAccessibilityLayoutChangedNotification;
             case Event::focusChanged:           return NSAccessibilityFocusedUIElementChangedNotification;
-            case Event::windowOpened:           return NSAccessibilityWindowCreatedNotification;
+
+            case Event::windowOpened:
+                // VoiceOver moves into a newly created window by itself. Popup menus move the
+                // focus onto one of their items explicitly instead, so that a submenu opened by
+                // hovering over its parent item doesn't take the focus away from that item.
+                if (handler.getRole() == AccessibilityRole::popupMenu)
+                    break;
+
+                return NSAccessibilityWindowCreatedNotification;
+
             case Event::windowClosed:           break;
         }
 
         return NSAccessibilityNotificationName{};
-    }();
+    });
 
     sendHandlerNotification (handler, notification);
 }

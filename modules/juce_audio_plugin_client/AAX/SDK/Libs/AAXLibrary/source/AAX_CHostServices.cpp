@@ -72,6 +72,10 @@ AAX_Result AAX_CHostServices::Trace ( AAX_ETracePriorityHost inPriority, const c
 	if (sHostServices == 0)
 		return AAX_SUCCESS;
 
+	// Handle null format string gracefully
+	if (inFormat == nullptr)
+		return AAX_ERROR_NULL_ARGUMENT;
+
 	va_list	vargs;
 	AAX_CONSTEXPR std::size_t bufferSize{512};
 	char	message [ bufferSize ];
@@ -92,6 +96,10 @@ AAX_Result AAX_CHostServices::StackTrace ( AAX_ETracePriorityHost inTracePriorit
 	//Bail if the host does not support host services (e.g. unit tests)
 	if (sHostServices == 0)
 		return AAX_SUCCESS;
+	
+	// Handle null format string gracefully
+	if (inFormat == nullptr)
+		return AAX_ERROR_NULL_ARGUMENT;
 	
 	va_list	vargs;
 	AAX_CONSTEXPR std::size_t bufferSize{512};

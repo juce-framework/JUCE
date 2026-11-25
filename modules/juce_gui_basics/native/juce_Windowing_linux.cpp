@@ -379,8 +379,13 @@ public:
             jassert (otherPeer == nullptr || dynamic_cast<LinuxComponentPeer*> (c->getPeer()) != nullptr);
 
             if (auto* peer = static_cast<LinuxComponentPeer*> (otherPeer))
+            {
+                if ((peer->getStyleFlags() & windowIgnoresMouseClicks) != 0)
+                    continue;
+
                 if (peer->contains (globalToLocal (*peer, localToGlobal (*this, localPos.toFloat())).roundToInt(), true))
                     return false;
+            }
         }
 
         if (trueIfInAChildWindow)

@@ -69,8 +69,6 @@ public:
 	AAX_CAtomicQueue();
 	
 public:
-	static const size_t template_size = S;                               ///< The size used for this template instance
-	
 	typedef typename AAX_IPointerQueue<T>::template_type template_type;  ///< @copydoc AAX_IPointerQueue::template_type
 	typedef typename AAX_IPointerQueue<T>::value_type value_type;        ///< @copydoc AAX_IPointerQueue::value_type
 	
@@ -262,7 +260,7 @@ template <typename T, size_t S>
 inline typename AAX_CAtomicQueue<T, S>::value_type AAX_CAtomicQueue<T, S>::Pop()
 {
 	// Note that read/write both begin at index 1
-	mReadIdx = (mReadIdx+1) % template_size;
+	mReadIdx = (mReadIdx+1) % S;
 	value_type const val = AAX_Atomic_Exchange_Pointer(mRingBuffer[mReadIdx], (value_type)0x0);
 	
 //	printf("AAX_CAtomicQueue: popped    - reset: %s, idx: %lu,            val:    %p\n",
@@ -288,7 +286,7 @@ inline typename AAX_CAtomicQueue<T, S>::value_type AAX_CAtomicQueue<T, S>::Peek(
 	//    ordering to be a problem between Peek() and Pop() on a single thread.)
 	// b) We don't care if mRingBuffer modifications are run out of order between the read
 	//    and write threads, as long as they are "close".
-	const uint32_t testIdx = (mReadIdx+1) % template_size;
+	const uint32_t testIdx = (mReadIdx+1) % S;
 	return AAX_Atomic_Load_Pointer(&mRingBuffer[testIdx]);
 }
 

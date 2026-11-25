@@ -53,7 +53,32 @@ enum class MessageBoxButtonRole
 {
     normal,                 /**< A style for standard actions. */
     destroy,                /**< An action that causes destructive changes. */
-    cancel,                 /**< An action that closes the dialog without making any changes. */
+    cancel,                 /**< An action that closes the dialog without making any changes.
+
+                                 The button with the 'cancel' role, if present,
+                                 will be positioned as follows in a native
+                                 message box:
+                                 - macOS: bottom of the stack of buttons, or
+                                   leftmost, depending on layout
+                                 - Android: leftmost
+                                 - Windows: rightmost
+                                 - iOS: bottom of the stack of buttons, or
+                                   leftmost, depending on layout
+
+                                 You will get the best result across all
+                                 platforms by setting both the preferred action
+                                 and the cancel role.
+
+                                 Native dialogs may optionally be dismissed by pressing the escape
+                                 key, or alt+f4 on Windows; or pressing the back button, or clicking
+                                 outside the dialog box on Android. The code
+                                 associated with the cancel button will be
+                                 returned when the box is dismissed. If you
+                                 want dismissal behaviour, make sure that one
+                                 of the buttons has been given the cancel role.
+                                 In single-button dialogs, the preferred action
+                                 can also have the cancel role.
+                            */
 };
 
 //==============================================================================
@@ -79,15 +104,7 @@ public:
         Within a given message box, a maximum of one button may have the 'destroy' role,
         and a maximum of one button may have the 'cancel' role.
 
-        The button with the 'cancel' role, if present, will be positioned as follows in a native
-        message box:
-        - macOS: bottom of the stack of buttons, or leftmost, depending on layout
-        - Android: leftmost
-        - Windows: rightmost
-        - iOS: bottom of the stack of buttons, or leftmost, depending on layout
-
-        You will get the best result across all platforms by setting both the preferred
-        action and the cancel role.
+        @see MessageBoxButtonRole
     */
     MessageBoxButtonOptions& setRole (MessageBoxButtonRole roleIn)
     {
@@ -204,7 +221,7 @@ public:
         Generally up to 3 buttons are supported for dialog boxes, so adding any more
         than this may have no effect.
 
-        Message-boxes with zero or one buttons, or that hold a button with the 'cancel' role, may
+        Message-boxes with zero buttons, or that hold a button with the 'cancel' role, may
         be cancelled. For example, on Windows, a native message box can be dismissed by pressing
         alt+f4 or escape, and on Android, a native message box can be dismissed by tapping outside
         the box or pressing the back button.
@@ -230,7 +247,7 @@ public:
         Generally up to 3 buttons are supported for dialog boxes, so adding any more
         than this may have no effect.
 
-        Message-boxes with zero or one buttons, or that hold a button with the 'cancel' role, may
+        Message-boxes with zero buttons, or that hold a button with the 'cancel' role, may
         be cancelled. For example, on Windows, a native message box can be dismissed by pressing
         alt+f4 or escape, and on Android, a native message box can be dismissed by tapping outside
         the box or pressing the back button.
@@ -372,6 +389,11 @@ public:
     /** Creates options suitable for a message box with two buttons.
 
         If no button text is supplied, "Yes" and "No" will be used.
+
+        The preferred action and cancel role are not set on the buttons,
+        since a yes/no choice implies two opposing actions with equal weight.
+        Attempting to dismiss the dialog by pressing the escape key will have
+        no effect because the cancel role is not set on any button.
     */
     [[deprecated ("Prefer to use MessageBoxOptions{}.withButton()..., so that result codes for each button are explicit")]]
     static MessageBoxOptions makeOptionsYesNo (MessageBoxIconType iconType,

@@ -37,6 +37,7 @@
 
 
 #include "AAX_IDisplayDelegateDecorator.h"
+#include "AAX_CString.h"
 #include <cmath>
 
 
@@ -67,6 +68,7 @@ class AAX_CDecibelDisplayDelegateDecorator : public AAX_IDisplayDelegateDecorato
 {
 public:
 	AAX_CDecibelDisplayDelegateDecorator(const AAX_IDisplayDelegate<T>& displayDelegate);
+	AAX_CDecibelDisplayDelegateDecorator(AAX_IDisplayDelegate<T>&& displayDelegate);
 	
 	//Virtual Overrides
 	AAX_CDecibelDisplayDelegateDecorator<T>*	Clone() const AAX_OVERRIDE;
@@ -83,6 +85,13 @@ public:
 template <typename T>
 AAX_CDecibelDisplayDelegateDecorator<T>::AAX_CDecibelDisplayDelegateDecorator(const AAX_IDisplayDelegate<T>& displayDelegate)  :
 	AAX_IDisplayDelegateDecorator<T>(displayDelegate)
+{
+
+}
+
+template <typename T>
+AAX_CDecibelDisplayDelegateDecorator<T>::AAX_CDecibelDisplayDelegateDecorator(AAX_IDisplayDelegate<T>&& displayDelegate)  :
+	AAX_IDisplayDelegateDecorator<T>(std::move(displayDelegate))
 {
 
 }

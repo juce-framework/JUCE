@@ -527,13 +527,6 @@ public:
         virtual ~LookAndFeelMethods() = default;
 
         virtual std::unique_ptr<AlertWindow> createAlertWindowForOptions (const MessageBoxOptions&) = 0;
-        virtual AlertWindow* createAlertWindow (const String& title, const String& message,
-                                                const String& button1,
-                                                const String& button2,
-                                                const String& button3,
-                                                MessageBoxIconType iconType,
-                                                int numButtons,
-                                                Component* associatedComponent) = delete;
 
         virtual void drawAlertBox (Graphics&, AlertWindow&, const Rectangle<int>& textArea, TextLayout&) = 0;
 
@@ -545,6 +538,12 @@ public:
         virtual Font getAlertWindowTitleFont() = 0;
         virtual Font getAlertWindowMessageFont() = 0;
         virtual Font getAlertWindowFont() = 0;
+
+    private:
+        // Replaced by createAlertWindowForOptions()
+        virtual AlertWindow* createAlertWindow (const String&, const String&,
+                                                const String&, const String&, const String&,
+                                                MessageBoxIconType, int, Component*) final { return nullptr; }
     };
 
     //==============================================================================

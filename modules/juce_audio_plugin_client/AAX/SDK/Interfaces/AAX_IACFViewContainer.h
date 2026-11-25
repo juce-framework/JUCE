@@ -1,7 +1,7 @@
 /*================================================================================================*/
 /*
  *
- *	Copyright 2013-2017, 2019, 2021, 2023-2024 Avid Technology, Inc.
+ *	Copyright 2013-2017, 2019, 2021, 2023-2024, 2026 Avid Technology, Inc.
  *	All rights reserved.
  *	
  *	This file is part of the Avid AAX SDK.
@@ -113,6 +113,22 @@ public:
 	virtual AAX_Result	HandleParameterMouseExit(AAX_CParamID inParamID, uint32_t inModifiers ) = 0;    ///< \copydoc AAX_IViewContainer::HandleParameterMouseExit()
     //@}end Host event handlers
 };
+
+
+/** \brief Additional methods to recover the view containter scaling factor
+  *
+  *    \details
+  *    \sa \ref AAX_IViewContainer
+  */
+class AAX_IACFViewContainer_V4 : public AAX_IACFViewContainer_V3
+{
+public:
+    /** @name View and GUI state queries
+     */
+    //@{
+	virtual AAX_Result GetScalingFactor(float* outScalingFactor) const = 0;   ///< \copydoc AAX_IViewContainer::GetScalingFactor()    //@}end View and GUI state queries
+};
+
 
 
 #ifdef __clang__

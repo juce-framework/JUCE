@@ -611,6 +611,12 @@ public:
             return pattern;
         };
 
+        const auto coversText = [&] (const Typeface::Ptr& typeface)
+        {
+            return typeface != nullptr
+                && (text.isEmpty() || typeface->getNominalGlyphForCodepoint (*text.getCharPointer()).has_value());
+        };
+
         const auto fallbackWithFamily = std::invoke ([&]
         {
             auto pattern = makeBasicPattern();
@@ -623,12 +629,13 @@ public:
             return fromPattern (pattern.get());
         });
 
-        if (text.isEmpty() || fallbackWithFamily->getNominalGlyphForCodepoint (*text.getCharPointer()).has_value())
+        if (coversText (fallbackWithFamily))
             return fallbackWithFamily;
 
-        const auto fallbackWithoutFamily = fromPattern (makeBasicPattern().get());
-        jassert (fallbackWithoutFamily->getNominalGlyphForCodepoint (*text.getCharPointer()).has_value());
-        return fallbackWithoutFamily;
+        if (const auto fallbackWithoutFamily = fromPattern (makeBasicPattern().get()); coversText (fallbackWithoutFamily))
+            return fallbackWithoutFamily;
+
+        return {};
        #else
         // Font substitution will not work unless fontconfig is enabled.
         jassertfalse;

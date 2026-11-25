@@ -29,8 +29,9 @@
 
 ACFMETHODIMP AAX_IEffectGUI::InternalQueryInterface(const acfIID & riid, void **ppvObjOut)
 {
-    if (   riid == IID_IAAXEffectGUIV1
-        || riid == IID_IAAXEffectGUIV2)
+    if (riid == IID_IAAXEffectGUIV1 ||
+        riid == IID_IAAXEffectGUIV2 ||
+        riid == IID_IAAXEffectGUIV3)
     { 
 		*ppvObjOut = static_cast<IACFUnknown *>(this);
         ( static_cast<IACFUnknown *>(*ppvObjOut))->AddRef();

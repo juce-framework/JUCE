@@ -321,6 +321,11 @@ TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
 
 void ComponentPeer::closeInputMethodContext() {}
 
+void ComponentPeer::updateInputMethodContextSelection()
+{
+    closeInputMethodContext();
+}
+
 void ComponentPeer::dismissPendingTextInput()
 {
     closeInputMethodContext();

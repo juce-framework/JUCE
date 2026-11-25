@@ -44,7 +44,7 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            9.0.5
+  version:            9.0.6
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
@@ -361,6 +361,9 @@ namespace juce
   #include <X11/XKBlib.h>
   #include <X11/cursorfont.h>
   #include <unistd.h>
+
+  // If you're missing this header, you need to install the libxext-dev package
+  #include <X11/extensions/shape.h>
 
   #if JUCE_USE_XRANDR
    // If you're missing this header, you need to install the libxrandr-dev package

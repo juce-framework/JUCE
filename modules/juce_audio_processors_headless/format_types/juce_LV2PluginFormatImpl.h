@@ -39,6 +39,7 @@
 #include <juce_audio_processors_headless/format_types/juce_LV2Common.h>
 #include <juce_audio_processors_headless/format_types/juce_LV2Resources.h>
 #include <juce_audio_processors_headless/utilities/juce_FlagCache.h>
+#include <juce_core/detail/juce_FunctionPointerDestructor.h>
 
 #include <thread>
 
@@ -124,7 +125,7 @@ public:
     WindowSizeChangeDetector()
         : hook (SetWindowsHookEx (WH_CALLWNDPROC,
                                   callWndProc,
-                                  (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                  nullptr,
                                   GetCurrentThreadId()))
     {}
 
@@ -202,12 +203,7 @@ private:
 };
 #endif
 
-struct FreeLilvNode
-{
-    void operator() (LilvNode* ptr) const noexcept { lilv_node_free (ptr); }
-};
-
-using OwningNode = std::unique_ptr<LilvNode, FreeLilvNode>;
+using OwningNode = std::unique_ptr<LilvNode, FunctionPointerDestructor<lilv_node_free>>;
 
 template <typename Traits>
 class TypesafeLilvNode
@@ -301,10 +297,10 @@ struct UsefulUris
    #undef X
 };
 
-template <typename Ptr, typename Free>
+template <typename Ptr, auto free>
 struct OwningPtrTraits
 {
-    using type = std::unique_ptr<Ptr, Free>;
+    using type = std::unique_ptr<Ptr, FunctionPointerDestructor<free>>;
     static const Ptr* get (const type& t) noexcept { return t.get(); }
 };
 
@@ -402,30 +398,24 @@ private:
     type nodes{};
 };
 
-struct NodesFree
-{
-    void operator() (LilvNodes* ptr) const noexcept { lilv_nodes_free (ptr); }
-};
-
-using OwningNodes    = NodesImpl<OwningPtrTraits<LilvNodes, NodesFree>>;
+using OwningNodes    = NodesImpl<OwningPtrTraits<LilvNodes, lilv_nodes_free>>;
 using NonOwningNodes = NodesImpl<NonOwningPtrTraits<LilvNodes>>;
 
 class ScalePoints
 {
 public:
-    explicit ScalePoints (const LilvScalePoints* pt)
+    explicit ScalePoints (LilvScalePoints* pt)
         : points (pt) {}
 
     ScalePointsIterator begin() const noexcept
     {
-        return points == nullptr ? ScalePointsIterator{}
-                                 : ScalePointsIterator { points };
+        return ScalePointsIterator { points.get() };
     }
 
     ScalePointsIterator end() const noexcept { return {}; }
 
 private:
-    const LilvScalePoints* points = nullptr;
+    std::unique_ptr<LilvScalePoints, FunctionPointerDestructor<lilv_scale_points_free>> points;
 };
 
 class ScalePoint
@@ -829,13 +819,8 @@ struct OptionalExtension
 
 class Instance
 {
-    struct Free
-    {
-        void operator() (LilvInstance* ptr) const noexcept { lilv_instance_free (ptr); }
-    };
-
 public:
-    using Ptr = std::unique_ptr<LilvInstance, Free>;
+    using Ptr = std::unique_ptr<LilvInstance, FunctionPointerDestructor<lilv_instance_free>>;
     using GetExtensionData = const void* (*) (const char*);
 
     Instance (const Plugin& pluginIn, double sampleRate, const LV2_Feature* const* features)
@@ -1778,11 +1763,9 @@ private:
     SupportsTime time = SupportsTime::no;
 };
 
-struct FreeString { void operator() (void* ptr) const noexcept { lilv_free (ptr); } };
-
 static File bundlePathFromUri (const char* uri)
 {
-    return File { std::unique_ptr<char, FreeString> { lilv_file_uri_parse (uri, nullptr) }.get() };
+    return File { std::unique_ptr<char, FunctionPointerDestructor<lilv_free>> { lilv_file_uri_parse (uri, nullptr) }.get() };
 }
 
 class Plugins
@@ -1836,12 +1819,7 @@ private:
     type classes{};
 };
 
-struct PluginClassesFree
-{
-    void operator() (LilvPluginClasses* ptr) const noexcept { lilv_plugin_classes_free (ptr); }
-};
-
-using OwningPluginClasses    = PluginClassesImpl<OwningPtrTraits<LilvPluginClasses, PluginClassesFree>>;
+using OwningPluginClasses    = PluginClassesImpl<OwningPtrTraits<LilvPluginClasses, lilv_plugin_classes_free>>;
 using NonOwningPluginClasses = PluginClassesImpl<NonOwningPtrTraits<LilvPluginClasses>>;
 
 class World
@@ -1889,12 +1867,7 @@ public:
     LilvWorld* get() const { return world.get(); }
 
 private:
-    struct Free
-    {
-        void operator() (LilvWorld* ptr) const noexcept { lilv_world_free (ptr); }
-    };
-
-    std::unique_ptr<LilvWorld, Free> world;
+    std::unique_ptr<LilvWorld, FunctionPointerDestructor<lilv_world_free>> world;
 };
 
 class Ports
@@ -2161,12 +2134,12 @@ public:
 
     std::string toString (LilvWorld* world, LV2_URID_Map* map, LV2_URID_Unmap* unmap, const char* uri) const
     {
-        std::unique_ptr<char, FreeString> result { lilv_state_to_string (world,
-                                                                         map,
-                                                                         unmap,
-                                                                         state.get(),
-                                                                         uri,
-                                                                         nullptr) };
+        std::unique_ptr<char, FunctionPointerDestructor<lilv_free>> result { lilv_state_to_string (world,
+                                                                                                   map,
+                                                                                                   unmap,
+                                                                                                   state.get(),
+                                                                                                   uri,
+                                                                                                   nullptr) };
         return std::string { result.get() };
     }
 
@@ -2246,12 +2219,7 @@ public:
     };
 
 private:
-    struct Free
-    {
-        void operator() (LilvState* ptr) const noexcept { lilv_state_free (ptr); }
-    };
-
-    std::unique_ptr<LilvState, Free> state;
+    std::unique_ptr<LilvState, FunctionPointerDestructor<lilv_state_free>> state;
 
     JUCE_LEAK_DETECTOR (PluginState)
 };
@@ -2685,12 +2653,7 @@ public:
     }
 
 private:
-    struct Free
-    {
-        void operator() (LilvUIs* ptr) const noexcept { lilv_uis_free (ptr); }
-    };
-
-    std::unique_ptr<LilvUIs, Free> uis;
+    std::unique_ptr<LilvUIs, FunctionPointerDestructor<lilv_uis_free>> uis;
 };
 
 //==============================================================================
@@ -4562,8 +4525,7 @@ private:
         world->loadAllFromPaths (world->newString (joined.toRawUTF8()));
     }
 
-    struct Free { void operator() (char* ptr) const noexcept { free (ptr); } };
-    using StringPtr = std::unique_ptr<char, Free>;
+    using StringPtr = std::unique_ptr<char, FunctionPointerDestructor<free>>;
 
     static bool hasUriScheme (const String& s)
     {

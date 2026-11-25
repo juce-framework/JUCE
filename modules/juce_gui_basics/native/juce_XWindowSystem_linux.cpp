@@ -1657,6 +1657,18 @@ static int getAllEventsMask (bool ignoresMouseClicks)
         return 0;
     }
 
+    // A window that ignores mouse clicks must also let pointer events through to whatever
+    // is beneath it, as it does on the other platforms. Deselecting the events is not
+    // enough for that: X would deliver them to the window's ancestors, not to the window
+    // below it, so the window is given an empty input shape instead.
+    if ((styleFlags & ComponentPeer::windowIgnoresMouseClicks) != 0)
+    {
+        int eventBase = 0, errorBase = 0;
+
+        if (X11Symbols::getInstance()->xShapeQueryExtension (display, &eventBase, &errorBase))
+            X11Symbols::getInstance()->xShapeCombineRectangles (display, windowH, ShapeInput, 0, 0, nullptr, 0, ShapeSet, Unsorted);
+    }
+
     // Set window manager hints
     if (auto wmHints = makeXFreePtr (X11Symbols::getInstance()->xAllocWMHints()))
     {
@@ -2253,10 +2265,8 @@ void XWindowSystem::toBehind (::Window windowH, ::Window otherWindow) const
 {
     jassert (windowH != 0 && otherWindow != 0);
 
-    const auto topLevelA = findTopLevelWindowOf (windowH);
-    const auto topLevelB = findTopLevelWindowOf (otherWindow);
-
-    Window newStack[] = { topLevelA, topLevelB };
+    Window newStack[] = { findTopLevelWindowOf (otherWindow),
+                          findTopLevelWindowOf (windowH) };
 
     XWindowSystemUtilities::ScopedXLock xLock;
     X11Symbols::getInstance()->xRestackWindows (display, newStack, numElementsInArray (newStack));
@@ -3319,10 +3329,9 @@ void XWindowSystem::setWindowType (::Window windowH, int styleFlags) const
 
     if (atoms.windowType != None)
     {
-        auto hint = (styleFlags & ComponentPeer::windowIsTemporary) != 0
-                    || ((styleFlags & ComponentPeer::windowHasDropShadow) == 0 && Desktop::canUseSemiTransparentWindows())
-                        ? XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WM_WINDOW_TYPE_COMBO")
-                        : XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WM_WINDOW_TYPE_NORMAL");
+        const auto isTemporary = (styleFlags & ComponentPeer::windowIsTemporary) != 0;
+        const auto hint = XWindowSystemUtilities::Atoms::getIfExists (display, isTemporary ? "_NET_WM_WINDOW_TYPE_COMBO"
+                                                                                           : "_NET_WM_WINDOW_TYPE_NORMAL");
 
         if (hint != None)
             xchangeProperty (windowH, atoms.windowType, XA_ATOM, 32, &hint, 1);

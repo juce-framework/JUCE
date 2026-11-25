@@ -1698,7 +1698,7 @@ bool TextEditor::moveCaretWithTransaction (const int newPos, const bool selectin
     moveCaretTo (newPos, selecting);
 
     if (auto* peer = getPeer())
-        peer->closeInputMethodContext();
+        peer->updateInputMethodContextSelection();
 
     return true;
 }

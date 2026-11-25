@@ -53,11 +53,23 @@
  *  - SDK 10.2.1 > \c 0x0A02
  *
  */
-#define AAX_SDK_VERSION ( 0x0209 )
+#define AAX_SDK_VERSION ( 0x020A )
 
-/** \brief An atomic revision number for the source included in this SDK
+/** \brief A numeric SDK release stamp for the source included in this SDK
+ *
+ *\details
+ *  This value now encodes the SDK version directly as a decimal integer using
+ *  the format \c 2MMmmrrr :
+ *
+ *  - \c MM is the major version number
+ *  - \c mm is the minor version number
+ *  - \c rrr is the patch version number
+ *
+ *  For example:
+ *  - SDK 2.4.0  > \c 20204000
+ *  - SDK 2.10.0 > \c 20210000
  */
-#define AAX_SDK_CURRENT_REVISION ( 20209000 )
+#define AAX_SDK_CURRENT_REVISION ( 20210000 )
 
 
 #define AAX_SDK_1p0p1_REVISION ( 3712639 )
@@ -87,6 +99,7 @@
 #define AAX_SDK_2p8p0_REVISION ( 20208000 )
 #define AAX_SDK_2p8p1_REVISION ( 20208001 )
 #define AAX_SDK_2p9p0_REVISION ( 20209000 )
+#define AAX_SDK_2p10p0_REVISION ( 20210000 )
 //CURREVSTAMP < do not remove this comment
 
 

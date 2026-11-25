@@ -31,7 +31,21 @@ namespace AAX
 {
 	/** Compare the parameter mappings in two page tables
 	 
+	 Compare page counts, parameter counts per page, and individual parameter identifiers.
+	 
+	 \par Error Handling Behavior:
+	 - If both tables return the same error when querying page counts, they are considered equivalent
+	 - If both tables return the same error when querying parameter counts for a page, that page is skipped
+	 - If both tables return the same error when querying a specific parameter ID, the comparison continues
+	 - Any difference in error codes between the tables results in inequality
+	 
+	 \par Template Parameters:
 	 \p T1 and \p T2: Page table class types (e.g. \ref AAX_IACFPageTable, \ref AAX_IPageTable)
+	 
+	 \param[in] inL	Left page table to compare
+	 \param[in] inR	Right page table to compare
+	 
+	 \return \c true if the parameter mappings are equivalent (including equivalent error states), \c false otherwise
 	 */
 	template <class T1, class T2>
 	inline bool PageTableParameterMappingsAreEqual(const T1& inL, const T2& inR)
@@ -71,6 +85,25 @@ namespace AAX
 		return true;
 	}
 	
+	/** Compare the parameter name variations in two page tables
+	 
+	 Compare parameter counts, parameter identifiers, variation counts per parameter, and individual variations.
+	 
+	 \par Error Handling Behavior:
+	 - If both tables return the same error when querying parameter counts, they are considered equivalent
+	 - If both tables return the same error when querying parameter identifiers at an index, that index is skipped
+	 - If both tables return the same error when querying variation counts for a parameter, that parameter is skipped
+	 - If both tables return the same error when querying a specific name variation, the comparison continues
+	 - Any difference in error codes between the tables results in inequality
+	 
+	 \par Template Parameters:
+	 \p T1 and \p T2: Page table class types (e.g. \ref AAX_IACFPageTable, \ref AAX_IPageTable)
+	 
+	 \param[in] inL	Left page table to compare
+	 \param[in] inR	Right page table to compare
+	 
+	 \return \c true if the parameter name variations are equivalent (including equivalent error states), \c false otherwise
+	 */
 	template <class T1, class T2>
 	inline bool PageTableParameterNameVariationsAreEqual(const T1& inL, const T2& inR)
 	{
@@ -119,6 +152,22 @@ namespace AAX
 		return true;
 	}
 	
+	/** Compare two page tables for equality
+	 
+	 Include comparisons of both parameter mapping and parameter name variations
+	 
+	 \par Error Handling Behavior:
+	 Inherits error handling behavior from both \ref PageTableParameterMappingsAreEqual and
+	 \ref PageTableParameterNameVariationsAreEqual. See those functions for detailed error handling semantics.
+	 
+	 \par Template Parameters:
+	 \p T1 and \p T2: Page table class types (e.g. \ref AAX_IACFPageTable, \ref AAX_IPageTable)
+	 
+	 \param[in] inL	Left page table to compare
+	 \param[in] inR	Right page table to compare
+	 
+	 \return \c true if both parameter mappings and name variations are equivalent, \c false otherwise
+	 */
 	template <class T1, class T2>
 	inline bool PageTablesAreEqual(const T1& inL, const T2& inR)
 	{
@@ -127,7 +176,18 @@ namespace AAX
 	
 	/** Copy a page table
 	 
+	 The destination table is cleared before copying begins.
+	 
+	 \par Error Handling Behavior:
+	 - Silently ignores errors when retrieving parameter mappings (failed retrievals are skipped)
+	 - Continues copying even if individual parameter mappings or name variations fail to retrieve
+	 - No error codes are returned; the function performs a best-effort copy
+	 
+	 \par Template Parameters:
 	 \p T: A page table class type (e.g. \ref AAX_IACFPageTable, \ref AAX_IPageTable)
+	 
+	 \param[out] to		Destination page table (will be cleared and populated with copied data)
+	 \param[in] from	Source page table to copy from
 	 */
 	template <class T>
 	inline void CopyPageTable(T& to, const T& from)
@@ -179,9 +239,18 @@ namespace AAX
 	
 	/** Find all slots where a particular parameter is mapped
 	 
+	 \par Error Handling Behavior:
+	 - Silently skips any parameter mappings that fail to retrieve (returns successful retrievals only)
+	 - Continues searching even if individual GetMappedParameterID calls fail
+	 - No error indication is provided if some mappings couldn't be retrieved
+	 
+	 \par Template Parameters:
 	 \p T: A page table class type (e.g. \ref AAX_IACFPageTable, \ref AAX_IPageTable)
 	 
-	 \returns A vector of pairs of [page index, slot index] each representing a single mapping of the parameter
+	 \param[in] inTable			Page table to search
+	 \param[in] inParameterID	Parameter identifier to search for
+	 
+	 \return A vector of pairs of [page index, slot index] representing each successful mapping retrieval of the parameter
 	 */
 	template <class T>
 	inline std::vector<std::pair<int32_t, int32_t> > FindParameterMappingsInPageTable(const T& inTable, AAX_CParamID inParameterID)
@@ -214,9 +283,20 @@ namespace AAX
 		return foundParamMappings;
 	}
 	
-	/** Remove all mappings of a particular from a page table
+	/** Remove all mappings of a particular parameter from a page table
 	 
+	 \sa \ref FindParameterMappingsInPageTable
+	 
+	 \par Error Handling Behavior:
+	 - Inherits error handling from \ref FindParameterMappingsInPageTable (silently skips failed retrievals)
+	 - Only attempts to clear mappings that were successfully located
+	 - No error indication is provided if some mappings couldn't be located or cleared
+	 
+	 \par Template Parameters:
 	 \p T: A page table class type (e.g. \ref AAX_IACFPageTable, \ref AAX_IPageTable)
+	 
+	 \param[in,out] ioTable		Page table to modify
+	 \param[in] inParameterID	Parameter identifier whose mappings should be removed
 	 */
 	template <class T>
 	inline void ClearMappedParameterByID(T& ioTable, AAX_CParamID inParameterID)

@@ -67,8 +67,7 @@ MessageBoxOptions MessageBoxOptions::makeOptionsOk (MessageBoxIconType iconType,
         .withIconType (iconType)
         .withTitle (title)
         .withMessage (message)
-        .withButton (MessageBoxButtonOptions { buttonText.isEmpty() ? TRANS ("OK") : buttonText, 0 }.setPreferredAction()
-                                                                                                    .setRole (MessageBoxButtonRole::cancel))
+        .withButton (MessageBoxButtonOptions { buttonText.isEmpty() ? TRANS ("OK") : buttonText, 0 }.setPreferredAction().setRole (MessageBoxButtonRole::cancel))
         .withAssociatedComponent (associatedComponent);
 }
 

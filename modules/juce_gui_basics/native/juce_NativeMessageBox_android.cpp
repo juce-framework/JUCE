@@ -65,9 +65,7 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
             setText (AndroidAlertDialogBuilder.setMessage, opts.getMessage());
 
             const auto& buttons = opts.getButtons();
-            const auto cancelIter = buttons.size() == 1
-                                  ? buttons.begin()
-                                  : std::find_if (buttons.begin(),
+            const auto cancelIter = std::find_if (buttons.begin(),
                                                   buttons.end(),
                                                   [] (const auto& b) { return b.getRole() == MessageBoxButtonRole::cancel; });
 

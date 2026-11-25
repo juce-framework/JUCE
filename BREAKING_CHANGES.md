@@ -1,5 +1,32 @@
 # JUCE breaking changes
 
+# Version 9.0.6
+
+## Change
+
+The deprecated function `MessageBoxOptions::makeOptionsYesNo` no longer
+produces a dialog that can be dismissed with 'escape' and confirmed with
+'return'.
+
+**Possible Issues**
+
+Programs that expect this behaviour will no longer function correctly.
+
+**Workaround**
+
+Build MessageBoxOptions manually, using `MessageBoxOptions::withButton` to add
+one button designated the preferred action, and one button with the cancel
+role.
+
+**Rationale**
+
+A yes/no choice has different semantics to OK/cancel. Unlike 'cancel',
+selecting 'no' may have some non-trivial effect. The box should not be
+dismissed with the escape key or other cancellation mechanisms ('back' on
+Android, alt+f4 on Windows), so that the user is required to explicitly select
+the negative option.
+
+
 # Version 9.0.5
 
 ## Change
@@ -82,6 +109,28 @@ trigger an assertion, and the result depended on the current working
 directory rather than on the File being used as the context. Forward slashes
 are accepted everywhere else in File on Windows, so isAbsolutePath() now
 accepts them too.
+
+
+## Change
+
+A DropShadower now uses one window, or one child component, sitting behind its
+owner rather than four around it.
+
+**Possible Issues**
+
+Code that counts or searches the children of a component containing a
+DropShadower's owner will find one shadow component rather than four.
+
+**Workaround**
+
+Shadow components can be identified by their interceptsMouseClicks state
+rather than their number.
+
+**Rationale**
+
+The four windows were a relic of pre-rendered shadow images and software
+composited layered windows. A single window needs a quarter of the native
+window operations whenever its owner is shown, moved or reordered.
 
 
 ## Change
@@ -293,8 +342,7 @@ AlertWindow functions.
 
 The alert window is now kept above the window containing the component, and
 is minimised and restored with it. It also moves with that window, where a
-window can position itself. On macOS it takes that window's level, so it may be
-covered by an always-on-top window that would previously have been below it.
+window can position itself.
 
 **Workaround**
 

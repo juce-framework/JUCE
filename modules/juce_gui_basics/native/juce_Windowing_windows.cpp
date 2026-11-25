@@ -640,7 +640,7 @@ private:
     bool darkModeEnabled = false;
     HHOOK hook { SetWindowsHookEx (WH_CALLWNDPROC,
                                    callWndProc,
-                                   (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                   nullptr,
                                    GetCurrentThreadId()) };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
@@ -1245,7 +1245,6 @@ public:
 
         // Complete the window initialisation on the calling thread
         setTitle (component.getName());
-        updateShadower();
 
         updateCurrentMonitorAndRefreshVBlankDispatcher (ForceRefreshDispatcher::yes);
 
@@ -1600,6 +1599,9 @@ public:
 
     bool setAlwaysOnTop (bool alwaysOnTop) override
     {
+        if (((GetWindowLongPtr (hwnd, GWL_EXSTYLE) & WS_EX_TOPMOST) != 0) == alwaysOnTop)
+            return true;
+
         const bool oldDeactivate = shouldDeactivateTitleBar;
         shouldDeactivateTitleBar = ((getStyleFlags() & windowIsTemporary) == 0);
 
@@ -2383,13 +2385,19 @@ private:
             return parentOrOwner != nullptr ? 0 : WS_EX_TOOLWINDOW;
         });
 
+        // A window that is always on top is created topmost. Windows takes the topmost style away
+        // from a window that is placed behind a normal one, and from the windows it owns and is
+        // owned by, so the window must never be ordered among normal windows before it is made
+        // topmost.
+        const DWORD topmost = (parentToAddTo == nullptr && component.isAlwaysOnTop()) ? WS_EX_TOPMOST : 0;
+
         hwnd = std::invoke ([&]
         {
             // An owned window is created in the DPI awareness of its owner, as a child window is
             // by Windows, so that a window owned by a host's window shares its coordinate space.
             const ScopedThreadDPIAwarenessSetter awarenessSetter { parentOrOwner };
 
-            return CreateWindowEx (exstyle, WindowClassHolder::getInstance()->getWindowClassName(),
+            return CreateWindowEx (exstyle | topmost, WindowClassHolder::getInstance()->getWindowClassName(),
                                    L"", type, 0, 0, 0, 0, parentOrOwner, nullptr,
                                    (HINSTANCE) Process::getCurrentModuleInstanceHandle(), nullptr);
         });
@@ -4336,6 +4344,10 @@ private:
                 if (wParam != 0)
                 {
                     component.setVisible (true);
+
+                    if (shadower == nullptr)
+                        updateShadower();
+
                     handleBroughtToFront();
 
                     if (renderContext != nullptr)
@@ -4844,7 +4856,7 @@ private:
         TopLevelWindowBroadcaster()
             : hook (SetWindowsHookEx (WH_CALLWNDPROC,
                                       callWndProc,
-                                      (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                      nullptr,
                                       GetCurrentThreadId()))
         {}
 

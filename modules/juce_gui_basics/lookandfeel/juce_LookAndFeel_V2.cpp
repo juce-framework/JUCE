@@ -411,9 +411,10 @@ std::unique_ptr<AlertWindow> LookAndFeel_V2::createAlertWindowForOptions (const 
     if (opt.getNumButtons() == 1)
     {
         const auto& button = opt.getButtons().front();
+        const auto cancelRole = button.getRole() == MessageBoxButtonRole::cancel;
         aw->addButton (button.getText(),
                        button.getCode(),
-                       KeyPress (KeyPress::escapeKey),
+                       cancelRole ? KeyPress (KeyPress::escapeKey) : KeyPress{},
                        KeyPress (KeyPress::returnKey));
 
         return aw;
@@ -425,18 +426,18 @@ std::unique_ptr<AlertWindow> LookAndFeel_V2::createAlertWindowForOptions (const 
 
     std::set<juce_wchar> uniqueShortcuts;
 
-    for (const auto [index, value] : enumerate (buttonOrder))
+    for (const auto& value : buttonOrder)
     {
         const auto& button = buttons[(size_t) value];
         const auto shortcut = CharacterFunctions::toLowerCase (button.getText()[0]);
         const auto mnemonic = uniqueShortcuts.insert (shortcut).second ? KeyPress ((int) shortcut, 0, 0) : KeyPress();
 
-        const auto actionKey = std::invoke ([&, visualIndex = index]
+        const auto actionKey = std::invoke ([&]
         {
-            if (button.isPreferredAction() || (opt.getNumButtons() == 2 && visualIndex == 0))
+            if (button.isPreferredAction())
                 return KeyPress (KeyPress::returnKey);
 
-            if (button.getRole() == MessageBoxButtonRole::cancel || visualIndex == opt.getNumButtons() - 1)
+            if (button.getRole() == MessageBoxButtonRole::cancel)
                 return KeyPress (KeyPress::escapeKey);
 
             return KeyPress();

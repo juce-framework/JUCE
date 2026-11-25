@@ -36,6 +36,7 @@
 #define AAX_CSTRINGDISPLAYDELEGATE_H
 
 #include "AAX_IDisplayDelegate.h"
+#include "AAX_CString.h"
 #include <sstream>
 #include <map>
 
@@ -118,12 +119,25 @@ bool		AAX_CStringDisplayDelegate<T>::ValueToString(T value, AAX_CString* valueSt
 }
 
 template <typename T>
-bool		AAX_CStringDisplayDelegate<T>::ValueToString(T value, int32_t /*maxNumChars*/, AAX_CString* valueString) const
+bool		AAX_CStringDisplayDelegate<T>::ValueToString(T value, int32_t maxNumChars, AAX_CString* valueString) const
 {
 	// First, get the full length string.
 	bool result = this->ValueToString(value, valueString);
 	
-	//<DMT> TODO: Shorten the string based on the number of characters...  
+	// Truncate the string based on the number of characters
+	if (result && maxNumChars > 0 && static_cast<int32_t>(valueString->Length()) > maxNumChars)
+	{
+		AAX_CString truncatedString;
+		truncatedString.Set(valueString->Get());
+		// Create a null-terminated truncated string
+		std::string tempStr(valueString->Get());
+		if (static_cast<int32_t>(tempStr.length()) > maxNumChars)
+		{
+			tempStr = tempStr.substr(0, static_cast<std::string::size_type>(maxNumChars));
+		}
+		truncatedString.Set(tempStr.c_str());
+		*valueString = truncatedString;
+	}
 	
 	return result;
 }

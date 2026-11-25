@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_processors_headless
   vendor:             juce
-  version:            9.0.5
+  version:            9.0.6
   name:               JUCE audio processor classes without UI
   description:        Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors without UI.
   website:            http://www.juce.com/juce
@@ -95,12 +95,20 @@
 #endif
 
 /** Config: JUCE_PLUGINHOST_LADSPA
-    Enables the LADSPA plugin hosting classes. This is Linux-only, of course.
+    Enables the LADSPA plugin hosting classes.
+
+    The LADSPA header is not distributed with JUCE, and is licensed under the LGPL. If this flag
+    is enabled, the header must be available as <ladspa.h>, or at the location specified by
+    JUCE_LADSPA_INCLUDE_PATH, and you must ensure that you adhere to the terms of the LGPL.
 
     @see LADSPAPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_VST3, JUCE_PLUGINHOST_AU
  */
 #ifndef JUCE_PLUGINHOST_LADSPA
  #define JUCE_PLUGINHOST_LADSPA 0
+#endif
+
+#ifndef JUCE_LADSPA_INCLUDE_PATH
+ #define JUCE_LADSPA_INCLUDE_PATH <ladspa.h>
 #endif
 
 /** Config: JUCE_PLUGINHOST_LV2

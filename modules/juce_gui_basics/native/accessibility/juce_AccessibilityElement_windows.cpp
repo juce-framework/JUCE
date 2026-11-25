@@ -599,32 +599,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetFocus (IRawElementProviderFragment*
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {
-        const auto getFocusHandler = [this]() -> AccessibilityHandler*
-        {
-            if (auto* modal = Component::getCurrentlyModalComponent())
-            {
-                const auto& component = accessibilityHandler.getComponent();
-
-                if (! component.isParentOf (modal)
-                     && component.isCurrentlyBlockedByAnotherModalComponent())
-                {
-                    if (auto* modalHandler = modal->getAccessibilityHandler())
-                    {
-                        if (auto* focusChild = modalHandler->getChildFocus())
-                            return focusChild;
-
-                        return modalHandler;
-                    }
-                }
-            }
-
-            if (auto* focusChild = accessibilityHandler.getChildFocus())
-                return focusChild;
-
-            return nullptr;
-        };
-
-        if (auto* focusHandler = getFocusHandler())
+        if (auto* focusHandler = detail::AccessibilityHelpers::getFocusedHandler (accessibilityHandler))
             focusHandler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (pRetVal));
 
         return S_OK;

@@ -95,8 +95,8 @@ public:
 
         The component's window is looked up when the desktop window is created, so the
         component should be on the desktop, or inside a component that is, by then. It has
-        no effect on iOS or Android. On macOS a window takes the level of the window it is
-        associated with, so Component::setAlwaysOnTop() has no effect on it.
+        no effect on iOS or Android. On macOS a window is raised to the level of the window
+        it is associated with, if that is higher than its own.
 
         A window cannot be associated with a component in itself, or in a window that was
         opened from it, directly or indirectly. Such an association is ignored.

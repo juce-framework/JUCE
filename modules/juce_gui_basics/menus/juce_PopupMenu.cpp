@@ -205,7 +205,9 @@ struct ItemComponent final : public Component
             if (customComp != nullptr)
                 customComp->setHighlighted (shouldBeHighlighted);
 
-            if (isHighlighted)
+            // Items highlighted before the window is shown have the focus grabbed by
+            // MenuWindow::handleAsyncUpdate() once it is
+            if (isHighlighted && isShowing())
                 if (auto* handler = getAccessibilityHandler())
                     handler->grabFocus();
 
@@ -249,8 +251,8 @@ private:
 
         AccessibleState getCurrentState() const override
         {
-            auto state = AccessibilityHandler::getCurrentState().withSelectable()
-                                                                .withAccessibleOffscreen();
+            auto state = getStateIgnoringUnenteredSubMenu().withSelectable()
+                                                           .withAccessibleOffscreen();
 
             if (hasActiveSubMenu (itemComponent.item))
             {
@@ -265,6 +267,19 @@ private:
         }
 
     private:
+        // A submenu opened by hovering is modal, but until it owns the keyboard the items of
+        // its parent menu are still the ones being interacted with, so they aren't treated
+        // as being blocked by it
+        AccessibleState getStateIgnoringUnenteredSubMenu() const
+        {
+            if (! itemComponent.parentWindow.isBlockedOnlyByUnenteredSubMenu())
+                return AccessibilityHandler::getCurrentState();
+
+            const auto state = AccessibleState().withFocusable();
+
+            return hasFocus (false) ? state.withFocused() : state;
+        }
+
         static AccessibilityActions getAccessibilityActions (ItemAccessibilityHandler&,
                                                              ItemComponent& item)
         {
@@ -357,17 +372,21 @@ private:
 //==============================================================================
 struct MenuWindow final : public Component, private AsyncUpdater
 {
+    enum class OpenedByHover { no, yes };
+
     MenuWindow (const PopupMenu& menu,
                 MenuWindow* parentWindow,
                 Options opts,
                 bool alignToRectangle,
                 ApplicationCommandManager** manager,
-                float parentScaleFactor = 1.0f)
+                float parentScaleFactor = 1.0f,
+                OpenedByHover openedByHover = OpenedByHover::no)
         : Component ("menu"),
           parent (parentWindow),
           options (opts.withParentComponent (findNonNullLookAndFeel (menu, parentWindow).getParentComponentForMenuOptions (opts))),
           managerOfChosenCommand (manager),
           componentAttachedTo (options.getTargetComponent()),
+          openedByMouseHover (openedByHover == OpenedByHover::yes),
           windowCreationTime (Time::getMillisecondCounter()),
           lastFocusedTime (windowCreationTime),
           timeEnteredCurrentChildComp (windowCreationTime),
@@ -668,6 +687,12 @@ struct MenuWindow final : public Component, private AsyncUpdater
         if (! isShowing())
             return;
 
+        // A submenu opened by hovering over its parent item doesn't take the accessibility focus
+        // away from that item, as with native menus. The focus moves into the submenu once an
+        // item in it is highlighted.
+        if (openedByMouseHover)
+            return;
+
         auto* accessibleFocus = std::invoke ([this]() -> AccessibilityHandler*
         {
             if (currentChild != nullptr)
@@ -690,6 +715,21 @@ struct MenuWindow final : public Component, private AsyncUpdater
     //==============================================================================
     bool keyPressed (const KeyPress& key) override
     {
+        // The left key is handled by this window even when it doesn't own the keyboard, so that
+        // it closes a submenu opened by hovering
+        if (! ownsKeyboard() && ! key.isKeyCode (KeyPress::leftKey))
+        {
+            if (key.isKeyCode (KeyPress::rightKey))
+            {
+                keyboardHasEntered = true;
+                selectNextItem (MenuSelectionDirection::current);
+                return true;
+            }
+
+            jassert (parent != nullptr);
+            return parent != nullptr && parent->keyPressed (key);
+        }
+
         if (currentChild != nullptr && currentChild->customComponentKeyPressed (key))
             return true;
 
@@ -1340,18 +1380,22 @@ struct MenuWindow final : public Component, private AsyncUpdater
 
     bool isSubMenuVisible() const noexcept          { return activeSubMenu != nullptr && activeSubMenu->isVisible(); }
 
-    bool showSubMenuFor (ItemComponent* childComp)
+    bool showSubMenuFor (ItemComponent* childComp, OpenedByHover openedByHover = OpenedByHover::no)
     {
         activeSubMenu.reset();
 
         if (childComp == nullptr || ! hasActiveSubMenu (childComp->item))
             return false;
 
+        // A submenu opened by hovering doesn't highlight anything until the pointer enters it
+        const auto initiallySelectedItem = openedByHover == OpenedByHover::yes ? 0 : options.getInitiallySelectedItemId();
+
         activeSubMenu.reset (new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
                                                             options.forSubmenu()
                                                                    .withTargetScreenArea (childComp->getScreenBounds())
-                                                                   .withMinimumWidth (0),
-                                                            false, managerOfChosenCommand, scaleFactor));
+                                                                   .withMinimumWidth (0)
+                                                                   .withInitiallySelectedItem (initiallySelectedItem),
+                                                            false, managerOfChosenCommand, scaleFactor, openedByHover));
 
         activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
         activeSubMenu->enterModalState (false);
@@ -1376,7 +1420,7 @@ struct MenuWindow final : public Component, private AsyncUpdater
     {
         disableMouseMovesOnMenuAndAncestors();
 
-        auto start = [&]
+        auto start = std::invoke ([&]
         {
             auto index = items.indexOf (currentChild);
 
@@ -1385,7 +1429,7 @@ struct MenuWindow final : public Component, private AsyncUpdater
 
             return direction == MenuSelectionDirection::backwards ? items.size() - 1
                                                                   : 0;
-        }();
+        });
 
         auto preIncrement = (direction != MenuSelectionDirection::current && currentChild != nullptr);
 
@@ -1398,6 +1442,10 @@ struct MenuWindow final : public Component, private AsyncUpdater
             {
                 if (canBeHighlightedByKeyboard (mic->item) || hasActiveSubMenu (mic->item))
                 {
+                    // A submenu opened by hovering belongs to the item the highlight is moving away from
+                    if (mic != currentChild && isSubMenuVisible())
+                        activeSubMenu->hide (nullptr, true);
+
                     setCurrentlyHighlightedChild (mic);
                     return;
                 }
@@ -1458,6 +1506,20 @@ struct MenuWindow final : public Component, private AsyncUpdater
         return mouseWasOver;
     }
 
+    // A submenu opened by hovering over its parent item doesn't own the keyboard until the
+    // pointer enters it or the right arrow key is pressed, as with native menus
+    bool ownsKeyboard() const
+    {
+        return ! openedByMouseHover || mouseHasBeenOver() || keyboardHasEntered;
+    }
+
+    bool isBlockedOnlyByUnenteredSubMenu() const
+    {
+        return isSubMenuVisible()
+                && ! activeSubMenu->ownsKeyboard()
+                && Component::getCurrentlyModalComponent() == activeSubMenu.get();
+    }
+
     bool allowMouseUpToTriggerItem() const
     {
         return mouseUpCanTrigger;
@@ -1471,7 +1533,8 @@ struct MenuWindow final : public Component, private AsyncUpdater
     WeakReference<Component> componentAttachedTo;
     Rectangle<int> windowPos;
     bool needsToScroll = false;
-    bool hideOnExit = false, disableMouseMoves = false, hasAnyJuceCompHadFocus = false;
+    bool hideOnExit = false, disableMouseMoves = false, hasAnyJuceCompHadFocus = false, keyboardHasEntered = false;
+    const bool openedByMouseHover;
     int numColumns = 0, contentHeight = 0, childYOffset = 0;
     Component::SafePointer<ItemComponent> currentChild;
     std::unique_ptr<MenuWindow> activeSubMenu;
@@ -1499,7 +1562,12 @@ class MouseSourceState final : private Timer
 {
 public:
     MouseSourceState (MenuWindow& w, MouseInputSource s)
-        : window (w), source (s), lastScrollTime (Time::getMillisecondCounter())
+        : window (w),
+          source (s),
+          // A pointer that is already inside the window when it opens shouldn't highlight the
+          // item under it until it has actually moved
+          lastMousePos (source.getScreenPosition().roundToInt()),
+          lastScrollTime (Time::getMillisecondCounter())
     {
         startTimerHz (20);
     }
@@ -1559,7 +1627,7 @@ private:
              && window.currentChild != nullptr
              && ! (window.disableMouseMoves || window.isSubMenuVisible()))
         {
-            window.showSubMenuFor (window.currentChild);
+            window.showSubMenuFor (window.currentChild, MenuWindow::OpenedByHover::yes);
         }
 
         highlightItemUnderMouse (globalMousePos, localMousePos, timeNow);
@@ -1609,7 +1677,9 @@ private:
     void highlightItemUnderMouse (Point<int> globalMousePos, Point<int> localMousePos, uint32 timeNow)
     {
         const auto mouseTimedOut = lastMoveTime != 0 && 350 < (timeNow - lastMoveTime);
-        const auto mouseHasMoved = 2 < lastMousePos.getDistanceFrom (globalMousePos);
+        // A press counts as movement, so that pressing on an item highlights it even if the
+        // pointer hasn't moved since the window opened under it
+        const auto mouseHasMoved = 2 < lastMousePos.getDistanceFrom (globalMousePos) || source.isDragging();
         const auto isMouseOver = window.reallyContains (localMousePos, true);
 
         if (mouseHasMoved && isMouseOver)

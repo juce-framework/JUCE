@@ -73,13 +73,14 @@ DECLARE_JNI_CLASS (AndroidRectF, "android/graphics/RectF")
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  STATICMETHOD (getInstance, "getInstance", "(Ljava/lang/String;)Ljava/security/MessageDigest;") \
- METHOD       (update,      "update",      "([B)V") \
+ METHOD       (update,      "update",      "([BII)V") \
  METHOD       (digest,      "digest",      "()[B")
 DECLARE_JNI_CLASS (JavaMessageDigest, "java/security/MessageDigest")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD       (open,      "open",      "(Ljava/lang/String;)Ljava/io/InputStream;") \
+ METHOD       (list,      "list",      "(Ljava/lang/String;)[Ljava/lang/String;") \
 
 DECLARE_JNI_CLASS (AndroidAssetManager, "android/content/res/AssetManager")
 #undef JNI_CLASS_MEMBERS
@@ -351,11 +352,10 @@ private:
         auto* env = getEnv();
 
         LocalRef<jbyteArray> bytes { env->NewByteArray ((jint) blob.size()) };
-        {
-            auto* elements = env->GetByteArrayElements (bytes, nullptr);
-            const ScopeGuard scope { [&] { env->ReleaseByteArrayElements (bytes, elements, 0); }};
-            std::transform (blob.begin(), blob.end(), elements, [] (auto x) { return (jbyte) x; });
-        }
+        env->SetByteArrayRegion (bytes.get(),
+                                 0,
+                                 (jsize) blob.size(),
+                                 reinterpret_cast<const jbyte*> (blob.data()));
 
         LocalRef<jobject> byteBuffer { env->CallStaticObjectMethod (JavaByteBuffer,
                                                                     JavaByteBuffer.allocateDirect,
@@ -807,9 +807,36 @@ private:
         if (assetManager == nullptr)
             return {};
 
+        const String fontsDirectory { "fonts" };
+        const LocalRef javaFileName { javaString (fontsDirectory + "/" + typefaceName) };
+        const LocalRef list { (jobjectArray) env->CallObjectMethod (assetManager,
+                                                                    AndroidAssetManager.list,
+                                                                    javaString (fontsDirectory).get()) };
+        jniCheckHasExceptionOccurredAndClear();
+
+        if (list == nullptr)
+            return {};
+
+        const auto anyMatch = std::invoke ([&]
+        {
+            for (jint i = 0, end = env->GetArrayLength (list); i < end; ++i)
+            {
+                if (const LocalRef name { (jstring) env->GetObjectArrayElement (list, i) })
+                {
+                    if (juceString (name.get()) == typefaceName)
+                        return true;
+                }
+            }
+
+            return false;
+        });
+
+        if (! anyMatch)
+            return {};
+
         const LocalRef inputStream { env->CallObjectMethod (assetManager,
                                                             AndroidAssetManager.open,
-                                                            javaString ("fonts/" + typefaceName).get()) };
+                                                            javaFileName.get()) };
 
         // Opening an input stream for an asset might throw if the asset isn't found
         jniCheckHasExceptionOccurredAndClear();
@@ -837,15 +864,24 @@ private:
 
         const auto key = std::invoke ([&]
         {
+            constexpr size_t chunkSize = 16 * 1024;
+
             LocalRef digest (env->CallStaticObjectMethod (JavaMessageDigest, JavaMessageDigest.getInstance, javaString ("MD5").get()));
-            LocalRef bytes (env->NewByteArray ((int) data.size()));
+            LocalRef bytes (env->NewByteArray ((jint) chunkSize));
+            jboolean ignore{};
 
-            jboolean ignore;
-            auto* jbytes = env->GetByteArrayElements (bytes.get(), &ignore);
-            memcpy (jbytes, data.data(), data.size());
-            env->ReleaseByteArrayElements (bytes.get(), jbytes, 0);
+            for (size_t offset = 0; offset < data.size(); offset += chunkSize)
+            {
+                const auto bytesThisTime = std::min (chunkSize, data.size() - offset);
 
-            env->CallVoidMethod (digest.get(), JavaMessageDigest.update, bytes.get());
+                env->SetByteArrayRegion (bytes.get(),
+                                         0,
+                                         (jsize) bytesThisTime,
+                                         reinterpret_cast<const jbyte*> (data.data() + offset));
+
+                env->CallVoidMethod (digest.get(), JavaMessageDigest.update, bytes.get(), 0, (jint) bytesThisTime);
+            }
+
             LocalRef result ((jbyteArray) env->CallObjectMethod (digest.get(), JavaMessageDigest.digest));
             auto* md5Bytes = env->GetByteArrayElements (result.get(), &ignore);
             const ScopeGuard scope { [&] { env->ReleaseByteArrayElements (result.get(), md5Bytes, 0); } };
@@ -937,6 +973,13 @@ private:
         // Canvas.drawGlyphs is only available from API 31
         if (getAndroidSDKVersion() < 31)
             return {};
+
+        if (javaFont == nullptr)
+        {
+            // This API only works when the typeface has cached a copy of the native (Java) font,
+            // which should have happened on construction for a colour font.
+            return {};
+        }
 
         auto* env = getEnv();
 

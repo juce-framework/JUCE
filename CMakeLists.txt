@@ -34,7 +34,7 @@ cmake_minimum_required(VERSION 3.22)
 
 get_property(_juce_initial_global_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
-project(JUCE VERSION 9.0.5 LANGUAGES C CXX)
+project(JUCE VERSION 9.0.6 LANGUAGES C CXX)
 
 if(NOT (JUCE_IS_TOP_LEVEL OR "C" IN_LIST _juce_initial_global_languages))
     message(FATAL_ERROR "A C compiler is required to build targets that depend on JUCE. "
@@ -111,6 +111,12 @@ endif()
 # checking out the tag releases/2.1.0.
 if(JUCE_GLOBAL_ARA_SDK_PATH)
     juce_set_ara_sdk_path("${JUCE_GLOBAL_ARA_SDK_PATH}")
+endif()
+
+set(enable_ladspa_flag "")
+
+if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
+    set(enable_ladspa_flag JUCE_PLUGINHOST_LADSPA=1)
 endif()
 
 # We don't build anything other than the juceaide by default, because we want to keep configuration

@@ -47,6 +47,12 @@ struct TextureInfo
     float fullWidthProportion, fullHeightProportion;
 };
 
+struct CachedImageListListener
+{
+    virtual ~CachedImageListListener() = default;
+    virtual void cachedImageListWillClearTextureId (GLuint textureId) = 0;
+};
+
 //==============================================================================
 // This list persists in the OpenGLContext, and will re-use cached textures which
 // are created from Images.
@@ -133,8 +139,17 @@ struct CachedImageList final : public ReferenceCountedObject,
 
             if (textureNeedsReloading)
             {
+                GLint prev{};
+                glGetIntegerv (GL_TEXTURE_BINDING_2D, &prev);
+
                 textureNeedsReloading = false;
                 texture.loadImage (Image (*pixelData));
+
+                GLint next{};
+                glGetIntegerv (GL_TEXTURE_BINDING_2D, &next);
+
+                if (next != prev)
+                    glBindTexture (GL_TEXTURE_2D, (GLuint) prev);
             }
 
             t.textureID = texture.getTextureID();
@@ -157,10 +172,21 @@ struct CachedImageList final : public ReferenceCountedObject,
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage)
     };
 
+    void addListener (CachedImageListListener& x)
+    {
+        listeners.add (&x);
+    }
+
+    void removeListener (CachedImageListListener& x)
+    {
+        listeners.remove (&x);
+    }
+
     using Ptr = ReferenceCountedObjectPtr<CachedImageList>;
 
 private:
     OpenGLContext& context;
+    ListenerList<CachedImageListListener> listeners;
     OwnedArray<CachedImage> images;
     size_t totalSize = 0;
     const size_t maxCacheSize;
@@ -185,6 +211,9 @@ private:
 
         if (iter == images.end())
             return;
+
+        const auto textureId = (*iter)->texture.getTextureID();
+        listeners.call ([textureId] (auto& l) { l.cachedImageListWillClearTextureId (textureId); });
 
         if (canUseContext())
         {
@@ -341,6 +370,29 @@ struct ActiveTextures
             jassert (t == (GLint) textureID);
         }
        #endif
+    }
+
+    void unbindTextureFromAllUnits (GLuint textureID) noexcept
+    {
+        const auto previousActiveTexture = currentActiveTexture;
+        auto resetToPreviousTexture = false;
+
+        for (const auto [index, id] : enumerate (currentTextureID, int{}))
+        {
+            if (id != textureID)
+                continue;
+
+            if (index != currentActiveTexture)
+            {
+                setActiveTexture (index);
+                resetToPreviousTexture = true;
+            }
+
+            bindTexture (0);
+        }
+
+        if (resetToPreviousTexture && 0 <= previousActiveTexture)
+            setActiveTexture (previousActiveTexture);
     }
 
 private:
@@ -1698,7 +1750,7 @@ private:
 };
 
 //==============================================================================
-struct GLState : private ImagePixelData::Listener
+struct GLState : private CachedImageListListener
 {
     explicit GLState (const Target& t) noexcept
         : target (t),
@@ -1718,17 +1770,15 @@ struct GLState : private ImagePixelData::Listener
         shaderQuadQueue.initialise();
         cachedImageList = CachedImageList::get (t.context);
         JUCE_CHECK_OPENGL_ERROR
+
+        cachedImageList->addListener (*this);
     }
 
     ~GLState() override
     {
         flush();
 
-        for (auto* pixelData : observedPixelData)
-        {
-            pixelData->listeners.remove (this);
-        }
-
+        cachedImageList->removeListener (*this);
         target.context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, previousFrameBufferTarget);
     }
 
@@ -1865,19 +1915,13 @@ struct GLState : private ImagePixelData::Listener
                                      bool isTiledFill,
                                      BlendMode mode)
     {
-        if (auto pd = image.getPixelData())
-        {
-            observedPixelData.insert (pd.get());
-            pd->listeners.add (this);
-        }
-
         const auto textureInfo = cachedImageList->getTextureFor (image);
 
         blendMode.setBlendMode (shaderQuadQueue, mode);
         auto programs = currentShader.programs;
 
         const ShaderPrograms::MaskedShaderParams* maskParams = nullptr;
-        const ShaderPrograms::ImageParams* imageParams;
+        const ShaderPrograms::ImageParams* imageParams = nullptr;
 
         if (maskArea != nullptr)
         {
@@ -1935,17 +1979,64 @@ struct GLState : private ImagePixelData::Listener
 
 private:
     GLuint previousFrameBufferTarget;
+
+    class ScopedTextureBindingState
+    {
+    public:
+        ScopedTextureBindingState()
+        {
+            glActiveTexture (previousTextureUnit);
+        }
+
+        ~ScopedTextureBindingState()
+        {
+            for (const auto [index, binding] : enumerate (previousTextureBindings, GLenum{}))
+            {
+                glActiveTexture (GL_TEXTURE0 + index);
+                glBindTexture (GL_TEXTURE_2D, binding);
+            }
+
+            glActiveTexture (previousTextureUnit);
+        }
+
+    private:
+        static GLuint getActiveTextureUnit()
+        {
+            GLint result{};
+            glGetIntegerv (GL_ACTIVE_TEXTURE, &result);
+            return (GLuint) result;
+        }
+
+        static std::vector<GLuint> getTextureBindings()
+        {
+            GLint numUnits{};
+            glGetIntegerv (GL_MAX_TEXTURE_IMAGE_UNITS, &numUnits);
+
+            std::vector<GLuint> result ((size_t) numUnits, 0);
+
+            for (const auto [index, value] : enumerate (result, GLenum{}))
+            {
+                glActiveTexture (GL_TEXTURE0 + index);
+                GLint binding{};
+                glGetIntegerv (GL_TEXTURE_BINDING_2D, &binding);
+                value = (GLuint) binding;
+            }
+
+            return result;
+        }
+
+        GLuint previousTextureUnit = getActiveTextureUnit();
+        std::vector<GLuint> previousTextureBindings = getTextureBindings();
+    };
+
+    ScopedTextureBindingState scopedTextureBindingState;
     SavedBinding<TraitsVAO> savedVAOBinding;
     ViewportRestorer viewportRestorer;
-    std::set<ImagePixelData*> observedPixelData;
 
-    void imageDataBeingDeleted (ImagePixelData* ipd) override
+    void cachedImageListWillClearTextureId (GLuint textureID) override
     {
-        observedPixelData.erase (ipd);
-        activeTextures.bindTexture (0);
+        activeTextures.unbindTextureFromAllUnits (textureID);
     }
-
-    void imageDataChanged (ImagePixelData*) override {}
 
     JUCE_DECLARE_NON_COPYABLE (GLState)
     JUCE_DECLARE_NON_MOVEABLE (GLState)

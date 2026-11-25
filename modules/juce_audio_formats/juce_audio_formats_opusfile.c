@@ -50,7 +50,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wbitwise-op-parentheses",
                                      "-Wshift-op-parentheses",
                                      "-Wsign-compare",
                                      "-Wsign-conversion")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4267 4127 4244 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365 4456 4457 4459 6297 6011 6001 6308 6255 6386 6385 6246 6387 6263 6262 28182 4232 4245 4018 6326)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4005 4267 4127 4244 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365 4456 4457 4459 6297 6011 6001 6308 6255 6386 6385 6246 6387 6263 6262 28182 4232 4245 4018 6326)
 
 #include "juce_audio_formats/codecs/opus/opusfile/src/info.c"
 #include "juce_audio_formats/codecs/opus/opusfile/src/internal.c"
