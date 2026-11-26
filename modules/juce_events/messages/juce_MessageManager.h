@@ -542,7 +542,7 @@ private:
 
     @tags{Events}
 */
-class JUCE_API MessageManagerLock      : private Thread::Listener
+class JUCE_API [[nodiscard]] MessageManagerLock      : private Thread::Listener
 {
 public:
     //==============================================================================
