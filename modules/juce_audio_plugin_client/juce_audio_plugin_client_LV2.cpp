@@ -1533,6 +1533,12 @@ LV2_SYMBOL_EXPORT const LV2_Descriptor* lv2_descriptor (uint32_t index)
         [] (LV2_Handle instance) { static_cast<LV2PluginInstance*> (instance)->deactivate(); },
         [] (LV2_Handle instance)
         {
+           #if JUCE_LINUX || JUCE_BSD
+            ScopedJuceInitialiser_GUI scopedJuceInitialiser;
+            SharedResourcePointer<detail::MessageThread> messageThread;
+            MessageManagerLock lock;
+           #endif
+
             JUCE_AUTORELEASEPOOL
             {
                 delete static_cast<LV2PluginInstance*> (instance);
