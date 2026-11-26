@@ -35,6 +35,111 @@
 namespace juce
 {
 
+// A closed menu's items have no Components, so they are invisible to assistive
+// tech (a screen-reader/automation client cannot discover or invoke a command
+// without first opening the menu). This exposes each entry as a zero-size,
+// never-painted child component carrying a menuItem handler: a leaf invokes its
+// command on press, a submenu owner is a focus container holding its entries
+// (recursing). The platform accessibility backends then present the menu tree
+// through the standard roles/actions (AT-SPI menu item + action; UIA MenuItem +
+// Invoke / ExpandCollapse; NSAccessibility) with no per-backend code.
+class MenuEntryComponent  : public Component
+{
+public:
+    MenuEntryComponent (const PopupMenu::Item& item, MenuBarModel* modelToUse, int topLevelIndexToUse)
+        : model (modelToUse),
+          topLevelIndex (topLevelIndexToUse),
+          name (item.text),
+          itemID (item.itemID),
+          action (item.action),
+          commandManager (item.commandManager),
+          enabled (item.isEnabled),
+          hasSubMenu (item.subMenu != nullptr)
+    {
+        setInterceptsMouseClicks (false, false);
+
+        if (hasSubMenu)
+        {
+            // a submenu owner exposes its entries as accessibility children
+            setFocusContainerType (FocusContainerType::focusContainer);
+
+            for (PopupMenu::MenuItemIterator iterator (*item.subMenu); iterator.next();)
+            {
+                const auto& sub = iterator.getItem();
+
+                if (sub.isSeparator || sub.isSectionHeader)
+                    continue;
+
+                auto child = std::make_unique<MenuEntryComponent> (sub, model, topLevelIndex);
+                addAndMakeVisible (*child);
+                entries.push_back (std::move (child));
+            }
+        }
+    }
+
+private:
+    void invoke()
+    {
+        // dispatch the way picking the open item would
+        if (action != nullptr)              { action(); return; }
+        if (commandManager != nullptr)      { commandManager->invokeDirectly (itemID, true); return; }
+        if (model != nullptr)               model->menuItemSelected (itemID, topLevelIndex);
+    }
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        class Handler  : public AccessibilityHandler
+        {
+        public:
+            explicit Handler (MenuEntryComponent& e)
+                : AccessibilityHandler (e, AccessibilityRole::menuItem, getActions (e)),
+                  entry (e)
+            {
+            }
+
+            String getTitle() const override  { return entry.name; }
+
+            AccessibleState getCurrentState() const override
+            {
+                // the entry components are zero-size, so they would be culled
+                // as "not visible within parent"; a closed menu's items are
+                // genuinely offscreen (the same flag PopupMenu's own items use)
+                return AccessibilityHandler::getCurrentState().withSelectable().withAccessibleOffscreen();
+            }
+
+        private:
+            static AccessibilityActions getActions (MenuEntryComponent& e)
+            {
+                if (! e.enabled)
+                    return {};
+
+                // a submenu owner is presented as expandable (UIA ExpandCollapse);
+                // its entries are always exposed as children, so the action is a
+                // no-op and the children carry the real commands
+                if (e.hasSubMenu)
+                    return AccessibilityActions().addAction (AccessibilityActionType::showMenu, [] {});
+
+                return AccessibilityActions().addAction (AccessibilityActionType::press, [&e] { e.invoke(); });
+            }
+
+            MenuEntryComponent& entry;
+        };
+
+        return std::make_unique<Handler> (*this);
+    }
+
+    MenuBarModel* model;
+    int topLevelIndex;
+    String name;
+    int itemID;
+    std::function<void()> action;
+    ApplicationCommandManager* commandManager;
+    bool enabled, hasSubMenu;
+    std::vector<std::unique_ptr<MenuEntryComponent>> entries;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuEntryComponent)
+};
+
 class MenuBarComponent::AccessibleItemComponent final : public Component
 {
 public:
@@ -43,9 +148,32 @@ public:
           name (menuItemName)
     {
         setInterceptsMouseClicks (false, false);
+
+        // expose this menu's entries as accessibility children (see MenuEntryComponent)
+        setFocusContainerType (FocusContainerType::focusContainer);
     }
 
     const String& getName() const noexcept    { return name; }
+
+    // (Re)populate the menu's entries as accessibility child components. Called
+    // whenever the menus change, so dynamic menus (e.g. recent-files) stay
+    // current; clearing first replaces any stale entries.
+    void buildEntries (const PopupMenu& menu, MenuBarModel* model, int topLevelIndex)
+    {
+        entries.clear();
+
+        for (PopupMenu::MenuItemIterator iterator (menu); iterator.next();)
+        {
+            const auto& item = iterator.getItem();
+
+            if (item.isSeparator || item.isSectionHeader)
+                continue;
+
+            auto entry = std::make_unique<MenuEntryComponent> (item, model, topLevelIndex);
+            addAndMakeVisible (*entry);
+            entries.push_back (std::move (entry));
+        }
+    }
 
 private:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
@@ -82,6 +210,7 @@ private:
 
     MenuBarComponent& owner;
     const String name;
+    std::vector<std::unique_ptr<MenuEntryComponent>> entries;
 };
 
 MenuBarComponent::MenuBarComponent (MenuBarModel* m)
@@ -404,16 +533,30 @@ void MenuBarComponent::menuBarItemsChanged (MenuBarModel*)
         repaint();
         resized();
     }
+    else if (model != nullptr)
+    {
+        // the menu names are unchanged but a menu's contents may have changed -
+        // refresh the accessibility entries so dynamic menus stay current
+        for (int i = 0; i < (int) itemComponents.size(); ++i)
+            itemComponents[(size_t) i]->buildEntries (model->getMenuForIndex (i, itemComponents[(size_t) i]->getName()), model, i);
+    }
 }
 
 void MenuBarComponent::updateItemComponents (const StringArray& menuNames)
 {
     itemComponents.clear();
 
-    for (const auto& name : menuNames)
+    for (int i = 0; i < menuNames.size(); ++i)
     {
-        itemComponents.push_back (std::make_unique<AccessibleItemComponent> (*this, name));
-        addAndMakeVisible (*itemComponents.back());
+        const auto& name = menuNames[(int) i];
+        auto item = std::make_unique<AccessibleItemComponent> (*this, name);
+
+        // expose this menu's entries to accessibility (see MenuEntryComponent)
+        if (model != nullptr)
+            item->buildEntries (model->getMenuForIndex (i, name), model, i);
+
+        addAndMakeVisible (*item);
+        itemComponents.push_back (std::move (item));
     }
 }
 
