@@ -2022,6 +2022,9 @@ private:
             if (details.programChanged)
                 flags |= programChangedFlag;
 
+            if (details.nonParameterStateChanged)
+                flags |= nonParameterStateChangedFlag;
+
             if (flags != 0)
             {
                 callbackFlags.fetch_or (flags);
@@ -2047,9 +2050,10 @@ private:
                 owner.PropertyChanged (kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, 0);
             }
 
+            // Sent for non parameter state changes, and for other types of changes too
             owner.PropertyChanged (kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, 0);
 
-            if ((flags & programChangedFlag) != 0)
+            if ((flags & programChangedFlag) != 0 || (flags & nonParameterStateChangedFlag) != 0)
             {
                 owner.refreshCurrentPreset();
                 owner.PropertyChanged (kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0);
@@ -2058,9 +2062,10 @@ private:
 
         JuceAU& owner;
 
-        static constexpr int latencyChangedFlag       = 1 << 0,
-                             parameterInfoChangedFlag = 1 << 1,
-                             programChangedFlag       = 1 << 2;
+        static constexpr int latencyChangedFlag           = 1 << 0,
+                             parameterInfoChangedFlag     = 1 << 1,
+                             programChangedFlag           = 1 << 2,
+                             nonParameterStateChangedFlag = 1 << 3;
 
         std::atomic<int> callbackFlags { 0 };
     };

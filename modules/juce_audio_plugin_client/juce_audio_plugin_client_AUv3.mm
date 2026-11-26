@@ -643,6 +643,11 @@ public:
             auto nodes = createParameterNodes<NodeArrayResult> (processor->getParameterTree());
             installNewParameterTree (std::move (nodes.nodeArray));
         }
+
+        if (details.nonParameterStateChanged)
+        {
+            ScopedKeyChange scope (au, @"fullState");
+        }
     }
 
     void sendParameterEvent (int idx, const float* newValue, AUParameterAutomationEventType type)
