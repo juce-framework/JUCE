@@ -1201,3 +1201,13 @@ private:
 };
 
 } // namespace juce
+
+/** @cond */
+namespace std
+{
+    template <> struct hash<juce::File>
+    {
+        size_t operator() (const juce::File& f) const noexcept    { return (size_t) f.hashCode64(); }
+    };
+}
+/** @endcond */
