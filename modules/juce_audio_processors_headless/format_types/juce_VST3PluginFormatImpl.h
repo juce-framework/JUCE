@@ -1379,7 +1379,8 @@ public:
     }
 
 private:
-    static Steinberg::int32 findClassMatchingDescription (VSTComSmartPtr<IPluginFactory> factory, const PluginDescription& desc)
+    static Steinberg::int32 findClassMatchingDescription (VSTComSmartPtr<IPluginFactory> factory,
+                                                          const PluginDescription& desc)
     {
         const auto numClasses = factory->countClasses();
 
@@ -1394,7 +1395,7 @@ private:
             const auto uniqueId = getHashForRange (getNormalisedTUID (info.cid));
             const auto deprecatedUid = getHashForRange (info.cid);
 
-            if (toString (info.name).trim() != desc.name)
+            if (toString (info.name) != desc.name)
                 continue;
 
             if (uniqueId != desc.uniqueId && deprecatedUid != desc.deprecatedUid)
