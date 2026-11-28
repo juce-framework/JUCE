@@ -75,6 +75,87 @@ namespace juce
     };
 }
 
+// PClassInfoW::fromAscii widens each byte on its own, which garbles any UTF-8 text that isn't
+// plain ASCII. This decodes the UTF-8 properly into a fixed-size UTF-16 buffer. We must avoid
+// relying on juce_core here, so this is a small self-contained decoder.
+[[maybe_unused]] static void widenNonAsciiUtf8 (Steinberg::char16* dest, size_t destSize, const char* source) noexcept
+{
+    const auto* p = reinterpret_cast<const unsigned char*> (source);
+
+    // Plain ASCII was already widened correctly, so leave it untouched.
+    auto isAscii = true;
+
+    for (auto* q = p; *q != 0; ++q)
+        isAscii = isAscii && *q < 0x80;
+
+    if (isAscii)
+        return;
+
+    static constexpr char32_t minValueForLength[] { 0, 0, 0x80, 0x800, 0x10000 };
+    size_t numWritten = 0;
+
+    // Decode one code point at a time, stopping before the buffer is full.
+    while (*p != 0)
+    {
+        char32_t codePoint = 0xfffd; // Replacement character, used for malformed input.
+        size_t numBytes = 1;
+
+        if (*p < 0x80)
+        {
+            codePoint = *p;
+        }
+        else
+        {
+            const size_t expected = (*p & 0xe0) == 0xc0 ? 2
+                                  : (*p & 0xf0) == 0xe0 ? 3
+                                  : (*p & 0xf8) == 0xf0 ? 4 : 0;
+
+            if (expected != 0)
+            {
+                char32_t value = (char32_t) (*p & (0xff >> (expected + 1)));
+                size_t i = 1;
+
+                for (; i < expected && (p[i] & 0xc0) == 0x80; ++i)
+                    value = (value << 6) | (char32_t) (p[i] & 0x3f);
+
+                const auto isValid = i == expected
+                                  && value >= minValueForLength[expected]
+                                  && value <= 0x10ffff
+                                  && ! (value >= 0xd800 && value <= 0xdfff);
+
+                if (isValid)
+                {
+                    codePoint = value;
+                    numBytes = expected;
+                }
+            }
+        }
+
+        const size_t numNeeded = codePoint >= 0x10000 ? 2 : 1;
+
+        // Leave room for the terminator, and never split a surrogate pair.
+        if (numWritten + numNeeded + 1 > destSize)
+            break;
+
+        if (numNeeded == 2)
+        {
+            codePoint -= 0x10000;
+            dest[numWritten++] = (Steinberg::char16) (0xd800 + (codePoint >> 10));
+            dest[numWritten++] = (Steinberg::char16) (0xdc00 + (codePoint & 0x3ff));
+        }
+        else
+        {
+            dest[numWritten++] = (Steinberg::char16) codePoint;
+        }
+
+        p += numBytes;
+    }
+
+    // Clear whatever fromAscii left behind, including the terminator.
+    while (numWritten < destSize)
+        dest[numWritten++] = 0;
+}
+
 //==============================================================================
 // See https://steinbergmedia.github.io/vst3_dev_portal/pages/FAQ/Compatibility+with+VST+2.x+or+VST+1.html
 
@@ -292,6 +373,12 @@ protected:
                      kVstVersionString)
         {
             infoW.fromAscii (info2);
+
+            // fromAscii garbles non-ASCII text, such as a plugin name containing a Greek letter.
+            widenNonAsciiUtf8 (infoW.name,       std::size (infoW.name),       info2.name);
+            widenNonAsciiUtf8 (infoW.vendor,     std::size (infoW.vendor),     info2.vendor);
+            widenNonAsciiUtf8 (infoW.version,    std::size (infoW.version),    info2.version);
+            widenNonAsciiUtf8 (infoW.sdkVersion, std::size (infoW.sdkVersion), info2.sdkVersion);
         }
 
         Steinberg::PClassInfo2 info2;
