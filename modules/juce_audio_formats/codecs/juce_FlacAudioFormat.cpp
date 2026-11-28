@@ -145,6 +145,20 @@ public:
                 // accurately than this. Probably fixed in newer versions of the library, though.
                 bufferedRange = emptyRange (requestedStart & ~511);
                 FLAC__stream_decoder_seek_absolute (decoder, (FLAC__uint64) bufferedRange.getStart());
+
+                // The seek hands over the rest of the frame the aligned position
+                // lies in, which can end before the position that was asked for
+                // when the block size is not a multiple of 512. The caller takes
+                // a reservoir that misses its position for the end of the stream
+                // and returns silence, so read on until the position is in hand.
+                while (! bufferedRange.isEmpty() && bufferedRange.getEnd() <= requestedStart)
+                {
+                    bufferedRange = emptyRange (bufferedRange.getEnd());
+
+                    if (! FLAC__stream_decoder_process_single (decoder))
+                        break;
+                }
+
                 return;
             }
 
