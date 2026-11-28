@@ -399,6 +399,13 @@ ImagePixelData::~ImagePixelData()
     listeners.call ([this] (Listener& l) { l.imageDataBeingDeleted (this); });
 }
 
+void ImagePixelData::clear (Rectangle<int> area, Colour colourToClearTo)
+{
+    auto g = createLowLevelContext();
+    g->setFill (colourToClearTo);
+    g->fillRect (area, true);
+}
+
 void ImagePixelData::sendDataChangeMessage()
 {
     listeners.call ([this] (Listener& l) { l.imageDataChanged (this); });
@@ -922,9 +929,7 @@ void Image::clear (const Rectangle<int>& area, Colour colourToClearTo)
     if (image == nullptr)
         return;
 
-    auto g = image->createLowLevelContext();
-    g->setFill (colourToClearTo);
-    g->fillRect (area, true);
+    image->clear (area, colourToClearTo);
 }
 
 //==============================================================================
